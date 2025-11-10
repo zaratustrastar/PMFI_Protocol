@@ -1,7 +1,8 @@
-modules = ["nodejs-22"]
+modules = ["nodejs-22", "postgresql-16"]
 
 [agent]
 stack = "AGENT_STACK"
+integrations = ["javascript_openai_ai_integrations:1.0.0", "agentstack-trigger-time_based:1.0.0"]
 
 [nix]
 channel = "stable-24_11"
@@ -16,22 +17,16 @@ run = ["sh", "-c", "cd .mastra/output && NODE_ENV=production node index.mjs"]
 deploymentTarget = "cloudrun"
 
 [[ports]]
-localPort = 5000
-externalPort = 80
-
-[[ports]]
 localPort = 3000
 externalPort = 3000
 exposeLocalhost = true
 
 [[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
 localPort = 8289
-
-[[ports]]
-localPort = 50052
-
-[[ports]]
-localPort = 50053
 
 [workflows]
 runButton = "Project"

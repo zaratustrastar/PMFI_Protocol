@@ -8,9 +8,9 @@ import { NonRetriableError } from "inngest";
 import { z } from "zod";
 
 import { sharedPostgresStorage } from "./storage";
-import { inngest, inngestServe } from "./inngest";
-import { exampleWorkflow } from "./workflows/exampleWorkflow"; // Replace with your own workflow
-import { exampleAgent } from "./agents/exampleAgent"; // Replace with your own agent
+import { inngest, inngestServe, registerCronWorkflow } from "./inngest";
+import { polymarketWorkflow } from "./workflows/polymarketWorkflow";
+import { polymarketAgent } from "./agents/polymarketAgent";
 
 class ProductionPinoLogger extends MastraLogger {
   protected logger: pino.Logger;
@@ -56,9 +56,13 @@ class ProductionPinoLogger extends MastraLogger {
 export const mastra = new Mastra({
   storage: sharedPostgresStorage,
   // Register your workflows here
-  workflows: {},
+  workflows: {
+    polymarketMonitor: polymarketWorkflow,
+  },
   // Register your agents here
-  agents: {},
+  agents: {
+    polymarketAgent: polymarketAgent,
+  },
   mcpServers: {
     allTools: new MCPServer({
       name: "allTools",
@@ -221,6 +225,10 @@ export const mastra = new Mastra({
           level: "info",
         }),
 });
+
+// Register cron trigger for Polymarket monitoring
+// Runs every hour at the top of the hour
+registerCronWorkflow("0 * * * *", polymarketWorkflow);
 
 /*  Sanity check 1: Throw an error if there are more than 1 workflows.  */
 // !!!!!! Do not remove this check. !!!!!!
