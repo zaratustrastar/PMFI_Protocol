@@ -154,9 +154,7 @@ async function generateTwitterOAuth(
   );
 
   const signature = await crypto.subtle.sign("HMAC", cryptoKey, messageData);
-  const oauth_signature = btoa(
-    String.fromCharCode(...new Uint8Array(signature))
-  );
+  const oauth_signature = Buffer.from(signature).toString("base64");
 
   params.oauth_signature = oauth_signature;
 

@@ -227,8 +227,8 @@ export const mastra = new Mastra({
 });
 
 // Register cron trigger for Polymarket monitoring
-// Runs every hour at the top of the hour
-registerCronWorkflow("0 * * * *", polymarketWorkflow);
+// Runs every minute to catch new markets immediately
+registerCronWorkflow("* * * * *", polymarketWorkflow);
 
 /*  Sanity check 1: Throw an error if there are more than 1 workflows.  */
 // !!!!!! Do not remove this check. !!!!!!
