@@ -15,7 +15,8 @@ from py_clob_client.clob_types import OrderArgs, OrderType
 from py_clob_client.order_builder.constants import BUY, SELL
 import config
 from market_utils import get_market_info
-from database import save_order, update_order_status
+from database import save_order, update_order_status, update_market_summary, get_open_sell_orders
+from telegram_notifier import notify_sell_executed
 
 
 class PolymarketTrader:
@@ -223,12 +224,90 @@ class PolymarketTrader:
         
         return filled_orders
     
-    def run_strategy(self, market_slug: str):
+    def check_sell_fills(self, market_slug: str) -> List[Dict]:
         """
-        Run the complete trading strategy for a market
+        Check open sell orders for fills and notify via Telegram
+        
+        Args:
+            market_slug: Market identifier
+            
+        Returns:
+            List of filled sell orders
+        """
+        open_sells = get_open_sell_orders(market_slug)
+        filled_sells = []
+        
+        for order in open_sells:
+            order_id = order["order_id"]
+            
+            try:
+                order_status = self.client.get_order(order_id)
+                status = order_status.get("status", "").upper()
+                
+                if status in ["FILLED", "MATCHED"]:
+                    # Get actual filled data
+                    filled_size = float(order_status.get("size_matched", order["size"]))
+                    avg_price = float(order_status.get("avg_price", order["price"]))
+                    
+                    # Calculate profit
+                    buy_price = order.get("buy_price", 0)
+                    profit_usd = (avg_price - buy_price) * filled_size
+                    profit_pct = ((avg_price / buy_price) - 1) * 100 if buy_price > 0 else 0
+                    
+                    print(f"   💰 SELL FILLED: {order['side']} @ ${avg_price:.4f} (+${profit_usd:.2f})")
+                    
+                    # Update database
+                    update_order_status(order_id, "FILLED", filled_size, avg_price)
+                    update_market_summary(market_slug)
+                    
+                    # Notify Telegram
+                    notify_sell_executed(market_slug, {
+                        "side": order["side"],
+                        "buy_price": buy_price,
+                        "sell_price": avg_price,
+                        "size": filled_size,
+                        "profit_usd": profit_usd,
+                        "profit_pct": profit_pct
+                    })
+                    
+                    filled_sells.append(order)
+                    
+            except Exception as e:
+                print(f"   ⚠️  Error checking sell order {order_id[:8]}: {str(e)}")
+        
+        return filled_sells
+    
+    def run_strategy_limited(self, market_slug: str, max_runtime_minutes: int = 60):
+        """
+        Run trading strategy with time limit (for auto-trader)
         
         Args:
             market_slug: Polymarket market slug
+            max_runtime_minutes: Maximum runtime in minutes
+        """
+        import time as time_module
+        start_time = time_module.time()
+        max_runtime_seconds = max_runtime_minutes * 60
+        
+        self._run_strategy_internal(market_slug, start_time, max_runtime_seconds)
+    
+    def run_strategy(self, market_slug: str):
+        """
+        Run the complete trading strategy for a market (unlimited time)
+        
+        Args:
+            market_slug: Polymarket market slug
+        """
+        self._run_strategy_internal(market_slug, None, None)
+    
+    def _run_strategy_internal(self, market_slug: str, start_time=None, max_runtime_seconds=None):
+        """
+        Internal strategy runner
+        
+        Args:
+            market_slug: Polymarket market slug
+            start_time: Start timestamp (for limited runtime)
+            max_runtime_seconds: Max runtime in seconds (None = unlimited)
         """
         print(f"\n{'='*60}")
         print(f"🎯 Starting trading strategy for: {market_slug}")
@@ -256,6 +335,7 @@ class PolymarketTrader:
         
         print(f"\n✅ Placed {len(all_buy_orders)} buy orders total")
         print(f"\n🔍 Monitoring for fills (checking every {config.POLL_INTERVAL_SECONDS}s)...")
+        print("   Buys → Auto-place sells | Sells → Notify Telegram")
         print("   Press Ctrl+C to stop monitoring\n")
         
         # Monitor for fills and auto-sell
@@ -294,6 +374,19 @@ class PolymarketTrader:
                         
                         processed_orders.add(order_id)
                         print(f"   ✅ Placed {len(sell_orders)} sell orders")
+                
+                # Check for filled sell orders and notify Telegram
+                filled_sells = self.check_sell_fills(market_slug)
+                if filled_sells:
+                    print(f"   📱 Notified Telegram about {len(filled_sells)} sell fills")
+                
+                # Check if time limit reached (for auto-trader)
+                if max_runtime_seconds is not None:
+                    elapsed = time.time() - start_time
+                    if elapsed >= max_runtime_seconds:
+                        print(f"\n⏰ Time limit reached ({max_runtime_seconds/60:.0f} minutes)")
+                        print("   Orders remain active on Polymarket")
+                        break
                 
                 # Wait before next check
                 time.sleep(config.POLL_INTERVAL_SECONDS)

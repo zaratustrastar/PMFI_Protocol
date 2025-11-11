@@ -144,5 +144,72 @@ def update_order_status(order_id: str, status: str, filled_size: float = None, f
     conn.close()
 
 
+def update_market_summary(market_slug: str):
+    """
+    Update trading summary for a market based on filled orders
+    
+    Args:
+        market_slug: Market identifier
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Count filled buys and sells
+    cur.execute("""
+        SELECT 
+            COUNT(*) FILTER (WHERE order_type = 'BUY' AND status = 'FILLED') as filled_buys,
+            COUNT(*) FILTER (WHERE order_type = 'SELL' AND status = 'FILLED') as filled_sells,
+            SUM(price * size) FILTER (WHERE order_type = 'BUY' AND status = 'FILLED') as total_invested,
+            SUM(price * size) FILTER (WHERE order_type = 'SELL' AND status = 'FILLED') as total_returned
+        FROM trading_positions
+        WHERE market_slug = %s
+    """, (market_slug,))
+    
+    row = cur.fetchone()
+    if row:
+        filled_buys = row[0] or 0
+        filled_sells = row[1] or 0
+        total_invested = float(row[2] or 0)
+        total_returned = float(row[3] or 0)
+        realized_pnl = total_returned - total_invested
+        
+        # Upsert summary
+        cur.execute("""
+            INSERT INTO trading_summary (market_slug, filled_buys, filled_sells, total_invested, total_returned, realized_pnl)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (market_slug) 
+            DO UPDATE SET
+                filled_buys = EXCLUDED.filled_buys,
+                filled_sells = EXCLUDED.filled_sells,
+                total_invested = EXCLUDED.total_invested,
+                total_returned = EXCLUDED.total_returned,
+                realized_pnl = EXCLUDED.realized_pnl,
+                updated_at = CURRENT_TIMESTAMP
+        """, (market_slug, filled_buys, filled_sells, total_invested, total_returned, realized_pnl))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def get_open_sell_orders(market_slug: str) -> list:
+    """Get all open sell orders for a market"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+        SELECT order_id, token_id, side, price, size, buy_price, profit_multiple
+        FROM trading_positions
+        WHERE market_slug = %s AND order_type = 'SELL' AND status = 'OPEN'
+        ORDER BY created_at DESC
+    """, (market_slug,))
+    
+    orders = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    return [dict(row) for row in orders]
+
+
 if __name__ == "__main__":
     init_database()
