@@ -1,131 +1,107 @@
 """
-Automatic Trading Coordinator
-Monitors for new markets and automatically trades them
+Automatic Trading Worker
+Continuously polls for queued trading jobs and executes them
 """
 
 import os
-import sys
 import time
-import psycopg2
-from datetime import datetime, timedelta
 from polymarket_trader import PolymarketTrader
+from database import get_pending_jobs, start_trading_job, complete_trading_job
 
-DATABASE_URL = os.getenv("DATABASE_URL", "")
 
-
-def get_new_markets(hours_back=1):
+def process_trading_job(job, trader: PolymarketTrader):
     """
-    Get new markets from the last N hours that haven't been traded yet
+    Process a single trading job
     
     Args:
-        hours_back: How many hours back to look for new markets
-        
-    Returns:
-        List of market slugs
-    """
-    conn = psycopg2.connect(DATABASE_URL)
-    cur = conn.cursor()
-    
-    # Get markets seen in last N hours that we haven't traded
-    cutoff_time = datetime.now() - timedelta(hours=hours_back)
-    
-    cur.execute("""
-        SELECT spm.market_id, MAX(spm.seen_at) as last_seen
-        FROM seen_polymarket_markets spm
-        LEFT JOIN trading_positions tp ON spm.market_id = tp.market_slug
-        WHERE spm.seen_at >= %s 
-        AND tp.market_slug IS NULL
-        GROUP BY spm.market_id
-        ORDER BY last_seen DESC
-        LIMIT 10
-    """, (cutoff_time,))
-    
-    markets = [row[0] for row in cur.fetchall()]
-    
-    cur.close()
-    conn.close()
-    
-    return markets
-
-
-def trade_market(market_slug: str, trader: PolymarketTrader, max_runtime_minutes=60):
-    """
-    Trade a single market with timeout
-    
-    Args:
-        market_slug: Market to trade
+        job: Job dict with id, market_id, created_at
         trader: PolymarketTrader instance
-        max_runtime_minutes: Maximum time to monitor this market
         
     Returns:
-        True if successfully traded
+        True if successful, False if error
     """
+    job_id = job['id']
+    market_id = job['market_id']
+    
     print(f"\n{'='*60}")
-    print(f"⚡ Auto-trading: {market_slug}")
+    print(f"⚡ Processing Job #{job_id}: {market_id}")
     print(f"{'='*60}")
     
     try:
-        # Start the trading strategy (will run indefinitely)
-        # For auto-trader, we'll modify it to run for a limited time
-        trader.run_strategy_limited(market_slug, max_runtime_minutes)
-        return True
+        # Mark job as running
+        start_trading_job(job_id)
+        print(f"🔄 Job #{job_id} marked as RUNNING")
+        
+        # Place orders (without blocking on monitoring)
+        # Monitoring is handled by a separate continuous process
+        success = trader.place_orders_only(market_id)
+        
+        if success:
+            # Mark job as completed
+            complete_trading_job(job_id)
+            print(f"✅ Job #{job_id} completed (orders placed)")
+            return True
+        else:
+            # Mark job as failed
+            complete_trading_job(job_id, "Failed to place orders")
+            print(f"❌ Job #{job_id} failed to place orders")
+            return False
+            
     except Exception as e:
-        print(f"❌ Error trading {market_slug}: {e}")
+        error_msg = str(e)
+        print(f"❌ Error processing job #{job_id}: {error_msg}")
+        
+        # Mark job as failed with error
+        complete_trading_job(job_id, error_msg)
         return False
 
 
 def main():
-    """Main coordinator loop"""
-    print("\n🤖 Polymarket Auto-Trader Starting...")
-    print(f"   Budget: $2 per market")
+    """Main worker loop - continuously polls for jobs"""
+    print("\n🤖 Polymarket Auto-Trading Worker Starting...")
+    print(f"   Budget: $2 per market ($0.20 × 10 orders × 2 sides)")
+    print(f"   Strategy: Ladder buys 0.1¢-1¢, ladder sells 3x-10x profit")
     print(f"   Notifications: Telegram @ponnymarket (sells only)")
-    print(f"   Mode: Auto-detect new markets\n")
+    print(f"   Mode: Queue-based worker\n")
     
     # Initialize trader once
     trader = PolymarketTrader()
     
-    # For scheduled deployment: run once and exit
-    # For continuous: run in a loop
-    mode = os.getenv("AUTO_TRADER_MODE", "once")  # "once" or "continuous"
+    # Poll interval in seconds
+    poll_interval = int(os.getenv("POLL_INTERVAL", "30"))
+    batch_size = int(os.getenv("BATCH_SIZE", "5"))
     
-    if mode == "continuous":
-        print("📊 Running in CONTINUOUS mode (press Ctrl+C to stop)\n")
-        
-        try:
-            while True:
-                # Get new markets
-                new_markets = get_new_markets(hours_back=1)
+    print(f"📊 Configuration:")
+    print(f"   Poll Interval: {poll_interval}s")
+    print(f"   Batch Size: {batch_size} jobs\n")
+    print("🔄 Starting worker loop (press Ctrl+C to stop)\n")
+    
+    try:
+        while True:
+            # Get pending jobs from database
+            pending_jobs = get_pending_jobs(limit=batch_size)
+            
+            if pending_jobs:
+                print(f"\n✅ Found {len(pending_jobs)} pending job(s)")
                 
-                if new_markets:
-                    print(f"\n✅ Found {len(new_markets)} new markets to trade")
+                # Process each job
+                for job in pending_jobs:
+                    process_trading_job(job, trader)
                     
-                    for market_slug in new_markets:
-                        trade_market(market_slug, trader, max_runtime_minutes=30)
-                else:
-                    print("⏸️  No new markets found")
-                
-                # Wait before checking again
-                print(f"\n💤 Waiting 60 seconds before next check...")
-                time.sleep(60)
-                
-        except KeyboardInterrupt:
-            print("\n\n⏸️  Auto-trader stopped by user")
-    
-    else:
-        print("📊 Running in ONCE mode (one-time check)\n")
-        
-        # Get new markets
-        new_markets = get_new_markets(hours_back=1)
-        
-        if new_markets:
-            print(f"\n✅ Found {len(new_markets)} new markets to trade\n")
+                    # Small delay between jobs
+                    time.sleep(2)
+            else:
+                print(f"⏸️  No pending jobs (checked at {time.strftime('%H:%M:%S')})")
             
-            for market_slug in new_markets:
-                trade_market(market_slug, trader, max_runtime_minutes=30)
+            # Wait before polling again
+            print(f"💤 Waiting {poll_interval}s before next poll...")
+            time.sleep(poll_interval)
             
-            print("\n✅ Auto-trader completed")
-        else:
-            print("⏸️  No new markets found to trade")
+    except KeyboardInterrupt:
+        print("\n\n⏸️  Worker stopped by user")
+    except Exception as e:
+        print(f"\n\n❌ Worker crashed: {e}")
+        raise
 
 
 if __name__ == "__main__":

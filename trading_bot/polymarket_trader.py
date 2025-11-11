@@ -277,6 +277,41 @@ class PolymarketTrader:
         
         return filled_sells
     
+    def place_orders_only(self, market_slug: str):
+        """
+        Place buy orders only without monitoring (for queue-based worker)
+        
+        Args:
+            market_slug: Polymarket market slug
+            
+        Returns:
+            True if orders placed successfully, False otherwise
+        """
+        print(f"\n{'='*60}")
+        print(f"🎯 Placing orders for: {market_slug}")
+        print(f"{'='*60}")
+        
+        # Get market information
+        market_info = get_market_info(market_slug)
+        
+        if not market_info:
+            print(f"❌ Market '{market_slug}' not found!")
+            return False
+        
+        print(f"\n📋 Market: {market_info['question']}")
+        print(f"   YES Token: {market_info['yes_token_id'][:16]}...")
+        print(f"   NO Token: {market_info['no_token_id'][:16]}...")
+        
+        # Place buy ladders on both YES and NO
+        yes_orders = self.place_buy_ladder(market_info['yes_token_id'], "YES", market_slug)
+        no_orders = self.place_buy_ladder(market_info['no_token_id'], "NO", market_slug)
+        
+        total_orders = len(yes_orders) + len(no_orders)
+        print(f"\n✅ Placed {total_orders} buy orders total")
+        print(f"   (Monitoring will be handled by separate process)\n")
+        
+        return True
+    
     def run_strategy_limited(self, market_slug: str, max_runtime_minutes: int = 60):
         """
         Run trading strategy with time limit (for auto-trader)
