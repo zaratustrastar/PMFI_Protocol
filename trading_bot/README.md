@@ -111,13 +111,38 @@ Market-level statistics:
 - `database.py`: Database operations
 - `config.py`: Configuration settings
 
+## Current Limitations
+
+⚠️ **This is a basic MVP with known limitations:**
+
+1. **No sell order monitoring** - Bot places sell orders but doesn't track when they fill
+   - You must manually check Polymarket to see if sells executed
+   - P&L tracking only updates for buy fills, not sell fills
+   - Consider this for future improvement
+
+2. **Partial fills** - Bot logs partial fills but doesn't hedge them
+   - If a buy partially fills, sell ladder waits for full fill
+   - Unhedged exposure if market moves before full fill
+
+3. **No stop-loss** - Bot never cancels losing positions
+   - Sell orders stay open indefinitely at high prices
+   - You may hold positions long-term if prices don't reach targets
+
+4. **Single market only** - Bot runs on one market at a time
+   - To trade multiple markets, run multiple instances
+   - No portfolio-level risk management
+
+5. **No balance checks** - Bot doesn't verify sufficient USDC before placing orders
+   - Orders will fail if wallet balance too low
+
 ## Safety Notes
 
 ⚠️ **This bot trades real money**
-- Start with small amounts
+- Start with small amounts ($20 per market)
 - Markets can move against you
-- Prices may never reach your sell targets
-- Always monitor your positions
+- Sell prices may never be reached
+- Always monitor your positions on polymarket.com
+- Check database regularly for position status
 
 ## Integration with Telegram Monitoring
 
