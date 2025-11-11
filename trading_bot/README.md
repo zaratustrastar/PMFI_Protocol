@@ -35,7 +35,11 @@ Already installed via Replit package manager:
 
 ## Usage
 
-### Run the bot on a market:
+### Automatic Deployment (Recommended):
+The bot runs automatically every 15 minutes via Replit Scheduled Deployment.
+See `DEPLOYMENT.md` for full setup instructions.
+
+### Manual Testing:
 ```bash
 cd trading_bot
 python3 run_trader.py <market-slug>
@@ -51,7 +55,7 @@ python3 run_trader.py eth-updown-15m-1762961400
 2. Browse markets
 3. The slug is in the URL: `polymarket.com/event/SLUG`
 
-Or use your existing Telegram monitoring to get new market slugs automatically.
+Or use your existing Telegram monitoring - new markets are auto-detected!
 
 ## How It Works
 
