@@ -2,6 +2,7 @@ import { createStep, createWorkflow } from "../inngest";
 import { z } from "zod";
 import { fetchPolymarketMarkets } from "../tools/fetchPolymarketMarkets";
 import { postToTelegram } from "../tools/postToTelegram";
+import { queueTradingJob } from "../tools/queueTradingJob";
 import pkg from "pg";
 const { Pool } = pkg;
 
@@ -153,6 +154,24 @@ ${market.description ? `📊 ${market.description.substring(0, 200)}${market.des
           logger?.info("✅ [monitorAndPost] Marked as seen", {
             marketId: market.id,
           });
+
+          // Queue this market for automated trading
+          try {
+            const queueResult = await queueTradingJob.execute({
+              context: { marketIds: [market.id] },
+              mastra,
+              runtimeContext: {},
+            });
+            logger?.info("💰 [monitorAndPost] Queued for trading", {
+              marketId: market.id,
+              queued: queueResult.queued,
+            });
+          } catch (error) {
+            logger?.error("❌ [monitorAndPost] Failed to queue trading job", {
+              marketId: market.id,
+              error,
+            });
+          }
         } else {
           logger?.warn("⚠️ [monitorAndPost] Not marking as seen (posting failed)", {
             marketId: market.id,

@@ -18,6 +18,20 @@ def init_database():
     conn = get_db_connection()
     cur = conn.cursor()
     
+    # Trading jobs queue - markets waiting to be traded
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS trading_jobs (
+            id SERIAL PRIMARY KEY,
+            market_id TEXT UNIQUE NOT NULL,
+            status TEXT NOT NULL DEFAULT 'PENDING',
+            error_message TEXT,
+            started_at TIMESTAMP,
+            completed_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
     # Trading positions table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS trading_positions (
@@ -209,6 +223,76 @@ def get_open_sell_orders(market_slug: str) -> list:
     conn.close()
     
     return [dict(row) for row in orders]
+
+
+def queue_trading_job(market_id: str):
+    """Queue a new market for trading"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+        INSERT INTO trading_jobs (market_id, status)
+        VALUES (%s, 'PENDING')
+        ON CONFLICT (market_id) DO NOTHING
+    """, (market_id,))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def get_pending_jobs(limit: int = 10) -> List[Dict]:
+    """Get pending trading jobs"""
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT id, market_id, created_at
+        FROM trading_jobs
+        WHERE status = 'PENDING'
+        ORDER BY created_at ASC
+        LIMIT %s
+    """, (limit,))
+    
+    jobs = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    return [dict(row) for row in jobs]
+
+
+def start_trading_job(job_id: int):
+    """Mark a job as started"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+        UPDATE trading_jobs
+        SET status = 'RUNNING', started_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+        WHERE id = %s
+    """, (job_id,))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def complete_trading_job(job_id: int, error_message: str = None):
+    """Mark a job as completed or failed"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    status = 'FAILED' if error_message else 'COMPLETED'
+    
+    cur.execute("""
+        UPDATE trading_jobs
+        SET status = %s, error_message = %s, completed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+        WHERE id = %s
+    """, (status, error_message, job_id))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
 
 
 if __name__ == "__main__":
