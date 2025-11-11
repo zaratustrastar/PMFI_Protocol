@@ -1,16 +1,15 @@
 # Overview
 
-This is a **Polymarket Monitoring Automation** built with Mastra that automatically detects new prediction markets on Polymarket and posts notifications to both Telegram (@ponnymarket) and Twitter (@ponnymarket). The system runs every minute via a cron trigger and ensures reliable delivery to both platforms.
+This is a **Polymarket Monitoring Automation** built with Mastra that automatically detects new prediction markets on Polymarket and posts notifications to Telegram (@ponnymarket). The system runs every minute via a cron trigger and ensures reliable delivery.
 
 **Current Automation:**
 - **Trigger**: Time-based cron running every minute (`* * * * *`)
-- **Workflow**: Fetches latest Polymarket markets, identifies new ones, posts to social media, tracks in database
+- **Workflow**: Fetches latest Polymarket markets, identifies new ones, posts to Telegram, tracks in database
 - **Tools**: 
   - `fetchPolymarketMarkets`: Fetches markets from Polymarket API
   - `postToTelegram`: Posts formatted messages to Telegram channel
-  - `postToTwitter`: Posts tweets using Twitter API v1.1
 - **Database**: PostgreSQL tracks seen markets to prevent duplicates
-- **Reliability**: Markets are marked as "seen" ONLY after both Telegram and Twitter posts succeed
+- **Reliability**: Markets are marked as "seen" ONLY after successful Telegram posting
 
 Mastra is an all-in-one framework for building AI-powered applications with TypeScript, featuring agents that use LLMs and tools, graph-based workflows for orchestrated multi-step processes, and comprehensive memory management for conversation history and context.
 
