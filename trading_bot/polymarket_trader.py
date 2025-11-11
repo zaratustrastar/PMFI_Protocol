@@ -15,6 +15,7 @@ from py_clob_client.clob_types import OrderArgs, OrderType
 from py_clob_client.order_builder.constants import BUY, SELL
 import config
 from market_utils import get_market_info
+from database import save_order, update_order_status
 
 
 class PolymarketTrader:
@@ -52,13 +53,14 @@ class PolymarketTrader:
         """
         return config.ORDER_SIZE_USD / price
     
-    def place_buy_ladder(self, token_id: str, side_name: str) -> List[Dict]:
+    def place_buy_ladder(self, token_id: str, side_name: str, market_slug: str) -> List[Dict]:
         """
         Place ladder buy orders from 0.1¢ to 1¢
         
         Args:
             token_id: Token ID to trade
             side_name: "YES" or "NO" for logging
+            market_slug: Market identifier for database
             
         Returns:
             List of placed order responses
@@ -87,7 +89,8 @@ class PolymarketTrader:
                     print(f"   ✅ Buy @ ${price:.4f} ({size:.2f} tokens) - Order ID: {order_id[:8]}...")
                     
                     # Track this order
-                    placed_orders.append({
+                    order_data = {
+                        "market_slug": market_slug,
                         "order_id": order_id,
                         "token_id": token_id,
                         "side": side_name,
@@ -95,7 +98,11 @@ class PolymarketTrader:
                         "price": price,
                         "size": size,
                         "status": "OPEN"
-                    })
+                    }
+                    placed_orders.append(order_data)
+                    
+                    # Save to database
+                    save_order(order_data)
                 else:
                     error = response.get("error", "Unknown error")
                     print(f"   ❌ Buy @ ${price:.4f} failed: {error}")
@@ -105,15 +112,16 @@ class PolymarketTrader:
         
         return placed_orders
     
-    def place_sell_ladder(self, token_id: str, buy_price: float, buy_size: float, side_name: str) -> List[Dict]:
+    def place_sell_ladder(self, token_id: str, buy_price: float, buy_size: float, side_name: str, market_slug: str) -> List[Dict]:
         """
         Place ladder sell orders at 200%-1000% profit
         
         Args:
             token_id: Token ID to sell
-            buy_price: Original buy price
-            buy_size: Number of tokens bought
+            buy_price: Original buy price (actual filled price)
+            buy_size: Number of tokens bought (actual filled quantity)
             side_name: "YES" or "NO" for logging
+            market_slug: Market identifier for database
             
         Returns:
             List of placed sell order responses
@@ -148,7 +156,8 @@ class PolymarketTrader:
                     profit_pct = (multiple - 1) * 100
                     print(f"   ✅ Sell @ ${sell_price:.4f} ({size_per_order:.2f} tokens, +{profit_pct:.0f}%) - Order ID: {order_id[:8]}...")
                     
-                    placed_orders.append({
+                    order_data = {
+                        "market_slug": market_slug,
                         "order_id": order_id,
                         "token_id": token_id,
                         "side": side_name,
@@ -158,7 +167,11 @@ class PolymarketTrader:
                         "buy_price": buy_price,
                         "profit_multiple": multiple,
                         "status": "OPEN"
-                    })
+                    }
+                    placed_orders.append(order_data)
+                    
+                    # Save to database
+                    save_order(order_data)
                 else:
                     error = response.get("error", "Unknown error")
                     print(f"   ❌ Sell @ ${sell_price:.4f} failed: {error}")
@@ -176,7 +189,7 @@ class PolymarketTrader:
             orders: List of order dictionaries
             
         Returns:
-            List of filled orders
+            List of filled orders with actual filled size and price
         """
         filled_orders = []
         
@@ -187,10 +200,23 @@ class PolymarketTrader:
                 order_status = self.client.get_order(order_id)
                 status = order_status.get("status", "").upper()
                 
-                if status == "MATCHED":
-                    print(f"   🎯 Order filled: {order['type']} {order['side']} @ ${order['price']:.4f}")
+                # Handle both full and partial fills
+                if status in ["FILLED", "MATCHED"]:
+                    # Get actual filled quantity and average price
+                    filled_size = float(order_status.get("size_matched", order["size"]))
+                    avg_price = float(order_status.get("avg_price", order["price"]))
+                    
+                    print(f"   🎯 Order filled: {order['type']} {order['side']} @ ${avg_price:.4f} ({filled_size:.2f} tokens)")
+                    
                     order["status"] = "FILLED"
+                    order["filled_size"] = filled_size
+                    order["filled_price"] = avg_price
                     filled_orders.append(order)
+                    
+                elif status == "PARTIAL":
+                    # Partial fill - track but don't trigger sell yet
+                    filled_size = float(order_status.get("size_matched", 0))
+                    print(f"   ⏳ Partial fill: {order['type']} {order['side']} ({filled_size:.2f}/{order['size']:.2f})")
                     
             except Exception as e:
                 print(f"   ⚠️  Error checking order {order_id[:8]}: {str(e)}")
@@ -222,10 +248,10 @@ class PolymarketTrader:
         # Place buy ladders on both YES and NO
         all_buy_orders = []
         
-        yes_orders = self.place_buy_ladder(market_info['yes_token_id'], "YES")
+        yes_orders = self.place_buy_ladder(market_info['yes_token_id'], "YES", market_slug)
         all_buy_orders.extend(yes_orders)
         
-        no_orders = self.place_buy_ladder(market_info['no_token_id'], "NO")
+        no_orders = self.place_buy_ladder(market_info['no_token_id'], "NO", market_slug)
         all_buy_orders.extend(no_orders)
         
         print(f"\n✅ Placed {len(all_buy_orders)} buy orders total")
@@ -249,11 +275,21 @@ class PolymarketTrader:
                     if order_id not in processed_orders:
                         print(f"\n🎉 Buy order filled! Placing sell ladder...")
                         
+                        # Update buy order status in database with actual fill data
+                        update_order_status(
+                            order_id, 
+                            "FILLED",
+                            filled_buy.get("filled_size"),
+                            filled_buy.get("filled_price")
+                        )
+                        
+                        # Use actual filled price and size
                         sell_orders = self.place_sell_ladder(
                             filled_buy["token_id"],
-                            filled_buy["price"],
-                            filled_buy["size"],
-                            filled_buy["side"]
+                            filled_buy.get("filled_price", filled_buy["price"]),
+                            filled_buy.get("filled_size", filled_buy["size"]),
+                            filled_buy["side"],
+                            market_slug
                         )
                         
                         processed_orders.add(order_id)

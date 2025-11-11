@@ -117,16 +117,27 @@ def get_open_orders(market_slug: Optional[str] = None) -> List[Dict]:
     return [dict(row) for row in orders]
 
 
-def update_order_status(order_id: str, status: str):
-    """Update order status"""
+def update_order_status(order_id: str, status: str, filled_size: float = None, filled_price: float = None):
+    """Update order status with actual fill data"""
     conn = get_db_connection()
     cur = conn.cursor()
     
-    cur.execute("""
-        UPDATE trading_positions 
-        SET status = %s, updated_at = CURRENT_TIMESTAMP
-        WHERE order_id = %s
-    """, (status, order_id))
+    if filled_size is not None and filled_price is not None:
+        cur.execute("""
+            UPDATE trading_positions 
+            SET status = %s, 
+                size = %s,
+                price = %s,
+                filled_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE order_id = %s
+        """, (status, filled_size, filled_price, order_id))
+    else:
+        cur.execute("""
+            UPDATE trading_positions 
+            SET status = %s, updated_at = CURRENT_TIMESTAMP
+            WHERE order_id = %s
+        """, (status, order_id))
     
     conn.commit()
     cur.close()
