@@ -14,6 +14,16 @@ const { Pool } = pkg;
  */
 
 /**
+ * Escape HTML special characters for Telegram HTML parse mode
+ */
+function escapeTelegramHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
  * Step 1: Fetch Markets and Post to Telegram
  * Fetches markets, identifies new ones, posts them, and ONLY THEN marks as seen
  */
@@ -102,12 +112,18 @@ const monitorAndPost = createStep({
           question: market.question,
         });
 
-        // Format Telegram message
+        // Format Telegram message (escape HTML special chars in user content)
+        const escapedQuestion = escapeTelegramHtml(market.question);
+        const escapedDescription = market.description
+          ? escapeTelegramHtml(market.description.substring(0, 200)) +
+            (market.description.length > 200 ? "..." : "")
+          : "";
+        
         const telegramMessage = `🔮 <b>New Polymarket Market!</b>
 
-<b>Question:</b> ${market.question}
+<b>Question:</b> ${escapedQuestion}
 
-${market.description ? `📊 ${market.description.substring(0, 200)}${market.description.length > 200 ? "..." : ""}
+${escapedDescription ? `📊 ${escapedDescription}
 
 ` : ""}<a href="${market.url}">🔗 Trade on Polymarket</a>
 
@@ -155,20 +171,22 @@ ${market.description ? `📊 ${market.description.substring(0, 200)}${market.des
             marketId: market.id,
           });
 
-          // Queue this market for automated trading
+          // Queue this market for automated trading (use slug, not ID)
           try {
             const queueResult = await queueTradingJob.execute({
-              context: { marketIds: [market.id] },
+              context: { marketIds: [market.slug] },
               mastra,
               runtimeContext: {},
             });
             logger?.info("💰 [monitorAndPost] Queued for trading", {
               marketId: market.id,
+              marketSlug: market.slug,
               queued: queueResult.queued,
             });
           } catch (error) {
             logger?.error("❌ [monitorAndPost] Failed to queue trading job", {
               marketId: market.id,
+              marketSlug: market.slug,
               error,
             });
           }
