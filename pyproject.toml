@@ -1,0 +1,10 @@
+[project]
+name = "repl-nix-workspace"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "py-clob-client>=0.28.0",
+    "requests>=2.32.5",
+    "web3>=7.14.0",
+]
