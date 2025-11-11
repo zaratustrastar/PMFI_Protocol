@@ -1,20 +1,44 @@
 # Overview
 
-This is a **Polymarket Monitoring and Automated Trading System** with two components:
+This is a **Fully Automated Polymarket Monitoring and Trading System** that combines market detection, Telegram notifications, and automated trading in a queue-based architecture.
 
-## 1. Market Monitoring (Mastra)
-Automatically detects new prediction markets on Polymarket and posts notifications to Telegram (@ponnymarket).
+## Architecture
+
+### 1. Market Monitoring (Mastra Workflow)
 - **Trigger**: Time-based cron running every minute (`* * * * *`)
-- **Workflow**: Fetches latest markets, identifies new ones, posts to Telegram, tracks in database
-- **Database**: PostgreSQL tracks seen markets to prevent duplicates
+- **Workflow**:
+  1. Fetches latest markets from Polymarket API
+  2. Identifies new markets not yet seen
+  3. Posts notifications to Telegram (@ponnymarket)
+  4. **Queues markets for automated trading** in `trading_jobs` table
+  5. Marks markets as seen in database
+- **Database**: PostgreSQL tracks seen markets and trading jobs
 
-## 2. Automated Trading Bot (Python)
-Executes ladder trading strategy on Polymarket markets with sell monitoring and Telegram notifications.
-- **Strategy**: $2 per market (20 buy orders: 0.1¢-1¢ on YES and NO tokens)
-- **Automation**: Auto-places sell orders at 3x-10x profit when buys fill
-- **Monitoring**: Tracks both buy and sell fills, updates database with P&L
+### 2. Trading Job Worker (Python)
+- **Mode**: Continuous worker polling `trading_jobs` queue
+- **Process**:
+  1. Polls database for PENDING jobs
+  2. Places buy orders (10 orders × 2 sides = $2 per market)
+  3. Marks job as COMPLETED/FAILED
+  4. Moves to next job
+- **Strategy**: Ladder buys 0.1¢-1¢ on YES and NO tokens ($0.20 per order)
+- **Deployment**: Run `trading_bot/start_worker.sh` continuously
+
+### 3. Order Monitor (Python)
+- **Mode**: Continuous monitor for ALL active orders
+- **Process**:
+  1. Monitors all OPEN buy orders → places sell ladder when filled
+  2. Monitors all OPEN sell orders → posts Telegram notification when filled
+- **Sell Strategy**: Ladder sells at 3x-10x profit
 - **Notifications**: Posts to Telegram (@ponnymarket) **ONLY when sells execute**
-- **Deployment**: Ready for Replit Scheduled Deployment (runs every 15 minutes)
+- **Deployment**: Run `trading_bot/start_monitor.sh` continuously
+
+## Deployment
+
+Three processes run concurrently:
+1. **Mastra Workflow** (cron every minute): Detects markets → Posts to Telegram → Queues jobs
+2. **Trading Worker** (`auto_trader.py`): Processes queued jobs → Places orders
+3. **Order Monitor** (`order_monitor.py`): Monitors fills → Places sells → Notifies Telegram
 
 Mastra is an all-in-one framework for building AI-powered applications with TypeScript, featuring agents that use LLMs and tools, graph-based workflows for orchestrated multi-step processes, and comprehensive memory management for conversation history and context.
 

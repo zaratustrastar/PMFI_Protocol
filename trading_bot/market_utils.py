@@ -47,23 +47,41 @@ def get_token_ids(market_data: Dict) -> Dict[str, str]:
     Extract YES and NO token IDs from market data
     
     Args:
-        market_data: Market data from Gamma API
+        market_data: Market data from Gamma API (event level)
         
     Returns:
         Dictionary with 'yes' and 'no' token IDs
     """
-    tokens = market_data.get("tokens", [])
+    import json
     
-    token_ids = {}
+    token_ids = {"yes": "", "no": ""}
     
-    for token in tokens:
-        outcome = token.get("outcome", "").lower()
-        token_id = token.get("token_id", "")
-        
-        if outcome == "yes":
-            token_ids["yes"] = token_id
-        elif outcome == "no":
-            token_ids["no"] = token_id
+    # Handle nested structure - event.markets[0] contains the actual market data
+    markets = market_data.get("markets", [])
+    if not markets:
+        return token_ids
+    
+    market = markets[0]  # Get first market in event
+    
+    # Extract clobTokenIds (JSON string array)
+    clob_token_ids_str = market.get("clobTokenIds", "[]")
+    try:
+        clob_token_ids = json.loads(clob_token_ids_str)
+    except:
+        clob_token_ids = []
+    
+    # Extract outcomes (JSON string array)
+    outcomes_str = market.get("outcomes", "[]")
+    try:
+        outcomes = json.loads(outcomes_str)
+    except:
+        outcomes = []
+    
+    # Map tokens to outcomes
+    # For binary markets: first token = YES (or first outcome), second = NO (or second outcome)
+    if len(clob_token_ids) >= 2:
+        token_ids["yes"] = clob_token_ids[0]
+        token_ids["no"] = clob_token_ids[1]
     
     return token_ids
 
