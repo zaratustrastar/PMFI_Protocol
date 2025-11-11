@@ -106,23 +106,30 @@ def save_order(order_data: Dict):
     conn.close()
 
 
-def get_open_orders(market_slug: Optional[str] = None) -> List[Dict]:
-    """Get all open orders, optionally filtered by market"""
+def get_open_orders(market_slug: Optional[str] = None, order_type: Optional[str] = None) -> List[Dict]:
+    """Get all open orders, optionally filtered by market and/or order type"""
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
+    # Build WHERE clause based on filters
+    conditions = ["status = 'OPEN'"]
+    params = []
+    
     if market_slug:
-        cur.execute("""
-            SELECT * FROM trading_positions 
-            WHERE status = 'OPEN' AND market_slug = %s
-            ORDER BY created_at DESC
-        """, (market_slug,))
-    else:
-        cur.execute("""
-            SELECT * FROM trading_positions 
-            WHERE status = 'OPEN'
-            ORDER BY created_at DESC
-        """)
+        conditions.append("market_slug = %s")
+        params.append(market_slug)
+    
+    if order_type:
+        conditions.append("order_type = %s")
+        params.append(order_type)
+    
+    where_clause = " AND ".join(conditions)
+    
+    cur.execute(f"""
+        SELECT * FROM trading_positions 
+        WHERE {where_clause}
+        ORDER BY created_at DESC
+    """, tuple(params))
     
     orders = cur.fetchall()
     cur.close()
