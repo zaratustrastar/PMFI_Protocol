@@ -13,7 +13,7 @@ PRIVATE_KEY = os.getenv("POLYMARKET_PRIVATE_KEY", "")
 PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS", "")
 
 # Trading strategy parameters
-ORDER_SIZE_USD = 1.0  # $1 per order
+ORDER_SIZE_USD = 0.2  # $0.20 per order = $2 total per market (10 orders × 2 sides)
 
 # Buy ladder: 0.1¢ to 1¢ (0.001 to 0.01)
 BUY_LADDER_PRICES = [0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01]
