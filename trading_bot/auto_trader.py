@@ -30,12 +30,13 @@ def get_new_markets(hours_back=1):
     cutoff_time = datetime.now() - timedelta(hours=hours_back)
     
     cur.execute("""
-        SELECT DISTINCT pm.market_slug
-        FROM polymarket_markets pm
-        LEFT JOIN trading_positions tp ON pm.market_slug = tp.market_slug
-        WHERE pm.first_seen >= %s 
+        SELECT spm.market_id, MAX(spm.seen_at) as last_seen
+        FROM seen_polymarket_markets spm
+        LEFT JOIN trading_positions tp ON spm.market_id = tp.market_slug
+        WHERE spm.seen_at >= %s 
         AND tp.market_slug IS NULL
-        ORDER BY pm.first_seen DESC
+        GROUP BY spm.market_id
+        ORDER BY last_seen DESC
         LIMIT 10
     """, (cutoff_time,))
     

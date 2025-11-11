@@ -47,9 +47,19 @@ Select your timezone (e.g., "America/New_York")
 Leave empty (no build needed for Python)
 
 ### 5. Run Command
+
+**Option A: Auto-detect markets (requires integration testing):**
 ```bash
 cd trading_bot && python3 auto_trader.py
 ```
+
+**Option B: Manual market list (recommended for testing):**
+Create a file `trading_bot/markets_to_trade.txt` with one market slug per line, then:
+```bash
+cd trading_bot && python3 -c "import sys; from polymarket_trader import PolymarketTrader; trader = PolymarketTrader(); [trader.run_strategy_limited(line.strip(), 30) for line in open('markets_to_trade.txt') if line.strip()]"
+```
+
+Start with Option B for testing, then move to Option A once you verify the integration works.
 
 ### 6. Deployment Secrets
 These should auto-populate from your Replit secrets:

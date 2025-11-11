@@ -7,35 +7,38 @@ import requests
 from typing import Optional, Dict, List
 
 
-def get_market_by_slug(slug: str) -> Optional[Dict]:
+def get_market_by_slug_or_id(identifier: str) -> Optional[Dict]:
     """
-    Get market data from Polymarket Gamma API by slug
+    Get market data from Polymarket Gamma API by slug OR event ID
     
     Args:
-        slug: Market slug (e.g., "btc-90k-dec-31")
+        identifier: Market slug (e.g., "btc-90k-dec-31") OR event ID (e.g., "677402")
         
     Returns:
         Market data dictionary or None if not found
     """
-    # First, search for the event by slug
-    url = f"https://gamma-api.polymarket.com/events?slug={slug}"
+    # Try by ID first (if it's numeric-looking)
+    if identifier.isdigit():
+        url = f"https://gamma-api.polymarket.com/events/{identifier}"
+    else:
+        url = f"https://gamma-api.polymarket.com/events?slug={identifier}"
     
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         data = response.json()
         
-        # Return first matching event
+        # Handle different response formats
         if isinstance(data, list) and len(data) > 0:
             return data[0]
-        elif isinstance(data, dict):
+        elif isinstance(data, dict) and data.get('id'):
             return data
         else:
-            print(f"No market found for slug: {slug}")
+            print(f"No market found for: {identifier}")
             return None
             
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching market {slug}: {e}")
+        print(f"Error fetching market {identifier}: {e}")
         return None
 
 
@@ -65,17 +68,17 @@ def get_token_ids(market_data: Dict) -> Dict[str, str]:
     return token_ids
 
 
-def get_market_info(slug: str) -> Optional[Dict]:
+def get_market_info(identifier: str) -> Optional[Dict]:
     """
     Get complete market information including token IDs
     
     Args:
-        slug: Market slug
+        identifier: Market slug OR event ID
         
     Returns:
         Dictionary with market data and token IDs
     """
-    market_data = get_market_by_slug(slug)
+    market_data = get_market_by_slug_or_id(identifier)
     
     if not market_data:
         return None
@@ -83,8 +86,8 @@ def get_market_info(slug: str) -> Optional[Dict]:
     token_ids = get_token_ids(market_data)
     
     return {
-        "slug": slug,
-        "question": market_data.get("question", ""),
+        "slug": market_data.get("slug", identifier),
+        "question": market_data.get("question", market_data.get("title", "")),
         "market_id": market_data.get("id", ""),
         "condition_id": market_data.get("condition_id", ""),
         "yes_token_id": token_ids.get("yes", ""),
