@@ -1,163 +1,163 @@
-# Polymarket Automated Trading Bot
+# Polymarket Automated Trading System
 
-Automated ladder trading strategy for Polymarket prediction markets.
+Fully automated system for monitoring Polymarket markets, posting Telegram notifications, and executing ladder trading strategies.
 
-## Strategy
+## 🎯 What It Does
 
-1. **Buy Ladder**: Places limit buy orders from $0.001 to $0.01 (0.1¢ to 1¢) on both YES and NO tokens
-   - Each order: $1 worth of tokens
-   - Total investment: ~$20 per market ($10 YES + $10 NO)
+1. **Detects new markets** every minute
+2. **Posts to Telegram** (@ponnymarket)
+3. **Automatically trades** on new markets:
+   - Buy ladders: 1¢-3¢ per share ($0.20/order, $2 total)
+   - Sell ladders: 3x-10x profit on fills
+4. **Notifies Telegram** when sells execute
 
-2. **Monitor Fills**: Continuously checks for filled buy orders
+## 🏗️ Architecture
 
-3. **Sell Ladder**: When a buy fills, automatically places sell orders at 200%-1000% profit
-   - Divides position across 8 sell orders
-   - Prices: 3x, 4x, 5x, 6x, 7x, 8x, 9x, 10x the buy price
+```
+┌─────────────────────────────────────────────────────┐
+│ REPLIT (Mastra Workflow)                            │
+│ ✅ Market monitoring every minute                   │
+│ ✅ Telegram notifications                           │
+│ ✅ Queue jobs in PostgreSQL database                │
+└─────────────────────────┬───────────────────────────┘
+                          │
+                          │ (Database connection)
+                          │
+┌─────────────────────────▼───────────────────────────┐
+│ EXTERNAL SERVER (Residential IP / VPS)              │
+│ ✅ Trading worker (auto_trader.py)                  │
+│ ✅ Order monitor (order_monitor.py)                 │
+│ ✅ Place orders & monitor fills                     │
+└──────────────────────────────────────────────────────┘
+```
 
-## Setup
+## ⚠️ Critical: Cloudflare IP Blocking
 
-### Prerequisites
-- Python 3.11+
-- PostgreSQL database
-- Polymarket wallet with USDC balance
+Polymarket blocks datacenter IPs (including Replit). **Trading workers MUST run from residential IP.**
 
-### Environment Variables
-Set these in Replit Secrets:
-- `POLYMARKET_PRIVATE_KEY`: Your wallet private key
-- `POLYMARKET_PROXY_ADDRESS`: Your Polymarket funding address
-- `DATABASE_URL`: PostgreSQL connection string
+**What works from Replit:**
+- ✅ Market monitoring
+- ✅ Telegram notifications  
+- ✅ Database job queueing
 
-### Installation
-Already installed via Replit package manager:
-- `py-clob-client`
-- `web3`
-- `requests`
+**What requires residential IP:**
+- ❌ Order placement
+- ❌ Order monitoring
+- ❌ Fill detection
 
-## Usage
+## 🚀 Quick Start
 
-### Automatic Deployment (Recommended):
-The bot runs automatically every 15 minutes via Replit Scheduled Deployment.
-See `DEPLOYMENT.md` for full setup instructions.
+### 1. From Replit (Already Running)
 
-### Manual Testing:
+The Mastra workflow is already running and will:
+- Monitor markets every minute
+- Post new markets to Telegram
+- Queue trading jobs in database
+
+### 2. From External Server (Required for Trading)
+
+**Export database connection:**
+```bash
+# From Replit, get your DATABASE_URL
+echo $DATABASE_URL
+```
+
+**Set up on your home computer or VPS:**
+```bash
+# Clone repository
+git clone <your-repo-url>
+cd trading_bot
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+export DATABASE_URL="postgresql://..."
+export POLYMARKET_PRIVATE_KEY="..."
+export POLYMARKET_PROXY_ADDRESS="..."
+export POLYMARKET_API_KEY="..."
+export POLYMARKET_API_SECRET="..."
+export TELEGRAM_BOT_TOKEN="..."
+
+# Optional: Use residential proxy (if on VPS)
+export PROXY_URL="http://user:pass@proxy.com:port"
+
+# Start workers
+./start_worker.sh    # Places orders
+./start_monitor.sh   # Monitors fills & places sells
+```
+
+## 🔧 Configuration
+
+Edit `config.py` to customize:
+- `BUY_LADDER_PRICES`: Buy prices (currently 1¢-3¢)
+- `SELL_PROFIT_MULTIPLES`: Sell multipliers (currently 3x-10x)
+- `ORDER_SIZE_USD`: Order size (currently $0.20)
+- `POLL_INTERVAL_SECONDS`: Check interval (currently 10s)
+
+## 📊 Database Schema
+
+**`trading_jobs`**: Queued trading jobs
+- `id`: Job ID
+- `market_id`: Market slug
+- `status`: PENDING → RUNNING → COMPLETED/FAILED
+- `created_at`, `updated_at`: Timestamps
+
+**`orders`**: Tracked orders
+- `order_id`: Polymarket order ID
+- `market_slug`: Market identifier
+- `token_id`: YES/NO token
+- `side`: YES or NO
+- `type`: BUY or SELL
+- `price`, `size`: Order details
+- `status`: OPEN → FILLED
+
+## 🧪 Testing
+
+From Replit:
 ```bash
 cd trading_bot
-python3 run_trader.py <market-slug>
+python3 test_system.py
 ```
 
-### Example:
+From external server:
 ```bash
-python3 run_trader.py eth-updown-15m-1762961400
+# Test connection
+python3 -c "from polymarket_trader import PolymarketTrader; t = PolymarketTrader(); print('✅ Connected')"
 ```
 
-### Find market slugs:
-1. Go to polymarket.com
-2. Browse markets
-3. The slug is in the URL: `polymarket.com/event/SLUG`
+## 📝 Files
 
-Or use your existing Telegram monitoring - new markets are auto-detected!
-
-## How It Works
-
-1. **Initialization**
-   - Connects to Polymarket CLOB API
-   - Creates/derives API credentials
-   - Initializes database tables
-
-2. **Market Analysis**
-   - Fetches market data by slug
-   - Extracts YES and NO token IDs
-   - Validates market is active
-
-3. **Buy Phase**
-   - Places 10 buy orders on YES (0.1¢ to 1¢)
-   - Places 10 buy orders on NO (0.1¢ to 1¢)
-   - Logs all order IDs
-
-4. **Monitor Phase**
-   - Polls CLOB API every 10 seconds
-   - Checks status of all open buy orders
-   - Identifies filled orders
-
-5. **Sell Phase** (triggers when buy fills)
-   - Calculates profit prices (3x to 10x)
-   - Divides position across 8 sell orders
-   - Places all sell orders
-   - Tracks P&L in database
-
-## Database Schema
-
-### `trading_positions`
-Tracks all orders (buy and sell):
-- `order_id`: Unique Polymarket order ID
-- `market_slug`: Market identifier
-- `token_id`: YES or NO token ID
-- `side`: "YES" or "NO"
-- `order_type`: "BUY" or "SELL"
-- `price`: Order price
-- `size`: Number of tokens
-- `status`: "OPEN" or "FILLED"
-- `buy_price`: Original buy price (for sells)
-- `profit_multiple`: Profit multiplier (for sells)
-
-### `trading_summary`
-Market-level statistics:
-- `total_buys`, `filled_buys`
-- `total_sells`, `filled_sells`
-- `total_invested`, `total_returned`
-- `realized_pnl`: Profit/loss
-
-## Files
-
-- `run_trader.py`: Main launcher script
-- `polymarket_trader.py`: Core trading bot logic
-- `market_utils.py`: Market data fetching
-- `database.py`: Database operations
+**Core:**
+- `polymarket_trader.py`: Trading logic with curl_cffi Cloudflare bypass
+- `auto_trader.py`: Worker that processes queued jobs
+- `order_monitor.py`: Monitors fills and places sells
 - `config.py`: Configuration settings
 
-## Current Limitations
+**Utilities:**
+- `database.py`: PostgreSQL operations
+- `telegram_notifier.py`: Telegram notifications
+- `market_utils.py`: Market data fetching
 
-⚠️ **This is a basic MVP with known limitations:**
+**Deployment:**
+- `start_worker.sh`: Start trading worker
+- `start_monitor.sh`: Start order monitor
+- `CLOUDFLARE_ISSUE.md`: Detailed bypass documentation
 
-1. **No sell order monitoring** - Bot places sell orders but doesn't track when they fill
-   - You must manually check Polymarket to see if sells executed
-   - P&L tracking only updates for buy fills, not sell fills
-   - Consider this for future improvement
+## 🐛 Troubleshooting
 
-2. **Partial fills** - Bot logs partial fills but doesn't hedge them
-   - If a buy partially fills, sell ladder waits for full fill
-   - Unhedged exposure if market moves before full fill
+**"Cloudflare blocked (403)"**
+- You're running from a blocked IP
+- Solution: Run workers from residential IP
 
-3. **No stop-loss** - Bot never cancels losing positions
-   - Sell orders stay open indefinitely at high prices
-   - You may hold positions long-term if prices don't reach targets
+**"No orders placed"**
+- Market may not exist or have ended
+- Check token IDs in market data
 
-4. **Single market only** - Bot runs on one market at a time
-   - To trade multiple markets, run multiple instances
-   - No portfolio-level risk management
+**"Database connection failed"**
+- Verify DATABASE_URL is correct
+- Check network connectivity to Replit PostgreSQL
 
-5. **No balance checks** - Bot doesn't verify sufficient USDC before placing orders
-   - Orders will fail if wallet balance too low
+## 📖 More Info
 
-## Safety Notes
-
-⚠️ **This bot trades real money**
-- Start with small amounts ($20 per market)
-- Markets can move against you
-- Sell prices may never be reached
-- Always monitor your positions on polymarket.com
-- Check database regularly for position status
-
-## Integration with Telegram Monitoring
-
-Your existing Polymarket monitoring workflow detects new markets and posts to Telegram. You can integrate by:
-
-1. Extract market slug from new market notifications
-2. Automatically trigger this bot with the slug
-3. Bot places orders and monitors fills
-
-## Support
-
-For issues or questions about:
-- Polymarket API: https://docs.polymarket.com
-- CLOB Client: https://github.com/Polymarket/py-clob-client
+See `CLOUDFLARE_ISSUE.md` for detailed Cloudflare bypass documentation.
