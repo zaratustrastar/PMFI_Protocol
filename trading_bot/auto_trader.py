@@ -34,17 +34,17 @@ def process_trading_job(job, trader: PolymarketTrader):
         
         # Place orders (without blocking on monitoring)
         # Monitoring is handled by a separate continuous process
-        success = trader.place_orders_only(market_id)
+        orders_placed = trader.place_orders_only(market_id)
         
-        if success:
+        if orders_placed > 0:
             # Mark job as completed
             complete_trading_job(job_id)
-            print(f"✅ Job #{job_id} completed (orders placed)")
+            print(f"✅ Job #{job_id} completed ({orders_placed} orders placed)")
             return True
         else:
             # Mark job as failed
-            complete_trading_job(job_id, "Failed to place orders")
-            print(f"❌ Job #{job_id} failed to place orders")
+            complete_trading_job(job_id, "No orders placed (all failed)")
+            print(f"❌ Job #{job_id} failed - no orders placed")
             return False
             
     except Exception as e:
@@ -60,7 +60,7 @@ def main():
     """Main worker loop - continuously polls for jobs"""
     print("\n🤖 Polymarket Auto-Trading Worker Starting...")
     print(f"   Budget: $2 per market ($0.20 × 10 orders × 2 sides)")
-    print(f"   Strategy: Ladder buys 0.1¢-1¢, ladder sells 3x-10x profit")
+    print(f"   Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit")
     print(f"   Notifications: Telegram @ponnymarket (sells only)")
     print(f"   Mode: Queue-based worker\n")
     
