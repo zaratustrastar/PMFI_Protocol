@@ -35,7 +35,20 @@ class PolymarketTrader:
         
         # Create or derive API credentials
         print("🔑 Setting up API credentials...")
-        self.client.set_api_creds(self.client.create_or_derive_api_creds())
+        
+        # Use Builder API credentials if available, otherwise derive from private key
+        if config.BUILDER_API_KEY and config.BUILDER_API_SECRET:
+            print("   Using Builder API credentials...")
+            from py_clob_client.clob_types import ApiCreds
+            api_creds = ApiCreds(
+                api_key=config.BUILDER_API_KEY,
+                api_secret=config.BUILDER_API_SECRET,
+                api_passphrase=""  # Builder credentials don't use passphrase
+            )
+            self.client.set_api_creds(api_creds)
+        else:
+            print("   Deriving credentials from private key...")
+            self.client.set_api_creds(self.client.create_or_derive_api_creds())
         
         # Track active positions
         self.active_positions = {}  # {order_id: order_details}
@@ -56,7 +69,7 @@ class PolymarketTrader:
     
     def place_buy_ladder(self, token_id: str, side_name: str, market_slug: str) -> List[Dict]:
         """
-        Place ladder buy orders from 0.1¢ to 1¢
+        Place ladder buy orders from 1¢ to 3¢
         
         Args:
             token_id: Token ID to trade
