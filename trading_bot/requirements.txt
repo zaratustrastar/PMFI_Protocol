@@ -1,0 +1,18 @@
+# Polymarket Trading Bot Requirements
+# Install with: pip install -r requirements.txt
+
+# Polymarket API client
+py-clob-client>=0.28.0
+
+# Database
+psycopg2-binary>=2.9.0
+
+# HTTP requests with Cloudflare bypass
+curl-cffi>=0.13.0
+requests>=2.31.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Utilities
+web3>=6.0.0

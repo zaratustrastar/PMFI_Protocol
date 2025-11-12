@@ -5,6 +5,15 @@ Continuously polls for queued trading jobs and executes them
 
 import os
 import time
+
+# Load environment variables from .env file if it exists
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ Loaded environment variables from .env file")
+except ImportError:
+    print("⚠️  python-dotenv not installed, using system environment variables")
+
 from polymarket_trader import PolymarketTrader
 from database import get_pending_jobs, start_trading_job, complete_trading_job
 

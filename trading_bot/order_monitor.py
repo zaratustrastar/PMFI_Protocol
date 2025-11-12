@@ -5,6 +5,15 @@ Runs independently to monitor buy/sell fills across all markets
 
 import os
 import time
+
+# Load environment variables from .env file if it exists
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ Loaded environment variables from .env file")
+except ImportError:
+    print("⚠️  python-dotenv not installed, using system environment variables")
+
 from polymarket_trader import PolymarketTrader
 from database import get_open_orders, update_order_status, update_market_summary
 from telegram_notifier import notify_sell_executed
