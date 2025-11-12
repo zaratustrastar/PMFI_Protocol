@@ -47,45 +47,29 @@ Polymarket blocks datacenter IPs (including Replit). **Trading workers MUST run 
 
 ## 🚀 Quick Start
 
-### 1. From Replit (Already Running)
+### 1. From Replit (Already Running) ✅
 
 The Mastra workflow is already running and will:
 - Monitor markets every minute
 - Post new markets to Telegram
 - Queue trading jobs in database
 
-### 2. From External Server (Required for Trading)
+**This part is working!** You can see it posting to your Telegram.
 
-**Export database connection:**
-```bash
-# From Replit, get your DATABASE_URL
-echo $DATABASE_URL
-```
+### 2. From Your Home Computer (Required for Trading) 🏠
 
-**Set up on your home computer or VPS:**
-```bash
-# Clone repository
-git clone <your-repo-url>
-cd trading_bot
+**Trading is blocked on Replit due to Cloudflare IP filtering.**
 
-# Install dependencies
-pip install -r requirements.txt
+👉 **Follow the super simple guide:** `EASY_SETUP.md`
 
-# Configure environment
-export DATABASE_URL="postgresql://..."
-export POLYMARKET_PRIVATE_KEY="..."
-export POLYMARKET_PROXY_ADDRESS="..."
-export POLYMARKET_API_KEY="..."
-export POLYMARKET_API_SECRET="..."
-export TELEGRAM_BOT_TOKEN="..."
+**Quick version:**
+1. Run `cd trading_bot && ./export_env.sh` on Replit to get your passwords
+2. Download code to your computer
+3. Run `pip install -r requirements.txt`
+4. Create `.env` file with your passwords
+5. Run `python3 auto_trader.py` and `python3 order_monitor.py`
 
-# Optional: Use residential proxy (if on VPS)
-export PROXY_URL="http://user:pass@proxy.com:port"
-
-# Start workers
-./start_worker.sh    # Places orders
-./start_monitor.sh   # Monitors fills & places sells
-```
+**Full detailed instructions:** See `EASY_SETUP.md` for step-by-step guide!
 
 ## 🔧 Configuration
 
