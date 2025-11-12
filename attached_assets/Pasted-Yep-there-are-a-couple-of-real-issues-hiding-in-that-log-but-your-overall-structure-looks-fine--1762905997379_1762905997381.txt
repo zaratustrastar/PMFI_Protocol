@@ -1,0 +1,152 @@
+Yep, there are a couple of *real* issues hiding in that log, but your overall structure looks fine.
+
+You basically have **two separate problems**:
+
+---
+
+## 1. Your price ladder is invalid for these markets
+
+All these lines:
+
+```text
+❌ Buy @ $0.0010 error: price (0.001), min: 0.01 - max: 0.99
+...
+❌ Buy @ $0.0090 error: price (0.009), min: 0.01 - max: 0.99
+```
+
+mean:
+
+* For these markets, the **minimum allowed price is 0.01** (1 cent).
+* You’re trying to place orders at `0.001`–`0.009` (0.1–0.9 cents), which are *below* the allowed min.
+* So the client rejects them before they even hit the matching engine.
+
+So for these markets:
+
+* You **cannot** trade 0.1–0.9¢
+* You must start at **0.01** or higher, and respect the tick size.
+
+### What to fix
+
+1. Change your ladder so it never goes below the market's `min_price` / tick:
+
+   ```python
+   BUY_PRICES = [0.01, 0.011, 0.012, 0.013, 0.015, 0.0175, 0.02]  # example
+   ```
+
+2. Even better: **read the constraints from the market** and build the ladder dynamically:
+
+   * Get `min_price`, `max_price`, and `tick_size` from the market data.
+   * Generate prices as `min_price + k * tick_size`.
+
+Right now your bot says:
+
+```text
+   Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+   Strategy: Ladder buys 0.1¢-1¢
+```
+
+But for this event the **real allowed range is 1¢–99¢**, so the idea “0.1¢–1¢” just can’t work there.
+
+---
+
+## 2. Cloudflare 403 – you’re being blocked
+
+On the last price step (`0.0100`), the price is valid, so the client actually sends the order… and then you get:
+
+```text
+❌ Buy @ $0.0100 error: PolyApiException[status_code=403, error_message=<!DOCTYPE html> ... "Sorry, you have been blocked" ...]
+```
+
+This is Cloudflare saying:
+
+> “Requests from this IP / pattern are blocked from accessing polymarket.com”
+
+So:
+
+* Your **code path is correct**, the order is reaching the HTTP layer.
+* But the **infrastructure IP (Replit / server)** is getting blocked by Cloudflare’s WAF.
+
+### Things to check
+
+1. **API host**
+
+Make sure your `ClobClient` is using the **CLOB host**, not the web UI host:
+
+```python
+CLOB_HOST = "https://clob.polymarket.com"
+
+client = ClobClient(
+    CLOB_HOST,
+    key=PRIVATE_KEY,
+    chain_id=POLYGON,
+    signature_type=0,
+    funder=FUNDER,
+)
+```
+
+If you accidentally pass `https://polymarket.com` anywhere, you’ll hit the website (with Cloudflare anti-bot), not the trading API.
+
+2. **Environment**
+
+If you *are* using `clob.polymarket.com` and still get 403 with that Cloudflare HTML, then:
+
+* The IP range of your host (Replit / some cloud box) was likely flagged.
+* The error text even says: “You can email the site owner… include the Cloudflare Ray ID”.
+
+So the only real fix then is:
+
+* Contact Polymarket dev support, send them:
+
+  * the **Ray IDs** in the logs (e.g. `99d1c2225929bd60` etc),
+  * your use case (API trading bot),
+  * and ask them to unblock / whitelist your environment.
+
+---
+
+## 3. Logic issue in your worker
+
+This is smaller but important:
+
+```text
+✅ Placed 0 buy orders total
+   (Monitoring will be handled by separate process)
+
+✅ Job #29 completed (orders placed)
+```
+
+Here the job is marked **completed** even though:
+
+* every single order failed (wrong price or 403),
+* no actual orders exist on the book.
+
+So from a trading logic perspective that job should be **FAILED** (or “no orders placed”) and maybe requeued.
+
+### What to change
+
+Wherever you summarise:
+
+```python
+if total_orders == 0:
+    # treat as failure
+    job.status = "FAILED"
+    job.error = "No orders placed (all errors)"
+else:
+    job.status = "COMPLETED"
+```
+
+Right now you’re always logging ✅ and “completed”, which is misleading.
+
+---
+
+## TL;DR
+
+1. **Prices**: your ladder is too low for these markets.
+   → Start at `0.01` or above, or compute from `min_price` / tick size.
+
+2. **403 / Cloudflare**: your environment (or host) is being blocked.
+   → Double-check you use `https://clob.polymarket.com`.
+   → If yes, you’ll need Polymarket / Cloudflare to unblock your IP range.
+
+3. **Worker logic**: don’t mark jobs “completed” if `0` orders actually went through.
+
+If you paste your `BUY_PRICES` array and how you init `ClobClient`, I can rewrite that part so it auto-adjusts to each market’s min/max and reduces the chance of hitting these errors again.
