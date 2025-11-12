@@ -21,8 +21,9 @@ This is a **Fully Automated Polymarket Monitoring and Trading System** that comb
   2. Places buy orders (10 orders × 2 sides = $2 per market)
   3. Marks job as COMPLETED/FAILED
   4. Moves to next job
-- **Strategy**: Ladder buys 0.1¢-1¢ on YES and NO tokens ($0.20 per order)
-- **Deployment**: Run `trading_bot/start_worker.sh` continuously
+- **Strategy**: Ladder buys 1¢-3¢ on YES and NO tokens ($0.20 per order)
+- **Cloudflare Bypass**: Uses curl_cffi with Chrome 120 TLS fingerprint spoofing + browser headers
+- **Deployment**: **MUST run from residential IP** (home computer or VPS with residential proxy)
 
 ### 3. Order Monitor (Python)
 - **Mode**: Continuous monitor for ALL active orders
@@ -31,14 +32,32 @@ This is a **Fully Automated Polymarket Monitoring and Trading System** that comb
   2. Monitors all OPEN sell orders → posts Telegram notification when filled
 - **Sell Strategy**: Ladder sells at 3x-10x profit
 - **Notifications**: Posts to Telegram (@ponnymarket) **ONLY when sells execute**
-- **Deployment**: Run `trading_bot/start_monitor.sh` continuously
+- **Deployment**: **MUST run from residential IP** (same as worker)
+
+## Cloudflare IP Blocking
+
+⚠️ **CRITICAL**: Polymarket's trading API blocks datacenter IPs (including Replit's 34.148.246.114)
+
+**What Works from Replit:**
+- ✅ Market monitoring (uses Gamma API, no Cloudflare)
+- ✅ Telegram notifications
+- ✅ Job queueing in PostgreSQL
+
+**What Requires Residential IP:**
+- ❌ Order placement (POST /orders)
+- ❌ Order status checks (GET /orders)
+- ❌ Fill monitoring
+
+**Solution**: Run workers from home computer or VPS with residential proxy
+
+See `trading_bot/CLOUDFLARE_ISSUE.md` for detailed setup instructions.
 
 ## Deployment
 
 Three processes run concurrently:
-1. **Mastra Workflow** (cron every minute): Detects markets → Posts to Telegram → Queues jobs
-2. **Trading Worker** (`auto_trader.py`): Processes queued jobs → Places orders
-3. **Order Monitor** (`order_monitor.py`): Monitors fills → Places sells → Notifies Telegram
+1. **Mastra Workflow** (Replit, cron every minute): Detects markets → Posts to Telegram → Queues jobs
+2. **Trading Worker** (External, residential IP): Processes queued jobs → Places orders
+3. **Order Monitor** (External, residential IP): Monitors fills → Places sells → Notifies Telegram
 
 Mastra is an all-in-one framework for building AI-powered applications with TypeScript, featuring agents that use LLMs and tools, graph-based workflows for orchestrated multi-step processes, and comprehensive memory management for conversation history and context.
 
