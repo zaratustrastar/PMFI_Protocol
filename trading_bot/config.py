@@ -9,12 +9,10 @@ CLOB_HOST = "https://clob.polymarket.com"
 CHAIN_ID = 137  # Polygon mainnet
 
 # Credentials from environment
+# NOTE: Trading API credentials are automatically derived from your private key
+# Builder API credentials are NOT used for trading - they're only for fee rebates/attribution
 PRIVATE_KEY = os.getenv("POLYMARKET_PRIVATE_KEY", "")
 PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS", "")
-
-# Builder API credentials (for authenticated requests)
-BUILDER_API_KEY = os.getenv("POLYMARKET_API_KEY", "")
-BUILDER_API_SECRET = os.getenv("POLYMARKET_API_SECRET", "")
 
 # Trading strategy parameters
 ORDER_SIZE_USD = 0.2  # $0.20 per order = $2 total per market (10 orders × 2 sides)
