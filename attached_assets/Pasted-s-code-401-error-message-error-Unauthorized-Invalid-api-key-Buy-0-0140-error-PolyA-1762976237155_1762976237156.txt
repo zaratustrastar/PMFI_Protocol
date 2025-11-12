@@ -1,0 +1,51 @@
+s_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+
+❌ No orders placed (all orders failed)
+❌ Job #232 failed - no orders placed
+
+============================================================
+⚡ Processing Job #233: sol-updown-15m-1763047800
+============================================================
+🔄 Job #233 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: sol-updown-15m-1763047800
+============================================================
+
+📋 Market: Solana Up or Down - November 13, 10:30AM-10:45AM ET
+   YES Token: 4884549683123824...
+   NO Token: 8412898448561975...
+
+📊 Placing BUY ladder for YES token...
+   Token ID: 48845496831238244566351662312727457097150528139642508096787961031701545222629
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+
+📊 Placing BUY ladder for NO token...
+   Token ID: 84128984485619758599744275468850799237791475346475244555354363067388971729260
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]

@@ -1,0 +1,45 @@
+✅ Loaded environment variables from .env file
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+
+🤖 Polymarket Auto-Trading Worker Starting...
+   Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+   Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+   Notifications: Telegram @ponnymarket (sells only)
+   Mode: Queue-based worker
+
+🤖 Initializing Polymarket Trading Bot...
+   Bypass method: curl_cffi
+   🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+🔑 Setting up API credentials...
+   Deriving credentials from private key...
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/py_clob_client/client.py", line 243, in create_or_derive_api_creds
+    return self.create_api_key(nonce)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/py_clob_client/client.py", line 200, in create_api_key
+    self.assert_level_1_auth()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/py_clob_client/client.py", line 690, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/georgyarsentyev/Desktop/YOUR-FOLDER-NAME/trading_bot/auto_trader.py", line 117, in <module>
+    main()
+    ~~~~^^
+  File "/Users/georgyarsentyev/Desktop/YOUR-FOLDER-NAME/trading_bot/auto_trader.py", line 77, in main
+    trader = PolymarketTrader()
+  File "/Users/georgyarsentyev/Desktop/YOUR-FOLDER-NAME/trading_bot/polymarket_trader.py", line 66, in __init__
+    self.client.set_api_creds(self.client.create_or_derive_api_creds())
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/py_clob_client/client.py", line 245, in create_or_derive_api_creds
+    return self.derive_api_key(nonce)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/py_clob_client/client.py", line 221, in derive_api_key
+    self.assert_level_1_auth()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/py_clob_client/client.py", line 690, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
