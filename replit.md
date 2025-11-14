@@ -8,11 +8,13 @@ This is a **Fully Automated Polymarket Monitoring and Trading System** that comb
 - **Trigger**: Time-based cron running every minute (`* * * * *`)
 - **Workflow**:
   1. Fetches latest markets from Polymarket API
-  2. Identifies new markets not yet seen
-  3. Posts notifications to Telegram (@ponnymarket)
-  4. **Queues markets for automated trading** in `trading_jobs` table
-  5. Marks markets as seen in database
+  2. **Filters out short-term markets** (ending in <72 hours)
+  3. Identifies new markets not yet seen
+  4. Posts notifications to Telegram (@ponnymarket)
+  5. **Queues markets for automated trading** in `trading_jobs` table
+  6. Marks markets as seen in database
 - **Database**: PostgreSQL tracks seen markets and trading jobs
+- **Market Filter**: Skips markets ending within 72 hours to avoid capital locked in short-term positions
 
 ### 2. Trading Job Worker (Python)
 - **Mode**: Continuous worker polling `trading_jobs` queue
@@ -28,9 +30,11 @@ This is a **Fully Automated Polymarket Monitoring and Trading System** that comb
 ### 3. Order Monitor (Python)
 - **Mode**: Continuous monitor for ALL active orders
 - **Process**:
-  1. Monitors all OPEN buy orders → places sell ladder when filled
-  2. Monitors all OPEN sell orders → posts Telegram notification when filled
+  1. **Auto-cancels stale orders** (>12 hours old) to free up capital
+  2. Monitors all OPEN buy orders → places sell ladder when filled
+  3. Monitors all OPEN sell orders → posts Telegram notification when filled
 - **Sell Strategy**: Ladder sells at 3x-10x profit
+- **Auto-Cancel**: Orders unfilled after 12 hours are automatically cancelled to prevent capital lockup
 - **Notifications**: Posts to Telegram (@ponnymarket) **ONLY when sells execute**
 - **Deployment**: **MUST run from residential IP** (same as worker)
 
