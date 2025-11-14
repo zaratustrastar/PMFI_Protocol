@@ -22,14 +22,15 @@ from telegram_notifier import notify_sell_executed
 
 def cancel_stale_orders(trader: PolymarketTrader, max_age_hours: int = 12):
     """
-    Cancel orders that have been open for more than max_age_hours
+    Cancel BUY orders that have been open for more than max_age_hours
+    IMPORTANT: Only cancels BUY orders - SELL orders are left open indefinitely
     
     Args:
         trader: PolymarketTrader instance
         max_age_hours: Maximum age in hours before canceling (default 12)
     """
-    # Get all open orders
-    all_open_orders = get_open_orders()
+    # Get all open BUY orders only (never cancel SELL orders - they're profit targets!)
+    all_open_orders = get_open_orders(order_type="BUY")
     
     if not all_open_orders:
         return
