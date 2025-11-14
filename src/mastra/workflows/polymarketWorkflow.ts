@@ -24,6 +24,35 @@ function escapeTelegramHtml(text: string): string {
 }
 
 /**
+ * Check if a market is an up/down short-term market
+ */
+function isUpDownMarket(market: any): boolean {
+  const UPDOWN_KEYWORDS = [
+    "up or down",
+    "up-or-down",
+    "updown",
+    "15m",
+    "30m",
+    "1h",
+    "2h",
+    "4h",
+    "12pm et",
+    "1pm et",
+    "2pm et",
+    "3pm et",
+    "4pm et",
+    "5pm et",
+  ];
+
+  const name = (market.question || market.name || market.title || "").toLowerCase();
+  const slug = (market.slug || "").toLowerCase();
+  const tags = (market.tags || []).map((t: any) => String(t).toLowerCase());
+  const haystack = [name, slug, ...tags].join(" ");
+
+  return UPDOWN_KEYWORDS.some((keyword) => haystack.includes(keyword)) || tags.includes("updown");
+}
+
+/**
  * Step 1: Fetch Markets and Post to Telegram
  * Fetches markets, identifies new ones, posts them, and ONLY THEN marks as seen
  */
@@ -70,50 +99,6 @@ const monitorAndPost = createStep({
         };
       }
 
-      // Filter out short-term markets (ending in less than 72 hours)
-      const now = new Date();
-      const minEndTime = new Date(now.getTime() + 72 * 60 * 60 * 1000); // 72 hours from now
-      
-      const longTermMarkets = marketsResult.markets.filter((market: any) => {
-        if (!market.end_date_iso) {
-          logger?.warn("⚠️ [monitorAndPost] Market missing end_date_iso", {
-            marketId: market.id,
-            question: market.question,
-          });
-          return false; // Skip markets without end date
-        }
-
-        const endDate = new Date(market.end_date_iso);
-        const isLongTerm = endDate >= minEndTime;
-        
-        if (!isLongTerm) {
-          const hoursUntilEnd = (endDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-          logger?.info("⏰ [monitorAndPost] Skipping short-term market", {
-            marketId: market.id,
-            question: market.question.substring(0, 100),
-            endDate: market.end_date_iso,
-            hoursUntilEnd: hoursUntilEnd.toFixed(1),
-          });
-        }
-        
-        return isLongTerm;
-      });
-
-      logger?.info("🔍 [monitorAndPost] Filtered for long-term markets", {
-        totalFetched: marketsResult.markets.length,
-        longTerm: longTermMarkets.length,
-        filtered: marketsResult.markets.length - longTermMarkets.length,
-      });
-
-      if (longTermMarkets.length === 0) {
-        return {
-          success: true,
-          newMarketsFound: 0,
-          telegramPosts: 0,
-          message: "No long-term markets found (all markets end within 72 hours)",
-        };
-      }
-
       // Step 2: Check which markets are new (not yet in database)
       await pool.query(`
         CREATE TABLE IF NOT EXISTS seen_polymarket_markets (
@@ -123,7 +108,7 @@ const monitorAndPost = createStep({
       `);
 
       const newMarkets = [];
-      for (const market of longTermMarkets) {
+      for (const market of marketsResult.markets) {
         const result = await pool.query(
           "SELECT market_id FROM seen_polymarket_markets WHERE market_id = $1",
           [market.id]
@@ -215,23 +200,31 @@ ${escapedDescription ? `📊 ${escapedDescription}
             marketId: market.id,
           });
 
-          // Queue this market for automated trading (use slug, not ID)
-          try {
-            const queueResult = await queueTradingJob.execute({
-              context: { marketIds: [market.slug] },
-              mastra,
-              runtimeContext: {},
-            });
-            logger?.info("💰 [monitorAndPost] Queued for trading", {
+          // Queue this market for automated trading ONLY if it's not an up/down market
+          const isUpDown = isUpDownMarket(market);
+          if (!isUpDown) {
+            try {
+              const queueResult = await queueTradingJob.execute({
+                context: { marketIds: [market.slug] },
+                mastra,
+                runtimeContext: {},
+              });
+              logger?.info("💰 [monitorAndPost] Queued for trading", {
+                marketId: market.id,
+                marketSlug: market.slug,
+                queued: queueResult.queued,
+              });
+            } catch (error) {
+              logger?.error("❌ [monitorAndPost] Failed to queue trading job", {
+                marketId: market.id,
+                marketSlug: market.slug,
+                error,
+              });
+            }
+          } else {
+            logger?.info("⏭️ [monitorAndPost] Skipped trading queue (up/down market)", {
               marketId: market.id,
-              marketSlug: market.slug,
-              queued: queueResult.queued,
-            });
-          } catch (error) {
-            logger?.error("❌ [monitorAndPost] Failed to queue trading job", {
-              marketId: market.id,
-              marketSlug: market.slug,
-              error,
+              question: market.question.substring(0, 100),
             });
           }
         } else {

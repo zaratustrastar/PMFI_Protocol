@@ -31,15 +31,26 @@ def process_trading_job(job, trader: PolymarketTrader):
     """
     job_id = job['id']
     market_id = job['market_id']
+    created_at = job['created_at']
     
     print(f"\n{'='*60}")
     print(f"⚡ Processing Job #{job_id}: {market_id}")
     print(f"{'='*60}")
     
+    # Check if job is too old (older than 24 hours)
+    from datetime import datetime, timezone
+    job_age_hours = (datetime.now(timezone.utc) - created_at.replace(tzinfo=timezone.utc)).total_seconds() / 3600
+    
+    if job_age_hours > 24:
+        print(f"⏰ Job #{job_id} is {job_age_hours:.1f} hours old (created: {created_at})")
+        print(f"❌ Skipping job - too old (>24 hours)")
+        complete_trading_job(job_id, f"Job expired (age: {job_age_hours:.1f}h)")
+        return False
+    
     try:
         # Mark job as running
         start_trading_job(job_id)
-        print(f"🔄 Job #{job_id} marked as RUNNING")
+        print(f"🔄 Job #{job_id} marked as RUNNING (age: {job_age_hours:.1f}h)")
         
         # Place orders (without blocking on monitoring)
         # Monitoring is handled by a separate continuous process
