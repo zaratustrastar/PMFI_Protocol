@@ -421,7 +421,7 @@ class PolymarketTrader:
             True if cancellation was successful, False otherwise
         """
         try:
-            response = self.client.cancel_order(order_id)
+            response = self.client.cancel(order_id)
             
             if response.get("success", False):
                 print(f"   ✅ Cancelled order {order_id[:8]}...")
