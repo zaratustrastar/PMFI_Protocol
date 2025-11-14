@@ -5,6 +5,7 @@ Runs independently to monitor buy/sell fills across all markets
 
 import os
 import time
+from datetime import datetime, timedelta
 
 # Load environment variables from .env file if it exists
 try:
@@ -19,12 +20,71 @@ from database import get_open_orders, update_order_status, update_market_summary
 from telegram_notifier import notify_sell_executed
 
 
+def cancel_stale_orders(trader: PolymarketTrader, max_age_hours: int = 12):
+    """
+    Cancel orders that have been open for more than max_age_hours
+    
+    Args:
+        trader: PolymarketTrader instance
+        max_age_hours: Maximum age in hours before canceling (default 12)
+    """
+    # Get all open orders
+    all_open_orders = get_open_orders()
+    
+    if not all_open_orders:
+        return
+    
+    now = datetime.now()
+    stale_cutoff = now - timedelta(hours=max_age_hours)
+    
+    cancelled_count = 0
+    
+    for order in all_open_orders:
+        created_at = order.get("created_at")
+        
+        if not created_at:
+            continue
+        
+        # Convert to datetime if it's a string
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+        
+        # Check if order is stale
+        if created_at < stale_cutoff:
+            order_id = order["order_id"]
+            order_age_hours = (now - created_at).total_seconds() / 3600
+            
+            print(f"\n⏰ Cancelling stale order (age: {order_age_hours:.1f}h)")
+            print(f"   Order: {order['order_type']} {order['side']} @ ${order['price']:.4f}")
+            print(f"   Market: {order['market_slug']}")
+            
+            # Cancel the order
+            if trader.cancel_order(order_id):
+                # Update database
+                update_order_status(order_id, "CANCELLED")
+                cancelled_count += 1
+                print(f"   ✅ Order cancelled and marked in database")
+            else:
+                print(f"   ⚠️  Cancellation failed")
+    
+    if cancelled_count > 0:
+        print(f"\n🗑️  Cancelled {cancelled_count} stale order(s)")
+
+
 def monitor_all_orders(trader: PolymarketTrader):
     """
     Monitor all open orders for fills
     - Buys: Place sell ladder when filled
     - Sells: Notify Telegram when filled
+    - Cancel stale orders (>12 hours old)
     """
+    # First, cancel any stale orders (>12 hours old)
+    try:
+        cancel_stale_orders(trader, max_age_hours=12)
+    except Exception as e:
+        print(f"⚠️  Error cancelling stale orders: {e}")
+        # Continue with monitoring even if cancellation fails
+    
     # Get all open buy orders
     open_buys = get_open_orders(order_type="BUY")
     

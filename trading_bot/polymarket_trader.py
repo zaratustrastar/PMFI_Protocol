@@ -410,6 +410,31 @@ class PolymarketTrader:
         
         return filled_sells
     
+    def cancel_order(self, order_id: str) -> bool:
+        """
+        Cancel an open order on Polymarket
+        
+        Args:
+            order_id: The order ID to cancel
+            
+        Returns:
+            True if cancellation was successful, False otherwise
+        """
+        try:
+            response = self.client.cancel_order(order_id)
+            
+            if response.get("success", False):
+                print(f"   ✅ Cancelled order {order_id[:8]}...")
+                return True
+            else:
+                error = response.get("error", "Unknown error")
+                print(f"   ❌ Failed to cancel {order_id[:8]}: {error}")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Error cancelling {order_id[:8]}: {str(e)}")
+            return False
+    
     def place_orders_only(self, market_slug: str) -> int:
         """
         Place buy orders only without monitoring (for queue-based worker)
