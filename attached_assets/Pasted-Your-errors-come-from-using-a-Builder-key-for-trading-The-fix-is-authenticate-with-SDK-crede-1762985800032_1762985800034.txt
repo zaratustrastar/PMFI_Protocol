@@ -1,0 +1,59 @@
+Your errors come from using a **Builder key** for trading. The fix is: **authenticate with SDK credentials derived from your wallet’s private key** (not the Builder key).
+
+here’s exactly what to do:
+
+1. get your wallet private key
+
+* if you log in with a browser wallet (metamask/rabby/phantom): export the PK from the extension.
+* if you use Magic/email: use [https://reveal.magic.link/polymarket](https://reveal.magic.link/polymarket) to reveal the key.
+
+2. put it in your `.env` (or Replit “Secrets”)
+
+```
+PRIVATE_KEY=0xYOUR_PRIVATE_KEY
+# optional — still keep your builder key if your code uses it for attribution/rebates
+POLY_BUILDER_API_KEY=pk_builder_xxx
+```
+
+make sure `.env` is git-ignored.
+
+3. initialize the trading client with SDK creds (not the builder key)
+   Your code should call the SDK helper that was mentioned to you:
+
+```python
+# example skeleton — adapt to your project’s structure
+from py_clob_client.client import ClobClient
+from py_clob_client.config import get_api_base
+from py_clob_client.utils import create_or_derive_api_creds
+import os
+
+pk = os.environ["PRIVATE_KEY"]
+
+# derive trading credentials from the wallet key
+api_creds = create_or_derive_api_creds(private_key=pk)
+
+# build an authenticated client; SDK will set headers incl. POLY_ADDRESS
+client = ClobClient(
+    api_url=get_api_base("prod"),   # or your project’s api host
+    api_creds=api_creds
+)
+
+# now place orders using `client` …
+```
+
+important: do **not** pass the Builder key to the trading client. Keep it only where your code attributes orders/fees.
+
+4. restart and verify env is loaded
+
+```bash
+# optional
+env | grep -E 'PRIVATE_KEY|BUILDER'
+```
+
+You should then see orders succeed (401s disappear). If you still get 401:
+
+* double-check you really passed `api_creds` returned by `create_or_derive_api_creds()` to your client
+* ensure the `PRIVATE_KEY` matches the wallet that owns the Polymarket trading address you use
+* confirm your account is KYC’d and trading-enabled; remove any IP allow-list issues.
+
+want me to point to the exact file/lines to edit? paste the snippet where you construct the client / set headers, and I’ll rewrite it with `create_or_derive_api_creds()` wired in.

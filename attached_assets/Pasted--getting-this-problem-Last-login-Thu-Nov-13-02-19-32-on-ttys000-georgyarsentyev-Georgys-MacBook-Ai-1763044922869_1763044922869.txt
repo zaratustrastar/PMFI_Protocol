@@ -1,0 +1,255 @@
+ getting this problem: Last login: Thu Nov 13 02:19:32 on ttys000
+georgyarsentyev@Georgys-MacBook-Air ~ % cd Desktop/YOUR-FOLDER-NAME/trading_bot
+georgyarsentyev@Georgys-MacBook-Air trading_bot % cd Desktop/YOUR-FOLDER-NAME/trading_bot
+python3 auto_trader.py
+cd: no such file or directory: Desktop/YOUR-FOLDER-NAME/trading_bot
+✅ Loaded environment variables from .env file
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+
+🤖 Polymarket Auto-Trading Worker Starting...
+   Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+   Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+   Notifications: Telegram @ponnymarket (sells only)
+   Mode: Queue-based worker
+
+🤖 Initializing Polymarket Trading Bot...
+   Bypass method: curl_cffi
+   🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+🔑 Deriving trading credentials from private key...
+✅ Trading bot initialized!
+📊 Configuration:
+   Poll Interval: 30s
+   Batch Size: 5 jobs
+
+🔄 Starting worker loop (press Ctrl+C to stop)
+
+
+✅ Found 5 pending job(s)
+
+============================================================
+⚡ Processing Job #324: solana-up-or-down-on-november-14
+============================================================
+🔄 Job #324 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: solana-up-or-down-on-november-14
+============================================================
+
+📋 Market: Solana Up or Down on November 14?
+   YES Token: 7400773333873655...
+   NO Token: 2517589380860933...
+
+📊 Placing BUY ladder for YES token...
+   Token ID: 74007733338736553950765971528495709854735913210374822528110455366192170340887
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+📊 Placing BUY ladder for NO token...
+   Token ID: 25175893808609336002442540956271892688210070173060548672476206279836501350271
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+❌ No orders placed (all orders failed)
+❌ Job #324 failed - no orders placed
+
+============================================================
+⚡ Processing Job #325: solana-up-or-down-november-14-12pm-et
+============================================================
+🔄 Job #325 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: solana-up-or-down-november-14-12pm-et
+============================================================
+
+📋 Market: Solana Up or Down - November 14, 12PM ET
+   YES Token: 6531723880006417...
+   NO Token: 1027804477101118...
+
+📊 Placing BUY ladder for YES token...
+   Token ID: 65317238800064174914137640241383591275598137801841016196894429251977129676720
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+📊 Placing BUY ladder for NO token...
+   Token ID: 102780447710111835103465969544240322702112414632800621779903985470758531689540
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+❌ No orders placed (all orders failed)
+❌ Job #325 failed - no orders placed
+
+============================================================
+⚡ Processing Job #326: ow-al-qadsiah-ge-2025-11-26
+============================================================
+🔄 Job #326 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: ow-al-qadsiah-ge-2025-11-26
+============================================================
+
+📋 Market: Overwatch: Al Qadsiah vs Geekay Esports (BO2)
+   YES Token: 1124514267912760...
+   NO Token: 3742866039409438...
+
+📊 Placing BUY ladder for YES token...
+   Token ID: 112451426791276085982126052801306636063380968953737269267465651943903539903901
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+📊 Placing BUY ladder for NO token...
+   Token ID: 37428660394094389919864245225036027511358533689341715942439462021069939372659
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+❌ No orders placed (all orders failed)
+❌ Job #326 failed - no orders placed
+
+============================================================
+⚡ Processing Job #327: ethereum-up-or-down-on-november-14
+============================================================
+🔄 Job #327 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: ethereum-up-or-down-on-november-14
+============================================================
+
+📋 Market: Ethereum Up or Down on November 14?
+   YES Token: 9440122561113401...
+   NO Token: 2448130250511332...
+
+📊 Placing BUY ladder for YES token...
+   Token ID: 94401225611134012522113976166261900515299557935045736878433348031341039099895
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+📊 Placing BUY ladder for NO token...
+   Token ID: 24481302505113325669532452439934627580822304935439916537592764172024811162476
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+❌ No orders placed (all orders failed)
+❌ Job #327 failed - no orders placed
+
+============================================================
+⚡ Processing Job #328: ethereum-up-or-down-november-14-12pm-et
+============================================================
+🔄 Job #328 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: ethereum-up-or-down-november-14-12pm-et
+============================================================
+
+📋 Market: Ethereum Up or Down - November 14, 12PM ET
+   YES Token: 5651603994729301...
+   NO Token: 2201085964334626...
+
+📊 Placing BUY ladder for YES token...
+   Token ID: 56516039947293012480384580075486719767160293983041339357859881111466572021462
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+📊 Placing BUY ladder for NO token...
+   Token ID: 22010859643346261005195939774626109051825082374009689408044811671414391973767
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+❌ No orders placed (all orders failed)
+❌ Job #328 failed - no orders placed
+💤 Waiting 30s before next poll...
+
+✅ Found 5 pending job(s)
+
+============================================================
+⚡ Processing Job #329: bitcoin-up-or-down-november-14-12pm-et
+============================================================
+🔄 Job #329 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: bitcoin-up-or-down-november-14-12pm-et
+============================================================
+
+📋 Market: Bitcoin Up or Down - November 14, 12PM ET
+   YES Token: 8856913669484394...
+   NO Token: 7397375360886034...
+
+📊 Placing BUY ladder for YES token...

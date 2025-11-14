@@ -1,0 +1,29 @@
+arket: Ethereum Up or Down - November 13, 12:00PM-12:15PM ET
+   YES Token: 5245035148819495...
+   NO Token: 6301840176191311...
+
+📊 Placing BUY ladder for YES token...
+   Token ID: 52450351488194956054737975694028308981334765480134269523942001322323553793550
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+
+📊 Placing BUY ladder for NO token...
+   Token ID: 63018401761913111031794650230144895291090457469303686927593257822656430759304
+   ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0160 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0280 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]
+   ❌ Buy @ $0.0300 error: PolyApiException[status_code=400, error_message={'error': 'invalid signature'}]

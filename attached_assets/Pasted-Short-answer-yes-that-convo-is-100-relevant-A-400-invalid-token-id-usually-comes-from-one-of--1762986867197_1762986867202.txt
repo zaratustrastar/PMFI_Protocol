@@ -1,0 +1,92 @@
+Short answer: yes — that convo is 100% relevant. A “400 invalid token id” usually comes from one of these:
+
+1. you’re using the wrong ID
+   You must pass the **outcome’s CLOB token id** (YES/NO), not the market id, condition id, or collection id.
+
+2. extra quotes / double-encoded JSON
+   In your paste you had:
+
+   ```
+   "clobTokenIds": "["1041...", "4452..."]"
+   ```
+
+   That’s an **array encoded as a string**. Use a real array of strings (or ints), not a quoted blob.
+
+3. wrong environment mismatch
+   Token ids from **prod** won’t work if your client points to **test** (or vice versa). Make sure:
+
+   ```python
+   client = ClobClient(api_url=get_api_base("prod"), api_creds=creds)
+   ```
+
+4. stale/closed/paused market
+   If the market is expired or paused, some endpoints return 400 for its tokens.
+
+5. hidden characters / formatting
+   Trailing spaces/newlines or unicode quotes in the token id will make it “invalid.”
+
+6. header/auth path
+   If you’re unauthenticated for certain calls, some SDKs respond with 400. (Sounds like you already switched to SDK creds from PRIVATE_KEY — good.)
+
+Do this to be bullet-proof:
+
+A) fetch fresh tokens in code (don’t hand-copy from docs)
+
+```python
+from py_clob_client.client import ClobClient
+from py_clob_client.utils import create_or_derive_api_creds
+from py_clob_client.config import get_api_base
+
+import os
+
+pk = os.environ["PRIVATE_KEY"]
+creds = create_or_derive_api_creds(private_key=pk)
+client = ClobClient(api_url=get_api_base("prod"), api_creds=creds)
+
+# 1) list markets and pick one reliably
+markets = client.list_markets()  # adjust if your SDK uses a different call
+m = next(mm for mm in markets if "Ethereum Up or Down" in mm["name"])
+
+# 2) extract the actual YES/NO token ids from the market object
+yes_id = m["outcomes"]["YES"]["clobTokenId"]     # adjust key names to your client
+no_id  = m["outcomes"]["NO"]["clobTokenId"]
+
+# sanity check: order book should work and not 400
+book = client.get_order_book(yes_id)
+print("Best bid/ask:", book.get("bids", [None])[0], book.get("asks", [None])[0])
+```
+
+B) if you must use Gamma directly, keep the types clean
+
+* Correct: `clob_token_ids=1041735...` (as a plain number or unquoted in query)
+* When parsing the response in Python, you should end up with:
+
+  ```python
+  clob_token_ids = ["1041735...", "4452802..."]  # list of strings
+  ```
+
+  Not: `"["1041...", "4452..."]"` (that’s a string of JSON).
+
+C) place a tiny valid order to confirm
+
+```python
+from py_clob_client.exceptions import PolyApiException
+
+order = dict(token_id=yes_id, side="buy", price=0.05, size=1.0, time_in_force="GTC")
+try:
+    resp = client.place_order(**order)
+    print(resp)
+except PolyApiException as e:
+    print("Status:", e.status_code)
+    print("Body:", getattr(e, "error_message", None))
+    raise
+```
+
+Quick checklist if it still says “invalid token id”:
+
+* print the actual `yes_id` you’re sending; ensure it’s the same as in Gamma right now.
+* `type(yes_id)` is `str` (or `int`) — no extra whitespace: `print(repr(yes_id))`
+* you’re on `get_api_base("prod")` and the market is currently live.
+* try `client.get_order_book(yes_id)` first — if that 400s, the id is wrong/stale.
+
+If you paste the `repr(yes_id)` you’re using and the `Body:` line from the exception, I’ll pinpoint exactly which of the above is tripping you up.

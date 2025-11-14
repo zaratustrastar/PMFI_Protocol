@@ -1,0 +1,166 @@
+Last login: Thu Nov 13 15:34:50 on ttys001
+georgyarsentyev@Georgys-MacBook-Air ~ % cd Desktop/YOUR-FOLDER-NAME/trading_bot
+georgyarsentyev@Georgys-MacBook-Air trading_bot % cd Desktop/YOUR-FOLDER-NAME/trading_bot
+python3 auto_trader.py
+cd: no such file or directory: Desktop/YOUR-FOLDER-NAME/trading_bot
+✅ Loaded environment variables from .env file
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+
+🤖 Polymarket Auto-Trading Worker Starting...
+   Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+   Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+   Notifications: Telegram @ponnymarket (sells only)
+   Mode: Queue-based worker
+
+🤖 Initializing Polymarket Trading Bot...
+   Bypass method: curl_cffi
+   🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+🔑 Deriving trading credentials from private key...
+✅ Trading bot initialized!
+📊 Configuration:
+   Poll Interval: 30s
+   Batch Size: 5 jobs
+
+🔄 Starting worker loop (press Ctrl+C to stop)
+
+
+✅ Found 5 pending job(s)
+
+============================================================
+⚡ Processing Job #334: ethereum-above-3200-on-november-19
+============================================================
+🔄 Job #334 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: ethereum-above-3200-on-november-19
+============================================================
+No market found for: ethereum-above-3200-on-november-19
+❌ Market 'ethereum-above-3200-on-november-19' not found!
+❌ Job #334 failed - no orders placed
+
+============================================================
+⚡ Processing Job #335: ethereum-above-3300-on-november-19
+============================================================
+🔄 Job #335 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: ethereum-above-3300-on-november-19
+============================================================
+No market found for: ethereum-above-3300-on-november-19
+❌ Market 'ethereum-above-3300-on-november-19' not found!
+❌ Job #335 failed - no orders placed
+
+============================================================
+⚡ Processing Job #336: nor-kfu-bog-2025-11-21-spread-away-1pt5
+============================================================
+🔄 Job #336 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: nor-kfu-bog-2025-11-21-spread-away-1pt5
+============================================================
+No market found for: nor-kfu-bog-2025-11-21-spread-away-1pt5
+❌ Market 'nor-kfu-bog-2025-11-21-spread-away-1pt5' not found!
+❌ Job #336 failed - no orders placed
+
+============================================================
+⚡ Processing Job #337: nor-kfu-bog-2025-11-21-total-2pt5
+============================================================
+🔄 Job #337 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: nor-kfu-bog-2025-11-21-total-2pt5
+============================================================
+No market found for: nor-kfu-bog-2025-11-21-total-2pt5
+❌ Market 'nor-kfu-bog-2025-11-21-total-2pt5' not found!
+❌ Job #337 failed - no orders placed
+
+============================================================
+⚡ Processing Job #338: nor-kfu-bog-2025-11-21-btts
+============================================================
+🔄 Job #338 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: nor-kfu-bog-2025-11-21-btts
+============================================================
+No market found for: nor-kfu-bog-2025-11-21-btts
+❌ Market 'nor-kfu-bog-2025-11-21-btts' not found!
+❌ Job #338 failed - no orders placed
+💤 Waiting 30s before next poll...
+
+✅ Found 5 pending job(s)
+
+============================================================
+⚡ Processing Job #339: nor-vif-kbk-2025-11-22-spread-home-1pt5
+============================================================
+🔄 Job #339 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: nor-vif-kbk-2025-11-22-spread-home-1pt5
+============================================================
+No market found for: nor-vif-kbk-2025-11-22-spread-home-1pt5
+❌ Market 'nor-vif-kbk-2025-11-22-spread-home-1pt5' not found!
+❌ Job #339 failed - no orders placed
+
+============================================================
+⚡ Processing Job #340: nor-vif-kbk-2025-11-22-btts
+============================================================
+🔄 Job #340 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: nor-vif-kbk-2025-11-22-btts
+============================================================
+No market found for: nor-vif-kbk-2025-11-22-btts
+❌ Market 'nor-vif-kbk-2025-11-22-btts' not found!
+❌ Job #340 failed - no orders placed
+
+============================================================
+⚡ Processing Job #341: nor-vif-kbk-2025-11-22-total-3pt5
+============================================================
+🔄 Job #341 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: nor-vif-kbk-2025-11-22-total-3pt5
+============================================================
+No market found for: nor-vif-kbk-2025-11-22-total-3pt5
+❌ Market 'nor-vif-kbk-2025-11-22-total-3pt5' not found!
+❌ Job #341 failed - no orders placed
+
+============================================================
+⚡ Processing Job #342: nor-mol-bra-2025-11-22-btts
+============================================================
+🔄 Job #342 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: nor-mol-bra-2025-11-22-btts
+============================================================
+No market found for: nor-mol-bra-2025-11-22-btts
+❌ Market 'nor-mol-bra-2025-11-22-btts' not found!
+❌ Job #342 failed - no orders placed
+
+============================================================
+⚡ Processing Job #343: nor-mol-bra-2025-11-22-spread-away-1pt5
+============================================================
+🔄 Job #343 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: nor-mol-bra-2025-11-22-spread-away-1pt5
+============================================================
+No market found for: nor-mol-bra-2025-11-22-spread-away-1pt5
+❌ Market 'nor-mol-bra-2025-11-22-spread-away-1pt5' not found!
+❌ Job #343 failed - no orders placed
+💤 Waiting 30s before next poll...
+
+✅ Found 5 pending job(s)
+
+============================================================
+⚡ Processing Job #344: nor-mol-bra-2025-11-22-total-2pt5
+============================================================
+🔄 Job #344 marked as RUNNING
+
+============================================================
+🎯 Placing orders for: nor-mol-bra-2025-11-22-total-2pt5
+============================================================
+No market found for: nor-mol-bra-2025-11-22-total-2pt5
+❌ Market 'nor-mol-bra-2025-11-22-total-2pt5' not found!
+❌ Job #344 failed - no orders placed
+
