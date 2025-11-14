@@ -18,6 +18,40 @@ from polymarket_trader import PolymarketTrader
 from database import get_pending_jobs, start_trading_job, complete_trading_job
 
 
+def is_updown_market(market_slug: str) -> bool:
+    """
+    Check if a market is an up/down short-term market
+    
+    Args:
+        market_slug: Market slug/identifier
+        
+    Returns:
+        True if it's an up/down market that should be skipped
+    """
+    UPDOWN_KEYWORDS = [
+        "up or down",
+        "up-or-down",
+        "updown",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "4h",
+        "12pm et",
+        "1pm et",
+        "2pm et",
+        "3pm et",
+        "4pm et",
+        "5pm et",
+        "6pm et",
+        "7pm et",
+        "8pm et",
+    ]
+    
+    slug_lower = market_slug.lower()
+    return any(keyword in slug_lower for keyword in UPDOWN_KEYWORDS)
+
+
 def process_trading_job(job, trader: PolymarketTrader):
     """
     Process a single trading job
@@ -36,6 +70,13 @@ def process_trading_job(job, trader: PolymarketTrader):
     print(f"\n{'='*60}")
     print(f"⚡ Processing Job #{job_id}: {market_id}")
     print(f"{'='*60}")
+    
+    # Check if it's an up/down market (defense in depth - should already be filtered in workflow)
+    if is_updown_market(market_id):
+        print(f"⏭️  Job #{job_id} is an UP/DOWN market - skipping to avoid short-term capital lockup")
+        print(f"   Market: {market_id}")
+        complete_trading_job(job_id, "Skipped: Up/Down market (short-term)")
+        return False
     
     # Check if job is too old (older than 24 hours)
     from datetime import datetime, timezone
