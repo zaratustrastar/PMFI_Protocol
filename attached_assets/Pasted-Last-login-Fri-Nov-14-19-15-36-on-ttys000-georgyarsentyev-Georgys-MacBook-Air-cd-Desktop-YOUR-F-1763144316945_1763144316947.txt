@@ -1,0 +1,395 @@
+Last login: Fri Nov 14 19:15:36 on ttys000
+georgyarsentyev@Georgys-MacBook-Air ~ % cd Desktop/YOUR-FOLDER-NAME/trading_bot
+georgyarsentyev@Georgys-MacBook-Air trading_bot % cd Desktop/YOUR-FOLDER-NAME/trading_bot
+python3 order_monitor.py
+cd: no such file or directory: Desktop/YOUR-FOLDER-NAME/trading_bot
+✅ Loaded environment variables from .env file
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+
+👁️  Polymarket Order Monitor Starting...
+   Monitors: All open buy/sell orders
+   Buys filled: Auto-place sell ladder
+   Sells filled: Notify Telegram (@ponnymarket)
+
+🤖 Initializing Polymarket Trading Bot...
+   Bypass method: curl_cffi
+   🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+🔑 Deriving trading credentials from private key...
+✅ Trading bot initialized!
+📊 Configuration:
+   Poll Interval: 30s
+
+🔄 Starting monitor loop (press Ctrl+C to stop)
+
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0100
+   Market: ethereum-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x956794: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0300
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x257249: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0280
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x06e91e: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0250
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xe87455: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0220
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x0b2dbb: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0200
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xc24ae5: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0180
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xdb84ff: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0160
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x1e3341: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0140
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x4bf75d: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0120
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x5338b5: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0100
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xc802e5: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0300
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x999137: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0280
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x152a35: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0250
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x77ac71: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0220
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x54128c: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0200
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xa56d88: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0180
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x917d47: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0160
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xf1b250: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0140
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xb8ee0d: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0120
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x185a49: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0100
+   Market: solana-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x4baccc: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0300
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x218dfd: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0280
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x70c08f: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0250
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x4be977: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0220
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x8eabe9: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0200
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x9fd770: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0180
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x5b075b: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0160
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xf85646: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0140
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x023d86: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0120
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xa2203b: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0100
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x830eef: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0300
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x90f34d: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0280
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x963404: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0250
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x3692c4: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0220
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x4a8324: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0200
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xfdb81a: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0180
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xcf6f83: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0160
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x39321c: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0140
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0xc8ef6d: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0120
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x03d6b0: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0100
+   Market: xrp-up-or-down-november-14-4pm-et
+   ❌ Failed to cancel 0x8ba0b0: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0300
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x7d0d1c: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0280
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x190333: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0250
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0xe6ed8b: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0220
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x285a67: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0200
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x1cf6b1: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0180
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x5ef4ad: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0160
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0xb3d1ce: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0140
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0xc0414f: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0120
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x385838: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0100
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x92a667: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0300
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x6c5e01: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0280
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0xa291f5: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0250
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x2b5b9b: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0220
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x82e80d: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0200
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x575e5e: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0180
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x0000a5: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0160
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x3caaeb: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0140
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x040b87: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0120
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x88f09e: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY YES @ $0.0100
+   Market: sol-updown-15m-1763066700
+   ❌ Failed to cancel 0x435c6e: Unknown error
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 27.2h)
+   Order: BUY NO @ $0.0300
+   Market: xrp-updown-15m-1763066700
+   ❌ Failed to cancel 0x579da3: Unknown error
+   ⚠️  Cancellation failed

@@ -421,18 +421,49 @@ class PolymarketTrader:
             True if cancellation was successful, False otherwise
         """
         try:
+            print(f"   🔍 DEBUG: Attempting to cancel order {order_id[:8]}...")
             response = self.client.cancel(order_id)
             
-            if response.get("success", False):
-                print(f"   ✅ Cancelled order {order_id[:8]}...")
-                return True
+            # Debug: Print full response to understand structure
+            print(f"   🔍 DEBUG: Cancel response type: {type(response)}")
+            print(f"   🔍 DEBUG: Cancel response: {response}")
+            
+            # Handle different response types
+            if response is None:
+                print(f"   ❌ Failed to cancel {order_id[:8]}: Response is None")
+                return False
+            
+            # If response is a dict
+            if isinstance(response, dict):
+                # Check for success field
+                if response.get("success", False):
+                    print(f"   ✅ Cancelled order {order_id[:8]}...")
+                    return True
+                else:
+                    error = response.get("error") or response.get("errorMsg") or "Unknown error"
+                    print(f"   ❌ Failed to cancel {order_id[:8]}: {error}")
+                    print(f"   🔍 DEBUG: Full response: {response}")
+                    return False
+            
+            # If response is True/False boolean
+            elif isinstance(response, bool):
+                if response:
+                    print(f"   ✅ Cancelled order {order_id[:8]}...")
+                    return True
+                else:
+                    print(f"   ❌ Failed to cancel {order_id[:8]}: Response is False")
+                    return False
+            
+            # Unknown response type
             else:
-                error = response.get("error", "Unknown error")
-                print(f"   ❌ Failed to cancel {order_id[:8]}: {error}")
+                print(f"   ❌ Failed to cancel {order_id[:8]}: Unexpected response type {type(response)}")
                 return False
                 
         except Exception as e:
             print(f"   ❌ Error cancelling {order_id[:8]}: {str(e)}")
+            import traceback
+            print(f"   🔍 DEBUG: Full traceback:")
+            traceback.print_exc()
             return False
     
     def place_orders_only(self, market_slug: str) -> int:
