@@ -249,7 +249,7 @@ def queue_trading_job(market_id: str):
 
 
 def get_pending_jobs(limit: int = 10) -> List[Dict]:
-    """Get pending trading jobs"""
+    """Get pending trading jobs (only jobs created within last 24 hours)"""
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
@@ -257,6 +257,7 @@ def get_pending_jobs(limit: int = 10) -> List[Dict]:
         SELECT id, market_id, created_at
         FROM trading_jobs
         WHERE status = 'PENDING'
+          AND created_at > NOW() - INTERVAL '24 hours'
         ORDER BY created_at ASC
         LIMIT %s
     """, (limit,))
