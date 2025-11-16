@@ -1,0 +1,110 @@
+Last login: Sun Nov 16 02:47:56 on ttys000
+georgyarsentyev@Georgys-MacBook-Air ~ % cd trading_bot && ./export_env.sh
+cd: no such file or directory: trading_bot
+georgyarsentyev@Georgys-MacBook-Air ~ % cat > .env << 'EOF'
+DATABASE_URL=postgresql://neondb_owner:npg_sPnNQtm3xf8h@ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
+POLYMARKET_PRIVATE_KEY=0x0ceab8e1bf3b8009d2c5bf5496f2980aac9380bc1b7375d2ac1d1898895e33c8
+POLYMARKET_PROXY_ADDRESS=0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+TELEGRAM_BOT_TOKEN=8456822133:AAH5YjXPtCKLpCR4BtQgNYyejub14qqBZ-Q
+EOF
+georgyarsentyev@Georgys-MacBook-Air ~ % cd Desktop/YOUR-FOLDER-NAME/trading_bot
+python3 order_monitor.py
+✅ Loaded environment variables from .env file
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+
+👁️  Polymarket Order Monitor Starting...
+   Monitors: All open buy/sell orders
+   Buys filled: Auto-place sell ladder
+   Sells filled: Notify Telegram (@ponnymarket)
+
+🤖 Initializing Polymarket Trading Bot...
+   Bypass method: curl_cffi
+   🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+🔑 Deriving trading credentials from private key...
+✅ Trading bot initialized!
+📊 Configuration:
+   Poll Interval: 30s
+
+🔄 Starting monitor loop (press Ctrl+C to stop)
+
+
+⏰ Cancelling stale order (age: 31.2h)
+   Order: BUY NO @ $0.0300
+   Market: cwbb-queen-scarst-2025-11-20
+   🔍 DEBUG: Attempting to cancel order 0xf6f748...
+   🔍 DEBUG: Cancel response type: <class 'dict'>
+   🔍 DEBUG: Cancel response: {'not_canceled': {'0xf6f748aa7ba321efe0ec3b2af30ba887245548f78843fbf94f69e495b8feb61e': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ❌ Failed to cancel 0xf6f748: Unknown error
+   🔍 DEBUG: Full response: {'not_canceled': {'0xf6f748aa7ba321efe0ec3b2af30ba887245548f78843fbf94f69e495b8feb61e': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 31.2h)
+   Order: BUY NO @ $0.0280
+   Market: cwbb-queen-scarst-2025-11-20
+   🔍 DEBUG: Attempting to cancel order 0x9ddb00...
+   🔍 DEBUG: Cancel response type: <class 'dict'>
+   🔍 DEBUG: Cancel response: {'not_canceled': {'0x9ddb00ee362dbc62c6a39da1aa2cfe6bc82acdd38723480dba5c9c9830509458': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ❌ Failed to cancel 0x9ddb00: Unknown error
+   🔍 DEBUG: Full response: {'not_canceled': {'0x9ddb00ee362dbc62c6a39da1aa2cfe6bc82acdd38723480dba5c9c9830509458': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 31.2h)
+   Order: BUY NO @ $0.0250
+   Market: cwbb-queen-scarst-2025-11-20
+   🔍 DEBUG: Attempting to cancel order 0x44f839...
+   🔍 DEBUG: Cancel response type: <class 'dict'>
+   🔍 DEBUG: Cancel response: {'not_canceled': {'0x44f8391d79e87d712f5d353785f730170216822613e42a9951be4ed85bc8d76a': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ❌ Failed to cancel 0x44f839: Unknown error
+   🔍 DEBUG: Full response: {'not_canceled': {'0x44f8391d79e87d712f5d353785f730170216822613e42a9951be4ed85bc8d76a': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 31.2h)
+   Order: BUY NO @ $0.0220
+   Market: cwbb-queen-scarst-2025-11-20
+   🔍 DEBUG: Attempting to cancel order 0x261ec8...
+   🔍 DEBUG: Cancel response type: <class 'dict'>
+   🔍 DEBUG: Cancel response: {'not_canceled': {'0x261ec8a7bf6653b9ac8835e8bd76d35bbb42ccbd0b5ee451d54847a2d18a0e5e': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ❌ Failed to cancel 0x261ec8: Unknown error
+   🔍 DEBUG: Full response: {'not_canceled': {'0x261ec8a7bf6653b9ac8835e8bd76d35bbb42ccbd0b5ee451d54847a2d18a0e5e': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 31.2h)
+   Order: BUY NO @ $0.0200
+   Market: cwbb-queen-scarst-2025-11-20
+   🔍 DEBUG: Attempting to cancel order 0xaf587a...
+   🔍 DEBUG: Cancel response type: <class 'dict'>
+   🔍 DEBUG: Cancel response: {'not_canceled': {'0xaf587ae3b141ac372527da7821b7da3ccdbe30ce83d96cef4221ea7fb0beb318': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ❌ Failed to cancel 0xaf587a: Unknown error
+   🔍 DEBUG: Full response: {'not_canceled': {'0xaf587ae3b141ac372527da7821b7da3ccdbe30ce83d96cef4221ea7fb0beb318': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 31.2h)
+   Order: BUY NO @ $0.0180
+   Market: cwbb-queen-scarst-2025-11-20
+   🔍 DEBUG: Attempting to cancel order 0xd5b21c...
+   🔍 DEBUG: Cancel response type: <class 'dict'>
+   🔍 DEBUG: Cancel response: {'not_canceled': {'0xd5b21cbdb2d3a27179172f8e012b8eaff83f3102121f05b27bc7365e9cdbd724': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ❌ Failed to cancel 0xd5b21c: Unknown error
+   🔍 DEBUG: Full response: {'not_canceled': {'0xd5b21cbdb2d3a27179172f8e012b8eaff83f3102121f05b27bc7365e9cdbd724': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 31.2h)
+   Order: BUY NO @ $0.0160
+   Market: cwbb-queen-scarst-2025-11-20
+   🔍 DEBUG: Attempting to cancel order 0x5c3843...
+   🔍 DEBUG: Cancel response type: <class 'dict'>
+   🔍 DEBUG: Cancel response: {'not_canceled': {'0x5c38438078fce76bf841ab8ad3251e70cc078eb5bb2e87fe1f68687bc9f1e46f': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ❌ Failed to cancel 0x5c3843: Unknown error
+   🔍 DEBUG: Full response: {'not_canceled': {'0x5c38438078fce76bf841ab8ad3251e70cc078eb5bb2e87fe1f68687bc9f1e46f': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ⚠️  Cancellation failed
+
+⏰ Cancelling stale order (age: 31.2h)
+   Order: BUY NO @ $0.0140
+   Market: cwbb-queen-scarst-2025-11-20
+   🔍 DEBUG: Attempting to cancel order 0x65810d...
+   🔍 DEBUG: Cancel response type: <class 'dict'>
+   🔍 DEBUG: Cancel response: {'not_canceled': {'0x65810d68d2d79c74f6d727d0099142e409563ab95fa41cbf5bb91ed03827c848': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ❌ Failed to cancel 0x65810d: Unknown error
+   🔍 DEBUG: Full response: {'not_canceled': {'0x65810d68d2d79c74f6d727d0099142e409563ab95fa41cbf5bb91ed03827c848': "order can't be found - already canceled or matched"}, 'canceled': []}
+   ⚠️  Cancellation failed
+

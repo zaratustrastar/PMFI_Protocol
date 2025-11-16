@@ -15,44 +15,81 @@ except ImportError:
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-def cleanup_old_jobs():
-    """Delete jobs older than 24 hours"""
+def cleanup_old_jobs(nuclear: bool = False):
+    """
+    Clean up stale trading jobs
+    
+    Args:
+        nuclear: If True, mark ALL pending jobs as expired (fresh start)
+                 If False, only mark jobs >1 hour old as expired
+    """
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
     
-    # Get current UTC time
-    now = datetime.now(timezone.utc)
-    
-    # Count old jobs
-    cur.execute("""
-        SELECT COUNT(*) FROM trading_jobs 
-        WHERE created_at < NOW() - INTERVAL '24 hours'
-        AND status = 'PENDING'
-    """)
-    old_count = cur.fetchone()[0]
-    
-    print(f"📊 Found {old_count} stale jobs (>24 hours old)")
-    
-    if old_count > 0:
-        # Delete old jobs
+    if nuclear:
+        # NUCLEAR: Mark ALL pending jobs as expired
         cur.execute("""
-            UPDATE trading_jobs
-            SET status = 'EXPIRED', 
-                error_message = 'Job expired (>24 hours old)',
-                updated_at = CURRENT_TIMESTAMP
-            WHERE created_at < NOW() - INTERVAL '24 hours'
+            SELECT COUNT(*) FROM trading_jobs 
+            WHERE status = 'PENDING'
+        """)
+        old_count = cur.fetchone()[0]
+        
+        print(f"🔴 NUCLEAR CLEANUP: Found {old_count} pending jobs (ALL will be marked EXPIRED)")
+        
+        if old_count > 0:
+            cur.execute("""
+                UPDATE trading_jobs
+                SET status = 'EXPIRED', 
+                    error_message = 'Nuclear cleanup - fresh start',
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE status = 'PENDING'
+            """)
+            
+            conn.commit()
+            print(f"✅ Marked {cur.rowcount} jobs as EXPIRED (nuclear cleanup)")
+        else:
+            print("✅ No pending jobs found")
+    else:
+        # NORMAL: Mark jobs >1 hour old as expired
+        cur.execute("""
+            SELECT COUNT(*) FROM trading_jobs 
+            WHERE created_at < NOW() - INTERVAL '1 hour'
             AND status = 'PENDING'
         """)
+        old_count = cur.fetchone()[0]
         
-        conn.commit()
-        print(f"✅ Marked {cur.rowcount} stale jobs as EXPIRED")
-    else:
-        print("✅ No stale jobs to clean up")
+        print(f"📊 Found {old_count} stale jobs (>1 hour old)")
+        
+        if old_count > 0:
+            cur.execute("""
+                UPDATE trading_jobs
+                SET status = 'EXPIRED', 
+                    error_message = 'Job expired (>1 hour old)',
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE created_at < NOW() - INTERVAL '1 hour'
+                AND status = 'PENDING'
+            """)
+            
+            conn.commit()
+            print(f"✅ Marked {cur.rowcount} stale jobs as EXPIRED")
+        else:
+            print("✅ No stale jobs to clean up")
     
     cur.close()
     conn.close()
 
 if __name__ == "__main__":
-    print("🧹 Cleaning up stale trading jobs...\n")
-    cleanup_old_jobs()
+    import sys
+    
+    # Check for --nuclear flag
+    nuclear_mode = "--nuclear" in sys.argv
+    
+    if nuclear_mode:
+        print("🧹 NUCLEAR CLEANUP MODE: Marking ALL pending jobs as expired...\n")
+        print("⚠️  This will clear the entire queue for a fresh start!\n")
+    else:
+        print("🧹 Cleaning up stale trading jobs (>1 hour old)...\n")
+        print("💡 Use --nuclear flag to mark ALL pending jobs as expired\n")
+    
+    cleanup_old_jobs(nuclear=nuclear_mode)
     print("\n✅ Cleanup complete!")

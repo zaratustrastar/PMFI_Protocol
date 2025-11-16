@@ -421,12 +421,7 @@ class PolymarketTrader:
             True if cancellation was successful, False otherwise
         """
         try:
-            print(f"   🔍 DEBUG: Attempting to cancel order {order_id[:8]}...")
             response = self.client.cancel(order_id)
-            
-            # Debug: Print full response to understand structure
-            print(f"   🔍 DEBUG: Cancel response type: {type(response)}")
-            print(f"   🔍 DEBUG: Cancel response: {response}")
             
             # Handle different response types
             if response is None:
@@ -435,20 +430,40 @@ class PolymarketTrader:
             
             # If response is a dict
             if isinstance(response, dict):
-                # Check for success field
-                if response.get("success", False):
-                    print(f"   ✅ Cancelled order {order_id[:8]}...")
+                # Check if order was successfully canceled
+                canceled_list = response.get("canceled", [])
+                if order_id in canceled_list:
+                    print(f"   ✅ Cancelled order {order_id[:8]}")
                     return True
-                else:
-                    error = response.get("error") or response.get("errorMsg") or "Unknown error"
-                    print(f"   ❌ Failed to cancel {order_id[:8]}: {error}")
-                    print(f"   🔍 DEBUG: Full response: {response}")
-                    return False
+                
+                # Check if order is in not_canceled dict
+                not_canceled = response.get("not_canceled", {})
+                if order_id in not_canceled:
+                    reason = not_canceled[order_id]
+                    
+                    # If already canceled/matched, that's success - order is gone
+                    if "already canceled" in reason.lower() or "already matched" in reason.lower() or "can't be found" in reason.lower():
+                        print(f"   ✅ Order {order_id[:8]} already gone ({reason})")
+                        return True
+                    else:
+                        # Other reasons are actual failures
+                        print(f"   ❌ Failed to cancel {order_id[:8]}: {reason}")
+                        return False
+                
+                # Check for legacy success field
+                if response.get("success", False):
+                    print(f"   ✅ Cancelled order {order_id[:8]}")
+                    return True
+                
+                # No clear success indicator
+                error = response.get("error") or response.get("errorMsg") or "Unknown error"
+                print(f"   ❌ Failed to cancel {order_id[:8]}: {error}")
+                return False
             
             # If response is True/False boolean
             elif isinstance(response, bool):
                 if response:
-                    print(f"   ✅ Cancelled order {order_id[:8]}...")
+                    print(f"   ✅ Cancelled order {order_id[:8]}")
                     return True
                 else:
                     print(f"   ❌ Failed to cancel {order_id[:8]}: Response is False")
