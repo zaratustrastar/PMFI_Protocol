@@ -95,7 +95,7 @@ def save_order(order_data: Dict):
         order_data.get("order_id"),
         order_data.get("token_id"),
         order_data.get("side"),
-        order_data.get("type"),
+        order_data.get("order_type"),
         order_data.get("price"),
         order_data.get("size"),
         order_data.get("status"),

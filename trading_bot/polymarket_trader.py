@@ -228,7 +228,7 @@ class PolymarketTrader:
                         "order_id": order_id,
                         "token_id": token_id,
                         "side": side_name,
-                        "type": "BUY",
+                        "order_type": "BUY",
                         "price": price,
                         "size": size,
                         "status": "OPEN"
@@ -295,7 +295,7 @@ class PolymarketTrader:
                         "order_id": order_id,
                         "token_id": token_id,
                         "side": side_name,
-                        "type": "SELL",
+                        "order_type": "SELL",
                         "price": sell_price,
                         "size": size_per_order,
                         "buy_price": buy_price,
@@ -340,7 +340,7 @@ class PolymarketTrader:
                     filled_size = float(order_status.get("size_matched", order["size"]))
                     avg_price = float(order_status.get("avg_price", order["price"]))
                     
-                    print(f"   🎯 Order filled: {order['type']} {order['side']} @ ${avg_price:.4f} ({filled_size:.2f} tokens)")
+                    print(f"   🎯 Order filled: {order['order_type']} {order['side']} @ ${avg_price:.4f} ({filled_size:.2f} tokens)")
                     
                     order["status"] = "FILLED"
                     order["filled_size"] = filled_size
@@ -350,27 +350,26 @@ class PolymarketTrader:
                 elif status == "PARTIAL":
                     # Partial fill - track but don't trigger sell yet
                     filled_size = float(order_status.get("size_matched", 0))
-                    print(f"   ⏳ Partial fill: {order['type']} {order['side']} ({filled_size:.2f}/{order['size']:.2f})")
+                    print(f"   ⏳ Partial fill: {order['order_type']} {order['side']} ({filled_size:.2f}/{order['size']:.2f})")
                     
             except Exception as e:
                 print(f"   ⚠️  Error checking order {order_id[:8]}: {str(e)}")
         
         return filled_orders
     
-    def check_sell_fills(self, market_slug: str) -> List[Dict]:
+    def check_sell_fills(self, orders: List[Dict]) -> List[Dict]:
         """
         Check open sell orders for fills and notify via Telegram
         
         Args:
-            market_slug: Market identifier
+            orders: List of sell order dictionaries
             
         Returns:
             List of filled sell orders
         """
-        open_sells = get_open_sell_orders(market_slug)
         filled_sells = []
         
-        for order in open_sells:
+        for order in orders:
             order_id = order["order_id"]
             
             try:
@@ -391,18 +390,26 @@ class PolymarketTrader:
                     
                     # Update database
                     update_order_status(order_id, "FILLED", filled_size, avg_price)
-                    update_market_summary(market_slug)
                     
-                    # Notify Telegram
-                    notify_sell_executed(market_slug, {
-                        "side": order["side"],
-                        "buy_price": buy_price,
-                        "sell_price": avg_price,
-                        "size": filled_size,
-                        "profit_usd": profit_usd,
-                        "profit_pct": profit_pct
-                    })
+                    # Get market slug from order for summary and notification
+                    market_slug = order.get("market_slug", "")
+                    if market_slug:
+                        update_market_summary(market_slug)
+                        
+                        # Notify Telegram
+                        notify_sell_executed(market_slug, {
+                            "side": order["side"],
+                            "buy_price": buy_price,
+                            "sell_price": avg_price,
+                            "size": filled_size,
+                            "profit_usd": profit_usd,
+                            "profit_pct": profit_pct
+                        })
                     
+                    # Store fill data in order dict
+                    order["status"] = "FILLED"
+                    order["filled_size"] = filled_size
+                    order["filled_price"] = avg_price
                     filled_sells.append(order)
                     
             except Exception as e:
