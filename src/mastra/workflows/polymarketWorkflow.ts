@@ -53,6 +53,33 @@ function isUpDownMarket(market: any): boolean {
 }
 
 /**
+ * Check if a market's duration is too short (< 15 hours)
+ * Markets with short durations (same-day sports, quick events) should not be traded
+ */
+function isShortDurationMarket(market: any, minHours: number = 15): { isShort: boolean; durationHours?: number } {
+  if (!market.createdAt || !market.closedTime) {
+    // No date info - can't determine duration, allow trading (fallback to keyword filter)
+    return { isShort: false };
+  }
+
+  try {
+    const created = new Date(market.createdAt);
+    const closed = new Date(market.closedTime);
+    
+    const durationMs = closed.getTime() - created.getTime();
+    const durationHours = durationMs / (1000 * 60 * 60);
+    
+    return {
+      isShort: durationHours < minHours,
+      durationHours: Math.round(durationHours * 10) / 10, // Round to 1 decimal
+    };
+  } catch (error) {
+    // Invalid date format - can't parse, allow trading (fallback to keyword filter)
+    return { isShort: false };
+  }
+}
+
+/**
  * Step 1: Fetch Markets and Post to Telegram
  * Fetches markets, identifies new ones, posts them, and ONLY THEN marks as seen
  */
@@ -200,12 +227,37 @@ ${escapedDescription ? `📊 ${escapedDescription}
             marketId: market.id,
           });
 
-          // Queue this market for automated trading ONLY if it's not an up/down market
+          // Queue this market for automated trading ONLY if it passes all filters
           const isUpDown = isUpDownMarket(market);
-          if (!isUpDown) {
+          const durationCheck = isShortDurationMarket(market);
+          
+          // Skip trading if it's an up/down market OR too short duration
+          if (isUpDown) {
+            logger?.info("⏭️ [monitorAndPost] Skipped trading queue (up/down market)", {
+              marketId: market.id,
+              question: market.question.substring(0, 100),
+            });
+          } else if (durationCheck.isShort) {
+            logger?.info("⏭️ [monitorAndPost] Skipped trading queue (short duration)", {
+              marketId: market.id,
+              question: market.question.substring(0, 100),
+              durationHours: durationCheck.durationHours,
+              minRequired: 15,
+            });
+          } else {
+            // Market passed all filters - queue for trading
             try {
               const queueResult = await queueTradingJob.execute({
-                context: { marketIds: [market.slug] },
+                context: {
+                  marketIds: [market.slug],
+                  marketData: [
+                    {
+                      id: market.slug,
+                      createdAt: market.createdAt,
+                      closedTime: market.closedTime,
+                    },
+                  ],
+                },
                 mastra,
                 runtimeContext: {},
               });
@@ -213,6 +265,7 @@ ${escapedDescription ? `📊 ${escapedDescription}
                 marketId: market.id,
                 marketSlug: market.slug,
                 queued: queueResult.queued,
+                durationHours: durationCheck.durationHours,
               });
             } catch (error) {
               logger?.error("❌ [monitorAndPost] Failed to queue trading job", {
@@ -221,11 +274,6 @@ ${escapedDescription ? `📊 ${escapedDescription}
                 error,
               });
             }
-          } else {
-            logger?.info("⏭️ [monitorAndPost] Skipped trading queue (up/down market)", {
-              marketId: market.id,
-              question: market.question.substring(0, 100),
-            });
           }
         } else {
           logger?.warn("⚠️ [monitorAndPost] Not marking as seen (posting failed)", {

@@ -15,6 +15,16 @@ export const queueTradingJob = createTool({
     marketIds: z
       .array(z.string())
       .describe("Array of market IDs to queue for trading"),
+    marketData: z
+      .array(
+        z.object({
+          id: z.string(),
+          createdAt: z.string().optional(),
+          closedTime: z.string().optional(),
+        })
+      )
+      .optional()
+      .describe("Optional market data including dates for filtering"),
   }),
 
   outputSchema: z.object({
@@ -37,15 +47,33 @@ export const queueTradingJob = createTool({
       let skipped = 0;
 
       for (const marketId of context.marketIds) {
-        const result = await pool.query(
-          `
-          INSERT INTO trading_jobs (market_id, status)
-          VALUES ($1, 'PENDING')
-          ON CONFLICT (market_id) DO NOTHING
-          RETURNING id
-        `,
-          [marketId]
-        );
+        // Find market data if provided
+        const market = context.marketData?.find((m) => m.id === marketId);
+        
+        let result;
+        if (market?.createdAt && market?.closedTime) {
+          // Insert with market dates
+          result = await pool.query(
+            `
+            INSERT INTO trading_jobs (market_id, status, market_created_at, market_closed_time)
+            VALUES ($1, 'PENDING', $2, $3)
+            ON CONFLICT (market_id) DO NOTHING
+            RETURNING id
+          `,
+            [marketId, market.createdAt, market.closedTime]
+          );
+        } else {
+          // Insert without market dates (fallback)
+          result = await pool.query(
+            `
+            INSERT INTO trading_jobs (market_id, status)
+            VALUES ($1, 'PENDING')
+            ON CONFLICT (market_id) DO NOTHING
+            RETURNING id
+          `,
+            [marketId]
+          );
+        }
 
         if (result.rowCount > 0) {
           queued++;

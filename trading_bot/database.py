@@ -28,7 +28,9 @@ def init_database():
             started_at TIMESTAMP,
             completed_at TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            market_created_at TIMESTAMP,
+            market_closed_time TIMESTAMP
         )
     """)
     
@@ -265,7 +267,7 @@ def get_pending_jobs(limit: int = 10) -> List[Dict]:
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
     cur.execute("""
-        SELECT id, market_id, created_at
+        SELECT id, market_id, created_at, market_created_at, market_closed_time
         FROM trading_jobs
         WHERE status = 'PENDING'
           AND created_at > NOW() - INTERVAL '1 hour'

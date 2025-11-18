@@ -26,8 +26,8 @@ export const fetchPolymarketMarkets = createTool({
         description: z.string().optional(),
         active: z.boolean(),
         closed: z.boolean(),
-        startDate: z.string().optional(),
-        endDate: z.string().optional(),
+        createdAt: z.string().optional(),
+        closedTime: z.string().optional(),
         url: z.string(),
       })
     ),
@@ -83,8 +83,8 @@ export const fetchPolymarketMarkets = createTool({
               description: market.description || event.description || "",
               active: market.active !== false,
               closed: market.closed === true,
-              startDate: market.startDate || event.startDate,
-              endDate: market.endDate || event.endDate,
+              createdAt: market.createdAt || event.createdAt,
+              closedTime: market.closedTime || event.closedTime,
               url: `https://polymarket.com/event/${event.slug || market.slug}`,
             });
           }
