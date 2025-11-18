@@ -17,7 +17,7 @@ except ImportError:
 
 from polymarket_trader import PolymarketTrader
 from database import get_open_orders, update_order_status, update_market_summary
-from telegram_notifier import notify_sell_executed
+from telegram_notifier import notify_buy_filled, notify_sell_executed
 
 
 def cancel_stale_orders(trader: PolymarketTrader, max_age_hours: int = 12):
@@ -99,23 +99,32 @@ def monitor_all_orders(trader: PolymarketTrader):
             for filled_buy in filled_buys:
                 order_id = filled_buy["order_id"]
                 market_slug = filled_buy["market_slug"]
+                filled_price = filled_buy.get('filled_price', filled_buy['price'])
+                filled_size = filled_buy.get('filled_size', filled_buy['size'])
                 
-                print(f"\n🎉 Buy filled: {filled_buy['side']} @ ${filled_buy.get('filled_price', filled_buy['price']):.4f}")
+                print(f"\n🎉 Buy filled: {filled_buy['side']} @ ${filled_price:.4f}")
                 
                 # Update buy order status with actual fill data
                 update_order_status(
                     order_id,
                     "FILLED",
-                    filled_buy.get("filled_size"),
-                    filled_buy.get("filled_price")
+                    filled_size,
+                    filled_price
                 )
+                
+                # Send Telegram notification
+                notify_buy_filled(market_slug, {
+                    "side": filled_buy["side"],
+                    "price": filled_price,
+                    "size": filled_size
+                })
                 
                 # Place sell ladder
                 print(f"   📈 Placing sell ladder...")
                 sell_orders = trader.place_sell_ladder(
                     filled_buy["token_id"],
-                    filled_buy.get("filled_price", filled_buy["price"]),
-                    filled_buy.get("filled_size", filled_buy["size"]),
+                    filled_price,
+                    filled_size,
                     filled_buy["side"],
                     market_slug
                 )

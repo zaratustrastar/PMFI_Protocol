@@ -10,6 +10,51 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHANNEL = "@ponnymarket"
 
 
+def notify_buy_filled(market_slug: str, trade_data: Dict):
+    """
+    Send Telegram notification when a buy order fills
+    
+    Args:
+        market_slug: Market identifier
+        trade_data: Dict with keys: side, price, size
+    """
+    if not TELEGRAM_BOT_TOKEN:
+        print("⚠️  TELEGRAM_BOT_TOKEN not set, skipping notification")
+        return
+    
+    # Format the message
+    side = trade_data.get("side", "")
+    price = trade_data.get("price", 0)
+    size = trade_data.get("size", 0)
+    
+    message = f"""📥 **BUY FILLED**
+
+Market: {market_slug}
+Side: {side}
+Tokens: {size:.2f}
+Price: ${price:.4f}
+
+🎯 Sell ladder created
+"""
+    
+    # Send to Telegram
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHANNEL,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
+    
+    try:
+        response = requests.post(url, json=payload, timeout=10)
+        if response.status_code == 200:
+            print(f"✅ Telegram notification sent for {side} buy fill")
+        else:
+            print(f"⚠️  Telegram notification failed: {response.text}")
+    except Exception as e:
+        print(f"⚠️  Error sending Telegram notification: {e}")
+
+
 def notify_sell_executed(market_slug: str, trade_data: Dict):
     """
     Send Telegram notification when a sell order executes
