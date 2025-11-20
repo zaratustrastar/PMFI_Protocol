@@ -1,0 +1,27 @@
+[Unit]
+Description=Polymarket Order Monitor - Monitors Fills and Places Sells
+After=network.target postgresql.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/polymarket-bot/trading_bot
+
+# Load environment variables
+EnvironmentFile=/opt/polymarket-bot/.env
+
+# Use virtual environment Python
+ExecStart=/opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+
+# Auto-restart on failure
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=polymarket-monitor
+
+[Install]
+WantedBy=multi-user.target

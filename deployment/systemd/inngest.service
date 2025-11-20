@@ -1,0 +1,27 @@
+[Unit]
+Description=Inngest Server - Workflow Orchestration
+After=network.target postgresql.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/polymarket-bot
+
+# Load environment variables
+EnvironmentFile=/opt/polymarket-bot/.env
+
+# Start Inngest server
+ExecStart=/opt/polymarket-bot/scripts/inngest.sh
+
+# Auto-restart on failure
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=inngest
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,27 @@
+[Unit]
+Description=Polymarket Trading Worker - Processes Job Queue
+After=network.target postgresql.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/polymarket-bot/trading_bot
+
+# Load environment variables
+EnvironmentFile=/opt/polymarket-bot/.env
+
+# Use virtual environment Python
+ExecStart=/opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+
+# Auto-restart on failure
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=polymarket-worker
+
+[Install]
+WantedBy=multi-user.target

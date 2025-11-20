@@ -1,0 +1,27 @@
+[Unit]
+Description=Mastra Development Server - Polymarket Trading Bot
+After=network.target inngest.service postgresql.service
+Wants=network.target inngest.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/polymarket-bot
+
+# Load environment variables
+EnvironmentFile=/opt/polymarket-bot/.env
+
+# Start Mastra dev server
+ExecStart=/usr/bin/npm run dev
+
+# Auto-restart on failure
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mastra
+
+[Install]
+WantedBy=multi-user.target
