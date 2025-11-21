@@ -1,0 +1,45 @@
+*** System restart required ***
+Last login: Fri Nov 21 01:24:31 2025 from 162.243.190.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Show just the POLYMARKET lines (hiding full values)
+grep "POLYMARKET" /opt/polymarket-bot/.env | sed 's/=.*/=***HIDDEN***/'
+POLYMARKET_PRIVATE_KEY=***HIDDEN***
+POLYMARKET_PROXY_ADDRESS=***HIDDEN***
+POLYMARKET_API_KEY=***HIDDEN***
+POLYMARKET_API_SECRET=***HIDDEN***
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd /opt/polymarket-bot
+grep -v '^#' .env | grep -v '^$' | grep '=' > .env.systemd
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# echo "✅ Created .env.systemd with $(wc -l < .env.systemd) lines"
+head -3 .env.systemd
+sudo sed -i 's|EnvironmentFile=/opt/polymarket-bot/.env|EnvironmentFile=/opt/polymarket-bot/.env.systemd|' /etc/systemd/system/polymarket-worker.service
+sudo sed -i 's|EnvironmentFile=/opt/polymarket-bot/.env|EnvironmentFile=/opt/polymarket-bot/.env.systemd|' /etc/systemd/system/polymarket-monitor.service
+sudo systemctl daemon-reload
+sudo systemctl restart polymarket-worker.service polymarket-monitor.service
+sudo systemctl status polymarket-worker.service --no-pager -l
+sudo systemctl status polymarket-monitor.service --no-pager -l
+✅ Created .env.systemd with 18 lines
+DATABASE_URL=postgresql://polymarket:ChangeThisPassword123!@localhost:5432/polymarket_trading
+PGHOST=localhost
+PGPORT=5432
+● polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue
+     Loaded: loaded (/etc/systemd/system/polymarket-worker.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-11-21 01:41:22 UTC; 101ms ago
+   Main PID: 28399 (python3)
+      Tasks: 1 (limit: 1110)
+     Memory: 4.6M (peak: 4.8M)
+        CPU: 14ms
+     CGroup: /system.slice/polymarket-worker.service
+             └─28399 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+
+Nov 21 01:41:22 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-11-21 01:41:22 UTC; 137ms ago
+   Main PID: 28401 (python3)
+      Tasks: 1 (limit: 1110)
+     Memory: 3.8M (peak: 4.0M)
+        CPU: 26ms
+     CGroup: /system.slice/polymarket-monitor.service
+             └─28401 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+
+Nov 21 01:41:22 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# 

@@ -1,0 +1,44 @@
+# Check monitor logs (last 30 lines)  
+journalctl -u polymarket-monitor.service -n 30 --no-pager
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 216, in <module>
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:     main()
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 190, in main
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:     pending_jobs = get_pending_jobs(limit=batch_size)
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:   File "/opt/polymarket-bot/trading_bot/database.py", line 266, in get_pending_jobs
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:     conn = get_db_connection()
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:            ^^^^^^^^^^^^^^^^^^^
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:   File "/opt/polymarket-bot/trading_bot/database.py", line 13, in get_db_connection
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:     return psycopg2.connect(config.DATABASE_URL)
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Nov 21 01:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: psycopg2.OperationalError: connection to server at "localhost" (::1), port 5432 failed: SSL SYSCALL error: EOF detected
+Nov 21 01:02:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Nov 21 01:02:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Nov 21 01:02:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Consumed 19.349s CPU time, 55.2M memory peak, 0B memory swap peak.
+Nov 21 01:02:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 1.
+Nov 21 01:02:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue...
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Deactivated successfully.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Consumed 5.086s CPU time, 62.7M memory peak, 0B memory swap peak.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 21 01:18:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue...
+Nov 21 01:18:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Deactivated successfully.
+Nov 21 01:18:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 21 01:18:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Consumed 1.567s CPU time, 52.6M memory peak, 0B memory swap peak.
+Nov 21 01:41:22 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 20 23:35:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells...
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Deactivated successfully.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Consumed 46.112s CPU time, 53.4M memory peak, 0B memory swap peak.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 21 01:41:22 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells...
+Nov 21 01:41:22 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Deactivated successfully.
+Nov 21 01:41:22 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 21 01:41:22 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Consumed 6.461s CPU time, 53.4M memory peak, 0B memory swap peak.
+Nov 21 01:41:22 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# 

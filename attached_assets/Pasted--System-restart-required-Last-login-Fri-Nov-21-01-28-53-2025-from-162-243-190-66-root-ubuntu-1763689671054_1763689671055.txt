@@ -1,0 +1,47 @@
+*** System restart required ***
+Last login: Fri Nov 21 01:28:53 2025 from 162.243.190.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# grep DATABASE_URL /opt/polymarket-bot/.env
+DATABASE_URL=postgresql://polymarket:ChangeThisPassword123!@localhost:5432/polymarket_trading
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Check the DATABASE_URL from Replit environment
+echo $DATABASE_URL
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Update DATABASE_URL in .env file
+cd /opt/polymarket-bot
+sed -i 's|^DATABASE_URL=.*|DATABASE_URL=postgresql://neondb_owner:npg_sPnNQtm3xf8h@ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require|' .env
+
+# Recreate .env.systemd with correct database URL
+grep -v '^#' .env | grep -v '^$' | grep '=' > .env.systemd
+
+# Verify the DATABASE_URL is correct now
+echo "✅ Checking DATABASE_URL in .env.systemd:"
+grep DATABASE_URL .env.systemd
+
+# Restart both services
+sudo systemctl restart polymarket-worker.service polymarket-monitor.service
+
+# Wait 3 seconds then check logs
+sleep 3
+journalctl -u polymarket-worker.service -n 20 --no-pager
+✅ Checking DATABASE_URL in .env.systemd:
+DATABASE_URL=postgresql://neondb_owner:npg_sPnNQtm3xf8h@ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
+Nov 21 01:02:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Nov 21 01:02:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Nov 21 01:02:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Consumed 19.349s CPU time, 55.2M memory peak, 0B memory swap peak.
+Nov 21 01:02:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 1.
+Nov 21 01:02:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue...
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Deactivated successfully.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Consumed 5.086s CPU time, 62.7M memory peak, 0B memory swap peak.
+Nov 21 01:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 21 01:18:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue...
+Nov 21 01:18:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Deactivated successfully.
+Nov 21 01:18:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 21 01:18:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Consumed 1.567s CPU time, 52.6M memory peak, 0B memory swap peak.
+Nov 21 01:41:22 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 21 01:47:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue...
+Nov 21 01:47:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Deactivated successfully.
+Nov 21 01:47:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 21 01:47:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Consumed 3.190s CPU time, 4.8M memory peak, 0B memory swap peak.
+Nov 21 01:47:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# 
