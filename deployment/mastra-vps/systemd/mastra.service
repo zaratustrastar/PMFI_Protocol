@@ -1,0 +1,20 @@
+[Unit]
+Description=Mastra Workflow Server - Market Detection & Job Queuing
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/polymarket-bot/mastra
+EnvironmentFile=/opt/polymarket-bot/mastra/.env
+Environment="NODE_ENV=production"
+Environment="PATH=/usr/bin:/usr/local/bin"
+ExecStart=/usr/bin/npx mastra dev
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mastra
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,20 @@
+[Unit]
+Description=Inngest Workflow Orchestration Server
+After=network.target mastra.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/polymarket-bot/mastra
+EnvironmentFile=/opt/polymarket-bot/mastra/.env
+Environment="NODE_ENV=production"
+Environment="PATH=/usr/bin:/usr/local/bin"
+ExecStart=/bin/bash /opt/polymarket-bot/mastra/scripts/inngest.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=inngest
+
+[Install]
+WantedBy=multi-user.target
