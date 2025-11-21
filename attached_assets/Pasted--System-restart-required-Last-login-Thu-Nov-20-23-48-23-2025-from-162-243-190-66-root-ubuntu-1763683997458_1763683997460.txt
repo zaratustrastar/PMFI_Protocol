@@ -1,0 +1,44 @@
+*** System restart required ***
+Last login: Thu Nov 20 23:48:23 2025 from 162.243.190.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u mastra.service -u polymarket-worker.service -u polymarket-monitor.service -f
+Nov 21 00:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     at async InngestRun.start (file:///opt/polymarket-bot/node_modules/@mastra/inngest/dist/index.js:144:23)
+Nov 21 00:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     at async V1InngestExecution.userFnToRun (file:///opt/polymarket-bot/.mastra/output/index.mjs:85:22) {
+Nov 21 00:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:   [cause]: AggregateError [ECONNREFUSED]:
+Nov 21 00:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:       at internalConnectMultiple (node:net:1122:18)
+Nov 21 00:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:       at afterConnectMultiple (node:net:1689:7)
+Nov 21 00:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:       at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+Nov 21 00:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     code: 'ECONNREFUSED',
+Nov 21 00:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     [errors]: [ [Error], [Error] ]
+Nov 21 00:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:   }
+Nov 21 00:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: }
+Nov 21 00:12:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:12:00.703 +0000] (Mastra): 🚀 [monitorAndPost] Starting Polymarket monitoring
+Nov 21 00:12:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:12:00.706 +0000] (Mastra): 🔧 [fetchPolymarketMarkets] Starting execution
+Nov 21 00:12:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     limit: 20
+Nov 21 00:12:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:12:00.707 +0000] (Mastra): 📝 [fetchPolymarketMarkets] Fetching from Polymarket API
+Nov 21 00:12:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     url: "https://gamma-api.polymarket.com/events?order=id&ascending=false&closed=false&limit=20"
+Nov 21 00:12:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:12:01.165 +0000] (Mastra): 📊 [fetchPolymarketMarkets] Received events
+Nov 21 00:12:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     count: 20
+Nov 21 00:12:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:12:01.168 +0000] (Mastra): ✅ [fetchPolymarketMarkets] Processing complete
+Nov 21 00:12:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     marketsCount: 20
+Nov 21 00:12:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:12:01.168 +0000] (Mastra): 📊 [monitorAndPost] Fetched markets
+Nov 21 00:12:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     count: 20
+Nov 21 00:12:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:12:01.227 +0000] (Mastra): ✅ [monitorAndPost] Identified new markets
+Nov 21 00:12:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     newCount: 0
+# Check if PostgreSQL is running
+systemctl status postgresql
+
+# Also check if it's listening on the right port
+netstat -tulpn | grep 5432
+Nov 21 00:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:13:00.861 +0000] (Mastra): 🚀 [monitorAndPost] Starting Polymarket monitoring
+Nov 21 00:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:13:00.863 +0000] (Mastra): 🔧 [fetchPolymarketMarkets] Starting execution
+Nov 21 00:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     limit: 20
+Nov 21 00:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:13:00.863 +0000] (Mastra): 📝 [fetchPolymarketMarkets] Fetching from Polymarket API
+Nov 21 00:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     url: "https://gamma-api.polymarket.com/events?order=id&ascending=false&closed=false&limit=20"
+Nov 21 00:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:13:01.407 +0000] (Mastra): 📊 [fetchPolymarketMarkets] Received events
+Nov 21 00:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     count: 20
+Nov 21 00:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:13:01.413 +0000] (Mastra): ✅ [fetchPolymarketMarkets] Processing complete
+Nov 21 00:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     marketsCount: 20
+Nov 21 00:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:13:01.414 +0000] (Mastra): 📊 [monitorAndPost] Fetched markets
+Nov 21 00:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     count: 20
+Nov 21 00:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-21 00:13:01.557 +0000] (Mastra): ✅ [monitorAndPost] Identified new markets
+Nov 21 00:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     newCount: 0

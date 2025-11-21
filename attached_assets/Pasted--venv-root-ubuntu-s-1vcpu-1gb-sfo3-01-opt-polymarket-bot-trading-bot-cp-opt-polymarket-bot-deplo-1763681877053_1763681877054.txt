@@ -1,0 +1,67 @@
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# cp /opt/polymarket-bot/deployment/systemd/*.service /etc/systemd/system/
+systemctl daemon-reload
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# systemctl enable mastra.service
+systemctl enable inngest.service
+systemctl enable polymarket-worker.service
+systemctl enable polymarket-monitor.service
+Created symlink /etc/systemd/system/multi-user.target.wants/mastra.service → /etc/systemd/system/mastra.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/inngest.service → /etc/systemd/system/inngest.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/polymarket-worker.service → /etc/systemd/system/polymarket-worker.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/polymarket-monitor.service → /etc/systemd/system/polymarket-monitor.service.
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# # Start Inngest first (required by Mastra)
+systemctl start inngest.service
+sleep 5
+
+# Start Mastra
+systemctl start mastra.service
+sleep 3
+
+# Start worker and monitor
+systemctl start polymarket-worker.service
+systemctl start polymarket-monitor.service
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# systemctl status mastra.service
+systemctl status inngest.service
+systemctl status polymarket-worker.service
+systemctl status polymarket-monitor.service
+● mastra.service - Mastra Development Server - Polymarket Trading Bot
+     Loaded: loaded (/etc/systemd/system/mastra.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2025-11-20 23:35:33 UTC; 5s ago
+   Main PID: 24232 (npm run dev)
+      Tasks: 28 (limit: 1110)
+     Memory: 214.2M (peak: 214.4M)
+        CPU: 3.940s
+     CGroup: /system.slice/mastra.service
+             ├─24232 "npm run dev"
+             ├─24246 sh -c "mastra dev"
+             ├─24247 node /opt/polymarket-bot/node_modules/.bin/mastra dev
+             └─24258 /opt/polymarket-bot/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.25.10 --ping
+
+Nov 20 23:35:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 20 23:35:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24232]: > agent-stack-mastra@1.0.0 dev
+Nov 20 23:35:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24232]: > mastra dev
+● inngest.service - Inngest Server - Workflow Orchestration
+     Loaded: loaded (/etc/systemd/system/inngest.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Thu 2025-11-20 23:35:33 UTC; 5s ago
+    Process: 24231 ExecStart=/opt/polymarket-bot/scripts/inngest.sh (code=exited, status=127)
+   Main PID: 24231 (code=exited, status=127)
+        CPU: 5ms
+● polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue
+     Loaded: loaded (/etc/systemd/system/polymarket-worker.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2025-11-20 23:35:36 UTC; 2s ago
+   Main PID: 24265 (python3)
+      Tasks: 1 (limit: 1110)
+     Memory: 46.3M (peak: 46.5M)
+        CPU: 814ms
+     CGroup: /system.slice/polymarket-worker.service
+             └─24265 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+
+Nov 20 23:35:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2025-11-20 23:35:36 UTC; 2s ago
+   Main PID: 24268 (python3)
+      Tasks: 1 (limit: 1110)
+     Memory: 44.7M (peak: 45.0M)
+        CPU: 815ms
+     CGroup: /system.slice/polymarket-monitor.service
+             └─24268 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py

@@ -1,0 +1,21 @@
+# See recent worker activity
+journalctl -u polymarket-worker.service --since "00:15:00" -n 100
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: TypeError: fetch failed
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     at node:internal/deps/undici/undici:13510:13
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     at async InngestRun.getRuns (file:///opt/polymarket-bot/node_modules/@mastra/inngest/dist/index.js:48:22)
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     at async InngestRun.getRunOutput (file:///opt/polymarket-bot/node_modules/@mastra/inngest/dist/index.js:60:14)
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     at async InngestRun.start (file:///opt/polymarket-bot/node_modules/@mastra/inngest/dist/index.js:144:23)
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     at async V1InngestExecution.userFnToRun (file:///opt/polymarket-bot/.mastra/output/index.mjs:85:22) {
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:   [cause]: AggregateError [ECONNREFUSED]:
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:       at internalConnectMultiple (node:net:1122:18)
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:       at afterConnectMultiple (node:net:1689:7)
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:       at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     code: 'ECONNREFUSED',
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     [errors]: [ [Error], [Error] ]
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:   }
+Nov 21 00:47:38 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: }
+# See recent worker activity
+journalctl -u polymarket-worker.service --since "01:15:00" -n 100
+# Check database for the job status
+psql -U postgres -d polymarket_trading -c "SELECT id, market_slug, status, created_at, updated_at FROM trading_jobs WHERE market_slug LIKE '%somalian%' ORDER BY id DESC LIMIT 1;"

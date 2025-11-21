@@ -1,0 +1,34 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# systemctl status polymarket-worker.service polymarket-monitor.service
+● polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue
+     Loaded: loaded (/etc/systemd/system/polymarket-worker.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2025-11-20 23:35:36 UTC; 24min ago
+   Main PID: 24265 (python3)
+      Tasks: 1 (limit: 1110)
+     Memory: 44.2M (peak: 55.2M)
+        CPU: 2.627s
+     CGroup: /system.slice/polymarket-worker.service
+             └─24265 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+
+Nov 20 23:52:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ❌ Market 'cs2-bb3-orm-2025-11-22-game2' not found!
+Nov 20 23:52:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ❌ Job #3 failed - no orders placed
+Nov 20 23:52:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ============================================================
+Nov 20 23:52:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ⚡ Processing Job #4: cs2-bb3-orm-2025-11-22-total-games-2pt5
+Nov 20 23:52:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ============================================================
+Nov 20 23:52:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: 🔄 Job #4 marked as RUNNING (age: 0.0h)
+Nov 20 23:52:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ============================================================
+Nov 20 23:52:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: 🎯 Placing orders for: cs2-bb3-orm-2025-11-22-total-games-2pt5
+Nov 20 23:52:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ============================================================
+Nov 20 23:52:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: No market found for: cs2-bb3-orm-2025-11-22-total-games-2pt5
+
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2025-11-20 23:35:36 UTC; 24min ago
+   Main PID: 24268 (python3)
+      Tasks: 1 (limit: 1110)
+     Memory: 43.2M (peak: 53.4M)
+        CPU: 4.178s
+     CGroup: /system.slice/polymarket-monitor.service
+             └─24268 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+
+Nov 20 23:35:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

@@ -1,0 +1,48 @@
+Nov 20 23:51:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Server - Workflow Orchestration.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# systemctl status mastra.service inngest.service polymarket-worker.service polymarket-monitor.service
+● mastra.service - Mastra Development Server - Polymarket Trading Bot
+     Loaded: loaded (/etc/systemd/system/mastra.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2025-11-20 23:35:33 UTC; 19min ago
+   Main PID: 24232 (npm run dev)
+      Tasks: 41 (limit: 1110)
+     Memory: 509.9M (peak: 608.3M)
+        CPU: 43.060s
+     CGroup: /system.slice/mastra.service
+             ├─24232 "npm run dev"
+             ├─24246 sh -c "mastra dev"
+             ├─24247 node /opt/polymarket-bot/node_modules/.bin/mastra dev
+             ├─24258 /opt/polymarket-bot/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.25.10 --ping
+             ├─24285 /bin/sh -c "/usr/bin/node --import=file:///opt/polymarket-bot/node_modules/mastra/dist/commands/dev/telemetry-loader.js --import=./instrume>
+             └─24286 /usr/bin/node --import=file:///opt/polymarket-bot/node_modules/mastra/dist/commands/dev/telemetry-loader.js --import=./instrumentation.mjs >
+
+Nov 20 23:55:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-20 23:55:01.156 +0000] (Mastra): 📝 [fetchPolymarketMarkets] Fetching from Polymarket API
+Nov 20 23:55:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     url: "https://gamma-api.polymarket.com/events?order=id&ascending=false&closed=false&limit=20"
+Nov 20 23:55:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-20 23:55:01.670 +0000] (Mastra): 📊 [fetchPolymarketMarkets] Received events
+Nov 20 23:55:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     count: 20
+Nov 20 23:55:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-20 23:55:01.694 +0000] (Mastra): ✅ [fetchPolymarketMarkets] Processing complete
+Nov 20 23:55:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     marketsCount: 23
+Nov 20 23:55:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-20 23:55:01.697 +0000] (Mastra): 📊 [monitorAndPost] Fetched markets
+Nov 20 23:55:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     count: 23
+Nov 20 23:55:02 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]: INFO [2025-11-20 23:55:02.076 +0000] (Mastra): ✅ [monitorAndPost] Identified new markets
+Nov 20 23:55:02 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[24247]:     newCount: 0
+
+● inngest.service - Inngest Server - Workflow Orchestration
+     Loaded: loaded (/etc/systemd/system/inngest.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2025-11-20 23:51:09 UTC; 4min 10s ago
+   Main PID: 24918 (inngest-cli)
+      Tasks: 7 (limit: 1110)
+     Memory: 89.7M (peak: 113.3M)
+        CPU: 11.794s
+     CGroup: /system.slice/inngest.service
+             └─24918 /opt/polymarket-bot/node_modules/.bin/inngest-cli dev -u http://localhost:5000/api/inngest --host 127.0.0.1 --port 3000 --config .config/in>
+
+Nov 20 23:54:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[24918]: {"time":"2025-11-20T23:54:00.283372646Z","level":"INFO","msg":"publishing event","caller":"api","even>
+Nov 20 23:54:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[24918]: {"time":"2025-11-20T23:54:00.306823152Z","level":"INFO","msg":"received event","event":"workflow.poly>
+Nov 20 23:54:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[24918]: {"time":"2025-11-20T23:54:00.309448321Z","level":"INFO","msg":"initializing fn","event":"workflow.pol>
+Nov 20 23:54:05 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[24918]: {"time":"2025-11-20T23:54:05.807694988Z","level":"INFO","msg":"received event","event":"inngest/funct>
+Nov 20 23:54:15 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[24918]: {"time":"2025-11-20T23:54:15.491557957Z","level":"INFO","msg":"received event","event":"inngest/funct>
+Nov 20 23:55:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[24918]: {"time":"2025-11-20T23:55:00.025473956Z","level":"INFO","msg":"initializing fn","function":"cron-trig>
+Nov 20 23:55:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[24918]: {"time":"2025-11-20T23:55:00.246696694Z","level":"INFO","msg":"received event","event":"inngest/sched>
+Nov 20 23:55:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[24918]: {"time":"2025-11-20T23:55:00.454286919Z","level":"INFO","msg":"publishing event","caller":"api","even>
+Nov 20 23:55:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[24918]: {"time":"2025-11-20T23:55:00.555047027Z","level":"INFO","msg":"received event","event":"workflow.poly>
+lines 1-45

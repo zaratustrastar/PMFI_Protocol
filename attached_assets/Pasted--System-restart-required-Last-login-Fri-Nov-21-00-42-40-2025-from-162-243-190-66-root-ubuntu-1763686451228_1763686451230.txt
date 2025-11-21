@@ -1,0 +1,27 @@
+*** System restart required ***
+Last login: Fri Nov 21 00:42:40 2025 from 162.243.190.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# systemctl status polymarket-worker.service --no-pager -l
+● polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue
+     Loaded: loaded (/etc/systemd/system/polymarket-worker.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2025-11-20 23:35:36 UTC; 1h 18min ago
+   Main PID: 24265 (python3)
+      Tasks: 1 (limit: 1110)
+     Memory: 44.3M (peak: 55.2M)
+        CPU: 11.584s
+     CGroup: /system.slice/polymarket-worker.service
+             └─24265 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+
+Nov 21 00:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: 💤 Waiting 30s before next poll...
+Nov 21 00:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ⏸️  No pending jobs (checked at 00:20:12)
+Nov 21 00:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: 💤 Waiting 30s before next poll...
+Nov 21 00:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ⏸️  No pending jobs (checked at 00:20:42)
+Nov 21 00:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: 💤 Waiting 30s before next poll...
+Nov 21 00:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ⏸️  No pending jobs (checked at 00:21:13)
+Nov 21 00:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: 💤 Waiting 30s before next poll...
+Nov 21 00:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ⏸️  No pending jobs (checked at 00:21:44)
+Nov 21 00:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: 💤 Waiting 30s before next poll...
+Nov 21 00:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[24265]: ⏸️  No pending jobs (checked at 00:22:14)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Check if job was created
+psql $DATABASE_URL -c "SELECT id, market_slug, status, created_at FROM trading_jobs WHERE market_slug LIKE '%somalian%' ORDER BY id DESC LIMIT 1;"
+psql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "root" does not exist
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
