@@ -1,0 +1,91 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# sudo systemctl status mastra inngest polymarket-worker polymarket-monitor --no-pager
+● mastra.service - Mastra Workflow Server - Market Detection & Job Queuing
+     Loaded: loaded (/etc/systemd/system/mastra.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-11-21 17:10:15 UTC; 34min ago
+   Main PID: 924 (npm run dev)
+      Tasks: 42 (limit: 2315)
+     Memory: 702.9M (peak: 834.5M)
+        CPU: 1min 12.430s
+     CGroup: /system.slice/mastra.service
+             ├─924 "npm run dev"
+             ├─947 sh -c "mastra dev"
+             ├─948 node /opt/polymarket-bot/node_modules/.bin/mastra dev
+             ├─984 /opt/polymarket-bot/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.25.10 --ping
+             ├─992 /bin/sh -c "/usr/bin/node --import=file:///opt/polymarket-bot/node_modules/mastra/dist/commands/dev/telemetry-loader.js --import=./instrument…
+             └─993 /usr/bin/node --import=file:///opt/polymarket-bot/node_modules/mastra/dist/commands/dev/telemetry-loader.js --import=./instrumentation.mjs --…
+
+Nov 21 17:44:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[948]: INFO [2025-11-21 17:44:01.219 +0000] (Mastra): 📝 [fetchPolymarketMarkets] Fetching from Polymarket API
+Nov 21 17:44:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[948]:     url: "https://gamma-api.polymarket.com/events?order=id&ascending=false&closed=false&limit=20"
+Nov 21 17:44:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[948]: INFO [2025-11-21 17:44:01.565 +0000] (Mastra): 📊 [fetchPolymarketMarkets] Received events
+Nov 21 17:44:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[948]:     count: 20
+Nov 21 17:44:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[948]: INFO [2025-11-21 17:44:01.566 +0000] (Mastra): ✅ [fetchPolymarketMarkets] Processing complete
+Nov 21 17:44:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[948]:     marketsCount: 20
+Nov 21 17:44:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[948]: INFO [2025-11-21 17:44:01.566 +0000] (Mastra): 📊 [monitorAndPost] Fetched markets
+Nov 21 17:44:01 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[948]:     count: 20
+Nov 21 17:44:03 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[948]: INFO [2025-11-21 17:44:03.458 +0000] (Mastra): ✅ [monitorAndPost] Identified new markets
+Nov 21 17:44:03 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[948]:     newCount: 0
+
+● inngest.service - Inngest Workflow Orchestration Server
+     Loaded: loaded (/etc/systemd/system/inngest.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-11-21 17:10:15 UTC; 34min ago
+   Main PID: 923 (inngest-cli)
+      Tasks: 8 (limit: 2315)
+     Memory: 279.3M (peak: 288.3M)
+        CPU: 57.142s
+     CGroup: /system.slice/inngest.service
+             └─923 /opt/polymarket-bot/node_modules/.bin/inngest-cli dev -u http://localhost:5000/api/inngest --host 127.0.0.1 --port 3000 --config .config/inng…
+
+Nov 21 17:43:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[923]: {"time":"2025-11-21T17:43:00.330881777Z","level":"INFO","msg":"initializing fn","event":"work…a4156c01"}
+Nov 21 17:43:04 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[923]: {"time":"2025-11-21T17:43:04.095530994Z","level":"INFO","msg":"received event","event":"innge…KCW369HK"}
+Nov 21 17:43:15 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[923]: {"time":"2025-11-21T17:43:15.377120504Z","level":"INFO","msg":"received event","event":"innge…BYQP60P7"}
+Nov 21 17:44:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[923]: {"time":"2025-11-21T17:44:00.001979902Z","level":"INFO","msg":"initializing fn","function":"c…c949eb23"}
+Nov 21 17:44:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[923]: {"time":"2025-11-21T17:44:00.012646028Z","level":"INFO","msg":"received event","event":"innge…GGF3CW4T"}
+Nov 21 17:44:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[923]: {"time":"2025-11-21T17:44:00.522394928Z","level":"INFO","msg":"publishing event","caller":"api","event_…
+Nov 21 17:44:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[923]: {"time":"2025-11-21T17:44:00.767227117Z","level":"INFO","msg":"received event","event":"workf…FAEVBGVN"}
+Nov 21 17:44:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[923]: {"time":"2025-11-21T17:44:00.767795252Z","level":"INFO","msg":"initializing fn","event":"work…a4156c01"}
+Nov 21 17:44:04 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[923]: {"time":"2025-11-21T17:44:04.781620257Z","level":"INFO","msg":"received event","event":"innge…FWCQFHRT"}
+Nov 21 17:44:15 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[923]: {"time":"2025-11-21T17:44:15.815551043Z","level":"INFO","msg":"received event","event":"innge…J09KEJEE"}
+
+● polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue
+     Loaded: loaded (/etc/systemd/system/polymarket-worker.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-11-21 17:10:15 UTC; 34min ago
+   Main PID: 926 (python3)
+      Tasks: 1 (limit: 2315)
+     Memory: 64.1M (peak: 64.6M)
+        CPU: 5.231s
+     CGroup: /system.slice/polymarket-worker.service
+             └─926 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+
+Nov 21 17:42:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 17:42:33)
+Nov 21 17:42:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 21 17:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 17:43:03)
+Nov 21 17:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 21 17:43:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 17:43:34)
+Nov 21 17:43:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 21 17:44:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 17:44:04)
+Nov 21 17:44:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 21 17:44:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 17:44:35)
+Nov 21 17:44:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-11-21 17:10:15 UTC; 34min ago
+   Main PID: 925 (python3)
+      Tasks: 1 (limit: 2315)
+     Memory: 55.9M (peak: 56.4M)
+        CPU: 3.932s
+     CGroup: /system.slice/polymarket-monitor.service
+             └─925 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+
+Nov 21 17:10:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[925]:    Buys filled: Auto-place sell ladder
+Nov 21 17:10:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[925]:    Sells filled: Notify Telegram (@ponnymarket)
+Nov 21 17:10:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[925]: 🤖 Initializing Polymarket Trading Bot...
+Nov 21 17:10:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[925]:    Bypass method: curl_cffi
+Nov 21 17:10:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[925]:    🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+Nov 21 17:10:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[925]: 🔑 Deriving trading credentials from private key...
+Nov 21 17:10:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[925]: ✅ Trading bot initialized!
+Nov 21 17:10:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[925]: 📊 Configuration:
+Nov 21 17:10:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[925]:    Poll Interval: 30s
+Nov 21 17:10:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[925]: 🔄 Starting monitor loop (press Ctrl+C to stop)
+Hint: Some lines were ellipsized, use -l to show in full.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# 

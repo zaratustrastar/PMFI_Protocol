@@ -1,0 +1,46 @@
+Nov 22 01:13:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 01:13:29)
+Nov 22 01:13:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 22 01:13:59 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 01:13:59)
+Nov 22 01:13:59 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 22 01:14:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ✅ Found 1 pending job(s)
+Nov 22 01:14:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ============================================================
+Nov 22 01:14:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⚡ Processing Job #1759: tush-push-banned-for-2026-nfl-season
+Nov 22 01:14:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ============================================================
+Nov 22 01:14:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 🔄 Job #1759 marked as RUNNING (age: 0.0h)
+Nov 22 01:14:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ============================================================
+Nov 22 01:14:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 🎯 Placing orders for: tush-push-banned-for-2026-nfl-season
+Nov 22 01:14:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ============================================================
+Nov 22 01:14:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 📋 Market: Tush Push banned for 2026 NFL Season?
+Nov 22 01:14:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    YES Token: 5552442384777186...
+Nov 22 01:14:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    NO Token: 6301056004983445...
+Nov 22 01:14:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 📊 Placing BUY ladder for YES token...
+Nov 22 01:14:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    Token ID: 55524423847771863690119111045454872962064505499670250166016272151554247537657
+Nov 22 01:14:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0100 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0120 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0140 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0160 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0180 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0200 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0220 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0250 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0280 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0300 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 📊 Placing BUY ladder for NO token...
+Nov 22 01:14:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    Token ID: 63010560049834459410138379197302401609600732174402468450894530846936740184285
+Nov 22 01:14:37 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0100 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:37 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0120 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:37 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0140 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:38 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0160 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:38 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0180 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:38 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0200 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:38 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0220 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0250 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0280 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]:    ❌ Buy @ $0.0300 error: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Nov 22 01:14:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ❌ No orders placed (all orders failed)
+Nov 22 01:14:40 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ❌ Job #1759 failed - no orders placed
+Nov 22 01:14:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 22 01:15:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 01:15:12)
+Nov 22 01:15:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 22 01:15:43 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 01:15:43)
+Nov 22 01
