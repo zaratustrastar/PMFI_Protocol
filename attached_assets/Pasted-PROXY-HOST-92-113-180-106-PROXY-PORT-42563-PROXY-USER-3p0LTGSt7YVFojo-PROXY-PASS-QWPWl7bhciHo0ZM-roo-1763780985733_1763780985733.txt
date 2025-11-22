@@ -1,0 +1,64 @@
+PROXY_HOST=92.113.180.106
+PROXY_PORT=42563
+PROXY_USER=3p0LTGSt7YVFojo
+PROXY_PASS=QWPWl7bhciHo0ZM
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-87-generic x86_64)
+-bash: syntax error near unexpected token `('
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~#  * Documentation:  https://help.ubuntu.com
+ystemctl status polymarket-worker.service polymarket-monitor.service: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~#  * Management:     https://landscape.canonical.com
+ystemctl status polymarket-worker.service polymarket-monitor.service: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~#  * Support:        https://ubuntu.com/pro
+ystemctl status polymarket-worker.service polymarket-monitor.service: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~#  System information as of Sat Nov 22 03:06:00 UTC 2025
+System: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~#   System load:  0.02               Processes:             130
+System: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~#   Usage of /:   17.7% of 23.17GB   Users logged in:       0
+Command 'Usage' not found, did you mean:
+  command 'osage' from deb graphviz (2.42.2-9ubuntu0.1)
+Try: apt install <deb name>
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~#   Memory usage: 71%                IPv4 address for eth0: 147.182.206.35
+Memory: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~#   Swap usage:   0%                 IPv4 address for eth0: 10.48.0.5
+Swap: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# Expanded Security Maintenance for Applications is not enabled.
+Expanded: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 12 updates can be applied immediately.
+12: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# To see these additional updates run: apt list --upgradable
+To: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# Enable ESM Apps to receive additional future security updates.
+Enable: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# See https://ubuntu.com/esm or run: sudo pro status
+Command 'See' not found, did you mean:
+  command 'pee' from deb moreutils (0.67-1)
+  command 'tee' from deb coreutils (9.4-3ubuntu6.1)
+  command 'see' from deb mailcap (3.70+nmu1ubuntu1)
+  command 'ree' from deb ree (1.4.1-2)
+Try: apt install <deb name>
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# Last login: Sat Nov 22 02:20:02 2025 from 162.243.190.66
+Command 'Last' not found, did you mean:
+  command 'fast' from snap fast (0.0.4)
+  command 'ast' from deb jruby (9.3.9.0+ds-1)
+  command 'nast' from deb nast (0.2.0-10)
+  command 'last' from deb util-linux (2.39.3-9ubuntu6.3)
+See 'snap info <snapname>' for additional versions.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Connect to your VPS first
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~#: command not found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# ssh root@147.182.239.195
+echo "" >> /opt/polymarket-bot/.env.systemd
+echo "PROXY_HOST=92.113.180.106" >> /opt/polymarket-bot/.env.systemd
+echo "PROXY_PORT=42563" >> /opt/polymarket-bot/.env.systemd
+echo "PROXY_USER=3p0LTGSt7YVFojo" >> /opt/polymarket-bot/.env.systemd
+echo "PROXY_PASS=QWPWl7bhciHo0ZM" >> /opt/polymarket-bot/.env.systemd
+tail -5 /opt/polymarket-bot/.env.systemd
