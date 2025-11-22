@@ -1,0 +1,47 @@
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-87-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Sat Nov 22 03:34:58 UTC 2025
+
+  System load:  0.07               Processes:             130
+  Usage of /:   17.7% of 23.17GB   Users logged in:       0
+  Memory usage: 78%                IPv4 address for eth0: 147.182.206.35
+  Swap usage:   0%                 IPv4 address for eth0: 10.48.0.5
+
+Expanded Security Maintenance for Applications is not enabled.
+
+12 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+Last login: Sat Nov 22 03:15:07 2025 from 162.243.190.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Clear the completion timestamps so worker picks it up
+psql "postgresql://neondb_owner:npg_sPnNQtm3xf8h@ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require" -c "UPDATE trading_jobs SET status = 'PENDING', started_at = NULL, completed_at = NULL, error_message = NULL, updated_at = NOW() WHERE market_id = 'tush-push-banned-for-2026-nfl-season';"
+
+# Watch worker pick it up within 30 seconds
+journalctl -u polymarket-worker.service -f
+UPDATE 1
+Nov 22 03:33:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:33:15)
+Nov 22 03:33:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...
+Nov 22 03:33:45 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:33:45)
+Nov 22 03:33:45 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...
+Nov 22 03:34:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:34:16)
+Nov 22 03:34:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...
+Nov 22 03:34:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:34:46)
+Nov 22 03:34:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...
+Nov 22 03:35:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:35:17)
+Nov 22 03:35:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...
+Nov 22 03:35:47 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:35:47)
+Nov 22 03:35:47 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...
+Nov 22 03:36:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:36:18)
+Nov 22 03:36:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...
+Nov 22 03:36:49 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:36:49)
+Nov 22 03:36:49 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...
+Nov 22 03:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:37:19)
+Nov 22 03:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...

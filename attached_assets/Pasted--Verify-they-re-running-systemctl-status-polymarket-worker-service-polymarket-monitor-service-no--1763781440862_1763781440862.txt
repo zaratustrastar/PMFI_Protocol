@@ -1,0 +1,40 @@
+# Verify they're running
+systemctl status polymarket-worker.service polymarket-monitor.service --no-pager | grep -E "(Active|Main PID)"
+
+# Watch the worker logs to see it using the proxy
+journalctl -u polymarket-worker.service -f
+     Active: active (running) since Sat 2025-11-22 03:16:23 UTC; 31ms ago
+   Main PID: 9033 (python3)
+     Active: active (running) since Sat 2025-11-22 03:16:23 UTC; 23ms ago
+   Main PID: 9037 (python3)
+Nov 22 03:14:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 22 03:15:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 03:15:24)
+Nov 22 03:15:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 22 03:15:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: ⏸️  No pending jobs (checked at 03:15:54)
+Nov 22 03:15:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[926]: 💤 Waiting 30s before next poll...
+Nov 22 03:16:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue...
+Nov 22 03:16:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Deactivated successfully.
+Nov 22 03:16:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 22 03:16:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Consumed 36.326s CPU time, 64.6M memory peak, 0B memory swap peak.
+Nov 22 03:16:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 22 03:16:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ✅ Loaded environment variables from .env file
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 🤖 Polymarket Auto-Trading Worker Starting...
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]:    Notifications: Telegram @ponnymarket (sells only)
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]:    Mode: Queue-based worker
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 🤖 Initializing Polymarket Trading Bot...
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]:    Bypass method: curl_cffi
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]:    🌐 Using proxy: 92.113.180.106:42563
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]:    🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+Nov 22 03:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 🔑 Deriving trading credentials from private key...
+Nov 22 03:16:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ✅ Trading bot initialized!
+Nov 22 03:16:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 📊 Configuration:
+Nov 22 03:16:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]:    Poll Interval: 30s
+Nov 22 03:16:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]:    Batch Size: 5 jobs
+Nov 22 03:16:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 🔄 Starting worker loop (press Ctrl+C to stop)
+Nov 22 03:16:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:16:26)
+Nov 22 03:16:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...
+Nov 22 03:16:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: ⏸️  No pending jobs (checked at 03:16:57)
+Nov 22 03:16:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[9033]: 💤 Waiting 30s before next poll...
