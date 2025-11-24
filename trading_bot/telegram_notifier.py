@@ -10,6 +10,21 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHANNEL = "@ponnymarket"
 
 
+def add_referral_code(market_slug: str) -> str:
+    """
+    Convert market slug to Polymarket URL with referral code
+    
+    Args:
+        market_slug: Market identifier (e.g., 'tush-push-banned-for-2026-nfl-season')
+        
+    Returns:
+        Full Polymarket URL with referral code
+    """
+    base_url = f"https://polymarket.com/event/{market_slug}"
+    referral_code = "q2XDjZW"
+    return f"{base_url}?via={referral_code}"
+
+
 def notify_buy_filled(market_slug: str, trade_data: Dict):
     """
     Send Telegram notification when a buy order fills
@@ -27,6 +42,9 @@ def notify_buy_filled(market_slug: str, trade_data: Dict):
     price = trade_data.get("price", 0)
     size = trade_data.get("size", 0)
     
+    # Get referral URL
+    market_url = add_referral_code(market_slug)
+    
     message = f"""📥 **BUY FILLED**
 
 Market: {market_slug}
@@ -35,6 +53,8 @@ Tokens: {size:.2f}
 Price: ${price:.4f}
 
 🎯 Sell ladder created
+
+[View Market]({market_url})
 """
     
     # Send to Telegram
@@ -75,6 +95,9 @@ def notify_sell_executed(market_slug: str, trade_data: Dict):
     profit_usd = trade_data.get("profit_usd", 0)
     profit_pct = trade_data.get("profit_pct", 0)
     
+    # Get referral URL
+    market_url = add_referral_code(market_slug)
+    
     message = f"""🎯 **SELL EXECUTED**
 
 Market: {market_slug}
@@ -85,6 +108,8 @@ Buy: ${buy_price:.4f}
 Sell: ${sell_price:.4f}
 
 💰 Profit: ${profit_usd:.2f} (+{profit_pct:.0f}%)
+
+[View Market]({market_url})
 """
     
     # Send to Telegram
@@ -118,6 +143,9 @@ def notify_multiple_sells(market_slug: str, sells: list):
     
     total_profit = sum(s.get("profit_usd", 0) for s in sells)
     
+    # Get referral URL
+    market_url = add_referral_code(market_slug)
+    
     lines = [f"🎯 **{len(sells)} SELLS EXECUTED**\n", f"Market: {market_slug}\n"]
     
     for sell in sells:
@@ -129,6 +157,7 @@ def notify_multiple_sells(market_slug: str, sells: list):
         lines.append(f"• {side} @ ${sell_price:.4f} → +${profit_usd:.2f} ({profit_pct:.0f}%)")
     
     lines.append(f"\n💰 Total Profit: ${total_profit:.2f}")
+    lines.append(f"\n[View Market]({market_url})")
     
     message = "\n".join(lines)
     
