@@ -189,13 +189,16 @@ const monitorAndPost = createStep({
             (market.description.length > 200 ? "..." : "")
           : "";
         
+        // Add referral code to market URL
+        const referralUrl = addReferralCode(market.url);
+        
         const telegramMessage = `🔮 <b>New Polymarket Market!</b>
 
 <b>Question:</b> ${escapedQuestion}
 
 ${escapedDescription ? `📊 ${escapedDescription}
 
-` : ""}<a href="${market.url}">🔗 Trade on Polymarket</a>
+` : ""}<a href="${referralUrl}">🔗 Trade on Polymarket</a>
 
 #Polymarket #PredictionMarkets`;
 
