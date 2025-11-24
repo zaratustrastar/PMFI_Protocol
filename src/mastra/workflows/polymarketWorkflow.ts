@@ -24,6 +24,20 @@ function escapeTelegramHtml(text: string): string {
 }
 
 /**
+ * Add referral code to Polymarket URLs
+ */
+function addReferralCode(url: string): string {
+  const referralCode = "q2XDjZW";
+  
+  // Check if URL already has query parameters
+  if (url.includes("?")) {
+    return `${url}&via=${referralCode}`;
+  } else {
+    return `${url}?via=${referralCode}`;
+  }
+}
+
+/**
  * Check if a market is an up/down short-term market
  */
 function isUpDownMarket(market: any): boolean {
