@@ -24,6 +24,34 @@ function escapeTelegramHtml(text: string): string {
 }
 
 /**
+ * Add referral code to Polymarket URLs
+ * Safe implementation: handles null/undefined, only modifies polymarket.com URLs
+ */
+function addReferralCode(url: string | undefined | null): string {
+  try {
+    // Safety check: return empty string if invalid input
+    if (!url || typeof url !== "string") {
+      return "";
+    }
+
+    // Only modify Polymarket URLs
+    if (!url.includes("polymarket.com")) {
+      return url;
+    }
+
+    // Add referral code with correct separator
+    const separator = url.includes("?") ? "&" : "?";
+    const urlWithRef = `${url}${separator}via=q2XDjZW`;
+
+    // Escape & for Telegram HTML
+    return urlWithRef.replace(/&/g, "&amp;");
+  } catch (error) {
+    // Failsafe: return original URL if anything goes wrong
+    return url || "";
+  }
+}
+
+/**
  * Check if a market is an up/down short-term market
  */
 function isUpDownMarket(market: any): boolean {
@@ -181,7 +209,7 @@ const monitorAndPost = createStep({
 
 ${escapedDescription ? `📊 ${escapedDescription}
 
-` : ""}<a href="${market.url}">🔗 Trade on Polymarket</a>
+` : ""}<a href="${addReferralCode(market.url)}">🔗 Trade on Polymarket</a>
 
 #Polymarket #PredictionMarkets`;
 

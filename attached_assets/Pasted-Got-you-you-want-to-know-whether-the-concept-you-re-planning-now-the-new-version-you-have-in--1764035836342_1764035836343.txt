@@ -1,0 +1,115 @@
+Got you — you want to know whether the **concept** you’re planning now (the new version you have in mind) is **safe**, **correct**, and **different** from what broke things before — **without showing the actual code**.
+
+Here’s the answer in a clear comparison:
+
+---
+
+# ✅ **If your idea follows these principles, then YES — it is the correct, safe version.**
+
+### **1. Referral logic should only run INSIDE the workflow, not at module top-level.**
+
+**Safe:**
+
+```ts
+async function polymarketWorkflow(...) {
+    const url = addReferralCode(market.url);
+}
+```
+
+**Dangerous (old broken version):**
+
+```ts
+const test = addReferralCode(process.env.SOMETHING);   // runs at import time
+```
+
+If your idea avoids top-level calls → ✔️ safe.
+
+---
+
+### **2. The helper must accept undefined/null and never crash**
+
+**Safe:**
+
+* Accepts `string | undefined | null`
+* Checks `if (!rawUrl || typeof rawUrl !== "string") return ""`
+* Wrapped in try/catch or has no risky operations
+
+**Dangerous (old broken version):**
+
+```ts
+function addReferralCode(url: string) {
+    if (url.includes("?"))  // 💥 if url is undefined
+}
+```
+
+If your idea prevents `url.includes` crashes → ✔️ safe.
+
+---
+
+### **3. Only modify URLs that contain “polymarket.com”**
+
+This prevents accidental modifications to:
+
+* Telegram API URLs
+* Images
+* Anything else passed through the message builder
+
+If your idea includes a domain check → ✔️ safe.
+
+---
+
+### **4. Add `?via=...` or `&via=...` correctly**
+
+**Safe:**
+
+```ts
+const sep = url.includes("?") ? "&" : "?";
+return `${url}${sep}via=${refCode}`;
+```
+
+If your idea uses this logic → ✔️ correct.
+
+---
+
+### **5. Escape `&` for Telegram HTML**
+
+**Safe:**
+
+```ts
+url.replace(/&/g, "&amp;");
+```
+
+If your idea includes escaping → ✔️ correct.
+
+---
+
+### **6. No modification of system files, cron logic, or Inngest config**
+
+Your previous issues came from:
+
+* Zombie processes
+* Inngest not starting
+* Dev server crashed on port 5000
+
+If your idea *only* touches URL-building logic inside the workflow → ✔️ this will not break services again.
+
+---
+
+# ❗ Summary: The correct “idea shape” looks like this
+
+If your plan follows this mental model:
+
+1. **Safe helper** that never throws
+2. **Used only inside workflow**
+3. **Only on polymarket links**
+4. **Adds ?via= or &via=**
+5. **Escapes & for Telegram HTML**
+6. **Does not affect Inngest, cron, Mastra startup**
+
+👉 **Then YES — it is correct.**
+
+👉 **And YES — it is different and safer than anything that caused issues before.**
+
+---
+
+If you want, paste *just a pseudocode version* of your new idea and I’ll confirm it 100%.
