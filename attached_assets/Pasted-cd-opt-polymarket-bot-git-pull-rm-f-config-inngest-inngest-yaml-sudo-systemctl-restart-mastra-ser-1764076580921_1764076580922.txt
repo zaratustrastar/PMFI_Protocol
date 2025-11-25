@@ -1,0 +1,71 @@
+cd /opt/polymarket-bot
+git pull
+rm -f .config/inngest/inngest.yaml
+sudo systemctl restart mastra.service
+sudo systemctl restart inngest.service
+journalctl -u inngest.service -n 50
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# cd /opt/polymarket-bot
+git pull
+rm -f .config/inngest/inngest.yaml
+sudo systemctl restart mastra.service
+sudo systemctl restart inngest.service
+journalctl -u inngest.service -n 50
+remote: Enumerating objects: 67, done.
+remote: Counting objects: 100% (67/67), done.
+remote: Compressing objects: 100% (19/19), done.
+remote: Total 56 (delta 37), reused 56 (delta 37), pack-reused 0 (from 0)
+Unpacking objects: 100% (56/56), 27.87 KiB | 751.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   5bba10c..a79f90b  main       -> origin/main
+Updating 5bba10c..a79f90b
+error: Your local changes to the following files would be overwritten by merge:
+        scripts/inngest.sh
+Please commit your changes or stash them before you merge.
+Aborting
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.086310414Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.094367681Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.086345689Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.094958323Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.095202476Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.095919774Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.095716051Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.096543771Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.098831639Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.099188474Z","level":"ERROR","msg":"error handling queue item","error":"U>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.099249155Z","level":"ERROR","msg":"error handling queue item","error":"U>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.100952434Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping inngest.service - Inngest Workflow Orchestration Server...
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.120713976Z","level":"ERROR","msg":"error handling queue item","error":"U>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.13926708Z","level":"ERROR","msg":"error handling queue item","error":"Un>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.156128569Z","level":"ERROR","msg":"error handling queue item","error":"U>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.157918368Z","level":"ERROR","msg":"error handling queue item","error":"U>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17570]: {"time":"2025-11-25T13:14:54.158920266Z","level":"INFO","msg":"signal received, service stopping","ca>
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Deactivated successfully.
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Consumed 6min 14.077s CPU time, 224.9M memory peak, 0B memory swap peak.
+Nov 25 13:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.080413927Z","level":"INFO","msg":"using config","file":".config/inngest/>
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.147781938Z","level":"INFO","msg":"starting executor grpc server","svc":">
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.179225522Z","level":"INFO","msg":"service starting","caller":"devserver">
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.180201397Z","level":"INFO","msg":"service starting","caller":"connect-ga>
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.180384121Z","level":"INFO","msg":"starting connect gateway grpc server",>
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.180971233Z","level":"INFO","msg":"starting event stream","backend":"redi>
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.183215093Z","level":"INFO","msg":"service starting","caller":"executor",>
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.183262753Z","level":"INFO","msg":"subscribing to function queue"}
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.183564474Z","level":"INFO","msg":"service starting","caller":"api","serv>
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.18358505Z","level":"INFO","msg":"starting server","caller":"api","addr":>
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.183699481Z","level":"INFO","msg":"service starting","caller":"runner","s>
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.18645205Z","level":"INFO","msg":"autodiscovering locally hosted SDKs"}
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.186711995Z","level":"INFO","msg":"apps synced, disabling auto-discovery"}
+Nov 25 13:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:14:55.188406344Z","level":"INFO","msg":"subscribing to events","topic":"events>
+Nov 25 13:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:16:00.001974936Z","level":"INFO","msg":"initializing fn","function":"cron-trig>
+Nov 25 13:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:16:00.159955802Z","level":"INFO","msg":"received event","event":"inngest/sched>
+Nov 25 13:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:16:00.661310323Z","level":"INFO","msg":"publishing event","caller":"api","even>
+Nov 25 13:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:16:00.662855837Z","level":"INFO","msg":"received event","event":"workflow.poly>
+Nov 25 13:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:16:00.663493699Z","level":"INFO","msg":"initializing fn","event":"workflow.pol>
+Nov 25 13:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:16:00.920175875Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:16:00.921256559Z","level":"WARN","msg":"EOF writing request to SDK","account_i>
+Nov 25 13:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:16:00.922369913Z","level":"ERROR","msg":"error handling queue item","error":"U>
+Nov 25 13:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[18836]: {"time":"2025-11-25T13:16:00.927817597Z","level":"ERROR","msg":"error handling queue item","error":"U>
+lines 1-45
