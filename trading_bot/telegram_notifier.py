@@ -10,6 +10,15 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHANNEL = "@ponnymarket"
 
 
+def add_referral_code(market_slug: str) -> str:
+    """
+    Generate Polymarket URL with referral code
+    Format: https://polymarket.com/event/{slug}?via=q2XDjZW
+    """
+    base_url = f"https://polymarket.com/event/{market_slug}"
+    return f"{base_url}?via=q2XDjZW"
+
+
 def notify_buy_filled(market_slug: str, trade_data: Dict):
     """
     Send Telegram notification when a buy order fills
@@ -75,6 +84,9 @@ def notify_sell_executed(market_slug: str, trade_data: Dict):
     profit_usd = trade_data.get("profit_usd", 0)
     profit_pct = trade_data.get("profit_pct", 0)
     
+    # Add market link with referral code
+    market_url = add_referral_code(market_slug)
+    
     message = f"""🎯 **SELL EXECUTED**
 
 Market: {market_slug}
@@ -85,6 +97,8 @@ Buy: ${buy_price:.4f}
 Sell: ${sell_price:.4f}
 
 💰 Profit: ${profit_usd:.2f} (+{profit_pct:.0f}%)
+
+🔗 {market_url}
 """
     
     # Send to Telegram
@@ -129,6 +143,10 @@ def notify_multiple_sells(market_slug: str, sells: list):
         lines.append(f"• {side} @ ${sell_price:.4f} → +${profit_usd:.2f} ({profit_pct:.0f}%)")
     
     lines.append(f"\n💰 Total Profit: ${total_profit:.2f}")
+    
+    # Add market link with referral code
+    market_url = add_referral_code(market_slug)
+    lines.append(f"\n🔗 {market_url}")
     
     message = "\n".join(lines)
     
