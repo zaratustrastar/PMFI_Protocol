@@ -1,0 +1,171 @@
+Your git reset didn’t go far enough
+
+You ran:
+
+git log --oneline -3
+63c370e (HEAD -> main, origin/main, origin/HEAD) Saved progress at the end of the loop
+ad75e81 Add referral code to all market links sent to Telegram
+70f1fe9 Add referral link to all Polymarket market notifications
+
+git reset --hard HEAD~1
+HEAD is now at ad75e81 Add referral code to all market links sent to Telegram
+
+
+So:
+
+63c370e – some later work
+
+ad75e81 – “Add referral code to all market links sent to Telegram”
+
+70f1fe9 – “Add referral link to all Polymarket market notifications” (also referral)
+
+You reset from 63c370e to HEAD~1 → ad75e81.
+
+👉 That still contains the referral integration. You only dropped the top commit, but both ad75e81 and 70f1fe9 are “referral” commits. So you’re still running broken referral code and testing with it.
+
+If you want a clean test “before referral existed”, you need to go before 70f1fe9:
+
+# WARNING: this discards local changes; only do if you're okay with that
+git reset --hard 70f1fe9^   # commit before the first referral change
+
+systemctl restart inngest.service
+sleep 5
+systemctl restart mastra.service
+sleep 10
+
+journalctl -u mastra.service --since "1 minute ago" --no-pager
+
+
+If markets start posting again after that, it’s 100% confirmed: referral integration is the culprit.
+
+2. The likely bug inside addReferralCode
+
+Your helper (from grep):
+
+function addReferralCode(url: string): string {
+  const referralCode = "q2XDjZW";
+  
+  // Check if URL already has query parameters
+  if (url.includes("?")) {
+    return `${url}&via=${referralCode}`;
+  }
+  // (I assume you have a `return `${url}?via=${referralCode}`` here)
+}
+...
+const referralUrl = addReferralCode(market.url);
+
+
+Two big problems:
+
+a) It assumes url is always a valid string
+
+If any market has market.url undefined / null / empty:
+
+addReferralCode(market.url);   // market.url === undefined
+// -> url.includes("?")  → TypeError: Cannot read properties of undefined (reading 'includes')
+
+
+That will blow up the workflow run and may stop the whole function before it reaches the Telegram call.
+
+b) It can break HTML for Telegram
+
+If you send:
+
+const telegramMessage = `
+<b>Market:</b> ${referralUrl}
+`;
+
+
+with parse_mode: "HTML":
+
+When there’s already a ? in the URL, you now insert &via=....
+
+A bare & in HTML must be escaped as &amp;.
+
+Telegram is strict about entity parsing; a bad &something can cause “can’t parse entities” errors and the message fails.
+
+So even if the workflow does run, the final step “send message to Telegram” might be failing every time.
+
+3. How to fix addReferralCode properly
+
+Replace your helper with this defensive version:
+
+function addReferralCode(rawUrl: string | undefined | null): string {
+  const referralCode = "q2XDjZW";
+
+  // Guard against missing/invalid URLs
+  if (!rawUrl || typeof rawUrl !== "string") {
+    console.error("[referral] Missing or invalid URL, skipping:", rawUrl);
+    return "";
+  }
+
+  const url = rawUrl.trim();
+  if (!url) {
+    console.error("[referral] Empty URL, skipping");
+    return "";
+  }
+
+  // Optional: only touch Polymarket links
+  if (!url.includes("polymarket.com")) {
+    return url;
+  }
+
+  // Add query param safely
+  const withParam = url.includes("?")
+    ? `${url}&via=${referralCode}`
+    : `${url}?via=${referralCode}`;
+
+  return withParam;
+}
+
+
+And when building the message:
+
+const referralUrl = addReferralCode(market.url);
+const finalUrl = referralUrl || market.url || "";
+
+// If you use HTML parse_mode, escape &
+const safeUrl = finalUrl.replace(/&/g, "&amp;");
+
+const telegramMessage = `🔮 <b>New Polymarket Market!</b>
+
+<b>Question:</b> ${escapedQuestion}
+
+<b>Market:</b> ${safeUrl}
+`;
+
+
+This way:
+
+No more includes on undefined.
+
+If anything about the URL is weird, you log and do not crash the workflow.
+
+Telegram gets a safe URL string with &amp; so HTML parsing won’t fail.
+
+4. What I’d do in your place, step-by-step
+
+Prove it’s the referral code
+
+git reset --hard 70f1fe9^ (pre-referral)
+
+Restart services; check if markets post again.
+
+If yes → confirmed referral is the problem.
+
+Re-apply referral with safe helper
+
+Add the defensive addReferralCode above.
+
+Make sure you never call it at top-level; only inside the workflow.
+
+Escape & in the final message if using HTML parse_mode.
+
+Add a simple log in the workflow to confirm it’s running:
+
+console.log("[polymarketWorkflow] tick, markets fetched:", markets.length);
+
+
+Then:
+
+journalctl -u mastra.service --since "1 minute ago" --no-pager | grep "polymarketWorkflo

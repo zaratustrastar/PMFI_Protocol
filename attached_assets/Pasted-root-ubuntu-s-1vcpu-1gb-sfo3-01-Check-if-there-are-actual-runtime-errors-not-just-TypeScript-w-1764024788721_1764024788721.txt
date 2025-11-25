@@ -1,0 +1,53 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Check if there are actual runtime errors (not just TypeScript warnings)
+journalctl -u mastra.service --since "22:32:00" --no-pager | tail -50
+Nov 24 22:42:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping mastra.service - Mastra Workflow Server - Market Detection & Job Queuing...
+Nov 24 22:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: State 'final-sigterm' timed out. Killing.
+Nov 24 22:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Killing process 61896 (node) with signal SIGKILL.
+Nov 24 22:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed to kill control group /system.slice/mastra.service, ignoring: Invalid argument
+Nov 24 22:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'timeout'.
+Nov 24 22:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Unit process 61896 (node) remains running after unit stopped.
+Nov 24 22:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped mastra.service - Mastra Workflow Server - Market Detection & Job Queuing.
+Nov 24 22:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 19.579s CPU time, 858.2M memory peak, 0B memory swap peak.
+Nov 24 22:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Workflow Server - Market Detection & Job Queuing.
+Nov 24 22:43:58 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62002]: ◐ Preparing development environment...
+Nov 24 22:44:02 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62002]: ✓ Initial bundle complete
+Nov 24 22:44:02 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62002]: ◇ Starting Mastra dev server...
+Nov 24 22:44:04 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62002]: {"level":"warn","time":"2025-11-24T22:44:04.634Z","name":"Mastra","msg":"Mastra telemetry is deprecated and will be removed on the Nov 4th release. Instead use AI Tracing. More info can be found here: https://github.com/mastra-ai/mastra/issues/8577 and here: https://mastra.ai/en/docs/observability/ai-tracing/overview"}
+Nov 24 22:44:04 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62002]:  mastra  0.14.1-alpha.0 ready in 2371 ms
+Nov 24 22:44:04 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62002]: │ Playground: http://0.0.0.0:5000/
+Nov 24 22:44:04 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62002]: │ API:        http://0.0.0.0:5000/api
+Nov 24 22:44:04 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62002]: ◯ watching for file changes...
+Nov 24 22:45:37 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping mastra.service - Mastra Workflow Server - Market Detection & Job Queuing...
+Nov 24 22:47:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: State 'final-sigterm' timed out. Killing.
+Nov 24 22:47:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Killing process 62023 (node) with signal SIGKILL.
+Nov 24 22:47:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed to kill control group /system.slice/mastra.service, ignoring: Invalid argument
+Nov 24 22:47:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'timeout'.
+Nov 24 22:47:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped mastra.service - Mastra Workflow Server - Market Detection & Job Queuing.
+Nov 24 22:47:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 20.680s CPU time, 858.2M memory peak, 0B memory swap peak.
+Nov 24 22:47:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Workflow Server - Market Detection & Job Queuing.
+Nov 24 22:47:25 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62121]: ◐ Preparing development environment...
+Nov 24 22:47:30 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62121]: ✓ Initial bundle complete
+Nov 24 22:47:30 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62121]: ◇ Starting Mastra dev server...
+Nov 24 22:47:32 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62121]: {"level":"warn","time":"2025-11-24T22:47:32.478Z","name":"Mastra","msg":"Mastra telemetry is deprecated and will be removed on the Nov 4th release. Instead use AI Tracing. More info can be found here: https://github.com/mastra-ai/mastra/issues/8577 and here: https://mastra.ai/en/docs/observability/ai-tracing/overview"}
+Nov 24 22:47:32 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62121]:  mastra  0.14.1-alpha.0 ready in 2462 ms
+Nov 24 22:47:32 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62121]: │ Playground: http://0.0.0.0:5000/
+Nov 24 22:47:32 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62121]: │ API:        http://0.0.0.0:5000/api
+Nov 24 22:47:32 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62121]: ◯ watching for file changes...
+Nov 24 22:47:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping mastra.service - Mastra Workflow Server - Market Detection & Job Queuing...
+Nov 24 22:49:06 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: State 'final-sigterm' timed out. Killing.
+Nov 24 22:49:06 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Killing process 62140 (node) with signal SIGKILL.
+Nov 24 22:49:06 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed to kill control group /system.slice/mastra.service, ignoring: Invalid argument
+Nov 24 22:49:06 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'timeout'.
+Nov 24 22:49:06 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Unit process 62140 (node) remains running after unit stopped.
+Nov 24 22:49:06 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped mastra.service - Mastra Workflow Server - Market Detection & Job Queuing.
+Nov 24 22:49:06 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 19.008s CPU time, 656.1M memory peak, 0B memory swap peak.
+Nov 24 22:49:16 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Workflow Server - Market Detection & Job Queuing.
+Nov 24 22:49:20 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62215]: ◐ Preparing development environment...
+Nov 24 22:49:25 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62215]: ✓ Initial bundle complete
+Nov 24 22:49:25 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62215]: ◇ Starting Mastra dev server...
+Nov 24 22:49:27 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62215]: {"level":"warn","time":"2025-11-24T22:49:27.881Z","name":"Mastra","msg":"Mastra telemetry is deprecated and will be removed on the Nov 4th release. Instead use AI Tracing. More info can be found here: https://github.com/mastra-ai/mastra/issues/8577 and here: https://mastra.ai/en/docs/observability/ai-tracing/overview"}
+Nov 24 22:49:28 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62215]:  mastra  0.14.1-alpha.0 ready in 2587 ms
+Nov 24 22:49:28 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62215]: │ Playground: http://0.0.0.0:5000/
+Nov 24 22:49:28 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62215]: │ API:        http://0.0.0.0:5000/api
+Nov 24 22:49:28 ubuntu-s-1vcpu-1gb-sfo3-01 npx[62215]: ◯ watching for file changes...
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
