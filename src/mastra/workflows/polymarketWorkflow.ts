@@ -24,20 +24,6 @@ function escapeTelegramHtml(text: string): string {
 }
 
 /**
- * Add referral code to Polymarket URLs
- */
-function addReferralCode(url: string): string {
-  const referralCode = "q2XDjZW";
-  
-  // Check if URL already has query parameters
-  if (url.includes("?")) {
-    return `${url}&via=${referralCode}`;
-  } else {
-    return `${url}?via=${referralCode}`;
-  }
-}
-
-/**
  * Check if a market is an up/down short-term market
  */
 function isUpDownMarket(market: any): boolean {
@@ -189,16 +175,13 @@ const monitorAndPost = createStep({
             (market.description.length > 200 ? "..." : "")
           : "";
         
-        // Add referral code to market URL
-        const referralUrl = addReferralCode(market.url);
-        
         const telegramMessage = `🔮 <b>New Polymarket Market!</b>
 
 <b>Question:</b> ${escapedQuestion}
 
 ${escapedDescription ? `📊 ${escapedDescription}
 
-` : ""}<a href="${referralUrl}">🔗 Trade on Polymarket</a>
+` : ""}<a href="${market.url}">🔗 Trade on Polymarket</a>
 
 #Polymarket #PredictionMarkets`;
 
