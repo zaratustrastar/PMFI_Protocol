@@ -1,0 +1,48 @@
+Last login: Tue Nov 25 13:47:34 2025 from 198.211.111.194
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # 1. Check all services are running
+systemctl status mastra.service inngest.service polymarket-worker.service polymarket-monitor.service --no-pager | grep -E "(Active|Main PID)"
+
+# 2. Check recent workflow activity (should run every 60 seconds)
+journalctl -u mastra.service --since "5 minutes ago" --no-pager | grep -E "(New markets found|monitorAndPost|Posted to Telegram)"
+
+# 3. Check if jobs are being queued
+psql "postgresql://neondb_owner:npg_sPnNQtm3xf8h@ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require" -c "SELECT COUNT(*) as pending_jobs FROM trading_jobs WHERE status = 'PENDING' AND created_at > NOW() - INTERVAL '1 hour';"
+
+# 4. Check worker activity
+journalctl -u polymarket-worker.service --since "5 minutes ago" --no-pager | tail -20
+
+# 5. Check Telegram channel @ponnymarket for recent posts
+     Active: active (running) since Tue 2025-11-25 13:18:00 UTC; 35min ago
+   Main PID: 19036 (npm exec mastra)
+     Active: active (running) since Tue 2025-11-25 13:18:00 UTC; 35min ago
+   Main PID: 19046 (npm exec innges)
+     Active: active (running) since Mon 2025-11-24 23:27:56 UTC; 14h ago
+   Main PID: 949 (python3)
+     Active: active (running) since Mon 2025-11-24 23:27:56 UTC; 14h ago
+   Main PID: 948 (python3)
+ pending_jobs 
+--------------
+            0
+(1 row)
+
+Nov 25 13:51:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]: 📊 Placing BUY ladder for NO token...
+Nov 25 13:51:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    Token ID: 51048898152493337713331563635428009003924326958902633893388611072683718659303
+Nov 25 13:51:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    ✅ Buy @ $0.0100 (20.00 tokens) - Order ID: 0xa5f38e...
+Nov 25 13:51:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    ✅ Buy @ $0.0120 (16.67 tokens) - Order ID: 0x981298...
+Nov 25 13:51:37 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    ✅ Buy @ $0.0140 (14.29 tokens) - Order ID: 0xe7f87d...
+Nov 25 13:51:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    ✅ Buy @ $0.0160 (12.50 tokens) - Order ID: 0xb02a90...
+Nov 25 13:51:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    ✅ Buy @ $0.0180 (11.11 tokens) - Order ID: 0x6f52e2...
+Nov 25 13:51:43 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    ✅ Buy @ $0.0200 (10.00 tokens) - Order ID: 0xf98205...
+Nov 25 13:51:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    ✅ Buy @ $0.0220 (9.09 tokens) - Order ID: 0x600eb0...
+Nov 25 13:51:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    ✅ Buy @ $0.0250 (8.00 tokens) - Order ID: 0x692627...
+Nov 25 13:51:47 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    ✅ Buy @ $0.0280 (7.14 tokens) - Order ID: 0x8fd7b2...
+Nov 25 13:51:49 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    ✅ Buy @ $0.0300 (6.67 tokens) - Order ID: 0x392c70...
+Nov 25 13:51:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]: ✅ Placed 20 buy orders total
+Nov 25 13:51:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]:    (Monitoring will be handled by separate process)
+Nov 25 13:51:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]: ✅ Job #2288 completed (20 orders placed)
+Nov 25 13:51:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]: 💤 Waiting 30s before next poll...
+Nov 25 13:52:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]: ⏸️  No pending jobs (checked at 13:52:23)
+Nov 25 13:52:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]: 💤 Waiting 30s before next poll...
+Nov 25 13:52:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]: ⏸️  No pending jobs (checked at 13:52:53)
+Nov 25 13:52:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[949]: 💤 Waiting 30s before next poll...
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

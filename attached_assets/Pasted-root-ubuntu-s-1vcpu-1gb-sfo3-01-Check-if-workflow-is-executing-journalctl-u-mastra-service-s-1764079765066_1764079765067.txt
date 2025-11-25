@@ -1,0 +1,53 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Check if workflow is executing
+journalctl -u mastra.service --since "10 minutes ago" --no-pager | tail -50
+Nov 25 14:07:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: ⚠️  We detected that you have multiple steps with the same ID.
+Nov 25 14:07:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Your function is still running, though it may exhibit unexpected behaviour. This can happen if you're using the same ID for multiple steps across different chains of parallel work. We found the issue with step "publish:workflow:polymarket-monitor:aba19641-e857-4499-a123-2fa6bacdda16". Using the same IDs across parallel chains of work can cause unexpected behaviour.
+Nov 25 14:07:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: We recommend using a unique ID for each step, especially those happening in parallel.
+Nov 25 14:07:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Code: AUTOMATIC_PARALLEL_INDEXING
+Nov 25 14:07:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: ⚠️  We detected that you have nested `step.*` tooling in `publish:workflow:polymarket-monitor:88e56547-8ef0-42f3-bb3a-320ad5fc1886`
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]:     at prettyError (file:///opt/polymarket-bot/node_modules/inngest/helpers/errors.js:231:51)
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]:     at stepHandler (file:///opt/polymarket-bot/node_modules/inngest/components/execution/v1.js:788:17)
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: It's possible to see this warning if steps are separated by regular asynchronous calls, which is fine. Nesting `step.*` tooling is not supported.
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Make sure you're not using `step.*` tooling inside of other `step.*` tooling. If you need to compose steps together, you can create a new async function and call it from within your step function, or use promise chaining.
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Code: NESTING_STEPS
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: ⚠️  We detected that you have multiple steps with the same ID.
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Your function is still running, though it may exhibit unexpected behaviour. This can happen if you're using the same ID for multiple steps across different chains of parallel work. We found the issue with step "publish:workflow:polymarket-monitor:88e56547-8ef0-42f3-bb3a-320ad5fc1886". Using the same IDs across parallel chains of work can cause unexpected behaviour.
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: We recommend using a unique ID for each step, especially those happening in parallel.
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Code: AUTOMATIC_PARALLEL_INDEXING
+Nov 25 14:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: ⚠️  We detected that you have nested `step.*` tooling in `publish:workflow:polymarket-monitor:76d4bb95-9e17-4bf5-8b4f-4ed7ba3303c3`
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]:     at prettyError (file:///opt/polymarket-bot/node_modules/inngest/helpers/errors.js:231:51)
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]:     at stepHandler (file:///opt/polymarket-bot/node_modules/inngest/components/execution/v1.js:788:17)
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: It's possible to see this warning if steps are separated by regular asynchronous calls, which is fine. Nesting `step.*` tooling is not supported.
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Make sure you're not using `step.*` tooling inside of other `step.*` tooling. If you need to compose steps together, you can create a new async function and call it from within your step function, or use promise chaining.
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Code: NESTING_STEPS
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: ⚠️  We detected that you have multiple steps with the same ID.
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Your function is still running, though it may exhibit unexpected behaviour. This can happen if you're using the same ID for multiple steps across different chains of parallel work. We found the issue with step "publish:workflow:polymarket-monitor:76d4bb95-9e17-4bf5-8b4f-4ed7ba3303c3". Using the same IDs across parallel chains of work can cause unexpected behaviour.
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: We recommend using a unique ID for each step, especially those happening in parallel.
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Code: AUTOMATIC_PARALLEL_INDEXING
+Nov 25 14:07:33 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: ⚠️  We detected that you have nested `step.*` tooling in `publish:workflow:polymarket-monitor:cc16b17a-9847-457b-88c7-fbd71a4498fe`
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]:     at prettyError (file:///opt/polymarket-bot/node_modules/inngest/helpers/errors.js:231:51)
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]:     at stepHandler (file:///opt/polymarket-bot/node_modules/inngest/components/execution/v1.js:788:17)
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: It's possible to see this warning if steps are separated by regular asynchronous calls, which is fine. Nesting `step.*` tooling is not supported.
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Make sure you're not using `step.*` tooling inside of other `step.*` tooling. If you need to compose steps together, you can create a new async function and call it from within your step function, or use promise chaining.
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Code: NESTING_STEPS
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: ⚠️  We detected that you have multiple steps with the same ID.
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Your function is still running, though it may exhibit unexpected behaviour. This can happen if you're using the same ID for multiple steps across different chains of parallel work. We found the issue with step "publish:workflow:polymarket-monitor:cc16b17a-9847-457b-88c7-fbd71a4498fe". Using the same IDs across parallel chains of work can cause unexpected behaviour.
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: We recommend using a unique ID for each step, especially those happening in parallel.
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: Code: AUTOMATIC_PARALLEL_INDEXING
+Nov 25 14:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[19069]: =================================================
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
