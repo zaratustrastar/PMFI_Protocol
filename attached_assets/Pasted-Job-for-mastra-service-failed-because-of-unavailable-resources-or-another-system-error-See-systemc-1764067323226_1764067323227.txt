@@ -1,0 +1,36 @@
+Job for mastra.service failed because of unavailable resources or another system error.
+See "systemctl status mastra.service" and "journalctl -xeu mastra.service" for details.
+Job for inngest.service failed because of unavailable resources or another system error.
+See "systemctl status inngest.service" and "journalctl -xeu inngest.service" for details.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# # First, revert the systemd service to the ORIGINAL working config
+sudo nano /etc/systemd/system/mastra.service
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# # First, revert the systemd service to the ORIGINAL working config
+sudo nano /etc/systemd/system/mastra.service
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# # Pull the latest code (to get the new helper functions)
+cd /opt/polymarket-bot
+git pull
+
+# Reload and restart
+sudo systemctl daemon-reload
+sudo systemctl restart mastra.service
+sudo systemctl restart inngest.service
+
+# Check it works
+journalctl -u mastra.service -f
+Already up to date.
+Failed to restart mastra.service: Unit mastra.service has a bad unit file setting.
+See system logs and 'systemctl status mastra.service' for details.
+Job for inngest.service failed because of unavailable resources or another system error.
+See "systemctl status inngest.service" and "journalctl -xeu inngest.service" for details.
+Nov 25 10:41:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'resources'.
+Nov 25 10:41:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Failed to start mastra.service - Mastra Workflow Server - Market Detection & Job Queuing.
+Nov 25 10:41:19 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Scheduled restart job, restart counter is at 60.
+Nov 25 10:41:19 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed to load environment files: No such file or directory
+Nov 25 10:41:19 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed to spawn 'start' task: No such file or directory
+Nov 25 10:41:19 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'resources'.
+Nov 25 10:41:19 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Failed to start mastra.service - Mastra Workflow Server - Market Detection & Job Queuing.
+Nov 25 10:41:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: /etc/systemd/system/mastra.service:20: Unknown key name 'Description' in section 'Install', ignoring.
+Nov 25 10:41:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: /etc/systemd/system/mastra.service:21: Unknown key name 'After' in section 'Install', ignoring.
+Nov 25 10:41:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Service has more than one ExecStart= setting, which is only allowed for Type=oneshot services. Refusing.
+Nov 25 10:41:29 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed to schedule restart job: Unit mastra.service has a bad unit file setting.
+Nov 25 10:41:29 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'resources'.
