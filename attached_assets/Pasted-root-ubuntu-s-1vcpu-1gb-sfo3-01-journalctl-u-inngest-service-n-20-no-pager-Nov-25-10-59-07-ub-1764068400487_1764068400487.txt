@@ -1,0 +1,22 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u inngest.service -n 20 --no-pager
+Nov 25 10:59:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Scheduled restart job, restart counter is at 24.
+Nov 25 10:59:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 10:59:07 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17262]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 10:59:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Main process exited, code=exited, status=127/n/a
+Nov 25 10:59:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 10:59:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Scheduled restart job, restart counter is at 25.
+Nov 25 10:59:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 10:59:17 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17266]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 10:59:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Main process exited, code=exited, status=127/n/a
+Nov 25 10:59:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 10:59:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Scheduled restart job, restart counter is at 26.
+Nov 25 10:59:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 10:59:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17269]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 10:59:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Main process exited, code=exited, status=127/n/a
+Nov 25 10:59:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 10:59:38 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Scheduled restart job, restart counter is at 27.
+Nov 25 10:59:38 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 10:59:38 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[17271]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 10:59:38 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Main process exited, code=exited, status=127/n/a
+Nov 25 10:59:38 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

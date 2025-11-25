@@ -1,0 +1,25 @@
+Nov 25 10:55:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Job for inngest.service failed because of unavailable resources or another system error.
+See "systemctl status inngest.service" and "journalctl -xeu inngest.service" for details.
+● inngest.service - Inngest Workflow Orchestration Server
+     Loaded: loaded (/etc/systemd/system/inngest.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: resources) since Tue 2025-11-25 10:55:11 UTC; 25ms ago
+        CPU: 0
+Nov 25 10:41:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Service has more than one ExecStart= setting, which is only allowed for Type=oneshot services. Refusing.
+Nov 25 10:41:29 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed to schedule restart job: Unit mastra.service has a bad unit file setting.
+Nov 25 10:41:29 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'resources'.
+Nov 25 10:46:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Found ordering cycle on mastra.service/start
+Nov 25 10:46:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Found dependency on inngest.service/start
+Nov 25 10:46:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Unable to break cycle starting with inngest.service/start
+Nov 25 10:55:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Found ordering cycle on mastra.service/start
+Nov 25 10:55:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Found dependency on inngest.service/start
+Nov 25 10:55:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Job inngest.service/start deleted to break ordering cycle starting with inngest.service/start
+Nov 25 10:55:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 25 10:55:16 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[17149]: ◐ Preparing development environment...
+Nov 25 10:55:20 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[17149]: ✓ Initial bundle complete
+Nov 25 10:55:20 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[17149]: ◇ Starting Mastra dev server...
+Nov 25 10:55:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[17149]: WARN [2025-11-25 10:55:23.186 +0000] (Mastra): Mastra telemetry is deprecated and will be removed on the Nov 4th release. Instead use AI Tracing. More info can be found here: https://github.com/mastra-ai/mastra/issues/8577 and here: https://mastra.ai/en/docs/observability/ai-tracing/overview
+Nov 25 10:55:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[17149]:  mastra  0.14.1-alpha.0 ready in 2717 ms
+Nov 25 10:55:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[17149]: │ Playground: http://0.0.0.0:5000/
+Nov 25 10:55:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[17149]: │ API:        http://0.0.0.0:5000/api
+Nov 25 10:55:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[17149]: ◯ watching for file changes...

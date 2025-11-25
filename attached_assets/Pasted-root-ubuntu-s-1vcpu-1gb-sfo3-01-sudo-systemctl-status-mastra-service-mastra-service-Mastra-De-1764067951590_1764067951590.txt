@@ -1,0 +1,38 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo systemctl status mastra.service
+× mastra.service - Mastra Development Server - Polymarket Trading Bot
+     Loaded: loaded (/etc/systemd/system/mastra.service; enabled; preset: enabled)
+     Active: failed (Result: resources) since Tue 2025-11-25 10:41:29 UTC; 10min ago
+   Duration: 10h 31min 53.813s
+        CPU: 0
+
+Nov 25 10:41:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: /etc/systemd/system/mastra.service:20: Unknown key name 'Description' in section 'Install', ignoring.
+Nov 25 10:41:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: /etc/systemd/system/mastra.service:21: Unknown key name 'After' in section 'Install', ignoring.
+Nov 25 10:41:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Service has more than one ExecStart= setting, which is only allowed for Type=oneshot serv>
+Nov 25 10:41:29 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed to schedule restart job: Unit mastra.service has a bad unit file setting.
+Nov 25 10:41:29 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'resources'.
+Nov 25 10:46:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Found ordering cycle on mastra.service/start
+Nov 25 10:46:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Found dependency on inngest.service/start
+Nov 25 10:46:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Unable to break cycle starting with inngest.service/start
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # First, let's see what's ACTUALLY in the file right now
+cat /etc/systemd/system/mastra.service
+[Unit]
+Description=Mastra Development Server - Polymarket Trading Bot
+After=network.target inngest.service postgresql.service
+Wants=network.target inngest.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/polymarket-bot
+EnvironmentFile=/opt/polymarket-bot/.env
+ExecStart=/usr/bin/npx mastra dev
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mastra
+
+[Install]
+WantedBy=multi-user.target
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

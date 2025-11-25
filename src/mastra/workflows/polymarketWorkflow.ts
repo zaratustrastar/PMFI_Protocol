@@ -112,22 +112,24 @@ function isShortDurationMarket(market: any, minHours: number = 15): { isShort: b
  * Uses market.categories[0], or slug prefix, or fallback to "other"
  */
 function getMarketCategory(market: any): string {
-  try {
-    // Try market.categories array first
-    if (Array.isArray(market.categories) && market.categories.length > 0) {
-      return String(market.categories[0]);
+  // 1. Try primary category from array
+  if (Array.isArray(market.categories) && market.categories.length > 0) {
+    const c = market.categories[0];
+    if (typeof c === "string" && c.trim() !== "") {
+      return c.toLowerCase();
     }
-    
-    // Try slug prefix (e.g., "sports/nfl-game" -> "sports")
-    if (market.slug && typeof market.slug === "string" && market.slug.includes("/")) {
-      return market.slug.split("/")[0];
-    }
-    
-    // Fallback
-    return "other";
-  } catch (error) {
-    return "other";
   }
+
+  // 2. Try slug prefix before "/"
+  if (typeof market.slug === "string" && market.slug.includes("/")) {
+    const prefix = market.slug.split("/")[0].trim();
+    if (prefix) {
+      return prefix.toLowerCase();
+    }
+  }
+
+  // 3. Fallback
+  return "other";
 }
 
 /**
