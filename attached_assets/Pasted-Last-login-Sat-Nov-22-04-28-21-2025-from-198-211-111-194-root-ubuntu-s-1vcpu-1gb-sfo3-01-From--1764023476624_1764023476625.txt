@@ -1,0 +1,143 @@
+Last login: Sat Nov 22 04:28:21 2025 from 198.211.111.194
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # From your VPS
+cd /opt/polymarket-bot
+git pull  # If you're using git to sync
+Already up to date.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# # Restart Mastra (for new market notifications with referral)
+systemctl restart mastra.service inngest.service
+
+# Restart Python services (for buy/sell notifications with referral)
+systemctl restart polymarket-worker.service polymarket-monitor.service
+
+# Verify they're running
+systemctl status mastra.service polymarket-worker.service --no-pager | grep Active
+     Active: active (running) since Mon 2025-11-24 22:17:06 UTC; 65ms ago
+     Active: active (running) since Mon 2025-11-24 22:17:06 UTC; 58ms ago
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# cd /opt/polymarket-bot
+git pull
+systemctl restart mastra.service inngest.service polymarket-worker.service polymarket-monitor.service
+remote: Enumerating objects: 92, done.
+remote: Counting objects: 100% (92/92), done.
+remote: Compressing objects: 100% (32/32), done.
+remote: Total 82 (delta 50), reused 81 (delta 49), pack-reused 0 (from 0)
+Unpacking objects: 100% (82/82), 1.26 MiB | 7.33 MiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   7048bd6..63c370e  main       -> origin/main
+Updating 7048bd6..63c370e
+Fast-forward
+ .replit                                                                                               |   4 +
+ ...ing-sudo-systemctl-status-polymarket-worker-service-polymarket-mon-1763745294600_1763745294601.txt |  70 ++++++
+ ...30-lines-journalctl-u-polymarket-monitor-service-n-30-no-pager-Nov-1763689368055_1763689368056.txt |  44 ++++
+ ...et-sudo-systemctl-status-mastra-inngest-polymarket-worker-polymark-1763745394094_1763745394094.txt |  93 ++++++++
+ ...-COMMANDS-Commands-marked-with-may-be-preceded-by-a-number-N-Notes-1763682070888_1763682070890.txt | 583 +++++++++++++++++++++++++++++++++++++++++++++++++
+ ...-journalctl-u-polymarket-worker-service-since-00-15-00-n-100-Nov-2-1763686118488_1763686118489.txt |  21 ++
+ ...ast-login-Fri-Nov-21-00-42-40-2025-from-162-243-190-66-root-ubuntu-1763686451228_1763686451230.txt |  27 +++
+ ...ast-login-Fri-Nov-21-01-24-31-2025-from-162-243-190-66-root-ubuntu-1763689295965_1763689295966.txt |  45 ++++
+ ...ast-login-Fri-Nov-21-01-28-53-2025-from-162-243-190-66-root-ubuntu-1763689671054_1763689671055.txt |  47 ++++
+ ...ast-login-Thu-Nov-20-23-48-23-2025-from-162-243-190-66-root-ubuntu-1763683997458_1763683997460.txt |  44 ++++
+ ...tl-status-polymarket-worker-service-polymarket-monitor-service-no--1763781440862_1763781440862.txt |  40 ++++
+ ...sfo3-01-opt-polymarket-bot-trading-bot-cp-opt-polymarket-bot-deplo-1763681877053_1763681877054.txt |  67 ++++++
+ ...-1gb-sfo3-01-systemd-1-Started-polymarket-monitor-service-Polymark-1763681934450_1763681934451.txt |  49 +++++
+ ...-1gb-sfo3-01-systemd-1-Started-polymarket-monitor-service-Polymark-1763683507314_1763683507314.txt |  48 +++++
+ ...pu-1gb-sfo3-01-systemd-1-Started-inngest-service-Inngest-Server-Wo-1763682957612_1763682957612.txt |  48 +++++
+ ...-1gb-sfo3-01-polymarket-worker-29001-Loaded-environment-variables--1763691077337_1763691077338.txt |  31 +++
+ ...pu-1gb-sfo3-01-mastra-948-INFO-2025-11-21-17-49-00-618-0000-Mastra-1763747699756_1763747699758.txt |  31 +++
+ ...cpu-1gb-sfo3-01-polymarket-worker-926-No-pending-jobs-checked-at-0-1763778198213_1763778198214.txt |  46 ++++
+ ...s-1vcpu-1gb-sfo3-01-polymarket-worker-9033-Buy-0-0100-error-PolyAp-1763782877100_1763782877101.txt |  27 +++
+ ...RT-42563-PROXY-USER-3p0LTGSt7YVFojo-PROXY-PASS-QWPWl7bhciHo0ZM-roo-1763780985733_1763780985733.txt |  64 ++++++
+ ...3-LTS-GNU-Linux-6-8-0-87-generic-x86-64-Documentation-https-help-u-1763782654997_1763782654998.txt |  47 ++++
+ ...01-Check-if-the-process-is-still-alive-systemctl-status-polymarket-1763687945541_1763687945542.txt |  76 +++++++
+ ...opt-polymarket-bot-sudo-systemctl-status-mastra-inngest-polymarket-1763747191999_1763747192000.txt |  91 ++++++++
+ ...opt-polymarket-bot-sudo-systemctl-status-mastra-inngest-polymarket-1763747214055_1763747214056.txt |  91 ++++++++
+ ...-systemctl-status-polymarket-worker-service-polymarket-monitor-ser-1763683332574_1763683332574.txt |  34 +++
+ attached_assets/Screenshot 2025-11-21 at 01.59.36_1763686780109.png                                   | Bin 0 -> 381259 bytes
+ attached_assets/Screenshot 2025-11-21 at 17.50.09_1763743811500.png                                   | Bin 0 -> 1014226 bytes
+ deployment/TRANSFER_TO_VPS.md                                                                         |  50 +++++
+ deployment/mastra-deployment.tar.gz                                                                   | Bin 0 -> 27153 bytes
+ deployment/mastra-vps/.env.template                                                                   |  24 +++
+ deployment/mastra-vps/GET_ENV_VARS.md                                                                 |  73 +++++++
+ deployment/mastra-vps/INSTALLATION_GUIDE.md                                                           | 329 ++++++++++++++++++++++++++++
+ deployment/mastra-vps/README.md                                                                       | 119 ++++++++++
+ deployment/mastra-vps/install.sh                                                                      |  70 ++++++
+ deployment/mastra-vps/package.json                                                                    |  51 +++++
+ deployment/mastra-vps/scripts/inngest.sh                                                              |  16 ++
+ deployment/mastra-vps/src/global.d.ts                                                                 |   1 +
+ deployment/mastra-vps/src/mastra/agents/exampleAgent.ts                                               | 107 +++++++++
+ deployment/mastra-vps/src/mastra/agents/polymarketAgent.ts                                            |  78 +++++++
+ deployment/mastra-vps/src/mastra/index.ts                                                             | 247 +++++++++++++++++++++
+ deployment/mastra-vps/src/mastra/inngest/client.ts                                                    |  17 ++
+ deployment/mastra-vps/src/mastra/inngest/index.ts                                                     | 130 +++++++++++
+ deployment/mastra-vps/src/mastra/storage/index.ts                                                     |   7 +
+ deployment/mastra-vps/src/mastra/tools/exampleTool.ts                                                 |  70 ++++++
+ deployment/mastra-vps/src/mastra/tools/fetchPolymarketMarkets.ts                                      | 107 +++++++++
+ deployment/mastra-vps/src/mastra/tools/postToTelegram.ts                                              |  85 ++++++++
+ deployment/mastra-vps/src/mastra/tools/postToTwitter.ts                                               | 170 +++++++++++++++
+ deployment/mastra-vps/src/mastra/tools/queueTradingJob.ts                                             | 102 +++++++++
+ deployment/mastra-vps/src/mastra/tools/trackSeenMarkets.ts                                            |  83 +++++++
+ deployment/mastra-vps/src/mastra/workflows/exampleWorkflow.ts                                         | 204 ++++++++++++++++++
+ deployment/mastra-vps/src/mastra/workflows/polymarketWorkflow.ts                                      | 335 ++++++++++++++++++++++++++++
+ deployment/mastra-vps/src/triggers/exampleConnectorTrigger.ts                                         | 140 ++++++++++++
+ deployment/mastra-vps/src/triggers/slackTriggers.ts                                                   | 599 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ deployment/mastra-vps/src/triggers/telegramTriggers.ts                                                |  59 +++++
+ deployment/mastra-vps/systemd/inngest.service                                                         |  20 ++
+ deployment/mastra-vps/systemd/mastra.service                                                          |  20 ++
+ deployment/mastra-vps/tsconfig.json                                                                   |  16 ++
+ src/mastra/workflows/polymarketWorkflow.ts                                                            |  19 +-
+ trading_bot/telegram_notifier.py                                                                      |  29 +++
+ 59 files changed, 5144 insertions(+), 1 deletion(-)
+ create mode 100644 attached_assets/Pasted--Check-if-services-are-still-running-sudo-systemctl-status-polymarket-worker-service-polymarket-mon-1763745294600_1763745294601.txt
+ create mode 100644 attached_assets/Pasted--Check-monitor-logs-last-30-lines-journalctl-u-polymarket-monitor-service-n-30-no-pager-Nov-1763689368055_1763689368056.txt
+ create mode 100644 attached_assets/Pasted--Install-WantedBy-multi-user-target-sudo-systemctl-status-mastra-inngest-polymarket-worker-polymark-1763745394094_1763745394094.txt
+ create mode 100644 attached_assets/Pasted--SUMMARY-OF-LESS-COMMANDS-Commands-marked-with-may-be-preceded-by-a-number-N-Notes-1763682070888_1763682070890.txt
+ create mode 100644 attached_assets/Pasted--See-recent-worker-activity-journalctl-u-polymarket-worker-service-since-00-15-00-n-100-Nov-2-1763686118488_1763686118489.txt
+ create mode 100644 attached_assets/Pasted--System-restart-required-Last-login-Fri-Nov-21-00-42-40-2025-from-162-243-190-66-root-ubuntu-1763686451228_1763686451230.txt
+ create mode 100644 attached_assets/Pasted--System-restart-required-Last-login-Fri-Nov-21-01-24-31-2025-from-162-243-190-66-root-ubuntu-1763689295965_1763689295966.txt
+ create mode 100644 attached_assets/Pasted--System-restart-required-Last-login-Fri-Nov-21-01-28-53-2025-from-162-243-190-66-root-ubuntu-1763689671054_1763689671055.txt
+ create mode 100644 attached_assets/Pasted--System-restart-required-Last-login-Thu-Nov-20-23-48-23-2025-from-162-243-190-66-root-ubuntu-1763683997458_1763683997460.txt
+ create mode 100644 attached_assets/Pasted--Verify-they-re-running-systemctl-status-polymarket-worker-service-polymarket-monitor-service-no--1763781440862_1763781440862.txt
+ create mode 100644 attached_assets/Pasted--venv-root-ubuntu-s-1vcpu-1gb-sfo3-01-opt-polymarket-bot-trading-bot-cp-opt-polymarket-bot-deplo-1763681877053_1763681877054.txt
+ create mode 100644 attached_assets/Pasted-Nov-20-23-35-36-ubuntu-s-1vcpu-1gb-sfo3-01-systemd-1-Started-polymarket-monitor-service-Polymark-1763681934450_1763681934451.txt
+ create mode 100644 attached_assets/Pasted-Nov-20-23-35-36-ubuntu-s-1vcpu-1gb-sfo3-01-systemd-1-Started-polymarket-monitor-service-Polymark-1763683507314_1763683507314.txt
+ create mode 100644 attached_assets/Pasted-Nov-20-23-51-09-ubuntu-s-1vcpu-1gb-sfo3-01-systemd-1-Started-inngest-service-Inngest-Server-Wo-1763682957612_1763682957612.txt
+ create mode 100644 attached_assets/Pasted-Nov-21-02-07-23-ubuntu-s-1vcpu-1gb-sfo3-01-polymarket-worker-29001-Loaded-environment-variables--1763691077337_1763691077338.txt
+ create mode 100644 attached_assets/Pasted-Nov-21-17-49-00-ubuntu-s-1vcpu-1gb-sfo3-01-mastra-948-INFO-2025-11-21-17-49-00-618-0000-Mastra-1763747699756_1763747699758.txt
+ create mode 100644 attached_assets/Pasted-Nov-22-01-13-29-ubuntu-s-1vcpu-1gb-sfo3-01-polymarket-worker-926-No-pending-jobs-checked-at-0-1763778198213_1763778198214.txt
+ create mode 100644 attached_assets/Pasted-Nov-22-03-40-26-ubuntu-s-1vcpu-1gb-sfo3-01-polymarket-worker-9033-Buy-0-0100-error-PolyAp-1763782877100_1763782877101.txt
+ create mode 100644 attached_assets/Pasted-PROXY-HOST-92-113-180-106-PROXY-PORT-42563-PROXY-USER-3p0LTGSt7YVFojo-PROXY-PASS-QWPWl7bhciHo0ZM-roo-1763780985733_1763780985733.txt
+ create mode 100644 attached_assets/Pasted-Welcome-to-Ubuntu-24-04-3-LTS-GNU-Linux-6-8-0-87-generic-x86-64-Documentation-https-help-u-1763782654997_1763782654998.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Check-if-the-process-is-still-alive-systemctl-status-polymarket-1763687945541_1763687945542.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-opt-polymarket-bot-sudo-systemctl-status-mastra-inngest-polymarket-1763747191999_1763747192000.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-opt-polymarket-bot-sudo-systemctl-status-mastra-inngest-polymarket-1763747214055_1763747214056.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-systemctl-status-polymarket-worker-service-polymarket-monitor-ser-1763683332574_1763683332574.txt
+ create mode 100644 attached_assets/Screenshot 2025-11-21 at 01.59.36_1763686780109.png
+ create mode 100644 attached_assets/Screenshot 2025-11-21 at 17.50.09_1763743811500.png
+ create mode 100644 deployment/TRANSFER_TO_VPS.md
+ create mode 100644 deployment/mastra-deployment.tar.gz
+ create mode 100644 deployment/mastra-vps/.env.template
+ create mode 100644 deployment/mastra-vps/GET_ENV_VARS.md
+ create mode 100644 deployment/mastra-vps/INSTALLATION_GUIDE.md
+ create mode 100644 deployment/mastra-vps/README.md
+ create mode 100755 deployment/mastra-vps/install.sh
+ create mode 100644 deployment/mastra-vps/package.json
+ create mode 100755 deployment/mastra-vps/scripts/inngest.sh
+ create mode 100644 deployment/mastra-vps/src/global.d.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/agents/exampleAgent.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/agents/polymarketAgent.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/index.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/inngest/client.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/inngest/index.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/storage/index.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/tools/exampleTool.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/tools/fetchPolymarketMarkets.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/tools/postToTelegram.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/tools/postToTwitter.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/tools/queueTradingJob.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/tools/trackSeenMarkets.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/workflows/exampleWorkflow.ts
+ create mode 100644 deployment/mastra-vps/src/mastra/workflows/polymarketWorkflow.ts
+ create mode 100644 deployment/mastra-vps/src/triggers/exampleConnectorTrigger.ts
+ create mode 100644 deployment/mastra-vps/src/triggers/slackTriggers.ts
+ create mode 100644 deployment/mastra-vps/src/triggers/telegramTriggers.ts
+ create mode 100644 deployment/mastra-vps/systemd/inngest.service
+ create mode 100644 deployment/mastra-vps/systemd/mastra.service
+ create mode 100644 deployment/mastra-vps/tsconfig.json

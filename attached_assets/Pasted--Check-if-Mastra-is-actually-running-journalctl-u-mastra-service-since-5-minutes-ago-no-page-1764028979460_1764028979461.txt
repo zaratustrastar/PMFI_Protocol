@@ -1,0 +1,98 @@
+# Check if Mastra is actually running
+journalctl -u mastra.service --since "5 minutes ago" --no-pager | tail -20
+Nov 24 23:57:42 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:57:42 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1907]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:57:42 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:57:52 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:57:52 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1911]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:57:52 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:58:02 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:58:02 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1916]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:58:02 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:58:12 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:58:12 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1920]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:58:12 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:58:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:58:23 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1928]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:58:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:58:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:58:33 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1936]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:58:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:58:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:58:43 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1941]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:58:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:58:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:58:53 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1946]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:58:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:59:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:59:04 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1954]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:59:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:59:14 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:59:14 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1957]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:59:14 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:59:24 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:59:24 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1962]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:59:24 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:59:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:59:34 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1966]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:59:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:59:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:59:45 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1971]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:59:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:59:55 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 24 23:59:55 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1976]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 24 23:59:55 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:00:05 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:00:05 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1993]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:00:05 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:00:15 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:00:15 ubuntu-s-1vcpu-1gb-sfo3-01 bash[1997]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:00:15 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2000]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2005]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:00:46 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:00:46 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2010]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:00:46 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:00:56 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:00:56 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2015]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:00:56 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:01:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:01:07 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2019]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:01:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:01:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:01:17 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2024]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:01:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:01:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:01:27 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2028]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:01:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:01:37 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:01:37 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2033]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:01:37 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:01:48 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:01:48 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2036]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:01:48 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:01:58 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:01:58 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2041]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:01:58 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:02:08 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:02:08 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2045]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:02:08 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:02:18 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:02:18 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2050]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:02:18 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:02:28 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:02:28 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2054]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:02:28 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 25 00:02:39 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 25 00:02:39 ubuntu-s-1vcpu-1gb-sfo3-01 bash[2059]: /opt/polymarket-bot/scripts/inngest.sh: line 16: exec: inngest-cli: not found
+Nov 25 00:02:39 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed with result 'exit-code'.
+Nov 24 23:57:42 ubuntu-s-1vcpu-1gb-sfo3-01 npx[1875]: {"level":"warn","time":"2025-11-24T23:57:42.462Z","name":"Mastra","msg":"Mastra telemetry is deprecated and will be removed on the Nov 4th release. Instead use AI Tracing. More info can be found here: https://github.com/mastra-ai/mastra/issues/8577 and here: https://mastra.ai/en/docs/observability/ai-tracing/overview"}
+Nov 24 23:57:42 ubuntu-s-1vcpu-1gb-sfo3-01 npx[1875]:  mastra  0.14.1-alpha.0 ready in 2106 ms
+Nov 24 23:57:42 ubuntu-s-1vcpu-1gb-sfo3-01 npx[1875]: │ Playground: http://0.0.0.0:5000/
+Nov 24 23:57:42 ubuntu-s-1vcpu-1gb-sfo3-01 npx[1875]: │ API:        http://0.0.0.0:5000/api
+Nov 24 23:57:42 ubuntu-s-1vcpu-1gb-sfo3-01 npx[1875]: ◯ watching for file changes...
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# 

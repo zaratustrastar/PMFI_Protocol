@@ -25,29 +25,15 @@ function escapeTelegramHtml(text: string): string {
 
 /**
  * Add referral code to Polymarket URLs
- * Safe implementation: handles null/undefined, only modifies polymarket.com URLs
  */
-function addReferralCode(url: string | undefined | null): string {
-  try {
-    // Safety check: return empty string if invalid input
-    if (!url || typeof url !== "string") {
-      return "";
-    }
-
-    // Only modify Polymarket URLs
-    if (!url.includes("polymarket.com")) {
-      return url;
-    }
-
-    // Add referral code with correct separator
-    const separator = url.includes("?") ? "&" : "?";
-    const urlWithRef = `${url}${separator}via=q2XDjZW`;
-
-    // Escape & for Telegram HTML
-    return urlWithRef.replace(/&/g, "&amp;");
-  } catch (error) {
-    // Failsafe: return original URL if anything goes wrong
-    return url || "";
+function addReferralCode(url: string): string {
+  const referralCode = "q2XDjZW";
+  
+  // Check if URL already has query parameters
+  if (url.includes("?")) {
+    return `${url}&via=${referralCode}`;
+  } else {
+    return `${url}?via=${referralCode}`;
   }
 }
 
@@ -105,50 +91,6 @@ function isShortDurationMarket(market: any, minHours: number = 15): { isShort: b
     // Invalid date format - can't parse, allow trading (fallback to keyword filter)
     return { isShort: false };
   }
-}
-
-/**
- * Extract the primary category from a market
- * Uses market.categories[0], or slug prefix, or fallback to "other"
- */
-function getMarketCategory(market: any): string {
-  // 1. Try primary category from array
-  if (Array.isArray(market.categories) && market.categories.length > 0) {
-    const c = market.categories[0];
-    if (typeof c === "string" && c.trim() !== "") {
-      return c.toLowerCase();
-    }
-  }
-
-  // 2. Try slug prefix before "/"
-  if (typeof market.slug === "string" && market.slug.includes("/")) {
-    const prefix = market.slug.split("/")[0].trim();
-    if (prefix) {
-      return prefix.toLowerCase();
-    }
-  }
-
-  // 3. Fallback
-  return "other";
-}
-
-/**
- * Map a category string to a nice hashtag
- */
-function getCategoryHashtag(category: string): string {
-  const c = category.toLowerCase().trim();
-  
-  if (c === "sports") return "#Sports";
-  if (c === "politics") return "#Politics";
-  if (c === "crypto") return "#Crypto";
-  if (c === "finance") return "#Finance";
-  if (c === "news") return "#News";
-  if (c === "entertainment") return "#Entertainment";
-  if (c === "technology" || c === "tech") return "#Tech";
-  if (c === "economics") return "#Economics";
-  
-  // Fallback for unknown or "other"
-  return "#Markets";
 }
 
 /**
@@ -247,9 +189,8 @@ const monitorAndPost = createStep({
             (market.description.length > 200 ? "..." : "")
           : "";
         
-        // Get dynamic category hashtag
-        const category = getMarketCategory(market);
-        const categoryHashtag = getCategoryHashtag(category);
+        // Add referral code to market URL
+        const referralUrl = addReferralCode(market.url);
         
         const telegramMessage = `🔮 <b>New Polymarket Market!</b>
 
@@ -257,9 +198,9 @@ const monitorAndPost = createStep({
 
 ${escapedDescription ? `📊 ${escapedDescription}
 
-` : ""}<a href="${addReferralCode(market.url)}">🔗 Trade on Polymarket</a>
+` : ""}<a href="${referralUrl}">🔗 Trade on Polymarket</a>
 
-${categoryHashtag}`;
+#Polymarket #PredictionMarkets`;
 
         let telegramSuccess = false;
 
