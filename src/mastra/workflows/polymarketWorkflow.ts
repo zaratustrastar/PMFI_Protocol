@@ -108,6 +108,48 @@ function isShortDurationMarket(market: any, minHours: number = 15): { isShort: b
 }
 
 /**
+ * Extract the primary category from a market
+ * Uses market.categories[0], or slug prefix, or fallback to "other"
+ */
+function getMarketCategory(market: any): string {
+  try {
+    // Try market.categories array first
+    if (Array.isArray(market.categories) && market.categories.length > 0) {
+      return String(market.categories[0]);
+    }
+    
+    // Try slug prefix (e.g., "sports/nfl-game" -> "sports")
+    if (market.slug && typeof market.slug === "string" && market.slug.includes("/")) {
+      return market.slug.split("/")[0];
+    }
+    
+    // Fallback
+    return "other";
+  } catch (error) {
+    return "other";
+  }
+}
+
+/**
+ * Map a category string to a nice hashtag
+ */
+function getCategoryHashtag(category: string): string {
+  const c = category.toLowerCase().trim();
+  
+  if (c === "sports") return "#Sports";
+  if (c === "politics") return "#Politics";
+  if (c === "crypto") return "#Crypto";
+  if (c === "finance") return "#Finance";
+  if (c === "news") return "#News";
+  if (c === "entertainment") return "#Entertainment";
+  if (c === "technology" || c === "tech") return "#Tech";
+  if (c === "economics") return "#Economics";
+  
+  // Fallback for unknown or "other"
+  return "#Markets";
+}
+
+/**
  * Step 1: Fetch Markets and Post to Telegram
  * Fetches markets, identifies new ones, posts them, and ONLY THEN marks as seen
  */
@@ -203,6 +245,10 @@ const monitorAndPost = createStep({
             (market.description.length > 200 ? "..." : "")
           : "";
         
+        // Get dynamic category hashtag
+        const category = getMarketCategory(market);
+        const categoryHashtag = getCategoryHashtag(category);
+        
         const telegramMessage = `🔮 <b>New Polymarket Market!</b>
 
 <b>Question:</b> ${escapedQuestion}
@@ -211,7 +257,7 @@ ${escapedDescription ? `📊 ${escapedDescription}
 
 ` : ""}<a href="${addReferralCode(market.url)}">🔗 Trade on Polymarket</a>
 
-#Polymarket #PredictionMarkets`;
+${categoryHashtag}`;
 
         let telegramSuccess = false;
 
