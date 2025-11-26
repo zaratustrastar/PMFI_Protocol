@@ -1,0 +1,45 @@
+
+# Discard local changes and pull fresh code
+git checkout -- .
+git pull
+
+# Then run the setup
+chmod +x trading_bot/setup_cron.sh
+bash trading_bot/setup_cron.sh
+Updating 0386d44..c027d77
+Fast-forward
+ ...Y-workflow-logs-at-all-journalctl-u-mastra-service-since-23-32-00--1764027991802_1764027991803.txt | 136 -----------------------------------
+ ...ly-running-journalctl-u-mastra-service-since-5-minutes-ago-no-page-1764028979460_1764028979461.txt |  98 --------------------------
+ ...-registered-grep-registerCronWorkflow-src-mastra-index-ts-function-1764025100603_1764025100604.txt |  43 ------------
+ ...ing-again-journalctl-u-mastra-service-since-1-minute-ago-no-pager--1764025910334_1764025910335.txt |  81 ---------------------
+ ...nning-journalctl-u-mastra-service-since-2-minutes-ago-no-pager-tai-1764027764086_1764027764087.txt |  19 -----
+ ...running-journalctl-u-mastra-service-since-1-minute-ago-no-pager-gr-1764028660645_1764028660647.txt | 195 ---------------------------------------------------
+ ...-psql-postgresql-neondb-owner-npg-sPnNQtm3xf8h-ep-noisy-lab-ahf3wc-1764078874044_1764078874044.txt |  59 ++++++++++++++++
+ ...21-2025-from-198-211-111-194-root-ubuntu-s-1vcpu-1gb-sfo3-01-From--1764023476624_1764023476625.txt | 143 -------------------------------------
+ ...-34-2025-from-198-211-111-194-root-ubuntu-s-1vcpu-1gb-sfo3-01-1-Ch-1764078819947_1764078819948.txt |  48 +++++++++++++
+ ...referral-change-is-Mastra-starts-fine-but-the-monitorAndPost-workf-1764024710057_1764024710058.txt | 182 -----------------------------------------------
+ ...o-far-enough-You-ran-git-log-oneline-3-63c370e-HEAD-main-origin-ma-1764025231604_1764025231605.txt | 171 --------------------------------------------
+ ...-01-Check-if-there-are-actual-runtime-errors-not-just-TypeScript-w-1764024788721_1764024788721.txt |  53 --------------
+ ...o3-01-Check-if-workflow-is-executing-journalctl-u-mastra-service-s-1764079765066_1764079765067.txt |  53 ++++++++++++++
+ ...1-opt-polymarket-bot-See-the-actual-Inngest-crash-error-journalctl-1764028129637_1764028129638.txt |  53 --------------
+ ...opt-polymarket-bot-systemctl-status-mastra-service-inngest-service-1764023899947_1764023899949.txt | 109 ----------------------------
+ src/mastra/workflows/polymarketWorkflow.ts                                                            |  15 ++--
+ trading_bot/telegram_notifier.py                                                                      |  29 +++-----
+ 17 files changed, 177 insertions(+), 1310 deletions(-)
+ delete mode 100644 attached_assets/Pasted--Also-check-if-there-are-ANY-workflow-logs-at-all-journalctl-u-mastra-service-since-23-32-00--1764027991802_1764027991803.txt
+ delete mode 100644 attached_assets/Pasted--Check-if-Mastra-is-actually-running-journalctl-u-mastra-service-since-5-minutes-ago-no-page-1764028979460_1764028979461.txt
+ delete mode 100644 attached_assets/Pasted--Check-if-cron-trigger-is-still-registered-grep-registerCronWorkflow-src-mastra-index-ts-function-1764025100603_1764025100604.txt
+ delete mode 100644 attached_assets/Pasted--Check-if-workflow-is-running-again-journalctl-u-mastra-service-since-1-minute-ago-no-pager--1764025910334_1764025910335.txt
+ delete mode 100644 attached_assets/Pasted--Check-if-workflow-is-running-journalctl-u-mastra-service-since-2-minutes-ago-no-pager-tai-1764027764086_1764027764087.txt
+ delete mode 100644 attached_assets/Pasted--Check-if-workflows-are-running-journalctl-u-mastra-service-since-1-minute-ago-no-pager-gr-1764028660645_1764028660647.txt
+ create mode 100644 attached_assets/Pasted--Check-recent-markets-detected-psql-postgresql-neondb-owner-npg-sPnNQtm3xf8h-ep-noisy-lab-ahf3wc-1764078874044_1764078874044.txt
+ delete mode 100644 attached_assets/Pasted-Last-login-Sat-Nov-22-04-28-21-2025-from-198-211-111-194-root-ubuntu-s-1vcpu-1gb-sfo3-01-From--1764023476624_1764023476625.txt
+ create mode 100644 attached_assets/Pasted-Last-login-Tue-Nov-25-13-47-34-2025-from-198-211-111-194-root-ubuntu-s-1vcpu-1gb-sfo3-01-1-Ch-1764078819947_1764078819948.txt
+ delete mode 100644 attached_assets/Pasted-So-the-core-symptom-after-your-referral-change-is-Mastra-starts-fine-but-the-monitorAndPost-workf-1764024710057_1764024710058.txt
+ delete mode 100644 attached_assets/Pasted-Your-git-reset-didn-t-go-far-enough-You-ran-git-log-oneline-3-63c370e-HEAD-main-origin-ma-1764025231604_1764025231605.txt
+ delete mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Check-if-there-are-actual-runtime-errors-not-just-TypeScript-w-1764024788721_1764024788721.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Check-if-workflow-is-executing-journalctl-u-mastra-service-s-1764079765066_1764079765067.txt
+ delete mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-opt-polymarket-bot-See-the-actual-Inngest-crash-error-journalctl-1764028129637_1764028129638.txt
+ delete mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-opt-polymarket-bot-systemctl-status-mastra-service-inngest-service-1764023899947_1764023899949.txt
+chmod: cannot access 'trading_bot/setup_cron.sh': No such file or directory
+bash: trading_bot/setup_cron.sh: No such file or directory
