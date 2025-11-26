@@ -300,8 +300,17 @@ def format_tags_as_hashtags(tags: List) -> str:
     hashtags = []
     for tag in tags:
         if tag:
-            # Clean up tag: remove spaces, special chars, capitalize
-            clean_tag = str(tag).replace(" ", "").replace("-", "").replace("&", "And")
+            # Tags come as objects with 'label' or 'slug' field
+            if isinstance(tag, dict):
+                tag_name = tag.get("label") or tag.get("slug") or ""
+            else:
+                tag_name = str(tag)
+            
+            if not tag_name:
+                continue
+                
+            # Clean up tag: remove spaces, special chars
+            clean_tag = tag_name.replace(" ", "").replace("-", "").replace("&", "And")
             # Remove any non-alphanumeric chars
             clean_tag = "".join(c for c in clean_tag if c.isalnum())
             if clean_tag:
