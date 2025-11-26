@@ -1,0 +1,25 @@
+Nov 26 02:50:57 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:  mastra  0.14.1-alpha.0 ready in 2394 ms
+Nov 26 02:50:57 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: │ Playground: http://0.0.0.0:5000/
+Nov 26 02:50:57 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: │ API:        http://0.0.0.0:5000/api
+Nov 26 02:50:57 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: ◯ watching for file changes...
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: =================================================
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: ⚠️  We detected that you have nested `step.*` tooling in `publish:workflow:polymarket-monitor:0608ed61-d726-4cf5-a6de-122470d2a62f`
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:     at prettyError (file:///opt/polymarket-bot/node_modules/inngest/helpers/errors.js:231:51)
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:     at stepHandler (file:///opt/polymarket-bot/node_modules/inngest/components/execution/v1.js:788:17)
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: It's possible to see this warning if steps are separated by regular asynchronous calls, which is fine. Nesting `step.*` tooling is not supported.
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: Make sure you're not using `step.*` tooling inside of other `step.*` tooling. If you need to compose steps together, you can create a new async function and call it from within your step function, or use promise chaining.
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: Code: NESTING_STEPS
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: =================================================
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: =================================================
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: ⚠️  We detected that you have multiple steps with the same ID.
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: Your function is still running, though it may exhibit unexpected behaviour. This can happen if you're using the same ID for multiple steps across different chains of parallel work. We found the issue with step "publish:workflow:polymarket-monitor:0608ed61-d726-4cf5-a6de-122470d2a62f". Using the same IDs across parallel chains of work can cause unexpected behaviour.
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: We recommend using a unique ID for each step, especially those happening in parallel.
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: Code: AUTOMATIC_PARALLEL_INDEXING
+Nov 26 02:52:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: =================================================
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# sudo systemctl restart inngest.service
+
+# Wait about 60 seconds for the cron to trigger, then check:
+journalctl -u mastra.service --since "2 minutes ago" | grep -E "(monitorAndPost|cron|Posted to Telegram)"
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# 

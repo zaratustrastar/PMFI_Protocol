@@ -1,0 +1,146 @@
+:/opt/polymarket-bot# cd /opt/polymarket-bot
+npm run build
+
+sudo systemctl restart mastra.service
+sudo systemctl restart inngest.service
+
+> agent-stack-mastra@1.0.0 build
+> mastra build
+
+INFO [2025-11-26 02:19:45.421 +0000] (Mastra CLI): Analyzing dependencies...
+INFO [2025-11-26 02:19:49.762 +0000] (Mastra CLI): Optimizing dependencies...
+INFO [2025-11-26 02:20:35.136 +0000] (Mastra CLI): Bundling Mastra application
+INFO [2025-11-26 02:20:45.045 +0000] (Mastra CLI): Bundling Mastra done
+INFO [2025-11-26 02:20:45.048 +0000] (Mastra CLI): Copying public files
+INFO [2025-11-26 02:20:45.055 +0000] (Mastra CLI): Done copying public files
+INFO [2025-11-26 02:20:45.057 +0000] (Mastra CLI): Copying .npmrc file
+INFO [2025-11-26 02:20:45.061 +0000] (Mastra CLI): Done copying .npmrc file
+INFO [2025-11-26 02:20:45.062 +0000] (Mastra CLI): Installing dependencies
+added 435 packages in 28s
+INFO [2025-11-26 02:21:13.354 +0000] (Mastra CLI): added 435 packages in 28s
+INFO [2025-11-26 02:21:13.424 +0000] (Mastra CLI): Done installing dependencies
+INFO [2025-11-26 02:21:13.425 +0000] (Mastra CLI): Build successful, you can now deploy the .mastra/output directory to your target platform.
+INFO [2025-11-26 02:21:13.426 +0000] (Mastra CLI): To start the server, run: node --import=./.mastra/output/instrumentation.mjs .mastra/output/index.mjs
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# journalctl -u mastra.service -f
+Nov 26 02:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3099]:                                  ^
+Nov 26 02:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3099]: TypeError: createWorkflow(...).then(...).commit(...).on is not a function
+Nov 26 02:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3099]:     at file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148:34
+Nov 26 02:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3099]:     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+Nov 26 02:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3099]:     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+Nov 26 02:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3099]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Nov 26 02:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3099]: Node.js v20.19.5
+Nov 26 02:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=exited, status=1/FAILURE
+Nov 26 02:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'exit-code'.
+Nov 26 02:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 2.628s CPU time.
+Nov 26 02:23:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Scheduled restart job, restart counter is at 3.
+Nov 26 02:23:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3115]: file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3115]: }).then(monitorAndPost).commit().on("cron", {
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3115]:                                  ^
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3115]: TypeError: createWorkflow(...).then(...).commit(...).on is not a function
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3115]:     at file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148:34
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3115]:     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3115]:     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3115]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3115]: Node.js v20.19.5
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=exited, status=1/FAILURE
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'exit-code'.
+Nov 26 02:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 2.887s CPU time.
+Nov 26 02:23:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Scheduled restart job, restart counter is at 4.
+Nov 26 02:23:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3128]: file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3128]: }).then(monitorAndPost).commit().on("cron", {
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3128]:                                  ^
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3128]: TypeError: createWorkflow(...).then(...).commit(...).on is not a function
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3128]:     at file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148:34
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3128]:     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3128]:     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3128]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3128]: Node.js v20.19.5
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=exited, status=1/FAILURE
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'exit-code'.
+Nov 26 02:23:35 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 2.832s CPU time.
+Nov 26 02:23:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Scheduled restart job, restart counter is at 5.
+Nov 26 02:23:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3143]: file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3143]: }).then(monitorAndPost).commit().on("cron", {
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3143]:                                  ^
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3143]: TypeError: createWorkflow(...).then(...).commit(...).on is not a function
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3143]:     at file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148:34
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3143]:     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3143]:     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3143]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3143]: Node.js v20.19.5
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=exited, status=1/FAILURE
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'exit-code'.
+Nov 26 02:23:47 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 2.598s CPU time.
+Nov 26 02:23:57 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Scheduled restart job, restart counter is at 6.
+Nov 26 02:23:57 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3155]: file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3155]: }).then(monitorAndPost).commit().on("cron", {
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3155]:                                  ^
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3155]: TypeError: createWorkflow(...).then(...).commit(...).on is not a function
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3155]:     at file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148:34
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3155]:     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3155]:     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3155]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3155]: Node.js v20.19.5
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=exited, status=1/FAILURE
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'exit-code'.
+Nov 26 02:23:59 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 2.522s CPU time.
+Nov 26 02:24:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Scheduled restart job, restart counter is at 7.
+Nov 26 02:24:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3168]: file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3168]: }).then(monitorAndPost).commit().on("cron", {
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3168]:                                  ^
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3168]: TypeError: createWorkflow(...).then(...).commit(...).on is not a function
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3168]:     at file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148:34
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3168]:     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3168]:     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3168]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3168]: Node.js v20.19.5
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=exited, status=1/FAILURE
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'exit-code'.
+Nov 26 02:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 2.477s CPU time.
+Nov 26 02:24:21 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Scheduled restart job, restart counter is at 8.
+Nov 26 02:24:21 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3180]: file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3180]: }).then(monitorAndPost).commit().on("cron", {
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3180]:                                  ^
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3180]: TypeError: createWorkflow(...).then(...).commit(...).on is not a function
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3180]:     at file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148:34
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3180]:     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3180]:     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3180]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3180]: Node.js v20.19.5
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=exited, status=1/FAILURE
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'exit-code'.
+Nov 26 02:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 2.665s CPU time.
+Nov 26 02:24:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Scheduled restart job, restart counter is at 9.
+Nov 26 02:24:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3194]: file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3194]: }).then(monitorAndPost).commit().on("cron", {
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3194]:                                  ^
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3194]: TypeError: createWorkflow(...).then(...).commit(...).on is not a function
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3194]:     at file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148:34
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3194]:     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3194]:     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3194]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3194]: Node.js v20.19.5
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=exited, status=1/FAILURE
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'exit-code'.
+Nov 26 02:24:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 2.826s CPU time.
+Nov 26 02:24:46 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Scheduled restart job, restart counter is at 10.
+Nov 26 02:24:46 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3209]: file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3209]: }).then(monitorAndPost).commit().on("cron", {
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3209]:                                  ^
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3209]: TypeError: createWorkflow(...).then(...).commit(...).on is not a function
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3209]:     at file:///opt/polymarket-bot/.mastra/output/mastra.mjs:112148:34
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3209]:     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3209]:     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3209]:     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[3209]: Node.js v20.19.5
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=exited, status=1/FAILURE
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'exit-code'.
+Nov 26 02:24:48 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 2.659s CPU time.

@@ -1,0 +1,13 @@
+Nov 26 02:53:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:     at prettyError (file:///opt/polymarket-bot/node_modules/inngest/helpers/errors.js:231:51)
+Nov 26 02:54:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:     at prettyError (file:///opt/polymarket-bot/node_modules/inngest/helpers/errors.js:231:51)
+Nov 26 02:55:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:     at prettyError (file:///opt/polymarket-bot/node_modules/inngest/helpers/errors.js:231:51)
+Nov 26 02:56:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:     at prettyError (file:///opt/polymarket-bot/node_modules/inngest/helpers/errors.js:231:51)
+Nov 26 02:56:30 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:     at prettyError (file:///opt/polymarket-bot/node_modules/inngest/helpers/errors.js:231:51)
+Nov 26 02:57:00 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:     at prettyError (file:///opt/polymarket-bot/node_modules/inngest/helpers/errors.js:231:51)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# journalctl -u inngest.service --since "5 minutes ago" --no-pager | grep -E "(function.finished|error|ERROR)"
+Nov 26 02:56:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4784]: {"time":"2025-11-26T02:56:00.100107383Z","level":"ERROR","msg":"error handling queue item","error":"invalid status code: 504"}
+Nov 26 02:56:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4784]: {"time":"2025-11-26T02:56:00.990728484Z","level":"ERROR","msg":"error handling queue item","error":"invalid status code: 504"}
+Nov 26 02:56:01 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4784]: {"time":"2025-11-26T02:56:01.030685021Z","level":"INFO","msg":"received event","event":"inngest/function.finished","event_id":"01KAZ1DQEY0TVG31X3Z0181YER","internal_id":"01KAZ1DQEYZK2600PZW3YWE15P"}
+Nov 26 02:57:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4784]: {"time":"2025-11-26T02:57:00.102124168Z","level":"ERROR","msg":"error handling queue item","error":"invalid status code: 504"}
+Nov 26 02:57:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4784]: {"time":"2025-11-26T02:57:00.689833786Z","level":"ERROR","msg":"error handling queue item","error":"invalid status code: 504"}
+Nov 26 02:57:00 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4784]: {"time":"2025-11-26T02:57:00.705925653Z","level":"INFO","msg":"received event","event":"inngest/function.finished","event_id":"01KAZ1FHRH32133Y38HRQBWZ3W","internal_id":"01KAZ1FHRH013FGQ5KXZGNWD85"}

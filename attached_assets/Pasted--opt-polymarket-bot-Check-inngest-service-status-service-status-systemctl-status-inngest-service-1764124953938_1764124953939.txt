@@ -1,0 +1,32 @@
+/opt/polymarket-bot# # Check inngest service status:service status:
+systemctl status inngest.service --no-pager
+
+# Check if inngest is even running:
+ps aux | grep inngest
+● inngest.service - Inngest Workflow Orchestration Server
+     Loaded: loaded (/etc/systemd/system/inngest.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2025-11-26 02:35:26 UTC; 6min ago
+   Main PID: 4300 (npm exec innges)
+      Tasks: 20 (limit: 4653)
+     Memory: 67.4M (peak: 74.5M)
+        CPU: 6.727s
+     CGroup: /system.slice/inngest.service
+             ├─4300 "npm exec inngest-cli dev -u http://localhost:5000/api/inngest --host 127.0.0.1 --port 3000 --config /root/.config/inngest/inngest.yaml"
+             ├─4316 sh -c "inngest-cli dev -u http://localhost:5000/api/inngest --host 127.0.0.1 --port 3000 --config /root/.config/inngest/inngest.yaml"
+             └─4317 inngest-cli dev -u http://localhost:5000/api/inngest --host 127.0.0.1 --port 3000 --config /root/.config/inngest/inngest.yaml
+
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.338346364Z","level":"INFO","msg":"starting connect gateway grpc…:":50052"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.339000899Z","level":"INFO","msg":"starting event stream","backe…":"redis"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.339573874Z","level":"INFO","msg":"autodiscovering locally hosted SDKs"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.342881005Z","level":"INFO","msg":"apps synced, disabling auto-discovery"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.33927775Z","level":"INFO","msg":"service starting","caller":"ex…executor"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.343697924Z","level":"INFO","msg":"subscribing to function queue"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.339532934Z","level":"INFO","msg":"service starting","caller":"a…ce":"api"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.344004872Z","level":"INFO","msg":"starting server","caller":"ap…0.1:3000"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.343117244Z","level":"INFO","msg":"service starting","caller":"r…:"runner"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.344976495Z","level":"INFO","msg":"subscribing to events","topic":"events"}
+Hint: Some lines were ellipsized, use -l to show in full.
+root        4300  0.1  1.5 1098380 61280 ?       Ssl  02:35   0:00 npm exec inngest-cli dev -u http://localhost:5000/api/inngest --host 127.0.0.1 --port 3000 --config /root/.config/inngest/inngest.yaml
+root        4316  0.0  0.0   2800  1664 ?        S    02:35   0:00 sh -c inngest-cli dev -u http://localhost:5000/api/inngest --host 127.0.0.1 --port 3000 --config /root/.config/inngest/inngest.yaml
+root        4317  1.5  2.5 1327396 100480 ?      Sl   02:35   0:06 inngest-cli dev -u http://localhost:5000/api/inngest --host 127.0.0.1 --port 3000 --config /root/.config/inngest/inngest.yaml
+root        4432  0.0  0.0   7076  2048 pts/0    S+   02:41   0:00 grep --color=auto inngest

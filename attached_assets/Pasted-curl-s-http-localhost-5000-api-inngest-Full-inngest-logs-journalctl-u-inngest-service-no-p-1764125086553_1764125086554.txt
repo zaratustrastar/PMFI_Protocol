@@ -1,0 +1,34 @@
+curl -s http://localhost:5000/api/inngest
+
+# Full inngest logs:
+journalctl -u inngest.service --no-pager | tail -30
+{"authentication_succeeded":null,"extra":{"is_mode_explicit":false},"has_event_key":false,"has_signing_key":false,"function_count":2,"mode":"dev","schema_version":"2024-05-24"}Nov 26 02:32:35 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4240]: {"time":"2025-11-26T02:32:35.642649757Z","level":"INFO","msg":"starting connect gateway grpc server","caller":"connect-gateway","addr":":50052"}
+Nov 26 02:32:35 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4240]: {"time":"2025-11-26T02:32:35.642827403Z","level":"INFO","msg":"service starting","caller":"executor","service":"executor"}
+Nov 26 02:32:35 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4240]: {"time":"2025-11-26T02:32:35.64284716Z","level":"INFO","msg":"subscribing to function queue"}
+Nov 26 02:32:35 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4240]: {"time":"2025-11-26T02:32:35.643103313Z","level":"INFO","msg":"service starting","caller":"api","service":"api"}
+Nov 26 02:32:35 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4240]: {"time":"2025-11-26T02:32:35.643138316Z","level":"INFO","msg":"starting server","caller":"api","addr":"127.0.0.1:3000"}
+Nov 26 02:32:35 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4240]: {"time":"2025-11-26T02:32:35.643239969Z","level":"INFO","msg":"autodiscovering locally hosted SDKs"}
+Nov 26 02:32:35 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4240]: {"time":"2025-11-26T02:32:35.644680384Z","level":"INFO","msg":"subscribing to events","topic":"events"}
+Nov 26 02:32:35 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4240]: {"time":"2025-11-26T02:32:35.645224524Z","level":"INFO","msg":"apps synced, disabling auto-discovery"}
+Nov 26 02:35:26 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4240]: {"time":"2025-11-26T02:35:26.755140387Z","level":"INFO","msg":"signal received, service stopping","caller":"devserver","service":"devserver","signal":"context canceled","seconds":30}
+Nov 26 02:35:26 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4240]: {"time":"2025-11-26T02:35:26.755144257Z","level":"INFO","msg":"signal received, service stopping","caller":"api","service":"api","signal":"context canceled","seconds":30}
+Nov 26 02:35:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping inngest.service - Inngest Workflow Orchestration Server...
+Nov 26 02:35:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Failed to kill control group /system.slice/inngest.service, ignoring: Invalid argument
+Nov 26 02:35:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Deactivated successfully.
+Nov 26 02:35:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped inngest.service - Inngest Workflow Orchestration Server.
+Nov 26 02:35:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: inngest.service: Consumed 3.434s CPU time, 74.5M memory peak, 0B memory swap peak.
+Nov 26 02:35:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started inngest.service - Inngest Workflow Orchestration Server.
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.296880718Z","level":"INFO","msg":"using config","file":"/root/.config/inngest/inngest.yaml"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.328286495Z","level":"INFO","msg":"starting executor grpc server","svc":"executor","addr":":50053"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.337078821Z","level":"INFO","msg":"service starting","caller":"devserver","service":"devserver"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.338163578Z","level":"INFO","msg":"service starting","caller":"connect-gateway","service":"connect-gateway"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.338346364Z","level":"INFO","msg":"starting connect gateway grpc server","caller":"connect-gateway","addr":":50052"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.339000899Z","level":"INFO","msg":"starting event stream","backend":"redis"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.339573874Z","level":"INFO","msg":"autodiscovering locally hosted SDKs"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.342881005Z","level":"INFO","msg":"apps synced, disabling auto-discovery"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.33927775Z","level":"INFO","msg":"service starting","caller":"executor","service":"executor"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.343697924Z","level":"INFO","msg":"subscribing to function queue"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.339532934Z","level":"INFO","msg":"service starting","caller":"api","service":"api"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.344004872Z","level":"INFO","msg":"starting server","caller":"api","addr":"127.0.0.1:3000"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.343117244Z","level":"INFO","msg":"service starting","caller":"runner","service":"runner"}
+Nov 26 02:35:27 ubuntu-s-1vcpu-1gb-sfo3-01 inngest[4317]: {"time":"2025-11-26T02:35:27.344976495Z","level":"INFO","msg":"subscribing to events","topic":"events"}

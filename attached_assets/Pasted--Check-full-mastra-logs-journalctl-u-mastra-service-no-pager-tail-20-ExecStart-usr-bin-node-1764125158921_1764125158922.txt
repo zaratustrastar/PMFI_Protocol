@@ -1,0 +1,23 @@
+# Check full mastra logs:
+journalctl -u mastra.service --no-pager | tail -20
+ExecStart=/usr/bin/node --import=/opt/polymarket-bot/.mastra/output/instrumentation.mjs /opt/polymarket-bot/.mastra/output/index.mjs
+Nov 26 02:30:30 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4147]:   code: 'ERR_MODULE_NOT_FOUND',
+Nov 26 02:30:30 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4147]:   url: 'file:///opt/polymarket-bot/.mastra/output/index.mjs'
+Nov 26 02:30:30 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4147]: }
+Nov 26 02:30:30 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4147]: Node.js v20.19.5
+Nov 26 02:30:30 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=exited, status=1/FAILURE
+Nov 26 02:30:30 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'exit-code'.
+Nov 26 02:30:40 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Scheduled restart job, restart counter is at 40.
+Nov 26 02:30:40 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:30:41 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4171]: {"level":"warn","time":"2025-11-26T02:30:41.428Z","name":"Mastra","msg":"Mastra telemetry is deprecated and will be removed on the Nov 4th release. Instead use AI Tracing. More info can be found here: https://github.com/mastra-ai/mastra/issues/8577 and here: https://mastra.ai/en/docs/observability/ai-tracing/overview"}
+Nov 26 02:30:41 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4171]: {"level":"info","time":"2025-11-26T02:30:41.508Z","name":"Mastra","msg":" Mastra API running on port http://0.0.0.0:5000/api"}
+Nov 26 02:31:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping mastra.service - Mastra Development Server - Polymarket Trading Bot...
+Nov 26 02:32:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: State 'stop-sigterm' timed out. Killing.
+Nov 26 02:32:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Killing process 4171 (node) with signal SIGKILL.
+Nov 26 02:32:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=killed, status=9/KILL
+Nov 26 02:32:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'timeout'.
+Nov 26 02:32:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:32:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 3.610s CPU time.
+Nov 26 02:32:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:32:37 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4212]: {"level":"warn","time":"2025-11-26T02:32:37.130Z","name":"Mastra","msg":"Mastra telemetry is deprecated and will be removed on the Nov 4th release. Instead use AI Tracing. More info can be found here: https://github.com/mastra-ai/mastra/issues/8577 and here: https://mastra.ai/en/docs/observability/ai-tracing/overview"}
+Nov 26 02:32:37 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4212]: {"level":"info","time":"2025-11-26T02:32:37.290Z","name":"Mastra","msg":" Mastra API running on port http://0.0.0.0:5000/api"}

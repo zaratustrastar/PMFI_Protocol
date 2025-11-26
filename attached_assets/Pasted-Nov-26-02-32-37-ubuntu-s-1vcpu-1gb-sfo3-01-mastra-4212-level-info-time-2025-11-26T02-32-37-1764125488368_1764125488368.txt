@@ -1,0 +1,18 @@
+Nov 26 02:32:37 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4212]: {"level":"info","time":"2025-11-26T02:32:37.290Z","name":"Mastra","msg":" Mastra API running on port http://0.0.0.0:5000/api"}
+Nov 26 02:49:13 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping mastra.service - Mastra Development Server - Polymarket Trading Bot...
+Nov 26 02:50:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: State 'stop-sigterm' timed out. Killing.
+Nov 26 02:50:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Killing process 4212 (node) with signal SIGKILL.
+Nov 26 02:50:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed to kill control group /system.slice/mastra.service, ignoring: Invalid argument
+Nov 26 02:50:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Main process exited, code=killed, status=9/KILL
+Nov 26 02:50:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Failed with result 'timeout'.
+Nov 26 02:50:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:50:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 17.360s CPU time, 170.1M memory peak, 0B memory swap peak.
+Nov 26 02:50:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 26 02:50:50 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: ◐ Preparing development environment...
+Nov 26 02:50:54 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: ✓ Initial bundle complete
+Nov 26 02:50:54 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: ◇ Starting Mastra dev server...
+Nov 26 02:50:57 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: WARN [2025-11-26 02:50:57.025 +0000] (Mastra): Mastra telemetry is deprecated and will be removed on the Nov 4th release. Instead use AI Tracing. More info can be found here: https://github.com/mastra-ai/mastra/issues/8577 and here: https://mastra.ai/en/docs/observability/ai-tracing/overview
+Nov 26 02:50:57 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]:  mastra  0.14.1-alpha.0 ready in 2394 ms
+Nov 26 02:50:57 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: │ Playground: http://0.0.0.0:5000/
+Nov 26 02:50:57 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: │ API:        http://0.0.0.0:5000/api
+Nov 26 02:50:57 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[4713]: ◯ watching for file changes...
