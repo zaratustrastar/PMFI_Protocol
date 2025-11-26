@@ -1,0 +1,85 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # On your VPS, pull the latest code:
+cd /opt/polymarket-bot
+git pull origin main
+
+# Add the bot token:
+nano .env.systemd
+# Add: TELEGRAM_BOT_TOKEN=8456822133:AAH5YjXPtCKLpCR4BtQgNYyejub14qqBZ-Q
+
+# Restart services:
+systemctl daemon-reload
+systemctl restart mastra.service inngest.service
+remote: Enumerating objects: 54, done.
+remote: Counting objects: 100% (54/54), done.
+remote: Compressing objects: 100% (19/19), done.
+remote: Total 40 (delta 22), reused 39 (delta 21), pack-reused 0 (from 0)
+Unpacking objects: 100% (40/40), 29.28 KiB | 1.22 MiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+ * branch            main       -> FETCH_HEAD
+   a79f90b..0386d44  main       -> origin/main
+Updating a79f90b..0386d44
+Fast-forward
+ ...l-journalctl-u-mastra-service-since-23-32-00--1764027991802_1764027991803.txt | 136 +++++++++++++++++
+ ...-u-mastra-service-since-5-minutes-ago-no-page-1764028979460_1764028979461.txt |  98 ++++++++++++
+ ...sterCronWorkflow-src-mastra-index-ts-function-1764025100603_1764025100604.txt |  43 ++++++
+ ...opt-polymarket-bot-name-polymarketWorkflow-ts-1764066930390_1764066930390.txt |  58 -------
+ ...u-mastra-service-since-1-minute-ago-no-pager--1764025910334_1764025910335.txt |  81 ++++++++++
+ ...stra-service-since-2-minutes-ago-no-pager-tai-1764027764086_1764027764087.txt |  19 +++
+ ...mastra-service-since-1-minute-ago-no-pager-gr-1764028660645_1764028660647.txt | 195 ++++++++++++++++++++++++
+ ...t-tlnp-grep-node-Nov-25-12-52-19-ubuntu-s-1vc-1764075210415_1764075210416.txt |  54 -------
+ ...v20-x-Nov-24-23-54-23-ubuntu-s-1vcpu-1gb-sfo3-1764067051296_1764067051297.txt | 299 ------------------------------------
+ ...-re-planning-now-the-new-version-you-have-in--1764035836342_1764035836343.txt | 115 --------------
+ ...-so-it-doesn-t-start-optimizing-random-stuff--1764036808383_1764036808384.txt | 102 -------------
+ ...resources-or-another-system-error-See-systemc-1764067323226_1764067323227.txt |  36 -----
+ ...111-194-root-ubuntu-s-1vcpu-1gb-sfo3-01-From--1764023476624_1764023476625.txt | 143 ++++++++++++++++++
+ ...11-194-root-ubuntu-s-1vcpu-1gb-sfo3-01-cd-tmp-1764066696361_1764066696362.txt |  81 ----------
+ ...1-Started-mastra-service-Mastra-Development-S-1764068175362_1764068175362.txt |  25 ---
+ ...stra-starts-fine-but-the-monitorAndPost-workf-1764024710057_1764024710058.txt | 182 ++++++++++++++++++++++
+ ...git-log-oneline-3-63c370e-HEAD-main-origin-ma-1764025231604_1764025231605.txt | 171 +++++++++++++++++++++
+ ...ST-See-the-startup-logs-to-check-what-port-Ma-1764075291001_1764075291002.txt | 311 --------------------------------------
+ ...s-actually-running-and-triggering-workflows-j-1764075145974_1764075145975.txt | 111 --------------
+ ...e-actual-runtime-errors-not-just-TypeScript-w-1764024788721_1764024788721.txt |  53 +++++++
+ ...st-startup-script-cat-opt-polymarket-bot-scri-1764075454481_1764075454481.txt | 123 ---------------
+ ...-logs-you-should-see-the-workflow-trigger-wit-1764068717792_1764068717793.txt |  42 -----
+ ...gest-service-n-20-no-pager-Nov-25-10-59-07-ub-1764068400487_1764068400487.txt |  22 ---
+ ...See-the-actual-Inngest-crash-error-journalctl-1764028129637_1764028129638.txt |  53 +++++++
+ ...stemctl-status-mastra-service-inngest-service-1764023899947_1764023899949.txt | 109 +++++++++++++
+ ...tatus-mastra-service-mastra-service-Mastra-De-1764067951590_1764067951590.txt |  38 -----
+ deployment/FIX_VPS_AUTONOMY.sh                                                   | 104 -------------
+ deployment/VPS_AUTONOMY_FIX_GUIDE.md                                             | 266 --------------------------------
+ deployment/systemd/mastra.service                                                |  21 ++-
+ scripts/inngest.sh                                                               |   4 +-
+ src/mastra/workflows/polymarketWorkflow.ts                                       |  83 ++--------
+ trading_bot/telegram_notifier.py                                                 |  29 ++++
+ 32 files changed, 1340 insertions(+), 1867 deletions(-)
+ create mode 100644 attached_assets/Pasted--Also-check-if-there-are-ANY-workflow-logs-at-all-journalctl-u-mastra-service-since-23-32-00--1764027991802_1764027991803.txt
+ create mode 100644 attached_assets/Pasted--Check-if-Mastra-is-actually-running-journalctl-u-mastra-service-since-5-minutes-ago-no-page-1764028979460_1764028979461.txt
+ create mode 100644 attached_assets/Pasted--Check-if-cron-trigger-is-still-registered-grep-registerCronWorkflow-src-mastra-index-ts-function-1764025100603_1764025100604.txt
+ delete mode 100644 attached_assets/Pasted--Check-if-there-s-a-different-mastra-location-find-opt-polymarket-bot-name-polymarketWorkflow-ts-1764066930390_1764066930390.txt
+ create mode 100644 attached_assets/Pasted--Check-if-workflow-is-running-again-journalctl-u-mastra-service-since-1-minute-ago-no-pager--1764025910334_1764025910335.txt
+ create mode 100644 attached_assets/Pasted--Check-if-workflow-is-running-journalctl-u-mastra-service-since-2-minutes-ago-no-pager-tai-1764027764086_1764027764087.txt
+ create mode 100644 attached_assets/Pasted--Check-if-workflows-are-running-journalctl-u-mastra-service-since-1-minute-ago-no-pager-gr-1764028660645_1764028660647.txt
+ delete mode 100644 attached_assets/Pasted--Check-what-port-Mastra-is-listening-on-sudo-netstat-tlnp-grep-node-Nov-25-12-52-19-ubuntu-s-1vc-1764075210415_1764075210416.txt
+ delete mode 100644 attached_assets/Pasted--Verify-Node-js-installed-node-version-Should-be-v20-x-Nov-24-23-54-23-ubuntu-s-1vcpu-1gb-sfo3-1764067051296_1764067051297.txt
+ delete mode 100644 attached_assets/Pasted-Got-you-you-want-to-know-whether-the-concept-you-re-planning-now-the-new-version-you-have-in--1764035836342_1764035836343.txt
+ delete mode 100644 attached_assets/Pasted-Here-s-a-task-you-can-literally-paste-into-Replit-so-it-doesn-t-start-optimizing-random-stuff--1764036808383_1764036808384.txt
+ delete mode 100644 attached_assets/Pasted-Job-for-mastra-service-failed-because-of-unavailable-resources-or-another-system-error-See-systemc-1764067323226_1764067323227.txt
+ create mode 100644 attached_assets/Pasted-Last-login-Sat-Nov-22-04-28-21-2025-from-198-211-111-194-root-ubuntu-s-1vcpu-1gb-sfo3-01-From--1764023476624_1764023476625.txt
+ delete mode 100644 attached_assets/Pasted-Last-login-Tue-Nov-25-01-48-35-2025-from-198-211-111-194-root-ubuntu-s-1vcpu-1gb-sfo3-01-cd-tmp-1764066696361_1764066696362.txt
+ delete mode 100644 attached_assets/Pasted-Nov-25-10-55-11-ubuntu-s-1vcpu-1gb-sfo3-01-systemd-1-Started-mastra-service-Mastra-Development-S-1764068175362_1764068175362.txt
+ create mode 100644 attached_assets/Pasted-So-the-core-symptom-after-your-referral-change-is-Mastra-starts-fine-but-the-monitorAndPost-workf-1764024710057_1764024710058.txt
+ create mode 100644 attached_assets/Pasted-Your-git-reset-didn-t-go-far-enough-You-ran-git-log-oneline-3-63c370e-HEAD-main-origin-ma-1764025231604_1764025231605.txt
+ delete mode 100644 attached_assets/Pasted-cat-opt-polymarket-bot-env-grep-E-PORT-URL-HOST-See-the-startup-logs-to-check-what-port-Ma-1764075291001_1764075291002.txt
+ delete mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Check-if-Inngest-is-actually-running-and-triggering-workflows-j-1764075145974_1764075145975.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Check-if-there-are-actual-runtime-errors-not-just-TypeScript-w-1764024788721_1764024788721.txt
+ delete mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Show-me-the-Inngest-startup-script-cat-opt-polymarket-bot-scri-1764075454481_1764075454481.txt
+ delete mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Watch-the-mastra-logs-you-should-see-the-workflow-trigger-wit-1764068717792_1764068717793.txt
+ delete mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-journalctl-u-inngest-service-n-20-no-pager-Nov-25-10-59-07-ub-1764068400487_1764068400487.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-opt-polymarket-bot-See-the-actual-Inngest-crash-error-journalctl-1764028129637_1764028129638.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-opt-polymarket-bot-systemctl-status-mastra-service-inngest-service-1764023899947_1764023899949.txt
+ delete mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-sudo-systemctl-status-mastra-service-mastra-service-Mastra-De-1764067951590_1764067951590.txt
+ delete mode 100644 deployment/FIX_VPS_AUTONOMY.sh
+ delete mode 100644 deployment/VPS_AUTONOMY_FIX_GUIDE.md
+Failed to restart inngest.service: Transaction order is cyclic. See system logs for details.
+See system logs and 'systemctl status inngest.service' for details.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# 

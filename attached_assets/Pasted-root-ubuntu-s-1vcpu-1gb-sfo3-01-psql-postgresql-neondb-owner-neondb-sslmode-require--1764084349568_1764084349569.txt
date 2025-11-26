@@ -1,0 +1,45 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# psql "postgresql://neondb_owner:...@.../neondb?sslmode=require" \
+  -c "SELECT market_id, created_at FROM trading_jobs ORDER BY created_at DESC LIMIT 5;"
+psql: error: could not translate host name "..." to address: Name or service not known
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u mastra.service --since "15:18:00" --no-pager | head -40
+Nov 25 15:18:37 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping mastra.service - Mastra Development Server - Polymarket Trading Bot...
+Nov 25 15:18:37 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Deactivated successfully.
+Nov 25 15:18:37 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 25 15:18:37 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: mastra.service: Consumed 23.487s CPU time, 832.2M memory peak, 0B memory swap peak.
+Nov 25 15:18:37 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started mastra.service - Mastra Development Server - Polymarket Trading Bot.
+Nov 25 15:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: ◐ Preparing development environment...
+Nov 25 15:18:46 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: ✓ Initial bundle complete
+Nov 25 15:18:46 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: ◇ Starting Mastra dev server...
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: WARN [2025-11-25 15:18:48.748 +0000] (Mastra): Mastra telemetry is deprecated and will be removed on the Nov 4th release. Instead use AI Tracing. More info can be found here: https://github.com/mastra-ai/mastra/issues/8577 and here: https://mastra.ai/en/docs/observability/ai-tracing/overview
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:  mastra  0.14.1-alpha.0 ready in 2521 ms
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: │ Playground: http://0.0.0.0:5000/
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: │ API:        http://0.0.0.0:5000/api
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: ◯ watching for file changes...
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: file:///opt/polymarket-bot/node_modules/@mastra/pg/dist/index.js:4215
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:       throw new MastraError(
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:             ^
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: MastraError: SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:     at PostgresStore.init (file:///opt/polymarket-bot/node_modules/@mastra/pg/dist/index.js:4215:13)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:   id: 'MASTRA_STORAGE_POSTGRES_STORE_INIT_FAILED',
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:   domain: 'STORAGE',
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:   category: 'THIRD_PARTY',
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:   details: {},
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:   [cause]: MastraError: SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:       at StoreOperationsPG.createTable (file:///opt/polymarket-bot/node_modules/@mastra/pg/dist/index.js:2852:13)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:       at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:       at async Promise.all (index 0)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:       at async PostgresStore.init (file:///opt/polymarket-bot/node_modules/@mastra/core/dist/chunk-NMSLDMQ6.js:182:5)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:       at async PostgresStore.init (file:///opt/polymarket-bot/node_modules/@mastra/pg/dist/index.js:4207:7) {
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:     id: 'MASTRA_STORAGE_PG_STORE_CREATE_TABLE_FAILED',
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:     domain: 'STORAGE',
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:     category: 'THIRD_PARTY',
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:     details: { tableName: 'mastra_workflow_snapshot' },
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:     [cause]: Error: SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at Object.continueSession (/opt/polymarket-bot/node_modules/pg/lib/crypto/sasl.js:36:11)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at Client._handleAuthSASLContinue (/opt/polymarket-bot/node_modules/pg/lib/client.js:276:18)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at Connection.emit (node:events:524:28)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at /opt/polymarket-bot/node_modules/pg/lib/connection.js:116:12
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at Parser.parse (/opt/polymarket-bot/node_modules/pg-protocol/dist/parser.js:36:17)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at Socket.<anonymous> (/opt/polymarket-bot/node_modules/pg-protocol/dist/index.js:11:42)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

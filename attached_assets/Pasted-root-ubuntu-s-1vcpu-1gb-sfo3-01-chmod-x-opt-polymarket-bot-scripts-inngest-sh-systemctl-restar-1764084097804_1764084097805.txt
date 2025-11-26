@@ -1,0 +1,56 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# chmod +x /opt/polymarket-bot/scripts/inngest.sh
+
+systemctl restart inngest.service
+systemctl status inngest.service --no-pager | grep Active
+     Active: active (running) since Tue 2025-11-25 15:15:52 UTC; 16ms ago
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cat /opt/polymarket-bot/scripts/inngest.sh
+#!/usr/bin/env bash
+set -e
+
+# Put config in user's home directory
+INNGEST_CONFIG="$HOME/.config/inngest/inngest.yaml"
+
+if [[ ! -f "${INNGEST_CONFIG}" ]]; then
+  mkdir -p "$(dirname "${INNGEST_CONFIG}")"
+
+  if [[ -n "${DATABASE_URL}" ]]; then
+    # Use Postgres if DATABASE_URL is set
+    cat > "${INNGEST_CONFIG}" <<EOF2
+postgres-uri: "${DATABASE_URL}"
+EOF2
+  else
+    # Fall back to SQLite in a local folder
+    SQLITE_DIR="/opt/polymarket-bot/.local/share/inngest"
+    mkdir -p "${SQLITE_DIR}"
+
+    cat > "${INNGEST_CONFIG}" <<EOF2
+sqlite-dir: "${SQLITE_DIR}"
+EOF2
+  fi
+fi
+
+# Run Inngest via npx so the local dependency is found
+exec npx inngest-cli dev \
+  -u http://localhost:5000/api/inngest \
+  --host 127.0.0.1 \
+  --port 3000 \
+  --config "${INNGEST_CONFIG}"
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# systemctl restart mastra.service
+systemctl status mastra.service --no-pager | grep Active
+     Active: active (running) since Tue 2025-11-25 15:18:37 UTC; 13ms ago
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u mastra.service -f
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at /opt/polymarket-bot/node_modules/pg/lib/connection.js:116:12
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at Parser.parse (/opt/polymarket-bot/node_modules/pg-protocol/dist/parser.js:36:17)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at Socket.<anonymous> (/opt/polymarket-bot/node_modules/pg-protocol/dist/index.js:11:42)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at Socket.emit (node:events:524:28)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at addChunk (node:internal/streams/readable:561:12)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:         at Readable.push (node:internal/streams/readable:392:5)
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]:   }
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: }
+Nov 25 15:18:48 ubuntu-s-1vcpu-1gb-sfo3-01 mastra[1837]: Node.js v20.19.5
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# psql "postgresql://neondb_owner:...@.../neondb?sslmode=require" \
+  -c "SELECT market_id, created_at FROM trading_jobs ORDER BY created_at DESC LIMIT 5;"
+psql: error: could not translate host name "..." to address: Name or service not known
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

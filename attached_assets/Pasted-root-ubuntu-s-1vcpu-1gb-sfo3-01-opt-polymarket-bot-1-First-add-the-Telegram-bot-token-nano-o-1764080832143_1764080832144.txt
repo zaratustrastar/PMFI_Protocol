@@ -1,0 +1,65 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# # 1. First, add the Telegram bot token:
+nano /opt/polymarket-bot/.env.systemd
+
+# Add this line at the bottom:
+# TELEGRAM_BOT_TOKEN=8456822133:AAH5YjXPtCKLpCR4BtQgNYyejub14qqBZ-Q
+
+# Save and exit (Ctrl+X, Y, Enter)
+
+# 2. Fix the inngest cyclic dependency error by stopping everything first:
+systemctl stop mastra.service inngest.service polymarket-worker.service polymarket-monitor.service
+
+# 3. Reload systemd:
+systemctl daemon-reload
+
+# 4. Start services in correct order:
+systemctl start inngest.service
+sleep 2
+systemctl start mastra.service
+systemctl start polymarket-worker.service
+systemctl start polymarket-monitor.service
+
+# 5. Check everything is running:
+systemctl status mastra.service inngest.service --no-pager | grep Active
+
+# 6. Watch for Telegram posts (should happen within 60 seconds):
+journalctl -u mastra.service -f | grep -E "(Posted to Telegram|referral|via=)"
+Failed to stop inngest.service: Transaction order is cyclic. See system logs for details.
+See system logs and 'systemctl status inngest.service' for details.
+^C
+^C
+cFailed to start mastra.service: Transaction order is cyclic. See system logs for details.
+See system logs and 'systemctl status mastra.service' for details.
+     Active: deactivating (final-sigterm) since Tue 2025-11-25 14:26:01 UTC; 11s ago
+     Active: active (running) since Tue 2025-11-25 14:22:10 UTC; 4min 2s ago
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# # 1. First, add the Telegram bot token:
+nano /opt/polymarket-bot/.env.systemd
+
+# Add this line at the bottom:
+# TELEGRAM_BOT_TOKEN=8456822133:AAH5YjXPtCKLpCR4BtQgNYyejub14qqBZ-Q
+
+# Save and exit (Ctrl+X, Y, Enter)
+
+# 2. Fix the inngest cyclic dependency error by stopping everything first:
+systemctl stop mastra.service inngest.service polymarket-worker.service polymarket-monitor.service
+
+# 3. Reload systemd:
+systemctl daemon-reload
+
+# 4. Start services in correct order:
+systemctl start inngest.service
+sleep 2
+systemctl start mastra.service
+systemctl start polymarket-worker.service
+systemctl start polymarket-monitor.service
+
+# 5. Check everything is running:
+systemctl status mastra.service inngest.service --no-pager | grep Active
+
+# 6. Watch for Telegram posts (should happen within 60 seconds):
+journalctl -u mastra.service -f | grep -E "(Posted to Telegram|referral|via=)"
+Failed to stop inngest.service: Transaction order is cyclic. See system logs for details.
+See system logs and 'systemctl status inngest.service' for details.
+     Active: active (running) since Tue 2025-11-25 14:27:03 UTC; 83ms ago
+     Active: active (running) since Tue 2025-11-25 14:22:10 UTC; 4min 53s ago
