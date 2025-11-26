@@ -292,6 +292,24 @@ def queue_trading_job(market_slug: str, created_at: Optional[str] = None, closed
     conn.close()
 
 
+def format_tags_as_hashtags(tags: List) -> str:
+    """Convert API tags to hashtags"""
+    if not tags:
+        return ""
+    
+    hashtags = []
+    for tag in tags:
+        if tag:
+            # Clean up tag: remove spaces, special chars, capitalize
+            clean_tag = str(tag).replace(" ", "").replace("-", "").replace("&", "And")
+            # Remove any non-alphanumeric chars
+            clean_tag = "".join(c for c in clean_tag if c.isalnum())
+            if clean_tag:
+                hashtags.append(f"#{clean_tag}")
+    
+    return " ".join(hashtags[:5])  # Limit to 5 tags
+
+
 def process_market(market: Dict) -> bool:
     """
     Process a single new market:
@@ -311,6 +329,10 @@ def process_market(market: Dict) -> bool:
     
     market_url = add_referral_code(market.get("url", "https://polymarket.com"))
     
+    # Get category hashtags from API tags
+    tags = market.get("tags", [])
+    category_hashtags = format_tags_as_hashtags(tags)
+    
     # Format Telegram message
     message = f"""🔮 <b>New Polymarket Market!</b>
 
@@ -323,7 +345,7 @@ def process_market(market: Dict) -> bool:
     
     message += f"""<a href="{market_url}">🔗 Trade on Polymarket</a>
 
-#Polymarket #PredictionMarkets"""
+#Polymarket {category_hashtags}"""
     
     # Post to Telegram
     telegram_success = post_to_telegram(message)
