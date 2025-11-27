@@ -17,7 +17,7 @@ except ImportError:
 
 from polymarket_trader import PolymarketTrader
 from database import get_open_orders, update_order_status, update_market_summary
-from telegram_notifier import notify_buy_filled, notify_sell_executed
+from telegram_notifier import notify_buy_filled, notify_sell_executed, notify_sell_ladder_result
 
 
 def cancel_stale_orders(trader: PolymarketTrader, max_age_hours: int = 12):
@@ -101,8 +101,10 @@ def monitor_all_orders(trader: PolymarketTrader):
                 market_slug = filled_buy["market_slug"]
                 filled_price = filled_buy.get('filled_price', filled_buy['price'])
                 filled_size = filled_buy.get('filled_size', filled_buy['size'])
+                token_id = filled_buy.get("token_id")
+                side = filled_buy["side"]
                 
-                print(f"\n🎉 Buy filled: {filled_buy['side']} @ ${filled_price:.4f}")
+                print(f"\n🎉 Buy filled: {side} @ ${filled_price:.4f}")
                 
                 # Update buy order status with actual fill data
                 update_order_status(
@@ -112,24 +114,47 @@ def monitor_all_orders(trader: PolymarketTrader):
                     filled_price
                 )
                 
-                # Send Telegram notification
+                # Send Telegram notification about buy fill
                 notify_buy_filled(market_slug, {
-                    "side": filled_buy["side"],
+                    "side": side,
                     "price": filled_price,
                     "size": filled_size
                 })
                 
-                # Place sell ladder
-                print(f"   📈 Placing sell ladder...")
-                sell_orders = trader.place_sell_ladder(
-                    filled_buy["token_id"],
-                    filled_price,
-                    filled_size,
-                    filled_buy["side"],
-                    market_slug
-                )
+                # Validate token_id before placing sell ladder
+                if not token_id:
+                    error_msg = f"Missing token_id for order {order_id[:8]}"
+                    print(f"   ❌ Cannot place sell ladder: {error_msg}")
+                    notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
+                    continue
                 
-                print(f"   ✅ Placed {len(sell_orders)} sell orders")
+                # Place sell ladder with error handling
+                print(f"   📈 Placing sell ladder...")
+                print(f"      Token ID: {token_id[:16]}...")
+                print(f"      Buy price: ${filled_price:.4f}")
+                print(f"      Size: {filled_size:.2f} tokens")
+                
+                try:
+                    sell_orders = trader.place_sell_ladder(
+                        token_id,
+                        filled_price,
+                        filled_size,
+                        side,
+                        market_slug
+                    )
+                    
+                    if sell_orders and len(sell_orders) > 0:
+                        print(f"   ✅ Placed {len(sell_orders)} sell orders")
+                        notify_sell_ladder_result(market_slug, side, success=True, sell_count=len(sell_orders))
+                    else:
+                        error_msg = "No sell orders were placed (all failed)"
+                        print(f"   ❌ {error_msg}")
+                        notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
+                        
+                except Exception as e:
+                    error_msg = str(e)
+                    print(f"   ❌ Sell ladder error: {error_msg}")
+                    notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
                 
                 # Update summary
                 update_market_summary(market_slug)

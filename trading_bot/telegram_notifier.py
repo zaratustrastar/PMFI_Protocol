@@ -21,7 +21,7 @@ def add_referral_code(market_slug: str) -> str:
 
 def notify_buy_filled(market_slug: str, trade_data: Dict):
     """
-    Send Telegram notification when a buy order fills
+    Send Telegram notification when a buy order fills (without sell ladder status)
     
     Args:
         market_slug: Market identifier
@@ -43,7 +43,7 @@ Side: {side}
 Tokens: {size:.2f}
 Price: ${price:.4f}
 
-🎯 Sell ladder created
+⏳ Placing sell ladder...
 """
     
     # Send to Telegram
@@ -58,6 +58,59 @@ Price: ${price:.4f}
         response = requests.post(url, json=payload, timeout=10)
         if response.status_code == 200:
             print(f"✅ Telegram notification sent for {side} buy fill")
+        else:
+            print(f"⚠️  Telegram notification failed: {response.text}")
+    except Exception as e:
+        print(f"⚠️  Error sending Telegram notification: {e}")
+
+
+def notify_sell_ladder_result(market_slug: str, side: str, success: bool, sell_count: int = 0, error: str = ""):
+    """
+    Send Telegram notification about sell ladder placement result
+    
+    Args:
+        market_slug: Market identifier
+        side: YES or NO
+        success: Whether sell ladder was placed successfully
+        sell_count: Number of sell orders placed (if successful)
+        error: Error message (if failed)
+    """
+    if not TELEGRAM_BOT_TOKEN:
+        print("⚠️  TELEGRAM_BOT_TOKEN not set, skipping notification")
+        return
+    
+    if success:
+        message = f"""✅ **SELL LADDER PLACED**
+
+Market: {market_slug}
+Side: {side}
+Orders: {sell_count} sell orders at 3x-10x profit
+
+🎯 Now waiting for sells to fill...
+"""
+    else:
+        message = f"""❌ **SELL LADDER FAILED**
+
+Market: {market_slug}
+Side: {side}
+Error: {error}
+
+⚠️ Manual action may be needed!
+"""
+    
+    # Send to Telegram
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHANNEL,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
+    
+    try:
+        response = requests.post(url, json=payload, timeout=10)
+        if response.status_code == 200:
+            status = "success" if success else "failure"
+            print(f"✅ Telegram notification sent for sell ladder {status}")
         else:
             print(f"⚠️  Telegram notification failed: {response.text}")
     except Exception as e:

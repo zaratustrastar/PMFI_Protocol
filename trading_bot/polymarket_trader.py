@@ -261,11 +261,25 @@ class PolymarketTrader:
             List of placed sell order responses
         """
         print(f"\n💰 Placing SELL ladder for {side_name} token (bought @ ${buy_price:.4f})...")
+        print(f"   Token ID: {token_id}")
+        print(f"   Buy size: {buy_size:.2f} tokens")
+        print(f"   Profit multiples: {config.SELL_PROFIT_MULTIPLES}")
+        
+        # Validate inputs
+        if not token_id:
+            print(f"   ❌ CRITICAL: token_id is None or empty!")
+            return []
+        
+        if buy_size <= 0:
+            print(f"   ❌ CRITICAL: buy_size is {buy_size} (must be > 0)")
+            return []
         
         placed_orders = []
+        failed_orders = []
         
         # Divide position across sell ladder
         size_per_order = buy_size / len(config.SELL_PROFIT_MULTIPLES)
+        print(f"   Size per order: {size_per_order:.4f} tokens")
         
         for multiple in config.SELL_PROFIT_MULTIPLES:
             sell_price = buy_price * multiple
@@ -274,7 +288,11 @@ class PolymarketTrader:
             if sell_price > 0.99:
                 sell_price = 0.99
             
+            profit_pct = (multiple - 1) * 100
+            
             try:
+                print(f"\n   📝 Creating sell order @ ${sell_price:.4f} (+{profit_pct:.0f}%)...")
+                
                 order_args = OrderArgs(
                     price=sell_price,
                     size=size_per_order,
@@ -282,12 +300,16 @@ class PolymarketTrader:
                     token_id=token_id,
                 )
                 
+                print(f"      OrderArgs: price={sell_price}, size={size_per_order:.4f}, side=SELL, token_id={token_id[:16]}...")
+                
                 signed_order = self.client.create_order(order_args)
+                print(f"      Order signed successfully")
+                
                 response = self.client.post_order(signed_order, OrderType.GTC)
+                print(f"      API Response: {json.dumps(response, default=str)[:200]}...")
                 
                 if response.get("success"):
                     order_id = response.get("orderID", "")
-                    profit_pct = (multiple - 1) * 100
                     print(f"   ✅ Sell @ ${sell_price:.4f} ({size_per_order:.2f} tokens, +{profit_pct:.0f}%) - Order ID: {order_id[:8]}...")
                     
                     order_data = {
@@ -307,11 +329,29 @@ class PolymarketTrader:
                     # Save to database
                     save_order(order_data)
                 else:
-                    error = response.get("error", "Unknown error")
-                    print(f"   ❌ Sell @ ${sell_price:.4f} failed: {error}")
+                    error = response.get("error", response.get("errorMsg", "Unknown error"))
+                    error_code = response.get("errorCode", "N/A")
+                    print(f"   ❌ Sell @ ${sell_price:.4f} failed!")
+                    print(f"      Error: {error}")
+                    print(f"      Error code: {error_code}")
+                    print(f"      Full response: {json.dumps(response, default=str)}")
+                    failed_orders.append({"price": sell_price, "error": error})
                     
             except Exception as e:
-                print(f"   ❌ Sell @ ${sell_price:.4f} error: {str(e)}")
+                import traceback
+                print(f"   ❌ Sell @ ${sell_price:.4f} exception: {str(e)}")
+                print(f"      Traceback: {traceback.format_exc()}")
+                failed_orders.append({"price": sell_price, "error": str(e)})
+        
+        # Summary
+        print(f"\n   📊 Sell ladder summary:")
+        print(f"      Placed: {len(placed_orders)}/{len(config.SELL_PROFIT_MULTIPLES)}")
+        print(f"      Failed: {len(failed_orders)}/{len(config.SELL_PROFIT_MULTIPLES)}")
+        
+        if failed_orders:
+            print(f"      Failed orders:")
+            for fo in failed_orders:
+                print(f"         - ${fo['price']:.4f}: {fo['error'][:50]}...")
         
         return placed_orders
     
@@ -320,15 +360,21 @@ class PolymarketTrader:
         Check which orders have been filled
         
         Args:
-            orders: List of order dictionaries
+            orders: List of order dictionaries (must include token_id from database)
             
         Returns:
-            List of filled orders with actual filled size and price
+            List of filled orders with actual filled size, price, AND original token_id preserved
         """
         filled_orders = []
         
         for order in orders:
             order_id = order["order_id"]
+            
+            # CRITICAL: Preserve token_id from original order (API response doesn't include it)
+            original_token_id = order.get("token_id")
+            if not original_token_id:
+                print(f"   ⚠️  Order {order_id[:8]} missing token_id in database - cannot place sell ladder!")
+                continue
             
             try:
                 order_status = self.client.get_order(order_id)
@@ -341,11 +387,17 @@ class PolymarketTrader:
                     avg_price = float(order_status.get("avg_price", order["price"]))
                     
                     print(f"   🎯 Order filled: {order['order_type']} {order['side']} @ ${avg_price:.4f} ({filled_size:.2f} tokens)")
+                    print(f"      Token ID: {original_token_id[:16]}...")
                     
-                    order["status"] = "FILLED"
-                    order["filled_size"] = filled_size
-                    order["filled_price"] = avg_price
-                    filled_orders.append(order)
+                    # Build filled order with ALL required fields preserved
+                    filled_order = {
+                        **order,  # Keep all original fields including token_id
+                        "status": "FILLED",
+                        "filled_size": filled_size,
+                        "filled_price": avg_price,
+                        "token_id": original_token_id  # Explicitly ensure token_id is present
+                    }
+                    filled_orders.append(filled_order)
                     
                 elif status == "PARTIAL":
                     # Partial fill - track but don't trigger sell yet
