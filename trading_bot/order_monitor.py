@@ -86,8 +86,8 @@ def monitor_all_orders(trader: PolymarketTrader):
         print(f"⚠️  Error cancelling stale orders: {e}")
         # Continue with monitoring even if cancellation fails
     
-    # Get all open buy orders
-    open_buys = get_open_orders(order_type="BUY")
+    # Get all open buy orders (no age limit - monitor ALL open buys for fills)
+    open_buys = get_open_orders(order_type="BUY", max_age_hours=None)
     
     if open_buys:
         print(f"🔍 Checking {len(open_buys)} open buy orders...")

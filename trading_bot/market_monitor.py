@@ -273,19 +273,28 @@ def is_updown_market(text: str, tags: List = None) -> bool:
 
 
 def is_short_duration(created_at: str, closed_time: str, min_hours: int = 15) -> tuple:
-    """Check if market duration is too short (< 15 hours)"""
-    if not created_at or not closed_time:
+    """Check if market closes too soon (< 15 hours from now)"""
+    if not closed_time:
         return (False, None)
     
     try:
-        created = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+        from datetime import timezone
+        now = datetime.now(timezone.utc)
         closed = datetime.fromisoformat(closed_time.replace("Z", "+00:00"))
         
-        duration = closed - created
-        duration_hours = duration.total_seconds() / 3600
+        # Calculate time remaining until market closes
+        time_remaining = closed - now
+        hours_remaining = time_remaining.total_seconds() / 3600
         
-        return (duration_hours < min_hours, round(duration_hours, 1))
-    except Exception:
+        # Skip if market closes in less than min_hours
+        is_short = hours_remaining < min_hours
+        
+        if is_short:
+            log(f"   ⏱️ Short duration: closes in {round(hours_remaining, 1)}h (min: {min_hours}h)")
+        
+        return (is_short, round(hours_remaining, 1))
+    except Exception as e:
+        log(f"   ⚠️ Date parse error: {e} | closed_time={closed_time}")
         return (False, None)
 
 
