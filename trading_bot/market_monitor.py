@@ -3,11 +3,10 @@
 Standalone Polymarket Market Monitor
 
 This script runs via system cron every minute to:
-1. Fetch latest markets from Polymarket API
-2. Check which markets are new (not seen before)
-3. Post new markets to Telegram with referral code
-4. Queue qualifying markets for trading
-5. Mark markets as seen in database
+1. Fetch latest EVENTS from Polymarket API
+2. Post to Telegram once per new EVENT
+3. Queue each qualifying sub-market for trading (even if event was already seen)
+4. Track events and conditions separately
 
 Usage:
     python market_monitor.py
@@ -21,8 +20,9 @@ import sys
 import requests
 import psycopg2
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Set
 import html
+import time
 
 # Configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "")
@@ -67,19 +67,28 @@ def get_db_connection():
 
 
 def init_tables():
-    """Ensure required tables exist with all columns for multi-market support"""
+    """Ensure required tables exist"""
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # Seen markets table
+    # Seen events table (for Telegram - one post per event)
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS seen_polymarket_markets (
-            market_id TEXT PRIMARY KEY,
+        CREATE TABLE IF NOT EXISTS seen_polymarket_events (
+            event_slug TEXT PRIMARY KEY,
             seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     
-    # Trading jobs table - includes columns for multi-market support
+    # Seen conditions table (for trading - track each sub-market)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS seen_trading_conditions (
+            condition_id TEXT PRIMARY KEY,
+            event_slug TEXT,
+            seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    # Trading jobs table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS trading_jobs (
             id SERIAL PRIMARY KEY,
@@ -99,7 +108,7 @@ def init_tables():
         )
     """)
     
-    # Ensure columns exist for existing tables (migration)
+    # Migration for existing tables
     try:
         cur.execute("""
             ALTER TABLE trading_jobs 
@@ -109,84 +118,39 @@ def init_tables():
             ADD COLUMN IF NOT EXISTS outcomes TEXT
         """)
     except Exception:
-        pass  # Column already exists or not supported
+        pass
     
     conn.commit()
     cur.close()
     conn.close()
 
 
-def fetch_markets(limit: int = 20) -> List[Dict]:
-    """Fetch latest markets from Polymarket Gamma API"""
+def fetch_events(limit: int = 20) -> List[Dict]:
+    """Fetch latest EVENTS from Polymarket Gamma API."""
     try:
         url = f"{GAMMA_API_URL}?order=id&ascending=false&closed=false&limit={limit}"
         response = requests.get(url, timeout=30)
         response.raise_for_status()
         events = response.json()
         
-        # Extract individual markets from events
-        markets = []
-        for event in events:
-            event_slug = event.get("slug", "")
-            
-            # Each event can have multiple markets (sub-markets)
-            if "markets" in event and event["markets"]:
-                for market in event["markets"]:
-                    # condition_id is the unique trading identifier for each sub-market
-                    condition_id = market.get("conditionId", market.get("condition_id", ""))
-                    
-                    markets.append({
-                        "id": str(market.get("id", "")),
-                        "question": market.get("question", event.get("title", "")),
-                        "description": market.get("description", event.get("description", "")),
-                        "slug": market.get("slug", event_slug),
-                        "event_slug": event_slug,
-                        "condition_id": condition_id,
-                        "url": f"https://polymarket.com/event/{event_slug}",
-                        "createdAt": market.get("createdAt", event.get("createdAt")),
-                        "closedTime": market.get("endDate", event.get("endDate")),
-                        "tags": event.get("tags", []),
-                        "clobTokenIds": market.get("clobTokenIds", "[]"),
-                        "outcomes": market.get("outcomes", "[]"),
-                    })
-            else:
-                # Single market event (use event-level data)
-                condition_id = event.get("conditionId", event.get("condition_id", ""))
-                
-                markets.append({
-                    "id": str(event.get("id", "")),
-                    "question": event.get("title", event.get("question", "")),
-                    "description": event.get("description", ""),
-                    "slug": event_slug,
-                    "event_slug": event_slug,
-                    "condition_id": condition_id,
-                    "url": f"https://polymarket.com/event/{event_slug}",
-                    "createdAt": event.get("createdAt"),
-                    "closedTime": event.get("endDate"),
-                    "tags": event.get("tags", []),
-                    "clobTokenIds": event.get("clobTokenIds", "[]"),
-                    "outcomes": event.get("outcomes", "[]"),
-                })
-        
-        log(f"Fetched {len(markets)} markets from {len(events)} events")
-        return markets
+        log(f"Fetched {len(events)} events from API")
+        return events
         
     except Exception as e:
-        log(f"ERROR fetching markets: {e}")
+        log(f"ERROR fetching events: {e}")
         return []
 
 
-def get_seen_market_ids(market_ids: List[str]) -> set:
-    """Check which market IDs have already been seen"""
-    if not market_ids:
+def get_seen_event_slugs(event_slugs: List[str]) -> Set[str]:
+    """Check which event slugs have already been seen (for Telegram)"""
+    if not event_slugs:
         return set()
     
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # Query for existing market IDs
-    placeholders = ",".join(["%s"] * len(market_ids))
-    cur.execute(f"SELECT market_id FROM seen_polymarket_markets WHERE market_id IN ({placeholders})", market_ids)
+    placeholders = ",".join(["%s"] * len(event_slugs))
+    cur.execute(f"SELECT event_slug FROM seen_polymarket_events WHERE event_slug IN ({placeholders})", event_slugs)
     
     seen = {row[0] for row in cur.fetchall()}
     
@@ -196,14 +160,48 @@ def get_seen_market_ids(market_ids: List[str]) -> set:
     return seen
 
 
-def mark_as_seen(market_id: str):
-    """Mark a market as seen in the database"""
+def get_seen_condition_ids(condition_ids: List[str]) -> Set[str]:
+    """Check which condition IDs have already been processed (for trading)"""
+    if not condition_ids:
+        return set()
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    placeholders = ",".join(["%s"] * len(condition_ids))
+    cur.execute(f"SELECT condition_id FROM seen_trading_conditions WHERE condition_id IN ({placeholders})", condition_ids)
+    
+    seen = {row[0] for row in cur.fetchall()}
+    
+    cur.close()
+    conn.close()
+    
+    return seen
+
+
+def mark_event_as_seen(event_slug: str):
+    """Mark an event as seen for Telegram"""
     conn = get_db_connection()
     cur = conn.cursor()
     
     cur.execute(
-        "INSERT INTO seen_polymarket_markets (market_id) VALUES (%s) ON CONFLICT DO NOTHING",
-        (market_id,)
+        "INSERT INTO seen_polymarket_events (event_slug) VALUES (%s) ON CONFLICT DO NOTHING",
+        (event_slug,)
+    )
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def mark_condition_as_seen(condition_id: str, event_slug: str):
+    """Mark a condition as seen for trading"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute(
+        "INSERT INTO seen_trading_conditions (condition_id, event_slug) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+        (condition_id, event_slug)
     )
     
     conn.commit()
@@ -250,36 +248,36 @@ def post_to_telegram(message: str) -> bool:
         return False
 
 
-def is_updown_market(market: Dict) -> bool:
-    """Check if market is an up/down short-term market"""
-    name = (market.get("question", "") or "").lower()
-    slug = (market.get("slug", "") or "").lower()
-    tags = [str(t).lower() for t in market.get("tags", [])]
-    haystack = " ".join([name, slug] + tags)
+def is_updown_market(text: str, tags: List = None) -> bool:
+    """Check if market/event is an up/down short-term market"""
+    haystack = text.lower()
+    
+    if tags:
+        tag_strings = []
+        for tag in tags:
+            if isinstance(tag, dict):
+                tag_strings.append(str(tag.get("label", "")).lower())
+                tag_strings.append(str(tag.get("slug", "")).lower())
+            else:
+                tag_strings.append(str(tag).lower())
+        haystack += " " + " ".join(tag_strings)
     
     for keyword in UPDOWN_KEYWORDS:
         if keyword in haystack:
             return True
     
-    if "updown" in tags:
+    if tags and "updown" in [str(t).lower() for t in tags]:
         return True
     
     return False
 
 
-def is_short_duration_market(market: Dict, min_hours: int = 15) -> tuple:
-    """
-    Check if market duration is too short (< 15 hours)
-    Returns (is_short, duration_hours)
-    """
-    created_at = market.get("createdAt")
-    closed_time = market.get("closedTime")
-    
+def is_short_duration(created_at: str, closed_time: str, min_hours: int = 15) -> tuple:
+    """Check if market duration is too short (< 15 hours)"""
     if not created_at or not closed_time:
         return (False, None)
     
     try:
-        # Parse ISO format dates
         created = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
         closed = datetime.fromisoformat(closed_time.replace("Z", "+00:00"))
         
@@ -299,40 +297,15 @@ def queue_trading_job(
     outcomes: str,
     created_at: Optional[str] = None, 
     closed_time: Optional[str] = None
-):
-    """
-    Queue a sub-market for trading using condition_id as unique identifier.
-    
-    Args:
-        condition_id: Unique identifier for the sub-market (used as market_id)
-        event_slug: Parent event slug (for display/reference)
-        question: Market question (e.g., "Match Winner", "O/U 4.5")
-        clob_token_ids: JSON string of YES/NO token IDs
-        outcomes: JSON string of outcome names
-        created_at: Market creation time
-        closed_time: Market close time
-    """
+) -> bool:
+    """Queue a sub-market for trading using condition_id as unique identifier."""
     if not condition_id:
-        log(f"⚠️  No condition_id for market, skipping trading queue: {question[:50]}")
-        return
+        return False
     
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # Ensure we have the new columns
-    try:
-        cur.execute("""
-            ALTER TABLE trading_jobs 
-            ADD COLUMN IF NOT EXISTS event_slug TEXT,
-            ADD COLUMN IF NOT EXISTS question TEXT,
-            ADD COLUMN IF NOT EXISTS clob_token_ids TEXT,
-            ADD COLUMN IF NOT EXISTS outcomes TEXT
-        """)
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-    
-    # Parse dates if provided
+    # Parse dates
     market_created = None
     market_closed = None
     
@@ -348,16 +321,18 @@ def queue_trading_job(
         except:
             pass
     
-    # Use condition_id as the unique market_id (each sub-market gets its own job)
     cur.execute("""
         INSERT INTO trading_jobs (market_id, event_slug, question, clob_token_ids, outcomes, status, market_created_at, market_closed_time)
         VALUES (%s, %s, %s, %s, %s, 'PENDING', %s, %s)
         ON CONFLICT (market_id) DO NOTHING
     """, (condition_id, event_slug, question, clob_token_ids, outcomes, market_created, market_closed))
     
+    rows_inserted = cur.rowcount
     conn.commit()
     cur.close()
     conn.close()
+    
+    return rows_inserted > 0
 
 
 def format_tags_as_hashtags(tags: List) -> str:
@@ -368,7 +343,6 @@ def format_tags_as_hashtags(tags: List) -> str:
     hashtags = []
     for tag in tags:
         if tag:
-            # Tags come as objects with 'label' or 'slug' field
             if isinstance(tag, dict):
                 tag_name = tag.get("label") or tag.get("slug") or ""
             else:
@@ -377,95 +351,98 @@ def format_tags_as_hashtags(tags: List) -> str:
             if not tag_name:
                 continue
                 
-            # Clean up tag: remove spaces, special chars
             clean_tag = tag_name.replace(" ", "").replace("-", "").replace("&", "And")
-            # Remove any non-alphanumeric chars
             clean_tag = "".join(c for c in clean_tag if c.isalnum())
             if clean_tag:
                 hashtags.append(f"#{clean_tag}")
     
-    return " ".join(hashtags[:5])  # Limit to 5 tags
+    return " ".join(hashtags[:5])
 
 
-def process_market(market: Dict) -> bool:
-    """
-    Process a single new market:
-    1. Post to Telegram
-    2. Queue for trading if it passes filters
-    3. Mark as seen
+def post_event_to_telegram(event: Dict) -> bool:
+    """Post a single Telegram message for an event"""
+    event_slug = event.get("slug", "")
+    title = event.get("title", "New Market")
+    tags = event.get("tags", [])
     
-    Returns True if Telegram post succeeded
-    """
-    market_id = market["id"]
-    question = escape_html(market.get("question", "New Market"))
-    description = market.get("description", "")
-    if description:
-        description = escape_html(description[:200])
-        if len(market.get("description", "")) > 200:
-            description += "..."
-    
-    market_url = add_referral_code(market.get("url", "https://polymarket.com"))
-    
-    # Get category hashtags from API tags
-    tags = market.get("tags", [])
+    question = escape_html(title)
+    event_url = add_referral_code(f"https://polymarket.com/event/{event_slug}")
     category_hashtags = format_tags_as_hashtags(tags)
     
-    # Format Telegram message
-    message = f"""🔮 <b>New Polymarket Market!</b>
+    message = f"""🔮 <b>New Market!</b>
 
-<b>Question:</b> {question}
+{question}
 
-"""
-    
-    if description:
-        message += f"📊 {description}\n\n"
-    
-    message += f"""<a href="{market_url}">🔗 Trade on Polymarket</a>
+🔗 <a href="{event_url}">Trade</a>
 
 #Polymarket {category_hashtags}"""
     
-    # Post to Telegram
-    telegram_success = post_to_telegram(message)
+    return post_to_telegram(message)
+
+
+def process_sub_market(market: Dict, event: Dict, seen_conditions: Set[str]) -> dict:
+    """
+    Process a single sub-market for trading queue.
+    Returns result dict.
+    """
+    event_slug = event.get("slug", "")
+    tags = event.get("tags", [])
     
-    if telegram_success:
-        log(f"✅ Posted to Telegram: {question[:50]}...")
-        
-        # Mark as seen ONLY after successful Telegram post
-        mark_as_seen(market_id)
-        
-        # Check if market qualifies for trading
-        is_updown = is_updown_market(market)
-        is_short, duration = is_short_duration_market(market)
-        
-        if is_updown:
-            log(f"⏭️  Skipped trading (up/down market): {market.get('slug', '')}")
-        elif is_short:
-            log(f"⏭️  Skipped trading (short duration {duration}h): {market.get('slug', '')}")
-        else:
-            # Queue for trading - use condition_id as unique identifier
-            condition_id = market.get("condition_id", "")
-            event_slug = market.get("event_slug", market.get("slug", ""))
-            market_question = market.get("question", "")
-            clob_token_ids = market.get("clobTokenIds", "[]")
-            outcomes = market.get("outcomes", "[]")
-            
-            if condition_id:
-                queue_trading_job(
-                    condition_id=condition_id,
-                    event_slug=event_slug,
-                    question=market_question,
-                    clob_token_ids=clob_token_ids,
-                    outcomes=outcomes,
-                    created_at=market.get("createdAt"),
-                    closed_time=market.get("closedTime")
-                )
-                log(f"💰 Queued for trading: {market_question[:40]}... (condition: {condition_id[:16]}...)")
-            else:
-                log(f"⚠️  No condition_id, can't queue for trading: {market_question[:40]}...")
+    market_question = market.get("question", event.get("title", ""))
+    condition_id = market.get("conditionId", market.get("condition_id", ""))
+    clob_token_ids = market.get("clobTokenIds", "[]")
+    outcomes = market.get("outcomes", "[]")
+    created_at = market.get("createdAt", event.get("createdAt"))
+    closed_time = market.get("endDate", event.get("endDate"))
+    
+    result = {"queued": False, "skipped": False, "reason": ""}
+    
+    # Skip if no condition_id
+    if not condition_id:
+        result["skipped"] = True
+        result["reason"] = "no_condition_id"
+        return result
+    
+    # Skip if already seen
+    if condition_id in seen_conditions:
+        result["skipped"] = True
+        result["reason"] = "already_seen"
+        return result
+    
+    # Check if up/down market
+    search_text = f"{market_question} {event_slug}"
+    if is_updown_market(search_text, tags):
+        mark_condition_as_seen(condition_id, event_slug)
+        result["skipped"] = True
+        result["reason"] = "updown"
+        return result
+    
+    # Check duration
+    is_short, duration = is_short_duration(created_at, closed_time)
+    if is_short:
+        mark_condition_as_seen(condition_id, event_slug)
+        result["skipped"] = True
+        result["reason"] = f"short_{duration}h"
+        return result
+    
+    # Queue for trading
+    if queue_trading_job(
+        condition_id=condition_id,
+        event_slug=event_slug,
+        question=market_question,
+        clob_token_ids=clob_token_ids,
+        outcomes=outcomes,
+        created_at=created_at,
+        closed_time=closed_time
+    ):
+        mark_condition_as_seen(condition_id, event_slug)
+        result["queued"] = True
+        log(f"   💰 Queued: {market_question[:40]}...")
     else:
-        log(f"❌ Failed to post to Telegram, will retry: {market_id}")
+        result["skipped"] = True
+        result["reason"] = "already_queued"
     
-    return telegram_success
+    return result
 
 
 def main():
@@ -475,36 +452,68 @@ def main():
     # Ensure tables exist
     init_tables()
     
-    # Fetch latest markets
-    markets = fetch_markets(limit=20)
+    # Fetch latest events
+    events = fetch_events(limit=20)
     
-    if not markets:
-        log("No markets fetched, exiting")
+    if not events:
+        log("No events fetched, exiting")
         return
     
-    # Check which are new
-    market_ids = [m["id"] for m in markets if m.get("id")]
-    seen_ids = get_seen_market_ids(market_ids)
+    # Get all event slugs and condition IDs
+    event_slugs = [e.get("slug", "") for e in events if e.get("slug")]
     
-    new_markets = [m for m in markets if m.get("id") and m["id"] not in seen_ids]
+    all_condition_ids = []
+    for event in events:
+        markets = event.get("markets", [event])
+        for market in markets:
+            cid = market.get("conditionId", market.get("condition_id", ""))
+            if cid:
+                all_condition_ids.append(cid)
     
-    log(f"Found {len(new_markets)} new markets out of {len(markets)} total")
+    # Check what we've already seen
+    seen_event_slugs = get_seen_event_slugs(event_slugs)
+    seen_conditions = get_seen_condition_ids(all_condition_ids)
     
-    if not new_markets:
-        log("No new markets to process")
-        return
+    # Stats
+    telegram_posted = 0
+    markets_queued = 0
+    markets_skipped = 0
     
-    # Process each new market
-    success_count = 0
-    for market in new_markets:
-        if process_market(market):
-            success_count += 1
+    for event in events:
+        event_slug = event.get("slug", "")
+        if not event_slug:
+            continue
         
-        # Small delay between posts to avoid rate limiting
-        import time
-        time.sleep(1)
+        title = event.get("title", "")[:50]
+        
+        # TELEGRAM: Post once per new event
+        if event_slug not in seen_event_slugs:
+            if post_event_to_telegram(event):
+                log(f"✅ Telegram: {title}...")
+                mark_event_as_seen(event_slug)
+                telegram_posted += 1
+                time.sleep(1)  # Rate limit
+            else:
+                log(f"❌ Telegram failed: {title}...")
+                continue  # Don't process sub-markets if Telegram fails
+        
+        # TRADING: Process each sub-market (even for already-seen events)
+        markets = event.get("markets", [])
+        if not markets:
+            markets = [event]  # Single-market event
+        
+        for market in markets:
+            result = process_sub_market(market, event, seen_conditions)
+            
+            if result["queued"]:
+                markets_queued += 1
+            elif result["skipped"] and result["reason"] not in ["already_seen", "already_queued"]:
+                markets_skipped += 1
     
-    log(f"✅ Completed: {success_count}/{len(new_markets)} markets posted to Telegram")
+    # Summary
+    new_events = len([e for e in events if e.get("slug") and e["slug"] not in seen_event_slugs])
+    log(f"Found {new_events} new events, {len(events) - new_events} existing")
+    log(f"✅ Done: {telegram_posted} Telegram, {markets_queued} queued, {markets_skipped} filtered")
 
 
 if __name__ == "__main__":
