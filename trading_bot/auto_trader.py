@@ -93,26 +93,31 @@ def process_trading_job(job, trader: PolymarketTrader):
     Process a single trading job
     
     Args:
-        job: Job dict with id, market_id, created_at, market_created_at, market_closed_time
+        job: Job dict with id, market_id (condition_id), created_at, market_created_at, 
+             market_closed_time, event_slug, question, clob_token_ids, outcomes
         trader: PolymarketTrader instance
         
     Returns:
         True if successful, False if error
     """
     job_id = job['id']
-    market_id = job['market_id']
+    condition_id = job['market_id']  # Now contains condition_id (unique per sub-market)
+    question = job.get('question', condition_id)  # Use question if available
     created_at = job['created_at']
     market_created_at = job.get('market_created_at')
     market_closed_time = job.get('market_closed_time')
     
     print(f"\n{'='*60}")
-    print(f"⚡ Processing Job #{job_id}: {market_id}")
+    print(f"⚡ Processing Job #{job_id}: {question[:50]}...")
+    print(f"   Condition ID: {condition_id[:20]}..." if condition_id else "")
     print(f"{'='*60}")
     
     # Check if it's an up/down market (defense in depth - should already be filtered in workflow)
-    if is_updown_market(market_id):
+    # Check both condition_id and question for keywords
+    search_text = f"{condition_id} {question}".lower()
+    if is_updown_market(search_text):
         print(f"⏭️  Job #{job_id} is an UP/DOWN market - skipping to avoid short-term capital lockup")
-        print(f"   Market: {market_id}")
+        print(f"   Market: {question[:60]}")
         complete_trading_job(job_id, "Skipped: Up/Down market (short-term)")
         return False
     
@@ -120,7 +125,7 @@ def process_trading_job(job, trader: PolymarketTrader):
     is_short, duration_hours = is_short_duration_market(market_created_at, market_closed_time)
     if is_short:
         print(f"⏭️  Job #{job_id} has short duration ({duration_hours}h < 15h minimum)")
-        print(f"   Market: {market_id}")
+        print(f"   Market: {question[:60]}")
         print(f"   Created: {market_created_at}, Closes: {market_closed_time}")
         complete_trading_job(job_id, f"Skipped: Short duration ({duration_hours}h < 15h)")
         return False
@@ -140,9 +145,15 @@ def process_trading_job(job, trader: PolymarketTrader):
         start_trading_job(job_id)
         print(f"🔄 Job #{job_id} marked as RUNNING (age: {job_age_hours:.1f}h)")
         
-        # Place orders (without blocking on monitoring)
+        # Place orders using job data (no API lookup needed for new jobs)
         # Monitoring is handled by a separate continuous process
-        orders_placed = trader.place_orders_only(market_id)
+        if job.get('clob_token_ids'):
+            # New-style job with token data - use directly
+            orders_placed = trader.place_orders_only_from_job(job)
+        else:
+            # Old-style job without token data - fallback to API lookup
+            event_slug = job.get('event_slug', condition_id)
+            orders_placed = trader.place_orders_only(event_slug)
         
         if orders_placed > 0:
             # Mark job as completed

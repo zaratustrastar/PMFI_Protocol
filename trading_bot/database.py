@@ -18,7 +18,7 @@ def init_database():
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # Trading jobs queue - markets waiting to be traded
+    # Trading jobs queue - markets waiting to be traded (with multi-market support)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS trading_jobs (
             id SERIAL PRIMARY KEY,
@@ -30,9 +30,25 @@ def init_database():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             market_created_at TIMESTAMP,
-            market_closed_time TIMESTAMP
+            market_closed_time TIMESTAMP,
+            event_slug TEXT,
+            question TEXT,
+            clob_token_ids TEXT,
+            outcomes TEXT
         )
     """)
+    
+    # Migration: add new columns for existing tables
+    try:
+        cur.execute("""
+            ALTER TABLE trading_jobs 
+            ADD COLUMN IF NOT EXISTS event_slug TEXT,
+            ADD COLUMN IF NOT EXISTS question TEXT,
+            ADD COLUMN IF NOT EXISTS clob_token_ids TEXT,
+            ADD COLUMN IF NOT EXISTS outcomes TEXT
+        """)
+    except Exception:
+        pass
     
     # Trading positions table
     cur.execute("""
@@ -267,7 +283,8 @@ def get_pending_jobs(limit: int = 10) -> List[Dict]:
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
     cur.execute("""
-        SELECT id, market_id, created_at, market_created_at, market_closed_time
+        SELECT id, market_id, created_at, market_created_at, market_closed_time,
+               event_slug, question, clob_token_ids, outcomes
         FROM trading_jobs
         WHERE status = 'PENDING'
           AND created_at > NOW() - INTERVAL '1 hour'

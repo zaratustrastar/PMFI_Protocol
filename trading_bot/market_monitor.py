@@ -67,7 +67,7 @@ def get_db_connection():
 
 
 def init_tables():
-    """Ensure required tables exist"""
+    """Ensure required tables exist with all columns for multi-market support"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -79,7 +79,7 @@ def init_tables():
         )
     """)
     
-    # Trading jobs table
+    # Trading jobs table - includes columns for multi-market support
     cur.execute("""
         CREATE TABLE IF NOT EXISTS trading_jobs (
             id SERIAL PRIMARY KEY,
@@ -91,9 +91,25 @@ def init_tables():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             market_created_at TIMESTAMP,
-            market_closed_time TIMESTAMP
+            market_closed_time TIMESTAMP,
+            event_slug TEXT,
+            question TEXT,
+            clob_token_ids TEXT,
+            outcomes TEXT
         )
     """)
+    
+    # Ensure columns exist for existing tables (migration)
+    try:
+        cur.execute("""
+            ALTER TABLE trading_jobs 
+            ADD COLUMN IF NOT EXISTS event_slug TEXT,
+            ADD COLUMN IF NOT EXISTS question TEXT,
+            ADD COLUMN IF NOT EXISTS clob_token_ids TEXT,
+            ADD COLUMN IF NOT EXISTS outcomes TEXT
+        """)
+    except Exception:
+        pass  # Column already exists or not supported
     
     conn.commit()
     cur.close()
@@ -111,30 +127,45 @@ def fetch_markets(limit: int = 20) -> List[Dict]:
         # Extract individual markets from events
         markets = []
         for event in events:
-            # Each event can have multiple markets
-            if "markets" in event:
+            event_slug = event.get("slug", "")
+            
+            # Each event can have multiple markets (sub-markets)
+            if "markets" in event and event["markets"]:
                 for market in event["markets"]:
+                    # condition_id is the unique trading identifier for each sub-market
+                    condition_id = market.get("conditionId", market.get("condition_id", ""))
+                    
                     markets.append({
                         "id": str(market.get("id", "")),
                         "question": market.get("question", event.get("title", "")),
                         "description": market.get("description", event.get("description", "")),
-                        "slug": market.get("slug", event.get("slug", "")),
-                        "url": f"https://polymarket.com/event/{event.get('slug', '')}",
+                        "slug": market.get("slug", event_slug),
+                        "event_slug": event_slug,
+                        "condition_id": condition_id,
+                        "url": f"https://polymarket.com/event/{event_slug}",
                         "createdAt": market.get("createdAt", event.get("createdAt")),
                         "closedTime": market.get("endDate", event.get("endDate")),
                         "tags": event.get("tags", []),
+                        "clobTokenIds": market.get("clobTokenIds", "[]"),
+                        "outcomes": market.get("outcomes", "[]"),
                     })
             else:
-                # Single market event
+                # Single market event (use event-level data)
+                condition_id = event.get("conditionId", event.get("condition_id", ""))
+                
                 markets.append({
                     "id": str(event.get("id", "")),
                     "question": event.get("title", event.get("question", "")),
                     "description": event.get("description", ""),
-                    "slug": event.get("slug", ""),
-                    "url": f"https://polymarket.com/event/{event.get('slug', '')}",
+                    "slug": event_slug,
+                    "event_slug": event_slug,
+                    "condition_id": condition_id,
+                    "url": f"https://polymarket.com/event/{event_slug}",
                     "createdAt": event.get("createdAt"),
                     "closedTime": event.get("endDate"),
                     "tags": event.get("tags", []),
+                    "clobTokenIds": event.get("clobTokenIds", "[]"),
+                    "outcomes": event.get("outcomes", "[]"),
                 })
         
         log(f"Fetched {len(markets)} markets from {len(events)} events")
@@ -260,10 +291,46 @@ def is_short_duration_market(market: Dict, min_hours: int = 15) -> tuple:
         return (False, None)
 
 
-def queue_trading_job(market_slug: str, created_at: Optional[str] = None, closed_time: Optional[str] = None):
-    """Queue a market for trading"""
+def queue_trading_job(
+    condition_id: str, 
+    event_slug: str,
+    question: str,
+    clob_token_ids: str,
+    outcomes: str,
+    created_at: Optional[str] = None, 
+    closed_time: Optional[str] = None
+):
+    """
+    Queue a sub-market for trading using condition_id as unique identifier.
+    
+    Args:
+        condition_id: Unique identifier for the sub-market (used as market_id)
+        event_slug: Parent event slug (for display/reference)
+        question: Market question (e.g., "Match Winner", "O/U 4.5")
+        clob_token_ids: JSON string of YES/NO token IDs
+        outcomes: JSON string of outcome names
+        created_at: Market creation time
+        closed_time: Market close time
+    """
+    if not condition_id:
+        log(f"⚠️  No condition_id for market, skipping trading queue: {question[:50]}")
+        return
+    
     conn = get_db_connection()
     cur = conn.cursor()
+    
+    # Ensure we have the new columns
+    try:
+        cur.execute("""
+            ALTER TABLE trading_jobs 
+            ADD COLUMN IF NOT EXISTS event_slug TEXT,
+            ADD COLUMN IF NOT EXISTS question TEXT,
+            ADD COLUMN IF NOT EXISTS clob_token_ids TEXT,
+            ADD COLUMN IF NOT EXISTS outcomes TEXT
+        """)
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
     
     # Parse dates if provided
     market_created = None
@@ -281,11 +348,12 @@ def queue_trading_job(market_slug: str, created_at: Optional[str] = None, closed
         except:
             pass
     
+    # Use condition_id as the unique market_id (each sub-market gets its own job)
     cur.execute("""
-        INSERT INTO trading_jobs (market_id, status, market_created_at, market_closed_time)
-        VALUES (%s, 'PENDING', %s, %s)
+        INSERT INTO trading_jobs (market_id, event_slug, question, clob_token_ids, outcomes, status, market_created_at, market_closed_time)
+        VALUES (%s, %s, %s, %s, %s, 'PENDING', %s, %s)
         ON CONFLICT (market_id) DO NOTHING
-    """, (market_slug, market_created, market_closed))
+    """, (condition_id, event_slug, question, clob_token_ids, outcomes, market_created, market_closed))
     
     conn.commit()
     cur.close()
@@ -374,15 +442,26 @@ def process_market(market: Dict) -> bool:
         elif is_short:
             log(f"⏭️  Skipped trading (short duration {duration}h): {market.get('slug', '')}")
         else:
-            # Queue for trading
-            market_slug = market.get("slug", "")
-            if market_slug:
+            # Queue for trading - use condition_id as unique identifier
+            condition_id = market.get("condition_id", "")
+            event_slug = market.get("event_slug", market.get("slug", ""))
+            market_question = market.get("question", "")
+            clob_token_ids = market.get("clobTokenIds", "[]")
+            outcomes = market.get("outcomes", "[]")
+            
+            if condition_id:
                 queue_trading_job(
-                    market_slug,
-                    market.get("createdAt"),
-                    market.get("closedTime")
+                    condition_id=condition_id,
+                    event_slug=event_slug,
+                    question=market_question,
+                    clob_token_ids=clob_token_ids,
+                    outcomes=outcomes,
+                    created_at=market.get("createdAt"),
+                    closed_time=market.get("closedTime")
                 )
-                log(f"💰 Queued for trading: {market_slug}")
+                log(f"💰 Queued for trading: {market_question[:40]}... (condition: {condition_id[:16]}...)")
+            else:
+                log(f"⚠️  No condition_id, can't queue for trading: {market_question[:40]}...")
     else:
         log(f"❌ Failed to post to Telegram, will retry: {market_id}")
     

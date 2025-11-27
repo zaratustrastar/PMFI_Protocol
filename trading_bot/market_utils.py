@@ -1,10 +1,64 @@
 """
 Polymarket Market Utilities
-Get token IDs and market information from market slugs
+Get token IDs and market information from market slugs or condition IDs
 """
 
+import json
 import requests
 from typing import Optional, Dict, List
+
+
+def get_market_info_from_job(job: Dict) -> Optional[Dict]:
+    """
+    Get market info directly from job data (no API call needed).
+    
+    This is the preferred method when trading from the job queue, since
+    the job already contains the condition_id, token IDs, etc.
+    
+    Args:
+        job: Job dict with condition_id, clob_token_ids, outcomes, etc.
+        
+    Returns:
+        Dictionary with market data and token IDs, or None if missing data
+    """
+    condition_id = job.get("market_id", "")  # condition_id is stored as market_id
+    clob_token_ids_str = job.get("clob_token_ids", "[]")
+    outcomes_str = job.get("outcomes", "[]")
+    question = job.get("question", "")
+    event_slug = job.get("event_slug", "")
+    
+    if not condition_id:
+        print(f"❌ No condition_id in job")
+        return None
+    
+    # Parse token IDs
+    try:
+        clob_token_ids = json.loads(clob_token_ids_str) if clob_token_ids_str else []
+    except:
+        clob_token_ids = []
+    
+    # Parse outcomes
+    try:
+        outcomes = json.loads(outcomes_str) if outcomes_str else []
+    except:
+        outcomes = []
+    
+    if len(clob_token_ids) < 2:
+        print(f"❌ Missing token IDs for {question[:40]}...")
+        print(f"   clob_token_ids_str: {clob_token_ids_str}")
+        return None
+    
+    return {
+        "slug": event_slug,
+        "question": question,
+        "market_id": condition_id,
+        "condition_id": condition_id,
+        "yes_token_id": clob_token_ids[0],
+        "no_token_id": clob_token_ids[1],
+        "outcomes": outcomes,
+        "active": True,
+        "closed": False,
+    }
 
 
 def get_market_by_slug_or_id(identifier: str) -> Optional[Dict]:
@@ -42,40 +96,48 @@ def get_market_by_slug_or_id(identifier: str) -> Optional[Dict]:
         return None
 
 
-def get_token_ids(market_data: Dict) -> Dict[str, str]:
+def get_token_ids(market_data: Dict, condition_id: Optional[str] = None) -> Dict[str, str]:
     """
-    Extract YES and NO token IDs from market data
+    Extract YES and NO token IDs from market data.
     
     Args:
         market_data: Market data from Gamma API (event level)
+        condition_id: If provided, find this specific sub-market. Otherwise, use first market.
         
     Returns:
         Dictionary with 'yes' and 'no' token IDs
     """
-    import json
-    
     token_ids = {"yes": "", "no": ""}
     
-    # Handle nested structure - event.markets[0] contains the actual market data
+    # Handle nested structure - event.markets[] contains sub-markets
     markets = market_data.get("markets", [])
     if not markets:
         return token_ids
     
-    market = markets[0]  # Get first market in event
+    # Find the right market
+    market = None
+    if condition_id:
+        # Find specific sub-market by condition_id
+        for m in markets:
+            m_condition_id = m.get("conditionId", m.get("condition_id", ""))
+            if m_condition_id == condition_id:
+                market = m
+                break
+        
+        if not market:
+            print(f"⚠️  Sub-market with condition_id {condition_id[:16]}... not found")
+            # Fall back to first market
+            market = markets[0]
+    else:
+        # Use first market (backwards compatible)
+        market = markets[0]
     
     # Extract clobTokenIds (JSON string array)
     clob_token_ids_str = market.get("clobTokenIds", "[]")
     try:
-        clob_token_ids = json.loads(clob_token_ids_str)
+        clob_token_ids = json.loads(clob_token_ids_str) if isinstance(clob_token_ids_str, str) else clob_token_ids_str
     except:
         clob_token_ids = []
-    
-    # Extract outcomes (JSON string array)
-    outcomes_str = market.get("outcomes", "[]")
-    try:
-        outcomes = json.loads(outcomes_str)
-    except:
-        outcomes = []
     
     # Map tokens to outcomes
     # For binary markets: first token = YES (or first outcome), second = NO (or second outcome)

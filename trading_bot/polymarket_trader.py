@@ -14,7 +14,7 @@ from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import OrderArgs, OrderType
 from py_clob_client.order_builder.constants import BUY, SELL
 import config
-from market_utils import get_market_info
+from market_utils import get_market_info, get_market_info_from_job
 from database import save_order, update_order_status, update_market_summary, get_open_sell_orders
 from telegram_notifier import notify_sell_executed
 
@@ -568,6 +568,62 @@ class PolymarketTrader:
         # Place buy ladders on both YES and NO
         yes_orders = self.place_buy_ladder(market_info['yes_token_id'], "YES", market_slug)
         no_orders = self.place_buy_ladder(market_info['no_token_id'], "NO", market_slug)
+        
+        total_orders = len(yes_orders) + len(no_orders)
+        
+        if total_orders > 0:
+            print(f"\n✅ Placed {total_orders} buy orders total")
+            print(f"   (Monitoring will be handled by separate process)\n")
+        else:
+            print(f"\n❌ No orders placed (all orders failed)")
+        
+        return total_orders
+    
+    def place_orders_only_from_job(self, job: dict) -> int:
+        """
+        Place buy orders using job data directly (no API lookup needed).
+        
+        This is the preferred method for queue-based trading as the job
+        already contains the token IDs and condition_id from when the
+        market was first detected.
+        
+        Args:
+            job: Job dict with market_id (condition_id), clob_token_ids, question, etc.
+            
+        Returns:
+            Number of orders successfully placed (0 if data missing or all orders failed)
+        """
+        question = job.get('question', 'Unknown Market')
+        condition_id = job.get('market_id', '')
+        event_slug = job.get('event_slug', '')
+        
+        print(f"\n{'='*60}")
+        print(f"🎯 Placing orders for: {question[:50]}...")
+        print(f"   Condition ID: {condition_id[:20]}..." if condition_id else "   No condition ID!")
+        print(f"{'='*60}")
+        
+        # Get market info from job data (no API call)
+        market_info = get_market_info_from_job(job)
+        
+        if not market_info:
+            # Fallback: Try API lookup by event_slug (for old jobs without token data)
+            print(f"⚠️  No token data in job, falling back to API lookup...")
+            market_info = get_market_info(event_slug) if event_slug else None
+        
+        if not market_info:
+            print(f"❌ Could not get market info for job!")
+            return 0
+        
+        print(f"\n📋 Market: {market_info['question']}")
+        print(f"   YES Token: {market_info['yes_token_id'][:16]}...")
+        print(f"   NO Token: {market_info['no_token_id'][:16]}...")
+        
+        # Place buy ladders on both YES and NO
+        # Use condition_id as the market identifier for order tracking
+        market_identifier = condition_id if condition_id else event_slug
+        
+        yes_orders = self.place_buy_ladder(market_info['yes_token_id'], "YES", market_identifier)
+        no_orders = self.place_buy_ladder(market_info['no_token_id'], "NO", market_identifier)
         
         total_orders = len(yes_orders) + len(no_orders)
         
