@@ -226,9 +226,9 @@ export const mastra = new Mastra({
         }),
 });
 
-// Register cron trigger for Polymarket monitoring
-// Runs every minute to catch new markets immediately
-registerCronWorkflow("* * * * *", polymarketWorkflow);
+// DISABLED: Polymarket monitoring moved to VPS
+// The VPS cron job handles market detection and Telegram posting
+// registerCronWorkflow("* * * * *", polymarketWorkflow);
 
 /*  Sanity check 1: Throw an error if there are more than 1 workflows.  */
 // !!!!!! Do not remove this check. !!!!!!
