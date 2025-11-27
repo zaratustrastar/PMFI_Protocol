@@ -336,9 +336,12 @@ def queue_trading_job(
 
 
 def format_tags_as_hashtags(tags: List) -> str:
-    """Convert API tags to hashtags"""
+    """Convert API tags to hashtags, filtering out internal Polymarket tags"""
     if not tags:
         return ""
+    
+    # Internal tags to filter out
+    excluded_tags = {"hidefromnew", "recurring", "polymarket"}
     
     hashtags = []
     for tag in tags:
@@ -353,6 +356,11 @@ def format_tags_as_hashtags(tags: List) -> str:
                 
             clean_tag = tag_name.replace(" ", "").replace("-", "").replace("&", "And")
             clean_tag = "".join(c for c in clean_tag if c.isalnum())
+            
+            # Skip excluded internal tags
+            if clean_tag.lower() in excluded_tags:
+                continue
+                
             if clean_tag:
                 hashtags.append(f"#{clean_tag}")
     
@@ -369,13 +377,14 @@ def post_event_to_telegram(event: Dict) -> bool:
     event_url = add_referral_code(f"https://polymarket.com/event/{event_slug}")
     category_hashtags = format_tags_as_hashtags(tags)
     
+    # Link at end for proper Telegram image preview
     message = f"""🔮 <b>New Market!</b>
 
 {question}
 
-🔗 <a href="{event_url}">Trade</a>
+{category_hashtags}
 
-#Polymarket {category_hashtags}"""
+🔗 <a href="{event_url}">Trade</a>"""
     
     return post_to_telegram(message)
 
