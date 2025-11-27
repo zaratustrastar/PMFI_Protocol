@@ -1,0 +1,56 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# cd /opt/polymarket-bot/trading_bot
+nohup /opt/polymarket-bot/trading_bot/venv/bin/python3 order_monitor.py >> /var/log/order_monitor.log 2>&1 &
+tail -f /var/log/order_monitor.log
+[1] 47944
+    self.client.set_api_creds(self.client.create_or_derive_api_creds())
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 245, in create_or_derive_api_creds
+    return self.derive_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 221, in derive_api_key
+    self.assert_level_1_auth()
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 690, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
+nohup: ignoring input
+✅ Loaded environment variables from .env file
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+
+👁️  Polymarket Order Monitor Starting...
+   Monitors: All open buy/sell orders
+   Buys filled: Auto-place sell ladder
+   Sells filled: Notify Telegram (@ponnymarket)
+
+🤖 Initializing Polymarket Trading Bot...
+   Bypass method: curl_cffi
+   🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+🔑 Deriving trading credentials from private key...
+Traceback (most recent call last):
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 243, in create_or_derive_api_creds
+    return self.create_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 200, in create_api_key
+    self.assert_level_1_auth()
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 690, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 192, in <module>
+    main()
+  File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 165, in main
+    trader = PolymarketTrader()
+             ^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/polymarket_trader.py", line 55, in __init__
+    self.client.set_api_creds(self.client.create_or_derive_api_creds())
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 245, in create_or_derive_api_creds
+    return self.derive_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 221, in derive_api_key
+    self.assert_level_1_auth()
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 690, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
