@@ -222,8 +222,8 @@ def escape_html(text: str) -> str:
     return html.escape(text)
 
 
-def post_to_telegram(message: str) -> bool:
-    """Post message to Telegram channel"""
+def post_to_telegram(message: str, max_retries: int = 3) -> bool:
+    """Post message to Telegram channel with retry logic for rate limiting"""
     if not TELEGRAM_BOT_TOKEN:
         log("WARNING: TELEGRAM_BOT_TOKEN not set, skipping Telegram post")
         return False
@@ -236,16 +236,32 @@ def post_to_telegram(message: str) -> bool:
         "disable_web_page_preview": False,
     }
     
-    try:
-        response = requests.post(url, json=payload, timeout=10)
-        if response.status_code == 200:
-            return True
-        else:
-            log(f"WARNING: Telegram post failed: {response.text}")
-            return False
-    except Exception as e:
-        log(f"ERROR posting to Telegram: {e}")
-        return False
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, json=payload, timeout=10)
+            if response.status_code == 200:
+                return True
+            elif response.status_code == 429:
+                try:
+                    error_data = response.json()
+                    retry_after = error_data.get("parameters", {}).get("retry_after", 30)
+                    log(f"⏳ Rate limited, waiting {retry_after}s before retry {attempt + 1}/{max_retries}")
+                    time.sleep(retry_after + 1)
+                except:
+                    log(f"⏳ Rate limited, waiting 30s before retry {attempt + 1}/{max_retries}")
+                    time.sleep(31)
+            else:
+                log(f"WARNING: Telegram post failed: {response.text}")
+                return False
+        except Exception as e:
+            log(f"ERROR posting to Telegram: {e}")
+            if attempt < max_retries - 1:
+                time.sleep(5)
+            else:
+                return False
+    
+    log("WARNING: Telegram post failed after max retries")
+    return False
 
 
 def is_updown_market(text: str, tags: List = None) -> bool:
