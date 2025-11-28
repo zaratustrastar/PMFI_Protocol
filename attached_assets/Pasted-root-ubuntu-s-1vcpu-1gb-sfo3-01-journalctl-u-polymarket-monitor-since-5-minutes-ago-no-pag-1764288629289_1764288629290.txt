@@ -1,0 +1,41 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u polymarket-monitor --since "5 minutes ago" --no-pager
+Nov 28 00:09:22 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 00:09:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68388]: ✅ Loaded environment variables from .env file
+Nov 28 00:09:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68388]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Nov 28 00:09:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68388]: Traceback (most recent call last):
+Nov 28 00:09:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68388]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 20, in <module>
+Nov 28 00:09:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68388]:     from telegram_notifier import notify_buy_filled, notify_sell_executed, notify_sell_ladder_result
+Nov 28 00:09:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68388]: ImportError: cannot import name 'notify_sell_ladder_result' from 'telegram_notifier' (/opt/polymarket-bot/trading_bot/telegram_notifier.py)
+Nov 28 00:09:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Nov 28 00:09:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Nov 28 00:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 1.
+Nov 28 00:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 00:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68396]: ✅ Loaded environment variables from .env file
+Nov 28 00:09:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68396]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Nov 28 00:09:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68396]: Traceback (most recent call last):
+Nov 28 00:09:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68396]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 20, in <module>
+Nov 28 00:09:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68396]:     from telegram_notifier import notify_buy_filled, notify_sell_executed, notify_sell_ladder_result
+Nov 28 00:09:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68396]: ImportError: cannot import name 'notify_sell_ladder_result' from 'telegram_notifier' (/opt/polymarket-bot/trading_bot/telegram_notifier.py)
+Nov 28 00:09:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Nov 28 00:09:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Nov 28 00:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 2.
+Nov 28 00:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 00:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68399]: ✅ Loaded environment variables from .env file
+Nov 28 00:09:45 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68399]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Nov 28 00:09:45 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68399]: Traceback (most recent call last):
+Nov 28 00:09:45 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68399]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 20, in <module>
+Nov 28 00:09:45 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68399]:     from telegram_notifier import notify_buy_filled, notify_sell_executed, notify_sell_ladder_result
+Nov 28 00:09:45 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68399]: ImportError: cannot import name 'notify_sell_ladder_result' from 'telegram_notifier' (/opt/polymarket-bot/trading_bot/telegram_notifier.py)
+Nov 28 00:09:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Nov 28 00:09:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Nov 28 00:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 3.
+Nov 28 00:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 00:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68406]: ✅ Loaded environment variables from .env file
+Nov 28 00:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68406]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Nov 28 00:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68406]: Traceback (most recent call last):
+Nov 28 00:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68406]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 20, in <module>
+Nov 28 00:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68406]:     from telegram_notifier import notify_buy_filled, notify_sell_executed, notify_sell_ladder_result
+Nov 28 00:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68406]: ImportError: cannot import name 'notify_sell_ladder_result' from 'telegram_notifier' (/opt/polymarket-bot/trading_bot/telegram_notifier.py)
+Nov 28 00:09:56 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Nov 28 00:09:56 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

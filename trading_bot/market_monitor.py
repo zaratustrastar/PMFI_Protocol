@@ -470,8 +470,8 @@ def main():
     # Ensure tables exist
     init_tables()
     
-    # Fetch latest events
-    events = fetch_events(limit=20)
+    # Fetch latest events (100 to catch all new markets)
+    events = fetch_events(limit=100)
     
     if not events:
         log("No events fetched, exiting")

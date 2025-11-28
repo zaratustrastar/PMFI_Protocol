@@ -1,0 +1,34 @@
+                             market_id                              |                                     question                                     | status  |         created_at         
+--------------------------------------------------------------------+----------------------------------------------------------------------------------+---------+----------------------------
+ 0x00b6f8cb5d030f10f22bacd74932326f24964a0857976aedf68a3cfa61165835 | Will the highest temperature in New York City be between 51-52°F on November 30? | PENDING | 2025-11-28 13:52:19.760722
+ 0xff4e05ffe28df28620d49229376170f452bd021f25741e7313b10429c9a1ec7f | Will the highest temperature in New York City be between 47-48°F on November 30? | PENDING | 2025-11-28 13:52:18.924326
+ 0x77a019772c88964fa4727517ccf23316e11260853459e7999a06e16e00902f1e | Will the highest temperature in New York City be between 43-44°F on November 30? | PENDING | 2025-11-28 13:52:17.791252
+ 0xd28a47b6f46a9212c2edaccdc3872170335f73b13160089d4af4caef5283b3f9 | Will the highest temperature in New York City be 53°F or higher on November 30?  | PENDING | 2025-11-28 13:52:16.924131
+ 0x682cfa5528505831b6db56f978734cbe22dbdb6cc78941d9b89e744d9a140d6e | Will the highest temperature in New York City be between 49-50°F on November 30? | PENDING | 2025-11-28 13:52:15.795755
+ 0x0bb192e0c71b616d80e3032edd6336b0376435c74b021cae236194f76d4bec03 | Will the highest temperature in New York City be between 45-46°F on November 30? | PENDING | 2025-11-28 13:52:14.912065
+ 0xeeb817cbd923a8e146038fd0c0a80285be35ba14c73b4236ba8db0e2854eed50 | Will the highest temperature in New York City be 42°F or below on November 30?   | PENDING | 2025-11-28 13:52:13.803721
+ 0xd237a5c2126c544f7ccb9bc969190ecd2b205e95c62cf193766e0b5db9899191 | Will the highest temperature in London be between 48-49°F on November 30?        | PENDING | 2025-11-28 13:52:10.727205
+ 0x7105975ef4ca285d4495bf4f414f5e0d1d179bae0438d24d344c9fd31c1b815c | Will the highest temperature in London be between 44-45°F on November 30?        | PENDING | 2025-11-28 13:52:09.582581
+ 0x7f451e4591abd061ed9c8e5798ae2a477b6056a93432439f09eefe97e34a57a1 | Will the highest temperature in London be between 40-41°F on November 30?        | PENDING | 2025-11-28 13:52:08.752282
+(10 rows)
+
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+(END)

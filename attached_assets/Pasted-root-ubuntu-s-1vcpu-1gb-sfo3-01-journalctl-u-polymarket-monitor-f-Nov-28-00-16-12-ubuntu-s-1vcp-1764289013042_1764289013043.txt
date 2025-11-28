@@ -1,0 +1,48 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u polymarket-monitor -f
+Nov 28 00:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xbc7ddf: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x7e5bfc: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xa25892: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x3cfd59: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x12bd82: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xabadd5: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x6527bc: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x0c34b5: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xba94ef: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x23fba6: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xdf0bdf: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xc99279: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xb9134c: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x3cd01b: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x23d41f: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x2a97b4: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xc3c66d: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x2393da: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x907177: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xcfc131: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xb6c6ee: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x2d9096: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xa9e949: 'NoneType' object has no attribute 'get'
+Nov 28 00:16:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xfa067b: 'NoneType' object has no attribute 'get'
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# tail -20 /var/log/market_monitor.log
+[2025-11-28 00:12:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:12:02] Fetched 20 events from API
+[2025-11-28 00:12:03] Found 0 new events, 20 existing
+[2025-11-28 00:12:03] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:13:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:13:03] Fetched 20 events from API
+[2025-11-28 00:13:04] Found 0 new events, 20 existing
+[2025-11-28 00:13:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:14:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:14:02] Fetched 20 events from API
+[2025-11-28 00:14:03] Found 0 new events, 20 existing
+[2025-11-28 00:14:03] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:15:02] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:15:03] Fetched 20 events from API
+[2025-11-28 00:15:04] Found 0 new events, 20 existing
+[2025-11-28 00:15:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:16:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:16:03] Fetched 20 events from API
+[2025-11-28 00:16:04] Found 0 new events, 20 existing
+[2025-11-28 00:16:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

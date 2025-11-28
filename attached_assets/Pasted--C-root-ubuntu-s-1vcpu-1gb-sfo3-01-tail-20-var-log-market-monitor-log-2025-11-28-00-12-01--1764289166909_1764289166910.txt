@@ -1,0 +1,44 @@
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# tail -20 /var/log/market_monitor.log
+[2025-11-28 00:12:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:12:02] Fetched 20 events from API
+[2025-11-28 00:12:03] Found 0 new events, 20 existing
+[2025-11-28 00:12:03] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:13:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:13:03] Fetched 20 events from API
+[2025-11-28 00:13:04] Found 0 new events, 20 existing
+[2025-11-28 00:13:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:14:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:14:02] Fetched 20 events from API
+[2025-11-28 00:14:03] Found 0 new events, 20 existing
+[2025-11-28 00:14:03] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:15:02] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:15:03] Fetched 20 events from API
+[2025-11-28 00:15:04] Found 0 new events, 20 existing
+[2025-11-28 00:15:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:16:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:16:03] Fetched 20 events from API
+[2025-11-28 00:16:04] Found 0 new events, 20 existing
+[2025-11-28 00:16:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# tail -20 /var/log/market_monitor.log
+[2025-11-28 00:15:02] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:15:03] Fetched 20 events from API
+[2025-11-28 00:15:04] Found 0 new events, 20 existing
+[2025-11-28 00:15:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:16:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:16:03] Fetched 20 events from API
+[2025-11-28 00:16:04] Found 0 new events, 20 existing
+[2025-11-28 00:16:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:17:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:17:02] Fetched 20 events from API
+[2025-11-28 00:17:03] Found 0 new events, 20 existing
+[2025-11-28 00:17:03] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:18:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:18:03] Fetched 20 events from API
+[2025-11-28 00:18:04] Found 0 new events, 20 existing
+[2025-11-28 00:18:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 00:19:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 00:19:02] Fetched 20 events from API
+[2025-11-28 00:19:03] Found 0 new events, 20 existing
+[2025-11-28 00:19:03] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
