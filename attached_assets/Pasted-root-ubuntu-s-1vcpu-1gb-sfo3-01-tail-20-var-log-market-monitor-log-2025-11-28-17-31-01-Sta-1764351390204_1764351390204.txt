@@ -1,0 +1,39 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# tail -20 /var/log/market_monitor.log
+[2025-11-28 17:31:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 17:31:03] Fetched 100 events from API
+[2025-11-28 17:31:04] Found 0 new events, 100 existing
+[2025-11-28 17:31:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:32:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 17:32:02] Fetched 100 events from API
+[2025-11-28 17:32:04] Found 0 new events, 100 existing
+[2025-11-28 17:32:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:33:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 17:33:02] Fetched 100 events from API
+[2025-11-28 17:33:04] Found 0 new events, 100 existing
+[2025-11-28 17:33:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:34:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 17:34:02] Fetched 100 events from API
+[2025-11-28 17:34:04] Found 0 new events, 100 existing
+[2025-11-28 17:34:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:35:01] 🚀 Starting Polymarket market monitor
+[2025-11-28 17:35:03] Fetched 100 events from API
+[2025-11-28 17:35:04] Found 0 new events, 100 existing
+[2025-11-28 17:35:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# grep "Telegram" /var/log/market_monitor.log | tail -10
+[2025-11-28 17:26:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:27:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:28:05] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:29:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:30:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:31:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:32:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:33:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:34:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-28 17:35:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# grep -i "error\|fail" /var/log/market_monitor.log | tail -5
+[2025-11-28 16:38:45] ❌ Telegram failed: KHL: Lokomotiv Yaroslavl vs. SKA St. Petersburg...
+[2025-11-28 16:38:45] WARNING: Telegram post failed: {"ok":false,"error_code":429,"description":"Too Many Requests: retry after 22","parameters":{"retry_after":22}}
+[2025-11-28 16:38:45] ❌ Telegram failed: SHL: Leksands IF vs. Brynaes...
+[2025-11-28 16:38:46] WARNING: Telegram post failed: {"ok":false,"error_code":429,"description":"Too Many Requests: retry after 21","parameters":{"retry_after":21}}
+[2025-11-28 16:38:46] ❌ Telegram failed: SNHL: Davos vs. Geneve-Servette...
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

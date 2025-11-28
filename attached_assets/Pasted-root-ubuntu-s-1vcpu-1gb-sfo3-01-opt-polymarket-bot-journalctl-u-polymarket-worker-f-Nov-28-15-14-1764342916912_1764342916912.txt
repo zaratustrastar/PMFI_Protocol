@@ -1,0 +1,77 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# journalctl -u polymarket-worker -f
+Nov 28 15:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91486]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 222, in <module>
+Nov 28 15:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91486]:     main()
+Nov 28 15:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91486]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 203, in main
+Nov 28 15:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91486]:     process_trading_job(job, trader)
+Nov 28 15:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91486]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 109, in process_trading_job
+Nov 28 15:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91486]:     print(f"⚡ Processing Job #{job_id}: {question[:50]}...")
+Nov 28 15:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91486]:                                           ^^^^^^^^
+Nov 28 15:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91486]: NameError: name 'question' is not defined
+Nov 28 15:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Nov 28 15:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Nov 28 15:14:51 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 3330.
+Nov 28 15:14:51 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 28 15:14:51 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: ✅ Loaded environment variables from .env file
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: 🤖 Polymarket Auto-Trading Worker Starting...
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:    Notifications: Telegram @ponnymarket (sells only)
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:    Mode: Queue-based worker
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: 🤖 Initializing Polymarket Trading Bot...
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:    Bypass method: curl_cffi
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:    🌐 Using proxy: 92.113.180.106:42563
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:    🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+Nov 28 15:14:52 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: 🔑 Deriving trading credentials from private key...
+Nov 28 15:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: ✅ Trading bot initialized!
+Nov 28 15:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: 📊 Configuration:
+Nov 28 15:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:    Poll Interval: 30s
+Nov 28 15:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:    Batch Size: 5 jobs
+Nov 28 15:14:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: 🔄 Starting worker loop (press Ctrl+C to stop)
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: ✅ Found 5 pending job(s)
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: ============================================================
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: ❌ Worker crashed: name 'question' is not defined
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: Traceback (most recent call last):
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 222, in <module>
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:     main()
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 203, in main
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:     process_trading_job(job, trader)
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 109, in process_trading_job
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:     print(f"⚡ Processing Job #{job_id}: {question[:50]}...")
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]:                                           ^^^^^^^^
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91492]: NameError: name 'question' is not defined
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Nov 28 15:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Nov 28 15:15:05 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 3331.
+Nov 28 15:15:05 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Nov 28 15:15:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: ✅ Loaded environment variables from .env file
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: 🤖 Polymarket Auto-Trading Worker Starting...
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:    Notifications: Telegram @ponnymarket (sells only)
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:    Mode: Queue-based worker
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: 🤖 Initializing Polymarket Trading Bot...
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:    Bypass method: curl_cffi
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:    🌐 Using proxy: 92.113.180.106:42563
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:    🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+Nov 28 15:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: 🔑 Deriving trading credentials from private key...
+Nov 28 15:15:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: ✅ Trading bot initialized!
+Nov 28 15:15:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: 📊 Configuration:
+Nov 28 15:15:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:    Poll Interval: 30s
+Nov 28 15:15:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:    Batch Size: 5 jobs
+Nov 28 15:15:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: 🔄 Starting worker loop (press Ctrl+C to stop)
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: ✅ Found 5 pending job(s)
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: ============================================================
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: ❌ Worker crashed: name 'question' is not defined
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: Traceback (most recent call last):
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 222, in <module>
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:     main()
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 203, in main
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:     process_trading_job(job, trader)
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 109, in process_trading_job
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:     print(f"⚡ Processing Job #{job_id}: {question[:50]}...")
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]:                                           ^^^^^^^^
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91506]: NameError: name 'question' is not defined
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Nov 28 15:15:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.

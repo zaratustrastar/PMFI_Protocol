@@ -1,0 +1,33 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# python3 -c "
+import re
+with open('/opt/polymarket-bot/trading_bot/polymarket_trader.py', 'r') as f:
+    content = f.read()
+# Check if already patched
+if 'if not order_status:' not in content:
+    content = content.replace(
+        'order_status = self.client.get_order(order_id)\n                status = order_status.get',
+        '''order_status = self.client.get_order(order_id)
+                if not order_status:
+                    print(f\"   ⚠️  Order {order_id[:8]} not found on exchange\")
+                    continue
+                status = order_status.get'''
+    )
+    with open('/opt/polymarket-bot/trading_bot/polymarket_trader.py', 'w') as f:
+        f.write(content)
+    print('✅ Patched successfully')
+else:
+    print('Already patched')
+"
+Already patched
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo systemctl restart polymarket-monitor && sleep 5 && journalctl -u polymarket-monitor -f
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]:    Sells filled: Notify Telegram (@ponnymarket)
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]: 🤖 Initializing Polymarket Trading Bot...
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]:    Bypass method: curl_cffi
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]:    🌐 Using proxy: 92.113.180.106:42563
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]:    🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]: 🔑 Deriving trading credentials from private key...
+Nov 28 17:24:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]: ✅ Trading bot initialized!
+Nov 28 17:24:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]: 📊 Configuration:
+Nov 28 17:24:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]:    Poll Interval: 30s
+Nov 28 17:24:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]: 🔄 Starting monitor loop (press Ctrl+C to stop)
+Nov 28 17:24:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]: 🔍 Checking 5930 open buy orders...

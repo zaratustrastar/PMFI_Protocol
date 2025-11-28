@@ -1,0 +1,47 @@
+# View live logs
+journalctl -u polymarket-monitor -f
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-11-28 00:13:08 UTC; 14h ago
+   Main PID: 68526 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 47.4M (peak: 48.1M)
+        CPU: 41min 55.473s
+     CGroup: /system.slice/polymarket-monitor.service
+             └─68526 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+
+Nov 28 15:04:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xf649c1: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xd6b5f3: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x3fec0f: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xd83a8b: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xc4d915: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x18e716: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xff1982: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x17660b: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x09c039: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x5fdfd6: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xf649c1: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xd6b5f3: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x3fec0f: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xd83a8b: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xc4d915: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x18e716: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xff1982: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x17660b: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x09c039: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x5fdfd6: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xf049ef: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x0a6133: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x69c22c: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x7eec03: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x5649e4: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x49cda9: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:37 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xf2a4cf: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:38 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xc911bc: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xdeded2: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x9e144d: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x798f09: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:43 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x72131a: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x8c8891: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:45 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xf8552e: 'NoneType' object has no attribute 'get'
+Nov 28 15:04:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xea9da3: 'NoneType' object has no attribute 'get'

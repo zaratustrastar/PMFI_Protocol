@@ -1,0 +1,24 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# sed -i 's/is_updown_market(market_id)/is_updown_market(condition_id)/' /opt/polymarket-bot/trading_bot/auto_trader.py
+sed -i 's/Market: {market_id}/Market: {question[:60]}/' /opt/polymarket-bot/trading_bot/auto_trader.py
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# sudo systemctl restart polymarket-worker && sleep 3 && systemctl status polymarket-worker
+● polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue
+     Loaded: loaded (/etc/systemd/system/polymarket-worker.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-11-28 15:13:57 UTC; 3s ago
+   Main PID: 91461 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 37.3M (peak: 37.7M)
+        CPU: 696ms
+     CGroup: /system.slice/polymarket-worker.service
+             └─91461 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+
+Nov 28 15:13:58 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91461]: 🤖 Initializing Polymarket Trading Bot...
+Nov 28 15:13:58 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91461]:    Bypass method: curl_cffi
+Nov 28 15:13:58 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91461]:    🌐 Using proxy: 92.113.180.106:42563
+Nov 28 15:13:58 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91461]:    🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+Nov 28 15:13:58 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91461]: 🔑 Deriving trading credentials from private key...
+Nov 28 15:14:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91461]: ✅ Trading bot initialized!
+Nov 28 15:14:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91461]: 📊 Configuration:
+Nov 28 15:14:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91461]:    Poll Interval: 30s
+Nov 28 15:14:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91461]:    Batch Size: 5 jobs
+Nov 28 15:14:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[91461]: 🔄 Starting worker loop (press Ctrl+C to stop)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# 

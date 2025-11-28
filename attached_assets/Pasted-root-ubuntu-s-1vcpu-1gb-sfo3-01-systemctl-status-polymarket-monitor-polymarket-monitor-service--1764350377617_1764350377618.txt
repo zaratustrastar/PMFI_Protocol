@@ -1,0 +1,23 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# systemctl status polymarket-monitor
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-11-28 00:13:08 UTC; 17h ago
+   Main PID: 68526 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 49.5M (peak: 52.0M)
+        CPU: 48min 5.530s
+     CGroup: /system.slice/polymarket-monitor.service
+             └─68526 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+
+Nov 28 17:18:56 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xa3a8e3: 'NoneType' object has no attribute 'get'
+Nov 28 17:18:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x1b84cb: 'NoneType' object has no attribute 'get'
+Nov 28 17:18:58 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xaa1bc7: 'NoneType' object has no attribute 'get'
+Nov 28 17:18:59 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xffab9b: 'NoneType' object has no attribute 'get'
+Nov 28 17:19:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xda5df0: 'NoneType' object has no attribute 'get'
+Nov 28 17:19:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x705acf: 'NoneType' object has no attribute 'get'
+Nov 28 17:19:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x302e63: 'NoneType' object has no attribute 'get'
+Nov 28 17:19:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x9fd8b4: 'NoneType' object has no attribute 'get'
+Nov 28 17:19:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0x812bde: 'NoneType' object has no attribute 'get'
+Nov 28 17:19:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[68526]:    ⚠️  Error checking order 0xbbf362: 'NoneType' object has no attribute 'get'
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u polymarket-monitor --since "10 min ago" | grep -i "valorant\|sell\|filled"
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
