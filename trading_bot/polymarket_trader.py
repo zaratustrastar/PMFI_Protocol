@@ -177,15 +177,15 @@ class PolymarketTrader:
     
     def calculate_order_size(self, price: float) -> float:
         """
-        Calculate number of tokens to buy for $1 order
+        Return fixed number of shares to buy per order
         
         Args:
-            price: Price per token
+            price: Price per token (not used, kept for compatibility)
             
         Returns:
-            Number of tokens (size)
+            Number of tokens (size) - fixed at ORDER_SIZE_SHARES
         """
-        return config.ORDER_SIZE_USD / price
+        return config.ORDER_SIZE_SHARES
     
     def place_buy_ladder(self, token_id: str, side_name: str, market_slug: str) -> List[Dict]:
         """
@@ -248,7 +248,8 @@ class PolymarketTrader:
     
     def place_sell_ladder(self, token_id: str, buy_price: float, buy_size: float, side_name: str, market_slug: str) -> List[Dict]:
         """
-        Place ladder sell orders at 200%-1000% profit
+        Place ONE sell order for half the shares at 3x profit (200%)
+        Keeps the other half to ride to resolution
         
         Args:
             token_id: Token ID to sell
@@ -260,10 +261,17 @@ class PolymarketTrader:
         Returns:
             List of placed sell order responses
         """
-        print(f"\n💰 Placing SELL ladder for {side_name} token (bought @ ${buy_price:.4f})...")
+        # Calculate sell size (half of buy) and price (3x buy price)
+        sell_size = buy_size * config.SELL_SHARE_RATIO
+        sell_price = buy_price * config.SELL_PROFIT_MULTIPLE
+        profit_pct = (config.SELL_PROFIT_MULTIPLE - 1) * 100
+        
+        print(f"\n💰 Placing SELL order for {side_name} token (bought @ ${buy_price:.4f})...")
         print(f"   Token ID: {token_id}")
         print(f"   Buy size: {buy_size:.2f} tokens")
-        print(f"   Profit multiples: {config.SELL_PROFIT_MULTIPLES}")
+        print(f"   Sell size: {sell_size:.2f} tokens (half)")
+        print(f"   Sell price: ${sell_price:.4f} ({config.SELL_PROFIT_MULTIPLE}x = +{profit_pct:.0f}%)")
+        print(f"   Keeping: {buy_size - sell_size:.2f} tokens to ride")
         
         # Validate inputs
         if not token_id:
@@ -274,84 +282,73 @@ class PolymarketTrader:
             print(f"   ❌ CRITICAL: buy_size is {buy_size} (must be > 0)")
             return []
         
+        if sell_size < 5:
+            print(f"   ❌ CRITICAL: sell_size is {sell_size:.2f} (must be >= 5 for Polymarket minimum)")
+            return []
+        
+        # Polymarket prices must be between 0.01 and 0.99
+        if sell_price > 0.99:
+            sell_price = 0.99
+            print(f"   ⚠️  Capped sell price at $0.99 (max allowed)")
+        
         placed_orders = []
-        failed_orders = []
         
-        # Divide position across sell ladder
-        size_per_order = buy_size / len(config.SELL_PROFIT_MULTIPLES)
-        print(f"   Size per order: {size_per_order:.4f} tokens")
-        
-        for multiple in config.SELL_PROFIT_MULTIPLES:
-            sell_price = buy_price * multiple
+        try:
+            print(f"\n   📝 Creating sell order @ ${sell_price:.4f} (+{profit_pct:.0f}%)...")
             
-            # Polymarket prices must be between 0.01 and 0.99
-            if sell_price > 0.99:
-                sell_price = 0.99
+            order_args = OrderArgs(
+                price=sell_price,
+                size=sell_size,
+                side=SELL,
+                token_id=token_id,
+            )
             
-            profit_pct = (multiple - 1) * 100
+            print(f"      OrderArgs: price={sell_price}, size={sell_size:.4f}, side=SELL, token_id={token_id[:16]}...")
             
-            try:
-                print(f"\n   📝 Creating sell order @ ${sell_price:.4f} (+{profit_pct:.0f}%)...")
+            signed_order = self.client.create_order(order_args)
+            print(f"      Order signed successfully")
+            
+            response = self.client.post_order(signed_order, OrderType.GTC)
+            print(f"      API Response: {json.dumps(response, default=str)[:200]}...")
+            
+            if response.get("success"):
+                order_id = response.get("orderID", "")
+                print(f"   ✅ Sell @ ${sell_price:.4f} ({sell_size:.2f} tokens, +{profit_pct:.0f}%) - Order ID: {order_id[:8]}...")
                 
-                order_args = OrderArgs(
-                    price=sell_price,
-                    size=size_per_order,
-                    side=SELL,
-                    token_id=token_id,
-                )
+                order_data = {
+                    "market_slug": market_slug,
+                    "order_id": order_id,
+                    "token_id": token_id,
+                    "side": side_name,
+                    "order_type": "SELL",
+                    "price": sell_price,
+                    "size": sell_size,
+                    "buy_price": buy_price,
+                    "profit_multiple": config.SELL_PROFIT_MULTIPLE,
+                    "status": "OPEN"
+                }
+                placed_orders.append(order_data)
                 
-                print(f"      OrderArgs: price={sell_price}, size={size_per_order:.4f}, side=SELL, token_id={token_id[:16]}...")
+                # Save to database
+                save_order(order_data)
+            else:
+                error = response.get("error", response.get("errorMsg", "Unknown error"))
+                error_code = response.get("errorCode", "N/A")
+                print(f"   ❌ Sell @ ${sell_price:.4f} failed!")
+                print(f"      Error: {error}")
+                print(f"      Error code: {error_code}")
+                print(f"      Full response: {json.dumps(response, default=str)}")
                 
-                signed_order = self.client.create_order(order_args)
-                print(f"      Order signed successfully")
-                
-                response = self.client.post_order(signed_order, OrderType.GTC)
-                print(f"      API Response: {json.dumps(response, default=str)[:200]}...")
-                
-                if response.get("success"):
-                    order_id = response.get("orderID", "")
-                    print(f"   ✅ Sell @ ${sell_price:.4f} ({size_per_order:.2f} tokens, +{profit_pct:.0f}%) - Order ID: {order_id[:8]}...")
-                    
-                    order_data = {
-                        "market_slug": market_slug,
-                        "order_id": order_id,
-                        "token_id": token_id,
-                        "side": side_name,
-                        "order_type": "SELL",
-                        "price": sell_price,
-                        "size": size_per_order,
-                        "buy_price": buy_price,
-                        "profit_multiple": multiple,
-                        "status": "OPEN"
-                    }
-                    placed_orders.append(order_data)
-                    
-                    # Save to database
-                    save_order(order_data)
-                else:
-                    error = response.get("error", response.get("errorMsg", "Unknown error"))
-                    error_code = response.get("errorCode", "N/A")
-                    print(f"   ❌ Sell @ ${sell_price:.4f} failed!")
-                    print(f"      Error: {error}")
-                    print(f"      Error code: {error_code}")
-                    print(f"      Full response: {json.dumps(response, default=str)}")
-                    failed_orders.append({"price": sell_price, "error": error})
-                    
-            except Exception as e:
-                import traceback
-                print(f"   ❌ Sell @ ${sell_price:.4f} exception: {str(e)}")
-                print(f"      Traceback: {traceback.format_exc()}")
-                failed_orders.append({"price": sell_price, "error": str(e)})
+        except Exception as e:
+            import traceback
+            print(f"   ❌ Sell @ ${sell_price:.4f} exception: {str(e)}")
+            print(f"      Traceback: {traceback.format_exc()}")
         
         # Summary
-        print(f"\n   📊 Sell ladder summary:")
-        print(f"      Placed: {len(placed_orders)}/{len(config.SELL_PROFIT_MULTIPLES)}")
-        print(f"      Failed: {len(failed_orders)}/{len(config.SELL_PROFIT_MULTIPLES)}")
-        
-        if failed_orders:
-            print(f"      Failed orders:")
-            for fo in failed_orders:
-                print(f"         - ${fo['price']:.4f}: {fo['error'][:50]}...")
+        if placed_orders:
+            print(f"\n   📊 Sell order placed successfully!")
+        else:
+            print(f"\n   📊 Sell order failed!")
         
         return placed_orders
     
