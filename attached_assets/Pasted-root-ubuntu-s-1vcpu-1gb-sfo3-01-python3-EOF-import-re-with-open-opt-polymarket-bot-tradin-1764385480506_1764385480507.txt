@@ -1,0 +1,69 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# python3 << 'EOF'
+import re
+
+with open('/opt/polymarket-bot/trading_bot/order_monitor.py', 'r') as f:
+    content = f.read()
+
+# Disable notify_buy_filled
+content = re.sub(
+    r'(\s+)(notify_buy_filled\(market_slug, \{)',
+    r'\1# DISABLED: \2',
+    content
+)
+content = re.sub(
+    r'(\s+)("side": side,\n\s+"price": filled_price,\n\s+"size": filled_size\n\s+\}\))',
+    r'\1# \2',
+    content
+)
+
+# Disable all notify_sell_ladder_result calls
+content = re.sub(
+    r'(\s+)(notify_sell_ladder_result\([^)]+\))',
+    r'\1# DISABLED: \2',
+    content
+)
+
+with open('/opt/polymarket-bot/trading_bot/order_monitor.py', 'w') as f:
+    f.write(content)
+
+print('✅ Disabled trade notifications in order_monitor.py')
+EOF
+✅ Disabled trade notifications in order_monitor.py
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# python3 << 'EOF'
+with open('/opt/polymarket-bot/trading_bot/polymarket_trader.py', 'r') as f:
+    content = f.read()
+
+old = '''                        # Notify Telegram
+                        notify_sell_executed(market_slug, {
+                            "side": order["side"],
+                            "buy_price": buy_price,
+                            "sell_price": avg_price,
+                            "size": filled_size,
+                            "profit_usd": profit_usd,
+                            "profit_pct": profit_pct
+                        })'''
+
+new = '''                        # DISABLED: Only new markets on Telegram
+                        # notify_sell_executed(market_slug, {
+                        #     "side": order["side"],
+                        #     "buy_price": buy_price,
+                        #     "sell_price": avg_price,
+                        #     "size": filled_size,
+                        #     "profit_usd": profit_usd,
+                        #     "profit_pct": profit_pct
+                        # })'''
+
+if old in content:
+    content = content.replace(old, new)
+    with open('/opt/polymarket-bot/trading_bot/polymarket_trader.py', 'w') as f:
+        f.write(content)
+    print('✅ Disabled sell notifications in polymarket_trader.py')
+else:
+    print('❌ Pattern not found - may already be disabled')
+EOF
+✅ Disabled sell notifications in polymarket_trader.py
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo systemctl restart polymarket-monitor polymarket-worker
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo systemctl status polymarket-monitor polymarket-worker | grep Active
+     Active: activating (auto-restart) (Result: exit-code) since Sat 2025-11-29 03:03:49 UTC; 370ms ago
+     Active: active (running) since Sat 2025-11-29 03:03:39 UTC; 10s ago
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

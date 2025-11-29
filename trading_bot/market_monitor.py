@@ -179,19 +179,45 @@ def get_seen_condition_ids(condition_ids: List[str]) -> Set[str]:
     return seen
 
 
-def mark_event_as_seen(event_slug: str):
-    """Mark an event as seen for Telegram"""
+def try_claim_event(event_slug: str) -> bool:
+    """
+    Atomically try to claim an event for Telegram posting.
+    Uses INSERT RETURNING to ensure only ONE process can ever claim a given event.
+    
+    Returns:
+        True if this process claimed the event (should post to Telegram)
+        False if another process already claimed it (skip posting)
+    """
     conn = get_db_connection()
     cur = conn.cursor()
     
-    cur.execute(
-        "INSERT INTO seen_polymarket_events (event_slug) VALUES (%s) ON CONFLICT DO NOTHING",
-        (event_slug,)
-    )
-    
-    conn.commit()
-    cur.close()
-    conn.close()
+    try:
+        cur.execute(
+            "INSERT INTO seen_polymarket_events (event_slug) VALUES (%s) ON CONFLICT DO NOTHING RETURNING event_slug",
+            (event_slug,)
+        )
+        
+        result = cur.fetchone()
+        conn.commit()
+        
+        claimed = result is not None
+        if not claimed:
+            log(f"⏭️  Event already claimed by another process: {event_slug[:30]}...")
+        
+        return claimed
+        
+    except Exception as e:
+        log(f"❌ Error claiming event {event_slug}: {e}")
+        conn.rollback()
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+
+def mark_event_as_seen(event_slug: str):
+    """Legacy function - use try_claim_event instead for atomic claiming"""
+    try_claim_event(event_slug)
 
 
 def mark_condition_as_seen(condition_id: str, event_slug: str):
@@ -520,17 +546,21 @@ def main():
         
         title = event.get("title", "")[:50]
         
-        # TELEGRAM: Post once per new event
+        # TELEGRAM: Post once per new event (ATOMIC claim prevents duplicates across processes)
         if event_slug not in seen_event_slugs:
-            mark_event_as_seen(event_slug)  # Mark FIRST to prevent duplicates
-            seen_event_slugs.add(event_slug)  # Update in-memory set for same-batch dedup
-            if post_event_to_telegram(event):
-                log(f"✅ Telegram: {title}...")
-                telegram_posted += 1
-                time.sleep(1)  # Rate limit
+            # Atomically try to claim this event - only one process can ever succeed
+            if try_claim_event(event_slug):
+                seen_event_slugs.add(event_slug)  # Update in-memory set for same-batch dedup
+                if post_event_to_telegram(event):
+                    log(f"✅ Telegram: {title}...")
+                    telegram_posted += 1
+                    time.sleep(1)  # Rate limit
+                else:
+                    log(f"❌ Telegram failed: {title}...")
+                    continue  # Don't process sub-markets if Telegram fails
             else:
-                log(f"❌ Telegram failed: {title}...")
-                continue  # Don't process sub-markets if Telegram fails
+                # Another process already claimed this event
+                seen_event_slugs.add(event_slug)
         
         # TRADING: Process each sub-market (even for already-seen events)
         markets = event.get("markets", [])

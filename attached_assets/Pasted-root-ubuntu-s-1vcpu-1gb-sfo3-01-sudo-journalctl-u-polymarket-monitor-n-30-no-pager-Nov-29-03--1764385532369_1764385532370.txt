@@ -1,0 +1,32 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo journalctl -u polymarket-monitor -n 30 --no-pager
+Nov 29 03:04:40 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Nov 29 03:04:40 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Nov 29 03:04:50 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 7.
+Nov 29 03:04:50 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 29 03:04:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107599]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 120
+Nov 29 03:04:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107599]:     "price": filled_price,
+Nov 29 03:04:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107599]: IndentationError: unexpected indent
+Nov 29 03:04:50 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Nov 29 03:04:50 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Nov 29 03:05:00 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 8.
+Nov 29 03:05:00 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 29 03:05:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107603]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 120
+Nov 29 03:05:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107603]:     "price": filled_price,
+Nov 29 03:05:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107603]: IndentationError: unexpected indent
+Nov 29 03:05:00 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Nov 29 03:05:00 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Nov 29 03:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 9.
+Nov 29 03:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 29 03:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107619]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 120
+Nov 29 03:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107619]:     "price": filled_price,
+Nov 29 03:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107619]: IndentationError: unexpected indent
+Nov 29 03:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Nov 29 03:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Nov 29 03:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 10.
+Nov 29 03:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 29 03:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107621]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 120
+Nov 29 03:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107621]:     "price": filled_price,
+Nov 29 03:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107621]: IndentationError: unexpected indent
+Nov 29 03:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Nov 29 03:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
