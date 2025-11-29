@@ -114,18 +114,18 @@ def monitor_all_orders(trader: PolymarketTrader):
                     filled_price
                 )
                 
-                # Send Telegram notification about buy fill
-                notify_buy_filled(market_slug, {
-                    "side": side,
-                    "price": filled_price,
-                    "size": filled_size
-                })
+                # DISABLED: Only show new markets on Telegram (no buy/sell notifications)
+                # notify_buy_filled(market_slug, {
+                #     "side": side,
+                #     "price": filled_price,
+                #     "size": filled_size
+                # })
                 
                 # Validate token_id before placing sell ladder
                 if not token_id:
                     error_msg = f"Missing token_id for order {order_id[:8]}"
                     print(f"   ❌ Cannot place sell ladder: {error_msg}")
-                    notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
+                    # DISABLED: notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
                     continue
                 
                 # Place sell ladder with error handling
@@ -145,16 +145,16 @@ def monitor_all_orders(trader: PolymarketTrader):
                     
                     if sell_orders and len(sell_orders) > 0:
                         print(f"   ✅ Placed {len(sell_orders)} sell orders")
-                        notify_sell_ladder_result(market_slug, side, success=True, sell_count=len(sell_orders))
+                        # DISABLED: notify_sell_ladder_result(market_slug, side, success=True, sell_count=len(sell_orders))
                     else:
                         error_msg = "No sell orders were placed (all failed)"
                         print(f"   ❌ {error_msg}")
-                        notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
+                        # DISABLED: notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
                         
                 except Exception as e:
                     error_msg = str(e)
                     print(f"   ❌ Sell ladder error: {error_msg}")
-                    notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
+                    # DISABLED: notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
                 
                 # Update summary
                 update_market_summary(market_slug)

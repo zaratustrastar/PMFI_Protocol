@@ -461,20 +461,20 @@ class PolymarketTrader:
                     # Update database
                     update_order_status(order_id, "FILLED", filled_size, avg_price)
                     
-                    # Get market slug from order for summary and notification
+                    # Get market slug from order for summary
                     market_slug = order.get("market_slug", "")
                     if market_slug:
                         update_market_summary(market_slug)
                         
-                        # Notify Telegram
-                        notify_sell_executed(market_slug, {
-                            "side": order["side"],
-                            "buy_price": buy_price,
-                            "sell_price": avg_price,
-                            "size": filled_size,
-                            "profit_usd": profit_usd,
-                            "profit_pct": profit_pct
-                        })
+                        # DISABLED: Only show new markets on Telegram (no buy/sell notifications)
+                        # notify_sell_executed(market_slug, {
+                        #     "side": order["side"],
+                        #     "buy_price": buy_price,
+                        #     "sell_price": avg_price,
+                        #     "size": filled_size,
+                        #     "profit_usd": profit_usd,
+                        #     "profit_pct": profit_pct
+                        # })
                     
                     # Store fill data in order dict
                     order["status"] = "FILLED"
