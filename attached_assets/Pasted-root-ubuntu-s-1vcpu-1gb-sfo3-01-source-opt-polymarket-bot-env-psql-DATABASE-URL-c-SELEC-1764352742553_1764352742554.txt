@@ -1,0 +1,41 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# source /opt/polymarket-bot/.env && psql "$DATABASE_URL" -c "SELECT id, question, status, created_at FROM trading_jobs WHERE question LIKE '%Solana%December%' OR question LIKE '%solana%100%' ORDER BY created_at DESC LIMIT 10;"
+  id  |                             question                             |  status   |         created_at         
+------+------------------------------------------------------------------+-----------+----------------------------
+ 4075 | Will the price of Solana be greater than $180 on December 5?     | PENDING   | 2025-11-28 17:18:00.934405
+ 4074 | Will the price of Solana be between $170 and $180 on December 5? | PENDING   | 2025-11-28 17:17:59.614202
+ 4073 | Will the price of Solana be between $160 and $170 on December 5? | RUNNING   | 2025-11-28 17:17:58.305342
+ 4072 | Will the price of Solana be between $150 and $160 on December 5? | COMPLETED | 2025-11-28 17:17:56.98767
+ 4071 | Will the price of Solana be between $140 and $150 on December 5? | COMPLETED | 2025-11-28 17:17:55.678113
+ 4070 | Will the price of Solana be between $130 and $140 on December 5? | COMPLETED | 2025-11-28 17:17:54.356677
+ 4069 | Will the price of Solana be between $120 and $130 on December 5? | COMPLETED | 2025-11-28 17:17:53.052438
+ 4068 | Will the price of Solana be between $110 and $120 on December 5? | COMPLETED | 2025-11-28 17:17:51.726024
+ 4067 | Will the price of Solana be between $100 and $110 on December 5? | COMPLETED | 2025-11-28 17:17:50.416822
+ 4066 | Will the price of Solana be between $90 and $100 on December 5?  | COMPLETED | 2025-11-28 17:17:49.099801
+(10 rows)
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# source /opt/polymarket-bot/.env && psql "$DATABASE_URL" -c "SELECT DISTINCT market_slug FROM trading_positions WHERE created_at > '2025-11-28' LIMIT 20;"
+                            market_slug                             
+--------------------------------------------------------------------
+ 0x38fc5a28b2ac506f7c8d9c7bec291484bf3feb64a5b91b73b3a776613aa988e6
+ 0x8ddc0fded66efbb50e8ed582849980bebc23597ab66d7d0de6da8992ac607d60
+ 0x938ac46ecf569f9c05cc81596683fcc11a655e69aa2512ecf23e754b476dcb08
+ 0x3b7da081d98111b40016f80adc6f7cf5a5ee1a38d79fd2dc534f57b25b7d37ad
+ 0x91cbf557e6c220299da1695fcc44a6993a5b0836af40e420ac49edb7f801b0a3
+ 0xdff7e2773c48e9b9572ac1cfad9751cb4603a720fe9a3a11adbbe923116c53d3
+ 0x4823a1f4173faf838d1fa30d9cf0868fe57b6376efa0344be2430cfbf77b7479
+ 0x6625e2d8c90521e640c71b53ca9557448146a5974f2ba301e6dbd72c6fff7904
+ 0x4a9384e02957fdbc584b45f792fe875fcd6a7996d4ab91a6c62b8552ef1a045f
+ 0x31958bd909a06788327ef42c723f4663289c4f53ad76a596e974957dc538ed9c
+ 0x130d6b97950037992ca427c044d69cbe29f9ab209e85ed15bdb8fb1a91da9736
+ 0x93cab6a58741c2a52f3c3a89204a13be0de1e676af36bb07eb5f5f2f67c1f3c4
+ 0x711ff2f833d1e014a183a111d64c95bc4de78f1f3e456a8842e7d6a6f154ba49
+ 0xafceecb83e5873ed5436a140a3dc791d7f9fea73d7f46f20fcd401958bc846d6
+ 0x59984bdd7e7c538cffbd2b4ce554ff320449746a0fcfd78b9db7fa28ad54573a
+ 0x01c13da19a30593773ac8482f3f1201796a3e7ce3b3b331e211128caaa78d953
+ 0x48a9eb37832a23688e7f236da7385cd83cf979952d805633e1a3fff5229096f7
+ 0x1aa5a496920f7b10901f622ef3afef1fb8498659d211bdc982a9467037b16ed8
+ 0xf227f33044ae935ad1669b6d3f5eab6400a4a869e87ab085e11ba215a1566ca9
+ 0x66338f075e34ba901c0c387cd1dbaeaaf0d2700d03935622f42e31288e25f95f
+(20 rows)
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

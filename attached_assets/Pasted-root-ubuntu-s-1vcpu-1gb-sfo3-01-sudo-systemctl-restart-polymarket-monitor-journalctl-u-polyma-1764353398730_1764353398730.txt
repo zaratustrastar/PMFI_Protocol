@@ -1,0 +1,27 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo systemctl restart polymarket-monitor && journalctl -u polymarket-monitor -f
+Nov 28 17:29:48 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94613]:       Token ID: 6718531868443387...
+Nov 28 17:29:49 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94613]:    🎯 Order filled: BUY NO @ $0.0180 (11.11 tokens)
+Nov 28 17:29:49 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94613]:       Token ID: 6718531868443387...
+Nov 28 17:29:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94613]:    🎯 Order filled: BUY NO @ $0.0160 (12.50 tokens)
+Nov 28 17:29:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94613]:       Token ID: 6718531868443387...
+Nov 28 18:09:41 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells...
+Nov 28 18:09:41 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Deactivated successfully.
+Nov 28 18:09:41 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 18:09:41 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Consumed 1min 51.596s CPU time, 46.6M memory peak, 0B memory swap peak.
+Nov 28 18:09:41 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 18:09:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]: ✅ Loaded environment variables from .env file
+Nov 28 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Nov 28 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]: 👁️  Polymarket Order Monitor Starting...
+Nov 28 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    Monitors: All open buy/sell orders
+Nov 28 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    Buys filled: Auto-place sell ladder
+Nov 28 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    Sells filled: Notify Telegram (@ponnymarket)
+Nov 28 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]: 🤖 Initializing Polymarket Trading Bot...
+Nov 28 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    Bypass method: curl_cffi
+Nov 28 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    🌐 Using proxy: 92.113.180.106:42563
+Nov 28 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+Nov 28 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]: 🔑 Deriving trading credentials from private key...
+Nov 28 18:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]: ✅ Trading bot initialized!
+Nov 28 18:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]: 📊 Configuration:
+Nov 28 18:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    Poll Interval: 30s
+Nov 28 18:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]: 🔄 Starting monitor loop (press Ctrl+C to stop)
+Nov 28 18:09:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]: 🔍 Checking 4019 open buy orders...

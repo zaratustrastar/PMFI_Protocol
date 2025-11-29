@@ -1,0 +1,45 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u polymarket-monitor --since "30 min ago" | grep -i "sell\|ladder"
+Nov 28 17:23:24 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells...
+Nov 28 17:23:24 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 17:23:24 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 17:23:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94521]:    Monitors: All open buy/sell orders
+Nov 28 17:23:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94521]:    Buys filled: Auto-place sell ladder
+Nov 28 17:23:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94521]:    Sells filled: Notify Telegram (@ponnymarket)
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells...
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]:    Monitors: All open buy/sell orders
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]:    Buys filled: Auto-place sell ladder
+Nov 28 17:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94543]:    Sells filled: Notify Telegram (@ponnymarket)
+Nov 28 17:27:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells...
+Nov 28 17:27:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 17:27:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Nov 28 17:27:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94613]:    Monitors: All open buy/sell orders
+Nov 28 17:27:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94613]:    Buys filled: Auto-place sell ladder
+Nov 28 17:27:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[94613]:    Sells filled: Notify Telegram (@ponnymarket)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# source /opt/polymarket-bot/.env && psql "$DATABASE_URL" -c "SELECT order_id, side, status, price, created_at FROM trading_positions WHERE market_slug LIKE '%solana%' ORDER BY created_at DESC LIMIT 20;"
+                              order_id                              | side |  status   |  price   |         created_at         
+--------------------------------------------------------------------+------+-----------+----------+----------------------------
+ 0x84ca75b56a6a9b245ccbbdf004e1c30474675c9a987956b23cc9965f5b5a4af6 | NO   | CANCELLED | 0.030000 | 2025-11-26 17:16:37.150033
+ 0x16ff8543e41715d468dd3b5187a61365ec540d03334fc439fc0c55583e9c381b | NO   | CANCELLED | 0.028000 | 2025-11-26 17:16:35.533136
+ 0x9f7d566eec8b888020719c778acfd840d82cb99298272a7c9576a59697d83efc | NO   | CANCELLED | 0.025000 | 2025-11-26 17:16:33.910525
+ 0x9917451bc78add6d1e47d455d73890c7b819885f926a45a0560a04a26bb1448b | NO   | CANCELLED | 0.022000 | 2025-11-26 17:16:32.086579
+ 0x232e7ce3e17e75606c63b6142fc81d36d5ab1b064b0dc86d378993bcd3f559f3 | NO   | CANCELLED | 0.020000 | 2025-11-26 17:16:30.479269
+ 0x838bbd2976003a081deac94cc002415ccd99676a68b508ce7251436a0c307163 | NO   | CANCELLED | 0.018000 | 2025-11-26 17:16:28.846387
+ 0x6c1e5c23265004b94d175b9520c866bc307fd8fd7e8a0a755dc15e5e1634842c | NO   | CANCELLED | 0.016000 | 2025-11-26 17:16:27.020348
+ 0x6f5a7b8a10b61dd1bea77dab87b77b7e60d36018b912a5cac370a91c3b547748 | NO   | CANCELLED | 0.014000 | 2025-11-26 17:16:25.38939
+ 0x1c632701676ea70641a99b62b22c08b2c4b8b82be976046453b5631fa93bba23 | NO   | CANCELLED | 0.012000 | 2025-11-26 17:16:23.786916
+ 0x3a41f46f6d3ec39db89b1493f3705991662e8ba2984e37a25bcb19cb8dde3e57 | NO   | CANCELLED | 0.010000 | 2025-11-26 17:16:22.20292
+ 0x391e6124ad4a8d8cb2958f8c45c7c620261caf62532c54681478cdf584bf4de2 | YES  | FILLED    | 0.030000 | 2025-11-26 17:16:17.648746
+ 0x973a7652527ac197950728dd6867a0377d6a079541b9aa7c2019f405b255dbe2 | YES  | FILLED    | 0.028000 | 2025-11-26 17:16:16.04301
+ 0x110abd571a6ee62f636124fd489c9c329d6ce7ff67dcc960ed321505526fc32c | YES  | FILLED    | 0.025000 | 2025-11-26 17:16:14.419613
+ 0x186835d1432e04c213964db5af2b66da37270c3030b479667c7e0ac966ee57c0 | YES  | FILLED    | 0.022000 | 2025-11-26 17:16:12.776947
+ 0xa69058fca65dc2bdd8ae65f9c8ad54cc684fc8fcd88f3baa49c02b52745e8ec4 | YES  | FILLED    | 0.020000 | 2025-11-26 17:16:11.165129
+ 0x68777ed891637a737c598d7aaeddac94f0261f8ebf5e6b4cccdb362092a61fd5 | YES  | FILLED    | 0.018000 | 2025-11-26 17:16:09.535756
+ 0xeae7eeb486fb7d0c4172dd0bd7b0b86ff05fb0d76e7c218492784bda049eaec7 | YES  | FILLED    | 0.016000 | 2025-11-26 17:16:07.71418
+ 0x99bacbfe9c9f1e23ae89e5e2b919f69c44c99a05636e4b4092da0289a189b2cc | YES  | CANCELLED | 0.014000 | 2025-11-26 17:16:06.112589
+ 0x3ee140a8070dc9fa4379cf4f8e063d002a93022dfff8f5252b3e3728f7bcb538 | YES  | CANCELLED | 0.012000 | 2025-11-26 17:16:04.461396
+ 0xa35bd49b673f0597a77517c7801a0e98ac2e392aa8787f1737083114fb149049 | YES  | CANCELLED | 0.010000 | 2025-11-26 17:16:02.787247
+(20 rows)
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
