@@ -1,0 +1,27 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# tail -f /var/log/market_monitor.log
+[2025-11-29 01:11:05] ✅ Telegram: XRP Up or Down - November 29, 8:00PM-8:15PM ET...
+[2025-11-29 01:11:08] ✅ Telegram: Bitcoin Up or Down - November 29, 8:00PM-8:15PM ET...
+[2025-11-29 01:11:11] ✅ Telegram: Ethereum Up or Down - November 29, 8:00PM-8:15PM E...
+[2025-11-29 01:11:14] ✅ Telegram: Solana Up or Down - November 29, 8:00PM-8:15PM ET...
+[2025-11-29 01:11:16] Found 4 new events, 96 existing
+[2025-11-29 01:11:16] ✅ Done: 4 Telegram, 0 queued, 4 filtered
+[2025-11-29 01:12:01] 🚀 Starting Polymarket market monitor
+[2025-11-29 01:12:03] Fetched 100 events from API
+[2025-11-29 01:12:04] Found 0 new events, 100 existing
+[2025-11-29 01:12:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+[2025-11-29 01:13:01] 🚀 Starting Polymarket market monitor
+[2025-11-29 01:13:03] Fetched 100 events from API
+[2025-11-29 01:13:04] Found 0 new events, 100 existing
+[2025-11-29 01:13:04] ✅ Done: 0 Telegram, 0 queued, 0 filtered
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u polymarket-monitor -f
+Nov 29 01:08:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    ⚠️  Order 0x075e2d not found on exchange (cancelled or expired)
+Nov 29 01:08:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    ⚠️  Order 0x84a727 not found on exchange (cancelled or expired)
+Nov 29 01:08:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    ⚠️  Order 0xfc1ce2 not found on exchange (cancelled or expired)
+Nov 29 01:08:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    ⚠️  Order 0xeba312 not found on exchange (cancelled or expired)
+Nov 29 01:08:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    ⚠️  Order 0x5b0976 not found on exchange (cancelled or expired)
+Nov 29 01:08:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    ⚠️  Order 0xadd287 not found on exchange (cancelled or expired)
+Nov 29 01:08:37 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    ⚠️  Order 0x0c4b4b not found on exchange (cancelled or expired)
+Nov 29 01:08:38 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    ⚠️  Order 0x946b6f not found on exchange (cancelled or expired)
+Nov 29 01:08:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    ⚠️  Order 0x6d9fe5 not found on exchange (cancelled or expired)
+Nov 29 01:10:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[95645]:    ⚠️  Error checking order 0xb7f190: PolyApiException[status_code=None, error_message=Request exception!]
