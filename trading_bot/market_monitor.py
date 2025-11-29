@@ -522,9 +522,10 @@ def main():
         
         # TELEGRAM: Post once per new event
         if event_slug not in seen_event_slugs:
+            mark_event_as_seen(event_slug)  # Mark FIRST to prevent duplicates
+            seen_event_slugs.add(event_slug)  # Update in-memory set for same-batch dedup
             if post_event_to_telegram(event):
                 log(f"✅ Telegram: {title}...")
-                mark_event_as_seen(event_slug)
                 telegram_posted += 1
                 time.sleep(1)  # Rate limit
             else:
