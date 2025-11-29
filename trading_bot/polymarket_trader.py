@@ -378,6 +378,13 @@ class PolymarketTrader:
             
             try:
                 order_status = self.client.get_order(order_id)
+                
+                # Auto-cancel orders not found on exchange (returns None)
+                if order_status is None:
+                    print(f"   ⚠️  Order {order_id[:8]} not found on exchange (cancelled or expired)")
+                    update_order_status(order_id, "CANCELLED")
+                    continue
+                
                 status = order_status.get("status", "").upper()
                 
                 # Handle both full and partial fills
@@ -405,7 +412,14 @@ class PolymarketTrader:
                     print(f"   ⏳ Partial fill: {order['order_type']} {order['side']} ({filled_size:.2f}/{order['size']:.2f})")
                     
             except Exception as e:
-                print(f"   ⚠️  Error checking order {order_id[:8]}: {str(e)}")
+                error_str = str(e).lower()
+                # Only auto-cancel for explicit "not found" errors, NOT transient network errors
+                if "not found" in error_str or "does not exist" in error_str or "order_not_found" in error_str:
+                    print(f"   ⚠️  Order {order_id[:8]} not found on exchange (cancelled or expired)")
+                    update_order_status(order_id, "CANCELLED")
+                else:
+                    # Transient errors (network, timeout) - keep order OPEN for retry
+                    print(f"   ⚠️  Error checking order {order_id[:8]}: {str(e)}")
         
         return filled_orders
     
@@ -426,6 +440,13 @@ class PolymarketTrader:
             
             try:
                 order_status = self.client.get_order(order_id)
+                
+                # Auto-cancel orders not found on exchange (returns None)
+                if order_status is None:
+                    print(f"   ⚠️  Order {order_id[:8]} not found on exchange (cancelled or expired)")
+                    update_order_status(order_id, "CANCELLED")
+                    continue
+                
                 status = order_status.get("status", "").upper()
                 
                 if status in ["FILLED", "MATCHED"]:
@@ -465,7 +486,14 @@ class PolymarketTrader:
                     filled_sells.append(order)
                     
             except Exception as e:
-                print(f"   ⚠️  Error checking sell order {order_id[:8]}: {str(e)}")
+                error_str = str(e).lower()
+                # Only auto-cancel for explicit "not found" errors, NOT transient network errors
+                if "not found" in error_str or "does not exist" in error_str or "order_not_found" in error_str:
+                    print(f"   ⚠️  Order {order_id[:8]} not found on exchange (cancelled or expired)")
+                    update_order_status(order_id, "CANCELLED")
+                else:
+                    # Transient errors (network, timeout) - keep order OPEN for retry
+                    print(f"   ⚠️  Error checking sell order {order_id[:8]}: {str(e)}")
         
         return filled_sells
     
