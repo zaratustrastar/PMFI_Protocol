@@ -1,0 +1,54 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# grep -n "def place_sell_ladder" /opt/polymarket-bot/trading_bot/polymarket_trader.py
+sed -n '249,360p' /opt/polymarket-bot/trading_bot/polymarket_trader.py | head -50
+249:    def place_sell_ladder(self, token_id: str, buy_price: float, buy_size: float, side_name: str, market_slug: str) -> List[Dict]:
+    def place_sell_ladder(self, token_id: str, buy_price: float, buy_size: float, side_name: str, market_slug: str) -> List[Dict]:
+        """
+        Place ladder sell orders at 200%-1000% profit
+        
+        Args:
+            token_id: Token ID to sell
+            buy_price: Original buy price (actual filled price)
+            buy_size: Number of tokens bought (actual filled quantity)
+            side_name: "YES" or "NO" for logging
+            market_slug: Market identifier for database
+            
+        Returns:
+            List of placed sell order responses
+        """
+        print(f"\n💰 Placing SELL ladder for {side_name} token (bought @ ${buy_price:.4f})...")
+        
+        placed_orders = []
+        
+        # Divide position across sell ladder
+        size_per_order = buy_size / len(config.SELL_PROFIT_MULTIPLES)
+        
+        for multiple in config.SELL_PROFIT_MULTIPLES:
+            sell_price = buy_price * multiple
+            
+            # Polymarket prices must be between 0.01 and 0.99
+            if sell_price > 0.99:
+                sell_price = 0.99
+            
+            try:
+                order_args = OrderArgs(
+                    price=sell_price,
+                    size=size_per_order,
+                    side=SELL,
+                    token_id=token_id,
+                )
+                
+                signed_order = self.client.create_order(order_args)
+                response = self.client.post_order(signed_order, OrderType.GTC)
+                
+                if response.get("success"):
+                    order_id = response.get("orderID", "")
+                    profit_pct = (multiple - 1) * 100
+                    print(f"   ✅ Sell @ ${sell_price:.4f} ({size_per_order:.2f} tokens, +{profit_pct:.0f}%) - Order ID: {order_id[:8]}...")
+                    
+                    order_data = {
+                        "market_slug": market_slug,
+                        "order_id": order_id,
+                        "token_id": token_id,
+                        "side": side_name,
+                        "order_type": "SELL",
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
