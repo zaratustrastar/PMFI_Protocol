@@ -1,0 +1,103 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u polymarket-monitor.service -n 300 --no-pager | grep -i "caaee5b9c"
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u polymarket-monitor.service -n 100 --no-pager | tail -100
+Nov 29 21:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY NO @ $0.0180
+Nov 29 21:05:11 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0x74cf25
+Nov 29 21:05:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY NO @ $0.0160
+Nov 29 21:05:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0xb4aab0
+Nov 29 21:05:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY NO @ $0.0140
+Nov 29 21:05:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0xff095b
+Nov 29 21:05:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY NO @ $0.0120
+Nov 29 21:05:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0x58e0df
+Nov 29 21:05:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY NO @ $0.0100
+Nov 29 21:05:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0xc11cb4
+Nov 29 21:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY YES @ $0.0300
+Nov 29 21:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0x32a08e
+Nov 29 21:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY YES @ $0.0280
+Nov 29 21:05:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0x9572f6
+Nov 29 21:05:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY YES @ $0.0250
+Nov 29 21:05:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0xa5f4ff
+Nov 29 21:05:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY YES @ $0.0220
+Nov 29 21:05:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0x87a60a
+Nov 29 21:05:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY YES @ $0.0200
+Nov 29 21:05:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0xb8538f
+Nov 29 21:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY YES @ $0.0180
+Nov 29 21:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0x88bfc4
+Nov 29 21:05:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY YES @ $0.0160
+Nov 29 21:05:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0x76a811
+Nov 29 21:05:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY YES @ $0.0140
+Nov 29 21:05:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0xf0a914
+Nov 29 21:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY YES @ $0.0120
+Nov 29 21:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0x859b4c
+Nov 29 21:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: ⏰ Cancelling stale order (age: 15.2h)
+Nov 29 21:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Order: BUY YES @ $0.0100
+Nov 29 21:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    Market: 0xe21c9816b0912155d34735951241ef32ac651ee12e05e4150a2785af39f90937
+Nov 29 21:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Cancelled order 0x99d167
+Nov 29 21:05:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ✅ Order cancelled and marked in database
+Nov 29 21:05:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: 🗑️  Cancelled 1697 stale order(s)
+Nov 29 21:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]: 🔍 Checking 5790 open buy orders...
+Nov 29 22:12:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ⚠️  Error checking order 0x3d3947: PolyApiException[status_code=None, error_message=Request exception!]
+Nov 29 22:24:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    🎯 Order filled: BUY NO @ $0.0300 (10.00 tokens)
+Nov 29 22:24:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:       Token ID: 4690945761567573...
+Nov 29 22:24:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    🎯 Order filled: BUY NO @ $0.0280 (10.00 tokens)
+Nov 29 22:24:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:       Token ID: 4690945761567573...
+Nov 29 22:24:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    🎯 Order filled: BUY NO @ $0.0250 (10.00 tokens)
+Nov 29 22:24:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:       Token ID: 4690945761567573...
+Nov 29 22:24:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    🎯 Order filled: BUY NO @ $0.0220 (10.00 tokens)
+Nov 29 22:24:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:       Token ID: 4690945761567573...
+Nov 29 22:24:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    🎯 Order filled: BUY NO @ $0.0200 (10.00 tokens)
+Nov 29 22:24:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:       Token ID: 4690945761567573...
+Nov 29 22:24:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    🎯 Order filled: BUY NO @ $0.0180 (10.00 tokens)
+Nov 29 22:24:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:       Token ID: 4690945761567573...
+Nov 29 22:24:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    🎯 Order filled: BUY NO @ $0.0160 (10.00 tokens)
+Nov 29 22:24:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:       Token ID: 4690945761567573...
+Nov 29 22:24:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    🎯 Order filled: BUY NO @ $0.0140 (10.00 tokens)
+Nov 29 22:24:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:       Token ID: 4690945761567573...
+Nov 29 22:24:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    🎯 Order filled: BUY NO @ $0.0120 (10.00 tokens)
+Nov 29 22:24:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:       Token ID: 4690945761567573...
+Nov 29 22:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    🎯 Order filled: BUY NO @ $0.0100 (10.00 tokens)
+Nov 29 22:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:       Token ID: 4690945761567573...
+Nov 29 22:36:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[107692]:    ⚠️  Error checking order 0xfea491: PolyApiException[status_code=None, error_message=Request exception!]
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

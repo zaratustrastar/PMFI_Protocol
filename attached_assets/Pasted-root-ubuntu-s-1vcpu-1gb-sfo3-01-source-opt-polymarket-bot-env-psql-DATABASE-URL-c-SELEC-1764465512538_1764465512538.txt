@@ -1,0 +1,26 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# source /opt/polymarket-bot/.env && psql "$DATABASE_URL" -c "SELECT LEFT(order_id,8) as order_id, LEFT(market_slug,30) as market, side, LEFT(token_id,16) as token_id, status FROM trading_positions WHERE order_type='BUY' AND status='FILLED' ORDER BY created_at DESC LIMIT 20;"
+ order_id |             market             | side |     token_id     | status 
+----------+--------------------------------+------+------------------+--------
+ 0xe7c7b5 | 0xa8caaf6b8cc75fbf3227cb5c178a | NO   | 4924426453378652 | FILLED
+ 0x35e7af | 0xa8caaf6b8cc75fbf3227cb5c178a | NO   | 4924426453378652 | FILLED
+ 0x823f47 | 0xa8caaf6b8cc75fbf3227cb5c178a | NO   | 4924426453378652 | FILLED
+ 0xbaf3f5 | 0xa8caaf6b8cc75fbf3227cb5c178a | NO   | 4924426453378652 | FILLED
+ 0xa9251c | 0xa8caaf6b8cc75fbf3227cb5c178a | NO   | 4924426453378652 | FILLED
+ 0x5fdf40 | 0xa8caaf6b8cc75fbf3227cb5c178a | NO   | 4924426453378652 | FILLED
+ 0x82380a | 0xa8caaf6b8cc75fbf3227cb5c178a | NO   | 4924426453378652 | FILLED
+ 0xaa6819 | 0xa8caaf6b8cc75fbf3227cb5c178a | NO   | 4924426453378652 | FILLED
+ 0x7c79e2 | 0xa8caaf6b8cc75fbf3227cb5c178a | NO   | 4924426453378652 | FILLED
+ 0x91b980 | 0xa8caaf6b8cc75fbf3227cb5c178a | NO   | 4924426453378652 | FILLED
+ 0xbac344 | 0xcaaee5b9c0f092fd3c703e96a09e | YES  | 3301147392386595 | FILLED
+ 0x4b62f9 | 0xcaaee5b9c0f092fd3c703e96a09e | YES  | 3301147392386595 | FILLED
+ 0x90967d | 0xcaaee5b9c0f092fd3c703e96a09e | YES  | 3301147392386595 | FILLED
+ 0xd4339a | 0xcaaee5b9c0f092fd3c703e96a09e | YES  | 3301147392386595 | FILLED
+ 0x7f39c4 | 0xcaaee5b9c0f092fd3c703e96a09e | YES  | 3301147392386595 | FILLED
+ 0xd1f08c | 0xcaaee5b9c0f092fd3c703e96a09e | YES  | 3301147392386595 | FILLED
+ 0x6b1b04 | 0xcaaee5b9c0f092fd3c703e96a09e | YES  | 3301147392386595 | FILLED
+ 0x78e674 | 0xcaaee5b9c0f092fd3c703e96a09e | YES  | 3301147392386595 | FILLED
+ 0xd9cc43 | 0xcaaee5b9c0f092fd3c703e96a09e | YES  | 3301147392386595 | FILLED
+ 0x9b7c88 | 0xcaaee5b9c0f092fd3c703e96a09e | YES  | 3301147392386595 | FILLED
+(20 rows)
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

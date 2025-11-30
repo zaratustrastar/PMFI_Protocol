@@ -88,6 +88,23 @@ def init_database():
         )
     """)
     
+    # Accumulated fills table - tracks total filled shares per token for sell threshold
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS accumulated_fills (
+            id SERIAL PRIMARY KEY,
+            market_slug TEXT NOT NULL,
+            token_id TEXT NOT NULL,
+            side TEXT NOT NULL,
+            total_shares DECIMAL(18, 6) DEFAULT 0,
+            total_cost DECIMAL(18, 6) DEFAULT 0,
+            avg_buy_price DECIMAL(10, 6) DEFAULT 0,
+            sell_placed BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(market_slug, token_id, side)
+        )
+    """)
+    
     conn.commit()
     cur.close()
     conn.close()
@@ -331,6 +348,140 @@ def complete_trading_job(job_id: int, error_message: str = None):
     conn.commit()
     cur.close()
     conn.close()
+
+
+def add_accumulated_fill(market_slug: str, token_id: str, side: str, filled_shares: float, filled_price: float) -> Dict:
+    """
+    Add filled shares to the accumulated total for a token.
+    Updates total shares, total cost, and recalculates average buy price.
+    
+    Args:
+        market_slug: Market identifier
+        token_id: Token ID
+        side: YES or NO
+        filled_shares: Number of shares filled in this order
+        filled_price: Price per share for this fill
+        
+    Returns:
+        Dict with current accumulated state including whether sell threshold is reached
+    """
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    fill_cost = filled_shares * filled_price
+    
+    # Upsert accumulated fill data
+    cur.execute("""
+        INSERT INTO accumulated_fills (market_slug, token_id, side, total_shares, total_cost, avg_buy_price)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON CONFLICT (market_slug, token_id, side) 
+        DO UPDATE SET
+            total_shares = accumulated_fills.total_shares + EXCLUDED.total_shares,
+            total_cost = accumulated_fills.total_cost + EXCLUDED.total_cost,
+            avg_buy_price = (accumulated_fills.total_cost + EXCLUDED.total_cost) / 
+                           NULLIF(accumulated_fills.total_shares + EXCLUDED.total_shares, 0),
+            updated_at = CURRENT_TIMESTAMP
+        RETURNING *
+    """, (market_slug, token_id, side, filled_shares, fill_cost, filled_price))
+    
+    result = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return dict(result) if result else {}
+
+
+def get_accumulated_fill(market_slug: str, token_id: str, side: str) -> Optional[Dict]:
+    """
+    Get accumulated fill data for a specific token.
+    
+    Returns:
+        Dict with total_shares, avg_buy_price, sell_placed, etc. or None
+    """
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT * FROM accumulated_fills
+        WHERE market_slug = %s AND token_id = %s AND side = %s
+    """, (market_slug, token_id, side))
+    
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    return dict(result) if result else None
+
+
+def mark_sell_placed(market_slug: str, token_id: str, side: str) -> bool:
+    """
+    Mark that a sell order has been placed for this accumulated fill.
+    This prevents duplicate sell orders.
+    
+    Returns:
+        True if successfully marked, False otherwise
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+        UPDATE accumulated_fills
+        SET sell_placed = TRUE, updated_at = CURRENT_TIMESTAMP
+        WHERE market_slug = %s AND token_id = %s AND side = %s
+    """, (market_slug, token_id, side))
+    
+    affected = cur.rowcount
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return affected > 0
+
+
+def check_sell_threshold(market_slug: str, token_id: str, side: str, min_shares: float = 6) -> Dict:
+    """
+    Check if accumulated fills have reached the sell threshold.
+    
+    Args:
+        market_slug: Market identifier
+        token_id: Token ID
+        side: YES or NO
+        min_shares: Minimum shares needed to trigger sell (default 6)
+        
+    Returns:
+        Dict with:
+            - threshold_reached: bool - True if >= min_shares accumulated
+            - sell_already_placed: bool - True if sell was already placed
+            - total_shares: float - Current accumulated shares
+            - avg_buy_price: float - Average buy price across all fills
+            - ready_to_sell: bool - True if threshold reached AND sell not placed yet
+    """
+    fill_data = get_accumulated_fill(market_slug, token_id, side)
+    
+    if not fill_data:
+        return {
+            "threshold_reached": False,
+            "sell_already_placed": False,
+            "total_shares": 0,
+            "avg_buy_price": 0,
+            "ready_to_sell": False
+        }
+    
+    total_shares = float(fill_data.get("total_shares", 0))
+    avg_price = float(fill_data.get("avg_buy_price", 0))
+    sell_placed = fill_data.get("sell_placed", False)
+    
+    threshold_reached = total_shares >= min_shares
+    ready_to_sell = threshold_reached and not sell_placed
+    
+    return {
+        "threshold_reached": threshold_reached,
+        "sell_already_placed": sell_placed,
+        "total_shares": total_shares,
+        "avg_buy_price": avg_price,
+        "ready_to_sell": ready_to_sell
+    }
 
 
 if __name__ == "__main__":
