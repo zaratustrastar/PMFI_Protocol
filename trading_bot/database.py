@@ -66,10 +66,17 @@ def init_database():
             buy_price DECIMAL(10, 6),
             profit_multiple DECIMAL(10, 2),
             filled_at TIMESTAMP,
+            accumulated BOOLEAN DEFAULT FALSE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    
+    # Migration: add accumulated column if it doesn't exist
+    try:
+        cur.execute("ALTER TABLE trading_positions ADD COLUMN IF NOT EXISTS accumulated BOOLEAN DEFAULT FALSE")
+    except Exception:
+        pass
     
     # Trading summary table
     cur.execute("""
@@ -209,6 +216,51 @@ def update_order_status(order_id: str, status: str, filled_size: float = None, f
     conn.commit()
     cur.close()
     conn.close()
+
+
+def mark_order_accumulated(order_id: str) -> bool:
+    """
+    Mark an order as having been accumulated (added to accumulated_fills).
+    Uses atomic update to prevent double-counting.
+    
+    Returns:
+        True if order was marked (first time), False if already accumulated
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Atomic update - only succeeds if accumulated is currently FALSE
+    cur.execute("""
+        UPDATE trading_positions 
+        SET accumulated = TRUE, updated_at = CURRENT_TIMESTAMP
+        WHERE order_id = %s AND (accumulated = FALSE OR accumulated IS NULL)
+        RETURNING order_id
+    """, (order_id,))
+    
+    result = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return result is not None
+
+
+def is_order_accumulated(order_id: str) -> bool:
+    """Check if an order has already been accumulated"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+        SELECT accumulated FROM trading_positions WHERE order_id = %s
+    """, (order_id,))
+    
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if result:
+        return result[0] == True
+    return False
 
 
 def update_market_summary(market_slug: str):

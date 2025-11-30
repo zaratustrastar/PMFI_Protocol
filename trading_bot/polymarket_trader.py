@@ -352,6 +352,103 @@ class PolymarketTrader:
         
         return placed_orders
     
+    def place_sell_order(self, token_id: str, avg_buy_price: float, sell_size: float, side_name: str, market_slug: str) -> List[Dict]:
+        """
+        Place ONE sell order for a fixed number of shares at 3x profit (200%)
+        Used by the accumulated fills system when threshold is reached.
+        
+        Args:
+            token_id: Token ID to sell
+            avg_buy_price: Average buy price across all fills
+            sell_size: Number of tokens to sell (fixed, e.g., 5)
+            side_name: "YES" or "NO" for logging
+            market_slug: Market identifier for database
+            
+        Returns:
+            List of placed sell order responses
+        """
+        sell_price = avg_buy_price * config.SELL_PROFIT_MULTIPLE
+        profit_pct = (config.SELL_PROFIT_MULTIPLE - 1) * 100
+        
+        print(f"\n💰 Placing SELL order for {side_name} token...")
+        print(f"   Token ID: {token_id}")
+        print(f"   Avg buy price: ${avg_buy_price:.4f}")
+        print(f"   Sell size: {sell_size:.2f} tokens")
+        print(f"   Sell price: ${sell_price:.4f} ({config.SELL_PROFIT_MULTIPLE}x = +{profit_pct:.0f}%)")
+        
+        # Validate inputs
+        if not token_id:
+            print(f"   ❌ CRITICAL: token_id is None or empty!")
+            return []
+        
+        if sell_size < 5:
+            print(f"   ❌ CRITICAL: sell_size is {sell_size:.2f} (must be >= 5 for Polymarket minimum)")
+            return []
+        
+        # Polymarket prices must be between 0.01 and 0.99
+        if sell_price > 0.99:
+            sell_price = 0.99
+            print(f"   ⚠️  Capped sell price at $0.99 (max allowed)")
+        
+        if sell_price < 0.01:
+            sell_price = 0.01
+            print(f"   ⚠️  Raised sell price to $0.01 (min allowed)")
+        
+        placed_orders = []
+        
+        try:
+            print(f"\n   📝 Creating sell order @ ${sell_price:.4f} (+{profit_pct:.0f}%)...")
+            
+            order_args = OrderArgs(
+                price=sell_price,
+                size=sell_size,
+                side=SELL,
+                token_id=token_id,
+            )
+            
+            print(f"      OrderArgs: price={sell_price}, size={sell_size:.4f}, side=SELL, token_id={token_id[:16]}...")
+            
+            signed_order = self.client.create_order(order_args)
+            print(f"      Order signed successfully")
+            
+            response = self.client.post_order(signed_order, OrderType.GTC)
+            print(f"      API Response: {json.dumps(response, default=str)[:200]}...")
+            
+            if response.get("success"):
+                order_id = response.get("orderID", "")
+                print(f"   ✅ Sell @ ${sell_price:.4f} ({sell_size:.2f} tokens, +{profit_pct:.0f}%) - Order ID: {order_id[:8]}...")
+                
+                order_data = {
+                    "market_slug": market_slug,
+                    "order_id": order_id,
+                    "token_id": token_id,
+                    "side": side_name,
+                    "order_type": "SELL",
+                    "price": sell_price,
+                    "size": sell_size,
+                    "buy_price": avg_buy_price,
+                    "profit_multiple": config.SELL_PROFIT_MULTIPLE,
+                    "status": "OPEN"
+                }
+                placed_orders.append(order_data)
+                
+                # Save to database
+                save_order(order_data)
+            else:
+                error = response.get("error", response.get("errorMsg", "Unknown error"))
+                error_code = response.get("errorCode", "N/A")
+                print(f"   ❌ Sell @ ${sell_price:.4f} failed!")
+                print(f"      Error: {error}")
+                print(f"      Error code: {error_code}")
+                print(f"      Full response: {json.dumps(response, default=str)}")
+                
+        except Exception as e:
+            import traceback
+            print(f"   ❌ Sell @ ${sell_price:.4f} exception: {str(e)}")
+            print(f"      Traceback: {traceback.format_exc()}")
+        
+        return placed_orders
+    
     def check_order_fills(self, orders: List[Dict]) -> List[Dict]:
         """
         Check which orders have been filled

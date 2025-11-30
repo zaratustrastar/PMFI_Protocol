@@ -16,8 +16,16 @@ except ImportError:
     print("⚠️  python-dotenv not installed, using system environment variables")
 
 from polymarket_trader import PolymarketTrader
-from database import get_open_orders, update_order_status, update_market_summary
+from database import (
+    get_open_orders, update_order_status, update_market_summary,
+    add_accumulated_fill, check_sell_threshold, mark_sell_placed,
+    mark_order_accumulated
+)
 from telegram_notifier import notify_buy_filled, notify_sell_executed, notify_sell_ladder_result
+
+# Configuration for sell threshold
+MIN_SHARES_FOR_SELL = 6  # Minimum accumulated shares before placing sell
+SELL_SHARES = 5  # Fixed number of shares to sell (rest kept as moonbag)
 
 
 def cancel_stale_orders(trader: PolymarketTrader, max_age_hours: int = 12):
@@ -104,7 +112,7 @@ def monitor_all_orders(trader: PolymarketTrader):
                 token_id = filled_buy.get("token_id")
                 side = filled_buy["side"]
                 
-                print(f"\n🎉 Buy filled: {side} @ ${filled_price:.4f}")
+                print(f"\n🎉 Buy filled: {side} @ ${filled_price:.4f} ({filled_size:.2f} shares)")
                 
                 # Update buy order status with actual fill data
                 update_order_status(
@@ -114,47 +122,65 @@ def monitor_all_orders(trader: PolymarketTrader):
                     filled_price
                 )
                 
-                # DISABLED: Only show new markets on Telegram (no buy/sell notifications)
-                # notify_buy_filled(market_slug, {
-                #     "side": side,
-                #     "price": filled_price,
-                #     "size": filled_size
-                # })
-                
-                # Validate token_id before placing sell ladder
+                # Validate token_id before accumulating
                 if not token_id:
                     error_msg = f"Missing token_id for order {order_id[:8]}"
-                    print(f"   ❌ Cannot place sell ladder: {error_msg}")
-                    # DISABLED: notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
+                    print(f"   ❌ Cannot accumulate fill: {error_msg}")
                     continue
                 
-                # Place sell ladder with error handling
-                print(f"   📈 Placing sell ladder...")
-                print(f"      Token ID: {token_id[:16]}...")
-                print(f"      Buy price: ${filled_price:.4f}")
-                print(f"      Size: {filled_size:.2f} tokens")
+                # Atomically mark this order as accumulated (prevents double-counting)
+                if not mark_order_accumulated(order_id):
+                    print(f"   ⏭️  Order {order_id[:8]} already accumulated - skipping")
+                    continue
                 
-                try:
-                    sell_orders = trader.place_sell_ladder(
-                        token_id,
-                        filled_price,
-                        filled_size,
-                        side,
-                        market_slug
-                    )
+                # Add to accumulated fills for this token (only happens once per order)
+                print(f"   📊 Adding to accumulated fills...")
+                add_accumulated_fill(market_slug, token_id, side, filled_size, filled_price)
+                
+                # Check if we've reached the sell threshold
+                threshold_check = check_sell_threshold(market_slug, token_id, side, MIN_SHARES_FOR_SELL)
+                
+                total_shares = threshold_check["total_shares"]
+                avg_buy_price = threshold_check["avg_buy_price"]
+                
+                print(f"      Total accumulated: {total_shares:.2f} shares @ avg ${avg_buy_price:.4f}")
+                print(f"      Threshold: {MIN_SHARES_FOR_SELL} shares | Ready to sell: {threshold_check['ready_to_sell']}")
+                
+                if threshold_check["ready_to_sell"]:
+                    # We have enough shares and haven't placed a sell yet!
+                    print(f"\n   📈 Threshold reached! Placing sell for {SELL_SHARES} shares...")
+                    print(f"      Token ID: {token_id[:16]}...")
+                    print(f"      Avg buy price: ${avg_buy_price:.4f}")
+                    print(f"      Sell shares: {SELL_SHARES}")
+                    print(f"      Moonbag: {total_shares - SELL_SHARES:.2f} shares")
                     
-                    if sell_orders and len(sell_orders) > 0:
-                        print(f"   ✅ Placed {len(sell_orders)} sell orders")
-                        # DISABLED: notify_sell_ladder_result(market_slug, side, success=True, sell_count=len(sell_orders))
-                    else:
-                        error_msg = "No sell orders were placed (all failed)"
-                        print(f"   ❌ {error_msg}")
-                        # DISABLED: notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
+                    try:
+                        # Place sell for exactly SELL_SHARES at 3x avg price
+                        sell_orders = trader.place_sell_order(
+                            token_id,
+                            avg_buy_price,
+                            SELL_SHARES,  # Fixed 5 shares
+                            side,
+                            market_slug
+                        )
                         
-                except Exception as e:
-                    error_msg = str(e)
-                    print(f"   ❌ Sell ladder error: {error_msg}")
-                    # DISABLED: notify_sell_ladder_result(market_slug, side, success=False, error=error_msg)
+                        if sell_orders and len(sell_orders) > 0:
+                            print(f"   ✅ Placed sell for {SELL_SHARES} shares")
+                            # Mark sell as placed to prevent duplicates
+                            mark_sell_placed(market_slug, token_id, side)
+                        else:
+                            error_msg = "Sell order failed"
+                            print(f"   ❌ {error_msg}")
+                            
+                    except Exception as e:
+                        error_msg = str(e)
+                        print(f"   ❌ Sell order error: {error_msg}")
+                
+                elif threshold_check["sell_already_placed"]:
+                    print(f"   ⏭️  Sell already placed for this token - skipping")
+                else:
+                    remaining = MIN_SHARES_FOR_SELL - total_shares
+                    print(f"   ⏳ Need {remaining:.2f} more shares to reach sell threshold")
                 
                 # Update summary
                 update_market_summary(market_slug)
