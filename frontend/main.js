@@ -9,9 +9,9 @@
 // CONFIGURATION - Update these after deploying contracts
 // =============================================================================
 
-// Testnet addresses (update after deployment)
-const VAULT_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";  // Update this
-const USDC_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";   // Update this
+// Base Sepolia testnet addresses (deployed 2025-01-06)
+const VAULT_ADDRESS = "0xDFde5410FF65D0fb31D82a901400eeb48c40b272";
+const USDC_ADDRESS = "0x7FF3F11bbE48a6573F7CeEA46993d8166bf057C5";
 
 // USDC has 6 decimals
 const USDC_DECIMALS = 6;
