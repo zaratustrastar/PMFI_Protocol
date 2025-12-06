@@ -54,8 +54,10 @@ contract MockSniperStrategy is ISniperStrategy, Ownable {
     /**
      * @notice Invest funds from the vault into this strategy
      * @param amount The amount to invest
+     * @dev Only callable by the vault
      */
     function invest(uint256 amount) external override {
+        require(msg.sender == vault, "Only vault can invest");
         require(amount > 0, "Amount must be > 0");
         
         IERC20(asset).safeTransferFrom(msg.sender, address(this), amount);
@@ -67,11 +69,12 @@ contract MockSniperStrategy is ISniperStrategy, Ownable {
     /**
      * @notice Withdraw funds from strategy back to the vault
      * @param amount The amount to withdraw
+     * @dev Only callable by the vault
      */
     function withdrawToVault(uint256 amount) external override {
+        require(msg.sender == vault, "Only vault can withdraw");
         require(amount > 0, "Amount must be > 0");
         require(amount <= totalStrategyValue, "Insufficient strategy value");
-        require(vault != address(0), "Vault not set");
         
         totalStrategyValue -= amount;
         IERC20(asset).safeTransfer(vault, amount);
