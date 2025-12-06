@@ -757,6 +757,47 @@
       "artifacts": [
         "TestUSDC"
       ]
+    },
+    "/home/runner/workspace/contracts/MockSniperStrategy.sol": {
+      "lastModificationDate": 1765032542800,
+      "contentHash": "3960df3274e4b45a3e98d03674107696",
+      "sourceName": "contracts/MockSniperStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "./ISniperStrategy.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "MockSniperStrategy"
+      ]
     }
   }
 }
