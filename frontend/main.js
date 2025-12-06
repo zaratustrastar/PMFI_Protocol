@@ -17,25 +17,34 @@ const USDC_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";   // Update t
 const USDC_DECIMALS = 6;
 
 // =============================================================================
-// ABIs (minimal - only functions we need)
+// ABIs - Loaded from JSON files
 // =============================================================================
 
-const VAULT_ABI = [
-    "function deposit(uint256 assets, address receiver) returns (uint256)",
-    "function withdraw(uint256 assets, address receiver, address owner) returns (uint256)",
-    "function totalAssets() view returns (uint256)",
-    "function balanceOf(address account) view returns (uint256)",
-    "function convertToAssets(uint256 shares) view returns (uint256)",
-    "function maxDeposit(address) view returns (uint256)",
-    "function asset() view returns (address)"
-];
+let VAULT_ABI = null;
+let USDC_ABI = null;
 
-const USDC_ABI = [
-    "function approve(address spender, uint256 amount) returns (bool)",
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function balanceOf(address account) view returns (uint256)",
-    "function decimals() view returns (uint8)"
-];
+async function loadABIs() {
+    try {
+        const [vaultResponse, usdcResponse] = await Promise.all([
+            fetch("abis/vault.json"),
+            fetch("abis/usdc.json")
+        ]);
+        
+        if (!vaultResponse.ok || !usdcResponse.ok) {
+            throw new Error("Failed to load ABI files");
+        }
+        
+        VAULT_ABI = await vaultResponse.json();
+        USDC_ABI = await usdcResponse.json();
+        
+        console.log("ABIs loaded successfully");
+        return true;
+    } catch (error) {
+        console.error("Error loading ABIs:", error);
+        alert("Failed to load contract ABIs. Make sure you're running from a web server.");
+        return false;
+    }
+}
 
 // =============================================================================
 // STATE
@@ -46,6 +55,7 @@ let signer = null;
 let userAddress = null;
 let vaultContract = null;
 let usdcContract = null;
+let abisLoaded = false;
 
 // =============================================================================
 // DOM ELEMENTS
@@ -106,6 +116,17 @@ async function connectWallet() {
         connectBtn.textContent = "Connecting...";
         connectBtn.disabled = true;
 
+        // Load ABIs if not already loaded
+        if (!abisLoaded) {
+            const loaded = await loadABIs();
+            if (!loaded) {
+                connectBtn.textContent = "Connect MetaMask";
+                connectBtn.disabled = false;
+                return;
+            }
+            abisLoaded = true;
+        }
+
         // Request account access
         const accounts = await window.ethereum.request({
             method: "eth_requestAccounts"
@@ -116,7 +137,7 @@ async function connectWallet() {
         signer = await provider.getSigner();
         userAddress = await signer.getAddress();
 
-        // Instantiate contracts
+        // Instantiate contracts with loaded ABIs
         vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
         usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
 
