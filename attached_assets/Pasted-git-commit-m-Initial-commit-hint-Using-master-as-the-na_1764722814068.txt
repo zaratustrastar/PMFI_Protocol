@@ -1,0 +1,45 @@
+git commit -m "Initial commit"
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint:   git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint:   git branch -m <name>
+Initialized empty Git repository in /root/polymarket-clean/.git/
+[master (root-commit) 16bbbce] Initial commit
+ 23 files changed, 3361 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+ create mode 100644 add_market_dates.py
+ create mode 100644 auto_trader.py
+ create mode 100644 cleanup_stale_jobs.py
+ create mode 100644 config.py
+ create mode 100644 database.py
+ create mode 100644 deploy_multi_market.py
+ create mode 100755 export_env.sh
+ create mode 100644 market_monitor.py
+ create mode 100644 market_utils.py
+ create mode 100644 order_monitor.py
+ create mode 100644 polymarket_trader.py
+ create mode 100644 requirements.txt
+ create mode 100755 run_trader.py
+ create mode 100755 start_monitor.sh
+ create mode 100755 start_worker.sh
+ create mode 100644 systemd/inngest.service
+ create mode 100644 systemd/mastra.service
+ create mode 100644 systemd/polymarket-monitor.service
+ create mode 100644 systemd/polymarket-worker.service
+ create mode 100644 telegram_notifier.py
+ create mode 100755 test_system.py
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/polymarket-clean# git remote add origin https://github.com/zaratustrastar/pmfi.git
+git branch -M main
+git push -u origin main
+Username for 'https://github.com': zaratustrastar
+Password for 'https://zaratustrastar@github.com': 
+remote: Invalid username or token. Password authentication is not supported for Git operations.
+fatal: Authentication failed for 'https://github.com/zaratustrastar/pmfi.git/'
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/polymarket-clean# 

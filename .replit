@@ -3,6 +3,7 @@ modules = ["nodejs-22", "python-3.11", "python3", "postgresql-16"]
 [agent]
 stack = "AGENT_STACK"
 integrations = ["javascript_openai_ai_integrations:1.0.0", "agentstack-trigger-time_based:1.0.0"]
+automationTriggerConnectorName = "legacy_timebased"
 
 [nix]
 channel = "stable-24_11"

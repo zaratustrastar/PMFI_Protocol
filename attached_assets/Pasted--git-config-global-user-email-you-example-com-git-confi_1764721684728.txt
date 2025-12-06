@@ -1,0 +1,71 @@
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'root@ubuntu-s-1vcpu-1gb-sfo3-01.(none)')
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/polymarket-clean# git config --global user.email "garsentyev1997@gmail.com"
+git config --global user.name "zaratustrastar"
+git add .
+git commit -m "Initial commit"
+[master (root-commit) 60da3ab] Initial commit
+ 14 files changed, 3180 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 add_market_dates.py
+ create mode 100644 auto_trader.py
+ create mode 100644 cleanup_stale_jobs.py
+ create mode 100644 config.py
+ create mode 100644 database.py
+ create mode 100644 deploy_multi_market.py
+ create mode 100644 market_monitor.py
+ create mode 100644 market_utils.py
+ create mode 100644 order_monitor.py
+ create mode 100644 polymarket_trader.py
+ create mode 100755 run_trader.py
+ create mode 100644 telegram_notifier.py
+ create mode 100755 test_system.py
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/polymarket-clean# git add .
+git commit -m "Initial commit"
+On branch master
+nothing to commit, working tree clean
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/polymarket-clean# # Create clean folder
+mkdir -p ~/polymarket-clean
+cd ~/polymarket-clean
+
+# Copy only the essential Python files
+cp /opt/polymarket-bot/trading_bot/*.py .
+
+# Remove any Replit-specific files if they exist
+rm -f replit.* .replit 2>/dev/null
+
+# Create .gitignore
+echo ".env
+.env.*
+*.pem
+*.key
+__pycache__/
+*.pyc
+.replit
+replit.*" > .gitignore
+
+# Create minimal .env.example
+echo "DATABASE_URL=
+POLYMARKET_PRIVATE_KEY=
+POLYMARKET_API_KEY=
+POLYMARKET_API_SECRET=
+POLYMARKET_PROXY_ADDRESS=
+TELEGRAM_BOT_TOKEN=" > .env.example
+
+# Init git and push
+git init
+git add .
+git commit -m "Initial commit"
+Reinitialized existing Git repository in /root/polymarket-clean/.git/
+On branch master
+nothing to commit, working tree clean
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/polymarket-clean# git remote add origin https://github.com/zaratustrastar/pmfi.git
+git push -u origin main
+error: src refspec main does not match any
+error: failed to push some refs to 'https://github.com/zaratustrastar/pmfi.git'
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/polymarket-clean# 

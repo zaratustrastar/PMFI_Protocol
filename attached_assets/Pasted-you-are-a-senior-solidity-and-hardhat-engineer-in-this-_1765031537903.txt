@@ -1,0 +1,48 @@
+you are a senior solidity and hardhat engineer.
+
+in this replit project, set up a minimal hardhat environment using npm and create a predictfi sniper vault v1 based on openzeppelin erc4626.
+
+requirements:
+- install hardhat and @openzeppelin/contracts via npm
+- create a basic hardhat.config.js for a single solidity version 0.8.20
+- under contracts/, create:
+  - TestUSDC.sol: a simple erc20 mock token called "Test USDC" with 6 decimals and symbol "tUSDC"
+  - ISniperStrategy.sol: interface with functions:
+      - function totalStrategyValue() external view returns (uint256);
+      - function invest(uint256 amount) external;
+      - function withdrawToVault(uint256 amount) external;
+      - function asset() external view returns (address);
+  - PredictFiSniperVault.sol: an erc4626 vault that:
+      - inherits from openzeppelin erc4626, ownable and reentrancyguard
+      - uses usdc as underlying asset
+      - exposes:
+          - ISniperStrategy public strategy;
+          - address public feeCollector;
+          - uint256 public performanceFeeBps;
+          - uint256 public bufferBps;
+          - uint256 public lastTotalAssets;
+          - uint256 public maxTotalDeposits;
+      - totalAssets() returns idle usdc balance plus strategy.totalStrategyValue()
+      - includes:
+          - constructor with params: asset, strategy, feeCollector, performanceFeeBps, bufferBps, maxTotalDeposits
+          - functions to setStrategy, setFeeCollector, setPerformanceFeeBps, setBufferBps, setMaxTotalDeposits (onlyOwner)
+          - function investIdle() that:
+              - calculates target idle = totalAssets * bufferBps / 10000
+              - if idle > target idle, approves and sends the difference to strategy.invest()
+          - harvest() that:
+              - charges performance fee on profit since lastTotalAssets
+              - mints vault shares to feeCollector equal to feeAssets converted to shares
+          - deposit and mint overridden to enforce maxTotalDeposits cap
+          - withdraw and redeem overridden to:
+              - call internal _prepareLiquidity(assetsNeeded) before super
+              - then update lastTotalAssets
+          - _prepareLiquidity(uint256 assetsNeeded) that:
+              - checks idle usdc in the vault
+              - if idle is not enough, calls strategy.withdrawToVault(shortfall)
+              - after call, if still not enough, emits LiquidityShortfall(assetsNeeded, newIdle) and reverts
+
+also:
+- make sure imports from openzeppelin are correct:
+  - erc4626, erc20, ownable, reentrancyguard
+- add a comment at the top of each contract with SPDX and pragma solidity ^0.8.20
+do not write tests yet. just set up the project and these contracts so they compile together.
