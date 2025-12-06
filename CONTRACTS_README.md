@@ -51,7 +51,7 @@ npx hardhat node
 
 In a new terminal, deploy:
 ```bash
-npx hardhat run scripts/deploy-sniper-vault.cjs --network localhost
+npx hardhat run scripts/deploy-sniper-vault.js --network localhost
 ```
 
 ## Deploy to Testnet
@@ -68,17 +68,17 @@ PRIVATE_KEY=your_private_key_here
 
 **Base Sepolia:**
 ```bash
-npx hardhat run scripts/deploy-sniper-vault.cjs --network baseSepolia
+npx hardhat run scripts/deploy-sniper-vault.js --network baseSepolia
 ```
 
 **Polygon Amoy:**
 ```bash
-npx hardhat run scripts/deploy-sniper-vault.cjs --network polygonAmoy
+npx hardhat run scripts/deploy-sniper-vault.js --network polygonAmoy
 ```
 
 **Ethereum Sepolia:**
 ```bash
-npx hardhat run scripts/deploy-sniper-vault.cjs --network sepolia
+npx hardhat run scripts/deploy-sniper-vault.js --network sepolia
 ```
 
 ## Vault Parameters
