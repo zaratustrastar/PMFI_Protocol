@@ -173,6 +173,60 @@ See the `TODO` comments in `bot/bot.py` for implementation placeholders.
 
 ---
 
+## Frontend
+
+The `frontend/` folder contains a simple HTML/JavaScript interface to interact with the vault using MetaMask.
+
+### Frontend Setup
+
+1. Update contract addresses in `frontend/main.js`:
+```javascript
+const VAULT_ADDRESS = "0x...";  // Your deployed vault address
+const USDC_ADDRESS = "0x...";   // Your deployed USDC address
+```
+
+2. Serve the frontend locally:
+```bash
+# Option 1: Python simple server
+cd frontend && python -m http.server 8080
+
+# Option 2: Node.js with npx
+npx serve frontend
+
+# Option 3: Just open index.html in browser
+open frontend/index.html
+```
+
+### Using the Frontend
+
+1. **Connect Wallet**: Click "Connect MetaMask" and approve the connection
+2. **Switch Network**: Make sure MetaMask is on the correct testnet (Base Sepolia, etc.)
+3. **Get Test USDC**: Use the TestUSDC contract's `mint()` function to get tokens
+4. **Deposit**: Enter amount, click Deposit (approves USDC first, then deposits)
+5. **Withdraw**: Enter amount, click Withdraw
+
+### Minting Test USDC
+
+Use Hardhat console to mint test tokens:
+```bash
+npx hardhat console --network baseSepolia
+```
+
+```javascript
+const usdc = await ethers.getContractAt("TestUSDC", "USDC_ADDRESS");
+await usdc.mint("YOUR_WALLET_ADDRESS", ethers.parseUnits("1000", 6));
+```
+
+### Features
+
+- Displays wallet connection status
+- Shows USDC balance and vault share balance
+- Shows total vault assets and your redeemable amount
+- Deposit with automatic USDC approval
+- Withdraw to receive USDC back
+
+---
+
 ## License
 
 MIT
