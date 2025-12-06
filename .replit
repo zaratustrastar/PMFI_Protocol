@@ -80,3 +80,8 @@ waitForPort = 3000
 
 [workflows.workflow.metadata]
 outputType = "automations"
+
+[userenv]
+
+[userenv.shared]
+BASESCAN_API_KEY = "AZBW4BSIC9IC3JPENXRWXTMT8QQ1PVTUAH"
