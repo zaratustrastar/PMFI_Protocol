@@ -15,10 +15,10 @@ async function main() {
   const testUSDCAddress = await testUSDC.getAddress();
   console.log("✅ TestUSDC deployed to:", testUSDCAddress);
 
-  // Deploy MockSniperStrategy
+  // Deploy MockSniperStrategy (vault address set to 0x0, will be set after vault deployment)
   console.log("\nDeploying MockSniperStrategy...");
   const MockSniperStrategy = await hre.ethers.getContractFactory("MockSniperStrategy");
-  const mockStrategy = await MockSniperStrategy.deploy(testUSDCAddress);
+  const mockStrategy = await MockSniperStrategy.deploy(testUSDCAddress, hre.ethers.ZeroAddress);
   await mockStrategy.waitForDeployment();
   const mockStrategyAddress = await mockStrategy.getAddress();
   console.log("✅ MockSniperStrategy deployed to:", mockStrategyAddress);

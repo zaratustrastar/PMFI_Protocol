@@ -27,9 +27,9 @@ describe("PredictFiSniperVault", function () {
     // Mint tUSDC to user
     await testUSDC.mint(user.address, INITIAL_USER_BALANCE);
 
-    // Deploy MockSniperStrategy
+    // Deploy MockSniperStrategy (vault address set to 0x0, will be set after vault deployment)
     const MockSniperStrategy = await ethers.getContractFactory("MockSniperStrategy");
-    mockStrategy = await MockSniperStrategy.deploy(await testUSDC.getAddress());
+    mockStrategy = await MockSniperStrategy.deploy(await testUSDC.getAddress(), ethers.ZeroAddress);
     await mockStrategy.waitForDeployment();
 
     // Deploy PredictFiSniperVault
@@ -237,6 +237,55 @@ describe("PredictFiSniperVault", function () {
       // Fee collector should have same shares
       const feeSharesAfter = await vault.balanceOf(deployer.address);
       expect(feeSharesAfter).to.equal(feeSharesBefore);
+    });
+  });
+
+  describe("Strategy Keeper Functions", function () {
+    let keeper;
+
+    beforeEach(async function () {
+      [, , keeper] = await ethers.getSigners();
+      // Set keeper on strategy
+      await mockStrategy.setKeeper(keeper.address);
+    });
+
+    it("owner can set keeper", async function () {
+      expect(await mockStrategy.keeper()).to.equal(keeper.address);
+    });
+
+    it("non-owner cannot set keeper", async function () {
+      await expect(
+        mockStrategy.connect(user).setKeeper(user.address)
+      ).to.be.revertedWith("not owner");
+    });
+
+    it("keeper can update strategy value", async function () {
+      // Deposit and invest
+      await testUSDC.connect(user).approve(await vault.getAddress(), DEPOSIT_AMOUNT);
+      await vault.connect(user).deposit(DEPOSIT_AMOUNT, user.address);
+      await vault.investIdle();
+
+      // Strategy value is now 800 USDC
+      const valueBefore = await mockStrategy.totalStrategyValue();
+      expect(valueBefore).to.equal(800n * ONE_USDC);
+
+      // Keeper updates NAV (simulate profit)
+      const newValue = 900n * ONE_USDC;
+      await mockStrategy.connect(keeper).updateStrategyValue(newValue);
+
+      expect(await mockStrategy.totalStrategyValue()).to.equal(newValue);
+    });
+
+    it("non-keeper cannot update strategy value", async function () {
+      await expect(
+        mockStrategy.connect(user).updateStrategyValue(1000n * ONE_USDC)
+      ).to.be.revertedWith("not keeper");
+    });
+
+    it("owner cannot update strategy value via updateStrategyValue", async function () {
+      await expect(
+        mockStrategy.updateStrategyValue(1000n * ONE_USDC)
+      ).to.be.revertedWith("not keeper");
     });
   });
 });

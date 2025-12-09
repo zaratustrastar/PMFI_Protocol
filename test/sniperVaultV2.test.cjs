@@ -19,9 +19,9 @@ describe("PredictFiSniperVaultV2", function () {
     usdc = await TestUSDC.deploy();
     await usdc.waitForDeployment();
 
-    // Deploy MockSniperStrategy
+    // Deploy MockSniperStrategy (vault address set to 0x0, will be set after vault deployment)
     const MockSniperStrategy = await ethers.getContractFactory("MockSniperStrategy");
-    strategy = await MockSniperStrategy.deploy(await usdc.getAddress());
+    strategy = await MockSniperStrategy.deploy(await usdc.getAddress(), ethers.ZeroAddress);
     await strategy.waitForDeployment();
 
     // Deploy PredictFiSniperVaultV2
