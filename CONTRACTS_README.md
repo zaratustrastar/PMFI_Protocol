@@ -17,7 +17,25 @@ An ERC4626 tokenized vault for managing USDC deposits and investing in predictio
 | `TestUSDC.sol` | Mock USDC token with 6 decimals for testing |
 | `ISniperStrategy.sol` | Interface for trading strategies |
 | `MockSniperStrategy.sol` | Mock strategy for testing |
-| `PredictFiSniperVault.sol` | Main ERC4626 vault contract |
+| `PredictFiSniperVault.sol` | Main ERC4626 vault contract (V1) |
+| `PredictFiSniperVaultV2.sol` | V2 vault with per-wallet deposit caps |
+
+## V2 Features: Per-Wallet Deposit Caps
+
+V2 adds individual wallet deposit limits on top of the global cap:
+
+**New State Variables:**
+- `walletDepositCap` - Maximum USDC each wallet can deposit
+- `walletDeposited[address]` - Tracks total deposited per wallet
+
+**New Functions:**
+- `setWalletDepositCap(uint256 _cap)` - Owner can update the per-wallet limit
+
+**Behavior:**
+- Deposit/mint checks both global cap AND per-wallet cap
+- Once a wallet hits their cap, they cannot deposit more
+- Withdrawals do NOT reduce `walletDeposited` (conservative MVP approach)
+- Different wallets have independent deposit limits
 
 ## Installation
 
