@@ -199,7 +199,7 @@ Alternative way to withdraw - specify shares instead of USDC amount:
 
 1. Create a `.env` file with:
 ```
-RPC_URL=https://sepolia.base.org
+RPC_URL=https://base-sepolia.publicnode.com
 VAULT_ADDRESS=0x26BCAe8DEA9A2b04a522cab2679CF9708d3F84E3
 USDC_ADDRESS=0x743dBb99B51A542aA7b6E859713b4b615445C019
 STRATEGY_ADDRESS=0x38B00348749CD5194c1fD732226Cd4F5fEEE4695

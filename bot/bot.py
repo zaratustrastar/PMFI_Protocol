@@ -2,10 +2,35 @@
 """
 PredictFi Sniper Vault - NAV Updater & Liquidity Management Bot
 
-This bot:
-1. Periodically updates the on-chain NAV of the strategy (keeper role)
-2. Monitors the vault for LiquidityShortfall events
-3. (Future) Handles withdrawing funds from Polymarket to cover shortfalls
+=============================================================================
+CURRENT FUNCTIONALITY:
+=============================================================================
+
+1. NAV UPDATES (every 60 seconds):
+   - Reads USDC balance in strategy contract
+   - Calculates NAV (currently: balance + 5% simulated profit)
+   - Pushes NAV to chain via strategy.updateStrategyValue()
+   
+2. LIQUIDITY SHORTFALL MONITORING (every 10 seconds):
+   - Watches for LiquidityShortfall events from the vault
+   - Logs requested amount (assetsNeeded) and available amount (availableAssets)
+   - Does NOT move funds yet - this is a TODO for production
+
+=============================================================================
+ENVIRONMENT VARIABLES REQUIRED:
+=============================================================================
+- RPC_URL: Base Sepolia RPC endpoint
+- VAULT_ADDRESS: PredictFiSniperVaultV2 contract address
+- USDC_ADDRESS: TestUSDC contract address  
+- STRATEGY_ADDRESS: MockSniperStrategy contract address
+- KEEPER_ADDRESS: Wallet address with keeper role on strategy
+- KEEPER_PRIVATE_KEY (or PRIVATE_KEY): Private key for signing transactions
+
+=============================================================================
+TODO FOR PRODUCTION:
+=============================================================================
+- Replace dummy NAV calculation with real Polymarket orderbook valuation
+- Implement actual liquidity handling: withdraw from Polymarket, send to vault
 
 This is a prototype - not production code.
 """
@@ -327,19 +352,33 @@ def handle_liquidity_shortfall(event: dict):
     print(f"   [TODO] Polymarket withdrawal + vault transfer not implemented yet")
 
 
-def listen_liquidity_shortfall():
+def listen_liquidity_shortfall(vault_contract=None, start_block=None):
     """
     Listen for LiquidityShortfall events from the vault.
     
-    Polls for new events every SHORTFALL_POLL_INTERVAL seconds.
+    This function:
+    - Polls the vault contract for LiquidityShortfall events
+    - Logs the requested amount (assetsNeeded) and idle available
+    - TODO: In production, free liquidity on Polymarket and send USDC to vault
+    
+    Args:
+        vault_contract: The vault contract instance (uses global if None)
+        start_block: Block to start listening from (uses current if None)
     """
     global w3, vault
+    
+    # Use provided contract or global
+    target_vault = vault_contract if vault_contract else vault
     
     print(f"\n🔍 Listening for LiquidityShortfall events...")
     print(f"   Poll interval: {SHORTFALL_POLL_INTERVAL}s")
     
+    # If start_block is None, set it to current block number
+    if start_block is None:
+        start_block = w3.eth.block_number
+    
     # Track the last checked block
-    last_block = w3.eth.block_number
+    last_block = start_block
     
     while True:
         try:
@@ -347,15 +386,20 @@ def listen_liquidity_shortfall():
             
             if current_block > last_block:
                 # Get events from last_block to current_block
-                events = vault.events.LiquidityShortfall.get_logs(
+                # Event: LiquidityShortfall(uint256 assetsNeeded, uint256 availableAssets)
+                events = target_vault.events.LiquidityShortfall.get_logs(
                     from_block=last_block + 1,
                     to_block=current_block
                 )
                 
                 for event in events:
                     handle_liquidity_shortfall(event)
+                    # Update start_block to event.blockNumber + 1 for next iteration
+                    last_block = event['blockNumber']
                 
-                last_block = current_block
+                # If no events, just update to current
+                if not events:
+                    last_block = current_block
             
         except Exception as e:
             print(f"❌ Error polling events: {e}")
