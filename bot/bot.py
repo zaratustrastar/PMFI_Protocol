@@ -32,7 +32,8 @@ USDC_ADDRESS = os.getenv("USDC_ADDRESS")
 STRATEGY_ADDRESS = os.getenv("STRATEGY_ADDRESS")
 
 # Keeper credentials (for updating NAV on-chain)
-KEEPER_PRIVATE_KEY = os.getenv("KEEPER_PRIVATE_KEY")
+# Try KEEPER_PRIVATE_KEY first, fallback to PRIVATE_KEY
+KEEPER_PRIVATE_KEY = os.getenv("KEEPER_PRIVATE_KEY") or os.getenv("PRIVATE_KEY")
 KEEPER_ADDRESS = os.getenv("KEEPER_ADDRESS")
 
 # Polling intervals
@@ -337,16 +338,24 @@ def listen_liquidity_shortfall():
     print(f"\n🔍 Listening for LiquidityShortfall events...")
     print(f"   Poll interval: {SHORTFALL_POLL_INTERVAL}s")
     
-    # Create event filter starting from latest block
-    event_filter = vault.events.LiquidityShortfall.create_filter(fromBlock='latest')
+    # Track the last checked block
+    last_block = w3.eth.block_number
     
     while True:
         try:
-            # Poll for new events
-            new_events = event_filter.get_new_entries()
+            current_block = w3.eth.block_number
             
-            for event in new_events:
-                handle_liquidity_shortfall(event)
+            if current_block > last_block:
+                # Get events from last_block to current_block
+                events = vault.events.LiquidityShortfall.get_logs(
+                    from_block=last_block + 1,
+                    to_block=current_block
+                )
+                
+                for event in events:
+                    handle_liquidity_shortfall(event)
+                
+                last_block = current_block
             
         except Exception as e:
             print(f"❌ Error polling events: {e}")
