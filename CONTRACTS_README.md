@@ -137,9 +137,12 @@ User Deposits USDC
 
 ---
 
-## Liquidity Management Bot
+## NAV Updater & Liquidity Management Bot
 
-The `bot/` folder contains a Python skeleton for monitoring and managing vault liquidity.
+The `bot/` folder contains a Python bot that:
+1. **Periodically updates the on-chain NAV** of the strategy (keeper role)
+2. **Monitors for LiquidityShortfall events** from the vault
+3. (Future) Handles withdrawing funds from Polymarket to cover shortfalls
 
 ### Bot Setup
 
@@ -155,18 +158,23 @@ pip install -r requirements.txt
 RPC_URL=https://sepolia.base.org
 
 # Deployed contract addresses (from deployment output)
-VAULT_ADDRESS=0x...
-USDC_ADDRESS=0x...
+VAULT_ADDRESS=0xDFde5410FF65D0fb31D82a901400eeb48c40b272
+USDC_ADDRESS=0x7FF3F11bbE48a6573F7CeEA46993d8166bf057C5
+STRATEGY_ADDRESS=0x6a944Badac3a3C42bAf0347631BB219961Eb60Bc
 
-# Strategy wallet for sending USDC to vault
-STRATEGY_ADDRESS=0x...
-STRATEGY_PRIVATE_KEY=your_private_key_here
+# Keeper credentials (the EOA that has been set as keeper on the strategy)
+KEEPER_ADDRESS=0xYourKeeperAddress
+KEEPER_PRIVATE_KEY=your_keeper_private_key_here
 ```
 
 3. Make sure contracts are compiled (the bot loads ABIs from artifacts):
 ```bash
 npx hardhat compile
 ```
+
+4. Set the keeper on-chain (owner must do this once):
+   - Go to the MockSniperStrategy on BaseScan
+   - Call `setKeeper(KEEPER_ADDRESS)` using the owner wallet
 
 ### Run the Bot
 
@@ -176,16 +184,24 @@ python bot/bot.py
 
 The bot will:
 - Connect to the blockchain via RPC
-- Load the vault and USDC contracts
-- Listen for `LiquidityShortfall` events
-- Log shortfall details when detected
+- Load the vault, USDC, and strategy contracts
+- Every 60 seconds: Calculate NAV and push it on-chain via `updateStrategyValue()`
+- Every 10 seconds: Check for `LiquidityShortfall` events and log them
 
-### What the Bot Does (Skeleton)
+### NAV Calculation (Current Implementation)
 
-Currently the bot only **monitors** for events. The following functionality needs to be implemented:
+The current implementation is a **dummy prototype**:
+- Reads USDC balance held by strategy contract
+- Adds a simulated 5% profit
+- Pushes this value on-chain
 
-1. **Polymarket Withdrawal**: When a shortfall is detected, withdraw USDC from Polymarket positions
-2. **Vault Transfer**: Send recovered USDC from the strategy wallet to the vault
+**TODO**: Replace with real Polymarket NAV calculation using orderbook mid prices.
+
+### LiquidityShortfall Handling (TODO)
+
+When a shortfall is detected, the bot should:
+1. Withdraw USDC from Polymarket positions
+2. Send recovered USDC to the vault
 
 See the `TODO` comments in `bot/bot.py` for implementation placeholders.
 

@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """
-PredictFi Sniper Vault - Liquidity Management Bot
+PredictFi Sniper Vault - NAV Updater & Liquidity Management Bot
 
-This bot monitors the vault for LiquidityShortfall events and will
-eventually handle withdrawing funds from Polymarket to cover shortfalls.
+This bot:
+1. Periodically updates the on-chain NAV of the strategy (keeper role)
+2. Monitors the vault for LiquidityShortfall events
+3. (Future) Handles withdrawing funds from Polymarket to cover shortfalls
 
-This is a skeleton - not production code.
+This is a prototype - not production code.
 """
 
 import os
 import sys
 import json
 import time
+import threading
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -20,15 +23,27 @@ from web3 import Web3
 # Load environment variables
 load_dotenv()
 
+# =============================================================================
 # Configuration from environment
+# =============================================================================
 RPC_URL = os.getenv("RPC_URL")
 VAULT_ADDRESS = os.getenv("VAULT_ADDRESS")
 USDC_ADDRESS = os.getenv("USDC_ADDRESS")
-STRATEGY_PRIVATE_KEY = os.getenv("STRATEGY_PRIVATE_KEY")
 STRATEGY_ADDRESS = os.getenv("STRATEGY_ADDRESS")
 
-# Polling interval in seconds
-POLL_INTERVAL = 5
+# Keeper credentials (for updating NAV on-chain)
+KEEPER_PRIVATE_KEY = os.getenv("KEEPER_PRIVATE_KEY")
+KEEPER_ADDRESS = os.getenv("KEEPER_ADDRESS")
+
+# Polling intervals
+NAV_UPDATE_INTERVAL = 60   # Update NAV every 60 seconds
+SHORTFALL_POLL_INTERVAL = 10  # Check for shortfall events every 10 seconds
+
+# Global web3 and contract instances
+w3 = None
+vault = None
+usdc = None
+strategy = None
 
 
 def load_abi(contract_name: str) -> dict:
@@ -41,7 +56,6 @@ def load_abi(contract_name: str) -> dict:
     Returns:
         The contract ABI as a dict
     """
-    # Find the project root (parent of bot/)
     project_root = Path(__file__).parent.parent
     artifact_path = project_root / "artifacts" / "contracts" / f"{contract_name}.sol" / f"{contract_name}.json"
     
@@ -64,67 +78,198 @@ def connect_to_chain() -> Web3:
     if not RPC_URL:
         raise ValueError("RPC_URL environment variable not set")
     
-    w3 = Web3(Web3.HTTPProvider(RPC_URL))
+    web3 = Web3(Web3.HTTPProvider(RPC_URL))
     
-    if not w3.is_connected():
+    if not web3.is_connected():
         raise ConnectionError(f"Failed to connect to RPC at {RPC_URL}")
     
     print(f"✅ Connected to chain: {RPC_URL}")
-    print(f"   Chain ID: {w3.eth.chain_id}")
-    print(f"   Latest block: {w3.eth.block_number}")
+    print(f"   Chain ID: {web3.eth.chain_id}")
+    print(f"   Latest block: {web3.eth.block_number}")
     
-    return w3
+    return web3
 
 
-def get_contracts(w3: Web3) -> tuple:
+def get_contracts(web3: Web3) -> tuple:
     """
-    Load and instantiate the vault and USDC contracts.
+    Load and instantiate the vault, USDC, and strategy contracts.
     
     Args:
-        w3: Web3 instance
+        web3: Web3 instance
     
     Returns:
-        Tuple of (vault_contract, usdc_contract)
+        Tuple of (vault_contract, usdc_contract, strategy_contract)
     """
     if not VAULT_ADDRESS:
         raise ValueError("VAULT_ADDRESS environment variable not set")
     if not USDC_ADDRESS:
         raise ValueError("USDC_ADDRESS environment variable not set")
+    if not STRATEGY_ADDRESS:
+        raise ValueError("STRATEGY_ADDRESS environment variable not set")
     
     # Load ABIs
-    vault_abi = load_abi("PredictFiSniperVault")
+    vault_abi = load_abi("PredictFiSniperVaultV2")
     usdc_abi = load_abi("TestUSDC")
+    strategy_abi = load_abi("MockSniperStrategy")
     
     # Instantiate contracts
-    vault = w3.eth.contract(
+    vault_contract = web3.eth.contract(
         address=Web3.to_checksum_address(VAULT_ADDRESS),
         abi=vault_abi
     )
-    usdc = w3.eth.contract(
+    usdc_contract = web3.eth.contract(
         address=Web3.to_checksum_address(USDC_ADDRESS),
         abi=usdc_abi
     )
+    strategy_contract = web3.eth.contract(
+        address=Web3.to_checksum_address(STRATEGY_ADDRESS),
+        abi=strategy_abi
+    )
     
     print(f"✅ Loaded contracts:")
-    print(f"   Vault: {VAULT_ADDRESS}")
-    print(f"   USDC:  {USDC_ADDRESS}")
+    print(f"   Vault:    {VAULT_ADDRESS}")
+    print(f"   USDC:     {USDC_ADDRESS}")
+    print(f"   Strategy: {STRATEGY_ADDRESS}")
     
-    return vault, usdc
+    return vault_contract, usdc_contract, strategy_contract
 
 
-def handle_liquidity_shortfall(event: dict, w3: Web3, vault, usdc):
+# =============================================================================
+# NAV CALCULATION
+# =============================================================================
+# TODO: Replace this with real Polymarket-based NAV calculation using orderbooks
+# =============================================================================
+
+def get_strategy_nav_dummy() -> int:
+    """
+    Calculate the strategy NAV (dummy implementation).
+    
+    Currently:
+    - Reads the USDC balance held by the strategy contract
+    - Pretends there's an extra 5% profit on top (simulating unrealized gains)
+    
+    TODO: Replace this with real Polymarket NAV calculation:
+    - Fetch open positions from Polymarket API
+    - Calculate mark-to-market value using orderbook mid prices
+    - Sum all position values + USDC balance
+    
+    Returns:
+        NAV in USDC (6 decimals)
+    """
+    global usdc, strategy
+    
+    # Get USDC balance held by strategy contract
+    usdc_balance = usdc.functions.balanceOf(STRATEGY_ADDRESS).call()
+    
+    # ==========================================================
+    # TODO: Replace with real Polymarket NAV calculation
+    # ==========================================================
+    # Example pseudocode for real implementation:
+    #
+    # positions = polymarket_client.get_positions()
+    # total_position_value = 0
+    # 
+    # for position in positions:
+    #     orderbook = polymarket_client.get_orderbook(position.market_id)
+    #     mid_price = (orderbook.best_bid + orderbook.best_ask) / 2
+    #     position_value = position.quantity * mid_price
+    #     total_position_value += position_value
+    #
+    # nav = usdc_balance + total_position_value
+    # ==========================================================
+    
+    # For now, simulate 5% profit on top of USDC balance
+    nav = int(usdc_balance * 105 / 100)
+    
+    print(f"📊 NAV Calculation (dummy):")
+    print(f"   USDC Balance:  {usdc_balance / 1e6:.2f} USDC")
+    print(f"   Simulated NAV: {nav / 1e6:.2f} USDC (+5% profit)")
+    
+    return nav
+
+
+def push_nav_to_chain():
+    """
+    Push the calculated NAV to the strategy contract on-chain.
+    
+    This function:
+    1. Calculates the current NAV using get_strategy_nav_dummy()
+    2. Builds a transaction to call strategy.updateStrategyValue(nav)
+    3. Signs it with KEEPER_PRIVATE_KEY
+    4. Sends the transaction and prints the tx hash
+    """
+    global w3, strategy
+    
+    if not KEEPER_PRIVATE_KEY:
+        print("❌ Cannot push NAV: KEEPER_PRIVATE_KEY not set")
+        return
+    if not KEEPER_ADDRESS:
+        print("❌ Cannot push NAV: KEEPER_ADDRESS not set")
+        return
+    
+    try:
+        # Get current NAV
+        nav = get_strategy_nav_dummy()
+        
+        # Get current on-chain value for comparison
+        current_on_chain = strategy.functions.totalStrategyValue().call()
+        
+        if nav == current_on_chain:
+            print(f"ℹ️  NAV unchanged ({nav / 1e6:.2f} USDC), skipping update")
+            return
+        
+        print(f"📤 Pushing NAV to chain...")
+        print(f"   Current on-chain: {current_on_chain / 1e6:.2f} USDC")
+        print(f"   New NAV:          {nav / 1e6:.2f} USDC")
+        
+        # Build transaction
+        keeper_address = Web3.to_checksum_address(KEEPER_ADDRESS)
+        nonce = w3.eth.get_transaction_count(keeper_address)
+        
+        tx = strategy.functions.updateStrategyValue(nav).build_transaction({
+            'from': keeper_address,
+            'nonce': nonce,
+            'gas': 100000,
+            'gasPrice': w3.eth.gas_price,
+            'chainId': w3.eth.chain_id
+        })
+        
+        # Sign transaction
+        signed_tx = w3.eth.account.sign_transaction(tx, KEEPER_PRIVATE_KEY)
+        
+        # Send transaction
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+        
+        print(f"✅ NAV update sent!")
+        print(f"   Tx Hash: {tx_hash.hex()}")
+        
+        # Wait for confirmation (optional)
+        receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
+        if receipt.status == 1:
+            print(f"✅ NAV update confirmed in block {receipt.blockNumber}")
+        else:
+            print(f"❌ NAV update failed!")
+            
+    except Exception as e:
+        print(f"❌ Error pushing NAV: {e}")
+
+
+# =============================================================================
+# LIQUIDITY SHORTFALL HANDLING
+# =============================================================================
+# TODO: Implement real response to shortfalls by withdrawing from Polymarket
+# =============================================================================
+
+def handle_liquidity_shortfall(event: dict):
     """
     Handle a LiquidityShortfall event.
     
-    This is where we would:
+    TODO: Implement real handling:
     1. Withdraw USDC from Polymarket positions
     2. Send USDC from strategy wallet to vault
     
     Args:
         event: The event data
-        w3: Web3 instance
-        vault: Vault contract instance
-        usdc: USDC contract instance
     """
     assets_needed = event["args"]["assetsNeeded"]
     available_assets = event["args"]["availableAssets"]
@@ -143,85 +288,103 @@ def handle_liquidity_shortfall(event: dict, w3: Web3, vault, usdc):
     # ==========================================================
     # TODO: Implement Polymarket withdrawal
     # ==========================================================
-    # Here we would:
+    # Steps to implement:
     # 1. Check current Polymarket positions
     # 2. Calculate which positions to close/sell
     # 3. Execute trades to recover USDC
     # 4. Wait for settlement
     #
     # Example pseudocode:
-    # polymarket_balance = polymarket_client.get_balance()
+    # polymarket_balance = polymarket_client.get_usdc_balance()
     # if polymarket_balance >= shortfall:
+    #     polymarket_client.withdraw(shortfall)
+    # else:
+    #     # Need to sell positions first
+    #     positions = polymarket_client.get_positions()
+    #     for pos in positions:
+    #         polymarket_client.market_sell(pos)
+    #     # Then withdraw
     #     polymarket_client.withdraw(shortfall)
     # ==========================================================
     
     # ==========================================================
     # TODO: Send USDC from strategy wallet to vault
     # ==========================================================
-    # Once we have USDC available, send it to the vault:
+    # Once USDC is available, send to vault:
     #
-    # strategy_account = w3.eth.account.from_key(STRATEGY_PRIVATE_KEY)
-    # 
-    # # Build transfer transaction
     # tx = usdc.functions.transfer(
     #     VAULT_ADDRESS,
     #     shortfall
-    # ).build_transaction({
-    #     'from': strategy_account.address,
-    #     'nonce': w3.eth.get_transaction_count(strategy_account.address),
-    #     'gas': 100000,
-    #     'gasPrice': w3.eth.gas_price
-    # })
+    # ).build_transaction({...})
     # 
-    # # Sign and send
-    # signed_tx = w3.eth.account.sign_transaction(tx, STRATEGY_PRIVATE_KEY)
-    # tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    # print(f"   Sent {shortfall / 1e6:.2f} USDC to vault. Tx: {tx_hash.hex()}")
+    # signed_tx = w3.eth.account.sign_transaction(tx, KEEPER_PRIVATE_KEY)
+    # tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+    # print(f"Sent {shortfall / 1e6:.2f} USDC to vault. Tx: {tx_hash.hex()}")
     # ==========================================================
     
-    print(f"\n   [SKELETON] Would handle shortfall of {shortfall / 1e6:.2f} USDC")
-    print(f"   [SKELETON] Polymarket withdrawal + vault transfer not implemented yet")
+    print(f"\n   [TODO] Would handle shortfall of {shortfall / 1e6:.2f} USDC")
+    print(f"   [TODO] Polymarket withdrawal + vault transfer not implemented yet")
 
 
-def listen_liquidity_shortfall(w3: Web3, vault, usdc):
+def listen_liquidity_shortfall():
     """
     Listen for LiquidityShortfall events from the vault.
     
-    Polls for new events every POLL_INTERVAL seconds and handles them.
-    
-    Args:
-        w3: Web3 instance
-        vault: Vault contract instance
-        usdc: USDC contract instance
+    Polls for new events every SHORTFALL_POLL_INTERVAL seconds.
     """
+    global w3, vault
+    
     print(f"\n🔍 Listening for LiquidityShortfall events...")
-    print(f"   Poll interval: {POLL_INTERVAL}s")
-    print(f"   Press Ctrl+C to stop\n")
+    print(f"   Poll interval: {SHORTFALL_POLL_INTERVAL}s")
     
     # Create event filter starting from latest block
     event_filter = vault.events.LiquidityShortfall.create_filter(fromBlock='latest')
     
-    try:
-        while True:
+    while True:
+        try:
             # Poll for new events
             new_events = event_filter.get_new_entries()
             
             for event in new_events:
-                handle_liquidity_shortfall(event, w3, vault, usdc)
+                handle_liquidity_shortfall(event)
             
-            # Wait before next poll
-            time.sleep(POLL_INTERVAL)
-            
-    except KeyboardInterrupt:
-        print("\n\n👋 Stopped listening for events")
+        except Exception as e:
+            print(f"❌ Error polling events: {e}")
+        
+        # Wait before next poll
+        time.sleep(SHORTFALL_POLL_INTERVAL)
+
+
+def nav_update_loop():
+    """
+    Periodically push NAV updates to the chain.
+    
+    Runs every NAV_UPDATE_INTERVAL seconds.
+    """
+    print(f"\n📈 Starting NAV update loop...")
+    print(f"   Update interval: {NAV_UPDATE_INTERVAL}s")
+    
+    while True:
+        try:
+            push_nav_to_chain()
+        except Exception as e:
+            print(f"❌ Error in NAV update loop: {e}")
+        
+        time.sleep(NAV_UPDATE_INTERVAL)
 
 
 def main():
     """
-    Main entry point for the liquidity management bot.
+    Main entry point for the NAV updater & liquidity management bot.
+    
+    Runs two loops:
+    1. NAV update loop (every 60 seconds)
+    2. Liquidity shortfall listener (every 10 seconds)
     """
+    global w3, vault, usdc, strategy
+    
     print("\n" + "="*60)
-    print("🏦 PredictFi Sniper Vault - Liquidity Bot")
+    print("🏦 PredictFi Sniper Vault - NAV Updater Bot")
     print("="*60 + "\n")
     
     # Validate required environment variables
@@ -229,6 +392,7 @@ def main():
         ("RPC_URL", RPC_URL),
         ("VAULT_ADDRESS", VAULT_ADDRESS),
         ("USDC_ADDRESS", USDC_ADDRESS),
+        ("STRATEGY_ADDRESS", STRATEGY_ADDRESS),
     ]
     
     missing = [name for name, value in required_vars if not value]
@@ -237,22 +401,40 @@ def main():
         print("   Please check your .env file")
         sys.exit(1)
     
-    # Optional but warn if missing
-    if not STRATEGY_PRIVATE_KEY:
-        print("⚠️  STRATEGY_PRIVATE_KEY not set - cannot send transactions")
-    if not STRATEGY_ADDRESS:
-        print("⚠️  STRATEGY_ADDRESS not set")
+    # Warn if keeper credentials not set
+    if not KEEPER_PRIVATE_KEY:
+        print("⚠️  KEEPER_PRIVATE_KEY not set - cannot push NAV updates")
+    if not KEEPER_ADDRESS:
+        print("⚠️  KEEPER_ADDRESS not set - cannot push NAV updates")
     
     try:
         # Connect to chain
         w3 = connect_to_chain()
         
         # Load contracts
-        vault, usdc = get_contracts(w3)
+        vault, usdc, strategy = get_contracts(w3)
         
-        # Start listening for events
-        listen_liquidity_shortfall(w3, vault, usdc)
+        # Verify keeper is set on strategy
+        if KEEPER_ADDRESS:
+            on_chain_keeper = strategy.functions.keeper().call()
+            if on_chain_keeper.lower() != KEEPER_ADDRESS.lower():
+                print(f"\n⚠️  WARNING: On-chain keeper ({on_chain_keeper}) != KEEPER_ADDRESS ({KEEPER_ADDRESS})")
+                print(f"   You may need to call strategy.setKeeper() first")
         
+        print(f"\n🚀 Starting bot loops...")
+        print(f"   NAV updates: every {NAV_UPDATE_INTERVAL}s")
+        print(f"   Shortfall checks: every {SHORTFALL_POLL_INTERVAL}s")
+        print(f"   Press Ctrl+C to stop\n")
+        
+        # Start NAV update loop in a separate thread
+        nav_thread = threading.Thread(target=nav_update_loop, daemon=True)
+        nav_thread.start()
+        
+        # Run shortfall listener in main thread
+        listen_liquidity_shortfall()
+        
+    except KeyboardInterrupt:
+        print("\n\n👋 Bot stopped")
     except Exception as e:
         print(f"\n❌ Error: {e}")
         sys.exit(1)
