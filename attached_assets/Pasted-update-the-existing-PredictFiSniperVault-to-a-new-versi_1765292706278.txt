@@ -1,0 +1,50 @@
+update the existing PredictFiSniperVault to a new version called PredictFiSniperVaultV2 with per-wallet deposit caps, while keeping the ERC4626 behaviour.
+
+requirements:
+- create a new contract file contracts/PredictFiSniperVaultV2.sol
+- base it on the current PredictFiSniperVault implementation, but add:
+
+1) new state:
+    - uint256 public walletDepositCap; // max assets (USDC) each wallet can deposit
+    - mapping(address => uint256) public walletDeposited; // tracks total deposited per address
+
+2) constructor:
+    - same params as before: asset, strategy, feeCollector, performanceFeeBps, bufferBps, maxTotalDeposits
+    - also accept an extra uint256 _walletDepositCap and store it in walletDepositCap
+
+3) new function:
+    - function setWalletDepositCap(uint256 _cap) external onlyOwner {
+        walletDepositCap = _cap;
+      }
+
+4) modify deposit and mint:
+
+    - in deposit(uint256 assets, address receiver):
+        - require(totalAssets() + assets <= maxTotalDeposits, "cap reached");
+        - require(walletDeposited[receiver] + assets <= walletDepositCap, "wallet cap reached");
+        - walletDeposited[receiver] += assets;
+        - then call super.deposit(assets, receiver) and return shares
+        - keep lastTotalAssets logic as in V1
+
+    - in mint(uint256 shares, address receiver):
+        - calculate assets = convertToAssets(shares)
+        - require(totalAssets() + assets <= maxTotalDeposits, "cap reached");
+        - require(walletDeposited[receiver] + assets <= walletDepositCap, "wallet cap reached");
+        - walletDeposited[receiver] += assets;
+        - then call super.mint(shares, receiver) and return usedAssets
+        - keep lastTotalAssets logic
+
+5) withdraw / redeem logic stays the same (withdrawal does NOT decrease walletDeposited; once you hit the cap, you cannot deposit more in total, which is fine for a conservative mvp).
+
+6) add a small test file test/sniperVaultV2.test.js that:
+    - deploys TestUSDC and MockSniperStrategy
+    - deploys PredictFiSniperVaultV2 with:
+        - maxTotalDeposits = 10_000 * 1e6
+        - walletDepositCap = 100 * 1e6
+    - verifies:
+        - user can deposit 100 * 1e6 but not 101 * 1e6
+        - a second deposit that would push them over the cap reverts with "wallet cap reached"
+        - global cap still enforced
+        - bufferBps and investIdle still work as in V1
+
+do not delete the old PredictFiSniperVault.sol, just add V2 alongside it. update README explaining V2 adds per-wallet caps.
