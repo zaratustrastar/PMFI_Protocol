@@ -1,0 +1,60 @@
+upgrade PolymarketClient in bot/bot.py to prepare for real polymarket integration while staying read only and safe.
+
+requirements:
+
+1) import requests at the top of bot.py.
+
+2) extend PolymarketClient:
+
+- in __init__, also accept an optional api_base_url string, store it:
+
+    def __init__(self, wallet_address: str, api_base_url: str = "https://api.polymarket.com"):
+        self.wallet_address = wallet_address
+        self.api_base_url = api_base_url
+
+- update fetch_positions to have the structure:
+
+    def fetch_positions(self):
+        """
+        TODO: replace with a real api call to polymarket to get open positions
+        for now, keep returning the same dummy structure as before.
+        expected real behaviour:
+
+        - call something like GET {api_base_url}/positions?owner={wallet_address}
+        - parse response into a list of dicts:
+            [{"market_id": "...", "side": "yes" or "no", "size": int}, ...]
+        """
+        return [
+            {"market_id": "market1", "side": "yes", "size": 10000},
+            {"market_id": "market2", "side": "no", "size": 5000},
+        ]
+
+- update fetch_orderbook:
+
+    def fetch_orderbook(self, market_id: str, side: str):
+        """
+        TODO: replace with real orderbook call to polymarket.
+
+        expected real behaviour:
+
+        - call something like GET {api_base_url}/markets/{market_id}/orderbook?side={side}
+        - read bid levels
+        - return a dict:
+
+            {"bids": [{"price": float, "size": int}, ...]}
+
+        for now, keep returning dummy bids as before.
+        """
+        return {
+            "bids": [
+                {"price": 0.09, "size": 3000},
+                {"price": 0.085, "size": 5000},
+                {"price": 0.08, "size": 20000},
+            ]
+        }
+
+3) do not yet implement the real http calls. just add docstrings and structure so later you only replace the dummy returns with actual requests.get and parsing logic.
+
+4) make sure NavEngine still works with the updated PolymarketClient.
+
+this keeps the code ready to be switched from dummy to real polymarket data with minimal changes.

@@ -41,7 +41,9 @@ import json
 import time
 import threading
 from pathlib import Path
+from typing import List, Dict, Optional
 
+import requests
 from dotenv import load_dotenv
 from web3 import Web3
 
@@ -70,6 +72,190 @@ w3 = None
 vault = None
 usdc = None
 strategy = None
+
+# Global Polymarket client and NAV engine instances
+polymarket_client = None
+nav_engine = None
+
+
+# =============================================================================
+# POLYMARKET CLIENT
+# =============================================================================
+# Read-only client for fetching positions and orderbook data from Polymarket.
+# Currently uses dummy data - replace with real API calls for production.
+# =============================================================================
+
+class PolymarketClient:
+    """
+    Client for interacting with Polymarket API.
+    
+    Currently returns dummy data for testing. To switch to real Polymarket data:
+    1. Replace fetch_positions() with real API call
+    2. Replace fetch_orderbook() with real API call
+    
+    This class is READ-ONLY and does not execute any trades.
+    """
+    
+    def __init__(self, wallet_address: str, api_base_url: str = "https://api.polymarket.com"):
+        """
+        Initialize the Polymarket client.
+        
+        Args:
+            wallet_address: The wallet address to fetch positions for
+            api_base_url: Base URL for Polymarket API (default: https://api.polymarket.com)
+        """
+        self.wallet_address = wallet_address
+        self.api_base_url = api_base_url
+    
+    def fetch_positions(self) -> List[Dict]:
+        """
+        Fetch open positions for the wallet from Polymarket.
+        
+        TODO: Replace with a real API call to Polymarket to get open positions.
+        
+        Expected real behaviour:
+        - Call something like GET {api_base_url}/positions?owner={wallet_address}
+        - Parse response into a list of dicts:
+            [{"market_id": "...", "side": "yes" or "no", "size": int}, ...]
+        
+        Example real implementation:
+        ```python
+        url = f"{self.api_base_url}/positions"
+        params = {"owner": self.wallet_address}
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        return [
+            {"market_id": p["marketId"], "side": p["side"], "size": p["size"]}
+            for p in data["positions"]
+        ]
+        ```
+        
+        Returns:
+            List of position dicts with market_id, side, and size
+        """
+        # DUMMY DATA - replace with real API call
+        return [
+            {"market_id": "market1", "side": "yes", "size": 10000},
+            {"market_id": "market2", "side": "no", "size": 5000},
+        ]
+    
+    def fetch_orderbook(self, market_id: str, side: str) -> Dict:
+        """
+        Fetch orderbook for a specific market and side from Polymarket.
+        
+        TODO: Replace with real orderbook call to Polymarket.
+        
+        Expected real behaviour:
+        - Call something like GET {api_base_url}/markets/{market_id}/orderbook?side={side}
+        - Read bid levels
+        - Return a dict: {"bids": [{"price": float, "size": int}, ...]}
+        
+        Example real implementation:
+        ```python
+        url = f"{self.api_base_url}/markets/{market_id}/orderbook"
+        params = {"side": side}
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        return {
+            "bids": [
+                {"price": float(b["price"]), "size": int(b["size"])}
+                for b in data["bids"]
+            ]
+        }
+        ```
+        
+        Args:
+            market_id: The market identifier
+            side: "yes" or "no"
+        
+        Returns:
+            Dict with bids list containing price and size
+        """
+        # DUMMY DATA - replace with real API call
+        return {
+            "bids": [
+                {"price": 0.09, "size": 3000},
+                {"price": 0.085, "size": 5000},
+                {"price": 0.08, "size": 20000},
+            ]
+        }
+
+
+# =============================================================================
+# NAV ENGINE
+# =============================================================================
+# Calculates Net Asset Value using PolymarketClient data
+# =============================================================================
+
+class NavEngine:
+    """
+    Calculates the Net Asset Value (NAV) of the strategy.
+    
+    Uses PolymarketClient to fetch positions and orderbooks,
+    then calculates mark-to-market value of all positions.
+    """
+    
+    def __init__(self, polymarket_client: PolymarketClient, usdc_contract, strategy_address: str):
+        """
+        Initialize the NAV engine.
+        
+        Args:
+            polymarket_client: PolymarketClient instance for fetching market data
+            usdc_contract: USDC contract instance for checking balances
+            strategy_address: Strategy contract address
+        """
+        self.polymarket_client = polymarket_client
+        self.usdc_contract = usdc_contract
+        self.strategy_address = strategy_address
+    
+    def calculate_nav(self) -> int:
+        """
+        Calculate the total NAV of the strategy.
+        
+        NAV = USDC balance + mark-to-market value of all positions
+        
+        For each position:
+        - Fetch orderbook
+        - Use best bid price for valuation (conservative)
+        - position_value = size * best_bid_price
+        
+        Returns:
+            NAV in USDC (6 decimals)
+        """
+        # Get USDC balance held by strategy contract
+        usdc_balance = self.usdc_contract.functions.balanceOf(self.strategy_address).call()
+        
+        # Fetch positions from Polymarket
+        positions = self.polymarket_client.fetch_positions()
+        
+        # Calculate mark-to-market value of positions
+        total_position_value = 0
+        
+        for position in positions:
+            market_id = position["market_id"]
+            side = position["side"]
+            size = position["size"]
+            
+            # Fetch orderbook for this market
+            orderbook = self.polymarket_client.fetch_orderbook(market_id, side)
+            
+            # Use best bid for conservative valuation
+            if orderbook["bids"]:
+                best_bid = orderbook["bids"][0]["price"]
+                position_value = int(size * best_bid)
+                total_position_value += position_value
+        
+        # Total NAV = USDC balance + position values
+        nav = usdc_balance + total_position_value
+        
+        print(f"📊 NAV Calculation:")
+        print(f"   USDC Balance:     {usdc_balance / 1e6:.2f} USDC")
+        print(f"   Positions Value:  {total_position_value / 1e6:.2f} USDC")
+        print(f"   Total NAV:        {nav / 1e6:.2f} USDC")
+        
+        return nav
 
 
 def load_abi(contract_name: str) -> dict:
@@ -219,12 +405,12 @@ def push_nav_to_chain():
     Push the calculated NAV to the strategy contract on-chain.
     
     This function:
-    1. Calculates the current NAV using get_strategy_nav_dummy()
+    1. Calculates the current NAV using NavEngine (or fallback to dummy)
     2. Builds a transaction to call strategy.updateStrategyValue(nav)
     3. Signs it with KEEPER_PRIVATE_KEY
     4. Sends the transaction and prints the tx hash
     """
-    global w3, strategy
+    global w3, strategy, nav_engine
     
     if not KEEPER_PRIVATE_KEY:
         print("❌ Cannot push NAV: KEEPER_PRIVATE_KEY not set")
@@ -234,8 +420,11 @@ def push_nav_to_chain():
         return
     
     try:
-        # Get current NAV
-        nav = get_strategy_nav_dummy()
+        # Get current NAV using NavEngine if available, otherwise use dummy
+        if nav_engine:
+            nav = nav_engine.calculate_nav()
+        else:
+            nav = get_strategy_nav_dummy()
         
         # Get current on-chain value for comparison
         current_on_chain = strategy.functions.totalStrategyValue().call()
@@ -430,11 +619,15 @@ def main():
     """
     Main entry point for the NAV updater & liquidity management bot.
     
+    This bot:
+    - Updates NAV on-chain every 60 seconds using PolymarketClient + NavEngine
+    - Watches for LiquidityShortfall events and logs them (does not move funds yet)
+    
     Runs two loops:
     1. NAV update loop (every 60 seconds)
     2. Liquidity shortfall listener (every 10 seconds)
     """
-    global w3, vault, usdc, strategy
+    global w3, vault, usdc, strategy, polymarket_client, nav_engine
     
     print("\n" + "="*60)
     print("🏦 PredictFi Sniper Vault - NAV Updater Bot")
@@ -466,6 +659,23 @@ def main():
         
         # Load contracts
         vault, usdc, strategy = get_contracts(w3)
+        
+        # Initialize PolymarketClient (uses KEEPER_ADDRESS as wallet to track)
+        # This is READ-ONLY - it only fetches positions and orderbooks
+        wallet_to_track = KEEPER_ADDRESS or "0x0000000000000000000000000000000000000000"
+        polymarket_client = PolymarketClient(
+            wallet_address=wallet_to_track,
+            api_base_url="https://api.polymarket.com"
+        )
+        print(f"✅ Initialized PolymarketClient (wallet: {wallet_to_track[:10]}...)")
+        
+        # Initialize NavEngine with PolymarketClient
+        nav_engine = NavEngine(
+            polymarket_client=polymarket_client,
+            usdc_contract=usdc,
+            strategy_address=STRATEGY_ADDRESS
+        )
+        print(f"✅ Initialized NavEngine")
         
         # Verify keeper is set on strategy
         if KEEPER_ADDRESS:
