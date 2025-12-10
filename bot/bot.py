@@ -351,7 +351,8 @@ class NavEngine:
     """
     
     # Fee/slippage haircut for realistic liquidation value
-    HAIRCUT_PERCENT = 0.02  # 2% for fees + slippage margin
+    # Set to 0 - user can adjust if needed
+    HAIRCUT_PERCENT = 0.0  # No haircut applied
     
     def __init__(self, polymarket_client: PolymarketClient, usdc_contract, strategy_address: str):
         """
