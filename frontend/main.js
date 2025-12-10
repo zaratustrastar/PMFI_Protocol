@@ -7,11 +7,11 @@
 // CONFIGURATION
 // =============================================================================
 
-const VAULT_ADDRESS = "0x26BCAe8DEA9A2b04a522cab2679CF9708d3F84E3";
-const USDC_ADDRESS = "0x743dBb99B51A542aA7b6E859713b4b615445C019";
+const VAULT_ADDRESS = "0x5E9Cfd99Cb55cB7981E8C7E8ceC73dC68e60e6C9";
+const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
-const BASE_SEPOLIA_RPC = "https://sepolia.base.org";
+const BASE_MAINNET_RPC = "https://mainnet.base.org";
 
 // =============================================================================
 // ABIs
@@ -423,7 +423,7 @@ withdrawBtn.addEventListener("click", handleWithdraw);
         abisLoaded = true;
         
         try {
-            const readOnlyProvider = new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC);
+            const readOnlyProvider = new ethers.JsonRpcProvider(BASE_MAINNET_RPC);
             vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, readOnlyProvider);
             usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, readOnlyProvider);
             
