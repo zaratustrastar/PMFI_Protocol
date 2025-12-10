@@ -334,6 +334,11 @@ async function handleDeposit() {
         return;
     }
 
+    if (!signer || !userAddress) {
+        showStatus(txStatus, "Please connect your wallet first", "error");
+        return;
+    }
+
     const amount = parseUSDC(amountStr);
 
     try {
@@ -341,18 +346,24 @@ async function handleDeposit() {
         withdrawBtn.disabled = true;
         hideStatus(txStatus);
 
+        // Ensure we're using signer-connected contracts
+        const signerUsdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
+        const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+
         showStatus(txStatus, "Checking allowance...", "info");
-        const allowance = await usdcContract.allowance(userAddress, VAULT_ADDRESS);
+        console.log("Checking allowance for", userAddress, "to", VAULT_ADDRESS);
+        const allowance = await signerUsdcContract.allowance(userAddress, VAULT_ADDRESS);
+        console.log("Allowance:", allowance.toString());
 
         if (allowance < amount) {
             showStatus(txStatus, "Approving USDC...", "info");
-            const approveTx = await usdcContract.approve(VAULT_ADDRESS, amount);
+            const approveTx = await signerUsdcContract.approve(VAULT_ADDRESS, amount);
             showStatus(txStatus, "Waiting for approval...", "info");
             await approveTx.wait();
         }
 
         showStatus(txStatus, "Depositing...", "info");
-        const depositTx = await vaultContract.deposit(amount, userAddress);
+        const depositTx = await signerVaultContract.deposit(amount, userAddress);
         showStatus(txStatus, "Confirming...", "info");
         await depositTx.wait();
 
@@ -380,6 +391,11 @@ async function handleWithdraw() {
         return;
     }
 
+    if (!signer || !userAddress) {
+        showStatus(txStatus, "Please connect your wallet first", "error");
+        return;
+    }
+
     const amount = parseUSDC(amountStr);
 
     try {
@@ -387,8 +403,11 @@ async function handleWithdraw() {
         withdrawBtn.disabled = true;
         hideStatus(txStatus);
 
+        // Ensure we're using signer-connected contract
+        const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+
         showStatus(txStatus, "Withdrawing...", "info");
-        const withdrawTx = await vaultContract.withdraw(amount, userAddress, userAddress);
+        const withdrawTx = await signerVaultContract.withdraw(amount, userAddress, userAddress);
         showStatus(txStatus, "Confirming...", "info");
         await withdrawTx.wait();
 
@@ -417,11 +436,25 @@ withdrawBtn.addEventListener("click", handleWithdraw);
 // INITIALIZATION
 // =============================================================================
 
+// Separate read-only contracts for stats display
+let readOnlyVaultContract = null;
+
 async function initReadOnlyProvider() {
+    // Don't overwrite signer-connected contracts if already connected
+    if (isConnected && signer) {
+        console.log("Skipping read-only init - already connected with signer");
+        return;
+    }
+    
     try {
         const readOnlyProvider = new ethers.JsonRpcProvider(BASE_MAINNET_RPC);
-        vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, readOnlyProvider);
-        usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, readOnlyProvider);
+        readOnlyVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, readOnlyProvider);
+        
+        // Only set main contracts if not connected
+        if (!isConnected) {
+            vaultContract = readOnlyVaultContract;
+            usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, readOnlyProvider);
+        }
         
         await refreshVaultStats();
         startAutoRefresh();
