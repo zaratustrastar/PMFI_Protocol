@@ -121,39 +121,56 @@ class PolymarketClient:
     
     def fetch_positions(self) -> List[Dict]:
         """
-        Fetch open positions for the wallet from Polymarket Data API.
+        Fetch ALL open positions for the wallet from Polymarket Data API.
+        Uses pagination to get all positions (API returns max ~100-200 per request).
         
-        Endpoint: GET https://data-api.polymarket.com/positions?user={wallet}
+        Endpoint: GET https://data-api.polymarket.com/positions?user={wallet}&limit=500&offset=0
         
         Returns:
             List of position dicts with token_id, side, size, and current_value
         """
         try:
-            url = f"{self.DATA_API_URL}/positions"
-            params = {"user": self.wallet_address}
+            print(f"📡 Fetching ALL positions for {self.wallet_address[:10]}...")
             
-            print(f"📡 Fetching positions for {self.wallet_address[:10]}...")
-            response = self.session.get(url, params=params, timeout=30)
-            response.raise_for_status()
+            all_positions_raw = []
+            offset = 0
+            limit = 500  # Max per request
             
-            data = response.json()
+            # Paginate through all positions
+            while True:
+                url = f"{self.DATA_API_URL}/positions"
+                params = {"user": self.wallet_address, "limit": limit, "offset": offset}
+                
+                response = self.session.get(url, params=params, timeout=30)
+                response.raise_for_status()
+                
+                data = response.json()
+                if not data:
+                    break
+                    
+                all_positions_raw.extend(data)
+                print(f"   Fetched {len(data)} positions (offset={offset}, total={len(all_positions_raw)})")
+                
+                if len(data) < limit:
+                    break  # No more pages
+                offset += limit
             
-            # Parse positions - Data API returns array of position objects
+            # Helper to safely convert to float (handles null/None from API)
+            def safe_float(val, default=0.0):
+                if val is None:
+                    return default
+                try:
+                    return float(val)
+                except (TypeError, ValueError):
+                    return default
+            
+            # Parse positions
             positions = []
-            for p in data:
+            for p in all_positions_raw:
                 # Skip positions with zero size
-                size = float(p.get("size", 0))
+                size = safe_float(p.get("size"))
                 if size <= 0:
                     continue
-                
-                # Helper to safely convert to float (handles null/None from API)
-                def safe_float(val, default=0.0):
-                    if val is None:
-                        return default
-                    try:
-                        return float(val)
-                    except (TypeError, ValueError):
-                        return default
                 
                 positions.append({
                     "token_id": p.get("asset") or "",  # Token ID for orderbook lookup
@@ -172,7 +189,7 @@ class PolymarketClient:
                     "redeemable": bool(p.get("redeemable", False)),
                 })
             
-            print(f"✅ Found {len(positions)} active positions")
+            print(f"✅ Found {len(positions)} active positions (from {len(all_positions_raw)} total)")
             return positions
             
         except requests.exceptions.RequestException as e:
@@ -181,6 +198,58 @@ class PolymarketClient:
         except (KeyError, ValueError) as e:
             print(f"❌ Error parsing positions response: {e}")
             return []
+    
+    def simulate_market_sell(self, size: float, bids: List[Dict]) -> float:
+        """
+        Simulate a market sell order by walking through the orderbook bids.
+        
+        This calculates the realistic liquidation value by filling against
+        actual bid orders, accounting for order book depth and illiquidity.
+        
+        Args:
+            size: Number of shares to sell
+            bids: List of bid orders [{"price": float, "size": float}, ...] sorted high→low
+        
+        Returns:
+            Total value received from the simulated sell (before fees)
+        """
+        remaining = size
+        value = 0.0
+        
+        for bid in bids:
+            if remaining <= 0:
+                break
+            
+            bid_price = float(bid.get("price", 0))
+            bid_size = float(bid.get("size", 0))
+            
+            if bid_price <= 0 or bid_size <= 0:
+                continue
+            
+            # Fill as much as possible at this price level
+            fill = min(remaining, bid_size)
+            value += fill * bid_price
+            remaining -= fill
+        
+        # Any remaining shares have no bids = illiquid, value = 0
+        if remaining > 0:
+            print(f"      ⚠️ {remaining:.2f} shares illiquid (no bids)")
+        
+        return value
+    
+    def fetch_cash_balance(self) -> float:
+        """
+        Fetch the USDC cash balance held on Polymarket.
+        
+        Note: This requires the wallet API which may need authentication.
+        For now, we return 0 as a placeholder - cash balance can be added manually.
+        
+        Returns:
+            Cash balance in USDC (float)
+        """
+        # TODO: Implement if Polymarket provides a public endpoint for cash balance
+        # For now, return 0 - user can add cash balance manually if needed
+        return 0.0
     
     def fetch_orderbook(self, token_id: str) -> Dict:
         """
@@ -274,12 +343,15 @@ class NavEngine:
     Calculates the Net Asset Value (NAV) of the strategy.
     
     Uses PolymarketClient to fetch positions from Data API.
-    The Data API already provides currentValue (mark-to-market) for each position.
     
-    Two calculation methods available:
-    1. Fast: Use currentValue from Data API (default)
-    2. Conservative: Fetch orderbook and use best bid price
+    Three calculation methods available:
+    1. Fast: Use currentValue from Data API (mid-market price)
+    2. Best-bid: Use best bid price from orderbook
+    3. Liquidation (RECOMMENDED): Simulate market sell through orderbook depth
     """
+    
+    # Fee/slippage haircut for realistic liquidation value
+    HAIRCUT_PERCENT = 0.02  # 2% for fees + slippage margin
     
     def __init__(self, polymarket_client: PolymarketClient, usdc_contract, strategy_address: str):
         """
@@ -294,7 +366,107 @@ class NavEngine:
         self.usdc_contract = usdc_contract
         self.strategy_address = strategy_address
     
-    def calculate_nav(self, use_orderbook: bool = False) -> int:
+    def calculate_liquidation_nav(self, verbose: bool = True) -> int:
+        """
+        Calculate the realistic LIQUIDATION NAV of the strategy.
+        
+        This is the TRUE value you would get if you sold everything right now:
+        1. Fetches ALL positions with pagination
+        2. For each position, simulates a market sell through the orderbook
+        3. Applies a 2% haircut for fees and slippage
+        4. Adds any cash balance on Polymarket
+        5. Adds on-chain USDC balance
+        
+        Returns:
+            Liquidation NAV in USDC (6 decimals)
+        """
+        print(f"\n{'='*60}")
+        print(f"💰 CALCULATING REALISTIC LIQUIDATION NAV")
+        print(f"{'='*60}")
+        
+        # Get USDC balance held by strategy contract (on-chain)
+        usdc_balance = self.usdc_contract.functions.balanceOf(self.strategy_address).call()
+        
+        # Fetch ALL positions from Polymarket Data API (with pagination)
+        positions = self.polymarket_client.fetch_positions()
+        
+        if not positions:
+            print(f"📊 No active Polymarket positions found")
+            nav = usdc_balance
+            print(f"\n📊 Liquidation NAV: {nav / 1e6:.2f} USDC (on-chain only)")
+            return nav
+        
+        print(f"\n📊 Simulating market sell for {len(positions)} positions...")
+        
+        total_liquidation_value = 0.0
+        total_mid_market_value = 0.0
+        illiquid_count = 0
+        
+        for i, position in enumerate(positions):
+            token_id = position.get("token_id", "")
+            size = position.get("size", 0)
+            outcome = position.get("outcome", "?")
+            title = position.get("title", "Unknown")[:40]
+            mid_value = position.get("current_value", 0)
+            
+            total_mid_market_value += mid_value
+            
+            if not token_id:
+                # No token_id, use mid-market as fallback
+                total_liquidation_value += mid_value
+                continue
+            
+            # Fetch orderbook and simulate market sell
+            orderbook = self.polymarket_client.fetch_orderbook(token_id)
+            bids = orderbook.get("bids", [])
+            
+            if not bids:
+                # No bids = completely illiquid, value = 0
+                illiquid_count += 1
+                if verbose:
+                    print(f"   ❌ {outcome}: {size:.1f} shares - NO BIDS (illiquid)")
+                    print(f"      └─ {title}")
+                continue
+            
+            # Simulate market sell
+            liquidation_value = self.polymarket_client.simulate_market_sell(size, bids)
+            total_liquidation_value += liquidation_value
+            
+            if verbose:
+                diff = liquidation_value - mid_value
+                diff_pct = (diff / mid_value * 100) if mid_value > 0 else 0
+                print(f"   • {outcome}: {size:.1f} → ${liquidation_value:.2f} (mid: ${mid_value:.2f}, {diff_pct:+.0f}%)")
+                print(f"      └─ {title}")
+        
+        # Apply haircut for fees + slippage
+        value_after_haircut = total_liquidation_value * (1 - self.HAIRCUT_PERCENT)
+        
+        # Get Polymarket cash balance (if any)
+        pm_cash = self.polymarket_client.fetch_cash_balance()
+        
+        # Total liquidation NAV
+        # Convert to 6 decimals (USDC format)
+        position_value_6dec = int(value_after_haircut * 1e6)
+        pm_cash_6dec = int(pm_cash * 1e6)
+        nav = usdc_balance + position_value_6dec + pm_cash_6dec
+        
+        print(f"\n{'='*60}")
+        print(f"📊 LIQUIDATION NAV SUMMARY")
+        print(f"{'='*60}")
+        print(f"   Positions analyzed:     {len(positions)}")
+        print(f"   Illiquid positions:     {illiquid_count}")
+        print(f"   Mid-market value:       ${total_mid_market_value:.2f}")
+        print(f"   Liquidation value:      ${total_liquidation_value:.2f}")
+        print(f"   After {self.HAIRCUT_PERCENT*100:.0f}% haircut:      ${value_after_haircut:.2f}")
+        print(f"   Polymarket cash:        ${pm_cash:.2f}")
+        print(f"   On-chain USDC:          ${usdc_balance / 1e6:.2f}")
+        print(f"   ─────────────────────────────────")
+        print(f"   LIQUIDATION NAV:        ${nav / 1e6:.2f} USDC")
+        print(f"{'='*60}")
+        
+        return nav
+    
+    def calculate_nav(self, use_orderbook: bool = False, use_liquidation: bool = True) -> int:
         """
         Calculate the total NAV of the strategy.
         
@@ -302,12 +474,17 @@ class NavEngine:
         
         Args:
             use_orderbook: If True, fetch orderbook for each position and use
-                          best bid for conservative valuation. If False (default),
-                          use the currentValue from Data API (faster).
+                          best bid for valuation. If False, use mid-market value.
+            use_liquidation: If True (default), use realistic liquidation NAV
+                            that simulates market sells through orderbook depth.
         
         Returns:
             NAV in USDC (6 decimals)
         """
+        # Default to liquidation NAV (most accurate)
+        if use_liquidation:
+            return self.calculate_liquidation_nav()
+        
         # Get USDC balance held by strategy contract (on-chain)
         usdc_balance = self.usdc_contract.functions.balanceOf(self.strategy_address).call()
         
