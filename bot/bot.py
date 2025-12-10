@@ -296,6 +296,11 @@ class PolymarketClient:
                 if price > 0:
                     asks.append({"price": price, "size": size})
             
+            # IMPORTANT: Sort bids descending (highest price first) for market sells
+            # Sort asks ascending (lowest price first) for market buys
+            bids.sort(key=lambda x: x["price"], reverse=True)
+            asks.sort(key=lambda x: x["price"], reverse=False)
+            
             return {"bids": bids, "asks": asks}
             
         except requests.exceptions.RequestException as e:
