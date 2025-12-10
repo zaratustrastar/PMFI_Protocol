@@ -1,6 +1,6 @@
 /**
- * PredictFi Sniper Vault V2 - Frontend
- * Professional DeFi interface for the pSNIPER vault
+ * PredictFi pSNIPER - Frontend
+ * Professional DeFi interface
  */
 
 // =============================================================================
@@ -57,18 +57,19 @@ let refreshTimer = null;
 // =============================================================================
 
 const connectBtn = document.getElementById("connectBtn");
-const walletAddressEl = document.getElementById("walletAddress");
-const sharePriceValueEl = document.getElementById("sharePriceValue");
-const positionValueEl = document.getElementById("positionValue");
-const sharesBalanceEl = document.getElementById("sharesBalance");
+const vaultTvlEl = document.getElementById("vaultTvl");
 const tvlValueEl = document.getElementById("tvlValue");
 const statsSharePriceEl = document.getElementById("statsSharePrice");
+const openDepositBtn = document.getElementById("openDepositBtn");
+const depositModal = document.getElementById("depositModal");
+const closeDepositModal = document.getElementById("closeDepositModal");
+const userPositionEl = document.getElementById("userPosition");
+const positionValueEl = document.getElementById("positionValue");
 const depositAmountEl = document.getElementById("depositAmount");
-const depositBtn = document.getElementById("depositBtn");
-const depositStatus = document.getElementById("depositStatus");
 const withdrawAmountEl = document.getElementById("withdrawAmount");
+const depositBtn = document.getElementById("depositBtn");
 const withdrawBtn = document.getElementById("withdrawBtn");
-const withdrawStatus = document.getElementById("withdrawStatus");
+const txStatus = document.getElementById("txStatus");
 const disclaimerModal = document.getElementById("disclaimerModal");
 const understandCheck = document.getElementById("understandCheck");
 const dontShowCheck = document.getElementById("dontShowCheck");
@@ -121,6 +122,29 @@ function initTabs() {
 }
 
 // =============================================================================
+// DEPOSIT MODAL
+// =============================================================================
+
+function initDepositModal() {
+    openDepositBtn.addEventListener("click", () => {
+        depositModal.classList.remove("hidden");
+        refreshUserStats();
+    });
+    
+    closeDepositModal.addEventListener("click", () => {
+        depositModal.classList.add("hidden");
+        hideStatus(txStatus);
+    });
+    
+    depositModal.addEventListener("click", (e) => {
+        if (e.target === depositModal) {
+            depositModal.classList.add("hidden");
+            hideStatus(txStatus);
+        }
+    });
+}
+
+// =============================================================================
 // UTILITY FUNCTIONS
 // =============================================================================
 
@@ -134,10 +158,6 @@ function formatUSDC(amount, decimals = 2) {
 
 function parseUSDC(amount) {
     return BigInt(Math.floor(Number(amount) * 10 ** USDC_DECIMALS));
-}
-
-function shortenAddress(address) {
-    return address.slice(0, 6) + "..." + address.slice(-4);
 }
 
 function showStatus(element, message, type) {
@@ -184,19 +204,17 @@ async function refreshVaultStats() {
             getTotalSupply()
         ]);
 
-        // Share Price
         let sharePrice = 1.0;
         if (totalSupply > 0n) {
             sharePrice = Number(totalAssets) / Number(totalSupply);
         }
         
-        const sharePriceStr = `$${sharePrice.toFixed(4)}`;
-        sharePriceValueEl.textContent = sharePriceStr;
         statsSharePriceEl.textContent = `$${sharePrice.toFixed(2)}`;
 
-        // TVL = share price * total supply (in USDC terms = totalAssets)
         const tvl = Number(totalAssets) / 10 ** USDC_DECIMALS;
-        tvlValueEl.textContent = `$${tvl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const tvlStr = `$${tvl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        vaultTvlEl.textContent = tvlStr;
+        tvlValueEl.textContent = tvlStr;
 
     } catch (error) {
         console.error("Error refreshing vault stats:", error);
@@ -204,21 +222,21 @@ async function refreshVaultStats() {
 }
 
 async function refreshUserStats() {
-    if (!userAddress || !vaultContract) return;
+    if (!userAddress || !vaultContract) {
+        userPositionEl.style.display = "none";
+        return;
+    }
 
     try {
         const shares = await vaultContract.balanceOf(userAddress);
         
-        // Shares balance
-        const sharesNum = Number(shares) / 10 ** USDC_DECIMALS;
-        sharesBalanceEl.textContent = sharesNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-        // Position value in USDC
         if (shares > 0n) {
             const redeemable = await vaultContract.convertToAssets(shares);
             positionValueEl.textContent = `$${formatUSDC(redeemable)}`;
+            userPositionEl.style.display = "block";
         } else {
             positionValueEl.textContent = "$0.00";
+            userPositionEl.style.display = "none";
         }
 
     } catch (error) {
@@ -274,11 +292,9 @@ async function connectWallet() {
 
         connectBtn.textContent = "Connected";
         connectBtn.classList.add("connected");
-        walletAddressEl.textContent = shortenAddress(userAddress);
-        walletAddressEl.style.display = "block";
+        connectBtn.disabled = false;
 
-        depositBtn.disabled = false;
-        withdrawBtn.disabled = false;
+        openDepositBtn.disabled = false;
 
         await refreshAll();
         startAutoRefresh();
@@ -299,7 +315,6 @@ function handleAccountsChanged(accounts) {
         location.reload();
     } else {
         userAddress = accounts[0];
-        walletAddressEl.textContent = shortenAddress(userAddress);
         refreshAll();
     }
 }
@@ -311,7 +326,7 @@ function handleAccountsChanged(accounts) {
 async function handleDeposit() {
     const amountStr = depositAmountEl.value;
     if (!amountStr || Number(amountStr) <= 0) {
-        showStatus(depositStatus, "Enter a valid amount", "error");
+        showStatus(txStatus, "Enter a valid amount", "error");
         return;
     }
 
@@ -319,32 +334,34 @@ async function handleDeposit() {
 
     try {
         depositBtn.disabled = true;
-        hideStatus(depositStatus);
+        withdrawBtn.disabled = true;
+        hideStatus(txStatus);
 
-        showStatus(depositStatus, "Checking allowance...", "info");
+        showStatus(txStatus, "Checking allowance...", "info");
         const allowance = await usdcContract.allowance(userAddress, VAULT_ADDRESS);
 
         if (allowance < amount) {
-            showStatus(depositStatus, "Approving USDC...", "info");
+            showStatus(txStatus, "Approving USDC...", "info");
             const approveTx = await usdcContract.approve(VAULT_ADDRESS, amount);
-            showStatus(depositStatus, "Waiting for approval...", "info");
+            showStatus(txStatus, "Waiting for approval...", "info");
             await approveTx.wait();
         }
 
-        showStatus(depositStatus, "Depositing...", "info");
+        showStatus(txStatus, "Depositing...", "info");
         const depositTx = await vaultContract.deposit(amount, userAddress);
-        showStatus(depositStatus, "Confirming...", "info");
+        showStatus(txStatus, "Confirming...", "info");
         await depositTx.wait();
 
-        showStatus(depositStatus, `Deposited $${amountStr}`, "success");
+        showStatus(txStatus, `Deposited $${amountStr} USDC`, "success");
         depositAmountEl.value = "";
         await refreshAll();
 
     } catch (error) {
         console.error("Deposit error:", error);
-        showStatus(depositStatus, error.reason || error.message, "error");
+        showStatus(txStatus, error.reason || error.message, "error");
     } finally {
         depositBtn.disabled = false;
+        withdrawBtn.disabled = false;
     }
 }
 
@@ -355,29 +372,31 @@ async function handleDeposit() {
 async function handleWithdraw() {
     const amountStr = withdrawAmountEl.value;
     if (!amountStr || Number(amountStr) <= 0) {
-        showStatus(withdrawStatus, "Enter a valid amount", "error");
+        showStatus(txStatus, "Enter a valid amount", "error");
         return;
     }
 
     const amount = parseUSDC(amountStr);
 
     try {
+        depositBtn.disabled = true;
         withdrawBtn.disabled = true;
-        hideStatus(withdrawStatus);
+        hideStatus(txStatus);
 
-        showStatus(withdrawStatus, "Withdrawing...", "info");
+        showStatus(txStatus, "Withdrawing...", "info");
         const withdrawTx = await vaultContract.withdraw(amount, userAddress, userAddress);
-        showStatus(withdrawStatus, "Confirming...", "info");
+        showStatus(txStatus, "Confirming...", "info");
         await withdrawTx.wait();
 
-        showStatus(withdrawStatus, `Withdrew $${amountStr}`, "success");
+        showStatus(txStatus, `Withdrew $${amountStr} USDC`, "success");
         withdrawAmountEl.value = "";
         await refreshAll();
 
     } catch (error) {
         console.error("Withdraw error:", error);
-        showStatus(withdrawStatus, error.reason || error.message, "error");
+        showStatus(txStatus, error.reason || error.message, "error");
     } finally {
+        depositBtn.disabled = false;
         withdrawBtn.disabled = false;
     }
 }
@@ -397,12 +416,12 @@ withdrawBtn.addEventListener("click", handleWithdraw);
 (async function init() {
     initDisclaimer();
     initTabs();
+    initDepositModal();
     
     const loaded = await loadABIs();
     if (loaded) {
         abisLoaded = true;
         
-        // Always create a read-only provider for vault stats (works without MetaMask)
         try {
             const readOnlyProvider = new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC);
             vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, readOnlyProvider);
@@ -414,7 +433,6 @@ withdrawBtn.addEventListener("click", handleWithdraw);
             console.log("Read-only provider init failed:", e);
         }
         
-        // If MetaMask is available, check for existing connection
         if (typeof window.ethereum !== "undefined") {
             try {
                 const accounts = await window.ethereum.request({ method: "eth_accounts" });

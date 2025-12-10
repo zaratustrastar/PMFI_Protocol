@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PredictFi - pSNIPER Vault</title>
+    <title>PredictFi - pSNIPER</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
     <style>
@@ -40,15 +40,6 @@
             border-radius: 50%;
         }
 
-        .logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 24px;
-            font-weight: 500;
-            color: #f0f6fc;
-            margin-left: 12px;
-            letter-spacing: -0.5px;
-        }
-
         .nav-tabs {
             display: flex;
             gap: 8px;
@@ -77,11 +68,11 @@
         }
 
         .connect-btn {
-            background: #f0f6fc;
-            color: #0d1117;
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: #fff;
             border: none;
             padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 24px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -94,15 +85,23 @@
         }
 
         .connect-btn.connected {
-            background: rgba(255,255,255,0.08);
+            background: rgba(126,231,135,0.15);
             color: #7ee787;
             border: 1px solid rgba(126,231,135,0.3);
         }
 
         .main-content {
-            max-width: 520px;
-            margin: 60px auto;
-            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 40px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            letter-spacing: -0.5px;
         }
 
         .tab-content {
@@ -113,192 +112,146 @@
             display: block;
         }
 
-        .vault-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 16px;
-            padding: 32px;
-        }
-
-        .vault-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            font-weight: 500;
-            margin-bottom: 32px;
-            letter-spacing: -0.5px;
-        }
-
-        .stats-grid {
+        .vaults-grid {
             display: grid;
-            gap: 24px;
-            margin-bottom: 32px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
         }
 
-        .stat-item {
+        .vault-card {
+            background: linear-gradient(180deg, rgba(30,35,50,1) 0%, rgba(20,25,35,1) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.2s;
+        }
+
+        .vault-card:hover {
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        .vault-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .vault-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .vault-info h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: #f0f6fc;
+            margin-bottom: 2px;
+        }
+
+        .vault-info .vault-type {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        .vault-stats {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .vault-stat {
+            flex: 1;
+        }
+
+        .vault-stat-label {
+            font-size: 11px;
+            color: #8b949e;
+            margin-bottom: 4px;
+        }
+
+        .vault-stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f0f6fc;
+        }
+
+        .vault-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .vault-meta-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
-        .stat-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .stat-label {
-            color: #8b949e;
-            font-size: 14px;
-        }
-
-        .stat-value {
-            font-size: 16px;
-            font-weight: 500;
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-        }
-
-        .stat-value.highlight {
-            color: #7ee787;
-        }
-
-        .actions-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .action-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .action-title {
+        .vault-meta-label {
             font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             color: #8b949e;
-            margin-bottom: 12px;
         }
 
-        .input-wrapper {
-            position: relative;
-            margin-bottom: 12px;
+        .vault-meta-value {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .input-field {
+        .chain-icon, .asset-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .asset-icon {
+            background: #2775ca;
+        }
+
+        .deposit-btn {
             width: 100%;
-            padding: 14px 16px;
-            padding-right: 60px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            font-size: 16px;
-            color: #f0f6fc;
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: rgba(255,255,255,0.2);
-        }
-
-        .input-field::placeholder {
-            color: #484f58;
-        }
-
-        .input-suffix {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #8b949e;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .action-btn {
-            width: 100%;
-            padding: 12px;
+            padding: 14px;
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .action-btn:disabled {
-            opacity: 0.4;
+        .deposit-btn:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .deposit-btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .btn-deposit {
-            background: #7ee787;
-            color: #0d1117;
-        }
-
-        .btn-deposit:hover:not(:disabled) {
-            background: #6bd976;
-        }
-
-        .btn-withdraw {
-            background: transparent;
-            color: #f0f6fc;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .btn-withdraw:hover:not(:disabled) {
-            background: rgba(255,255,255,0.04);
-            border-color: rgba(255,255,255,0.3);
-        }
-
-        .status-msg {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            display: none;
-        }
-
-        .status-msg.show {
-            display: block;
-        }
-
-        .status-msg.info {
-            background: rgba(56, 139, 253, 0.1);
-            border: 1px solid rgba(56, 139, 253, 0.2);
-            color: #58a6ff;
-        }
-
-        .status-msg.success {
-            background: rgba(126, 231, 135, 0.1);
-            border: 1px solid rgba(126, 231, 135, 0.2);
-            color: #7ee787;
-        }
-
-        .status-msg.error {
-            background: rgba(248, 81, 73, 0.1);
-            border: 1px solid rgba(248, 81, 73, 0.2);
-            color: #f85149;
-        }
-
-        .stats-page-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            font-weight: 500;
-            margin-bottom: 32px;
-            letter-spacing: -0.5px;
-        }
-
         .stats-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.06);
+            background: linear-gradient(180deg, rgba(30,35,50,1) 0%, rgba(20,25,35,1) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 16px;
             padding: 32px;
+            max-width: 400px;
         }
 
         .big-stat {
@@ -332,7 +285,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -386,16 +339,16 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
-            accent-color: #7ee787;
+            accent-color: #a855f7;
         }
 
         .modal-btn {
             width: 100%;
             padding: 14px;
-            background: #7ee787;
-            color: #0d1117;
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -403,7 +356,7 @@
         }
 
         .modal-btn:hover:not(:disabled) {
-            background: #6bd976;
+            opacity: 0.9;
         }
 
         .modal-btn:disabled {
@@ -411,11 +364,148 @@
             cursor: not-allowed;
         }
 
-        .wallet-address {
+        .deposit-modal .modal {
+            max-width: 380px;
+        }
+
+        .deposit-modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .deposit-modal-title img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-label {
             font-size: 12px;
             color: #8b949e;
-            margin-top: 8px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            padding-right: 60px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 16px;
+            color: #f0f6fc;
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: rgba(168,85,247,0.5);
+        }
+
+        .input-field::placeholder {
+            color: #484f58;
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8b949e;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-msg {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+            text-align: center;
+        }
+
+        .status-msg.show {
+            display: block;
+        }
+
+        .status-msg.info {
+            background: rgba(56, 139, 253, 0.1);
+            border: 1px solid rgba(56, 139, 253, 0.2);
+            color: #58a6ff;
+        }
+
+        .status-msg.success {
+            background: rgba(126, 231, 135, 0.1);
+            border: 1px solid rgba(126, 231, 135, 0.2);
+            color: #7ee787;
+        }
+
+        .status-msg.error {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid rgba(248, 81, 73, 0.2);
+            color: #f85149;
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-actions .modal-btn {
+            padding: 12px;
+        }
+
+        .modal-actions .modal-btn.secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #8b949e;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .user-position {
+            background: rgba(126,231,135,0.1);
+            border: 1px solid rgba(126,231,135,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .user-position-label {
+            font-size: 11px;
+            color: #7ee787;
+            margin-bottom: 4px;
+        }
+
+        .user-position-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #7ee787;
         }
     </style>
 </head>
@@ -423,7 +513,6 @@
     <header class="header">
         <a href="https://pmfi.cc" target="_blank" class="logo-link">
             <img src="logo.png" alt="PredictFi" class="logo-img">
-            <span class="logo-text">PredictFi</span>
         </a>
         
         <nav class="nav-tabs">
@@ -431,57 +520,56 @@
             <button class="nav-tab" data-tab="stats">Stats</button>
         </nav>
         
-        <div>
-            <button id="connectBtn" class="connect-btn">Connect Wallet</button>
-            <p id="walletAddress" class="wallet-address" style="display:none;"></p>
-        </div>
+        <button id="connectBtn" class="connect-btn">Connect Wallet</button>
     </header>
 
     <main class="main-content">
         <div id="vaultsTab" class="tab-content active">
-            <div class="vault-card">
-                <h1 class="vault-title">pSNIPER Vault</h1>
-                
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-label">pSNIPER Price</span>
-                        <span class="stat-value" id="sharePriceValue">$1.0000</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Position Value</span>
-                        <span class="stat-value highlight" id="positionValue">$0.00</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">pSNIPER Shares</span>
-                        <span class="stat-value" id="sharesBalance">0.00</span>
-                    </div>
-                </div>
-
-                <div class="actions-grid">
-                    <div class="action-card">
-                        <div class="action-title">Deposit</div>
-                        <div class="input-wrapper">
-                            <input type="number" id="depositAmount" class="input-field" placeholder="0.00" step="0.01" min="0">
-                            <span class="input-suffix">USDC</span>
+            <h1 class="page-title">Vaults</h1>
+            
+            <div class="vaults-grid">
+                <div class="vault-card">
+                    <div class="vault-header">
+                        <img src="logo.png" alt="pSNIPER" class="vault-icon">
+                        <div class="vault-info">
+                            <h3>pSNIPER</h3>
+                            <span class="vault-type">Prediction market sniper</span>
                         </div>
-                        <button id="depositBtn" class="action-btn btn-deposit" disabled>Deposit</button>
-                        <div id="depositStatus" class="status-msg"></div>
                     </div>
                     
-                    <div class="action-card">
-                        <div class="action-title">Withdraw</div>
-                        <div class="input-wrapper">
-                            <input type="number" id="withdrawAmount" class="input-field" placeholder="0.00" step="0.01" min="0">
-                            <span class="input-suffix">USDC</span>
+                    <div class="vault-stats">
+                        <div class="vault-stat">
+                            <div class="vault-stat-label">Target APY *</div>
+                            <div class="vault-stat-value">50%</div>
                         </div>
-                        <button id="withdrawBtn" class="action-btn btn-withdraw" disabled>Withdraw</button>
-                        <div id="withdrawStatus" class="status-msg"></div>
+                        <div class="vault-stat">
+                            <div class="vault-stat-label">TVL</div>
+                            <div class="vault-stat-value" id="vaultTvl">$0.00</div>
+                        </div>
                     </div>
+                    
+                    <div class="vault-meta">
+                        <div class="vault-meta-row">
+                            <span class="vault-meta-label">Assets:</span>
+                            <div class="vault-meta-value">
+                                <span class="asset-icon">$</span>
+                            </div>
+                        </div>
+                        <div class="vault-meta-row">
+                            <span class="vault-meta-label">Chain:</span>
+                            <div class="vault-meta-value">
+                                <span class="chain-icon">B</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="openDepositBtn" class="deposit-btn" disabled>Deposit</button>
                 </div>
             </div>
         </div>
 
         <div id="statsTab" class="tab-content">
+            <h1 class="page-title">Stats</h1>
             <div class="stats-card">
                 <div class="big-stat">
                     <div class="big-stat-label">Total Value Locked</div>
@@ -498,7 +586,7 @@
     <div id="disclaimerModal" class="modal-overlay">
         <div class="modal">
             <h2 class="modal-title">Risk Disclaimer</h2>
-            <p class="modal-text">PredictFi Sniper Vault is experimental.</p>
+            <p class="modal-text">PredictFi pSNIPER vault is experimental. You may lose some or all of your funds.</p>
             <div class="checkbox-group">
                 <label class="checkbox-label">
                     <input type="checkbox" id="understandCheck">
@@ -510,6 +598,44 @@
                 </label>
             </div>
             <button id="acceptBtn" class="modal-btn" disabled>Continue</button>
+        </div>
+    </div>
+
+    <div id="depositModal" class="modal-overlay hidden deposit-modal">
+        <div class="modal" style="position: relative;">
+            <button id="closeDepositModal" class="close-modal">&times;</button>
+            <div class="deposit-modal-title">
+                <img src="logo.png" alt="pSNIPER">
+                <span>pSNIPER</span>
+            </div>
+            
+            <div id="userPosition" class="user-position" style="display: none;">
+                <div class="user-position-label">Your Position</div>
+                <div class="user-position-value" id="positionValue">$0.00</div>
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">Deposit Amount</label>
+                <div class="input-wrapper">
+                    <input type="number" id="depositAmount" class="input-field" placeholder="0.00" step="0.01" min="0">
+                    <span class="input-suffix">USDC</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">Withdraw Amount</label>
+                <div class="input-wrapper">
+                    <input type="number" id="withdrawAmount" class="input-field" placeholder="0.00" step="0.01" min="0">
+                    <span class="input-suffix">USDC</span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button id="depositBtn" class="modal-btn">Deposit</button>
+                <button id="withdrawBtn" class="modal-btn secondary">Withdraw</button>
+            </div>
+            
+            <div id="txStatus" class="status-msg"></div>
         </div>
     </div>
 
