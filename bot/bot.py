@@ -146,16 +146,30 @@ class PolymarketClient:
                 if size <= 0:
                     continue
                 
+                # Helper to safely convert to float (handles null/None from API)
+                def safe_float(val, default=0.0):
+                    if val is None:
+                        return default
+                    try:
+                        return float(val)
+                    except (TypeError, ValueError):
+                        return default
+                
                 positions.append({
-                    "token_id": p.get("asset", ""),  # Token ID for orderbook lookup
-                    "market_id": p.get("market", ""),
-                    "outcome": p.get("outcome", ""),  # "Yes" or "No"
-                    "side": p.get("outcome", "").lower(),  # "yes" or "no"
+                    "token_id": p.get("asset") or "",  # Token ID for orderbook lookup
+                    "condition_id": p.get("conditionId") or "",
+                    "title": p.get("title") or "",  # Market title
+                    "outcome": p.get("outcome") or "",  # "Yes" or "No"
+                    "side": (p.get("outcome") or "").lower(),  # "yes" or "no"
                     "size": size,
-                    "avg_price": float(p.get("avgPrice", 0)),
-                    "current_value": float(p.get("currentValue", 0)),
-                    "pnl": float(p.get("pnl", 0)),
-                    "realized_pnl": float(p.get("realizedPnl", 0)),
+                    "avg_price": safe_float(p.get("avgPrice")),
+                    "current_value": safe_float(p.get("currentValue")),
+                    "initial_value": safe_float(p.get("initialValue")),
+                    "pnl": safe_float(p.get("cashPnl")),  # Use cashPnl for actual P&L
+                    "pnl_percent": safe_float(p.get("percentPnl")),
+                    "realized_pnl": safe_float(p.get("realizedPnl")),
+                    "cur_price": safe_float(p.get("curPrice")),
+                    "redeemable": bool(p.get("redeemable", False)),
                 })
             
             print(f"✅ Found {len(positions)} active positions")
@@ -190,19 +204,28 @@ class PolymarketClient:
             data = response.json()
             
             # Parse orderbook - CLOB returns bids and asks arrays
+            # Helper for safe float conversion
+            def safe_float(val, default=0.0):
+                if val is None:
+                    return default
+                try:
+                    return float(val)
+                except (TypeError, ValueError):
+                    return default
+            
             bids = []
-            for b in data.get("bids", []):
-                bids.append({
-                    "price": float(b.get("price", 0)),
-                    "size": float(b.get("size", 0)),
-                })
+            for b in data.get("bids") or []:
+                price = safe_float(b.get("price") if isinstance(b, dict) else None)
+                size = safe_float(b.get("size") if isinstance(b, dict) else None)
+                if price > 0:
+                    bids.append({"price": price, "size": size})
             
             asks = []
-            for a in data.get("asks", []):
-                asks.append({
-                    "price": float(a.get("price", 0)),
-                    "size": float(a.get("size", 0)),
-                })
+            for a in data.get("asks") or []:
+                price = safe_float(a.get("price") if isinstance(a, dict) else None)
+                size = safe_float(a.get("size") if isinstance(a, dict) else None)
+                if price > 0:
+                    asks.append({"price": price, "size": size})
             
             return {"bids": bids, "asks": asks}
             
@@ -320,9 +343,12 @@ class NavEngine:
             total_position_value += position_value
             
             # Log each position
+            title = position.get("title", "Unknown market")[:50]
             pnl = position.get("pnl", 0)
             pnl_sign = "+" if pnl >= 0 else ""
-            print(f"   • {outcome}: {size:.2f} shares @ ${position_value:.2f} ({pnl_sign}{pnl:.2f} PnL)")
+            redeemable = " [REDEEMABLE]" if position.get("redeemable", False) else ""
+            print(f"   • {outcome}: {size:.2f} @ ${position_value:.2f} ({pnl_sign}${pnl:.2f}){redeemable}")
+            print(f"     └─ {title}")
         
         # Total NAV = strategy USDC balance + Polymarket position values
         # Convert position value to 6 decimals (USDC format)
