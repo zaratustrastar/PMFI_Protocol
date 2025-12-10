@@ -1,6 +1,5 @@
 /**
  * PredictFi pSNIPER - Frontend
- * Professional DeFi interface
  */
 
 // =============================================================================
@@ -51,6 +50,7 @@ let vaultContract = null;
 let usdcContract = null;
 let abisLoaded = false;
 let refreshTimer = null;
+let isConnected = false;
 
 // =============================================================================
 // DOM ELEMENTS
@@ -60,11 +60,12 @@ const connectBtn = document.getElementById("connectBtn");
 const vaultTvlEl = document.getElementById("vaultTvl");
 const tvlValueEl = document.getElementById("tvlValue");
 const statsSharePriceEl = document.getElementById("statsSharePrice");
+const userStatsEl = document.getElementById("userStats");
+const positionValueEl = document.getElementById("positionValue");
+const sharesBalanceEl = document.getElementById("sharesBalance");
 const openDepositBtn = document.getElementById("openDepositBtn");
 const depositModal = document.getElementById("depositModal");
 const closeDepositModal = document.getElementById("closeDepositModal");
-const userPositionEl = document.getElementById("userPosition");
-const positionValueEl = document.getElementById("positionValue");
 const depositAmountEl = document.getElementById("depositAmount");
 const withdrawAmountEl = document.getElementById("withdrawAmount");
 const depositBtn = document.getElementById("depositBtn");
@@ -97,28 +98,6 @@ function initDisclaimer() {
 
 function updateAcceptBtn() {
     acceptBtn.disabled = !understandCheck.checked;
-}
-
-// =============================================================================
-// TAB NAVIGATION
-// =============================================================================
-
-function initTabs() {
-    const tabs = document.querySelectorAll(".nav-tab");
-    tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-            const tabName = tab.dataset.tab;
-            
-            tabs.forEach(t => t.classList.remove("active"));
-            tab.classList.add("active");
-            
-            document.querySelectorAll(".tab-content").forEach(content => {
-                content.classList.remove("active");
-            });
-            
-            document.getElementById(`${tabName}Tab`).classList.add("active");
-        });
-    });
 }
 
 // =============================================================================
@@ -222,21 +201,24 @@ async function refreshVaultStats() {
 }
 
 async function refreshUserStats() {
-    if (!userAddress || !vaultContract) {
-        userPositionEl.style.display = "none";
+    if (!userAddress || !vaultContract || !isConnected) {
+        userStatsEl.classList.add("hidden");
         return;
     }
 
     try {
         const shares = await vaultContract.balanceOf(userAddress);
+        const sharesNum = Number(shares) / 10 ** USDC_DECIMALS;
+        
+        sharesBalanceEl.textContent = sharesNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         
         if (shares > 0n) {
             const redeemable = await vaultContract.convertToAssets(shares);
             positionValueEl.textContent = `$${formatUSDC(redeemable)}`;
-            userPositionEl.style.display = "block";
+            userStatsEl.classList.remove("hidden");
         } else {
             positionValueEl.textContent = "$0.00";
-            userPositionEl.style.display = "none";
+            userStatsEl.classList.add("hidden");
         }
 
     } catch (error) {
@@ -266,6 +248,12 @@ async function connectWallet() {
         return;
     }
 
+    // If already connected, disconnect
+    if (isConnected) {
+        disconnectWallet();
+        return;
+    }
+
     try {
         connectBtn.textContent = "Connecting...";
         connectBtn.disabled = true;
@@ -290,7 +278,8 @@ async function connectWallet() {
         vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
         usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
 
-        connectBtn.textContent = "Connected";
+        isConnected = true;
+        connectBtn.textContent = "Disconnect";
         connectBtn.classList.add("connected");
         connectBtn.disabled = false;
 
@@ -310,9 +299,24 @@ async function connectWallet() {
     }
 }
 
+function disconnectWallet() {
+    isConnected = false;
+    userAddress = null;
+    signer = null;
+    
+    connectBtn.textContent = "Connect Wallet";
+    connectBtn.classList.remove("connected");
+    
+    openDepositBtn.disabled = true;
+    userStatsEl.classList.add("hidden");
+    
+    // Reinitialize with read-only provider
+    initReadOnlyProvider();
+}
+
 function handleAccountsChanged(accounts) {
     if (accounts.length === 0) {
-        location.reload();
+        disconnectWallet();
     } else {
         userAddress = accounts[0];
         refreshAll();
@@ -413,25 +417,28 @@ withdrawBtn.addEventListener("click", handleWithdraw);
 // INITIALIZATION
 // =============================================================================
 
+async function initReadOnlyProvider() {
+    try {
+        const readOnlyProvider = new ethers.JsonRpcProvider(BASE_MAINNET_RPC);
+        vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, readOnlyProvider);
+        usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, readOnlyProvider);
+        
+        await refreshVaultStats();
+        startAutoRefresh();
+    } catch (e) {
+        console.log("Read-only provider init failed:", e);
+    }
+}
+
 (async function init() {
     initDisclaimer();
-    initTabs();
     initDepositModal();
     
     const loaded = await loadABIs();
     if (loaded) {
         abisLoaded = true;
         
-        try {
-            const readOnlyProvider = new ethers.JsonRpcProvider(BASE_MAINNET_RPC);
-            vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, readOnlyProvider);
-            usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, readOnlyProvider);
-            
-            await refreshVaultStats();
-            startAutoRefresh();
-        } catch (e) {
-            console.log("Read-only provider init failed:", e);
-        }
+        await initReadOnlyProvider();
         
         if (typeof window.ethereum !== "undefined") {
             try {
