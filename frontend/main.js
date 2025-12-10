@@ -444,7 +444,17 @@ async function handleDeposit() {
 
     } catch (error) {
         console.error("Deposit error:", error);
-        showStatus(txStatus, error.reason || error.message, "error");
+        let errorMsg = error.reason || error.message;
+        if (error.code === "CALL_EXCEPTION" || errorMsg.includes("could not decode")) {
+            errorMsg = "Contract call failed. Please ensure you're on Base Mainnet.";
+        } else if (error.code === "ACTION_REJECTED") {
+            errorMsg = "Transaction rejected by user.";
+        } else if (errorMsg.includes("exceeds wallet cap")) {
+            errorMsg = "Deposit exceeds your 100 USDC wallet cap.";
+        } else if (errorMsg.includes("insufficient")) {
+            errorMsg = "Insufficient USDC balance.";
+        }
+        showStatus(txStatus, errorMsg, "error");
     } finally {
         depositBtn.disabled = false;
         withdrawBtn.disabled = false;

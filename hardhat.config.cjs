@@ -50,6 +50,14 @@ module.exports = {
     apiKey: process.env.BASESCAN_API_KEY || "",
     customChains: [
       {
+        network: "baseMainnet",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org"
+        }
+      },
+      {
         network: "baseSepolia",
         chainId: 84532,
         urls: {
