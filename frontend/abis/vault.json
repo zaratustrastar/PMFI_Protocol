@@ -1,6 +1,13 @@
 [
   {
     "type": "function",
+    "name": "maxWithdraw",
+    "inputs": [{ "name": "owner", "type": "address" }],
+    "outputs": [{ "type": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "deposit",
     "inputs": [
       { "name": "assets", "type": "uint256" },
