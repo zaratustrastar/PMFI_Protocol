@@ -75,7 +75,6 @@ const disclaimerModal = document.getElementById("disclaimerModal");
 const understandCheck = document.getElementById("understandCheck");
 const dontShowCheck = document.getElementById("dontShowCheck");
 const acceptBtn = document.getElementById("acceptBtn");
-const maxWithdrawLabel = document.getElementById("maxWithdrawLabel");
 
 // =============================================================================
 // DISCLAIMER MODAL
@@ -204,26 +203,14 @@ async function refreshVaultStats() {
 async function refreshUserStats() {
     if (!userAddress || !vaultContract || !isConnected) {
         userStatsEl.classList.add("hidden");
-        maxWithdrawLabel.textContent = "";
         return;
     }
 
     try {
-        const [shares, maxWithdrawAmount] = await Promise.all([
-            vaultContract.balanceOf(userAddress),
-            vaultContract.maxWithdraw(userAddress).catch(() => 0n)
-        ]);
-        
+        const shares = await vaultContract.balanceOf(userAddress);
         const sharesNum = Number(shares) / 10 ** USDC_DECIMALS;
-        sharesBalanceEl.textContent = sharesNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         
-        // Display max withdrawable amount
-        const maxWithdrawNum = Number(maxWithdrawAmount) / 10 ** USDC_DECIMALS;
-        if (maxWithdrawNum > 0) {
-            maxWithdrawLabel.textContent = `(max: $${maxWithdrawNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`;
-        } else {
-            maxWithdrawLabel.textContent = "";
-        }
+        sharesBalanceEl.textContent = sharesNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         
         if (shares > 0n) {
             const redeemable = await vaultContract.convertToAssets(shares);
