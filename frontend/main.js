@@ -11,6 +11,7 @@ const VAULT_ADDRESS = "0x26BCAe8DEA9A2b04a522cab2679CF9708d3F84E3";
 const USDC_ADDRESS = "0x743dBb99B51A542aA7b6E859713b4b615445C019";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
+const BASE_SEPOLIA_RPC = "https://sepolia.base.org";
 
 // =============================================================================
 // ABIs
@@ -401,21 +402,27 @@ withdrawBtn.addEventListener("click", handleWithdraw);
     if (loaded) {
         abisLoaded = true;
         
+        // Always create a read-only provider for vault stats (works without MetaMask)
+        try {
+            const readOnlyProvider = new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC);
+            vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, readOnlyProvider);
+            usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, readOnlyProvider);
+            
+            await refreshVaultStats();
+            startAutoRefresh();
+        } catch (e) {
+            console.log("Read-only provider init failed:", e);
+        }
+        
+        // If MetaMask is available, check for existing connection
         if (typeof window.ethereum !== "undefined") {
             try {
-                provider = new ethers.BrowserProvider(window.ethereum);
-                vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, provider);
-                usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
-                
-                await refreshVaultStats();
-                startAutoRefresh();
-                
                 const accounts = await window.ethereum.request({ method: "eth_accounts" });
                 if (accounts.length > 0) {
                     connectWallet();
                 }
             } catch (e) {
-                console.log("Auto-init failed:", e);
+                console.log("Auto-connect check failed:", e);
             }
         }
     }
