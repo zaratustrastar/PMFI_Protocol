@@ -11,6 +11,7 @@ const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
 const BASE_MAINNET_RPC = "https://mainnet.base.org";
+const BASE_MAINNET_CHAIN_ID = 8453;
 
 // =============================================================================
 // ABIs
@@ -75,6 +76,60 @@ const disclaimerModal = document.getElementById("disclaimerModal");
 const understandCheck = document.getElementById("understandCheck");
 const dontShowCheck = document.getElementById("dontShowCheck");
 const acceptBtn = document.getElementById("acceptBtn");
+const networkWarning = document.getElementById("networkWarning");
+const switchNetworkBtn = document.getElementById("switchNetworkBtn");
+
+// =============================================================================
+// NETWORK DETECTION
+// =============================================================================
+
+async function checkNetwork() {
+    if (typeof window.ethereum === "undefined") return true;
+    
+    try {
+        const chainId = await window.ethereum.request({ method: "eth_chainId" });
+        const currentChainId = parseInt(chainId, 16);
+        
+        if (currentChainId !== BASE_MAINNET_CHAIN_ID) {
+            networkWarning.classList.remove("hidden");
+            return false;
+        } else {
+            networkWarning.classList.add("hidden");
+            return true;
+        }
+    } catch (error) {
+        console.error("Error checking network:", error);
+        return true;
+    }
+}
+
+async function switchToBase() {
+    try {
+        await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: "0x2105" }]
+        });
+        await checkNetwork();
+    } catch (switchError) {
+        if (switchError.code === 4902) {
+            try {
+                await window.ethereum.request({
+                    method: "wallet_addEthereumChain",
+                    params: [{
+                        chainId: "0x2105",
+                        chainName: "Base",
+                        nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+                        rpcUrls: ["https://mainnet.base.org"],
+                        blockExplorerUrls: ["https://basescan.org"]
+                    }]
+                });
+                await checkNetwork();
+            } catch (addError) {
+                console.error("Failed to add Base network:", addError);
+            }
+        }
+    }
+}
 
 // =============================================================================
 // DISCLAIMER MODAL
@@ -271,6 +326,13 @@ async function connectWallet() {
 
         await window.ethereum.request({ method: "eth_requestAccounts" });
 
+        const isCorrectNetwork = await checkNetwork();
+        if (!isCorrectNetwork) {
+            connectBtn.textContent = "Connect Wallet";
+            connectBtn.disabled = false;
+            return;
+        }
+
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
         userAddress = await signer.getAddress();
@@ -289,7 +351,7 @@ async function connectWallet() {
         startAutoRefresh();
 
         window.ethereum.on("accountsChanged", handleAccountsChanged);
-        window.ethereum.on("chainChanged", () => location.reload());
+        window.ethereum.on("chainChanged", handleChainChanged);
 
     } catch (error) {
         console.error("Connection error:", error);
@@ -320,6 +382,15 @@ function handleAccountsChanged(accounts) {
     } else {
         userAddress = accounts[0];
         refreshAll();
+    }
+}
+
+async function handleChainChanged() {
+    const isCorrectNetwork = await checkNetwork();
+    if (!isCorrectNetwork) {
+        disconnectWallet();
+    } else {
+        location.reload();
     }
 }
 
@@ -467,6 +538,10 @@ async function initReadOnlyProvider() {
     initDisclaimer();
     initDepositModal();
     
+    if (switchNetworkBtn) {
+        switchNetworkBtn.addEventListener("click", switchToBase);
+    }
+    
     const loaded = await loadABIs();
     if (loaded) {
         abisLoaded = true;
@@ -474,6 +549,10 @@ async function initReadOnlyProvider() {
         await initReadOnlyProvider();
         
         if (typeof window.ethereum !== "undefined") {
+            checkNetwork();
+            
+            window.ethereum.on("chainChanged", checkNetwork);
+            
             try {
                 const accounts = await window.ethereum.request({ method: "eth_accounts" });
                 if (accounts.length > 0) {

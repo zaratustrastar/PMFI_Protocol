@@ -442,6 +442,41 @@
         .modal-actions .modal-btn.secondary:hover {
             background: rgba(255,255,255,0.05);
         }
+
+        .network-warning {
+            background: rgba(248, 81, 73, 0.15);
+            border-bottom: 1px solid rgba(248, 81, 73, 0.3);
+            padding: 12px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .network-warning.hidden {
+            display: none;
+        }
+
+        .network-warning-text {
+            color: #f85149;
+            font-size: 14px;
+        }
+
+        .switch-network-btn {
+            background: #f85149;
+            color: #fff;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .switch-network-btn:hover {
+            opacity: 0.85;
+        }
     </style>
 </head>
 <body>
@@ -452,6 +487,11 @@
         
         <button id="connectBtn" class="connect-btn">Connect Wallet</button>
     </header>
+
+    <div id="networkWarning" class="network-warning hidden">
+        <span class="network-warning-text">Please switch to Base Mainnet to use this app</span>
+        <button id="switchNetworkBtn" class="switch-network-btn">Switch to Base</button>
+    </div>
 
     <main class="main-content">
         <div class="cards-grid">
