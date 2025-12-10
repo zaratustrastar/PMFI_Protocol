@@ -8,191 +8,378 @@
     <style>
         * {
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
         }
+        
         body {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 20px;
-            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
         }
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
+        
+        .container {
+            max-width: 480px;
+            width: 100%;
         }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .logo span {
+            color: #666;
+        }
+        
         .subtitle {
             color: #666;
-            margin-bottom: 30px;
-        }
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .card h2 {
-            margin-top: 0;
-            color: #333;
-            font-size: 18px;
-        }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        .info-label {
-            color: #666;
-        }
-        .info-value {
-            color: #333;
-            font-weight: 500;
-            font-family: monospace;
             font-size: 14px;
         }
-        .input-group {
+        
+        .card {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 24px;
             margin-bottom: 16px;
         }
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
+        
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-bottom: 16px;
         }
-        .input-group input {
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .stat-row:first-of-type {
+            padding-top: 0;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-size: 14px;
+        }
+        
+        .stat-value {
+            color: #fff;
+            font-size: 14px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+        }
+        
+        .stat-value.highlight {
+            color: #00ff88;
+        }
+        
+        .stat-value.secondary {
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .connect-btn {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        .input-group input:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-        button {
-            width: 100%;
-            padding: 14px;
+            padding: 16px;
+            background: #fff;
+            color: #000;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: opacity 0.2s;
         }
-        button:disabled {
+        
+        .connect-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .connect-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .btn-connect {
-            background: #4CAF50;
-            color: white;
+        
+        .connect-btn.connected {
+            background: #1a1a1a;
+            color: #00ff88;
+            border: 1px solid #222;
         }
-        .btn-connect:hover:not(:disabled) {
-            background: #45a049;
+        
+        .input-group {
+            margin-bottom: 16px;
         }
-        .btn-deposit {
-            background: #2196F3;
-            color: white;
+        
+        .input-label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .btn-deposit:hover:not(:disabled) {
-            background: #1976D2;
+        
+        .input-wrapper {
+            position: relative;
         }
-        .btn-withdraw {
-            background: #FF9800;
-            color: white;
+        
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            padding-right: 70px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 8px;
+            font-size: 18px;
+            color: #fff;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
         }
-        .btn-withdraw:hover:not(:disabled) {
-            background: #F57C00;
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #444;
         }
-        .status {
-            margin-top: 16px;
-            padding: 12px;
+        
+        .input-field::placeholder {
+            color: #444;
+        }
+        
+        .input-suffix {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
             border-radius: 8px;
             font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .status.success {
-            background: #E8F5E9;
-            color: #2E7D32;
+        
+        .action-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
-        .status.error {
-            background: #FFEBEE;
-            color: #C62828;
+        
+        .btn-deposit {
+            background: #00ff88;
+            color: #000;
         }
-        .status.info {
-            background: #E3F2FD;
-            color: #1565C0;
+        
+        .btn-deposit:hover:not(:disabled) {
+            background: #00cc6a;
         }
-        .hidden {
+        
+        .btn-withdraw {
+            background: transparent;
+            color: #fff;
+            border: 1px solid #333;
+        }
+        
+        .btn-withdraw:hover:not(:disabled) {
+            border-color: #555;
+            background: #111;
+        }
+        
+        .status-msg {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
             display: none;
+        }
+        
+        .status-msg.show {
+            display: block;
+        }
+        
+        .status-msg.info {
+            background: rgba(0, 150, 255, 0.1);
+            border: 1px solid rgba(0, 150, 255, 0.2);
+            color: #0096ff;
+        }
+        
+        .status-msg.success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+        
+        .status-msg.error {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+        
+        .disclaimer {
+            margin-top: 32px;
+            padding: 16px;
+            background: rgba(255, 200, 0, 0.05);
+            border: 1px solid rgba(255, 200, 0, 0.1);
+            border-radius: 8px;
+        }
+        
+        .disclaimer-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #ffc800;
+            margin-bottom: 8px;
+        }
+        
+        .disclaimer-text {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .divider {
+            height: 1px;
+            background: #222;
+            margin: 16px 0;
+        }
+        
+        .wallet-address {
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+        }
+        
+        .refresh-indicator {
+            font-size: 11px;
+            color: #444;
+            text-align: center;
+            margin-top: 24px;
         }
     </style>
 </head>
 <body>
-    <h1>PredictFi Sniper Vault</h1>
-    <p class="subtitle">Deposit USDC to earn from prediction market sniping</p>
+    <div class="container">
+        <div class="header">
+            <div class="logo">predictfi<span>.sniper</span></div>
+            <p class="subtitle">polymarket sniper vault</p>
+        </div>
 
-    <!-- Connect Wallet -->
-    <div class="card">
-        <h2>Wallet</h2>
-        <button id="connectBtn" class="btn-connect">Connect MetaMask</button>
-        <div id="walletInfo" class="hidden">
-            <div class="info-row">
-                <span class="info-label">Your Address</span>
-                <span class="info-value" id="userAddress">-</span>
+        <div class="card">
+            <button id="connectBtn" class="connect-btn">Connect Wallet</button>
+            <p id="walletAddress" class="wallet-address hidden"></p>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Vault Stats</div>
+            <div class="stat-row">
+                <span class="stat-label">TVL</span>
+                <span class="stat-value" id="tvlValue">-</span>
             </div>
-            <div class="info-row">
-                <span class="info-label">USDC Balance</span>
-                <span class="info-value" id="usdcBalance">-</span>
+            <div class="stat-row">
+                <span class="stat-label">Share Price</span>
+                <span class="stat-value" id="sharePriceValue">-</span>
             </div>
-            <div class="info-row">
-                <span class="info-label">Vault Shares</span>
-                <span class="info-value" id="vaultShares">-</span>
+            <div class="stat-row">
+                <span class="stat-label">Global Cap</span>
+                <span class="stat-value secondary" id="globalCapValue">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Per Wallet Cap</span>
+                <span class="stat-value secondary" id="walletCapValue">-</span>
             </div>
         </div>
-    </div>
 
-    <!-- Vault Info -->
-    <div class="card">
-        <h2>Vault Info</h2>
-        <div class="info-row">
-            <span class="info-label">Vault Address</span>
-            <span class="info-value" id="vaultAddress">-</span>
+        <div class="card" id="userStatsCard">
+            <div class="card-title">Your Position</div>
+            <div class="stat-row">
+                <span class="stat-label">USDC Balance</span>
+                <span class="stat-value" id="usdcBalance">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Vault Shares</span>
+                <span class="stat-value" id="vaultShares">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Redeemable Value</span>
+                <span class="stat-value highlight" id="redeemableValue">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Remaining Deposit Capacity</span>
+                <span class="stat-value secondary" id="remainingCapacity">-</span>
+            </div>
         </div>
-        <div class="info-row">
-            <span class="info-label">Total Assets</span>
-            <span class="info-value" id="totalAssets">-</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Your Redeemable</span>
-            <span class="info-value" id="redeemable">-</span>
-        </div>
-    </div>
 
-    <!-- Deposit -->
-    <div class="card" id="depositCard">
-        <h2>Deposit USDC</h2>
-        <div class="input-group">
-            <label for="depositAmount">Amount (USDC)</label>
-            <input type="number" id="depositAmount" placeholder="0.00" step="0.01" min="0">
+        <div class="card">
+            <div class="card-title">Deposit</div>
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <input type="number" id="depositAmount" class="input-field" placeholder="0.00" step="0.01" min="0">
+                    <span class="input-suffix">USDC</span>
+                </div>
+            </div>
+            <button id="depositBtn" class="action-btn btn-deposit" disabled>Deposit</button>
+            <div id="depositStatus" class="status-msg"></div>
         </div>
-        <button id="depositBtn" class="btn-deposit" disabled>Deposit</button>
-        <div id="depositStatus" class="status hidden"></div>
-    </div>
 
-    <!-- Withdraw -->
-    <div class="card" id="withdrawCard">
-        <h2>Withdraw USDC</h2>
-        <div class="input-group">
-            <label for="withdrawAmount">Amount (USDC)</label>
-            <input type="number" id="withdrawAmount" placeholder="0.00" step="0.01" min="0">
+        <div class="card">
+            <div class="card-title">Withdraw</div>
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <input type="number" id="withdrawAmount" class="input-field" placeholder="0.00" step="0.01" min="0">
+                    <span class="input-suffix">USDC</span>
+                </div>
+            </div>
+            <button id="withdrawBtn" class="action-btn btn-withdraw" disabled>Withdraw</button>
+            <div id="withdrawStatus" class="status-msg"></div>
         </div>
-        <button id="withdrawBtn" class="btn-withdraw" disabled>Withdraw</button>
-        <div id="withdrawStatus" class="status hidden"></div>
+
+        <div class="disclaimer">
+            <div class="disclaimer-title">Risk Disclaimer</div>
+            <p class="disclaimer-text">
+                PredictFi Sniper Vault is experimental. Funds are at risk. NAV is based on estimated liquid prices from Polymarket orderbooks and can move quickly. Do not deposit more than you can afford to lose.
+            </p>
+        </div>
+
+        <p class="refresh-indicator">Auto-refreshes every 30 seconds</p>
     </div>
 
     <script src="main.js"></script>

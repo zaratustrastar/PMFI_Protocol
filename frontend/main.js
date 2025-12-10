@@ -1,23 +1,21 @@
 /**
- * PredictFi Sniper Vault - Frontend
+ * PredictFi Sniper Vault V2 - Frontend
  * 
- * Simple interface to deposit/withdraw USDC from the vault.
- * Uses ethers.js v6 and MetaMask.
+ * Interface to interact with the vault on Base Sepolia.
+ * Shows real-time vault stats and user position.
  */
 
 // =============================================================================
-// CONFIGURATION - Update these after deploying contracts
+// CONFIGURATION - Base Sepolia V2 Deployment
 // =============================================================================
 
-// Base Sepolia testnet addresses (deployed 2025-01-06)
-const VAULT_ADDRESS = "0xDFde5410FF65D0fb31D82a901400eeb48c40b272";
-const USDC_ADDRESS = "0x7FF3F11bbE48a6573F7CeEA46993d8166bf057C5";
-
-// USDC has 6 decimals
+const VAULT_ADDRESS = "0x26BCAe8DEA9A2b04a522cab2679CF9708d3F84E3";
+const USDC_ADDRESS = "0x743dBb99B51A542aA7b6E859713b4b615445C019";
 const USDC_DECIMALS = 6;
+const REFRESH_INTERVAL = 30000; // 30 seconds
 
 // =============================================================================
-// ABIs - Loaded from JSON files
+// ABIs
 // =============================================================================
 
 let VAULT_ABI = null;
@@ -41,7 +39,6 @@ async function loadABIs() {
         return true;
     } catch (error) {
         console.error("Error loading ABIs:", error);
-        alert("Failed to load contract ABIs. Make sure you're running from a web server.");
         return false;
     }
 }
@@ -56,19 +53,22 @@ let userAddress = null;
 let vaultContract = null;
 let usdcContract = null;
 let abisLoaded = false;
+let refreshTimer = null;
 
 // =============================================================================
 // DOM ELEMENTS
 // =============================================================================
 
 const connectBtn = document.getElementById("connectBtn");
-const walletInfo = document.getElementById("walletInfo");
-const userAddressEl = document.getElementById("userAddress");
+const walletAddressEl = document.getElementById("walletAddress");
+const tvlValueEl = document.getElementById("tvlValue");
+const sharePriceValueEl = document.getElementById("sharePriceValue");
+const globalCapValueEl = document.getElementById("globalCapValue");
+const walletCapValueEl = document.getElementById("walletCapValue");
 const usdcBalanceEl = document.getElementById("usdcBalance");
 const vaultSharesEl = document.getElementById("vaultShares");
-const vaultAddressEl = document.getElementById("vaultAddress");
-const totalAssetsEl = document.getElementById("totalAssets");
-const redeemableEl = document.getElementById("redeemable");
+const redeemableValueEl = document.getElementById("redeemableValue");
+const remainingCapacityEl = document.getElementById("remainingCapacity");
 const depositAmountEl = document.getElementById("depositAmount");
 const depositBtn = document.getElementById("depositBtn");
 const depositStatus = document.getElementById("depositStatus");
@@ -80,8 +80,12 @@ const withdrawStatus = document.getElementById("withdrawStatus");
 // UTILITY FUNCTIONS
 // =============================================================================
 
-function formatUSDC(amount) {
-    return (Number(amount) / 10 ** USDC_DECIMALS).toFixed(2);
+function formatUSDC(amount, decimals = 2) {
+    const value = Number(amount) / 10 ** USDC_DECIMALS;
+    return value.toLocaleString('en-US', { 
+        minimumFractionDigits: decimals, 
+        maximumFractionDigits: decimals 
+    });
 }
 
 function parseUSDC(amount) {
@@ -94,12 +98,146 @@ function shortenAddress(address) {
 
 function showStatus(element, message, type) {
     element.textContent = message;
-    element.className = `status ${type}`;
-    element.classList.remove("hidden");
+    element.className = `status-msg show ${type}`;
 }
 
 function hideStatus(element) {
-    element.classList.add("hidden");
+    element.className = "status-msg";
+}
+
+// =============================================================================
+// VAULT READ FUNCTIONS
+// =============================================================================
+
+async function getTotalAssets() {
+    if (!vaultContract) return 0n;
+    try {
+        return await vaultContract.totalAssets();
+    } catch (e) {
+        console.error("Error getting totalAssets:", e);
+        return 0n;
+    }
+}
+
+async function getTotalSupply() {
+    if (!vaultContract) return 0n;
+    try {
+        return await vaultContract.totalSupply();
+    } catch (e) {
+        console.error("Error getting totalSupply:", e);
+        return 0n;
+    }
+}
+
+async function getMaxTotalDeposits() {
+    if (!vaultContract) return 0n;
+    try {
+        return await vaultContract.maxTotalDeposits();
+    } catch (e) {
+        console.error("Error getting maxTotalDeposits:", e);
+        return 0n;
+    }
+}
+
+async function getWalletDepositCap() {
+    if (!vaultContract) return 0n;
+    try {
+        return await vaultContract.walletDepositCap();
+    } catch (e) {
+        console.error("Error getting walletDepositCap:", e);
+        return 0n;
+    }
+}
+
+async function getWalletDeposited(user) {
+    if (!vaultContract || !user) return 0n;
+    try {
+        return await vaultContract.walletDeposited(user);
+    } catch (e) {
+        console.error("Error getting walletDeposited:", e);
+        return 0n;
+    }
+}
+
+// =============================================================================
+// REFRESH DATA
+// =============================================================================
+
+async function refreshVaultStats() {
+    try {
+        const [totalAssets, totalSupply, maxDeposits, walletCap] = await Promise.all([
+            getTotalAssets(),
+            getTotalSupply(),
+            getMaxTotalDeposits(),
+            getWalletDepositCap()
+        ]);
+
+        // TVL
+        tvlValueEl.textContent = `$${formatUSDC(totalAssets)}`;
+
+        // Share Price (handle zero supply)
+        if (totalSupply > 0n) {
+            const sharePrice = (Number(totalAssets) / Number(totalSupply)).toFixed(4);
+            sharePriceValueEl.textContent = `$${sharePrice}`;
+        } else {
+            sharePriceValueEl.textContent = "$1.0000";
+        }
+
+        // Global Cap
+        globalCapValueEl.textContent = `$${formatUSDC(maxDeposits)}`;
+
+        // Per Wallet Cap
+        walletCapValueEl.textContent = `$${formatUSDC(walletCap)}`;
+
+    } catch (error) {
+        console.error("Error refreshing vault stats:", error);
+    }
+}
+
+async function refreshUserStats() {
+    if (!userAddress || !vaultContract || !usdcContract) return;
+
+    try {
+        const [usdcBalance, shares, walletCap, walletDeposited] = await Promise.all([
+            usdcContract.balanceOf(userAddress),
+            vaultContract.balanceOf(userAddress),
+            getWalletDepositCap(),
+            getWalletDeposited(userAddress)
+        ]);
+
+        // USDC Balance
+        usdcBalanceEl.textContent = `$${formatUSDC(usdcBalance)}`;
+
+        // Vault Shares
+        vaultSharesEl.textContent = `${formatUSDC(shares)} pSNIPERv2`;
+
+        // Redeemable Value
+        if (shares > 0n) {
+            const redeemable = await vaultContract.convertToAssets(shares);
+            redeemableValueEl.textContent = `$${formatUSDC(redeemable)}`;
+        } else {
+            redeemableValueEl.textContent = "$0.00";
+        }
+
+        // Remaining Deposit Capacity
+        const remaining = walletCap > walletDeposited ? walletCap - walletDeposited : 0n;
+        remainingCapacityEl.textContent = `$${formatUSDC(remaining)}`;
+
+    } catch (error) {
+        console.error("Error refreshing user stats:", error);
+    }
+}
+
+async function refreshAll() {
+    await Promise.all([
+        refreshVaultStats(),
+        refreshUserStats()
+    ]);
+}
+
+function startAutoRefresh() {
+    if (refreshTimer) clearInterval(refreshTimer);
+    refreshTimer = setInterval(refreshAll, REFRESH_INTERVAL);
 }
 
 // =============================================================================
@@ -116,50 +254,53 @@ async function connectWallet() {
         connectBtn.textContent = "Connecting...";
         connectBtn.disabled = true;
 
-        // Load ABIs if not already loaded
+        // Load ABIs
         if (!abisLoaded) {
             const loaded = await loadABIs();
             if (!loaded) {
-                connectBtn.textContent = "Connect MetaMask";
+                connectBtn.textContent = "Connect Wallet";
                 connectBtn.disabled = false;
+                alert("Failed to load contract ABIs");
                 return;
             }
             abisLoaded = true;
         }
 
         // Request account access
-        const accounts = await window.ethereum.request({
-            method: "eth_requestAccounts"
-        });
+        await window.ethereum.request({ method: "eth_requestAccounts" });
 
         // Create provider and signer
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
         userAddress = await signer.getAddress();
 
-        // Instantiate contracts with loaded ABIs
+        // Instantiate contracts
         vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
         usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
 
         // Update UI
         connectBtn.textContent = "Connected";
-        walletInfo.classList.remove("hidden");
-        userAddressEl.textContent = shortenAddress(userAddress);
-        vaultAddressEl.textContent = shortenAddress(VAULT_ADDRESS);
+        connectBtn.classList.add("connected");
+        walletAddressEl.textContent = shortenAddress(userAddress);
+        walletAddressEl.classList.remove("hidden");
 
         // Enable buttons
         depositBtn.disabled = false;
         withdrawBtn.disabled = false;
 
-        // Load balances
-        await refreshBalances();
+        // Load data
+        await refreshAll();
+
+        // Start auto-refresh
+        startAutoRefresh();
 
         // Listen for account changes
         window.ethereum.on("accountsChanged", handleAccountsChanged);
+        window.ethereum.on("chainChanged", () => location.reload());
 
     } catch (error) {
         console.error("Connection error:", error);
-        connectBtn.textContent = "Connect MetaMask";
+        connectBtn.textContent = "Connect Wallet";
         connectBtn.disabled = false;
         alert("Failed to connect: " + error.message);
     }
@@ -167,42 +308,11 @@ async function connectWallet() {
 
 function handleAccountsChanged(accounts) {
     if (accounts.length === 0) {
-        // User disconnected
         location.reload();
     } else {
-        // User switched accounts
         userAddress = accounts[0];
-        userAddressEl.textContent = shortenAddress(userAddress);
-        refreshBalances();
-    }
-}
-
-// =============================================================================
-// BALANCE REFRESH
-// =============================================================================
-
-async function refreshBalances() {
-    if (!userAddress || !vaultContract || !usdcContract) return;
-
-    try {
-        // Get USDC balance
-        const usdcBalance = await usdcContract.balanceOf(userAddress);
-        usdcBalanceEl.textContent = formatUSDC(usdcBalance) + " USDC";
-
-        // Get vault share balance
-        const shares = await vaultContract.balanceOf(userAddress);
-        vaultSharesEl.textContent = formatUSDC(shares) + " pSNIPER";
-
-        // Get redeemable amount
-        const redeemable = await vaultContract.convertToAssets(shares);
-        redeemableEl.textContent = formatUSDC(redeemable) + " USDC";
-
-        // Get total vault assets
-        const totalAssets = await vaultContract.totalAssets();
-        totalAssetsEl.textContent = formatUSDC(totalAssets) + " USDC";
-
-    } catch (error) {
-        console.error("Error refreshing balances:", error);
+        walletAddressEl.textContent = shortenAddress(userAddress);
+        refreshAll();
     }
 }
 
@@ -223,32 +333,30 @@ async function handleDeposit() {
         depositBtn.disabled = true;
         hideStatus(depositStatus);
 
-        // Step 1: Check allowance
+        // Check allowance
         showStatus(depositStatus, "Checking allowance...", "info");
         const allowance = await usdcContract.allowance(userAddress, VAULT_ADDRESS);
 
         if (allowance < amount) {
-            // Step 2: Approve
-            showStatus(depositStatus, "Approving USDC... Please confirm in MetaMask", "info");
+            showStatus(depositStatus, "Approving USDC... Please confirm in wallet", "info");
             const approveTx = await usdcContract.approve(VAULT_ADDRESS, amount);
-            showStatus(depositStatus, "Waiting for approval confirmation...", "info");
+            showStatus(depositStatus, "Waiting for approval...", "info");
             await approveTx.wait();
         }
 
-        // Step 3: Deposit
-        showStatus(depositStatus, "Depositing... Please confirm in MetaMask", "info");
+        // Deposit
+        showStatus(depositStatus, "Depositing... Please confirm in wallet", "info");
         const depositTx = await vaultContract.deposit(amount, userAddress);
-        showStatus(depositStatus, "Waiting for deposit confirmation...", "info");
+        showStatus(depositStatus, "Waiting for confirmation...", "info");
         await depositTx.wait();
 
-        // Success
-        showStatus(depositStatus, `Successfully deposited ${amountStr} USDC!`, "success");
+        showStatus(depositStatus, `Deposited $${amountStr} USDC`, "success");
         depositAmountEl.value = "";
-        await refreshBalances();
+        await refreshAll();
 
     } catch (error) {
         console.error("Deposit error:", error);
-        showStatus(depositStatus, "Deposit failed: " + (error.reason || error.message), "error");
+        showStatus(depositStatus, "Failed: " + (error.reason || error.message), "error");
     } finally {
         depositBtn.disabled = false;
     }
@@ -271,20 +379,18 @@ async function handleWithdraw() {
         withdrawBtn.disabled = true;
         hideStatus(withdrawStatus);
 
-        // Withdraw
-        showStatus(withdrawStatus, "Withdrawing... Please confirm in MetaMask", "info");
+        showStatus(withdrawStatus, "Withdrawing... Please confirm in wallet", "info");
         const withdrawTx = await vaultContract.withdraw(amount, userAddress, userAddress);
-        showStatus(withdrawStatus, "Waiting for withdrawal confirmation...", "info");
+        showStatus(withdrawStatus, "Waiting for confirmation...", "info");
         await withdrawTx.wait();
 
-        // Success
-        showStatus(withdrawStatus, `Successfully withdrew ${amountStr} USDC!`, "success");
+        showStatus(withdrawStatus, `Withdrew $${amountStr} USDC`, "success");
         withdrawAmountEl.value = "";
-        await refreshBalances();
+        await refreshAll();
 
     } catch (error) {
         console.error("Withdraw error:", error);
-        showStatus(withdrawStatus, "Withdraw failed: " + (error.reason || error.message), "error");
+        showStatus(withdrawStatus, "Failed: " + (error.reason || error.message), "error");
     } finally {
         withdrawBtn.disabled = false;
     }
@@ -298,11 +404,31 @@ connectBtn.addEventListener("click", connectWallet);
 depositBtn.addEventListener("click", handleDeposit);
 withdrawBtn.addEventListener("click", handleWithdraw);
 
-// Auto-connect if already authorized
-if (typeof window.ethereum !== "undefined") {
-    window.ethereum.request({ method: "eth_accounts" }).then(accounts => {
-        if (accounts.length > 0) {
-            connectWallet();
+// Try to auto-connect on load
+(async function init() {
+    // Load ABIs first for read-only data
+    const loaded = await loadABIs();
+    if (loaded) {
+        abisLoaded = true;
+        
+        // Create read-only provider for vault stats even without wallet
+        if (typeof window.ethereum !== "undefined") {
+            try {
+                provider = new ethers.BrowserProvider(window.ethereum);
+                vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, provider);
+                usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
+                
+                // Load vault stats
+                await refreshVaultStats();
+                
+                // Check if already connected
+                const accounts = await window.ethereum.request({ method: "eth_accounts" });
+                if (accounts.length > 0) {
+                    connectWallet();
+                }
+            } catch (e) {
+                console.log("Auto-init failed:", e);
+            }
         }
-    });
-}
+    }
+})();
