@@ -41,32 +41,29 @@
         }
 
         .connect-btn {
-            background: rgba(255,255,255,0.08);
-            color: #f0f6fc;
-            border: 1px solid rgba(255,255,255,0.15);
-            padding: 12px 24px;
-            border-radius: 8px;
+            background: #f0f6fc;
+            color: #0d1117;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
         }
 
         .connect-btn:hover {
-            background: rgba(255,255,255,0.12);
-            border-color: rgba(255,255,255,0.25);
+            opacity: 0.85;
         }
 
         .connect-btn.connected {
-            background: rgba(126,231,135,0.1);
-            color: #7ee787;
-            border-color: rgba(126,231,135,0.25);
+            background: #f0f6fc;
+            color: #0d1117;
         }
 
         .connect-btn.connected:hover {
-            background: rgba(248,81,73,0.1);
-            color: #f85149;
-            border-color: rgba(248,81,73,0.25);
+            background: #f85149;
+            color: #fff;
         }
 
         .main-content {
@@ -179,23 +176,23 @@
 
         .deposit-btn {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: #f0f6fc;
             color: #0d1117;
             border: none;
-            border-radius: 10px;
+            border-radius: 6px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
         }
 
         .deposit-btn:hover:not(:disabled) {
-            opacity: 0.9;
+            opacity: 0.85;
         }
 
         .deposit-btn:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
         }
 
@@ -297,19 +294,19 @@
 
         .modal-btn {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: #f0f6fc;
             color: #0d1117;
             border: none;
-            border-radius: 10px;
+            border-radius: 6px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
         }
 
         .modal-btn:hover:not(:disabled) {
-            opacity: 0.9;
+            opacity: 0.85;
         }
 
         .modal-btn:disabled {
@@ -462,17 +459,6 @@
                 <div class="vault-header">
                     <img src="logo.png" alt="pSNIPER" class="vault-icon">
                     <span class="vault-name">pSNIPER</span>
-                </div>
-                
-                <div class="vault-stats">
-                    <div class="vault-stat">
-                        <div class="vault-stat-label">Target APY *</div>
-                        <div class="vault-stat-value">50%</div>
-                    </div>
-                    <div class="vault-stat">
-                        <div class="vault-stat-label">TVL</div>
-                        <div class="vault-stat-value" id="vaultTvl">$0.00</div>
-                    </div>
                 </div>
                 
                 <div id="userStats" class="user-stats hidden">
