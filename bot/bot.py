@@ -46,6 +46,8 @@ from typing import List, Dict, Optional
 import requests
 from dotenv import load_dotenv
 from web3 import Web3
+from flask import Flask, jsonify, request as flask_request
+from flask_cors import CORS
 
 # Load environment variables
 load_dotenv()
@@ -69,8 +71,9 @@ KEEPER_ADDRESS = os.getenv("KEEPER_ADDRESS")
 POLYMARKET_PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS")
 
 # Polling intervals
-NAV_UPDATE_INTERVAL = 60   # Update NAV every 60 seconds
+NAV_UPDATE_INTERVAL = 30   # Update NAV every 30 seconds (more frequent for accurate pricing)
 SHORTFALL_POLL_INTERVAL = 10  # Check for shortfall events every 10 seconds
+HTTP_PORT = int(os.getenv("BOT_HTTP_PORT", 8080))  # HTTP API port for price queries
 
 # Global web3 and contract instances
 w3 = None
@@ -81,6 +84,26 @@ strategy = None
 # Global Polymarket client and NAV engine instances
 polymarket_client = None
 nav_engine = None
+
+# Global cached price data for fast API responses
+cached_price_data = {
+    "price_per_share": 1.0,
+    "total_assets": 0,
+    "total_supply": 0,
+    "buffer_usdc": 0,
+    "strategy_value": 0,
+    "last_updated": 0,
+    "last_nav_update_tx": None,
+}
+price_lock = threading.Lock()
+
+# Simple rate limiting for /price/refresh endpoint
+last_refresh_request = {}
+REFRESH_RATE_LIMIT_SECONDS = 5  # Minimum seconds between refresh requests per IP
+
+# Flask app for HTTP API
+flask_app = Flask(__name__)
+CORS(flask_app)  # Enable CORS for frontend access
 
 
 # =============================================================================
@@ -887,7 +910,7 @@ def listen_liquidity_shortfall(vault_contract=None, start_block=None):
 
 def nav_update_loop():
     """
-    Periodically push NAV updates to the chain.
+    Periodically push NAV updates to the chain and refresh cached price.
     
     Runs every NAV_UPDATE_INTERVAL seconds.
     """
@@ -897,10 +920,131 @@ def nav_update_loop():
     while True:
         try:
             push_nav_to_chain()
+            # Refresh cached price after each NAV update
+            refresh_cached_price()
         except Exception as e:
             print(f"❌ Error in NAV update loop: {e}")
         
         time.sleep(NAV_UPDATE_INTERVAL)
+
+
+# =============================================================================
+# FLASK HTTP API ENDPOINTS
+# =============================================================================
+# Provides live price data to the frontend
+# =============================================================================
+
+@flask_app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint."""
+    return jsonify({"status": "ok", "timestamp": int(time.time())})
+
+
+@flask_app.route('/price', methods=['GET'])
+def get_price():
+    """
+    Get the current pSNIPER price and vault stats.
+    
+    Returns cached data for fast response. Data is updated every 30 seconds
+    by the NAV update loop.
+    
+    Response:
+    {
+        "price_per_share": 1.05,  # Current pSNIPER price in USDC
+        "total_assets": 10500.00,  # Total vault assets in USDC
+        "total_supply": 10000.00,  # Total pSNIPER shares
+        "buffer_usdc": 1050.00,  # USDC in buffer (10%)
+        "strategy_value": 9450.00,  # Value in Polymarket strategy (90%)
+        "last_updated": 1702300000,  # Unix timestamp of last update
+        "last_nav_update_tx": "0x..."  # Last NAV update transaction hash
+    }
+    """
+    with price_lock:
+        return jsonify(cached_price_data)
+
+
+@flask_app.route('/price/refresh', methods=['POST'])
+def refresh_price():
+    """
+    Force a price refresh and return the updated price.
+    
+    This is called by the frontend before deposit/withdraw to get
+    the most accurate price at the moment of transaction.
+    
+    Rate limited to 1 request per 5 seconds per IP to prevent abuse.
+    
+    Returns the same format as /price but with freshly calculated values.
+    """
+    global cached_price_data, last_refresh_request
+    
+    # Simple rate limiting by IP
+    client_ip = flask_request.remote_addr or "unknown"
+    current_time = time.time()
+    
+    if client_ip in last_refresh_request:
+        time_since_last = current_time - last_refresh_request[client_ip]
+        if time_since_last < REFRESH_RATE_LIMIT_SECONDS:
+            # Return cached data instead of refreshing
+            with price_lock:
+                return jsonify(cached_price_data)
+    
+    last_refresh_request[client_ip] = current_time
+    
+    try:
+        refresh_cached_price()
+        with price_lock:
+            return jsonify(cached_price_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+def refresh_cached_price():
+    """
+    Refresh the cached price data from on-chain and Polymarket.
+    
+    Called by the NAV update loop and /price/refresh endpoint.
+    """
+    global cached_price_data, vault, usdc, strategy, nav_engine
+    
+    try:
+        # Get on-chain data
+        total_supply = vault.functions.totalSupply().call()
+        buffer_usdc = usdc.functions.balanceOf(VAULT_ADDRESS).call()
+        strategy_value = strategy.functions.totalStrategyValue().call()
+        total_assets = buffer_usdc + strategy_value
+        
+        # Calculate price per share
+        if total_supply > 0:
+            price_per_share = total_assets / total_supply
+        else:
+            price_per_share = 1.0
+        
+        # Update cached data
+        with price_lock:
+            cached_price_data = {
+                "price_per_share": price_per_share,
+                "total_assets": total_assets / 1e6,  # Convert to USDC
+                "total_supply": total_supply / 1e18,  # Convert from wei
+                "buffer_usdc": buffer_usdc / 1e6,
+                "strategy_value": strategy_value / 1e6,
+                "last_updated": int(time.time()),
+                "last_nav_update_tx": cached_price_data.get("last_nav_update_tx"),
+            }
+        
+        print(f"💰 Price refreshed: ${price_per_share:.6f} per pSNIPER")
+        
+    except Exception as e:
+        print(f"❌ Error refreshing cached price: {e}")
+
+
+
+
+def run_flask_server():
+    """Run the Flask HTTP server in a separate thread."""
+    print(f"🌐 Starting HTTP API server on port {HTTP_PORT}...")
+    flask_app.run(host='0.0.0.0', port=HTTP_PORT, threaded=True, use_reloader=False)
 
 
 def main():
@@ -908,12 +1052,14 @@ def main():
     Main entry point for the NAV updater & liquidity management bot.
     
     This bot:
-    - Updates NAV on-chain every 60 seconds using PolymarketClient + NavEngine
+    - Updates NAV on-chain every 30 seconds using PolymarketClient + NavEngine
     - Watches for LiquidityShortfall events and logs them (does not move funds yet)
+    - Serves live price data via HTTP API for frontend consumption
     
-    Runs two loops:
-    1. NAV update loop (every 60 seconds)
-    2. Liquidity shortfall listener (every 10 seconds)
+    Runs three loops:
+    1. HTTP API server (Flask on port 8080)
+    2. NAV update loop (every 30 seconds)
+    3. Liquidity shortfall listener (every 10 seconds)
     """
     global w3, vault, usdc, strategy, polymarket_client, nav_engine
     
@@ -979,10 +1125,19 @@ def main():
                 print(f"\n⚠️  WARNING: On-chain keeper ({on_chain_keeper}) != KEEPER_ADDRESS ({KEEPER_ADDRESS})")
                 print(f"   You may need to call strategy.setKeeper() first")
         
+        # Initial price refresh
+        print(f"\n💰 Initial price refresh...")
+        refresh_cached_price()
+        
         print(f"\n🚀 Starting bot loops...")
+        print(f"   HTTP API: http://0.0.0.0:{HTTP_PORT}")
         print(f"   NAV updates: every {NAV_UPDATE_INTERVAL}s")
         print(f"   Shortfall checks: every {SHORTFALL_POLL_INTERVAL}s")
         print(f"   Press Ctrl+C to stop\n")
+        
+        # Start Flask HTTP server in a separate thread
+        flask_thread = threading.Thread(target=run_flask_server, daemon=True)
+        flask_thread.start()
         
         # Start NAV update loop in a separate thread
         nav_thread = threading.Thread(target=nav_update_loop, daemon=True)

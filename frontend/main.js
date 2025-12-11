@@ -13,6 +13,12 @@ const REFRESH_INTERVAL = 30000;
 const BASE_MAINNET_RPC = "https://mainnet.base.org";
 const BASE_MAINNET_CHAIN_ID = 8453;
 
+// VPS Price API Configuration
+// Set this to your VPS URL where bot.py is running (e.g., "http://your-vps-ip:8080")
+// Leave empty to use on-chain data directly
+const PRICE_API_URL = localStorage.getItem("predictfi_price_api_url") || "";
+const PRICE_REFRESH_INTERVAL = 10000; // 10 seconds for live price updates
+
 // =============================================================================
 // ABIs
 // =============================================================================
@@ -51,7 +57,9 @@ let vaultContract = null;
 let usdcContract = null;
 let abisLoaded = false;
 let refreshTimer = null;
+let priceRefreshTimer = null;
 let isConnected = false;
+let lastPriceData = null;
 
 // =============================================================================
 // DOM ELEMENTS
@@ -201,6 +209,97 @@ function showStatus(element, message, type) {
 
 function hideStatus(element) {
     element.className = "status-msg";
+}
+
+// =============================================================================
+// PRICE API FUNCTIONS (VPS)
+// =============================================================================
+
+async function fetchPriceFromAPI() {
+    if (!PRICE_API_URL) return null;
+    
+    try {
+        const response = await fetch(`${PRICE_API_URL}/price`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            mode: 'cors'
+        });
+        
+        if (!response.ok) {
+            console.warn("Price API error:", response.status);
+            return null;
+        }
+        
+        const data = await response.json();
+        lastPriceData = data;
+        return data;
+    } catch (error) {
+        console.warn("Failed to fetch price from API:", error.message);
+        return null;
+    }
+}
+
+async function requestFreshPrice() {
+    if (!PRICE_API_URL) return null;
+    
+    try {
+        const response = await fetch(`${PRICE_API_URL}/price/refresh`, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+            mode: 'cors'
+        });
+        
+        if (!response.ok) {
+            console.warn("Price refresh API error:", response.status);
+            return null;
+        }
+        
+        const data = await response.json();
+        lastPriceData = data;
+        return data;
+    } catch (error) {
+        console.warn("Failed to refresh price from API:", error.message);
+        return null;
+    }
+}
+
+
+function updatePriceDisplay(priceData) {
+    if (!priceData) return;
+    
+    const sharePrice = priceData.price_per_share || 1.0;
+    statsSharePriceEl.textContent = `$${sharePrice.toFixed(4)}`;
+    
+    const tvl = priceData.total_assets || 0;
+    const tvlStr = `$${tvl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    vaultTvlEl.textContent = tvlStr;
+    tvlValueEl.textContent = tvlStr;
+    
+    // Update last updated timestamp if available
+    if (priceData.last_updated) {
+        const lastUpdated = new Date(priceData.last_updated * 1000);
+        console.log("Price last updated:", lastUpdated.toLocaleTimeString());
+    }
+}
+
+async function refreshPriceFromAPI() {
+    const priceData = await fetchPriceFromAPI();
+    if (priceData) {
+        updatePriceDisplay(priceData);
+        return true;
+    }
+    return false;
+}
+
+function startPriceAutoRefresh() {
+    if (priceRefreshTimer) clearInterval(priceRefreshTimer);
+    
+    if (PRICE_API_URL) {
+        console.log("Starting price auto-refresh from VPS every 10 seconds");
+        priceRefreshTimer = setInterval(refreshPriceFromAPI, PRICE_REFRESH_INTERVAL);
+        // Initial fetch
+        refreshPriceFromAPI();
+    }
 }
 
 // =============================================================================
@@ -417,6 +516,16 @@ async function handleDeposit() {
         withdrawBtn.disabled = true;
         hideStatus(txStatus);
 
+        // Request fresh price from VPS before deposit for accurate share pricing
+        if (PRICE_API_URL) {
+            showStatus(txStatus, "Fetching latest price...", "info");
+            const priceData = await requestFreshPrice();
+            if (priceData) {
+                console.log("Price refreshed before deposit:", priceData);
+                updatePriceDisplay(priceData);
+            }
+        }
+
         // Ensure we're using signer-connected contracts
         const signerUsdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
         const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
@@ -484,6 +593,16 @@ async function handleWithdraw() {
         withdrawBtn.disabled = true;
         hideStatus(txStatus);
 
+        // Request fresh price from VPS before withdraw for accurate share pricing
+        if (PRICE_API_URL) {
+            showStatus(txStatus, "Fetching latest price...", "info");
+            const priceData = await requestFreshPrice();
+            if (priceData) {
+                console.log("Price refreshed before withdraw:", priceData);
+                updatePriceDisplay(priceData);
+            }
+        }
+
         // Ensure we're using signer-connected contract
         const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
 
@@ -498,7 +617,11 @@ async function handleWithdraw() {
 
     } catch (error) {
         console.error("Withdraw error:", error);
-        showStatus(txStatus, error.reason || error.message, "error");
+        let errorMsg = error.reason || error.message;
+        if (errorMsg.includes("Insufficient liquidity")) {
+            errorMsg = "Insufficient liquidity. Please try a smaller amount or wait for funds to be freed.";
+        }
+        showStatus(txStatus, errorMsg, "error");
     } finally {
         depositBtn.disabled = false;
         withdrawBtn.disabled = false;
@@ -558,6 +681,9 @@ async function initReadOnlyProvider() {
         
         await initReadOnlyProvider();
         
+        // Start price auto-refresh from VPS (if configured)
+        startPriceAutoRefresh();
+        
         if (typeof window.ethereum !== "undefined") {
             checkNetwork();
             
@@ -572,5 +698,12 @@ async function initReadOnlyProvider() {
                 console.log("Auto-connect check failed:", e);
             }
         }
+    }
+    
+    // Log price API configuration
+    if (PRICE_API_URL) {
+        console.log("Price API URL configured:", PRICE_API_URL);
+    } else {
+        console.log("No Price API URL configured. Set via localStorage: localStorage.setItem('predictfi_price_api_url', 'http://your-vps:8080')");
     }
 })();
