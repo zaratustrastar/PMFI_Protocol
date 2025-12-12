@@ -1,0 +1,86 @@
+Goal:
+Enable safe withdrawals even when the vault buffer is insufficient, without ever overpaying users, and while syncing buffer + PM cash + liquidations correctly.
+
+Please produce a clean, complete solution using the logic we already discussed in previous messages.
+
+Include and refine the following points:
+
+Watchdog Required Behavior
+
+Continuously monitor:
+
+vault buffer
+
+total pending withdrawals (in USDC terms)
+
+PM cash available
+
+liquidatable PM positions
+
+Priority order when liquidity is needed:
+
+Use existing on-chain buffer
+
+Pull Polymarket cash into the vault
+
+If still insufficient, automatically liquidate Polymarket positions
+
+Only refill buffer up to the exact amount needed for pending withdrawals (avoid pushing excess)
+
+Temporarily throttle or pause new deposits during liquidity recovery
+
+On-chain Safety Requirements
+
+If buffer < owed amount, withdrawal becomes a queued async withdrawal
+
+Shares must be burned/locked at request time
+
+User must claim later using fresh signed NAV
+
+Vault must never pay more than shares * NAV
+
+NAV must come from the signed oracle
+
+Correctly handle partial refills and incremental liquidation
+
+Contract should support multiple pending withdrawals (FIFO or pro-rata)
+
+Edge Cases to Cover
+
+buffer has only part of what user needs (e.g., 30%)
+
+PM cash covers some (e.g., 65%)
+
+positions need liquidation for the remainder
+
+illiquid markets where positions cannot be fully sold
+
+temporary PM API delays
+
+NAV changes between request and claim
+
+watchdog temporarily offline
+
+large withdrawals during volatile markets
+
+avoid overpaying by 1 wei in any scenario
+
+Expected Output
+
+Produce:
+
+A refined, final specification of the Withdrawal Watchdog
+
+A simple step-by-step flow for:
+
+requestWithdraw
+
+off-chain refill steps (buffer → PM cash → liquidation)
+
+claim using fresh NAV
+
+A short explanation of why this architecture prevents excess payouts
+
+Mention any recommended guardrails the vault should enforce (e.g., max NAV jump, deadline checks)
+
+Keep it concise but correct — no need to restate the entire system, just finalize the watchdog logic with best practices and safety guarantees.
