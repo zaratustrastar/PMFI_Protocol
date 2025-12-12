@@ -1,0 +1,268 @@
+1. What you actually need for pSNIPE
+
+You don’t need continuous on-chain streaming of prices.
+
+You only need:
+
+A trust anchor (one signer) that says: “The current NAV is X, based on Polymarket data right now”
+
+A way for users to pay the gas to bring that signed NAV on-chain whenever they interact.
+
+That means:
+
+Off-chain: your bot computes NAV as now:
+NAV = (liquid_shares_combined + polymarket_cash + buffer) / total_psnipe_supply
+
+On-chain: you never accept arbitrary NAV from users.
+You only accept NAV that has been signed by your oracle key.
+
+2. Architecture for “live price, users pay gas”
+Off-chain: NAV oracle bot
+
+Every N seconds (or on-demand):
+
+Fetch positions + cash from Polymarket API.
+
+Compute liquidation value (ideally using best bid side of each market, not midprice).
+
+Compute NAV for 1 pSNIPE (scaled, e.g. 1e18).
+
+Pack it into a struct:
+
+struct NavData {
+    uint256 nav;        // NAV per pSNIPE in USDC terms, 1e18
+    uint256 timestamp;  // when this NAV was computed
+    uint256 deadline;   // last block timestamp where this is valid
+    uint256 roundId;    // monotonically increasing index
+}
+
+
+Sign this off-chain with your oracle private key:
+
+hash = keccak256(abi.encode(
+    NAV_TYPEHASH,
+    nav,
+    timestamp,
+    deadline,
+    roundId,
+    address(vault) // domain separation
+))
+sig = sign(hash, oracle_key)
+
+
+You can do this:
+
+Continuously every 5 seconds, or
+
+Only when some frontend asks “give me the latest signed NAV”.
+
+Signing is cheap; it doesn’t cost gas.
+
+On-chain: vault contract changes
+
+Your vault gets:
+
+address public immutable NAV_SIGNER; (your oracle key)
+
+A small verifier:
+
+function _verifyNav(NavData calldata n, bytes calldata sig)
+    internal
+    view
+{
+    require(block.timestamp <= n.deadline, "NAV: expired");
+
+    bytes32 structHash = keccak256(abi.encode(
+        NAV_TYPEHASH,
+        n.nav,
+        n.timestamp,
+        n.deadline,
+        n.roundId,
+        address(this)
+    ));
+    bytes32 digest = ECDSA.toEthSignedMessageHash(structHash);
+    address signer = ECDSA.recover(digest, sig);
+
+    require(signer == NAV_SIGNER, "NAV: invalid signer");
+}
+
+
+Then your public functions become:
+
+function deposit(
+    uint256 usdcAmount,
+    NavData calldata n,
+    bytes calldata sig
+) external {
+    _verifyNav(n, sig);
+
+    // optional sanity check on n.nav vs lastNav
+    // _checkNavChange(n.nav);
+
+    _updateNav(n.nav); // store if you want, or just use it locally
+
+    // transfer usdc from user
+    usdc.transferFrom(msg.sender, address(this), usdcAmount);
+
+    uint256 sharesToMint = usdcAmount * 1e18 / n.nav;
+    _mint(msg.sender, sharesToMint);
+}
+
+function redeem(
+    uint256 psnipeAmount,
+    NavData calldata n,
+    bytes calldata sig
+) external {
+    _verifyNav(n, sig);
+    _updateNav(n.nav);
+
+    uint256 usdcToSend = psnipeAmount * n.nav / 1e18;
+
+    _burn(msg.sender, psnipeAmount);
+    usdc.transfer(msg.sender, usdcToSend);
+}
+
+
+User pays gas for calling deposit or redeem.
+
+They cannot choose nav freely; it must come from a valid signature.
+
+You can still keep a lastNav in storage if you want to show it in the UI or do internal accounting.
+
+3. How the user flow looks in practice
+Deposit flow
+
+User clicks “deposit 1,000 USDC”.
+
+Frontend:
+
+Requests latest NavData + sig from your bot (HTTP).
+
+Shows NAV + timestamp to user if you want (“price last updated: 3s ago”).
+
+User signs a standard ERC20 approve once (or already did).
+
+Frontend sends one on-chain tx:
+
+vault.deposit(1000e6, navData, sig)
+
+
+Contract verifies signature, computes sharesToMint, transfers USDC, mints pSNIPE.
+
+Withdraw flow
+
+Exactly the same but calling redeem(psnipeAmount, navData, sig).
+
+If your bot is down and cannot provide a fresh signature, deposits/withdraws will simply revert because the frontend can’t give them a valid (navData, sig). That’s actually good: better no price than a bullshit price.
+
+4. Safety properties + typical edge cases
+What can the user manipulate?
+
+They can choose when to lock a price (e.g. if NAV is moving, they can wait for a slightly better signed NAV).
+
+They cannot:
+
+Fake a price.
+
+Backdate a price (because you enforce timestamp + deadline).
+
+Front-run your own updates, because only your oracle can create valid signatures.
+
+You can further protect by:
+
+Max age: require(block.timestamp - n.timestamp <= MAX_AGE)
+e.g. 10–30 seconds.
+
+Max change per round: compare n.nav vs lastNav and revert if > X% change unless roundId jumps by a lot (for crashes you do want to allow large changes).
+
+Monotone roundId: require(n.roundId > lastRoundId) to avoid replaying old signatures.
+
+NAV can go down (losses)
+
+Unlike some staking tokens, your NAV is not monotonic – you can lose on Polymarket.
+
+That’s fine, just don’t use monotonic NAV checks, use:
+
+max relative change per period, not “must be >= old”.
+
+Example:
+
+function _checkNavChange(uint256 newNav) internal view {
+    if (lastNav == 0) return; // first time
+
+    uint256 diff = newNav > lastNav ? newNav - lastNav : lastNav - newNav;
+    require(diff * 1e4 / lastNav <= MAX_BPS_CHANGE, "NAV: jump too big");
+}
+
+
+Where MAX_BPS_CHANGE might be, say, 500 (max 5% per round) unless roundId advanced a lot.
+
+5. Why this solves your exact pain points
+
+the problem is liquid shares combined and cash comes from polymarket api and runs from script and only afterwards comes on-chain summing it up with available cash.
+
+With the signed NAV pattern:
+
+You do not stream those Polymarket internals on-chain.
+
+You only stream a final NAV value (as a signed scalar).
+
+Internals stay off-chain (API + bot logic).
+
+The vault only cares about: “Is this NAV signed by my trusted key and not stale?”
+
+the critical thing is to make people mint psnipe at live price (deposit usdc) and withdraw psnipe at most recent price.
+
+This is exactly what happens:
+
+Every deposit/withdraw must include a fresh NavData + sig within, say, 10 seconds.
+
+If they try to use an old one → revert.
+
+You can run your oracle on a 5s loop off-chain and users pick the latest signed message.
+
+obviously i want to avoid spending gas every 10-30 secs
+
+You’re no longer spending any gas for price updates.
+Your bot never calls the chain.
+Only users call the chain, and they pay for the NAV update as part of their deposit/withdraw.
+
+and obviously very critical make it safe for whole protocol
+
+Safety hinges on:
+
+Oracle key security – that key is basically “price admin”.
+
+Reasonable expiry window – don’t allow 10-minute-old NAVs.
+
+Sanity checks – cap how fast NAV can change unless you explicitly allow a big jump.
+
+Correct NAV math off-chain – use bid side / real liquidation value as you mentioned in previous chat, not optimistic midprice.
+
+If any of these fail, you can cap damages (e.g. pause deposits, limit withdraw sizes, etc.), but the main attack surface (user faking price) is gone.
+
+6. Alternative you might be thinking about
+
+You might be tempted to do:
+
+“First tx: user calls updateNav(nav) to store NAV; second tx: deposit using stored NAV.”
+
+This is fine only if updateNav(nav) internally does signature verification like _verifyNav. Otherwise it’s a giant footgun.
+
+But in practice:
+
+A single tx with (assets, navData, sig) is cleaner UX.
+
+You can still store the nav inside that function to keep lastNav on-chain.
+
+If you want, next step we can:
+
+Draft a minimal pSNIPE-style vault in pseudo-solidity with:
+
+signed NAV logic,
+
+deposit / redeem flows,
+
+and a couple of sanity checks,
+
+so you can hand it straight to your dev or plug into your current repo.
