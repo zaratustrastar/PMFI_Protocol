@@ -1,5 +1,54 @@
 # Overview
 
+This project contains TWO main systems:
+
+## 1. pSNIPER Vault (V4) - ERC4626 Vault with Signed NAV Oracle
+
+A production-ready vault for managing USDC investments in Polymarket positions.
+
+### V4 Architecture (Signed NAV Oracle - Zero Gas for Oracle)
+
+**Key Innovation**: Oracle signs NAV data off-chain (free), users include signature in transactions (they pay gas).
+
+**Components:**
+- **Contract**: `contracts/PredictFiSniperVaultV4.sol` - ERC4626-style vault
+- **Bot**: `bot/bot_v4.py` - Zero-gas oracle that signs NAV data
+- **Frontend**: `frontend/main-v4.js` + `frontend/index.html`
+
+**How it works:**
+1. Bot calculates liquidation NAV from Polymarket orderbooks
+2. Bot signs NavData struct: `{nav, timestamp, deadline, roundId}` + vault address
+3. User calls `/sign-nav` endpoint to get signed data
+4. User includes signature in `deposit()` or `redeem()` transaction
+5. Contract verifies signature matches `navSigner` address
+
+**Safety Features:**
+- 30-second signature validity window
+- 5% max NAV change between updates
+- Monotonically increasing roundId (replay protection)
+- 1% withdrawal tax to deployer wallet
+- Per-wallet (100 USDC) and total (10k-100k USDC) deposit caps
+
+**Deployment:**
+```bash
+# Deploy V4 vault
+npx hardhat run scripts/deploy-v4-mainnet.js --network base
+
+# Start bot (from VPS with residential IP for Polymarket API)
+python bot/bot_v4.py
+```
+
+**Environment Variables for V4:**
+- `VAULT_V4_ADDRESS` - Deployed vault address
+- `ORACLE_PRIVATE_KEY` - Same as deployer, signs NAV data
+- `POLYMARKET_PROXY_ADDRESS` - Polymarket wallet with positions
+- `RPC_URL` - Base Mainnet RPC
+- `USDC_ADDRESS` - Base USDC (0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913)
+
+---
+
+## 2. Polymarket Trading Bot (Original System)
+
 This is a **Fully Automated Polymarket Monitoring and Trading System** that combines market detection, Telegram notifications, and automated trading in a queue-based architecture.
 
 ## Architecture

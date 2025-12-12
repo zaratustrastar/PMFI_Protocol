@@ -336,17 +336,29 @@ def create_nav_data_hash(nav: int, timestamp: int, deadline: int, round_id: int,
         roundId,
         address(this)
     ));
+    
+    IMPORTANT: Solidity's abi.encode pads each argument to 32 bytes.
+    Web3.solidity_keccak uses abi.encodePacked (no padding), so we must
+    use eth_abi.encode instead.
     """
+    import eth_abi
+    
     # NAV_TYPEHASH from contract
     NAV_TYPEHASH = Web3.keccak(text="NavData(uint256 nav,uint256 timestamp,uint256 deadline,uint256 roundId,address vault)")
     
-    # Encode the data (matching Solidity's abi.encode)
-    encoded = Web3.solidity_keccak(
+    # Convert vault address to checksum format
+    vault_addr_checksum = Web3.to_checksum_address(vault_address)
+    
+    # Use eth_abi.encode to match Solidity's abi.encode (with proper padding)
+    encoded_data = eth_abi.encode(
         ['bytes32', 'uint256', 'uint256', 'uint256', 'uint256', 'address'],
-        [NAV_TYPEHASH, nav, timestamp, deadline, round_id, vault_address]
+        [NAV_TYPEHASH, nav, timestamp, deadline, round_id, vault_addr_checksum]
     )
     
-    return encoded
+    # Hash the encoded data
+    struct_hash = Web3.keccak(encoded_data)
+    
+    return struct_hash
 
 
 def sign_nav_data(nav: int, timestamp: int, deadline: int, round_id: int, vault_address: str) -> Tuple[str, str]:
