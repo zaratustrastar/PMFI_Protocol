@@ -1080,6 +1080,44 @@
       "artifacts": [
         "ECDSA"
       ]
+    },
+    "/home/runner/workspace/contracts/MockUSDC.sol": {
+      "lastModificationDate": 1765543390003,
+      "contentHash": "a0ba2c44b5d2c18be106fdbe79da64bd",
+      "sourceName": "contracts/MockUSDC.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "MockUSDC"
+      ]
     }
   }
 }

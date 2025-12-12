@@ -1,0 +1,117 @@
+hat I’d explicitly verify (critical checklist)
+
+Claude says “Verified V4 vault implementation and bot” – cool, but I’d still manually check / test these:
+
+a) Exact struct layout
+
+In Solidity, you likely have something like:
+
+struct NavData {
+    uint256 nav;
+    uint256 timestamp;
+    uint256 deadline;
+    uint256 roundId;
+}
+
+
+And a hash like:
+
+bytes32 constant NAV_TYPEHASH = keccak256(
+    "NavData(uint256 nav,uint256 timestamp,uint256 deadline,uint256 roundId,address vault)"
+);
+
+bytes32 structHash = keccak256(abi.encode(
+    NAV_TYPEHASH,
+    navData.nav,
+    navData.timestamp,
+    navData.deadline,
+    navData.roundId,
+    address(this)
+));
+
+
+Your bot must:
+
+Use exactly this type string, including the order and spacing.
+
+Encode in the same order.
+
+If those match, signature verification will work.
+
+b) Deadline / age checks actually enforced on-chain
+
+Log says: “Add checks for data age” – good.
+
+Make sure in the contract you actually have:
+
+require(block.timestamp <= n.deadline, "NAV expired");
+
+
+and preferably also:
+
+require(n.timestamp + MAX_AGE >= block.timestamp, "NAV too old");
+
+
+so a user cannot submit a sig with a far future deadline.
+
+c) roundId & NAV jump limits
+
+The log only mentions “Add checks for data age”, not:
+
+monotone roundId, or
+
+“max NAV change per round”.
+
+I would recommend adding:
+
+require(n.roundId > lastRoundId, "NAV round not newer");
+lastRoundId = n.roundId;
+
+
+and optionally:
+
+if (lastNav != 0) {
+    uint256 diff = n.nav > lastNav ? n.nav - lastNav : lastNav - n.nav;
+    require(diff * 10_000 / lastNav <= MAX_BPS_CHANGE, "NAV jump too big");
+}
+lastNav = n.nav;
+
+
+Even if you don’t enforce a super-strict limit, some sanity check is nice in case the oracle logic goes haywire.
+
+d) Decimals and math
+
+From the log: “1% withdrawal tax: User redeems 100 shares → gets 99 USDC, you get 1 USDC.”
+
+That’s fine, but just double-check:
+
+nav is consistently scaled (e.g. 1e18) and used as:
+
+usdcAmount = shares * nav / 1e18;
+
+
+For deposits:
+
+shares = usdcAmount * 1e18 / nav;
+
+
+USDC decimals (probably 6) are handled correctly.
+
+No weird rounding that could be exploited (e.g. integer division always rounding up in a way that mints too many shares).
+
+e) Test vectors
+
+I’d insist on 1–2 hardhat test vectors:
+
+In JS/TS test, build NavData, sign it with a known private key (same way as bot), and call deposit.
+Make sure the contract recovers the signer correctly.
+
+Try:
+
+expired deadline → revert.
+
+older roundId → revert.
+
+modified nav with same signature → revert.
+
+If those pass, your bot↔contract glue is solid.
