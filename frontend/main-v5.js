@@ -289,6 +289,7 @@ async function updateUI() {
         const totalPendingShares = state[6];
         const pendingCount = state[7];
         const depositsThrottled = state[9];
+        const targetBuffer = state[10];
         
         if (tvlValueEl) {
             tvlValueEl.textContent = formatUSDC(vaultBalance);
@@ -336,13 +337,12 @@ async function updatePendingWithdrawals() {
         
         for (const id of requestIds) {
             const req = await vaultContract.getWithdrawalRequest(id);
-            if (!req[5] && !req[6]) {
+            if (!req[3] && !req[4]) {
                 userPendingWithdrawals.push({
                     id: Number(id),
                     shares: req[1],
-                    maxUsdc: req[3],
-                    requestTime: Number(req[4]),
-                    expired: req[6],
+                    requestTime: Number(req[2]),
+                    expired: req[4],
                 });
             }
         }
@@ -375,7 +375,6 @@ function renderPendingWithdrawals() {
                 <div class="request-info">
                     <span>Request #${req.id}</span>
                     <span>${formatShares(req.shares)} shares</span>
-                    <span>Max: ${formatUSDC(req.maxUsdc)}</span>
                     <span>Expires: ${formatTimeRemaining(expiresIn)}</span>
                 </div>
                 <button class="claim-btn" onclick="claimWithdrawal(${req.id})">

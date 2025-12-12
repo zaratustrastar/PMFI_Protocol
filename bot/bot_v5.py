@@ -52,6 +52,7 @@ WATCHDOG_INTERVAL_SECONDS = 30
 
 MIN_BID_SIZE_USDC = 5.0
 MAX_NAV_SANITY_CHANGE_PCT = 10.0
+NAV_HAIRCUT = 0.995
 
 # =============================================================================
 # GLOBALS
@@ -87,20 +88,24 @@ VAULT_V5_ABI = [
     {"inputs": [], "name": "lastRoundId", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
     {"inputs": [], "name": "totalPendingShares", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
     {"inputs": [], "name": "nextWithdrawalIndex", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
-    {"inputs": [], "name": "getPendingWithdrawalUsdc", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "targetBuffer", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "getPendingWithdrawalShares", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "getIdleBalance", "outputs": [
+        {"type": "uint256"}, {"type": "uint256"}
+    ], "stateMutability": "view", "type": "function"},
     {"inputs": [], "name": "getVaultState", "outputs": [
         {"type": "uint256"}, {"type": "uint256"}, {"type": "uint256"},
         {"type": "uint256"}, {"type": "uint256"}, {"type": "uint256"},
-        {"type": "uint256"}, {"type": "uint256"}, {"type": "bool"}, {"type": "bool"}
+        {"type": "uint256"}, {"type": "uint256"}, {"type": "bool"}, {"type": "bool"}, {"type": "uint256"}
     ], "stateMutability": "view", "type": "function"},
     {"inputs": [{"type": "uint256"}], "name": "getWithdrawalRequest", "outputs": [
         {"type": "address"}, {"type": "uint256"}, {"type": "uint256"},
-        {"type": "uint256"}, {"type": "uint256"}, {"type": "bool"}, {"type": "bool"}
+        {"type": "bool"}, {"type": "bool"}
     ], "stateMutability": "view", "type": "function"},
     {"inputs": [{"type": "uint256"}], "name": "withdrawalQueue", "outputs": [
-        {"type": "address"}, {"type": "uint256"}, {"type": "uint256"},
-        {"type": "uint256"}, {"type": "uint256"}, {"type": "bool"}
+        {"type": "address"}, {"type": "uint256"}, {"type": "uint256"}, {"type": "bool"}
     ], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "investIdle", "outputs": [{"type": "uint256"}], "stateMutability": "nonpayable", "type": "function"},
 ]
 
 ERC20_ABI = [
@@ -299,7 +304,7 @@ class NavEngine:
         
         self.previous_nav = total_nav
         
-        print(f"\n📊 NAV: ${total_nav:.2f} (positions: ${total_liquidation_value:.2f}, cash: ${pm_cash:.2f})")
+        print(f"\n📊 PM Liquidation Value: ${total_nav:.2f} (positions: ${total_liquidation_value:.2f}, cash: ${pm_cash:.2f})")
         
         return total_nav, {
             "positions_count": len(positions),
@@ -371,9 +376,13 @@ def get_signed_nav_data() -> Dict:
     total_assets_6dec = vault_balance + pm_liquidation_value
     
     if total_supply > 0:
-        nav = (total_assets_6dec * NAV_PRECISION * 10**12) // total_supply
+        raw_nav = (total_assets_6dec * NAV_PRECISION * 10**12) // total_supply
     else:
-        nav = NAV_PRECISION
+        raw_nav = NAV_PRECISION
+    
+    nav = int(raw_nav * NAV_HAIRCUT)
+    
+    print(f"📊 Final NAV: {nav / NAV_PRECISION:.6f} (raw: {raw_nav / NAV_PRECISION:.6f}, 0.5% haircut applied)")
     
     new_round_id = last_round_id + 1
     
@@ -429,25 +438,31 @@ class WithdrawalWatchdog:
     
     def check_pending_withdrawals(self) -> Dict:
         """Check current withdrawal queue status."""
-        global vault_v5, usdc
+        global vault_v5, usdc, nav_engine
         
         if not vault_v5:
             return {"error": "Vault not connected"}
         
         try:
-            pending_usdc = vault_v5.functions.getPendingWithdrawalUsdc().call()
+            pending_shares = vault_v5.functions.getPendingWithdrawalShares().call()
             buffer_balance = usdc.functions.balanceOf(VAULT_V5_ADDRESS).call()
+            target_buffer = vault_v5.functions.targetBuffer().call()
             
             state = vault_v5.functions.getVaultState().call()
+            last_nav = state[0]
             pending_count = state[7]
             deposits_throttled = state[9]
+            
+            pending_usdc = (pending_shares * last_nav) // NAV_PRECISION if last_nav > 0 else 0
             
             shortfall = pending_usdc - buffer_balance if pending_usdc > buffer_balance else 0
             
             return {
                 "pending_withdrawals_count": pending_count,
-                "pending_usdc": pending_usdc / 1e6,
+                "pending_shares": pending_shares / 1e6,
+                "pending_usdc_estimate": pending_usdc / 1e6,
                 "buffer_balance": buffer_balance / 1e6,
+                "target_buffer": target_buffer / 1e6,
                 "shortfall": shortfall / 1e6,
                 "deposits_throttled": deposits_throttled,
                 "needs_refill": shortfall > 0,

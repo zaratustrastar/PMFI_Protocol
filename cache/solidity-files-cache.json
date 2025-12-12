@@ -1120,8 +1120,8 @@
       ]
     },
     "/home/runner/workspace/contracts/PredictFiSniperVaultV5.sol": {
-      "lastModificationDate": 1765555168963,
-      "contentHash": "fed81cc25eefd2e44bfea4d19095b0e8",
+      "lastModificationDate": 1765556762318,
+      "contentHash": "83aaed1c4ab58632583236b816a8f5a6",
       "sourceName": "contracts/PredictFiSniperVaultV5.sol",
       "solcConfig": {
         "version": "0.8.20",

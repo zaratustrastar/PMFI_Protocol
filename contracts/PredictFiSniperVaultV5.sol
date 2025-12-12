@@ -11,16 +11,17 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 /**
  * @title PredictFiSniperVaultV5
- * @notice pSNIPER vault with async withdrawals and 90/10 auto-split
+ * @notice pSNIPER vault with async withdrawals and permissionless rebalancing
  * @dev 
  * 
- * Key V5 Features:
- * - 90/10 Auto-Split: Deposits emit event for bot to send 90% to Polymarket
+ * Key V5 Features (Refined):
+ * - Permissionless investIdle(): Anyone can rebalance idle funds to Polymarket
  * - Async Withdrawals: requestWithdraw → watchdog refills → claim
- * - FIFO Withdrawal Queue: Multiple pending withdrawals processed in order
+ * - Claim-time NAV: Users get current pro-rata value (simpler, no stored NAV)
  * - Signed NAV: Bot signs NAV off-chain, users include signature in tx
  * - 1% withdrawal tax to deployer
  * - Configurable per-wallet and total deposit caps
+ * - Claim allowed even when paused (users can always exit)
  */
 contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -41,9 +42,6 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     uint256 public constant USDC_DECIMALS = 6;
     uint256 public constant NAV_PRECISION = 1e18;
     
-    uint256 public constant BUFFER_RATIO_BPS = 1000;
-    uint256 public constant PM_RATIO_BPS = 9000;
-    
     uint256 public constant WITHDRAWAL_EXPIRY = 7 days;
 
     // ============================================
@@ -63,6 +61,8 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     uint256 public maxTotalDeposits;
     uint256 public totalDeposited;
     
+    uint256 public targetBuffer;
+    
     mapping(address => uint256) public walletDeposits;
     
     bool public paused;
@@ -75,8 +75,6 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     struct WithdrawalRequest {
         address user;
         uint256 shares;
-        uint256 navAtRequest;
-        uint256 maxUsdc;
         uint256 requestTime;
         bool claimed;
     }
@@ -106,17 +104,13 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         address indexed user, 
         uint256 usdcAmount, 
         uint256 sharesReceived, 
-        uint256 navUsed,
-        uint256 toBuffer,
-        uint256 toPolymarket
+        uint256 navUsed
     );
     
     event WithdrawalRequested(
         uint256 indexed requestId,
         address indexed user,
-        uint256 shares,
-        uint256 maxUsdc,
-        uint256 navAtRequest
+        uint256 shares
     );
     
     event WithdrawalClaimed(
@@ -135,15 +129,15 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     );
     
     event BufferRefilled(uint256 amount, string source);
+    event IdleFundsInvested(uint256 amount, address indexed caller);
     event NavUpdated(uint256 newNav, uint256 roundId, uint256 timestamp);
     event TaxCollectorUpdated(address indexed oldCollector, address indexed newCollector);
     event PolymarketWalletUpdated(address indexed oldWallet, address indexed newWallet);
     event CapsUpdated(uint256 perWallet, uint256 total);
+    event TargetBufferUpdated(uint256 oldBuffer, uint256 newBuffer);
     event Paused(bool isPaused);
     event DepositsThrottled(bool isThrottled);
     event EmergencyWithdraw(address indexed to, uint256 amount);
-    
-    event TransferToPolymarket(uint256 amount);
 
     // ============================================
     // Constructor
@@ -156,7 +150,8 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         address _polymarketWallet,
         uint256 _initialNav,
         uint256 _maxPerWallet,
-        uint256 _maxTotal
+        uint256 _maxTotal,
+        uint256 _targetBuffer
     ) ERC20("PredictFi Sniper", "pSNIPER") Ownable(msg.sender) {
         require(_usdc != address(0), "Invalid USDC");
         require(_navSigner != address(0), "Invalid signer");
@@ -173,6 +168,7 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         lastNavTimestamp = block.timestamp;
         maxDepositPerWallet = _maxPerWallet;
         maxTotalDeposits = _maxTotal;
+        targetBuffer = _targetBuffer;
     }
 
     // ============================================
@@ -195,7 +191,7 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     
     /**
      * @notice Deposit USDC and receive pSNIPE shares
-     * @dev 90% goes to Polymarket wallet, 10% stays in buffer
+     * @dev All USDC stays in vault; call investIdle() to rebalance
      * @param usdcAmount Amount of USDC to deposit (6 decimals)
      * @param navData Signed NAV data from oracle
      * @param signature Oracle signature over navData
@@ -217,26 +213,33 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         
         usdc.safeTransferFrom(msg.sender, address(this), usdcAmount);
         
-        uint256 toBuffer = (usdcAmount * BUFFER_RATIO_BPS) / 10000;
-        uint256 toPolymarket = usdcAmount - toBuffer;
-        
-        if (toPolymarket > 0) {
-            usdc.safeTransfer(polymarketWallet, toPolymarket);
-            emit TransferToPolymarket(toPolymarket);
-        }
-        
         walletDeposits[msg.sender] += usdcAmount;
         totalDeposited += usdcAmount;
         
         _mint(msg.sender, sharesToMint);
         
-        emit Deposit(msg.sender, usdcAmount, sharesToMint, navData.nav, toBuffer, toPolymarket);
+        emit Deposit(msg.sender, usdcAmount, sharesToMint, navData.nav);
+    }
+    
+    /**
+     * @notice Permissionless: Send idle funds above targetBuffer to Polymarket
+     * @dev Anyone can call this to rebalance the vault
+     * @return amountSent Amount of USDC sent to Polymarket wallet
+     */
+    function investIdle() external nonReentrant returns (uint256 amountSent) {
+        uint256 balance = usdc.balanceOf(address(this));
+        if (balance <= targetBuffer) return 0;
+        
+        amountSent = balance - targetBuffer;
+        usdc.safeTransfer(polymarketWallet, amountSent);
+        
+        emit IdleFundsInvested(amountSent, msg.sender);
     }
     
     /**
      * @notice Request withdrawal - shares are locked, USDC paid later
      * @param shareAmount Amount of pSNIPE shares to redeem
-     * @param navData Signed NAV data from oracle (used for max USDC calculation)
+     * @param navData Signed NAV data from oracle
      * @param signature Oracle signature over navData
      * @return requestId The withdrawal request ID
      */
@@ -250,18 +253,12 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         
         _verifyAndApplyNav(navData, signature);
         
-        uint256 grossUsdc = (shareAmount * navData.nav) / NAV_PRECISION;
-        uint256 tax = (grossUsdc * WITHDRAWAL_TAX_BPS) / 10000;
-        uint256 maxUsdc = grossUsdc - tax;
-        
         _transfer(msg.sender, address(this), shareAmount);
         
         requestId = withdrawalQueue.length;
         withdrawalQueue.push(WithdrawalRequest({
             user: msg.sender,
             shares: shareAmount,
-            navAtRequest: navData.nav,
-            maxUsdc: maxUsdc,
             requestTime: block.timestamp,
             claimed: false
         }));
@@ -269,20 +266,22 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         userWithdrawals[msg.sender].push(requestId);
         totalPendingShares += shareAmount;
         
-        emit WithdrawalRequested(requestId, msg.sender, shareAmount, maxUsdc, navData.nav);
+        emit WithdrawalRequested(requestId, msg.sender, shareAmount);
     }
     
     /**
      * @notice Claim a pending withdrawal (after buffer is refilled)
+     * @dev Uses claim-time NAV only (simpler, user gets current pro-rata share)
+     * @dev Allowed even when paused - users can always exit
      * @param requestId The withdrawal request ID
-     * @param navData Fresh signed NAV data (user pays at min of request NAV or claim NAV)
+     * @param navData Fresh signed NAV data
      * @param signature Oracle signature over navData
      */
     function claim(
         uint256 requestId,
         NavData calldata navData,
         bytes calldata signature
-    ) external nonReentrant whenNotPaused {
+    ) external nonReentrant {
         require(requestId < withdrawalQueue.length, "Invalid request");
         WithdrawalRequest storage request = withdrawalQueue[requestId];
         
@@ -292,9 +291,7 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         
         _verifyAndApplyNav(navData, signature);
         
-        uint256 navToUse = navData.nav < request.navAtRequest ? navData.nav : request.navAtRequest;
-        
-        uint256 grossUsdc = (request.shares * navToUse) / NAV_PRECISION;
+        uint256 grossUsdc = (request.shares * navData.nav) / NAV_PRECISION;
         uint256 tax = (grossUsdc * WITHDRAWAL_TAX_BPS) / 10000;
         uint256 netUsdc = grossUsdc - tax;
         
@@ -327,7 +324,7 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         usdc.safeTransfer(taxCollector, tax);
         usdc.safeTransfer(msg.sender, netUsdc);
         
-        emit WithdrawalClaimed(requestId, msg.sender, request.shares, netUsdc, tax, navToUse);
+        emit WithdrawalClaimed(requestId, msg.sender, request.shares, netUsdc, tax, navData.nav);
     }
     
     /**
@@ -401,6 +398,11 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         netUsdc = grossUsdc - tax;
     }
     
+    function getIdleBalance() external view returns (uint256 idle, uint256 buffer) {
+        buffer = usdc.balanceOf(address(this));
+        idle = buffer > targetBuffer ? buffer - targetBuffer : 0;
+    }
+    
     function getVaultState() external view returns (
         uint256 _lastNav,
         uint256 _lastRoundId,
@@ -411,7 +413,8 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         uint256 _totalPendingShares,
         uint256 _pendingWithdrawalsCount,
         bool _paused,
-        bool _depositsThrottled
+        bool _depositsThrottled,
+        uint256 _targetBuffer
     ) {
         uint256 pendingCount = 0;
         for (uint256 i = nextWithdrawalIndex; i < withdrawalQueue.length; i++) {
@@ -428,16 +431,13 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
             totalPendingShares,
             pendingCount,
             paused,
-            depositsThrottled
+            depositsThrottled,
+            targetBuffer
         );
     }
     
-    function getPendingWithdrawalUsdc() external view returns (uint256 totalUsdc) {
-        for (uint256 i = nextWithdrawalIndex; i < withdrawalQueue.length; i++) {
-            if (!withdrawalQueue[i].claimed) {
-                totalUsdc += withdrawalQueue[i].maxUsdc;
-            }
-        }
+    function getPendingWithdrawalShares() external view returns (uint256) {
+        return totalPendingShares;
     }
     
     function getUserWithdrawals(address user) external view returns (uint256[] memory) {
@@ -447,8 +447,6 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     function getWithdrawalRequest(uint256 requestId) external view returns (
         address user,
         uint256 shares,
-        uint256 navAtRequest,
-        uint256 maxUsdc,
         uint256 requestTime,
         bool claimed,
         bool expired
@@ -458,8 +456,6 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         return (
             r.user,
             r.shares,
-            r.navAtRequest,
-            r.maxUsdc,
             r.requestTime,
             r.claimed,
             block.timestamp > r.requestTime + WITHDRAWAL_EXPIRY
@@ -478,6 +474,11 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     function refillBuffer(uint256 amount) external onlyOwner {
         usdc.safeTransferFrom(msg.sender, address(this), amount);
         emit BufferRefilled(amount, "owner");
+    }
+    
+    function setTargetBuffer(uint256 _targetBuffer) external onlyOwner {
+        emit TargetBufferUpdated(targetBuffer, _targetBuffer);
+        targetBuffer = _targetBuffer;
     }
     
     function setTaxCollector(address _taxCollector) external onlyOwner {

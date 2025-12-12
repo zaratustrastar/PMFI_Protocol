@@ -1,11 +1,13 @@
 /**
  * Deploy PredictFiSniperVaultV5 to Base Mainnet
  * 
- * V5 Features:
- * - 90/10 auto-split (90% to Polymarket, 10% buffer)
+ * V5 Features (Refined):
+ * - Permissionless investIdle() for rebalancing
  * - Async withdrawal queue (requestWithdraw → claim)
+ * - Claim-time NAV (simpler, no stored NAV)
  * - Signed NAV oracle (zero gas for protocol)
  * - 1% withdrawal tax
+ * - Claim allowed even when paused
  * 
  * Usage:
  *   npx hardhat run scripts/deploy-v5-mainnet.js --network baseMainnet
@@ -26,7 +28,7 @@ async function main() {
 
   // Configuration
   const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // Base USDC
-  const NAV_SIGNER = deployer.address; // Oracle key (same as deployer)
+  const NAV_SIGNER = deployer.address; // Oracle key (same as deployer for MVP)
   const TAX_COLLECTOR = deployer.address; // 1% tax goes here
   const POLYMARKET_WALLET = process.env.POLYMARKET_PROXY_ADDRESS;
   
@@ -38,6 +40,7 @@ async function main() {
   const INITIAL_NAV = hre.ethers.parseUnits("1", 18); // 1.0 NAV
   const MAX_PER_WALLET = hre.ethers.parseUnits("100", 6); // 100 USDC per wallet
   const MAX_TOTAL = hre.ethers.parseUnits("10000", 6); // 10,000 USDC total cap
+  const TARGET_BUFFER = hre.ethers.parseUnits("1000", 6); // 1,000 USDC target buffer (~10%)
 
   console.log("Configuration:");
   console.log("  USDC:", USDC_ADDRESS);
@@ -47,6 +50,7 @@ async function main() {
   console.log("  Initial NAV:", "1.0");
   console.log("  Max per wallet:", "100 USDC");
   console.log("  Max total:", "10,000 USDC");
+  console.log("  Target buffer:", "1,000 USDC");
   console.log("");
 
   // Deploy
@@ -60,7 +64,8 @@ async function main() {
     POLYMARKET_WALLET,
     INITIAL_NAV,
     MAX_PER_WALLET,
-    MAX_TOTAL
+    MAX_TOTAL,
+    TARGET_BUFFER
   );
 
   await vault.waitForDeployment();
@@ -73,11 +78,13 @@ async function main() {
   const lastNav = await vault.lastNav();
   const maxPerWallet = await vault.maxDepositPerWallet();
   const maxTotal = await vault.maxTotalDeposits();
+  const targetBuf = await vault.targetBuffer();
   const pmWallet = await vault.polymarketWallet();
   
   console.log("  lastNav:", hre.ethers.formatUnits(lastNav, 18));
   console.log("  maxDepositPerWallet:", hre.ethers.formatUnits(maxPerWallet, 6), "USDC");
   console.log("  maxTotalDeposits:", hre.ethers.formatUnits(maxTotal, 6), "USDC");
+  console.log("  targetBuffer:", hre.ethers.formatUnits(targetBuf, 6), "USDC");
   console.log("  polymarketWallet:", pmWallet);
 
   console.log("\n========================================");
@@ -89,8 +96,9 @@ async function main() {
   console.log("1. Start bot: python bot/bot_v5.py");
   console.log("2. Update frontend to use V5 ABI and address");
   console.log("3. Test deposit/withdrawal flow");
-  console.log("4. Verify on Basescan:");
-  console.log(`   npx hardhat verify --network baseMainnet ${vaultAddress} "${USDC_ADDRESS}" "${NAV_SIGNER}" "${TAX_COLLECTOR}" "${POLYMARKET_WALLET}" "${INITIAL_NAV}" "${MAX_PER_WALLET}" "${MAX_TOTAL}"`);
+  console.log("4. Anyone can call investIdle() to rebalance");
+  console.log("5. Verify on Basescan:");
+  console.log(`   npx hardhat verify --network baseMainnet ${vaultAddress} "${USDC_ADDRESS}" "${NAV_SIGNER}" "${TAX_COLLECTOR}" "${POLYMARKET_WALLET}" "${INITIAL_NAV}" "${MAX_PER_WALLET}" "${MAX_TOTAL}" "${TARGET_BUFFER}"`);
 }
 
 main()

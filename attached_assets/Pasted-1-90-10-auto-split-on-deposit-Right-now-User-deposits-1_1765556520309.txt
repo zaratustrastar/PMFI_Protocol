@@ -1,0 +1,193 @@
+1. 90/10 auto-split on deposit
+
+Right now:
+
+User deposits → 10% stays in vault buffer, 90% auto-sent to Polymarket wallet
+Bot watches Deposit events and triggers the transfer
+
+This is fine, but for security + autonomy I’d slightly change the pattern:
+
+What I’d prefer
+
+Keep deposit() as stupid-simple as possible:
+
+Take USDC from user.
+
+Mint shares based on signed NAV.
+
+Do not move funds out in the same function.
+
+Add a separate, permissionless function, e.g.:
+
+function investIdle() external {
+    uint256 balance = usdc.balanceOf(address(this));
+    if (balance <= targetBuffer) return;
+
+    uint256 toSend = balance - targetBuffer;
+    usdc.transfer(polymarketWallet, toSend);
+}
+
+
+Then:
+
+The bot still watches Deposit events.
+
+But instead of calling some owner-only “emergencyWithdraw”, it just calls investIdle().
+
+Anyone can also call investIdle() (so the system doesn’t depend on one bot).
+
+Why this is better for MVP:
+
+Deposit stays minimal (less to audit, less that can go wrong).
+
+No special “drain” function that can accidentally send everything out.
+
+The logic “keep ~10% in buffer, 90% in PM” is encoded declaratively as targetBuffer, not buried in deposit code.
+
+It’s more autonomous: if your bot dies, any address can still rebalance idle funds.
+
+You can still keep the 90/10 target — it just becomes a number (targetBuffer) instead of being hard-wired into deposit behaviour.
+
+2. Async withdrawal queue: one small tweak
+
+Your V5 description:
+
+Request: requestWithdraw() - shares locked in vault, added to queue
+Wait: watchdog refills buffer
+Claim: claim() with fresh NAV - pays min(requestNAV, claimNAV), 1% tax
+
+The overall structure is great. My one suggestion:
+
+Don’t use min(requestNAV, claimNAV) if you don’t need to
+
+From a security perspective:
+
+min(requestNAV, claimNAV) is safe (you never overpay).
+
+But it introduces extra state (you have to remember requestNAV), and it means:
+
+if NAV pumps after request, user is underpaid (gets requestNAV, not new higher NAV),
+
+if NAV dumps, they get the lower claimNAV.
+
+This is conservative, but a bit weird.
+
+For both simplicity and consistency I’d do:
+
+Queue stores only shares, not a fixed USDC amount and not a request NAV.
+
+At claim time you always do:
+
+owed = shares * navAtClaim / 1e18;
+
+
+Benefits:
+
+No need to store NAV at request → fewer moving parts.
+
+User always gets current pro-rata share of the portfolio, no edge-case branch.
+
+You still never overpay, because you always rely on the fresh signed NAV.
+
+If you really want “never pay more than request NAV” you can leave min(request, claim) in, but from a protocol safety + simplicity view, “claim NAV only” is enough.
+
+Everything else in your queue design (burn/lock shares, watchdog refills buffer, FIFO-ish queue) is solid for MVP.
+
+3. NAV manipulation / oracle hardening
+
+You already added:
+
+depth-weighted liquidation,
+
+min $5 bid size,
+
+5% max NAV change,
+
+30s signature validity.
+
+For MVP, that’s actually quite decent.
+
+If you want one more low-effort safety rail without much complexity, I’d add:
+
+NAV haircut in the bot:
+
+After computing liquidation value, multiply by e.g. 0.995.
+
+This builds in an automatic 0.5% safety margin against overly optimistic books / tiny spoofing.
+
+This is easy, cheap, and doesn’t require contract changes.
+
+More advanced stuff like multi-snapshot TWAP can wait for “V6+”.
+
+4. Caps, expiry, and queue details
+
+What you have:
+
+Per-wallet and total caps (configurable) ✅
+
+7-day expiry on unclaimed withdrawals, user can cancel ✅
+
+FIFO not strictly enforced ❗ (but you accepted it as a limitation)
+
+From a security/autonomy angle:
+
+Caps help a lot; keep them low at start and gradually raise as you gain confidence.
+
+7-day expiry + cancel is nice UX, but not critical for security.
+
+Non-strict FIFO is fine for MVP so long as:
+
+you don’t do anything silly like “fully process later requests while older ones are literally impossible to fulfill” — but that’s more fairness than safety.
+
+If you want a tiny safety tweak:
+
+When computing owed in claim(), you can check:
+
+require(usdc.balanceOf(address(this)) >= owed, "insufficient buffer");
+
+
+which you probably already do, but it’s worth highlighting: claims should be hard-capped by actual buffer, not by “pending amount we think we can cover.”
+
+5. Operational + autonomy stuff
+
+For “everything works autonomously, effectively” I’d underline:
+
+Make critical functions permissionless when safe
+
+investIdle() as mentioned above.
+
+You can also consider a function like fulfillWithdrawals() that anyone can call, which processes the oldest pending withdrawal if the buffer is big enough.
+
+Add a simple circuit breaker
+
+A pause() that:
+
+stops new deposit() and new requestWithdraw(),
+
+but still allows claim() and maybe cancel().
+
+So if you detect something funky (oracle key compromised, PM API broken), you can freeze new risk while letting users exit through the existing queue when/if liquidity allows.
+
+Isolate keys
+
+Oracle signing key ≠ deployer / admin key ≠ polymarket hot wallet key.
+
+This doesn’t need code changes, just how you actually run it.
+
+These are “one-time” decisions that don’t complicate the contract much but massively improve security posture.
+
+TL;DR – What I’d change for MVP
+
+If I were you, I’d keep V5 architecture but:
+
+Make 90/10 via permissionless investIdle(), not inside deposit.
+
+In the queue, pay strictly with claim-time NAV, not min(requestNAV, claimNAV) (simpler and still safe).
+
+Keep min bid size, 5% NAV jump limit, 30s signature validity; optionally add a 0.5% haircut.
+
+Ensure claim() is hard-limited by actual buffer, not just by math.
+
+Add a pause switch and keep oracle/admin/wallet keys separated operationally.
+
+With those tweaks, you’ve got a pretty robust, mostly autonomous MVP that’s still understandable and maintainable.
