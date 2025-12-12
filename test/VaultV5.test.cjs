@@ -336,6 +336,23 @@ describe("PredictFiSniperVaultV5 - Refined", function () {
         )
       ).to.be.revertedWith("Vault is paused");
     });
+
+    it("should block investIdle when paused", async function () {
+      const vaultAddress = await vault.getAddress();
+      
+      const navData = await getSignedNav(INITIAL_NAV, 1, oracle, vaultAddress);
+      await vault.connect(user).deposit(
+        ethers.parseUnits("100", 6),
+        [navData.nav, navData.timestamp, navData.deadline, navData.roundId],
+        navData.signature
+      );
+      
+      await vault.connect(owner).setPaused(true);
+      
+      await expect(
+        vault.investIdle()
+      ).to.be.revertedWith("Vault is paused");
+    });
   });
 
   describe("1% Withdrawal Tax", function () {

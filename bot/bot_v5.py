@@ -36,6 +36,25 @@ import requests
 
 load_dotenv()
 
+
+def send_telegram_alert(message: str):
+    """Send alert to Telegram channel."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        print(f"⚠️  Telegram not configured: {message}")
+        return False
+    
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        resp = requests.post(url, json={
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": f"🚨 pSNIPER V5 ALERT\n\n{message}",
+            "parse_mode": "HTML",
+        }, timeout=10)
+        return resp.status_code == 200
+    except Exception as e:
+        print(f"❌ Telegram error: {e}")
+        return False
+
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
@@ -53,6 +72,11 @@ WATCHDOG_INTERVAL_SECONDS = 30
 MIN_BID_SIZE_USDC = 5.0
 MAX_NAV_SANITY_CHANGE_PCT = 10.0
 NAV_HAIRCUT = 0.995
+
+MAX_HOURLY_LIQUIDATION_USDC = 5000.0
+CIRCUIT_BREAKER_NAV_DROP_PCT = 15.0
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 # =============================================================================
 # GLOBALS
@@ -77,6 +101,13 @@ cached_nav = {
 nav_lock = threading.Lock()
 
 previous_nav_value = NAV_PRECISION
+
+hourly_liquidation_tracker = {
+    "hour": 0,
+    "amount": 0.0,
+}
+circuit_breaker_triggered = False
+baseline_nav = None
 
 # =============================================================================
 # ABI DEFINITIONS
@@ -516,15 +547,78 @@ class WithdrawalWatchdog:
     
     def get_watchdog_status(self) -> Dict:
         """Get full watchdog status for API."""
+        global circuit_breaker_triggered, hourly_liquidation_tracker
+        
         withdrawal_status = self.check_pending_withdrawals()
         shortfall, refill_plan = self.calculate_refill_needed()
+        
+        current_hour = int(time.time()) // 3600
+        hourly_used = hourly_liquidation_tracker["amount"] if hourly_liquidation_tracker["hour"] == current_hour else 0
         
         return {
             "withdrawals": withdrawal_status,
             "refill_plan": refill_plan,
             "last_check": self.last_check,
             "refill_in_progress": self.refill_in_progress,
+            "circuit_breaker": circuit_breaker_triggered,
+            "hourly_liquidation": {
+                "used": hourly_used,
+                "limit": MAX_HOURLY_LIQUIDATION_USDC,
+                "remaining": max(0, MAX_HOURLY_LIQUIDATION_USDC - hourly_used),
+            },
         }
+    
+    def check_circuit_breaker(self) -> bool:
+        """Check if circuit breaker should be triggered based on NAV drop."""
+        global circuit_breaker_triggered, baseline_nav, cached_nav
+        
+        if circuit_breaker_triggered:
+            return True
+        
+        with nav_lock:
+            current_nav = cached_nav.get("nav", NAV_PRECISION)
+        
+        if baseline_nav is None:
+            baseline_nav = current_nav
+            return False
+        
+        if baseline_nav > 0:
+            drop_pct = (baseline_nav - current_nav) / baseline_nav * 100
+            if drop_pct >= CIRCUIT_BREAKER_NAV_DROP_PCT:
+                circuit_breaker_triggered = True
+                msg = f"NAV dropped {drop_pct:.1f}% from baseline!\nBaseline: {baseline_nav/NAV_PRECISION:.4f}\nCurrent: {current_nav/NAV_PRECISION:.4f}"
+                print(f"🚨 CIRCUIT BREAKER TRIGGERED: {msg}")
+                send_telegram_alert(msg)
+                return True
+        
+        return False
+    
+    def can_liquidate(self, amount_usdc: float) -> Tuple[bool, str]:
+        """Check if liquidation is allowed within hourly limits."""
+        global hourly_liquidation_tracker
+        
+        current_hour = int(time.time()) // 3600
+        
+        if hourly_liquidation_tracker["hour"] != current_hour:
+            hourly_liquidation_tracker = {"hour": current_hour, "amount": 0.0}
+        
+        remaining = MAX_HOURLY_LIQUIDATION_USDC - hourly_liquidation_tracker["amount"]
+        
+        if amount_usdc > remaining:
+            return False, f"Hourly limit: ${remaining:.2f} remaining, need ${amount_usdc:.2f}"
+        
+        return True, "OK"
+    
+    def record_liquidation(self, amount_usdc: float):
+        """Record a liquidation against the hourly limit."""
+        global hourly_liquidation_tracker
+        
+        current_hour = int(time.time()) // 3600
+        
+        if hourly_liquidation_tracker["hour"] != current_hour:
+            hourly_liquidation_tracker = {"hour": current_hour, "amount": 0.0}
+        
+        hourly_liquidation_tracker["amount"] += amount_usdc
 
 
 watchdog = WithdrawalWatchdog()
@@ -537,12 +631,20 @@ watchdog = WithdrawalWatchdog()
 @app.route("/health", methods=["GET"])
 def health():
     """Health check endpoint."""
+    global circuit_breaker_triggered, hourly_liquidation_tracker
+    
+    current_hour = int(time.time()) // 3600
+    hourly_used = hourly_liquidation_tracker["amount"] if hourly_liquidation_tracker["hour"] == current_hour else 0
+    
     return jsonify({
-        "status": "ok",
-        "version": "v5",
+        "status": "ok" if not circuit_breaker_triggered else "CIRCUIT_BREAKER",
+        "version": "v5.1",
         "vault": VAULT_V5_ADDRESS,
         "oracle": oracle_account.address if oracle_account else None,
         "polymarket_wallet": POLYMARKET_PROXY_ADDRESS,
+        "circuit_breaker": circuit_breaker_triggered,
+        "hourly_liquidation_used": hourly_used,
+        "hourly_liquidation_limit": MAX_HOURLY_LIQUIDATION_USDC,
     })
 
 
@@ -604,18 +706,31 @@ def nav_update_loop():
 
 
 def watchdog_loop():
-    """Background loop to monitor pending withdrawals."""
+    """Background loop to monitor pending withdrawals and check safety limits."""
     global watchdog
     
     while True:
         try:
+            if watchdog.check_circuit_breaker():
+                print(f"🚨 Circuit breaker active - watchdog paused")
+                time.sleep(WATCHDOG_INTERVAL_SECONDS)
+                continue
+            
             status = watchdog.check_pending_withdrawals()
             watchdog.last_check = int(time.time())
             
             if status.get("needs_refill"):
-                print(f"⚠️  WATCHDOG: Refill needed! Shortfall: ${status['shortfall']:.2f}")
+                shortfall = status['shortfall']
+                print(f"⚠️  WATCHDOG: Refill needed! Shortfall: ${shortfall:.2f}")
                 _, plan = watchdog.calculate_refill_needed()
                 print(f"   Plan: {plan.get('action')}")
+                
+                can_liq, reason = watchdog.can_liquidate(shortfall)
+                if not can_liq:
+                    print(f"   ⛔ Liquidation blocked: {reason}")
+                    send_telegram_alert(f"Buffer refill needed (${shortfall:.2f}) but blocked:\n{reason}")
+                else:
+                    send_telegram_alert(f"Buffer shortfall detected: ${shortfall:.2f}\nPlan: {plan.get('action')}\n\nManual action may be required.")
             
         except Exception as e:
             print(f"❌ Watchdog error: {e}")
@@ -632,7 +747,7 @@ def initialize():
     global w3, oracle_account, usdc, vault_v5, polymarket_client, nav_engine
     
     print(f"\n{'='*60}")
-    print(f"🚀 PSNIPER V5 BOT STARTING")
+    print(f"🚀 PSNIPER V5.1 BOT STARTING (Autonomous)")
     print(f"{'='*60}")
     
     if not ORACLE_PRIVATE_KEY:
@@ -671,9 +786,11 @@ def initialize():
     wd_thread = threading.Thread(target=watchdog_loop, daemon=True)
     wd_thread.start()
     
-    print(f"\n✅ V5 Bot initialized successfully!")
-    print(f"   - NAV updates every 30 seconds")
+    print(f"\n✅ V5.1 Bot initialized successfully!")
+    print(f"   - NAV updates every 30 seconds (with 0.5% haircut)")
     print(f"   - Watchdog monitors every {WATCHDOG_INTERVAL_SECONDS} seconds")
+    print(f"   - Circuit breaker at {CIRCUIT_BREAKER_NAV_DROP_PCT}% NAV drop")
+    print(f"   - Max liquidation: ${MAX_HOURLY_LIQUIDATION_USDC}/hour")
     
     return True
 

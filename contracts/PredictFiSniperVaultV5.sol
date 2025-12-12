@@ -223,10 +223,10 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     
     /**
      * @notice Permissionless: Send idle funds above targetBuffer to Polymarket
-     * @dev Anyone can call this to rebalance the vault
+     * @dev Anyone can call this to rebalance the vault (blocked when paused)
      * @return amountSent Amount of USDC sent to Polymarket wallet
      */
-    function investIdle() external nonReentrant returns (uint256 amountSent) {
+    function investIdle() external nonReentrant whenNotPaused returns (uint256 amountSent) {
         uint256 balance = usdc.balanceOf(address(this));
         if (balance <= targetBuffer) return 0;
         
