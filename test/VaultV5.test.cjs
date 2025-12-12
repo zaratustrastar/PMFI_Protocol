@@ -17,6 +17,7 @@ describe("PredictFiSniperVaultV5 - Refined", function () {
   const MAX_PER_WALLET = ethers.parseUnits("100", 6);
   const MAX_TOTAL = ethers.parseUnits("10000", 6);
   const TARGET_BUFFER = ethers.parseUnits("100", 6);
+  const MAX_REBALANCE_PER_CALL = ethers.parseUnits("50", 6); // 50 USDC for testing
   
   const NAV_TYPEHASH = ethers.keccak256(
     ethers.toUtf8Bytes("NavData(uint256 nav,uint256 timestamp,uint256 deadline,uint256 roundId,address vault)")
@@ -58,7 +59,8 @@ describe("PredictFiSniperVaultV5 - Refined", function () {
       INITIAL_NAV,
       MAX_PER_WALLET,
       MAX_TOTAL,
-      TARGET_BUFFER
+      TARGET_BUFFER,
+      MAX_REBALANCE_PER_CALL
     );
     await vault.waitForDeployment();
     
@@ -92,6 +94,10 @@ describe("PredictFiSniperVaultV5 - Refined", function () {
 
     it("should allow anyone to call investIdle() to rebalance", async function () {
       const vaultAddress = await vault.getAddress();
+      
+      // Increase maxRebalancePerCall to allow full rebalance
+      await vault.connect(owner).setMaxRebalancePerCall(ethers.parseUnits("1000", 6));
+      
       const navData = await getSignedNav(INITIAL_NAV, 1, oracle, vaultAddress);
       
       await vault.connect(user).deposit(
@@ -131,6 +137,44 @@ describe("PredictFiSniperVaultV5 - Refined", function () {
       
       const result = await vault.connect(user2).investIdle.staticCall();
       expect(result).to.equal(0);
+    });
+
+    it("should rate limit investIdle() by maxRebalancePerCall", async function () {
+      const vaultAddress = await vault.getAddress();
+      const navData = await getSignedNav(INITIAL_NAV, 1, oracle, vaultAddress);
+      
+      await vault.connect(user).deposit(
+        ethers.parseUnits("100", 6),
+        [navData.nav, navData.timestamp, navData.deadline, navData.roundId],
+        navData.signature
+      );
+      
+      const navData2 = await getSignedNav(INITIAL_NAV, 2, oracle, vaultAddress);
+      await vault.connect(user2).deposit(
+        ethers.parseUnits("100", 6),
+        [navData2.nav, navData2.timestamp, navData2.deadline, navData2.roundId],
+        navData2.signature
+      );
+      
+      // Total 200 USDC in vault, target buffer is 100, so 100 USDC is idle
+      // But maxRebalancePerCall is 50, so only 50 should be sent
+      const pmBalanceBefore = await usdc.balanceOf(polymarketWallet.address);
+      
+      await vault.connect(user2).investIdle();
+      
+      const pmBalanceAfter = await usdc.balanceOf(polymarketWallet.address);
+      const amountSent = pmBalanceAfter - pmBalanceBefore;
+      
+      // Should only send maxRebalancePerCall (50 USDC), not the full idle amount (100 USDC)
+      expect(amountSent).to.equal(MAX_REBALANCE_PER_CALL);
+    });
+
+    it("should allow owner to update maxRebalancePerCall", async function () {
+      const newMax = ethers.parseUnits("200", 6);
+      
+      await vault.connect(owner).setMaxRebalancePerCall(newMax);
+      
+      expect(await vault.maxRebalancePerCall()).to.equal(newMax);
     });
   });
 
@@ -204,6 +248,8 @@ describe("PredictFiSniperVaultV5 - Refined", function () {
       const vaultAddress = await vault.getAddress();
       
       await vault.connect(owner).setTargetBuffer(ethers.parseUnits("10", 6));
+      // Increase maxRebalancePerCall to allow full rebalance
+      await vault.connect(owner).setMaxRebalancePerCall(ethers.parseUnits("1000", 6));
       
       const navData1 = await getSignedNav(INITIAL_NAV, 2, oracle, vaultAddress);
       await vault.connect(user2).deposit(
@@ -212,6 +258,8 @@ describe("PredictFiSniperVaultV5 - Refined", function () {
         navData1.signature
       );
       
+      // Call investIdle twice to drain most funds
+      await vault.investIdle();
       await vault.investIdle();
       
       const shares = await vault.balanceOf(user.address);

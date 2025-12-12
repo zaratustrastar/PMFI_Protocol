@@ -1,0 +1,97 @@
+Recommended path (MVP, autonomous, secure)
+✅ Use Option A as the base
+
+Extend the existing trading script with a simple “Liquidity Keeper” mode:
+
+Every N seconds:
+
+Query vault on-chain for:
+
+total pending withdrawal shares
+
+buffer balance
+
+Optionally hit bot_v5 /nav or /plan endpoint if you want a human-readable “refillNeeded = X” struct.
+
+Compute required refill:
+
+pendingUSDC ≈ totalPendingShares * NAV / 1e18
+targetBuffer = pendingUSDC * safetyFactor + baseBuffer
+if buffer < targetBuffer:
+    shortfall = targetBuffer - buffer
+
+
+If shortfall > 0:
+
+First use PM cash
+
+If not enough, sell positions
+
+Once PM wallet has shortfall USDC → withdraw/bridge to Base → send to vault
+
+This turns your trading script into:
+
+Strategy + Liquidity Keeper for the vault.
+
+No extra PM keys. No duplicate logic. Very clear responsibility.
+
+Small tweaks to make it even cleaner
+
+Let bot_v5 stay “read-only” + signer
+
+Signs NAV
+
+Exposes /sign-nav and maybe /withdrawals (read only, no funds)
+
+No PM private key inside, ever
+
+Trading script = only thing that controls PM wallet
+
+It reads data from:
+
+PM API
+
+vault contract
+
+bot_v5 endpoints
+
+It is the only thing that:
+
+places orders
+
+withdraws cash
+
+sends USDC back
+
+Start with on-chain RPC instead of /withdrawals
+
+If your contract already exposes a public getPendingWithdrawalShares() or similar, your script can skip HTTP and just read from the chain.
+
+TL;DR recommendation
+
+Don’t put Polymarket trading logic into bot_v5 as a second copy.
+
+Do extend your existing trading script (Option A) so it:
+
+watches vault state,
+
+refills buffer from PM cash,
+
+liquidates positions when needed,
+
+and pushes USDC back to the vault.
+
+That’s the most effective (one source of truth) and secure (one PM key, one trading stack) option for your autonomous MVP.
+
+If you want, I can outline the exact loop for the trading script:
+
+while True:
+  read on-chain vault state
+  read latest NAV
+  calculate shortfall
+  if shortfall > 0:
+    top up from PM cash or liquidations
+  sleep N seconds
+
+
+with a list of “stop conditions” (e.g. NAV too jumpy, PM API broken, etc.).

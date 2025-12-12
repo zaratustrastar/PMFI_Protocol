@@ -41,6 +41,7 @@ async function main() {
   const MAX_PER_WALLET = hre.ethers.parseUnits("100", 6); // 100 USDC per wallet
   const MAX_TOTAL = hre.ethers.parseUnits("10000", 6); // 10,000 USDC total cap
   const TARGET_BUFFER = hre.ethers.parseUnits("1000", 6); // 1,000 USDC target buffer (~10%)
+  const MAX_REBALANCE_PER_CALL = hre.ethers.parseUnits("1000", 6); // 1,000 USDC max per investIdle() call
 
   console.log("Configuration:");
   console.log("  USDC:", USDC_ADDRESS);
@@ -51,6 +52,7 @@ async function main() {
   console.log("  Max per wallet:", "100 USDC");
   console.log("  Max total:", "10,000 USDC");
   console.log("  Target buffer:", "1,000 USDC");
+  console.log("  Max rebalance per call:", "1,000 USDC");
   console.log("");
 
   // Deploy
@@ -65,7 +67,8 @@ async function main() {
     INITIAL_NAV,
     MAX_PER_WALLET,
     MAX_TOTAL,
-    TARGET_BUFFER
+    TARGET_BUFFER,
+    MAX_REBALANCE_PER_CALL
   );
 
   await vault.waitForDeployment();
@@ -98,7 +101,7 @@ async function main() {
   console.log("3. Test deposit/withdrawal flow");
   console.log("4. Anyone can call investIdle() to rebalance");
   console.log("5. Verify on Basescan:");
-  console.log(`   npx hardhat verify --network baseMainnet ${vaultAddress} "${USDC_ADDRESS}" "${NAV_SIGNER}" "${TAX_COLLECTOR}" "${POLYMARKET_WALLET}" "${INITIAL_NAV}" "${MAX_PER_WALLET}" "${MAX_TOTAL}" "${TARGET_BUFFER}"`);
+  console.log(`   npx hardhat verify --network baseMainnet ${vaultAddress} "${USDC_ADDRESS}" "${NAV_SIGNER}" "${TAX_COLLECTOR}" "${POLYMARKET_WALLET}" "${INITIAL_NAV}" "${MAX_PER_WALLET}" "${MAX_TOTAL}" "${TARGET_BUFFER}" "${MAX_REBALANCE_PER_CALL}"`);
 }
 
 main()

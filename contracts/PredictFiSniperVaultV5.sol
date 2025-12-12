@@ -62,6 +62,7 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     uint256 public totalDeposited;
     
     uint256 public targetBuffer;
+    uint256 public maxRebalancePerCall;
     
     mapping(address => uint256) public walletDeposits;
     
@@ -135,6 +136,7 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     event PolymarketWalletUpdated(address indexed oldWallet, address indexed newWallet);
     event CapsUpdated(uint256 perWallet, uint256 total);
     event TargetBufferUpdated(uint256 oldBuffer, uint256 newBuffer);
+    event MaxRebalanceUpdated(uint256 oldMax, uint256 newMax);
     event Paused(bool isPaused);
     event DepositsThrottled(bool isThrottled);
     event EmergencyWithdraw(address indexed to, uint256 amount);
@@ -151,7 +153,8 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         uint256 _initialNav,
         uint256 _maxPerWallet,
         uint256 _maxTotal,
-        uint256 _targetBuffer
+        uint256 _targetBuffer,
+        uint256 _maxRebalancePerCall
     ) ERC20("PredictFi Sniper", "pSNIPER") Ownable(msg.sender) {
         require(_usdc != address(0), "Invalid USDC");
         require(_navSigner != address(0), "Invalid signer");
@@ -169,6 +172,7 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
         maxDepositPerWallet = _maxPerWallet;
         maxTotalDeposits = _maxTotal;
         targetBuffer = _targetBuffer;
+        maxRebalancePerCall = _maxRebalancePerCall > 0 ? _maxRebalancePerCall : 1000e6; // Default 1000 USDC
     }
 
     // ============================================
@@ -224,13 +228,17 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     /**
      * @notice Permissionless: Send idle funds above targetBuffer to Polymarket
      * @dev Anyone can call this to rebalance the vault (blocked when paused)
+     * @dev Rate-limited by maxRebalancePerCall to prevent drain attacks
      * @return amountSent Amount of USDC sent to Polymarket wallet
      */
     function investIdle() external nonReentrant whenNotPaused returns (uint256 amountSent) {
         uint256 balance = usdc.balanceOf(address(this));
         if (balance <= targetBuffer) return 0;
         
-        amountSent = balance - targetBuffer;
+        uint256 idleFunds = balance - targetBuffer;
+        // Rate limit: cap at maxRebalancePerCall per transaction
+        amountSent = idleFunds > maxRebalancePerCall ? maxRebalancePerCall : idleFunds;
+        
         usdc.safeTransfer(polymarketWallet, amountSent);
         
         emit IdleFundsInvested(amountSent, msg.sender);
@@ -479,6 +487,12 @@ contract PredictFiSniperVaultV5 is ERC20, Ownable, ReentrancyGuard {
     function setTargetBuffer(uint256 _targetBuffer) external onlyOwner {
         emit TargetBufferUpdated(targetBuffer, _targetBuffer);
         targetBuffer = _targetBuffer;
+    }
+    
+    function setMaxRebalancePerCall(uint256 _maxRebalancePerCall) external onlyOwner {
+        require(_maxRebalancePerCall > 0, "Must be > 0");
+        emit MaxRebalanceUpdated(maxRebalancePerCall, _maxRebalancePerCall);
+        maxRebalancePerCall = _maxRebalancePerCall;
     }
     
     function setTaxCollector(address _taxCollector) external onlyOwner {

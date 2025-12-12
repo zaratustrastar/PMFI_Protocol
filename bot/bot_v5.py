@@ -109,6 +109,14 @@ hourly_liquidation_tracker = {
 circuit_breaker_triggered = False
 baseline_nav = None
 
+# Hourly NAV kill switch tracking
+nav_history: List[Tuple[int, int]] = []  # List of (timestamp, nav_value) tuples
+hourly_nav_kill_switch = False
+HOURLY_NAV_CHANGE_LIMIT_PCT = 10.0  # Max allowed NAV change in rolling 1-hour window
+
+# Empty orderbook kill switch
+orderbook_kill_switch = False
+
 # =============================================================================
 # ABI DEFINITIONS
 # =============================================================================
@@ -377,9 +385,75 @@ def sign_nav_data(nav: int, timestamp: int, deadline: int, round_id: int, vault_
     return signed.signature.hex(), oracle_account.address
 
 
+def check_hourly_nav_kill_switch(current_nav: int) -> Tuple[bool, Optional[str]]:
+    """
+    Check if NAV has changed more than 10% from any value in the last hour.
+    Returns (is_triggered, error_message).
+    """
+    global nav_history, hourly_nav_kill_switch
+    
+    if hourly_nav_kill_switch:
+        return True, "Hourly NAV kill switch already triggered"
+    
+    now = int(time.time())
+    one_hour_ago = now - 3600
+    
+    # Clean old entries and keep only last hour
+    nav_history[:] = [(ts, nav) for ts, nav in nav_history if ts >= one_hour_ago]
+    
+    # Check against all historical values in the last hour
+    for ts, historical_nav in nav_history:
+        if historical_nav > 0:
+            change_pct = abs(current_nav - historical_nav) / historical_nav * 100
+            if change_pct >= HOURLY_NAV_CHANGE_LIMIT_PCT:
+                hourly_nav_kill_switch = True
+                msg = (f"NAV changed {change_pct:.1f}% in last hour!\n"
+                       f"Historical ({(now - ts)//60}m ago): {historical_nav/NAV_PRECISION:.4f}\n"
+                       f"Current: {current_nav/NAV_PRECISION:.4f}")
+                print(f"🚨 HOURLY NAV KILL SWITCH TRIGGERED: {msg}")
+                send_telegram_alert(f"HOURLY NAV KILL SWITCH\n\n{msg}")
+                return True, msg
+    
+    # Add current NAV to history
+    nav_history.append((now, current_nav))
+    return False, None
+
+
+def check_orderbook_liquidity(details: Dict) -> Tuple[bool, Optional[str]]:
+    """
+    Check if orderbooks have sufficient liquidity.
+    Returns (has_liquidity, error_message if no liquidity).
+    """
+    global orderbook_kill_switch
+    
+    if orderbook_kill_switch:
+        return False, "Orderbook kill switch already triggered"
+    
+    # Check if positions exist but no liquidation value (empty orderbooks)
+    positions_count = details.get("positions_count", 0)
+    liquidation_value = details.get("liquidation_value", 0)
+    
+    if positions_count > 0 and liquidation_value == 0:
+        orderbook_kill_switch = True
+        msg = f"EMPTY ORDERBOOKS: {positions_count} positions but $0 liquidation value!"
+        print(f"🚨 ORDERBOOK KILL SWITCH TRIGGERED: {msg}")
+        send_telegram_alert(f"ORDERBOOK KILL SWITCH\n\n{msg}")
+        return False, msg
+    
+    return True, None
+
+
 def get_signed_nav_data() -> Dict:
     """Get the current NAV with a fresh signature."""
     global cached_nav, nav_engine, polymarket_client, usdc, vault_v5, w3
+    global hourly_nav_kill_switch, orderbook_kill_switch
+    
+    # Check if kill switches are already triggered
+    if hourly_nav_kill_switch:
+        raise Exception("KILL SWITCH: Hourly NAV change limit exceeded - signing disabled")
+    
+    if orderbook_kill_switch:
+        raise Exception("KILL SWITCH: Empty orderbooks detected - signing disabled")
     
     now = int(time.time())
     
@@ -395,13 +469,22 @@ def get_signed_nav_data() -> Dict:
     
     pm_liquidation_value = 0
     pm_cash = 0
+    pm_details = {}
     
     if nav_engine:
         try:
-            total_pm_value, details = nav_engine.calculate_liquidation_nav()
+            total_pm_value, pm_details = nav_engine.calculate_liquidation_nav()
             pm_liquidation_value = int(total_pm_value * 1e6)
-            pm_cash = int(details.get("pm_cash", 0) * 1e6)
+            pm_cash = int(pm_details.get("pm_cash", 0) * 1e6)
+            
+            # Check orderbook liquidity kill switch
+            has_liquidity, liquidity_error = check_orderbook_liquidity(pm_details)
+            if not has_liquidity:
+                raise Exception(f"KILL SWITCH: {liquidity_error}")
+                
         except Exception as e:
+            if "KILL SWITCH" in str(e):
+                raise
             print(f"❌ Error calculating PM NAV: {e}")
     
     total_assets_6dec = vault_balance + pm_liquidation_value
@@ -412,6 +495,11 @@ def get_signed_nav_data() -> Dict:
         raw_nav = NAV_PRECISION
     
     nav = int(raw_nav * NAV_HAIRCUT)
+    
+    # Check hourly NAV kill switch before signing
+    is_hourly_triggered, hourly_error = check_hourly_nav_kill_switch(nav)
+    if is_hourly_triggered:
+        raise Exception(f"KILL SWITCH: {hourly_error}")
     
     print(f"📊 Final NAV: {nav / NAV_PRECISION:.6f} (raw: {raw_nav / NAV_PRECISION:.6f}, 0.5% haircut applied)")
     
@@ -632,19 +720,36 @@ watchdog = WithdrawalWatchdog()
 def health():
     """Health check endpoint."""
     global circuit_breaker_triggered, hourly_liquidation_tracker
+    global hourly_nav_kill_switch, orderbook_kill_switch
     
     current_hour = int(time.time()) // 3600
     hourly_used = hourly_liquidation_tracker["amount"] if hourly_liquidation_tracker["hour"] == current_hour else 0
     
+    # Determine overall status
+    any_kill_switch = circuit_breaker_triggered or hourly_nav_kill_switch or orderbook_kill_switch
+    if circuit_breaker_triggered:
+        status = "CIRCUIT_BREAKER"
+    elif hourly_nav_kill_switch:
+        status = "HOURLY_NAV_KILL_SWITCH"
+    elif orderbook_kill_switch:
+        status = "ORDERBOOK_KILL_SWITCH"
+    else:
+        status = "ok"
+    
     return jsonify({
-        "status": "ok" if not circuit_breaker_triggered else "CIRCUIT_BREAKER",
+        "status": status,
         "version": "v5.1",
         "vault": VAULT_V5_ADDRESS,
         "oracle": oracle_account.address if oracle_account else None,
         "polymarket_wallet": POLYMARKET_PROXY_ADDRESS,
-        "circuit_breaker": circuit_breaker_triggered,
+        "kill_switches": {
+            "circuit_breaker": circuit_breaker_triggered,
+            "hourly_nav": hourly_nav_kill_switch,
+            "orderbook": orderbook_kill_switch,
+        },
         "hourly_liquidation_used": hourly_used,
         "hourly_liquidation_limit": MAX_HOURLY_LIQUIDATION_USDC,
+        "nav_history_count": len(nav_history),
     })
 
 
