@@ -1,15 +1,32 @@
 # Bridge Runbook: Polygon → Base
 
-This document explains how to manually bridge USDC from Polygon (Polymarket) to Base (Treasury) to refill the vault.
+This document explains how USDC is bridged from Polygon (Polymarket) to Base (Treasury) to refill the vault.
 
-## When to Bridge
+## Automatic Bridging (Default)
 
-The Liquidity Keeper will alert you via Telegram when:
-- Treasury balance falls below $500 (LOW warning)
-- Treasury balance falls below $100 (CRITICAL alert)
-- Positions are liquidated on Polygon
+The Liquidity Keeper now uses **Relay.link** for automatic bridging:
 
-## Step-by-Step Bridge Process
+1. **Liquidation** → USDC lands in PM wallet on Polygon
+2. **Auto-Bridge** → Relay.link transfers Polygon USDC → Base treasury (~3 seconds)
+3. **Treasury refill** → Next keeper iteration sends treasury → vault
+
+### Requirements for Auto-Bridge
+- POL (Polygon native token) in wallet for gas (~$0.01 per tx)
+- `POLYMARKET_PRIVATE_KEY` configured
+- `TREASURY_ADDRESS` set (or defaults to same wallet)
+- **USDC in wallet** (not in PM custody) - withdraw from PM first if needed
+
+### Known Limitation
+After selling PM positions, funds remain in PM custody. You must withdraw from PM to your Polygon wallet before auto-bridge can access them. The keeper will alert you when this is needed.
+
+### Relay.link Fees
+- Very low: ~$0.0001 per bridge (0.01% fee)
+- Fast: ~3 seconds
+- No API key required
+
+## Manual Bridging (Fallback)
+
+If auto-bridge fails, the keeper will alert via Telegram. Use these steps:
 
 ### 1. Withdraw from Polymarket to Polygon Wallet
 
@@ -21,28 +38,20 @@ If funds are still in Polymarket:
 
 ### 2. Bridge from Polygon to Base
 
-**Option A: Stargate Finance (Recommended)**
+**Option A: Relay.link (Recommended)**
+- URL: https://relay.link
+- Fast: ~3 seconds
+- Lowest fees
+
+**Option B: Stargate Finance**
 - URL: https://stargate.finance/transfer
 - Fast: ~15 minutes
 - Low fees
 
-Steps:
-1. Connect wallet (Polygon network)
-2. Select: From Polygon → To Base
-3. Token: USDC
-4. Enter amount
-5. Confirm transaction
-6. Wait for confirmation on Base
-
-**Option B: Hop Protocol**
-- URL: https://app.hop.exchange
-- Fast: ~10-15 minutes
-- Competitive fees
-
 **Option C: Across Protocol**
 - URL: https://across.to
 - Fast: ~5-10 minutes
-- Lowest fees for larger amounts
+- Competitive fees
 
 ### 3. Verify Funds on Base
 
@@ -53,37 +62,29 @@ After bridging:
 
 ## Addresses
 
-- **USDC on Polygon**: `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174`
+- **USDC on Polygon**: `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` (native USDC)
 - **USDC on Base**: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
 - **Vault Address**: Check `VAULT_V5_ADDRESS` in .env
-- **Treasury Address**: Check `TREASURY_ADDRESS` in .env (or defaults to PM wallet)
+- **Treasury Address**: Check `TREASURY_ADDRESS` in .env
 
 ## Gas Requirements
 
-- **Polygon**: Keep ~1 MATIC for gas (~$0.50)
+- **Polygon**: Keep ~1 POL for gas (~$0.50)
 - **Base**: Keep ~0.0001 ETH for gas (~$0.30)
-
-## Automation (Future)
-
-This bridge process can be automated using:
-- Across Protocol API
-- Stargate LayerZero SDK
-- Socket API (aggregates bridges)
-
-For now, manual bridging provides safety and control.
 
 ## Troubleshooting
 
 **Bridge stuck?**
-- Check transaction on source chain explorer
-- Most bridges have status pages (e.g., stargate.finance/activity)
-- Wait up to 30 minutes before retrying
+- Check transaction on Polygon explorer: https://polygonscan.com
+- Relay.link bridges are usually instant (<5s)
+- If using other bridges, wait up to 30 minutes before retrying
+
+**Auto-bridge not working?**
+- Check POL balance on Polygon wallet
+- Verify `POLYMARKET_PRIVATE_KEY` is correct
+- Check keeper logs for error messages
 
 **Wrong network?**
 - Ensure wallet is on correct network before sending
 - Base Chain ID: 8453
 - Polygon Chain ID: 137
-
-**Need help?**
-- Stargate Discord: discord.gg/stargate
-- Across Discord: discord.gg/across-protocol

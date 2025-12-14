@@ -54,6 +54,13 @@ except ImportError:
     import requests as curl_requests
     BYPASS_METHOD = "standard"
 
+try:
+    from relay_bridge import bridge_usdc_polygon_to_base, get_bridge_quote
+    HAS_RELAY_BRIDGE = True
+except ImportError:
+    HAS_RELAY_BRIDGE = False
+    print("⚠️  relay_bridge not available, auto-bridging disabled")
+
 load_dotenv()
 
 # =============================================================================
@@ -628,16 +635,65 @@ def liquidate_positions_for_usdc(needed_usdc: float, pm_client: PolymarketClient
     
     print(f"\n   Total liquidated: ${total_obtained:.2f} USDC (on Polygon)")
     
-    if total_obtained > 0:
-        send_telegram_alert(
-            f"🔥 Liquidation complete: ${total_obtained:.2f} USDC\n"
-            f"Funds are on Polygon - bridge to Base treasury when ready.\n\n"
-            f"Use Stargate/Hop/Across to bridge:\n"
-            f"From: Polygon USDC\n"
-            f"To: Base treasury ({TREASURY_ADDRESS[:10]}...)"
-        )
-    
     return total_obtained
+
+
+def bridge_polygon_to_base(amount_usdc: float) -> Tuple[bool, float]:
+    """
+    Bridge USDC from Polygon to Base treasury using Relay.link.
+    
+    Args:
+        amount_usdc: Amount to bridge
+    
+    Returns:
+        (success, amount_received_on_base)
+    """
+    if not HAS_RELAY_BRIDGE:
+        print("❌ Relay bridge not available")
+        send_telegram_alert(
+            f"🌉 Bridge needed: ${amount_usdc:.2f} USDC\n"
+            f"Auto-bridge unavailable - bridge manually via relay.link",
+            is_error=True
+        )
+        return False, 0.0
+    
+    if not POLYMARKET_PRIVATE_KEY:
+        print("❌ No private key for bridging")
+        return False, 0.0
+    
+    sender = Account.from_key(POLYMARKET_PRIVATE_KEY).address
+    recipient = TREASURY_ADDRESS or sender
+    
+    print(f"\n🌉 AUTO-BRIDGE: ${amount_usdc:.2f} USDC")
+    print(f"   From: Polygon {sender[:10]}...")
+    print(f"   To: Base {recipient[:10]}...")
+    
+    try:
+        result = bridge_usdc_polygon_to_base(
+            amount_usdc=amount_usdc,
+            sender_address=sender,
+            recipient_address=recipient,
+            private_key=POLYMARKET_PRIVATE_KEY,
+            polygon_rpc_url=POLYGON_RPC_URL
+        )
+        
+        if result.success:
+            print(f"✅ Bridge complete! Received ${result.amount_received:.2f} on Base")
+            return True, result.amount_received
+        else:
+            print(f"❌ Bridge failed: {result.error}")
+            send_telegram_alert(
+                f"❌ Bridge failed: {result.error}\n"
+                f"Amount: ${amount_usdc:.2f} USDC\n"
+                f"Bridge manually via relay.link",
+                is_error=True
+            )
+            return False, 0.0
+            
+    except Exception as e:
+        print(f"❌ Bridge error: {e}")
+        send_telegram_alert(f"❌ Bridge error: {e}", is_error=True)
+        return False, 0.0
 
 # =============================================================================
 # MAIN KEEPER LOOP
@@ -706,17 +762,31 @@ def keeper_iteration(pm_client: PolymarketClient) -> bool:
         pm_cash = pm_client.fetch_cash_balance()
         print(f"   PM cash available: ${pm_cash:.2f}")
         
-        if pm_cash > 0:
-            print(f"   Withdrawing PM cash to Polygon wallet...")
-            send_telegram_alert(
-                f"💵 PM Cash available: ${pm_cash:.2f}\n"
-                f"Initiate withdrawal to your Polygon wallet,\n"
-                f"then bridge to Base treasury."
-            )
-        
+        liquidated = 0.0
         if pm_cash < min(max_amount, still_needed):
             liquidate_amount = min(max_amount, still_needed) - pm_cash
-            liquidate_positions_for_usdc(liquidate_amount, pm_client)
+            liquidated = liquidate_positions_for_usdc(liquidate_amount, pm_client)
+        
+        if liquidated > 0 or pm_cash > 0:
+            wallet_address = Account.from_key(POLYMARKET_PRIVATE_KEY).address
+            wallet_usdc = usdc_polygon.functions.balanceOf(
+                Web3.to_checksum_address(wallet_address)
+            ).call() / 1e6 if usdc_polygon else 0
+            
+            print(f"   Wallet USDC balance: ${wallet_usdc:.2f}")
+            
+            if wallet_usdc > MIN_SHORTFALL_USDC:
+                print(f"\n🌉 Bridging ${wallet_usdc:.2f} from Polygon to Base...")
+                bridge_success, bridged_amount = bridge_polygon_to_base(wallet_usdc)
+                
+                if bridge_success:
+                    print(f"✅ Bridge complete - ${bridged_amount:.2f} now in treasury")
+            elif pm_cash > 0 or liquidated > 0:
+                send_telegram_alert(
+                    f"💵 Funds on Polymarket: ${pm_cash + liquidated:.2f}\n"
+                    f"Withdraw from PM to wallet, then auto-bridge will proceed.",
+                    is_error=True
+                )
     
     return True
 
