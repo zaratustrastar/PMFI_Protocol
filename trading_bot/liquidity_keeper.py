@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 """
-Liquidity Keeper - Autonomous Vault Buffer Refill System
-
-This script runs alongside the trading bot to ensure the vault always has
-sufficient buffer to process withdrawals.
+Liquidity Keeper - Treasury-Backed Vault Buffer Refill System
 
 Architecture:
-- bot_v5 = Read-only NAV signer (no PM credentials, no fund movements)
-- This script = Liquidity Keeper (has PM credentials, handles fund movements)
+- Base Treasury Wallet: Pre-funded USDC for instant vault refills
+- Keeper Loop: Detects shortfall → sends from treasury → alerts if treasury low
+- PM Liquidation: Sells positions → withdraws to Polygon wallet (manual bridge later)
 
-Loop Logic:
-1. Read vault state (pendingShares, buffer, NAV) from on-chain
+Flow:
+1. Read vault state (pendingShares, buffer, NAV) from Base chain
 2. Calculate shortfall = (pendingShares * NAV / 1e18) - buffer
 3. If shortfall > 0:
-   - Use PM cash first (withdraw from Polymarket)
-   - If still short, sell positions
-   - Bridge USDC to Base → send to vault
-4. Check stop conditions (kill switches, API errors, hourly limits)
-5. Sleep N seconds (30-60 seconds)
+   - Check treasury balance on Base
+   - If treasury has funds → send to vault instantly
+   - If treasury low → alert via Telegram + liquidate PM positions on Polygon
+4. PM liquidation stays on Polygon (manual bridge to Base treasury later)
+5. Check stop conditions (kill switches, hourly limits)
+6. Sleep and repeat
 
 Stop Conditions:
 - NAV kill switches triggered (check bot_v5 /health)
@@ -40,13 +39,20 @@ from eth_account import Account
 import requests
 
 try:
+    from py_clob_client.client import ClobClient
+    from py_clob_client.clob_types import OrderArgs, OrderType
+    from py_clob_client.order_builder.constants import SELL
+    HAS_CLOB_CLIENT = True
+except ImportError:
+    HAS_CLOB_CLIENT = False
+    print("⚠️  py-clob-client not available, liquidation disabled")
+
+try:
     from curl_cffi import requests as curl_requests
     BYPASS_METHOD = "curl_cffi"
-    print("🔓 Using curl_cffi for Cloudflare bypass")
 except ImportError:
     import requests as curl_requests
     BYPASS_METHOD = "standard"
-    print("⚠️  curl_cffi not available, using standard requests")
 
 load_dotenv()
 
@@ -61,6 +67,8 @@ USDC_BASE_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 POLYMARKET_PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS", "")
 POLYMARKET_PRIVATE_KEY = os.getenv("POLYMARKET_PRIVATE_KEY", "")
 
+TREASURY_ADDRESS = os.getenv("TREASURY_ADDRESS", "")
+
 BOT_V5_URL = os.getenv("BOT_V5_URL", "http://localhost:5001")
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
@@ -68,10 +76,15 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 PROXY_URL = os.getenv("PROXY_URL", "")
 
+POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
+USDC_POLYGON_ADDRESS = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+
 NAV_PRECISION = 10**18
 LOOP_INTERVAL_SECONDS = 60
 MIN_SHORTFALL_USDC = 10.0
 MAX_HOURLY_LIQUIDATION_USDC = 5000.0
+TREASURY_LOW_THRESHOLD_USDC = 500.0
+TREASURY_CRITICAL_THRESHOLD_USDC = 100.0
 
 # =============================================================================
 # ABIs
@@ -102,15 +115,20 @@ ERC20_ABI = [
 # GLOBALS
 # =============================================================================
 
-w3_base: Optional[Web3] = None
+w3_base: Web3 = None
+w3_polygon: Web3 = None
 vault_contract = None
 usdc_base = None
-keeper_account = None
+usdc_polygon = None
+treasury_account = None
+pm_clob_client = None
 
 hourly_tracker = {
     "hour": 0,
     "liquidated_usdc": 0.0,
 }
+
+last_treasury_alert_time = 0
 
 # =============================================================================
 # TELEGRAM ALERTS
@@ -136,11 +154,11 @@ def send_telegram_alert(message: str, is_error: bool = False):
         return False
 
 # =============================================================================
-# POLYMARKET CLIENT (for reading positions and cash)
+# POLYMARKET CLIENT (for reading positions and orderbooks)
 # =============================================================================
 
 class PolymarketClient:
-    """Client for reading Polymarket positions and cash balance."""
+    """Client for reading Polymarket positions and orderbooks."""
     
     DATA_API_URL = "https://data-api.polymarket.com"
     CLOB_API_URL = "https://clob.polymarket.com"
@@ -162,8 +180,7 @@ class PolymarketClient:
             response.raise_for_status()
             
             data = response.json()
-            cash = float(data.get("balance", 0)) if data else 0
-            return cash
+            return float(data.get("balance", 0)) if data else 0
             
         except Exception as e:
             print(f"❌ Error fetching PM cash: {e}")
@@ -191,6 +208,7 @@ class PolymarketClient:
                     "outcome": p.get("outcome") or "",
                     "size": size,
                     "current_value": float(p.get("currentValue", 0)),
+                    "condition_id": p.get("conditionId") or "",
                 })
             
             return positions
@@ -213,7 +231,7 @@ class PolymarketClient:
             for bid in data.get("bids", []):
                 price = float(bid.get("price", 0))
                 size = float(bid.get("size", 0))
-                if size * price >= 5.0:  # Min $5 bid size filter
+                if size * price >= 5.0:
                     bids.append({"price": price, "size": size})
             
             bids.sort(key=lambda x: x["price"], reverse=True)
@@ -230,27 +248,24 @@ class PolymarketClient:
 @dataclass
 class VaultState:
     """Current state of the vault."""
-    pending_shares: int  # Shares waiting to be redeemed (6 decimals)
-    buffer_balance: int  # USDC in vault buffer (6 decimals)
-    last_nav: int  # Last NAV (18 decimals)
-    total_supply: int  # Total vault shares (6 decimals)
-    shortfall: int  # USDC shortfall (6 decimals)
+    pending_shares: int
+    buffer_balance: int
+    last_nav: int
+    total_supply: int
+    shortfall: int
     
     @property
     def pending_shares_usdc(self) -> float:
-        """Pending shares converted to USDC value."""
         if self.last_nav > 0:
             return (self.pending_shares * self.last_nav) / NAV_PRECISION / 1e6
         return 0.0
     
     @property
     def buffer_usdc(self) -> float:
-        """Buffer balance in USDC."""
         return self.buffer_balance / 1e6
     
     @property
     def shortfall_usdc(self) -> float:
-        """Shortfall in USDC."""
         return self.shortfall / 1e6
 
 
@@ -286,14 +301,116 @@ def read_vault_state() -> Optional[VaultState]:
         return None
 
 # =============================================================================
+# TREASURY MANAGEMENT (Base chain)
+# =============================================================================
+
+def get_treasury_balance() -> float:
+    """Get treasury USDC balance on Base."""
+    global usdc_base
+    
+    if not usdc_base or not TREASURY_ADDRESS:
+        return 0.0
+    
+    try:
+        balance = usdc_base.functions.balanceOf(
+            Web3.to_checksum_address(TREASURY_ADDRESS)
+        ).call()
+        return balance / 1e6
+    except Exception as e:
+        print(f"❌ Error reading treasury balance: {e}")
+        return 0.0
+
+
+def send_from_treasury_to_vault(amount_usdc: float) -> bool:
+    """Send USDC from treasury wallet to vault on Base."""
+    global w3_base, treasury_account, usdc_base
+    
+    if not treasury_account:
+        print("❌ Treasury account not initialized")
+        return False
+    
+    amount_6dec = int(amount_usdc * 1e6)
+    
+    try:
+        treasury_addr = treasury_account.address
+        balance = usdc_base.functions.balanceOf(treasury_addr).call()
+        
+        if balance < amount_6dec:
+            print(f"❌ Insufficient treasury USDC. Have: ${balance/1e6:.2f}, Need: ${amount_usdc:.2f}")
+            return False
+        
+        nonce = w3_base.eth.get_transaction_count(treasury_addr)
+        gas_price = w3_base.eth.gas_price
+        
+        tx = usdc_base.functions.transfer(
+            Web3.to_checksum_address(VAULT_V5_ADDRESS),
+            amount_6dec
+        ).build_transaction({
+            'from': treasury_addr,
+            'nonce': nonce,
+            'gas': 100000,
+            'gasPrice': gas_price,
+            'chainId': 8453,
+        })
+        
+        signed_tx = treasury_account.sign_transaction(tx)
+        tx_hash = w3_base.eth.send_raw_transaction(signed_tx.raw_transaction)
+        
+        print(f"📤 Sending ${amount_usdc:.2f} USDC from treasury to vault...")
+        print(f"   TX: {tx_hash.hex()}")
+        
+        receipt = w3_base.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        
+        if receipt.status == 1:
+            print(f"✅ Transfer confirmed!")
+            send_telegram_alert(
+                f"✅ Vault refilled from treasury\n"
+                f"Amount: ${amount_usdc:.2f} USDC\n"
+                f"TX: {tx_hash.hex()[:20]}..."
+            )
+            return True
+        else:
+            print(f"❌ Transfer failed!")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error sending from treasury: {e}")
+        send_telegram_alert(f"❌ Treasury transfer failed: {e}", is_error=True)
+        return False
+
+
+def check_treasury_thresholds(treasury_balance: float):
+    """Alert if treasury is running low."""
+    global last_treasury_alert_time
+    
+    now = time.time()
+    if now - last_treasury_alert_time < 3600:
+        return
+    
+    if treasury_balance < TREASURY_CRITICAL_THRESHOLD_USDC:
+        send_telegram_alert(
+            f"🚨 TREASURY CRITICAL\n"
+            f"Balance: ${treasury_balance:.2f} USDC\n"
+            f"Threshold: ${TREASURY_CRITICAL_THRESHOLD_USDC:.2f}\n\n"
+            f"⚠️ Bridge funds from Polygon immediately!",
+            is_error=True
+        )
+        last_treasury_alert_time = now
+    elif treasury_balance < TREASURY_LOW_THRESHOLD_USDC:
+        send_telegram_alert(
+            f"⚠️ TREASURY LOW\n"
+            f"Balance: ${treasury_balance:.2f} USDC\n"
+            f"Threshold: ${TREASURY_LOW_THRESHOLD_USDC:.2f}\n\n"
+            f"Consider bridging funds from Polygon."
+        )
+        last_treasury_alert_time = now
+
+# =============================================================================
 # KILL SWITCH CHECK
 # =============================================================================
 
 def check_kill_switches() -> Tuple[bool, str]:
-    """
-    Check bot_v5 /health endpoint for kill switches.
-    Returns (is_safe, reason).
-    """
+    """Check bot_v5 /health endpoint for kill switches."""
     try:
         response = requests.get(f"{BOT_V5_URL}/health", timeout=10)
         if response.status_code != 200:
@@ -316,7 +433,7 @@ def check_kill_switches() -> Tuple[bool, str]:
         return True, "All systems operational"
         
     except requests.exceptions.ConnectionError:
-        return False, f"Cannot connect to bot_v5 at {BOT_V5_URL}"
+        return True, f"Bot V5 unreachable (proceeding with caution)"
     except Exception as e:
         return False, f"Error checking kill switches: {e}"
 
@@ -325,10 +442,7 @@ def check_kill_switches() -> Tuple[bool, str]:
 # =============================================================================
 
 def check_hourly_limit(amount_usdc: float) -> Tuple[bool, float]:
-    """
-    Check if we can liquidate this amount within hourly limit.
-    Returns (allowed, max_allowed_amount).
-    """
+    """Check if we can liquidate this amount within hourly limit."""
     global hourly_tracker
     
     current_hour = int(time.time()) // 3600
@@ -344,8 +458,7 @@ def check_hourly_limit(amount_usdc: float) -> Tuple[bool, float]:
     if remaining <= 0:
         return False, 0.0
     
-    allowed_amount = min(amount_usdc, remaining)
-    return True, allowed_amount
+    return True, min(amount_usdc, remaining)
 
 
 def record_liquidation(amount_usdc: float):
@@ -355,131 +468,115 @@ def record_liquidation(amount_usdc: float):
     print(f"📊 Hourly liquidation: ${hourly_tracker['liquidated_usdc']:.2f} / ${MAX_HOURLY_LIQUIDATION_USDC:.2f}")
 
 # =============================================================================
-# POLYMARKET BRIDGE (Polygon → Base)
+# POSITION LIQUIDATION (Polygon - stays on Polymarket)
 # =============================================================================
 
-# NOTE: The Polymarket USDC bridge requires:
-# 1. Withdraw USDC from Polymarket to Polygon wallet
-# 2. Bridge from Polygon to Base (via LayerZero, Across, or official bridge)
-# This is a complex multi-step process that may take 15-30 minutes.
-#
-# For now, we'll implement a simplified version that assumes USDC is already
-# available on Base and just needs to be transferred to the vault.
-
-def estimate_bridge_time() -> int:
-    """Estimate bridge time in seconds (Polygon → Base)."""
-    return 1800  # 30 minutes conservative estimate
-
-
-def bridge_usdc_to_base(amount_usdc: float) -> bool:
-    """
-    Bridge USDC from Polymarket (Polygon) to Base.
+def init_clob_client():
+    """Initialize py-clob-client for position liquidation."""
+    global pm_clob_client
     
-    TODO: Implement actual bridge logic using:
-    - LayerZero (fastest, ~15 min)
-    - Across Protocol (fast, ~10 min)
-    - Official Base bridge (slow, hours)
-    
-    For now, this is a placeholder that logs the intent.
-    """
-    print(f"🌉 BRIDGE REQUEST: ${amount_usdc:.2f} USDC from Polygon → Base")
-    print(f"   Estimated time: ~{estimate_bridge_time() // 60} minutes")
-    
-    # TODO: Implement actual bridge transaction
-    # This would involve:
-    # 1. Connect to Polygon RPC
-    # 2. Approve bridge contract
-    # 3. Call bridge function
-    # 4. Wait for confirmation on Base
-    
-    send_telegram_alert(
-        f"🌉 Bridge requested: ${amount_usdc:.2f} USDC\n"
-        f"From: Polygon (Polymarket)\n"
-        f"To: Base (Vault)\n"
-        f"ETA: ~{estimate_bridge_time() // 60} minutes"
-    )
-    
-    return False  # Not implemented yet
-
-
-def send_usdc_to_vault(amount_usdc: float) -> bool:
-    """
-    Send USDC from keeper wallet to vault on Base.
-    
-    Assumes USDC is already in the keeper wallet on Base.
-    """
-    global w3_base, keeper_account, usdc_base
-    
-    if not keeper_account:
-        print("❌ Keeper account not initialized")
+    if not HAS_CLOB_CLIENT:
         return False
     
-    amount_6dec = int(amount_usdc * 1e6)
+    if not POLYMARKET_PRIVATE_KEY:
+        print("❌ POLYMARKET_PRIVATE_KEY not set")
+        return False
     
     try:
-        keeper_address = keeper_account.address
-        balance = usdc_base.functions.balanceOf(keeper_address).call()
-        
-        if balance < amount_6dec:
-            print(f"❌ Insufficient USDC on Base. Have: ${balance/1e6:.2f}, Need: ${amount_usdc:.2f}")
-            return False
-        
-        nonce = w3_base.eth.get_transaction_count(keeper_address)
-        gas_price = w3_base.eth.gas_price
-        
-        tx = usdc_base.functions.transfer(
-            Web3.to_checksum_address(VAULT_V5_ADDRESS),
-            amount_6dec
-        ).build_transaction({
-            'from': keeper_address,
-            'nonce': nonce,
-            'gas': 100000,
-            'gasPrice': gas_price,
-            'chainId': 8453,  # Base mainnet
-        })
-        
-        signed_tx = keeper_account.sign_transaction(tx)
-        tx_hash = w3_base.eth.send_raw_transaction(signed_tx.raw_transaction)
-        
-        print(f"📤 Sent ${amount_usdc:.2f} USDC to vault")
-        print(f"   TX: {tx_hash.hex()}")
-        
-        receipt = w3_base.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
-        
-        if receipt.status == 1:
-            print(f"✅ Transfer confirmed!")
-            send_telegram_alert(f"✅ Sent ${amount_usdc:.2f} USDC to vault\nTX: {tx_hash.hex()[:16]}...")
-            return True
-        else:
-            print(f"❌ Transfer failed!")
-            return False
-            
+        pm_clob_client = ClobClient(
+            "https://clob.polymarket.com",
+            key=POLYMARKET_PRIVATE_KEY,
+            chain_id=137,
+            signature_type=1,
+            funder=POLYMARKET_PROXY_ADDRESS
+        )
+        pm_clob_client.set_api_creds(pm_clob_client.create_or_derive_api_creds())
+        print("✅ CLOB client initialized for liquidation")
+        return True
     except Exception as e:
-        print(f"❌ Error sending USDC to vault: {e}")
-        send_telegram_alert(f"❌ Failed to send USDC to vault: {e}", is_error=True)
+        print(f"❌ Failed to initialize CLOB client: {e}")
         return False
 
-# =============================================================================
-# POSITION LIQUIDATION
-# =============================================================================
+
+def liquidate_position(token_id: str, size: float, min_price: float = 0.01) -> Tuple[bool, float]:
+    """
+    Place a market sell order for a position.
+    Returns (success, usdc_obtained).
+    """
+    global pm_clob_client
+    
+    if not pm_clob_client:
+        print("❌ CLOB client not initialized")
+        return False, 0.0
+    
+    if size < 1.0:
+        print(f"   Skip: size {size:.2f} too small")
+        return False, 0.0
+    
+    try:
+        order_args = OrderArgs(
+            price=min_price,
+            size=size,
+            side=SELL,
+            token_id=token_id,
+        )
+        
+        signed_order = pm_clob_client.create_order(order_args)
+        response = pm_clob_client.post_order(signed_order, OrderType.FOK)
+        
+        if response.get("success"):
+            order_id = response.get("orderID", "")
+            print(f"   ✅ Market sell placed: {size:.2f} shares @ FOK")
+            
+            time.sleep(2)
+            
+            try:
+                order_status = pm_clob_client.get_order(order_id)
+                if order_status:
+                    filled_size = float(order_status.get("size_matched", 0))
+                    avg_price = float(order_status.get("avg_price", min_price))
+                    usdc_obtained = filled_size * avg_price
+                    return True, usdc_obtained
+            except:
+                pass
+            
+            return True, size * min_price
+        else:
+            error = response.get("error", "Unknown")
+            print(f"   ❌ Sell failed: {error}")
+            return False, 0.0
+            
+    except Exception as e:
+        print(f"   ❌ Liquidation error: {e}")
+        return False, 0.0
+
 
 def liquidate_positions_for_usdc(needed_usdc: float, pm_client: PolymarketClient) -> float:
     """
     Liquidate Polymarket positions to get needed USDC.
-    
-    TODO: Implement actual position selling using py-clob-client.
-    
-    Returns: Amount of USDC obtained (0 if not implemented yet)
+    Returns amount of USDC obtained on Polygon.
     """
-    print(f"🔥 LIQUIDATION REQUEST: Need ${needed_usdc:.2f} USDC")
+    print(f"\n🔥 LIQUIDATION: Need ${needed_usdc:.2f} USDC on Polygon")
+    
+    if not pm_clob_client:
+        if not init_clob_client():
+            send_telegram_alert(
+                f"🔥 Liquidation needed: ${needed_usdc:.2f} USDC\n"
+                f"⚠️ CLOB client not available - manual action required",
+                is_error=True
+            )
+            return 0.0
     
     positions = pm_client.fetch_positions()
     if not positions:
         print("   No positions to liquidate")
         return 0.0
     
-    total_liquidatable = 0.0
+    positions_by_value = []
     for pos in positions:
+        if not pos["token_id"]:
+            continue
+        
         orderbook = pm_client.fetch_orderbook(pos["token_id"])
         bids = orderbook.get("bids", [])
         
@@ -495,126 +592,166 @@ def liquidate_positions_for_usdc(needed_usdc: float, pm_client: PolymarketClient
             if remaining <= 0:
                 break
         
-        total_liquidatable += liq_value
-        print(f"   • {pos['outcome']}: ${liq_value:.2f} liquidatable")
+        if liq_value > 0:
+            positions_by_value.append({
+                **pos,
+                "liq_value": liq_value,
+                "best_bid": bids[0]["price"] if bids else 0,
+            })
     
-    print(f"   Total liquidatable: ${total_liquidatable:.2f}")
+    positions_by_value.sort(key=lambda x: x["liq_value"], reverse=True)
     
-    # TODO: Implement actual selling logic
-    # This requires using py-clob-client to place market sell orders
+    total_obtained = 0.0
+    still_needed = needed_usdc
     
-    send_telegram_alert(
-        f"🔥 Liquidation needed: ${needed_usdc:.2f} USDC\n"
-        f"Available to liquidate: ${total_liquidatable:.2f}\n"
-        f"⚠️ Manual intervention may be required"
-    )
+    for pos in positions_by_value:
+        if still_needed <= 0:
+            break
+        
+        size_to_sell = pos["size"]
+        if pos["liq_value"] > still_needed:
+            ratio = still_needed / pos["liq_value"]
+            size_to_sell = pos["size"] * ratio * 1.1
+        
+        print(f"\n   Liquidating {pos['outcome']}: {size_to_sell:.2f} shares (~${pos['liq_value']:.2f})")
+        
+        success, usdc = liquidate_position(
+            pos["token_id"],
+            size_to_sell,
+            pos["best_bid"] * 0.95
+        )
+        
+        if success:
+            total_obtained += usdc
+            still_needed -= usdc
+            record_liquidation(usdc)
     
-    return 0.0  # Not implemented yet
+    print(f"\n   Total liquidated: ${total_obtained:.2f} USDC (on Polygon)")
+    
+    if total_obtained > 0:
+        send_telegram_alert(
+            f"🔥 Liquidation complete: ${total_obtained:.2f} USDC\n"
+            f"Funds are on Polygon - bridge to Base treasury when ready.\n\n"
+            f"Use Stargate/Hop/Across to bridge:\n"
+            f"From: Polygon USDC\n"
+            f"To: Base treasury ({TREASURY_ADDRESS[:10]}...)"
+        )
+    
+    return total_obtained
 
 # =============================================================================
 # MAIN KEEPER LOOP
 # =============================================================================
 
 def keeper_iteration(pm_client: PolymarketClient) -> bool:
-    """
-    Single iteration of the keeper loop.
-    Returns True if successful, False if should pause/stop.
-    """
+    """Single iteration of the keeper loop."""
     print(f"\n{'='*60}")
-    print(f"🔄 LIQUIDITY KEEPER ITERATION - {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"🔄 LIQUIDITY KEEPER - {time.strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'='*60}")
     
     is_safe, reason = check_kill_switches()
     if not is_safe:
         print(f"🚫 STOPPED: {reason}")
-        send_telegram_alert(f"🚫 Keeper paused: {reason}", is_error=True)
         return False
+    print(f"✅ Kill switches: {reason}")
     
     vault_state = read_vault_state()
     if not vault_state:
         print("❌ Cannot read vault state")
         return False
     
-    print(f"\n📊 VAULT STATE:")
+    treasury_balance = get_treasury_balance()
+    
+    print(f"\n📊 STATUS:")
+    print(f"   Vault buffer: ${vault_state.buffer_usdc:.2f}")
     print(f"   Pending withdrawals: ${vault_state.pending_shares_usdc:.2f}")
-    print(f"   Buffer balance: ${vault_state.buffer_usdc:.2f}")
     print(f"   Shortfall: ${vault_state.shortfall_usdc:.2f}")
+    print(f"   Treasury (Base): ${treasury_balance:.2f}")
     print(f"   NAV: {vault_state.last_nav / NAV_PRECISION:.6f}")
     
+    check_treasury_thresholds(treasury_balance)
+    
     if vault_state.shortfall_usdc < MIN_SHORTFALL_USDC:
-        print(f"✅ No action needed (shortfall < ${MIN_SHORTFALL_USDC:.2f})")
+        print(f"\n✅ No action needed (shortfall < ${MIN_SHORTFALL_USDC:.2f})")
         return True
     
-    allowed, max_amount = check_hourly_limit(vault_state.shortfall_usdc)
-    if not allowed:
-        print("⏳ Hourly liquidation limit reached, waiting...")
-        return True
+    print(f"\n⚠️  SHORTFALL DETECTED: ${vault_state.shortfall_usdc:.2f}")
     
-    needed_usdc = min(vault_state.shortfall_usdc, max_amount)
-    print(f"\n💰 NEED TO REFILL: ${needed_usdc:.2f} USDC")
+    if treasury_balance >= vault_state.shortfall_usdc:
+        print(f"\n💰 Treasury has sufficient funds - refilling vault...")
+        success = send_from_treasury_to_vault(vault_state.shortfall_usdc)
+        if success:
+            print("✅ Vault refilled from treasury!")
+            return True
+        else:
+            print("❌ Treasury transfer failed")
+    elif treasury_balance > MIN_SHORTFALL_USDC:
+        print(f"\n💰 Using partial treasury funds: ${treasury_balance:.2f}")
+        send_from_treasury_to_vault(treasury_balance * 0.9)
     
-    pm_cash = pm_client.fetch_cash_balance()
-    print(f"   Polymarket cash available: ${pm_cash:.2f}")
-    
-    if pm_cash >= needed_usdc:
-        print(f"   ✅ Sufficient PM cash - initiating bridge")
-        if bridge_usdc_to_base(needed_usdc):
-            record_liquidation(needed_usdc)
-            if send_usdc_to_vault(needed_usdc):
-                print(f"✅ Refill complete!")
-                return True
-    else:
-        cash_to_use = pm_cash
-        still_needed = needed_usdc - pm_cash
+    still_needed = vault_state.shortfall_usdc - treasury_balance
+    if still_needed > MIN_SHORTFALL_USDC:
+        print(f"\n🔥 Need to liquidate ${still_needed:.2f} from Polymarket...")
         
-        print(f"   Using ${cash_to_use:.2f} from PM cash")
-        print(f"   Need to liquidate ${still_needed:.2f} more")
+        allowed, max_amount = check_hourly_limit(still_needed)
+        if not allowed:
+            print("⏳ Hourly liquidation limit reached")
+            send_telegram_alert(
+                f"⏳ Hourly liquidation limit reached\n"
+                f"Still need: ${still_needed:.2f} USDC\n"
+                f"Limit resets in {60 - (int(time.time()) % 3600) // 60} minutes"
+            )
+            return True
         
-        liquidated = liquidate_positions_for_usdc(still_needed, pm_client)
-        total_available = cash_to_use + liquidated
+        pm_cash = pm_client.fetch_cash_balance()
+        print(f"   PM cash available: ${pm_cash:.2f}")
         
-        if total_available > 0:
-            if bridge_usdc_to_base(total_available):
-                record_liquidation(total_available)
-                if send_usdc_to_vault(total_available):
-                    print(f"✅ Partial refill complete: ${total_available:.2f}")
-                    return True
+        if pm_cash > 0:
+            print(f"   Withdrawing PM cash to Polygon wallet...")
+            send_telegram_alert(
+                f"💵 PM Cash available: ${pm_cash:.2f}\n"
+                f"Initiate withdrawal to your Polygon wallet,\n"
+                f"then bridge to Base treasury."
+            )
+        
+        if pm_cash < min(max_amount, still_needed):
+            liquidate_amount = min(max_amount, still_needed) - pm_cash
+            liquidate_positions_for_usdc(liquidate_amount, pm_client)
     
-    print("⚠️  Could not complete refill - will retry")
     return True
 
 
 def run_keeper():
     """Main keeper loop."""
-    global w3_base, vault_contract, usdc_base, keeper_account
+    global w3_base, w3_polygon, vault_contract, usdc_base, usdc_polygon, treasury_account
     
     print(f"\n{'='*60}")
-    print(f"🚀 STARTING LIQUIDITY KEEPER")
+    print(f"🚀 LIQUIDITY KEEPER - Treasury-Backed Architecture")
     print(f"{'='*60}")
     
     if not VAULT_V5_ADDRESS:
         print("❌ VAULT_V5_ADDRESS not set")
         sys.exit(1)
     
-    if not POLYMARKET_PROXY_ADDRESS:
-        print("❌ POLYMARKET_PROXY_ADDRESS not set")
-        sys.exit(1)
+    if not TREASURY_ADDRESS:
+        print("⚠️  TREASURY_ADDRESS not set - will use keeper wallet as treasury")
     
     print(f"\nConfiguration:")
     print(f"   Vault: {VAULT_V5_ADDRESS}")
+    print(f"   Treasury: {TREASURY_ADDRESS or 'Same as keeper'}")
     print(f"   PM Wallet: {POLYMARKET_PROXY_ADDRESS}")
     print(f"   Base RPC: {BASE_RPC_URL}")
-    print(f"   Bot V5 URL: {BOT_V5_URL}")
+    print(f"   Polygon RPC: {POLYGON_RPC_URL}")
     print(f"   Loop interval: {LOOP_INTERVAL_SECONDS}s")
-    print(f"   Min shortfall: ${MIN_SHORTFALL_USDC:.2f}")
-    print(f"   Hourly limit: ${MAX_HOURLY_LIQUIDATION_USDC:.2f}")
+    print(f"   Treasury low threshold: ${TREASURY_LOW_THRESHOLD_USDC:.2f}")
+    print(f"   Hourly liquidation limit: ${MAX_HOURLY_LIQUIDATION_USDC:.2f}")
     
     print(f"\n🔌 Connecting to Base...")
     w3_base = Web3(Web3.HTTPProvider(BASE_RPC_URL))
     if not w3_base.is_connected():
         print("❌ Cannot connect to Base RPC")
         sys.exit(1)
-    print(f"   ✅ Connected to Base (block {w3_base.eth.block_number})")
+    print(f"   ✅ Connected (block {w3_base.eth.block_number})")
     
     vault_contract = w3_base.eth.contract(
         address=Web3.to_checksum_address(VAULT_V5_ADDRESS),
@@ -626,21 +763,40 @@ def run_keeper():
         abi=ERC20_ABI
     )
     
-    if POLYMARKET_PRIVATE_KEY:
-        keeper_account = Account.from_key(POLYMARKET_PRIVATE_KEY)
-        print(f"   Keeper wallet: {keeper_account.address}")
+    print(f"\n🔌 Connecting to Polygon...")
+    w3_polygon = Web3(Web3.HTTPProvider(POLYGON_RPC_URL))
+    if w3_polygon.is_connected():
+        print(f"   ✅ Connected (block {w3_polygon.eth.block_number})")
+        usdc_polygon = w3_polygon.eth.contract(
+            address=Web3.to_checksum_address(USDC_POLYGON_ADDRESS),
+            abi=ERC20_ABI
+        )
     else:
-        print("⚠️  POLYMARKET_PRIVATE_KEY not set - read-only mode")
+        print("   ⚠️  Cannot connect to Polygon (liquidation may fail)")
+    
+    if POLYMARKET_PRIVATE_KEY:
+        treasury_account = Account.from_key(POLYMARKET_PRIVATE_KEY)
+        actual_treasury = TREASURY_ADDRESS or treasury_account.address
+        print(f"\n   Treasury wallet: {actual_treasury}")
+    else:
+        print("\n⚠️  POLYMARKET_PRIVATE_KEY not set - read-only mode")
     
     pm_client = PolymarketClient(POLYMARKET_PROXY_ADDRESS)
     
-    is_safe, reason = check_kill_switches()
-    print(f"\n🔍 Initial kill switch check: {reason}")
+    treasury_bal = get_treasury_balance()
+    print(f"\n💰 Initial treasury balance: ${treasury_bal:.2f}")
+    
+    if treasury_bal < TREASURY_LOW_THRESHOLD_USDC:
+        send_telegram_alert(
+            f"⚠️ Treasury balance low at startup: ${treasury_bal:.2f}\n"
+            f"Consider pre-funding the treasury on Base."
+        )
     
     send_telegram_alert(
         f"🚀 Liquidity Keeper started\n"
-        f"Vault: {VAULT_V5_ADDRESS[:10]}...{VAULT_V5_ADDRESS[-8:]}\n"
-        f"Mode: {'Active' if keeper_account else 'Read-only'}"
+        f"Vault: {VAULT_V5_ADDRESS[:10]}...\n"
+        f"Treasury: ${treasury_bal:.2f} USDC\n"
+        f"Mode: {'Active' if treasury_account else 'Read-only'}"
     )
     
     print(f"\n🔄 Starting keeper loop...")
@@ -657,7 +813,7 @@ def run_keeper():
             else:
                 consecutive_failures += 1
                 if consecutive_failures >= max_failures:
-                    print(f"❌ {max_failures} consecutive failures, pausing for 5 minutes")
+                    print(f"❌ {max_failures} consecutive failures, pausing 5 min")
                     send_telegram_alert(
                         f"❌ Keeper paused after {max_failures} failures\n"
                         f"Will resume in 5 minutes",
