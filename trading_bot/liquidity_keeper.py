@@ -29,6 +29,7 @@ import os
 import sys
 import time
 import json
+import subprocess
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 from decimal import Decimal
@@ -695,6 +696,130 @@ def bridge_polygon_to_base(amount_usdc: float) -> Tuple[bool, float]:
         send_telegram_alert(f"❌ Bridge error: {e}", is_error=True)
         return False, 0.0
 
+
+# =============================================================================
+# PROXY WITHDRAW (via TypeScript module)
+# =============================================================================
+
+def get_proxy_usdc_balance() -> float:
+    """Get USDC.e balance in the PM proxy wallet via proxy_withdraw.ts."""
+    try:
+        result = subprocess.run(
+            ["npx", "tsx", "proxy_withdraw.ts", "info"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            cwd=os.path.dirname(os.path.abspath(__file__))
+        )
+        
+        if result.returncode != 0:
+            print(f"❌ proxy_withdraw info failed: {result.stderr}")
+            return 0.0
+        
+        for line in result.stdout.split("\n"):
+            line = line.strip()
+            if line.startswith("{") and line.endswith("}"):
+                try:
+                    proxy_info = json.loads(line)
+                    if "usdcBalance" in proxy_info:
+                        return float(proxy_info["usdcBalance"])
+                except (json.JSONDecodeError, ValueError, TypeError):
+                    continue
+            elif line.startswith("{"):
+                json_buffer = [line]
+                for next_line in result.stdout.split("\n")[result.stdout.split("\n").index(line)+1:]:
+                    json_buffer.append(next_line.strip())
+                    combined = "".join(json_buffer)
+                    try:
+                        proxy_info = json.loads(combined)
+                        if "usdcBalance" in proxy_info:
+                            return float(proxy_info["usdcBalance"])
+                        break
+                    except json.JSONDecodeError:
+                        if next_line.strip().endswith("}"):
+                            break
+                        continue
+        
+        print("❌ No valid proxy info JSON found in output")
+        return 0.0
+    except subprocess.TimeoutExpired:
+        print("❌ proxy_withdraw info timed out")
+        return 0.0
+    except Exception as e:
+        print(f"❌ Error getting proxy balance: {e}")
+        return 0.0
+
+
+def withdraw_from_proxy_to_treasury(amount_usdc: float, dry_run: bool = False) -> Tuple[bool, float]:
+    """
+    Withdraw USDC.e from PM Proxy to Base treasury via Relay bridge.
+    Uses proxy_withdraw.ts TypeScript module.
+    
+    Args:
+        amount_usdc: Amount to withdraw and bridge
+        dry_run: If True, simulate without executing
+    
+    Returns:
+        (success, amount_bridged)
+    """
+    if not TREASURY_ADDRESS:
+        print("❌ TREASURY_ADDRESS not set - cannot withdraw from proxy")
+        return False, 0.0
+    
+    print(f"\n🔧 PROXY WITHDRAW: ${amount_usdc:.2f} USDC via Relay")
+    print(f"   From: PM Proxy {POLYMARKET_PROXY_ADDRESS[:10]}...")
+    print(f"   To: Base Treasury {TREASURY_ADDRESS[:10]}...")
+    
+    cmd = ["npx", "tsx", "proxy_withdraw.ts", "withdraw", str(amount_usdc)]
+    if dry_run:
+        cmd.append("--dry-run")
+    
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=300,
+            cwd=os.path.dirname(os.path.abspath(__file__))
+        )
+        
+        print(f"   stdout: {result.stdout[-500:] if len(result.stdout) > 500 else result.stdout}")
+        
+        if result.returncode == 0:
+            print(f"✅ Proxy withdrawal complete!")
+            
+            if not dry_run:
+                send_telegram_alert(
+                    f"✅ Proxy withdrawal complete\n"
+                    f"Amount: ${amount_usdc:.2f} USDC\n"
+                    f"Flow: PM Proxy → Relay → Base Treasury"
+                )
+            
+            return True, amount_usdc
+        else:
+            error_msg = result.stderr[-200:] if result.stderr else "Unknown error"
+            print(f"❌ Proxy withdrawal failed: {error_msg}")
+            
+            if not dry_run:
+                send_telegram_alert(
+                    f"❌ Proxy withdrawal failed\n"
+                    f"Amount: ${amount_usdc:.2f}\n"
+                    f"Error: {error_msg[:100]}",
+                    is_error=True
+                )
+            
+            return False, 0.0
+            
+    except subprocess.TimeoutExpired:
+        print("❌ Proxy withdrawal timed out (5 min)")
+        send_telegram_alert("❌ Proxy withdrawal timed out", is_error=True)
+        return False, 0.0
+    except Exception as e:
+        print(f"❌ Proxy withdrawal error: {e}")
+        send_telegram_alert(f"❌ Proxy withdrawal error: {e}", is_error=True)
+        return False, 0.0
+
+
 # =============================================================================
 # MAIN KEEPER LOOP
 # =============================================================================
@@ -768,24 +893,40 @@ def keeper_iteration(pm_client: PolymarketClient) -> bool:
             liquidated = liquidate_positions_for_usdc(liquidate_amount, pm_client)
         
         if liquidated > 0 or pm_cash > 0:
-            wallet_address = Account.from_key(POLYMARKET_PRIVATE_KEY).address
-            wallet_usdc = usdc_polygon.functions.balanceOf(
-                Web3.to_checksum_address(wallet_address)
-            ).call() / 1e6 if usdc_polygon else 0
+            proxy_usdc = get_proxy_usdc_balance()
+            print(f"   PM Proxy USDC.e balance: ${proxy_usdc:.2f}")
             
-            print(f"   Wallet USDC balance: ${wallet_usdc:.2f}")
-            
-            if wallet_usdc > MIN_SHORTFALL_USDC:
-                print(f"\n🌉 Bridging ${wallet_usdc:.2f} from Polygon to Base...")
-                bridge_success, bridged_amount = bridge_polygon_to_base(wallet_usdc)
+            if proxy_usdc > MIN_SHORTFALL_USDC and TREASURY_ADDRESS:
+                withdraw_amount = min(proxy_usdc, max_amount)
+                print(f"\n🔧 Withdrawing ${withdraw_amount:.2f} from PM Proxy to Base Treasury...")
                 
-                if bridge_success:
-                    print(f"✅ Bridge complete - ${bridged_amount:.2f} now in treasury")
-            elif pm_cash > 0 or liquidated > 0:
+                withdraw_success, withdrawn = withdraw_from_proxy_to_treasury(withdraw_amount)
+                if withdraw_success:
+                    print(f"✅ Proxy withdrawal complete - ${withdrawn:.2f} bridged to treasury")
+                else:
+                    wallet_address = Account.from_key(POLYMARKET_PRIVATE_KEY).address
+                    wallet_usdc = usdc_polygon.functions.balanceOf(
+                        Web3.to_checksum_address(wallet_address)
+                    ).call() / 1e6 if usdc_polygon else 0
+                    
+                    print(f"   Falling back to EOA. Wallet USDC: ${wallet_usdc:.2f}")
+                    
+                    if wallet_usdc > MIN_SHORTFALL_USDC:
+                        print(f"\n🌉 Bridging ${wallet_usdc:.2f} from Polygon to Base...")
+                        bridge_success, bridged_amount = bridge_polygon_to_base(wallet_usdc)
+                        if bridge_success:
+                            print(f"✅ Bridge complete - ${bridged_amount:.2f} now in treasury")
+            elif proxy_usdc > 0 and not TREASURY_ADDRESS:
+                send_telegram_alert(
+                    f"💵 Funds in PM Proxy: ${proxy_usdc:.2f} USDC.e\n"
+                    f"⚠️ TREASURY_ADDRESS not set - configure to enable auto-withdrawal",
+                    is_error=True
+                )
+            else:
                 send_telegram_alert(
                     f"💵 Funds on Polymarket: ${pm_cash + liquidated:.2f}\n"
-                    f"Withdraw from PM to wallet, then auto-bridge will proceed.",
-                    is_error=True
+                    f"Waiting for funds to settle in proxy...",
+                    is_error=False
                 )
     
     return True

@@ -170,6 +170,10 @@ function validatePreFlight(proxyInfo: ProxyInfo, amountUsdc: number): string | n
     return `Unknown proxy type at ${proxyInfo.address}`;
   }
   
+  if (proxyInfo.type === 'safe') {
+    return `Safe proxy detected but not supported. This tool only supports Magic (EIP-1167) proxies. For Safe proxy withdrawals, use the Safe web app at app.safe.global`;
+  }
+  
   if (proxyInfo.usdcBalance < amountUsdc) {
     return `Insufficient USDC.e: have $${proxyInfo.usdcBalance.toFixed(2)}, need $${amountUsdc.toFixed(2)}`;
   }
@@ -182,8 +186,9 @@ function validatePreFlight(proxyInfo: ProxyInfo, amountUsdc: number): string | n
     return `Amount $${amountUsdc} exceeds max per tx $${MAX_PER_TX_USDC}`;
   }
   
+  // EOA needs MATIC to pay gas for proxy.proxy() calls - proxy itself doesn't hold MATIC
   if (proxyInfo.maticBalance < 0.01) {
-    return `Insufficient MATIC for gas: have ${proxyInfo.maticBalance.toFixed(4)}, need ~0.01`;
+    return `Insufficient MATIC on EOA for gas: have ${proxyInfo.maticBalance.toFixed(4)}, need ~0.01`;
   }
   
   return null;
@@ -347,22 +352,21 @@ async function withdrawToEOA(
 ): Promise<{ success: boolean; txHash?: string; error?: string }> {
   log('INFO', `Withdrawing $${amountUsdc} from proxy to EOA ${eoaAddress}`);
   
+  if (proxyType !== 'magic') {
+    log('ERROR', 'Only Magic proxy is supported. Safe proxy requires different implementation.');
+    return { success: false, error: 'Only Magic proxy is supported - Safe proxy not implemented' };
+  }
+  
   const amount6dec = BigInt(Math.floor(amountUsdc * 1e6));
   const usdcInterface = new ethers.Interface(ERC20_ABI);
   const transferData = usdcInterface.encodeFunctionData('transfer', [eoaAddress, amount6dec]);
   
-  if (proxyType === 'magic') {
-    return executeMagicProxyCall(
-      proxyAddress,
-      wallet,
-      [{ to: USDC_E_POLYGON, data: transferData, value: 0n }],
-      dryRun
-    );
-  } else {
-    // For Safe proxy, would use Safe Protocol Kit
-    // For now, return error as Safe support needs more implementation
-    return { success: false, error: 'Safe proxy not yet supported - use Magic proxy' };
-  }
+  return executeMagicProxyCall(
+    proxyAddress,
+    wallet,
+    [{ to: USDC_E_POLYGON, data: transferData, value: 0n }],
+    dryRun
+  );
 }
 
 async function withdrawViaBridge(
@@ -375,6 +379,11 @@ async function withdrawViaBridge(
 ): Promise<WithdrawResult> {
   log('INFO', `=== Direct Proxy → Relay Bridge ===`);
   
+  if (proxyType !== 'magic') {
+    log('ERROR', 'Only Magic proxy is supported. Safe proxy requires different implementation.');
+    return { success: false, amountSent: 0, error: 'Only Magic proxy is supported', flow: 'none' };
+  }
+  
   // Get quote with proxy as sender
   const quote = await getRelayQuote(proxyAddress, recipientAddress, amountUsdc);
   if (!quote) {
@@ -383,52 +392,53 @@ async function withdrawViaBridge(
   
   log('INFO', `Quote: output $${Number(quote.amountOut) / 1e6}, fee $${quote.feeUsd.toFixed(4)}`);
   
-  // Approve USDC spending
+  // Reset and approve USDC spending (reset to 0 first to avoid allowance issues)
   const usdcInterface = new ethers.Interface(ERC20_ABI);
+  const resetApproveData = usdcInterface.encodeFunctionData('approve', [quote.txData.to, 0n]);
   const approveData = usdcInterface.encodeFunctionData('approve', [quote.txData.to, quote.amountIn]);
   
-  if (proxyType === 'magic') {
-    // Execute approval
-    const approvalResult = await executeMagicProxyCall(
-      proxyAddress,
-      wallet,
-      [{ to: USDC_E_POLYGON, data: approveData, value: 0n }],
-      dryRun
-    );
-    
-    if (!approvalResult.success) {
-      return { success: false, amountSent: 0, error: `Approval failed: ${approvalResult.error}`, flow: 'direct' };
-    }
-    
-    // Execute bridge deposit
-    const depositResult = await executeMagicProxyCall(
-      proxyAddress,
-      wallet,
-      [{ to: quote.txData.to, data: quote.txData.data, value: BigInt(quote.txData.value) }],
-      dryRun
-    );
-    
-    if (!depositResult.success) {
-      return { success: false, amountSent: 0, error: `Deposit failed: ${depositResult.error}`, flow: 'direct' };
-    }
-    
-    if (dryRun) {
-      return { success: true, amountSent: amountUsdc, flow: 'direct' };
-    }
-    
-    // Poll for completion
-    const bridgeResult = await pollBridgeStatus(quote.requestId);
-    return {
-      success: bridgeResult.success,
-      txHash: depositResult.txHash,
-      requestId: quote.requestId,
-      amountSent: amountUsdc,
-      error: bridgeResult.success ? undefined : bridgeResult.message,
-      flow: 'direct',
-    };
-  } else {
-    return { success: false, amountSent: 0, error: 'Safe proxy not yet supported', flow: 'direct' };
+  // Execute reset + approval in one call
+  log('INFO', 'Resetting and approving USDC allowance...');
+  const approvalResult = await executeMagicProxyCall(
+    proxyAddress,
+    wallet,
+    [
+      { to: USDC_E_POLYGON, data: resetApproveData, value: 0n },
+      { to: USDC_E_POLYGON, data: approveData, value: 0n }
+    ],
+    dryRun
+  );
+  
+  if (!approvalResult.success) {
+    return { success: false, amountSent: 0, error: `Approval failed: ${approvalResult.error}`, flow: 'direct' };
   }
+  
+  // Execute bridge deposit
+  const depositResult = await executeMagicProxyCall(
+    proxyAddress,
+    wallet,
+    [{ to: quote.txData.to, data: quote.txData.data, value: BigInt(quote.txData.value) }],
+    dryRun
+  );
+  
+  if (!depositResult.success) {
+    return { success: false, amountSent: 0, error: `Deposit failed: ${depositResult.error}`, flow: 'direct' };
+  }
+  
+  if (dryRun) {
+    return { success: true, amountSent: amountUsdc, flow: 'direct' };
+  }
+  
+  // Poll for completion
+  const bridgeResult = await pollBridgeStatus(quote.requestId);
+  return {
+    success: bridgeResult.success,
+    txHash: depositResult.txHash,
+    requestId: quote.requestId,
+    amountSent: amountUsdc,
+    error: bridgeResult.success ? undefined : bridgeResult.message,
+    flow: 'direct',
+  };
 }
 
 // =============================================================================
