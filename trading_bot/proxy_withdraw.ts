@@ -36,6 +36,9 @@ const RELAY_API_URL = 'https://api.relay.link';
 const BASE_CHAIN_ID = 8453;
 const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 
+// Polymarket ProxyWallet Factory - EOA calls this, NOT the proxy wallet directly
+const PROXY_WALLET_FACTORY = '0xaB45c5A4B0c941a2F231C04C3f49182e1A254052';
+
 // Security guardrails
 const MAX_PER_TX_USDC = 5000;
 const MIN_WITHDRAWAL_USDC = 10;
@@ -45,8 +48,9 @@ const ALLOWED_DESTINATIONS: Set<string> = new Set(
   [TREASURY_ADDRESS].filter(Boolean).map(a => a.toLowerCase())
 );
 
-// Magic Proxy ABI
-const MAGIC_PROXY_ABI = [
+// ProxyWallet Factory ABI - the factory's proxy() function routes calls to user's proxy wallet
+// Note: NO isDelegateCall field - that was wrong
+const PROXY_FACTORY_ABI = [
   'function proxy((address to, bytes data, uint256 value)[] calls) payable returns (bytes[])',
 ];
 
@@ -136,6 +140,35 @@ async function detectProxyType(
   return 'magic';
 }
 
+// Compute the derived proxy wallet address for a given EOA using CREATE2
+function computeDerivedProxyAddress(eoaAddress: string): string {
+  const PROXY_IMPLEMENTATION = '0x44e999d5c2F66Ef0861317f9A4805AC2e90aEB4f';
+  
+  // Pad EOA to 32 bytes and hash for salt
+  const paddedEoa = ethers.zeroPadValue(eoaAddress, 32);
+  const salt = ethers.keccak256(paddedEoa);
+  
+  // EIP-1167 minimal proxy initCode
+  const initCode = ethers.concat([
+    '0x3d602d80600a3d3981f3363d3d373d3d3d363d73',
+    PROXY_IMPLEMENTATION,
+    '0x5af43d82803e903d91602b57fd5bf3',
+  ]);
+  const initCodeHash = ethers.keccak256(initCode);
+  
+  // CREATE2 formula: keccak256(0xff ++ factory ++ salt ++ initCodeHash)
+  const create2Input = ethers.concat([
+    '0xff',
+    PROXY_WALLET_FACTORY,
+    salt,
+    initCodeHash,
+  ]);
+  const hash = ethers.keccak256(create2Input);
+  
+  // Last 20 bytes = address
+  return ethers.getAddress('0x' + hash.slice(26));
+}
+
 async function getProxyInfo(
   proxyAddress: string,
   eoaAddress: string,
@@ -144,6 +177,16 @@ async function getProxyInfo(
   log('INFO', `Fetching proxy info for ${proxyAddress}`);
   
   const proxyType = await detectProxyType(proxyAddress, provider);
+  
+  // Check if configured proxy matches derived proxy
+  const derivedProxy = computeDerivedProxyAddress(eoaAddress);
+  if (derivedProxy.toLowerCase() !== proxyAddress.toLowerCase()) {
+    log('WARN', `⚠️ MISMATCH: Configured proxy ${proxyAddress} does NOT match derived proxy ${derivedProxy}`);
+    log('WARN', `The EOA's actual proxy wallet is ${derivedProxy}`);
+    log('WARN', `The configured POLYMARKET_PROXY_ADDRESS may belong to a different account`);
+  } else {
+    log('INFO', `✅ Configured proxy matches derived proxy for EOA`);
+  }
   
   // Get USDC.e balance
   const usdc = new ethers.Contract(USDC_E_POLYGON, ERC20_ABI, provider);
@@ -165,13 +208,19 @@ async function getProxyInfo(
 // VALIDATION
 // =============================================================================
 
-function validatePreFlight(proxyInfo: ProxyInfo, amountUsdc: number): string | null {
+function validatePreFlight(proxyInfo: ProxyInfo, amountUsdc: number, eoaAddress: string): string | null {
   if (proxyInfo.type === 'unknown') {
     return `Unknown proxy type at ${proxyInfo.address}`;
   }
   
   if (proxyInfo.type === 'safe') {
     return `Safe proxy detected but not supported. This tool only supports Magic (EIP-1167) proxies. For Safe proxy withdrawals, use the Safe web app at app.safe.global`;
+  }
+  
+  // CRITICAL: Verify the configured proxy matches the derived proxy for this EOA
+  const derivedProxy = computeDerivedProxyAddress(eoaAddress);
+  if (derivedProxy.toLowerCase() !== proxyInfo.address.toLowerCase()) {
+    return `PROXY MISMATCH: The configured POLYMARKET_PROXY_ADDRESS (${proxyInfo.address}) does NOT match the derived proxy wallet for this EOA (${derivedProxy}). The EOA's private key cannot control the configured proxy. Either update POLYMARKET_PRIVATE_KEY to match the configured proxy, or set POLYMARKET_PROXY_ADDRESS to ${derivedProxy}`;
   }
   
   if (proxyInfo.usdcBalance < amountUsdc) {
@@ -303,10 +352,16 @@ async function executeMagicProxyCall(
   calls: { to: string; data: string; value: bigint }[],
   dryRun: boolean
 ): Promise<{ success: boolean; txHash?: string; error?: string }> {
-  log('INFO', `${dryRun ? '[DRY RUN] ' : ''}Executing Magic proxy call`);
+  log('INFO', `${dryRun ? '[DRY RUN] ' : ''}Executing via ProxyWallet Factory`);
+  log('INFO', `Factory: ${PROXY_WALLET_FACTORY}`);
+  log('INFO', `Proxy wallet: ${proxyAddress}`);
+  log('INFO', `Calls: ${calls.length}`);
   
-  const proxy = new ethers.Contract(proxyAddress, MAGIC_PROXY_ABI, wallet);
+  // Call the FACTORY, not the proxy wallet directly
+  // The factory routes calls to the user's proxy wallet based on msg.sender
+  const factory = new ethers.Contract(PROXY_WALLET_FACTORY, PROXY_FACTORY_ABI, wallet);
   
+  // Format calls - just (to, data, value) - NO isDelegateCall
   const formattedCalls = calls.map(c => ({
     to: c.to,
     data: c.data,
@@ -316,24 +371,42 @@ async function executeMagicProxyCall(
   try {
     if (dryRun) {
       // Estimate gas to validate
-      await proxy.proxy.estimateGas(formattedCalls);
-      log('INFO', '[DRY RUN] Gas estimation successful');
+      const gasEstimate = await factory.proxy.estimateGas(formattedCalls);
+      log('INFO', `[DRY RUN] Gas estimation successful: ${gasEstimate.toString()}`);
       return { success: true };
     }
     
-    const tx = await proxy.proxy(formattedCalls);
+    const tx = await factory.proxy(formattedCalls);
     log('INFO', `TX submitted: ${tx.hash}`);
     
     const receipt = await tx.wait();
     if (receipt.status === 1) {
-      log('INFO', `✅ Magic proxy tx confirmed: ${receipt.hash}`);
+      log('INFO', `✅ Proxy tx confirmed: ${receipt.hash}`);
+      
+      // Validate return values from the proxy call
+      // For ERC20 transfer/approve calls, the return value should be true (non-zero)
+      // Parse logs to verify Transfer events occurred
+      const transferEventSig = ethers.id('Transfer(address,address,uint256)');
+      const approvalEventSig = ethers.id('Approval(address,address,uint256)');
+      
+      const relevantLogs = receipt.logs.filter((log: { address: string; topics: string[] }) => 
+        log.address.toLowerCase() === USDC_E_POLYGON.toLowerCase() &&
+        (log.topics[0] === transferEventSig || log.topics[0] === approvalEventSig)
+      );
+      
+      if (relevantLogs.length > 0) {
+        log('INFO', `✅ Verified ${relevantLogs.length} ERC20 event(s) in logs`);
+      } else {
+        log('WARN', `⚠️ No Transfer/Approval events found - transaction may have failed silently`);
+      }
+      
       return { success: true, txHash: receipt.hash };
     } else {
       return { success: false, error: 'Transaction reverted' };
     }
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : String(error);
-    log('ERROR', 'Magic proxy call failed', errMsg);
+    log('ERROR', 'Proxy factory call failed', errMsg);
     return { success: false, error: errMsg };
   }
 }
@@ -507,7 +580,7 @@ async function main(): Promise<void> {
       }
       
       const proxyInfo = await getProxyInfo(POLYMARKET_PROXY_ADDRESS, eoaAddress, provider);
-      const validationError = validatePreFlight(proxyInfo, amountUsdc);
+      const validationError = validatePreFlight(proxyInfo, amountUsdc, eoaAddress);
       if (validationError) {
         log('ERROR', `Validation failed: ${validationError}`);
         process.exit(1);
