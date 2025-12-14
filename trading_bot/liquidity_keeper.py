@@ -821,6 +821,190 @@ def withdraw_from_proxy_to_treasury(amount_usdc: float, dry_run: bool = False) -
 
 
 # =============================================================================
+# SAFE WALLET WITHDRAW (via TypeScript module)
+# =============================================================================
+
+# MetaMask Safe wallet credentials
+METAMASK_BUILDER_API_KEY = os.getenv("METAMASK_BUILDER_API_KEY", "")
+METAMASK_BUILDER_SECRET = os.getenv("METAMASK_BUILDER_SECRET", "")
+METAMASK_BUILDER_PASSPHRASE = os.getenv("METAMASK_BUILDER_PASSPHRASE", "")
+METAMASK_PRIVATE_KEY = os.getenv("METAMASK_PRIVATE_KEY", "")
+
+# Limits for Safe withdrawals
+MAX_SAFE_WITHDRAW_USDC = 1000.0  # Max per transaction
+MIN_SAFE_WITHDRAW_USDC = 1.0    # Min to bother withdrawing
+
+
+def get_safe_wallet_info() -> Optional[Dict]:
+    """
+    Get full info about the MetaMask Safe wallet via safe_withdraw.ts.
+    
+    Returns:
+        Dict with keys: eoaAddress, safeAddress, treasuryAddress, safeUsdcBalance, eoaUsdcBalance
+        Or None on error.
+    """
+    try:
+        result = subprocess.run(
+            ["npx", "tsx", "safe_withdraw.ts", "info"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            cwd=os.path.dirname(os.path.abspath(__file__))
+        )
+        
+        if result.returncode != 0:
+            print(f"❌ safe_withdraw info failed: {result.stderr}")
+            return None
+        
+        # Parse JSON output
+        for line in result.stdout.split("\n"):
+            line = line.strip()
+            if line.startswith("{") and line.endswith("}"):
+                try:
+                    info = json.loads(line)
+                    if "safeUsdcBalance" in info:
+                        return info
+                except (json.JSONDecodeError, ValueError, TypeError):
+                    continue
+        
+        print("❌ No valid safe info JSON found in output")
+        return None
+    except subprocess.TimeoutExpired:
+        print("❌ safe_withdraw info timed out")
+        return None
+    except Exception as e:
+        print(f"❌ Error getting safe info: {e}")
+        return None
+
+
+def get_safe_usdc_balance() -> float:
+    """Get USDC.e balance in the MetaMask Safe wallet via safe_withdraw.ts."""
+    info = get_safe_wallet_info()
+    if info and "safeUsdcBalance" in info:
+        return float(info["safeUsdcBalance"])
+    return 0.0
+
+
+def withdraw_from_safe_to_treasury(amount_usdc: float, dry_run: bool = False) -> Tuple[bool, float]:
+    """
+    Withdraw USDC.e from MetaMask Safe wallet to Treasury on Polygon.
+    Uses the Polymarket Builder Relayer via safe_withdraw.ts TypeScript module.
+    
+    This function is for withdrawing funds from the MetaMask-integrated Safe wallet
+    that holds Polymarket positions/funds, directly to the treasury address on Polygon.
+    
+    Args:
+        amount_usdc: Amount to withdraw in USDC
+        dry_run: If True, simulate without executing
+    
+    Returns:
+        (success, amount_withdrawn)
+    
+    Safety Features:
+        - Max $1000 per transaction
+        - Min $1 to avoid dust
+        - Requires all MetaMask builder credentials
+        - Polls until confirmation or failure
+    """
+    # Validate credentials
+    if not METAMASK_BUILDER_API_KEY or not METAMASK_BUILDER_SECRET or not METAMASK_BUILDER_PASSPHRASE:
+        print("❌ MetaMask builder credentials not configured")
+        send_telegram_alert(
+            f"💰 Safe withdrawal needed: ${amount_usdc:.2f} USDC\n"
+            f"⚠️ MetaMask builder credentials not set - manual action required",
+            is_error=True
+        )
+        return False, 0.0
+    
+    if not METAMASK_PRIVATE_KEY:
+        print("❌ METAMASK_PRIVATE_KEY not set")
+        return False, 0.0
+    
+    if not TREASURY_ADDRESS:
+        print("❌ TREASURY_ADDRESS not set - cannot withdraw from Safe")
+        return False, 0.0
+    
+    # Validate amount
+    if amount_usdc < MIN_SAFE_WITHDRAW_USDC:
+        print(f"⏭️  Amount ${amount_usdc:.2f} below minimum ${MIN_SAFE_WITHDRAW_USDC}")
+        return False, 0.0
+    
+    if amount_usdc > MAX_SAFE_WITHDRAW_USDC:
+        print(f"⚠️  Capping withdrawal at ${MAX_SAFE_WITHDRAW_USDC} (requested ${amount_usdc:.2f})")
+        amount_usdc = MAX_SAFE_WITHDRAW_USDC
+    
+    print(f"\n🔐 SAFE WITHDRAW: ${amount_usdc:.2f} USDC.e")
+    print(f"   From: MetaMask Safe wallet")
+    print(f"   To: Treasury {TREASURY_ADDRESS[:10]}...")
+    
+    # Build command
+    cmd = ["npx", "tsx", "safe_withdraw.ts", "withdraw", str(amount_usdc)]
+    if dry_run:
+        cmd.append("--dry-run")
+    
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=180,  # 3 minutes for relayer + polling
+            cwd=os.path.dirname(os.path.abspath(__file__))
+        )
+        
+        # Parse JSON result from output
+        withdraw_result = None
+        for line in result.stdout.split("\n"):
+            line = line.strip()
+            if line.startswith("{") and line.endswith("}"):
+                try:
+                    withdraw_result = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+        
+        if result.returncode == 0 and withdraw_result and withdraw_result.get("success"):
+            tx_hash = withdraw_result.get("txHash", "")
+            withdrawn = withdraw_result.get("amount", amount_usdc)
+            
+            print(f"✅ Safe withdrawal complete!")
+            if tx_hash:
+                print(f"   TX: {tx_hash}")
+                print(f"   Polygonscan: https://polygonscan.com/tx/{tx_hash}")
+            
+            if not dry_run:
+                send_telegram_alert(
+                    f"✅ Safe withdrawal complete\n"
+                    f"Amount: ${withdrawn:.2f} USDC.e\n"
+                    f"From: MetaMask Safe\n"
+                    f"To: Treasury\n"
+                    f"TX: {tx_hash[:20]}..." if tx_hash else ""
+                )
+            
+            return True, withdrawn
+        else:
+            error_msg = withdraw_result.get("error") if withdraw_result else result.stderr[-200:]
+            print(f"❌ Safe withdrawal failed: {error_msg}")
+            
+            if not dry_run:
+                send_telegram_alert(
+                    f"❌ Safe withdrawal failed\n"
+                    f"Amount: ${amount_usdc:.2f}\n"
+                    f"Error: {str(error_msg)[:100]}",
+                    is_error=True
+                )
+            
+            return False, 0.0
+            
+    except subprocess.TimeoutExpired:
+        print("❌ Safe withdrawal timed out (3 min)")
+        send_telegram_alert("❌ Safe withdrawal timed out", is_error=True)
+        return False, 0.0
+    except Exception as e:
+        print(f"❌ Safe withdrawal error: {e}")
+        send_telegram_alert(f"❌ Safe withdrawal error: {e}", is_error=True)
+        return False, 0.0
+
+
+# =============================================================================
 # MAIN KEEPER LOOP
 # =============================================================================
 
