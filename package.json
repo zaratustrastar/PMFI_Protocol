@@ -31,6 +31,8 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@openrouter/ai-sdk-provider": "^0.4.6",
     "@openzeppelin/contracts": "^5.4.0",
+    "@polymarket/builder-relayer-client": "^0.0.8",
+    "@polymarket/builder-signing-sdk": "^0.0.8",
     "@safe-global/protocol-kit": "^6.1.2",
     "@slack/web-api": "^7.9.3",
     "@types/pg": "^8.15.5",

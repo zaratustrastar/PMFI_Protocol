@@ -1,0 +1,127 @@
+You’re very close, but the conclusion “neither private key controls the proxy” is not proven by those two tests.
+
+What you did prove is this:
+
+0x4eCD… is not a Gnosis Safe interface (your getOwners() / getThreshold() calls reverted).
+
+The “derived proxy” calculation you ran is not authoritative (you assumed a specific factory + salt scheme; if that assumption is wrong, the “no match” means nothing).
+
+So the right interpretation is:
+
+Your proxy is a contract wallet, but it’s not a standard Safe ABI — you need the correct wallet ABI / execution method to move funds.
+
+And yes, you may still be able to automate withdrawals — just not using Safe Protocol Kit unless you confirm it’s actually a Safe behind a different proxy layer.
+
+Why getOwners() failing does not mean you can’t control it
+
+A bunch of Polymarket “proxy wallets” are deployed via relayer/factory patterns (your tx shows creation via Polymarket’s relay hub / proxy factory).
+
+It can be any of these:
+
+Minimal proxy (EIP-1167) pointing to an implementation contract (so you need to call implementation ABI methods through it)
+
+A custom “proxy wallet” contract (not Safe)
+
+A Safe-like wallet but behind a nonstandard proxy / fallback pattern
+
+If the wallet isn’t a Safe, Safe ABI calls will revert, but you can still be its owner/controller.
+
+Step 1: prove what kind of contract 0x4eCD… is (in 60 seconds)
+
+Run eth_getCode and detect if it’s an EIP-1167 minimal proxy. If it is, you can extract the implementation address from the bytecode.
+
+Node (ethers v6)
+import { ethers } from "ethers";
+
+const RPC = "https://polygon-rpc.com";
+const PROXY = "0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff";
+
+const provider = new ethers.JsonRpcProvider(RPC);
+
+const code = await provider.getCode(PROXY);
+console.log("code length:", code.length);
+
+// EIP-1167 pattern: 0x363d3d373d3d3d363d73<20-byte-impl>5af43d82803e903d91602b57fd5bf3
+const marker = "363d3d373d3d3d363d73";
+const idx = code.indexOf(marker);
+if (idx !== -1) {
+  const impl = "0x" + code.slice(idx + marker.length, idx + marker.length + 40);
+  console.log("looks like EIP-1167 minimal proxy, impl =", ethers.getAddress(impl));
+} else {
+  console.log("not an obvious EIP-1167 minimal proxy");
+}
+
+
+Outcome A: it prints an implementation address → great, now we inspect the implementation contract interface.
+Outcome B: not EIP-1167 → we need another proxy style (EIP-1967 slots etc.) or it’s a bespoke wallet.
+
+Step 2: find the “ownership / authorization” method for that wallet
+
+If it’s not a Safe, it likely has something like:
+
+owner() or getOwner()
+
+isOwner(address)
+
+signer() / getSigner()
+
+authority() / isAuthorized(address)
+
+execute(to,value,data) style method (common for proxy wallets)
+
+So you try small read calls without guessing wildly:
+
+const ABI_CANDIDATES = [
+  "function owner() view returns (address)",
+  "function getOwner() view returns (address)",
+  "function signer() view returns (address)",
+  "function getSigner() view returns (address)",
+  "function isOwner(address) view returns (bool)",
+  "function isAuthorized(address) view returns (bool)",
+];
+
+for (const sig of ABI_CANDIDATES) {
+  try {
+    const c = new ethers.Contract(PROXY, [sig], provider);
+    const fn = sig.slice("function ".length, sig.indexOf("("));
+    let res;
+    if (sig.includes("address)")) res = await c[fn]("0x32320BF36D31f3B430D5BC91f572987F019E0Fa9");
+    else res = await c[fn]();
+    console.log(sig, "=>", res);
+  } catch {}
+}
+
+
+If any of these returns your EOA or true, you’ve confirmed control logic.
+
+Step 3: the key question — does the wallet have an “execute” function?
+
+For automation, you need a method like:
+
+execute(address to, uint256 value, bytes data)
+
+execTransaction(...)
+
+call(...)
+
+If it exists and your EOA is authorized, then:
+
+✅ You can automate: wallet executes USDC.e.transfer(vault/bridge, amount)
+
+If it doesn’t expose any “execute” and only Polymarket relayer can move funds, then:
+
+❌ You cannot automate withdrawals purely on-chain.
+
+Important: don’t rely on “derived proxy” math
+
+That Create2 derivation you ran assumes:
+
+the correct factory address
+
+the correct implementation address
+
+the correct salt derivation
+
+If any is wrong, the computed address is meaningless. So “no match” is not evidence you don’t control the funded proxy.
+
+Your tx already shows this proxy was created via Polymarket’s relay hub/factory. That’s consistent with many different deterministic/non-deterministic deployment patterns.
