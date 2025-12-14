@@ -1,0 +1,74 @@
+The biggest improvement: you don’t need to move funds to your EOA first
+
+Your flow currently says:
+
+Safe → transfer USDC.e → EOA (Polygon) → Relay bridge → Base
+
+That works, but it’s one extra hop and increases operational risk (EOA temporarily holds more funds; more approvals; more code).
+
+Better MVP flow (fewer steps)
+
+Safe → bridge contract (Polygon) → Base treasury → vault
+
+Meaning: the Safe executes a transfer directly to the Relay bridge “sender” address/contract (or whatever Relay expects), instead of first transferring to your EOA.
+
+Only do the EOA hop if Relay requires the sender to be an EOA (some bridges do, some don’t).
+
+Critical checks before you ship this
+1) Confirm the Safe is actually controllable by your EOA
+
+Polymarket supports multiple “signature types” (EOA vs proxy vs Gnosis Safe). Your account type matters.
+
+You want to verify on-chain:
+
+getOwners() contains your EOA
+
+getThreshold() == 1
+
+If it’s threshold 1 and you’re the only owner, Protocol Kit will be straightforward.
+
+2) Gas reality
+
+Your message says:
+
+“Your EOA pays gas (~$0.01 MATIC) for the Safe tx”
+
+Correct: the executor pays gas, and in your setup that will be your keeper EOA submitting the Safe execution tx on Polygon. (Polymarket’s relayer infra is mainly for gasless trading flows; don’t assume it will cover your custom transfer out.)
+
+So yes: fund the keeper EOA with MATIC.
+
+3) USDC.e vs USDC
+
+Your Safe likely holds USDC.e on Polygon (common Polymarket collateral). Make sure:
+
+you transfer the right token
+
+your bridge expects that token and outputs what you want on Base
+
+MVP security guardrails I strongly recommend
+
+Because once you automate “Safe can send tokens anywhere,” the main risk becomes your keeper getting compromised.
+
+Hard-allowlist destination addresses
+
+only allow transfers to:
+
+your Base treasury (via bridge)
+
+your vault
+
+maybe one cold wallet (emergency)
+
+Cap outflow per hour/day
+
+e.g. max $5k/hour or whatever your MVP caps imply
+
+Dry-run simulation before sending
+
+simulate the Safe exec call / estimate gas
+
+abort if it would fail (wrong nonce, insufficient balance, token address mismatch)
+
+Separate keys
+
+oracle signer key must never be the same as the keeper executor key
