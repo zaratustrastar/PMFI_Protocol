@@ -41,9 +41,11 @@
         }
 
         .header-logo {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
+            box-shadow: 0 0 20px rgba(240, 246, 252, 0.3), 0 0 40px rgba(126, 231, 135, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.15);
         }
 
         .connect-btn {
@@ -74,8 +76,12 @@
 
         .main-content {
             max-width: 900px;
-            margin: 60px auto;
+            margin: 0 auto;
             padding: 0 40px;
+            min-height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .page-title {
