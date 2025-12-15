@@ -73,13 +73,17 @@ const userStatsEl = document.getElementById("userStats");
 const positionValueEl = document.getElementById("positionValue");
 const sharesBalanceEl = document.getElementById("sharesBalance");
 const openDepositBtn = document.getElementById("openDepositBtn");
+const openWithdrawBtn = document.getElementById("openWithdrawBtn");
 const depositModal = document.getElementById("depositModal");
+const withdrawModal = document.getElementById("withdrawModal");
 const closeDepositModal = document.getElementById("closeDepositModal");
+const closeWithdrawModal = document.getElementById("closeWithdrawModal");
 const depositAmountEl = document.getElementById("depositAmount");
 const withdrawAmountEl = document.getElementById("withdrawAmount");
 const depositBtn = document.getElementById("depositBtn");
 const withdrawBtn = document.getElementById("withdrawBtn");
 const txStatus = document.getElementById("txStatus");
+const withdrawTxStatus = document.getElementById("withdrawTxStatus");
 const disclaimerModal = document.getElementById("disclaimerModal");
 const understandCheck = document.getElementById("understandCheck");
 const dontShowCheck = document.getElementById("dontShowCheck");
@@ -182,6 +186,23 @@ function initDepositModal() {
         if (e.target === depositModal) {
             depositModal.classList.add("hidden");
             hideStatus(txStatus);
+        }
+    });
+
+    openWithdrawBtn.addEventListener("click", () => {
+        withdrawModal.classList.remove("hidden");
+        refreshUserStats();
+    });
+    
+    closeWithdrawModal.addEventListener("click", () => {
+        withdrawModal.classList.add("hidden");
+        hideStatus(withdrawTxStatus);
+    });
+    
+    withdrawModal.addEventListener("click", (e) => {
+        if (e.target === withdrawModal) {
+            withdrawModal.classList.add("hidden");
+            hideStatus(withdrawTxStatus);
         }
     });
 }
@@ -370,9 +391,11 @@ async function refreshUserStats() {
             const redeemable = await vaultContract.convertToAssets(shares);
             positionValueEl.textContent = `$${formatUSDC(redeemable)}`;
             userStatsEl.classList.remove("hidden");
+            openWithdrawBtn.disabled = false;
         } else {
             positionValueEl.textContent = "$0.00";
             userStatsEl.classList.add("hidden");
+            openWithdrawBtn.disabled = true;
         }
 
     } catch (error) {
@@ -469,6 +492,7 @@ function disconnectWallet() {
     connectBtn.classList.remove("connected");
     
     openDepositBtn.disabled = true;
+    openWithdrawBtn.disabled = true;
     userStatsEl.classList.add("hidden");
     
     // Reinitialize with read-only provider
@@ -577,25 +601,24 @@ async function handleDeposit() {
 async function handleWithdraw() {
     const amountStr = withdrawAmountEl.value;
     if (!amountStr || Number(amountStr) <= 0) {
-        showStatus(txStatus, "Enter a valid amount", "error");
+        showStatus(withdrawTxStatus, "Enter a valid amount", "error");
         return;
     }
 
     if (!signer || !userAddress) {
-        showStatus(txStatus, "Please connect your wallet first", "error");
+        showStatus(withdrawTxStatus, "Please connect your wallet first", "error");
         return;
     }
 
     const amount = parseUSDC(amountStr);
 
     try {
-        depositBtn.disabled = true;
         withdrawBtn.disabled = true;
-        hideStatus(txStatus);
+        hideStatus(withdrawTxStatus);
 
         // Request fresh price from VPS before withdraw for accurate share pricing
         if (PRICE_API_URL) {
-            showStatus(txStatus, "Fetching latest price...", "info");
+            showStatus(withdrawTxStatus, "Fetching latest price...", "info");
             const priceData = await requestFreshPrice();
             if (priceData) {
                 console.log("Price refreshed before withdraw:", priceData);
@@ -606,13 +629,14 @@ async function handleWithdraw() {
         // Ensure we're using signer-connected contract
         const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
 
-        showStatus(txStatus, "Withdrawing...", "info");
+        showStatus(withdrawTxStatus, "Withdrawing...", "info");
         const withdrawTx = await signerVaultContract.withdraw(amount, userAddress, userAddress);
-        showStatus(txStatus, "Confirming...", "info");
+        showStatus(withdrawTxStatus, "Confirming...", "info");
         await withdrawTx.wait();
 
-        showStatus(txStatus, `Withdrew $${amountStr} USDC`, "success");
+        showStatus(withdrawTxStatus, `Withdrew $${amountStr} USDC`, "success");
         withdrawAmountEl.value = "";
+        withdrawModal.classList.add("hidden");
         await refreshAll();
 
     } catch (error) {
@@ -621,9 +645,8 @@ async function handleWithdraw() {
         if (errorMsg.includes("Insufficient liquidity")) {
             errorMsg = "Insufficient liquidity. Please try a smaller amount or wait for funds to be freed.";
         }
-        showStatus(txStatus, errorMsg, "error");
+        showStatus(withdrawTxStatus, errorMsg, "error");
     } finally {
-        depositBtn.disabled = false;
         withdrawBtn.disabled = false;
     }
 }

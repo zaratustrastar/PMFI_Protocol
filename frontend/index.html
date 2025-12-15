@@ -40,6 +40,12 @@
             letter-spacing: -0.5px;
         }
 
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
         .connect-btn {
             background: #f0f6fc;
             color: #0d1117;
@@ -194,6 +200,38 @@
         .deposit-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-buttons .deposit-btn,
+        .action-buttons .withdraw-btn {
+            flex: 1;
+        }
+
+        .withdraw-btn {
+            padding: 12px;
+            background: transparent;
+            color: #f0f6fc;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .withdraw-btn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .withdraw-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            filter: blur(1px);
         }
 
         .stats-card-title {
@@ -482,7 +520,7 @@
 <body>
     <header class="header">
         <a href="https://pmfi.cc" target="_blank" class="logo-link">
-            <span class="logo-text">PredictFi</span>
+            <img src="psniper-logo.png" alt="pSNIPER" class="header-logo">
         </a>
         
         <button id="connectBtn" class="connect-btn">Connect Wallet</button>
@@ -497,7 +535,6 @@
         <div class="cards-grid">
             <div class="card">
                 <div class="vault-header">
-                    <img src="logo.png" alt="pSNIPER" class="vault-icon">
                     <span class="vault-name">pSNIPER</span>
                 </div>
                 
@@ -512,7 +549,10 @@
                     </div>
                 </div>
                 
-                <button id="openDepositBtn" class="deposit-btn" disabled>Deposit</button>
+                <div class="action-buttons">
+                    <button id="openDepositBtn" class="deposit-btn" disabled>Deposit</button>
+                    <button id="openWithdrawBtn" class="withdraw-btn" disabled>Withdraw</button>
+                </div>
             </div>
 
             <div class="card">
@@ -551,8 +591,7 @@
         <div class="modal">
             <button id="closeDepositModal" class="close-modal">&times;</button>
             <div class="deposit-modal-title">
-                <img src="logo.png" alt="pSNIPER">
-                <span>pSNIPER</span>
+                <span>Deposit to pSNIPER</span>
             </div>
             
             <div class="input-group">
@@ -563,20 +602,30 @@
                 </div>
             </div>
             
+            <button id="depositBtn" class="modal-btn">Deposit</button>
+            
+            <div id="txStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <div id="withdrawModal" class="modal-overlay hidden">
+        <div class="modal">
+            <button id="closeWithdrawModal" class="close-modal">&times;</button>
+            <div class="deposit-modal-title">
+                <span>Withdraw from pSNIPER</span>
+            </div>
+            
             <div class="input-group">
-                <label class="input-label">Withdraw Amount <span style="color:#8b949e;font-size:10px;">(net, after 1% exit fee)</span></label>
+                <label class="input-label">Withdraw Amount</label>
                 <div class="input-wrapper">
                     <input type="number" id="withdrawAmount" class="input-field" placeholder="0.00" step="0.01" min="0">
                     <span class="input-suffix">USDC</span>
                 </div>
             </div>
             
-            <div class="modal-actions">
-                <button id="depositBtn" class="modal-btn">Deposit</button>
-                <button id="withdrawBtn" class="modal-btn secondary">Withdraw</button>
-            </div>
+            <button id="withdrawBtn" class="modal-btn">Withdraw</button>
             
-            <div id="txStatus" class="status-msg"></div>
+            <div id="withdrawTxStatus" class="status-msg"></div>
         </div>
     </div>
 
