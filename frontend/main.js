@@ -66,7 +66,6 @@ let lastPriceData = null;
 // =============================================================================
 
 const connectBtn = document.getElementById("connectBtn");
-const vaultTvlEl = document.getElementById("vaultTvl");
 const tvlValueEl = document.getElementById("tvlValue");
 const statsSharePriceEl = document.getElementById("statsSharePrice");
 const userStatsEl = document.getElementById("userStats");
@@ -191,17 +190,21 @@ function initDepositModal() {
 
     openWithdrawBtn.addEventListener("click", () => {
         withdrawModal.classList.remove("hidden");
+        withdrawAmountEl.value = "";
+        hideStatus(withdrawTxStatus);
         refreshUserStats();
     });
     
     closeWithdrawModal.addEventListener("click", () => {
         withdrawModal.classList.add("hidden");
+        withdrawAmountEl.value = "";
         hideStatus(withdrawTxStatus);
     });
     
     withdrawModal.addEventListener("click", (e) => {
         if (e.target === withdrawModal) {
             withdrawModal.classList.add("hidden");
+            withdrawAmountEl.value = "";
             hideStatus(withdrawTxStatus);
         }
     });
@@ -293,7 +296,6 @@ function updatePriceDisplay(priceData) {
     
     const tvl = priceData.total_assets || 0;
     const tvlStr = `$${tvl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    vaultTvlEl.textContent = tvlStr;
     tvlValueEl.textContent = tvlStr;
     
     // Update last updated timestamp if available
@@ -367,7 +369,6 @@ async function refreshVaultStats() {
 
         const tvl = Number(totalAssets) / 10 ** USDC_DECIMALS;
         const tvlStr = `$${tvl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        vaultTvlEl.textContent = tvlStr;
         tvlValueEl.textContent = tvlStr;
 
     } catch (error) {
@@ -537,7 +538,6 @@ async function handleDeposit() {
 
     try {
         depositBtn.disabled = true;
-        withdrawBtn.disabled = true;
         hideStatus(txStatus);
 
         // Request fresh price from VPS before deposit for accurate share pricing
@@ -590,7 +590,6 @@ async function handleDeposit() {
         showStatus(txStatus, errorMsg, "error");
     } finally {
         depositBtn.disabled = false;
-        withdrawBtn.disabled = false;
     }
 }
 
@@ -636,8 +635,11 @@ async function handleWithdraw() {
 
         showStatus(withdrawTxStatus, `Withdrew $${amountStr} USDC`, "success");
         withdrawAmountEl.value = "";
-        withdrawModal.classList.add("hidden");
         await refreshAll();
+        setTimeout(() => {
+            withdrawModal.classList.add("hidden");
+            hideStatus(withdrawTxStatus);
+        }, 1500);
 
     } catch (error) {
         console.error("Withdraw error:", error);
