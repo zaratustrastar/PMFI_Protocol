@@ -58,7 +58,7 @@ from dotenv import load_dotenv
 from web3 import Web3
 from eth_account import Account
 from eth_account.messages import encode_defunct
-from flask import Flask, jsonify, request as flask_request
+from flask import Flask, jsonify, request as flask_request, send_from_directory
 from flask_cors import CORS
 
 # Load environment variables
@@ -113,6 +113,24 @@ nav_lock = threading.Lock()
 # Flask app
 flask_app = Flask(__name__)
 CORS(flask_app)
+
+# Frontend directory (check multiple possible locations)
+_script_dir = Path(__file__).resolve().parent
+FRONTEND_DIR = _script_dir / "frontend"
+if not FRONTEND_DIR.exists():
+    FRONTEND_DIR = _script_dir.parent / "frontend"
+if not FRONTEND_DIR.exists():
+    print(f"⚠️  Frontend directory not found at {FRONTEND_DIR}")
+
+@flask_app.route('/')
+def serve_index():
+    """Serve the main frontend page."""
+    return send_from_directory(FRONTEND_DIR, 'index.html')
+
+@flask_app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve static files from frontend directory."""
+    return send_from_directory(FRONTEND_DIR, filename)
 
 
 # =============================================================================
@@ -682,7 +700,9 @@ def main():
     
     # Start Flask server
     print(f"\n🚀 Starting HTTP API on port {HTTP_PORT}")
+    print(f"   Serving frontend from: {FRONTEND_DIR}")
     print(f"   Endpoints:")
+    print(f"   - GET  /             - Frontend UI")
     print(f"   - GET  /health       - Health check")
     print(f"   - GET  /price        - Cached price (for UI)")
     print(f"   - GET  /sign-nav     - Get signed NavData (for transactions)")
