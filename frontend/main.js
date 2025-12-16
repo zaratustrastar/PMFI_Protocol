@@ -28,9 +28,10 @@ let USDC_ABI = null;
 
 async function loadABIs() {
     try {
+        const cacheBuster = Date.now();
         const [vaultResponse, usdcResponse] = await Promise.all([
-            fetch("abis/vault.json"),
-            fetch("abis/usdc.json")
+            fetch(`abis/vault.json?v=${cacheBuster}`),
+            fetch(`abis/usdc.json?v=${cacheBuster}`)
         ]);
         
         if (!vaultResponse.ok || !usdcResponse.ok) {
@@ -39,6 +40,8 @@ async function loadABIs() {
         
         VAULT_ABI = await vaultResponse.json();
         USDC_ABI = await usdcResponse.json();
+        
+        console.log("ABIs loaded, VAULT_ABI is array:", Array.isArray(VAULT_ABI));
         return true;
     } catch (error) {
         console.error("Error loading ABIs:", error);

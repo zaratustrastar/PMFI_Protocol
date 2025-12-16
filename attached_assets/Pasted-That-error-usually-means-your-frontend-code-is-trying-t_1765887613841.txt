@@ -1,0 +1,76 @@
+That error usually means your frontend code is trying to **loop over an ABI value**, but the thing you’re passing as `abi` is **not an array** (it’s `undefined`, a string, an object, or the whole artifact instead of `artifact.abi`).
+
+Here are the most common causes:
+
+### 1) you imported the contract artifact incorrectly
+
+If you’re using Hardhat/Foundry artifacts, the ABI is often nested.
+
+✅ correct patterns:
+
+```js
+import artifact from "../artifacts/contracts/My.sol/My.json";
+const abi = artifact.abi;
+```
+
+❌ common mistake:
+
+```js
+const abi = artifact; // not iterable
+```
+
+### 2) wrong file / wrong export shape (especially with TypeScript, Vite, Next)
+
+Sometimes JSON imports behave differently depending on bundler.
+
+Check what you actually got:
+
+```js
+console.log("ABI value:", abi);
+console.log("Is array:", Array.isArray(abi));
+```
+
+If `abi` is `undefined`, your import path or JSON import config is wrong.
+
+### 3) you’re passing the wrong variable into ethers / wagmi / viem
+
+Examples:
+
+**ethers v6**
+
+```js
+new Contract(address, abi, provider)
+```
+
+If you accidentally do:
+
+```js
+new Contract(address, contractJson, provider) // contractJson is object, not abi array
+```
+
+you’ll see “abi is not iterable”.
+
+### 4) you’re fetching ABI from an API but not parsing / not using the right field
+
+If you fetch from Etherscan/Polygonscan-style APIs, ABI often comes as a **stringified JSON**:
+
+```js
+const abi = JSON.parse(data.result); // result is a string
+```
+
+If you skip `JSON.parse`, you pass a string → not iterable in the expected way.
+
+### 5) ABI is empty because build didn’t run or artifact missing
+
+If the artifact file exists but ABI is empty/undefined, compilation may not have produced it, or you’re pointing to the wrong contract output.
+
+---
+
+## quick fix checklist
+
+1. `console.log(abi)` right before you use it.
+2. Ensure `Array.isArray(abi) === true`.
+3. If you imported an artifact, use `artifact.abi`.
+4. If ABI comes from an API, `JSON.parse(...)`.
+
+If you paste the **code where you create the contract** (the line that uses `abi`) and how you **import/load** the ABI, I can tell you exactly which of the above is happening.
