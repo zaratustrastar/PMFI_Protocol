@@ -1,0 +1,58 @@
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# tail -f /opt/polymarket-bot/trading_bot/auto_trader.log
+tail -f /opt/polymarket-bot/trading_bot/order_monitor.log
+nohup: ignoring input
+^C
+   ⚠️  Order 0x351e2c not found on exchange (cancelled or expired)
+   ⚠️  Order 0x8cb10c not found on exchange (cancelled or expired)
+   ⚠️  Order 0xb71c2e not found on exchange (cancelled or expired)
+   ⚠️  Order 0x18fa2a not found on exchange (cancelled or expired)
+   ⚠️  Order 0x47443c not found on exchange (cancelled or expired)
+   ⚠️  Order 0xee97b2 not found on exchange (cancelled or expired)
+   ⚠️  Order 0x0efd96 not found on exchange (cancelled or expired)
+   ⚠️  Order 0x868391 not found on exchange (cancelled or expired)
+   ⚠️  Order 0x0e1d9a not found on exchange (cancelled or expired)
+   ⚠️  Order 0xca0ca0 not found on exchange (cancelled or expired)
+# See auto_trader logs
+tail -f /opt/polymarket-bot/trading_bot/auto_trader.log
+^C
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# # See auto_trader logs
+tail -f /opt/polymarket-bot/trading_bot/auto_trader.log
+nohup: ignoring input
+^C
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# # See order_monitor logs
+tail -f /opt/polymarket-bot/trading_bot/order_monitor.log
+   ⚠️  Order 0x351e2c not found on exchange (cancelled or expired)
+   ⚠️  Order 0x8cb10c not found on exchange (cancelled or expired)
+   ⚠️  Order 0xb71c2e not found on exchange (cancelled or expired)
+   ⚠️  Order 0x18fa2a not found on exchange (cancelled or expired)
+   ⚠️  Order 0x47443c not found on exchange (cancelled or expired)
+   ⚠️  Order 0xee97b2 not found on exchange (cancelled or expired)
+   ⚠️  Order 0x0efd96 not found on exchange (cancelled or expired)
+   ⚠️  Order 0x868391 not found on exchange (cancelled or expired)
+   ⚠️  Order 0x0e1d9a not found on exchange (cancelled or expired)
+   ⚠️  Order 0xca0ca0 not found on exchange (cancelled or expired)
+^C
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# tail -20 /opt/polymarket-bot/trading_bot/auto_trader.log
+tail -20 /opt/polymarket-bot/trading_bot/order_monitor.log
+nohup: ignoring input
+   ⚠️  Order 0x193d8c not found on exchange (cancelled or expired)
+   ⚠️  Order 0x6ae521 not found on exchange (cancelled or expired)
+   ⚠️  Order 0xf21f8b not found on exchange (cancelled or expired)
+   ⚠️  Order 0x2a06e2 not found on exchange (cancelled or expired)
+   ⚠️  Order 0xe622b0 not found on exchange (cancelled or expired)
+   ⚠️  Order 0xdb0d54 not found on exchange (cancelled or expired)
+   ⚠️  Order 0xf2498b not found on exchange (cancelled or expired)
+   ⚠️  Order 0x065eae not found on exchange (cancelled or expired)
+   ⚠️  Order 0xbb4883 not found on exchange (cancelled or expired)
+   ⚠️  Order 0x3f71fd not found on exchange (cancelled or expired)
+   ⚠️  Order 0x351e2c not found on exchange (cancelled or expired)
+   ⚠️  Order 0x8cb10c not found on exchange (cancelled or expired)
+   ⚠️  Order 0xb71c2e not found on exchange (cancelled or expired)
+   ⚠️  Order 0x18fa2a not found on exchange (cancelled or expired)
+   ⚠️  Order 0x47443c not found on exchange (cancelled or expired)
+   ⚠️  Order 0xee97b2 not found on exchange (cancelled or expired)
+   ⚠️  Order 0x0efd96 not found on exchange (cancelled or expired)
+   ⚠️  Order 0x868391 not found on exchange (cancelled or expired)
+   ⚠️  Order 0x0e1d9a not found on exchange (cancelled or expired)
+   ⚠️  Order 0xca0ca0 not found on exchange (cancelled or expired)
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# 

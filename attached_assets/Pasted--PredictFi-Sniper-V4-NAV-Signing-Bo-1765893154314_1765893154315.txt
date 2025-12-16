@@ -1,0 +1,48 @@
+============================================================
+🏦 PredictFi Sniper V4 - NAV Signing Bot (Zero Gas Oracle)
+============================================================
+
+✅ Oracle signer: 0x5087675E669e6244620013691c05C1De0e8B525e
+✅ Connected to chain (ID: 8453)
+⚠️  Could not load USDC contract: Artifact not found: /root/artifacts/contracts/TestUSDC.sol/TestUSDC.json
+⚠️  Could not load Vault V4 contract: Artifact not found: /root/artifacts/contracts/PredictFiSniperVaultV4.sol/PredictFiSniperVaultV4.json
+✅ Polymarket client initialized
+
+📊 Initial NAV calculation...
+
+============================================================
+💰 CALCULATING LIQUIDATION NAV
+============================================================
+📡 Fetching positions for 0x9cbc5577...
+✅ Found 0 active positions
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+
+📊 NAV: $0.00 (positions: $0.00, cash: $0.00)
+✅ Signed NAV: 1.000000 (round 1)
+
+============================================================
+💰 CALCULATING LIQUIDATION NAV
+============================================================
+
+🚀 Starting HTTP API on port 8080📡 Fetching positions for 0x9cbc5577...
+
+   Endpoints:
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavData (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v6'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+✅ Found 0 active positions
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+
+📊 NAV: $0.00 (positions: $0.00, cash: $0.00)
+✅ Signed NAV: 1.000000 (round 1)
