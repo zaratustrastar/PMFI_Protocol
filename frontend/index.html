@@ -526,6 +526,97 @@
         .switch-network-btn:hover {
             opacity: 0.85;
         }
+
+        /* Pending Withdrawals */
+        .pending-withdrawals-section {
+            margin-top: 32px;
+            background: linear-gradient(180deg, rgba(30,35,50,1) 0%, rgba(20,25,35,1) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .pending-withdrawals-section.hidden {
+            display: none;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: #f0f6fc;
+        }
+
+        .pending-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .pending-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .pending-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .pending-shares {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f0f6fc;
+        }
+
+        .pending-value {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .pending-time {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        .claim-btn {
+            padding: 8px 16px;
+            background: #7ee787;
+            color: #0d1117;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .claim-btn:hover:not(:disabled) {
+            opacity: 0.85;
+        }
+
+        .claim-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .claim-btn.expired {
+            background: #f85149;
+        }
+
+        .no-pending {
+            color: #8b949e;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
@@ -576,6 +667,14 @@
                     <div class="big-stat-label">pSNIPER Price</div>
                     <div class="big-stat-value" id="statsSharePrice">$1.00</div>
                 </div>
+            </div>
+        </div>
+        
+        <!-- Pending Withdrawals Section -->
+        <div id="pendingWithdrawalsSection" class="pending-withdrawals-section hidden">
+            <h3 class="section-title">Pending Withdrawals</h3>
+            <div id="pendingWithdrawalsList" class="pending-list">
+                <!-- Dynamically populated -->
             </div>
         </div>
     </main>

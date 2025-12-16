@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-PredictFi Sniper Vault V4 - NAV Signing Bot (Zero Gas Oracle)
+PredictFi Sniper Vault V6 - NAV Signing Bot (Zero Gas Oracle)
 
 =============================================================================
 ARCHITECTURE:
 =============================================================================
 
-This bot is a ZERO-GAS oracle for the V4 vault:
+This bot is a ZERO-GAS oracle for the V6 vault:
 - Signs NAV data off-chain (free - no gas needed)
 - Users include the signature when they deposit/withdraw (they pay gas)
 - Bot calculates liquidation NAV from Polymarket orderbooks
@@ -35,7 +35,7 @@ ENVIRONMENT VARIABLES:
 
 Required:
 - RPC_URL: Base Mainnet RPC endpoint
-- VAULT_V4_ADDRESS: PredictFiSniperVaultV4 contract address
+- VAULT_V6_ADDRESS: PredictFiSniperVaultV6 contract address
 - USDC_ADDRESS: USDC contract address
 - ORACLE_PRIVATE_KEY: Private key for signing NAV (same as deployer)
 - POLYMARKET_PROXY_ADDRESS: Polymarket wallet with positions
@@ -68,11 +68,12 @@ load_dotenv()
 # Configuration
 # =============================================================================
 RPC_URL = os.getenv("RPC_URL")
-VAULT_V4_ADDRESS = os.getenv("VAULT_V4_ADDRESS")
+# Support both VAULT_V6_ADDRESS (new) and VAULT_V4_ADDRESS (legacy) env vars
+VAULT_V6_ADDRESS = os.getenv("VAULT_V6_ADDRESS") or os.getenv("VAULT_V4_ADDRESS")
 USDC_ADDRESS = os.getenv("USDC_ADDRESS")
 
 # Oracle key - this is the key that signs NAV updates
-# Should match the navSigner address in the V4 contract
+# Should match the navSigner address in the V6 contract
 ORACLE_PRIVATE_KEY = os.getenv("ORACLE_PRIVATE_KEY") or os.getenv("KEEPER_PRIVATE_KEY") or os.getenv("PRIVATE_KEY")
 
 # Polymarket wallet address (for fetching positions)
@@ -92,7 +93,7 @@ last_refresh_request = {}
 # Global state
 w3 = None
 usdc = None
-vault_v4 = None
+vault_v6 = None
 polymarket_client = None
 nav_engine = None
 oracle_account = None
@@ -389,16 +390,16 @@ def get_signed_nav_data() -> Dict:
     Returns:
         Dict with navData fields and signature
     """
-    global cached_nav, nav_engine, polymarket_client, usdc, vault_v4, w3
+    global cached_nav, nav_engine, polymarket_client, usdc, vault_v6, w3
     
     # Calculate current NAV
     now = int(time.time())
     
     # Get vault state
     try:
-        total_supply = vault_v4.functions.totalSupply().call() if vault_v4 else 0
-        vault_balance = usdc.functions.balanceOf(VAULT_V4_ADDRESS).call() if usdc and VAULT_V4_ADDRESS else 0
-        last_round_id = vault_v4.functions.lastRoundId().call() if vault_v4 else 0
+        total_supply = vault_v6.functions.totalSupply().call() if vault_v6 else 0
+        vault_balance = usdc.functions.balanceOf(VAULT_V6_ADDRESS).call() if usdc and VAULT_V6_ADDRESS else 0
+        last_round_id = vault_v6.functions.lastRoundId().call() if vault_v6 else 0
     except Exception as e:
         print(f"❌ Error reading vault state: {e}")
         total_supply = 0
@@ -439,7 +440,7 @@ def get_signed_nav_data() -> Dict:
     deadline = now + NAV_VALIDITY_SECONDS
     
     # Sign the NAV data
-    signature, signer = sign_nav_data(nav, timestamp, deadline, new_round_id, VAULT_V4_ADDRESS)
+    signature, signer = sign_nav_data(nav, timestamp, deadline, new_round_id, VAULT_V6_ADDRESS)
     
     # Update cached values
     with nav_lock:
@@ -556,7 +557,7 @@ def sign_nav_debug():
         
         # Add extra debug info
         result["debug"] = {
-            "vault_address": VAULT_V4_ADDRESS,
+            "vault_address": VAULT_V6_ADDRESS,
             "oracle_address": oracle_account.address if oracle_account else None,
             "polymarket_wallet": POLYMARKET_PROXY_ADDRESS,
         }
@@ -600,7 +601,7 @@ def load_abi(contract_name: str) -> dict:
 
 def main():
     """Main entry point for V4 NAV signing bot."""
-    global w3, usdc, vault_v4, polymarket_client, nav_engine, oracle_account
+    global w3, usdc, vault_v6, polymarket_client, nav_engine, oracle_account
     
     print("\n" + "="*60)
     print("🏦 PredictFi Sniper V4 - NAV Signing Bot (Zero Gas Oracle)")
@@ -613,8 +614,8 @@ def main():
     if not ORACLE_PRIVATE_KEY:
         print("❌ ORACLE_PRIVATE_KEY not set")
         sys.exit(1)
-    if not VAULT_V4_ADDRESS:
-        print("⚠️  VAULT_V4_ADDRESS not set - signing will use placeholder")
+    if not VAULT_V6_ADDRESS:
+        print("⚠️  VAULT_V6_ADDRESS not set - signing will use placeholder")
     if not POLYMARKET_PROXY_ADDRESS:
         print("⚠️  POLYMARKET_PROXY_ADDRESS not set - NAV will be 1.0")
     
@@ -643,14 +644,14 @@ def main():
     
     try:
         vault_abi = load_abi("PredictFiSniperVaultV4")
-        vault_v4 = w3.eth.contract(
-            address=Web3.to_checksum_address(VAULT_V4_ADDRESS),
+        vault_v6 = w3.eth.contract(
+            address=Web3.to_checksum_address(VAULT_V6_ADDRESS),
             abi=vault_abi
         )
-        print(f"✅ Vault V4 contract: {VAULT_V4_ADDRESS}")
+        print(f"✅ Vault V4 contract: {VAULT_V6_ADDRESS}")
         
         # Verify oracle is the signer
-        on_chain_signer = vault_v4.functions.navSigner().call()
+        on_chain_signer = vault_v6.functions.navSigner().call()
         if on_chain_signer.lower() != oracle_account.address.lower():
             print(f"\n⚠️  WARNING: Vault navSigner ({on_chain_signer}) != Oracle ({oracle_account.address})")
             print(f"   Signatures will be REJECTED by the contract!")
@@ -658,7 +659,7 @@ def main():
             print(f"✅ Oracle matches vault navSigner")
     except Exception as e:
         print(f"⚠️  Could not load Vault V4 contract: {e}")
-        vault_v4 = None
+        vault_v6 = None
     
     # Initialize Polymarket client
     if POLYMARKET_PROXY_ADDRESS:

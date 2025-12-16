@@ -410,7 +410,8 @@ async function refreshUserStats() {
 async function refreshAll() {
     await Promise.all([
         refreshVaultStats(),
-        refreshUserStats()
+        refreshUserStats(),
+        loadPendingWithdrawals()
     ]);
 }
 
@@ -697,6 +698,146 @@ async function handleWithdraw() {
         showStatus(withdrawTxStatus, errorMsg, "error");
     } finally {
         withdrawBtn.disabled = false;
+    }
+}
+
+// =============================================================================
+// PENDING WITHDRAWALS
+// =============================================================================
+
+async function loadPendingWithdrawals() {
+    if (!userAddress || !vaultContract) return;
+    
+    const section = document.getElementById("pendingWithdrawalsSection");
+    const list = document.getElementById("pendingWithdrawalsList");
+    
+    try {
+        // Get user's withdrawal request IDs
+        const requestIds = await vaultContract.getUserWithdrawals(userAddress);
+        
+        if (!requestIds || requestIds.length === 0) {
+            section.classList.add("hidden");
+            return;
+        }
+        
+        // Fetch details for each request
+        const pendingRequests = [];
+        for (const requestId of requestIds) {
+            const req = await vaultContract.getWithdrawalRequest(requestId);
+            // req = [user, shares, requestTime, claimed, expired]
+            if (!req[3]) { // not claimed
+                pendingRequests.push({
+                    id: requestId,
+                    shares: req[1],
+                    requestTime: req[2],
+                    expired: req[4]
+                });
+            }
+        }
+        
+        if (pendingRequests.length === 0) {
+            section.classList.add("hidden");
+            return;
+        }
+        
+        // Get current share price
+        let sharePrice = 1.0;
+        try {
+            if (PRICE_API_URL) {
+                const res = await fetch(`${PRICE_API_URL}/price`);
+                const data = await res.json();
+                sharePrice = data.price_per_share || 1.0;
+            }
+        } catch (e) {
+            console.log("Could not fetch price for pending display");
+        }
+        
+        // Render list
+        list.innerHTML = pendingRequests.map(req => {
+            const sharesFormatted = Number(ethers.formatUnits(req.shares, 18)).toFixed(4);
+            const usdValue = (Number(ethers.formatUnits(req.shares, 18)) * sharePrice).toFixed(2);
+            const requestDate = new Date(Number(req.requestTime) * 1000).toLocaleString();
+            
+            return `
+                <div class="pending-item">
+                    <div class="pending-info">
+                        <div class="pending-shares">${sharesFormatted} pSNIPER</div>
+                        <div class="pending-value">~$${usdValue} USDC</div>
+                        <div class="pending-time">Requested: ${requestDate}</div>
+                    </div>
+                    <button class="claim-btn ${req.expired ? 'expired' : ''}" 
+                            onclick="handleClaim(${req.id})" 
+                            ${req.expired ? 'title="Expired - reclaim shares"' : ''}>
+                        ${req.expired ? 'Reclaim' : 'Claim'}
+                    </button>
+                </div>
+            `;
+        }).join('');
+        
+        section.classList.remove("hidden");
+        
+    } catch (error) {
+        console.error("Error loading pending withdrawals:", error);
+        section.classList.add("hidden");
+    }
+}
+
+async function handleClaim(requestId) {
+    if (!signer || !userAddress) {
+        alert("Please connect your wallet first");
+        return;
+    }
+    
+    if (!PRICE_API_URL) {
+        alert("VPS bot URL not configured");
+        return;
+    }
+    
+    const claimBtn = event.target;
+    const isExpired = claimBtn.classList.contains('expired');
+    
+    try {
+        claimBtn.disabled = true;
+        claimBtn.textContent = "Processing...";
+        
+        // Get signed NAV from VPS bot
+        const signedNav = await getSignedNav();
+        
+        const navData = {
+            nav: BigInt(signedNav.navData.nav),
+            timestamp: signedNav.navData.timestamp,
+            deadline: signedNav.navData.deadline,
+            roundId: signedNav.navData.roundId
+        };
+        const signature = signedNav.signature;
+        
+        const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+        
+        let tx;
+        if (isExpired) {
+            // Reclaim expired request - get shares back
+            tx = await signerVaultContract.reclaimExpired(requestId);
+        } else {
+            // Normal claim - get USDC
+            tx = await signerVaultContract.claim(requestId, navData, signature);
+        }
+        
+        await tx.wait();
+        
+        alert(isExpired ? "Shares reclaimed successfully!" : "Withdrawal claimed successfully!");
+        await refreshAll();
+        await loadPendingWithdrawals();
+        
+    } catch (error) {
+        console.error("Claim error:", error);
+        let errorMsg = error.reason || error.message;
+        if (errorMsg.includes("Insufficient buffer")) {
+            errorMsg = "Not enough USDC in buffer. Try again later when positions are liquidated.";
+        }
+        alert("Claim failed: " + errorMsg);
+    } finally {
+        claimBtn.disabled = false;
+        claimBtn.textContent = isExpired ? "Reclaim" : "Claim";
     }
 }
 

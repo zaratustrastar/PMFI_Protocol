@@ -2,25 +2,31 @@
 
 This project contains TWO main systems:
 
-## 1. pSNIPER Vault (V4) - ERC4626 Vault with Signed NAV Oracle
+## 1. pSNIPER Vault (V6) - ERC4626 Vault with Signed NAV Oracle & Auto-Split Deposits
 
 A production-ready vault for managing USDC investments in Polymarket positions.
 
-### V4 Architecture (Signed NAV Oracle - Zero Gas for Oracle)
+**Deployed Address**: `0x14909200fbfA97622bfA38f51EE4ce55D43D83C8` (Base Mainnet)
 
-**Key Innovation**: Oracle signs NAV data off-chain (free), users include signature in transactions (they pay gas).
+### V6 Architecture (Signed NAV Oracle - Zero Gas for Oracle + Async Withdrawals)
+
+**Key Innovations**:
+- Oracle signs NAV data off-chain (free), users include signature in transactions (they pay gas)
+- Auto-split deposits: configurable buffer (5-50%, default 10%), remainder auto-forwards to Polymarket
+- Async withdrawals: `requestWithdraw` → bot refills buffer → `claim`
 
 **Components:**
-- **Contract**: `contracts/PredictFiSniperVaultV4.sol` - ERC4626-style vault
-- **Bot**: `bot/bot_v4.py` - Zero-gas oracle that signs NAV data
-- **Frontend**: `frontend/main-v4.js` + `frontend/index.html`
+- **Contract**: `contracts/PredictFiSniperVaultV6.sol` - ERC4626-style vault with auto-split
+- **Bot**: `bot/bot_v6.py` - Zero-gas oracle that signs NAV data
+- **Frontend**: `frontend/main.js` + `frontend/index.html`
 
 **How it works:**
 1. Bot calculates liquidation NAV from Polymarket orderbooks
 2. Bot signs NavData struct: `{nav, timestamp, deadline, roundId}` + vault address
 3. User calls `/sign-nav` endpoint to get signed data
-4. User includes signature in `deposit()` or `redeem()` transaction
+4. User includes signature in `deposit()` or `requestWithdraw()` transaction
 5. Contract verifies signature matches `navSigner` address
+6. For withdrawals: user later calls `claim()` with fresh signed NAV when buffer has funds
 
 **Safety Features:**
 - 30-second signature validity window
@@ -28,22 +34,29 @@ A production-ready vault for managing USDC investments in Polymarket positions.
 - Monotonically increasing roundId (replay protection)
 - 1% withdrawal tax to deployer wallet
 - Per-wallet (100 USDC) and total (10k-100k USDC) deposit caps
+- Minimum 5% buffer floor for withdrawal liquidity
 
 **Deployment:**
 ```bash
-# Deploy V4 vault
-npx hardhat run scripts/deploy-v4-mainnet.js --network base
+# Deploy V6 vault
+npx hardhat run scripts/deploy-v6-mainnet.cjs --network base
 
 # Start bot (from VPS with residential IP for Polymarket API)
-python bot/bot_v4.py
+python bot/bot_v6.py
 ```
 
-**Environment Variables for V4:**
-- `VAULT_V4_ADDRESS` - Deployed vault address
+**Environment Variables for V6:**
+- `VAULT_V6_ADDRESS` - Deployed vault address (or `VAULT_V4_ADDRESS` for legacy)
 - `ORACLE_PRIVATE_KEY` - Same as deployer, signs NAV data
 - `POLYMARKET_PROXY_ADDRESS` - Polymarket wallet with positions
 - `RPC_URL` - Base Mainnet RPC
 - `USDC_ADDRESS` - Base USDC (0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913)
+
+**Frontend Setup:**
+Set VPS bot URL in browser console:
+```javascript
+localStorage.setItem('predictfi_price_api_url', 'http://your-vps-ip:8080')
+```
 
 ---
 
