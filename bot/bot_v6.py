@@ -100,7 +100,7 @@ oracle_account = None
 
 # Global cached NAV data
 cached_nav = {
-    "nav": NAV_PRECISION,  # 1.0 in 1e18 format (1 USDC per pSNIPER initially)
+    "nav": 10**6,  # 1e6 = $1.00 per share (matches contract formula)
     "round_id": 0,
     "last_calculated": 0,
     "total_supply": 0,
@@ -439,16 +439,23 @@ def get_signed_nav_data() -> Dict:
     # Total assets = vault buffer + Polymarket value
     total_assets_6dec = vault_balance + pm_liquidation_value
     
-    # Calculate NAV per share (in 1e18 precision)
+    # Calculate NAV per share
+    # Contract formula for deposit: sharesToMint = usdcAmount_6dec * 1e18 / nav
+    # Contract formula for withdraw: grossUsdc_6dec = shares_18dec * nav / 1e18
+    # 
+    # For NAV = $1.00/share, depositing 4 USDC should give 4e18 shares:
+    #   4e6 * 1e18 / nav = 4e18  →  nav = 1e6
+    #
+    # So: nav = (total_assets_6dec * 1e18) / total_supply_18dec
+    # When total_assets = 10 USDC (10e6) and total_supply = 10 shares (10e18):
+    #   nav = 10e6 * 1e18 / 10e18 = 1e6 ✓
     if total_supply > 0:
-        # nav = total_assets / total_supply, scaled to 1e18
-        # Since total_assets is in 6 decimals and total_supply is in 18 decimals:
-        # nav = total_assets_6dec * 1e18 / total_supply
-        nav = (total_assets_6dec * NAV_PRECISION) // (total_supply // 10**12)  # Adjust for decimals
-        # Simplify: nav = total_assets_6dec * 1e18 * 1e12 / total_supply
-        nav = (total_assets_6dec * NAV_PRECISION * 10**12) // total_supply if total_supply > 0 else NAV_PRECISION
+        nav = (total_assets_6dec * NAV_PRECISION) // total_supply
     else:
-        nav = NAV_PRECISION  # 1.0 if no supply
+        # Initial NAV when no supply: use 1e6 to represent $1.00/share
+        # This matches: usdcAmount * 1e18 / 1e6 = usdcAmount * 1e12 shares
+        # For 1 USDC (1e6): 1e6 * 1e18 / 1e6 = 1e18 shares ✓
+        nav = 10**6  # 1e6 = $1.00 per share
     
     # Increment round ID
     new_round_id = last_round_id + 1
@@ -473,7 +480,8 @@ def get_signed_nav_data() -> Dict:
             "total_assets": total_assets_6dec,
         }
     
-    print(f"✅ Signed NAV: {nav / 1e18:.6f} (round {new_round_id})")
+    # NAV is ~1e6 for $1/share, so divide by 1e6 to get human-readable price
+    print(f"✅ Signed NAV: ${nav / 1e6:.4f}/share (round {new_round_id})")
     
     return {
         "navData": {
@@ -485,7 +493,7 @@ def get_signed_nav_data() -> Dict:
         "signature": "0x" + signature,
         "signer": signer,
         "metadata": {
-            "price_per_share": nav / NAV_PRECISION,
+            "price_per_share": nav / 1e6,  # NAV is ~1e6 for $1/share
             "total_assets_usdc": total_assets_6dec / 1e6,
             "total_supply": total_supply / 1e18,
             "vault_buffer_usdc": vault_balance / 1e6,
@@ -514,7 +522,7 @@ def get_price():
     """Get cached price (fast, for UI display)."""
     with nav_lock:
         return jsonify({
-            "price_per_share": cached_nav["nav"] / NAV_PRECISION,
+            "price_per_share": cached_nav["nav"] / 1e6,  # NAV is ~1e6 for $1/share
             "nav_raw": str(cached_nav["nav"]),
             "total_supply": cached_nav["total_supply"] / 1e18 if cached_nav["total_supply"] else 0,
             "vault_buffer_usdc": cached_nav["vault_balance"] / 1e6 if cached_nav["vault_balance"] else 0,
