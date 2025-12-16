@@ -522,6 +522,29 @@ async function handleChainChanged() {
 }
 
 // =============================================================================
+// SIGNED NAV HELPER
+// =============================================================================
+
+async function getSignedNav() {
+    if (!PRICE_API_URL) {
+        throw new Error("VPS bot URL not configured. Set it in browser console: localStorage.setItem('predictfi_price_api_url', 'http://your-vps-ip:8080')");
+    }
+    
+    const response = await fetch(`${PRICE_API_URL}/sign-nav`);
+    if (!response.ok) {
+        throw new Error("Failed to get signed NAV from bot");
+    }
+    
+    const data = await response.json();
+    if (data.error) {
+        throw new Error(data.error);
+    }
+    
+    console.log("Got signed NAV:", data);
+    return data;
+}
+
+// =============================================================================
 // DEPOSIT
 // =============================================================================
 
@@ -537,21 +560,29 @@ async function handleDeposit() {
         return;
     }
 
+    if (!PRICE_API_URL) {
+        showStatus(txStatus, "VPS bot URL not configured", "error");
+        return;
+    }
+
     const amount = parseUSDC(amountStr);
 
     try {
         depositBtn.disabled = true;
         hideStatus(txStatus);
 
-        // Request fresh price from VPS before deposit for accurate share pricing
-        if (PRICE_API_URL) {
-            showStatus(txStatus, "Fetching latest price...", "info");
-            const priceData = await requestFreshPrice();
-            if (priceData) {
-                console.log("Price refreshed before deposit:", priceData);
-                updatePriceDisplay(priceData);
-            }
-        }
+        // Get signed NAV from VPS bot
+        showStatus(txStatus, "Getting signed price...", "info");
+        const signedNav = await getSignedNav();
+        
+        // Extract NavData struct and signature
+        const navData = {
+            nav: BigInt(signedNav.navData.nav),
+            timestamp: signedNav.navData.timestamp,
+            deadline: signedNav.navData.deadline,
+            roundId: signedNav.navData.roundId
+        };
+        const signature = signedNav.signature;
 
         // Ensure we're using signer-connected contracts
         const signerUsdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
@@ -570,7 +601,8 @@ async function handleDeposit() {
         }
 
         showStatus(txStatus, "Depositing...", "info");
-        const depositTx = await signerVaultContract.deposit(amount, userAddress);
+        console.log("Calling deposit with:", { amount: amount.toString(), navData, signature });
+        const depositTx = await signerVaultContract.deposit(amount, navData, signature);
         showStatus(txStatus, "Confirming...", "info");
         await depositTx.wait();
 
@@ -589,6 +621,8 @@ async function handleDeposit() {
             errorMsg = "Deposit exceeds your 100 USDC wallet cap.";
         } else if (errorMsg.includes("insufficient")) {
             errorMsg = "Insufficient USDC balance.";
+        } else if (errorMsg.includes("VPS")) {
+            errorMsg = "VPS bot not reachable. Check your bot URL.";
         }
         showStatus(txStatus, errorMsg, "error");
     } finally {
@@ -597,13 +631,13 @@ async function handleDeposit() {
 }
 
 // =============================================================================
-// WITHDRAW
+// WITHDRAW (V6: requestWithdraw creates a withdrawal request)
 // =============================================================================
 
 async function handleWithdraw() {
     const amountStr = withdrawAmountEl.value;
     if (!amountStr || Number(amountStr) <= 0) {
-        showStatus(withdrawTxStatus, "Enter a valid amount", "error");
+        showStatus(withdrawTxStatus, "Enter a valid pSNIPER amount", "error");
         return;
     }
 
@@ -612,37 +646,47 @@ async function handleWithdraw() {
         return;
     }
 
-    const amount = parseUSDC(amountStr);
+    if (!PRICE_API_URL) {
+        showStatus(withdrawTxStatus, "VPS bot URL not configured", "error");
+        return;
+    }
+
+    // Convert pSNIPER shares to 18 decimals
+    const shareAmount = ethers.parseUnits(amountStr, 18);
 
     try {
         withdrawBtn.disabled = true;
         hideStatus(withdrawTxStatus);
 
-        // Request fresh price from VPS before withdraw for accurate share pricing
-        if (PRICE_API_URL) {
-            showStatus(withdrawTxStatus, "Fetching latest price...", "info");
-            const priceData = await requestFreshPrice();
-            if (priceData) {
-                console.log("Price refreshed before withdraw:", priceData);
-                updatePriceDisplay(priceData);
-            }
-        }
+        // Get signed NAV from VPS bot
+        showStatus(withdrawTxStatus, "Getting signed price...", "info");
+        const signedNav = await getSignedNav();
+        
+        // Extract NavData struct and signature
+        const navData = {
+            nav: BigInt(signedNav.navData.nav),
+            timestamp: signedNav.navData.timestamp,
+            deadline: signedNav.navData.deadline,
+            roundId: signedNav.navData.roundId
+        };
+        const signature = signedNav.signature;
 
         // Ensure we're using signer-connected contract
         const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
 
-        showStatus(withdrawTxStatus, "Withdrawing...", "info");
-        const withdrawTx = await signerVaultContract.withdraw(amount, userAddress, userAddress);
+        showStatus(withdrawTxStatus, "Requesting withdrawal...", "info");
+        console.log("Calling requestWithdraw with:", { shareAmount: shareAmount.toString(), navData, signature });
+        const withdrawTx = await signerVaultContract.requestWithdraw(shareAmount, navData, signature);
         showStatus(withdrawTxStatus, "Confirming...", "info");
         await withdrawTx.wait();
 
-        showStatus(withdrawTxStatus, `Withdrew $${amountStr} USDC`, "success");
+        showStatus(withdrawTxStatus, `Withdrawal requested for ${amountStr} pSNIPER. Claim when funds available.`, "success");
         withdrawAmountEl.value = "";
         await refreshAll();
         setTimeout(() => {
             withdrawModal.classList.add("hidden");
             hideStatus(withdrawTxStatus);
-        }, 1500);
+        }, 3000);
 
     } catch (error) {
         console.error("Withdraw error:", error);
