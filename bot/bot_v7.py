@@ -455,6 +455,10 @@ class NavEngineV7:
 # NAV Signing V7
 # =============================================================================
 
+# Domain salt must match contract: keccak256("PredictFiSniperVaultV7.v1")
+DOMAIN_SALT = Web3.keccak(text="PredictFiSniperVaultV7.v1")
+CHAIN_ID = 8453  # Base mainnet
+
 def create_nav_data_hash_v7(
     total_assets: int,
     credited_cash: int,
@@ -464,18 +468,20 @@ def create_nav_data_hash_v7(
     timestamp: int,
     deadline: int,
     round_id: int,
-    vault_address: str
+    vault_address: str,
+    chain_id: int = CHAIN_ID
 ) -> bytes:
-    """Create hash for NavDataV7 signing."""
+    """Create hash for NavDataV7 signing (includes chainId and domainSalt for domain separation)."""
     from eth_abi import encode
     
-    NAV_TYPEHASH = Web3.keccak(text="NavDataV7(uint256 totalAssets,uint256 creditedCash,uint256 creditedPositions,uint256 pendingCredit,uint256 inFlightOnChain,uint256 timestamp,uint256 deadline,uint256 roundId,address vault)")
+    # Updated typehash to include chainId and domainSalt
+    NAV_TYPEHASH = Web3.keccak(text="NavDataV7(uint256 totalAssets,uint256 creditedCash,uint256 creditedPositions,uint256 pendingCredit,uint256 inFlightOnChain,uint256 timestamp,uint256 deadline,uint256 roundId,address vault,uint256 chainId,bytes32 domainSalt)")
     
     vault_addr_checksum = Web3.to_checksum_address(vault_address)
     
     encoded_data = encode(
-        ['bytes32', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'address'],
-        [NAV_TYPEHASH, total_assets, credited_cash, credited_positions, pending_credit, in_flight, timestamp, deadline, round_id, vault_addr_checksum]
+        ['bytes32', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'address', 'uint256', 'bytes32'],
+        [NAV_TYPEHASH, total_assets, credited_cash, credited_positions, pending_credit, in_flight, timestamp, deadline, round_id, vault_addr_checksum, chain_id, DOMAIN_SALT]
     )
     
     struct_hash = Web3.keccak(encoded_data)

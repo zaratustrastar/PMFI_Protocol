@@ -46,14 +46,24 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     // ============================================
     
     bytes32 public constant NAV_TYPEHASH = keccak256(
-        "NavDataV7(uint256 totalAssets,uint256 creditedCash,uint256 creditedPositions,uint256 pendingCredit,uint256 inFlightOnChain,uint256 timestamp,uint256 deadline,uint256 roundId,address vault)"
+        "NavDataV7(uint256 totalAssets,uint256 creditedCash,uint256 creditedPositions,uint256 pendingCredit,uint256 inFlightOnChain,uint256 timestamp,uint256 deadline,uint256 roundId,address vault,uint256 chainId,bytes32 domainSalt)"
     );
     
+    // Domain salt for pseudo EIP-712 separation
+    bytes32 public constant DOMAIN_SALT = keccak256("PredictFiSniperVaultV7.v1");
+    
     uint256 public constant MAX_NAV_AGE = 30;
+    uint256 public constant MIN_NAV_INTERVAL = 60;  // Min 60s between NAV updates
+    uint256 public constant STALE_NAV_GRACE = 900;  // 15 min grace for deposits/withdrawRequests
     uint256 public constant WITHDRAWAL_TAX_BPS = 100;
     uint256 public constant USDC_DECIMALS = 6;
     uint256 public constant NAV_PRECISION = 1e18;
     uint256 public constant WITHDRAWAL_EXPIRY = 7 days;
+    
+    // Pending ratio thresholds
+    uint256 public constant PENDING_RATIO_PAUSE = 3000;   // 30% - pause deposits
+    uint256 public constant PENDING_RATIO_CAP = 1000;     // 10% - cap single deposit
+    uint256 public constant MAX_DEPOSIT_DURING_LIMBO = 1000 * 1e6;  // $1000 max during limbo
     
     // Polymarket's official Base USDC deposit address
     address public constant POLYMARKET_BASE_DEPOSIT = 0xa76a91208FC7CB88420070AF978D12F440cab2F0;
@@ -79,6 +89,13 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     
     // Deposit tracking for pendingCredit reconciliation
     uint256 public totalForwardedToPolymarket;  // Total USDC sent to PM deposit address
+    
+    // Correction tracking for auditability
+    uint256 public correctionNonce;     // Increments on each manual correction
+    
+    // Last accepted NAV for stale grace period
+    uint256 public lastAcceptedTotalAssets;
+    uint256 public lastAcceptedTimestamp;
     
     mapping(address => uint256) public walletDeposits;
     
@@ -167,6 +184,32 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     event Paused(bool isPaused);
     event DepositsThrottled(bool isThrottled);
     event EmergencyWithdraw(address indexed to, uint256 amount);
+    
+    // Correction events for auditability
+    event CorrectionExpectedAssets(
+        uint256 indexed nonce,
+        uint256 oldValue,
+        uint256 newValue,
+        string reason
+    );
+    event CorrectionTotalForwarded(
+        uint256 indexed nonce,
+        uint256 oldValue,
+        uint256 newValue,
+        string reason
+    );
+    event CorrectionTradingLoss(
+        uint256 indexed nonce,
+        uint256 lossAmount,
+        uint256 oldExpected,
+        uint256 newExpected
+    );
+    event CorrectionTradingGain(
+        uint256 indexed nonce,
+        uint256 gainAmount,
+        uint256 oldExpected,
+        uint256 newExpected
+    );
 
     // ============================================
     // Constructor
@@ -196,7 +239,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         maxLossBps = _maxLossBps;
         
         lastRoundId = 0;
-        lastNavTimestamp = block.timestamp;
+        lastNavTimestamp = 0;  // Initialize to 0 to allow first NAV update
         expectedAssets = 0;
         totalForwardedToPolymarket = 0;
     }
@@ -207,6 +250,11 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     
     modifier whenNotPaused() {
         require(!paused, "Vault is paused");
+        _;
+    }
+    
+    modifier whenPaused() {
+        require(paused, "Vault must be paused");
         _;
     }
     
@@ -237,6 +285,14 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         
         require(walletDeposits[msg.sender] + usdcAmount <= maxDepositPerWallet, "Exceeds wallet cap");
         require(expectedAssets + usdcAmount <= maxTotalDeposits, "Exceeds total cap");
+        
+        // Limbo cap: if pendingCredit > 10% of totalAssets, cap single deposit to $1000
+        if (navData.totalAssets > 0) {
+            uint256 pendingRatioBps = (navData.pendingCredit * 10000) / navData.totalAssets;
+            if (pendingRatioBps > PENDING_RATIO_CAP) {
+                require(usdcAmount <= MAX_DEPOSIT_DURING_LIMBO, "Deposit capped during limbo");
+            }
+        }
         
         // Calculate NAV per share
         uint256 nav = _calculateNav(navData.totalAssets);
@@ -394,12 +450,16 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         require(block.timestamp - navData.timestamp <= MAX_NAV_AGE, "NAV too old");
         require(navData.roundId > lastRoundId, "RoundId must increase");
         
+        // Enforce minimum interval between NAV updates (prevents rapid spam)
+        require(navData.timestamp >= lastNavTimestamp + MIN_NAV_INTERVAL || lastNavTimestamp == 0, 
+                "NAV update too frequent");
+        
         // Verify asset breakdown adds up
         uint256 computedTotal = navData.creditedCash + navData.creditedPositions + 
                                 navData.pendingCredit + navData.inFlightOnChain;
         require(computedTotal == navData.totalAssets, "Asset breakdown mismatch");
         
-        // Verify signature
+        // Verify signature (includes chainId and domainSalt for domain separation)
         bytes32 structHash = keccak256(abi.encode(
             NAV_TYPEHASH,
             navData.totalAssets,
@@ -410,7 +470,9 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
             navData.timestamp,
             navData.deadline,
             navData.roundId,
-            address(this)
+            address(this),
+            block.chainid,
+            DOMAIN_SALT
         ));
         bytes32 digest = structHash.toEthSignedMessageHash();
         address signer = digest.recover(signature);
@@ -425,6 +487,10 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         
         lastRoundId = navData.roundId;
         lastNavTimestamp = navData.timestamp;
+        
+        // Store for stale NAV grace period
+        lastAcceptedTotalAssets = navData.totalAssets;
+        lastAcceptedTimestamp = block.timestamp;
         
         emit NavUpdated(
             navData.totalAssets,
@@ -588,39 +654,55 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     
     /**
      * @notice Update expected assets for reconciliation
-     * @dev Use carefully - only for correcting tracking errors after asset movements
+     * @dev Use carefully - only allowed when paused for safety
+     * @param _expectedAssets New expected assets value
+     * @param reason Human-readable reason for the correction
      */
-    function setExpectedAssets(uint256 _expectedAssets) external onlyOwner {
+    function setExpectedAssets(uint256 _expectedAssets, string calldata reason) external onlyOwner whenPaused {
+        uint256 oldValue = expectedAssets;
         expectedAssets = _expectedAssets;
+        correctionNonce++;
+        emit CorrectionExpectedAssets(correctionNonce, oldValue, _expectedAssets, reason);
     }
     
     /**
      * @notice Update forwarded total for reconciliation
-     * @dev Use carefully - only for correcting tracking errors
+     * @dev Use carefully - only allowed when paused for safety
+     * @param _totalForwarded New total forwarded value
+     * @param reason Human-readable reason for the correction
      */
-    function setTotalForwarded(uint256 _totalForwarded) external onlyOwner {
+    function setTotalForwarded(uint256 _totalForwarded, string calldata reason) external onlyOwner whenPaused {
+        uint256 oldValue = totalForwardedToPolymarket;
         totalForwardedToPolymarket = _totalForwarded;
+        correctionNonce++;
+        emit CorrectionTotalForwarded(correctionNonce, oldValue, _totalForwarded, reason);
     }
     
     /**
      * @notice Record asset loss from trading (reduces expectedAssets to match reality)
-     * @dev Call this when Polymarket positions lose value to prevent conservation bound from blocking
+     * @dev Only allowed when paused - call when positions lose value
      * @param lossAmount Amount of USDC lost (in 6 decimals)
      */
-    function recordTradingLoss(uint256 lossAmount) external onlyOwner {
+    function recordTradingLoss(uint256 lossAmount) external onlyOwner whenPaused {
+        uint256 oldExpected = expectedAssets;
         if (lossAmount >= expectedAssets) {
             expectedAssets = 0;
         } else {
             expectedAssets -= lossAmount;
         }
+        correctionNonce++;
+        emit CorrectionTradingLoss(correctionNonce, lossAmount, oldExpected, expectedAssets);
     }
     
     /**
      * @notice Record asset gain from trading (increases expectedAssets)
-     * @dev Call this when Polymarket positions profit
+     * @dev Only allowed when paused - call when positions profit
      * @param gainAmount Amount of USDC gained (in 6 decimals)
      */
-    function recordTradingGain(uint256 gainAmount) external onlyOwner {
+    function recordTradingGain(uint256 gainAmount) external onlyOwner whenPaused {
+        uint256 oldExpected = expectedAssets;
         expectedAssets += gainAmount;
+        correctionNonce++;
+        emit CorrectionTradingGain(correctionNonce, gainAmount, oldExpected, expectedAssets);
     }
 }

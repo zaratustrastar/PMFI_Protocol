@@ -1,0 +1,71 @@
+2) you have “manual corrections” + “recordTradingGain/Loss” that can be called anytime
+
+These functions are basically “trust me bro” accounting overrides. That’s okay for MVP if you clearly treat them as admin tools — but they must not silently undermine your conservation guarantees.
+
+MVP fix (minimal constraints):
+
+Only allow setExpectedAssets, setTotalForwarded, recordTradingGain/Loss when paused == true.
+
+Emit events for every manual correction with full parameters.
+
+Consider a correctionNonce so you can track history.
+
+This avoids “oops” moments and makes behavior auditable.
+
+important, but you can keep for MVP if you accept the risk
+3) not using EIP-712, using eth_sign over structHash
+
+This can be okay short-term, but it increases risk of:
+
+accidental signing of the same hash in another context
+
+weaker domain separation than EIP-712
+
+MVP fix (tiny):
+At least include in the hashed message:
+
+chainId
+
+verifyingContract (vault address)
+
+version string / salt
+
+You already include vault address — add chainId and a constant domain salt and you’re much safer without implementing full EIP-712 today.
+
+4) maxLossBps is “per update”
+
+You’re right: with per-update checks, someone who can influence updates (or an owner mistake) could ratchet changes.
+
+But realistically, if only the oracle signs, outsiders can’t spam updates unless you expose a public “updateNav” call anyone can trigger.
+
+MVP fix (simple):
+
+enforce a minimum update interval (e.g., “at least 30s/60s between accepted rounds”)
+
+or enforce “timestamp must be >= lastTimestamp + X”
+
+This alone kills “many small steps per second”.
+
+5) deposit minting always uses freshest signed NAV including pendingCredit
+
+This is functional, but it can be unfair in edge cases:
+
+pendingCredit large → NAV looks healthy but funds not yet tradable
+
+You already throttle at 50% pending, which helps.
+
+MVP fix (optional):
+
+lower pendingRatio pause threshold to something conservative (e.g., 25–35%) for MVP
+
+or add “if pendingCredit > 0, cap how much a single deposit can be” to avoid giant deposits during limbo
+
+ops stability note
+
+Your “API partial outage protection” is currently “bot errors, no signing.” That’s fine — but then on-chain functions that require navData will halt during outages.
+
+MVP-friendly pattern:
+
+allow deposits/withdraw requests using the last accepted NAV for up to N minutes (e.g., 10–30 min), while still blocking claims/payouts if liquidity isn’t there.
+
+This makes the dapp feel alive during API hiccups.
