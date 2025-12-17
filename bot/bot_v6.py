@@ -69,7 +69,8 @@ load_dotenv()
 # =============================================================================
 RPC_URL = os.getenv("RPC_URL")
 # Support both VAULT_V6_ADDRESS (new) and VAULT_V4_ADDRESS (legacy) env vars
-VAULT_V6_ADDRESS = os.getenv("VAULT_V6_ADDRESS") or os.getenv("VAULT_V4_ADDRESS")
+# Default to new V6 contract with correct 1e6 NAV
+VAULT_V6_ADDRESS = os.getenv("VAULT_V6_ADDRESS") or os.getenv("VAULT_V4_ADDRESS") or "0xAbfb4837c564b5B541A55f56B3796a5514499191"
 USDC_ADDRESS = os.getenv("USDC_ADDRESS")
 
 # Oracle key - this is the key that signs NAV updates

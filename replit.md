@@ -6,7 +6,7 @@ This project contains TWO main systems:
 
 A production-ready vault for managing USDC investments in Polymarket positions.
 
-**Deployed Address**: `0x14909200fbfA97622bfA38f51EE4ce55D43D83C8` (Base Mainnet)
+**Deployed Address**: `0xAbfb4837c564b5B541A55f56B3796a5514499191` (Base Mainnet - V6.1 with corrected NAV)
 
 ### V6 Architecture (Signed NAV Oracle - Zero Gas for Oracle + Async Withdrawals)
 
