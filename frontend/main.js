@@ -358,6 +358,16 @@ async function getTotalSupply() {
 
 async function refreshVaultStats() {
     try {
+        // First try to get stats from price API (includes PM positions)
+        if (PRICE_API_URL) {
+            const priceData = await fetchPriceFromAPI();
+            if (priceData) {
+                updatePriceDisplay(priceData);
+                return;
+            }
+        }
+        
+        // Fallback: read from contract directly (only shows buffer, not PM positions)
         const [totalAssets, totalSupply] = await Promise.all([
             getTotalAssets(),
             getTotalSupply()
@@ -368,7 +378,7 @@ async function refreshVaultStats() {
             sharePrice = Number(totalAssets) / Number(totalSupply);
         }
         
-        statsSharePriceEl.textContent = `$${sharePrice.toFixed(2)}`;
+        statsSharePriceEl.textContent = `$${sharePrice.toFixed(4)}`;
 
         const tvl = Number(totalAssets) / 10 ** USDC_DECIMALS;
         const tvlStr = `$${tvl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -609,6 +619,11 @@ async function handleDeposit() {
 
         showStatus(txStatus, `Deposited $${amountStr} USDC`, "success");
         depositAmountEl.value = "";
+        
+        // Force refresh the price API to update TVL immediately
+        if (PRICE_API_URL) {
+            await requestFreshPrice();
+        }
         await refreshAll();
 
     } catch (error) {

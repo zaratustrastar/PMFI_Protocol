@@ -525,14 +525,32 @@ def health():
 def get_price():
     """Get cached price (fast, for UI display)."""
     with nav_lock:
+        vault_buffer = cached_nav.get("vault_balance", 0) / 1e6 if cached_nav.get("vault_balance") else 0
+        pm_value = cached_nav.get("liquidation_value", 0) / 1e6 if cached_nav.get("liquidation_value") else 0
+        total_assets = cached_nav.get("total_assets", 0) / 1e6 if cached_nav.get("total_assets") else vault_buffer + pm_value
+        
         return jsonify({
             "price_per_share": cached_nav["nav"] / 1e6,  # NAV is ~1e6 for $1/share
             "nav_raw": str(cached_nav["nav"]),
             "total_supply": cached_nav["total_supply"] / 1e18 if cached_nav["total_supply"] else 0,
-            "vault_buffer_usdc": cached_nav["vault_balance"] / 1e6 if cached_nav["vault_balance"] else 0,
-            "pm_value_usdc": cached_nav["liquidation_value"] / 1e6 if cached_nav["liquidation_value"] else 0,
+            "total_assets": total_assets,  # TVL in USDC (for frontend)
+            "vault_buffer_usdc": vault_buffer,
+            "pm_value_usdc": pm_value,
             "last_updated": cached_nav["last_calculated"],
         })
+
+
+@flask_app.route('/price/refresh', methods=['GET', 'POST'])
+def refresh_price():
+    """Force refresh of on-chain data and return updated price."""
+    try:
+        # Call get_signed_nav_data which updates the cache
+        get_signed_nav_data()
+        # Now return the updated price data
+        return get_price()
+    except Exception as e:
+        print(f"❌ Error refreshing price: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 @flask_app.route('/sign-nav', methods=['GET', 'POST'])
