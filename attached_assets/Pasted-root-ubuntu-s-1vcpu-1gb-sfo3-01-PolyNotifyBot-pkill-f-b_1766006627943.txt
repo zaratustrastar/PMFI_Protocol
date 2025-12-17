@@ -1,0 +1,63 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# pkill -f bot_v7.py
+source ~/PolyNotifyBot/venv/bin/activate
+cd ~/PolyNotifyBot
+nohup python bot/bot_v7.py > bot.log 2>&1 &
+sleep 5
+curl http://localhost:8080/sign-nav | head -c 200
+[1] 670402
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Couldn't connect to server
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cat bot.log | tail -50
+   ❌ Yes: 75.0 - NO BIDS (illiquid)
+   ❌ Yes: 75.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=103210024761672208284756292694484537339158459911559724720651696421129165684471
+   ❌ Yes: 70.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=66833457640970406841233954792137430626799124163991480378229244746691477128582
+   ❌ Yes: 65.1 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=44882951701492277755780429370453572601338940981081432975399091929633359741553
+   ❌ Yes: 56.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=98236857096721998940239160057394046582783868729533676950824319185996076423027
+   ❌ Yes: 50.5 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=22666903447041141994995155278616650177494100569737657388776547362575286774203
+   ❌ Yes: 40.4 - NO BIDS (illiquid)
+   ❌ Yes: 40.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=94155057950836905091491932073211077395205873652621524509620072680518253545615
+   ❌ Yes: 30.2 - NO BIDS (illiquid)
+   ❌ Yes: 30.0 - NO BIDS (illiquid)
+   ❌ Yes: 20.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=56792710523452081880063276270454434128592705896858812868779277859236595656691
+   ❌ Yes: 10.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=51116034774564200360029397870512488079973624029602653546672655747739148207694
+   ❌ Amaru Gaming: 2.7 - NO BIDS (illiquid)
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+
+📊 Asset Breakdown:
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Credited positions:       $91.46
+   ─────────────────────────────
+   • TOTAL ASSETS:             $91.46
+✅ Signed NAV: $1.0000/share (round 1) [ok]
+
+🚀 Starting HTTP API on port 8080
+   Serving frontend from: /root/PolyNotifyBot/frontend
+   Endpoints:
+   - GET  /             - Frontend UI
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
