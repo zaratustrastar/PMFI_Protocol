@@ -414,13 +414,16 @@ def get_signed_nav_data() -> Dict:
     # Calculate current NAV
     now = int(time.time())
     
-    # Get vault state
+    # Get vault state - MUST read fresh from chain each time for correct roundId
     try:
         total_supply = vault_v6.functions.totalSupply().call() if vault_v6 else 0
         vault_balance = usdc.functions.balanceOf(VAULT_V6_ADDRESS).call() if usdc and VAULT_V6_ADDRESS else 0
         last_round_id = vault_v6.functions.lastRoundId().call() if vault_v6 else 0
+        print(f"📊 On-chain state: supply={total_supply/1e18:.4f}, buffer={vault_balance/1e6:.2f} USDC, lastRoundId={last_round_id}")
     except Exception as e:
         print(f"❌ Error reading vault state: {e}")
+        import traceback
+        traceback.print_exc()
         total_supply = 0
         vault_balance = 0
         last_round_id = 0
@@ -613,25 +616,56 @@ def nav_refresh_loop():
 # =============================================================================
 
 def load_abi(contract_name: str) -> dict:
-    """Load ABI from Hardhat artifacts."""
-    project_root = Path(__file__).parent.parent
-    artifact_path = project_root / "artifacts" / "contracts" / f"{contract_name}.sol" / f"{contract_name}.json"
+    """Load ABI from Hardhat artifacts or frontend/abis folder."""
+    bot_dir = Path(__file__).parent
+    project_root = bot_dir.parent
     
-    if not artifact_path.exists():
-        raise FileNotFoundError(f"Artifact not found: {artifact_path}")
+    # Try multiple locations
+    possible_paths = [
+        # Hardhat artifacts (when running from project root)
+        project_root / "artifacts" / "contracts" / f"{contract_name}.sol" / f"{contract_name}.json",
+        # Frontend ABIs (for VPS deployment)
+        bot_dir / "frontend" / "abis" / "vault.json",
+        project_root / "frontend" / "abis" / "vault.json",
+        # Direct sibling folder
+        bot_dir.parent / "frontend" / "abis" / "vault.json",
+    ]
     
-    with open(artifact_path, "r") as f:
-        artifact = json.load(f)
+    # For vault contracts, use the vault.json ABI
+    if "Vault" in contract_name:
+        for path in possible_paths[1:]:  # Skip hardhat artifact for vault
+            if path.exists():
+                print(f"📂 Loading ABI from: {path}")
+                with open(path, "r") as f:
+                    return json.load(f)
     
-    return artifact["abi"]
+    # Try Hardhat artifact path first
+    artifact_path = possible_paths[0]
+    if artifact_path.exists():
+        print(f"📂 Loading ABI from: {artifact_path}")
+        with open(artifact_path, "r") as f:
+            artifact = json.load(f)
+        return artifact["abi"]
+    
+    # For USDC, use a minimal ERC20 ABI
+    if "USDC" in contract_name or "ERC20" in contract_name:
+        print(f"📂 Using minimal ERC20 ABI for {contract_name}")
+        return [
+            {"inputs":[{"name":"account","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"name":"spender","type":"address"},{"name":"amount","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+        ]
+    
+    raise FileNotFoundError(f"ABI not found for {contract_name}. Checked: {possible_paths}")
 
 
 def main():
-    """Main entry point for V4 NAV signing bot."""
+    """Main entry point for V6 NAV signing bot."""
     global w3, usdc, vault_v6, polymarket_client, nav_engine, oracle_account
     
     print("\n" + "="*60)
-    print("🏦 PredictFi Sniper V4 - NAV Signing Bot (Zero Gas Oracle)")
+    print("🏦 PredictFi Sniper V6 - NAV Signing Bot (Zero Gas Oracle)")
     print("="*60 + "\n")
     
     # Validate required environment variables
@@ -670,12 +704,12 @@ def main():
         usdc = None
     
     try:
-        vault_abi = load_abi("PredictFiSniperVaultV4")
+        vault_abi = load_abi("PredictFiSniperVaultV6")
         vault_v6 = w3.eth.contract(
             address=Web3.to_checksum_address(VAULT_V6_ADDRESS),
             abi=vault_abi
         )
-        print(f"✅ Vault V4 contract: {VAULT_V6_ADDRESS}")
+        print(f"✅ Vault V6 contract: {VAULT_V6_ADDRESS}")
         
         # Verify oracle is the signer
         on_chain_signer = vault_v6.functions.navSigner().call()
