@@ -1,0 +1,20 @@
+Press CTRL+C to quit
+139.47.127.10 - - [17/Dec/2025 00:40:30] "GET /price HTTP/1.1" 200 -
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/psniper-vault# grep -o "0x[a-fA-F0-9]\{40\}" bot_v6.py | head -5
+0xAbfb4837c564b5B541A55f56B3796a5514499191
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/psniper-vault# curl http://147.182.206.35:8080/sign-nav/debug
+{"debug":{"oracle_address":"0x5087675E669e6244620013691c05C1De0e8B525e","polymarket_wallet":"0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5","vault_address":"0x14909200fbfA97622bfA38f51EE4ce55D43D83C8"},"metadata":{"pm_value_usdc":0.0,"price_per_share":1.0,"total_assets_usdc":0.0,"total_supply":0.0,"valid_until":1765932215,"vault_buffer_usdc":0.0},"navData":{"deadline":1765932215,"nav":"1000000","roundId":1,"timestamp":1765932185},"signature":"0x2dd94386de3648917aa8045e3e96af0738c408c887da1ab1dd52cdb54e7a6ba202e0b32c857008d4e662a510daf90317690754d212db8ff2717a3f8f2ff2e07a1c","signer":"0x5087675E669e6244620013691c05C1De0e8B525e"}
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/psniper-vault# pkill -f bot_v6.py
+sleep 2
+nohup python bot_v6.py > vault.log 2>&1 &
+sleep 3
+curl http://localhost:8080/sign-nav/debug | grep vault_address
+[2]+  Terminated              nohup python bot_v6.py > vault.log 2>&1
+[1] 637452
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   633  100   633    0     0   1791      0 --:--:-- --:--:-- --:--:--  1793
+{"debug":{"oracle_address":"0x5087675E669e6244620013691c05C1De0e8B525e","polymarket_wallet":"0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5","vault_address":"0x14909200fbfA97622bfA38f51EE4ce55D43D83C8"},"metadata":{"pm_value_usdc":0.0,"price_per_share":1.0,"total_assets_usdc":0.0,"total_supply":0.0,"valid_until":1765932260,"vault_buffer_usdc":0.0},"navData":{"deadline":1765932260,"nav":"1000000","roundId":1,"timestamp":1765932230},"signature":"0x66d554718c9ccbcd4c4c7c857a02d37a10ff8463394cd153cd305950f26c572d64bb593e55b4016c75bb62f0c2ecf6d36e8bfcbeddd4de90ad1a33a02d0276621c","signer":"0x5087675E669e6244620013691c05C1De0e8B525e"}
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/psniper-vault# curl http://147.182.206.35:8080/sign-nav/debug
+{"debug":{"oracle_address":"0x5087675E669e6244620013691c05C1De0e8B525e","polymarket_wallet":"0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5","vault_address":"0x14909200fbfA97622bfA38f51EE4ce55D43D83C8"},"metadata":{"pm_value_usdc":0.0,"price_per_share":1.0,"total_assets_usdc":0.0,"total_supply":0.0,"valid_until":1765932296,"vault_buffer_usdc":0.0},"navData":{"deadline":1765932296,"nav":"1000000","roundId":1,"timestamp":1765932266},"signature":"0xc81191d754b246e8aa6858aec5c70e8783cf98e713e8eddecf4bf0e614412e433478ad45344a60c09cf5748a10af285d1e49e7501bcf9b2814a7970855eb75f61c","signer":"0x5087675E669e6244620013691c05C1De0e8B525e"}
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/psniper-vault# 
