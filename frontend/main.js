@@ -6,7 +6,7 @@
 // CONFIGURATION
 // =============================================================================
 
-const VAULT_ADDRESS = "0xE5CA8d7f8F0aDf4781Eee911EfAA2633b0abd082";
+const VAULT_ADDRESS = "0x5f10aF485267A33121D4d877708ef99E7dD04E00";
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
@@ -535,23 +535,41 @@ async function handleChainChanged() {
 // SIGNED NAV HELPER (V7 compatible)
 // =============================================================================
 
-async function getSignedNav() {
+async function getSignedNav(retryCount = 0) {
     if (!PRICE_API_URL) {
         throw new Error("VPS bot URL not configured. Set it in browser console: localStorage.setItem('predictfi_price_api_url', 'http://your-vps-ip:8080')");
     }
     
-    const response = await fetch(`${PRICE_API_URL}/sign-nav`);
-    if (!response.ok) {
-        throw new Error("Failed to get signed NAV from bot");
-    }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
     
-    const data = await response.json();
-    if (data.error) {
-        throw new Error(data.error);
+    try {
+        const response = await fetch(`${PRICE_API_URL}/sign-nav`, {
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error("Failed to get signed NAV from bot");
+        }
+        
+        const data = await response.json();
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        console.log("Got signed NAV:", data);
+        return data;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        
+        if (error.name === 'AbortError' && retryCount < 1) {
+            console.log("Oracle slow, retrying...");
+            return getSignedNav(retryCount + 1);
+        }
+        
+        throw error;
     }
-    
-    console.log("Got signed NAV:", data);
-    return data;
 }
 
 function parseNavData(signedNav) {
@@ -603,24 +621,25 @@ async function handleDeposit() {
         return;
     }
 
+    // Check network FIRST before anything else
+    const isCorrectNetwork = await checkNetwork();
+    if (!isCorrectNetwork) {
+        showStatus(txStatus, "Please switch to Base Mainnet", "error");
+        await switchToBase();
+        return;
+    }
+
     const amount = parseUSDC(amountStr);
 
     try {
         depositBtn.disabled = true;
         hideStatus(txStatus);
 
-        // Get signed NAV from VPS bot
-        showStatus(txStatus, "Getting signed price...", "info");
-        const signedNav = await getSignedNav();
-        
-        // Extract NavData struct and signature (V7 compatible)
-        const navData = parseNavData(signedNav);
-        const signature = signedNav.signature;
-
         // Ensure we're using signer-connected contracts
         const signerUsdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
         const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
 
+        // STEP 1: Handle approval FIRST (no NAV needed)
         showStatus(txStatus, "Checking allowance...", "info");
         console.log("Checking allowance for", userAddress, "to", VAULT_ADDRESS);
         const allowance = await signerUsdcContract.allowance(userAddress, VAULT_ADDRESS);
@@ -631,11 +650,48 @@ async function handleDeposit() {
             const approveTx = await signerUsdcContract.approve(VAULT_ADDRESS, amount);
             showStatus(txStatus, "Waiting for approval...", "info");
             await approveTx.wait();
+            showStatus(txStatus, "Approved! Getting signed price...", "info");
         }
 
+        // STEP 2: Get signed NAV ONLY when ready to deposit
+        showStatus(txStatus, "Getting signed price...", "info");
+        let signedNav;
+        try {
+            signedNav = await getSignedNav();
+        } catch (navError) {
+            if (navError.name === 'AbortError') {
+                showStatus(txStatus, "Oracle slow, retrying...", "info");
+                signedNav = await getSignedNav(1);
+            } else {
+                throw navError;
+            }
+        }
+        
+        // Extract NavData struct and signature (V7 compatible)
+        const navData = parseNavData(signedNav);
+        const signature = signedNav.signature;
+
+        // STEP 3: Execute deposit (don't block on estimateGas)
         showStatus(txStatus, "Depositing...", "info");
         console.log("Calling deposit with:", { amount: amount.toString(), navData, signature });
-        const depositTx = await signerVaultContract.deposit(amount, navData, signature);
+        
+        let depositTx;
+        try {
+            depositTx = await signerVaultContract.deposit(amount, navData, signature);
+        } catch (callError) {
+            console.error("Deposit call error:", callError);
+            // Surface the actual revert reason
+            let revertReason = callError.reason || callError.data?.message || callError.message;
+            if (revertReason.includes("NAV too old")) {
+                revertReason = "Price data expired. Please try again.";
+            } else if (revertReason.includes("Invalid signature")) {
+                revertReason = "Invalid oracle signature. Contact support.";
+            } else if (revertReason.includes("exceeds wallet cap")) {
+                revertReason = "Deposit exceeds your wallet cap.";
+            }
+            throw new Error(revertReason);
+        }
+        
         showStatus(txStatus, "Confirming...", "info");
         await depositTx.wait();
 
@@ -651,15 +707,11 @@ async function handleDeposit() {
     } catch (error) {
         console.error("Deposit error:", error);
         let errorMsg = error.reason || error.message;
-        if (error.code === "CALL_EXCEPTION" || errorMsg.includes("could not decode")) {
-            errorMsg = "Contract call failed. Please ensure you're on Base Mainnet.";
-        } else if (error.code === "ACTION_REJECTED") {
+        if (error.code === "ACTION_REJECTED") {
             errorMsg = "Transaction rejected by user.";
-        } else if (errorMsg.includes("exceeds wallet cap")) {
-            errorMsg = "Deposit exceeds your 100 USDC wallet cap.";
         } else if (errorMsg.includes("insufficient")) {
             errorMsg = "Insufficient USDC balance.";
-        } else if (errorMsg.includes("VPS")) {
+        } else if (errorMsg.includes("VPS") || errorMsg.includes("fetch")) {
             errorMsg = "VPS bot not reachable. Check your bot URL.";
         }
         showStatus(txStatus, errorMsg, "error");

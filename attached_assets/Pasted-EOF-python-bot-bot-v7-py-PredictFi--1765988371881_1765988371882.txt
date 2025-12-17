@@ -1,0 +1,75 @@
+EOF
+
+python bot/bot_v7.py
+============================================================
+🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+   3-State Asset Tracking + Conservation Bounds
+============================================================
+
+📋 Configuration:
+   RPC: https://mainnet.base.org...
+   Vault V7: 0xE5CA8d7f8F0aDf4781Eee911EfAA2633b0abd082
+   USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+   PM Wallet: 0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+   PM Deposit: 0xa76a91208FC7CB88420070AF978D12F440cab2F0
+
+✅ Connected to Base (block 39599486)
+🔑 Oracle signer: 0x5087675E669e6244620013691c05C1De0e8B525e
+✅ USDC contract loaded
+✅ Vault V7 contract loaded
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, lastRoundId=0
+
+============================================================
+💰 CALCULATING V7 NAV (3-State)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions for 0x4eCD29f6...
+✅ Found 242 active positions
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=95640240624525632727446100584420796372169576635165217524695589992598017029835
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=40749966733266748595169165277639876104259935245602995393456979198982468209081
+   ❌ Over: 100.0 - NO BIDS (illiquid)
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=40757419015802663714827348724581885956006045707259619858429661027133641301602
+   ❌ Over: 100.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=73640577048430480953078252893214531286767955860636743734140903371338358742444
+   ❌ Over: 100.0 - NO BIDS (illiquid)
+   ❌ Over: 100.0 - NO BIDS (illiquid)
+   ❌ Over: 100.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=64037802023597074790038424406959183689641405375384015908749792459732325990714
+   ❌ Over: 100.0 - NO BIDS (illiquid)
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=105215141355048221111648111528519707822753327909370623826058877786322348828713
+   ❌ Yes: 95.0 - NO BIDS (illiquid)
+   ❌ Over: 90.8 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=33104920645311179667073712563017097907714108423069248764673333323110790993992
+   ❌ Over: 90.8 - NO BIDS (illiquid)
+   ❌ Yes: 88.6 - NO BIDS (illiquid)
+   ❌ Yes: 85.0 - NO BIDS (illiquid)
+   ❌ Yes: 80.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=29423748737236640052560285780444759603394780514262619440469064073519476301477
+   ❌ Yes: 80.0 - NO BIDS (illiquid)
+   ❌ Yes: 80.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=47734163279581635135875409038249918929837216632345215834058097144803728911378
+   ❌ Over: 75.0 - NO BIDS (illiquid)
+   ❌ Yes: 75.0 - NO BIDS (illiquid)
+   ❌ Yes: 75.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=103210024761672208284756292694484537339158459911559724720651696421129165684471
+   ❌ Yes: 70.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=66833457640970406841233954792137430626799124163991480378229244746691477128582
+   ❌ Yes: 65.1 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=44882951701492277755780429370453572601338940981081432975399091929633359741553
+   ❌ Yes: 56.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=98236857096721998940239160057394046582783868729533676950824319185996076423027
+   ❌ Yes: 50.5 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=22666903447041141994995155278616650177494100569737657388776547362575286774203
+   ❌ Yes: 40.4 - NO BIDS (illiquid)
+   ❌ Yes: 40.0 - NO BIDS (illiquid)
+❌ Error fetching orderbook: 404 Client Error: Not Found for url: https://clob.polymarket.com/book?token_id=94155057950836905091491932073211077395205873652621524509620072680518253545615
+   ❌ Yes: 30.2 - NO BIDS (illiquid)
+   ❌ Yes: 30.0 - NO BIDS (illiquid)
+   ❌ Yes: 21.1 - NO BIDS (illiquid)

@@ -1,6 +1,6 @@
 {
   "contract": "PredictFiSniperVaultV7",
-  "address": "0xE5CA8d7f8F0aDf4781Eee911EfAA2633b0abd082",
+  "address": "0x5f10aF485267A33121D4d877708ef99E7dD04E00",
   "network": "base-mainnet",
   "chainId": 8453,
   "deployer": "0x5087675E669e6244620013691c05C1De0e8B525e",
@@ -11,6 +11,6 @@
   "maxPerWallet": "100000000",
   "maxTotal": "100000000000",
   "maxLossBps": 1000,
-  "timestamp": "2025-12-17T15:58:51.760Z",
+  "timestamp": "2025-12-17T20:25:48.159Z",
   "polymarketBaseDeposit": "0xa76a91208FC7CB88420070AF978D12F440cab2F0"
 }

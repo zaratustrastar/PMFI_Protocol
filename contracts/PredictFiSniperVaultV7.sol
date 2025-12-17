@@ -52,7 +52,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     // Domain salt for pseudo EIP-712 separation
     bytes32 public constant DOMAIN_SALT = keccak256("PredictFiSniperVaultV7.v1");
     
-    uint256 public constant MAX_NAV_AGE = 30;
+    uint256 public constant MAX_NAV_AGE = 300;  // 5 minutes for MVP (bot takes 30-120s)
     uint256 public constant MIN_NAV_INTERVAL = 60;  // Min 60s between NAV updates
     uint256 public constant STALE_NAV_GRACE = 900;  // 15 min grace for deposits/withdrawRequests
     uint256 public constant WITHDRAWAL_TAX_BPS = 100;

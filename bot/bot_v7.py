@@ -69,7 +69,8 @@ POLYMARKET_PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS")
 
 HTTP_PORT = int(os.getenv("BOT_HTTP_PORT", 8080))
 
-NAV_VALIDITY_SECONDS = 30
+NAV_VALIDITY_SECONDS = 300  # Match contract MAX_NAV_AGE (5 minutes for MVP)
+NAV_CACHE_REFRESH_SECONDS = 45  # Refresh cache every 45 seconds
 NAV_PRECISION = 10**18
 
 # Safety valve thresholds
@@ -213,6 +214,7 @@ cached_nav = {
     "total_supply": 0,
     "safety_status": "ok",
 }
+cached_signed_nav = None  # Cached signed NAV response for instant returns
 nav_lock = threading.Lock()
 
 flask_app = Flask(__name__)
@@ -542,9 +544,9 @@ def check_safety_valves(breakdown: Dict, pm_cash: int) -> Tuple[str, str]:
     return "ok", ""
 
 
-def get_signed_nav_data_v7() -> Dict:
+def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     """Get current NAV with full breakdown and fresh signature."""
-    global cached_nav, nav_engine, pending_tracker, vault_v7, w3
+    global cached_nav, cached_signed_nav, nav_engine, pending_tracker, vault_v7, w3
     
     now = int(time.time())
     
@@ -638,7 +640,8 @@ def get_signed_nav_data_v7() -> Dict:
     
     print(f"✅ Signed NAV: ${nav/1e6:.4f}/share (round {new_round_id}) [{safety_status}]")
     
-    return {
+    # Build response and cache it
+    result = {
         "navData": {
             "totalAssets": str(total_assets),
             "creditedCash": str(breakdown["credited_cash"]),
@@ -666,6 +669,12 @@ def get_signed_nav_data_v7() -> Dict:
             "safety_reason": safety_reason,
         }
     }
+    
+    # Update signed NAV cache
+    with nav_lock:
+        cached_signed_nav = result
+    
+    return result
 
 
 # =============================================================================
@@ -718,18 +727,24 @@ def refresh_price():
 
 @flask_app.route('/sign-nav', methods=['GET', 'POST'])
 def sign_nav():
-    """Get signed NavDataV7 for deposit/withdraw transactions."""
-    client_ip = flask_request.remote_addr or "unknown"
-    current_time = time.time()
+    """Get signed NavDataV7 for deposit/withdraw transactions.
     
-    if client_ip in last_refresh_request:
-        time_since_last = current_time - last_refresh_request[client_ip]
-        if time_since_last < REFRESH_RATE_LIMIT_SECONDS:
-            pass  # Still generate fresh for transactions
-    
-    last_refresh_request[client_ip] = current_time
+    Returns cached signed NAV instantly for fast UX.
+    Cache is refreshed every 45 seconds by background thread.
+    """
+    global cached_signed_nav
     
     try:
+        with nav_lock:
+            if cached_signed_nav is not None:
+                # Check if cache is still valid (deadline not expired)
+                deadline = cached_signed_nav.get("navData", {}).get("deadline", 0)
+                if deadline > int(time.time()) + 30:  # At least 30s remaining
+                    print(f"⚡ Returning cached signed NAV (valid until {deadline})")
+                    return jsonify(cached_signed_nav)
+        
+        # No valid cache, generate fresh (should be rare after startup)
+        print("🔄 Generating fresh signed NAV (no valid cache)")
         result = get_signed_nav_data_v7()
         return jsonify(result)
     except Exception as e:
@@ -801,13 +816,18 @@ def record_withdrawal_back():
 # =============================================================================
 
 def nav_refresh_loop():
-    """Refresh NAV cache periodically."""
+    """Refresh NAV cache periodically for instant /sign-nav responses."""
+    print(f"🔄 Starting NAV refresh loop (every {NAV_CACHE_REFRESH_SECONDS}s)")
     while True:
         try:
+            print("=" * 60)
+            print("🔄 BACKGROUND NAV REFRESH")
+            print("=" * 60)
             get_signed_nav_data_v7()
+            print(f"✅ NAV cache updated, sleeping {NAV_CACHE_REFRESH_SECONDS}s")
         except Exception as e:
             print(f"❌ NAV refresh error: {e}")
-        time.sleep(30)
+        time.sleep(NAV_CACHE_REFRESH_SECONDS)
 
 
 # =============================================================================
