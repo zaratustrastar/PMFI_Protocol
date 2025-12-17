@@ -333,13 +333,10 @@ function startPriceAutoRefresh() {
 // =============================================================================
 
 async function getTotalAssets() {
-    if (!vaultContract) return 0n;
-    try {
-        return await vaultContract.totalAssets();
-    } catch (e) {
-        console.error("Error getting totalAssets:", e);
-        return 0n;
-    }
+    // V6 contract doesn't have totalAssets() - it uses off-chain NAV calculation
+    // This function is kept for compatibility but returns 0
+    console.warn("getTotalAssets: V6 uses off-chain NAV, returning 0");
+    return 0n;
 }
 
 async function getTotalSupply() {
@@ -367,22 +364,24 @@ async function refreshVaultStats() {
             }
         }
         
-        // Fallback: read from contract directly (only shows buffer, not PM positions)
-        const [totalAssets, totalSupply] = await Promise.all([
-            getTotalAssets(),
-            getTotalSupply()
-        ]);
-
-        let sharePrice = 1.0;
-        if (totalSupply > 0n) {
-            sharePrice = Number(totalAssets) / Number(totalSupply);
+        // Fallback: try to read totalSupply from contract (V6 doesn't have totalAssets)
+        try {
+            const totalSupply = await getTotalSupply();
+            
+            // For V6, we can't calculate TVL from contract alone - show supply only
+            if (totalSupply > 0n) {
+                const supplyNum = Number(totalSupply) / 1e18;
+                console.log(`Total supply: ${supplyNum} pSNIPER (TVL requires price API)`);
+            }
+            
+            // Default to $1/share when no API data available
+            statsSharePriceEl.textContent = `$1.0000`;
+            tvlValueEl.textContent = `$0.00`;
+        } catch (e) {
+            console.warn("Could not read contract state:", e);
+            statsSharePriceEl.textContent = `$1.0000`;
+            tvlValueEl.textContent = `$0.00`;
         }
-        
-        statsSharePriceEl.textContent = `$${sharePrice.toFixed(4)}`;
-
-        const tvl = Number(totalAssets) / 10 ** USDC_DECIMALS;
-        const tvlStr = `$${tvl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        tvlValueEl.textContent = tvlStr;
 
     } catch (error) {
         console.error("Error refreshing vault stats:", error);
