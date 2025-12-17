@@ -6,7 +6,7 @@
 // CONFIGURATION
 // =============================================================================
 
-const VAULT_ADDRESS = "0xAbfb4837c564b5B541A55f56B3796a5514499191";
+const VAULT_ADDRESS = "0xE5CA8d7f8F0aDf4781Eee911EfAA2633b0abd082";
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
