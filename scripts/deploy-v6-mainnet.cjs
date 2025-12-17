@@ -22,8 +22,10 @@ async function main() {
   // This should be the wallet that holds PM positions
   const POLYMARKET_WALLET = process.env.POLYMARKET_PROXY_ADDRESS || deployer.address;
   
-  // Initial NAV = $1.00 (1e18 precision)
-  const INITIAL_NAV = hre.ethers.parseUnits("1", 18);
+  // Initial NAV = $1.00 (1e6 precision - matches USDC decimals for correct share math)
+  // Contract formula: sharesToMint = usdcAmount * 1e18 / nav
+  // With nav=1e6: 4 USDC (4e6) * 1e18 / 1e6 = 4e18 shares = 4.0 pSNIPER
+  const INITIAL_NAV = hre.ethers.parseUnits("1", 6);
   
   // Caps
   const MAX_PER_WALLET = hre.ethers.parseUnits("100", 6);   // 100 USDC per wallet
