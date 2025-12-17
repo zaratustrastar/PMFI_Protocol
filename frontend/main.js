@@ -532,7 +532,7 @@ async function handleChainChanged() {
 }
 
 // =============================================================================
-// SIGNED NAV HELPER
+// SIGNED NAV HELPER (V7 compatible)
 // =============================================================================
 
 async function getSignedNav() {
@@ -552,6 +552,34 @@ async function getSignedNav() {
     
     console.log("Got signed NAV:", data);
     return data;
+}
+
+function parseNavData(signedNav) {
+    const nd = signedNav.navData;
+    
+    if (nd.totalAssets !== undefined) {
+        return {
+            totalAssets: BigInt(nd.totalAssets),
+            creditedCash: BigInt(nd.creditedCash),
+            creditedPositions: BigInt(nd.creditedPositions),
+            pendingCredit: BigInt(nd.pendingCredit),
+            inFlightOnChain: BigInt(nd.inFlightOnChain),
+            timestamp: nd.timestamp,
+            deadline: nd.deadline,
+            roundId: nd.roundId
+        };
+    }
+    
+    return {
+        nav: BigInt(nd.nav),
+        timestamp: nd.timestamp,
+        deadline: nd.deadline,
+        roundId: nd.roundId
+    };
+}
+
+function isV7NavData(navData) {
+    return navData.totalAssets !== undefined;
 }
 
 // =============================================================================
@@ -585,13 +613,8 @@ async function handleDeposit() {
         showStatus(txStatus, "Getting signed price...", "info");
         const signedNav = await getSignedNav();
         
-        // Extract NavData struct and signature
-        const navData = {
-            nav: BigInt(signedNav.navData.nav),
-            timestamp: signedNav.navData.timestamp,
-            deadline: signedNav.navData.deadline,
-            roundId: signedNav.navData.roundId
-        };
+        // Extract NavData struct and signature (V7 compatible)
+        const navData = parseNavData(signedNav);
         const signature = signedNav.signature;
 
         // Ensure we're using signer-connected contracts
@@ -677,13 +700,8 @@ async function handleWithdraw() {
         showStatus(withdrawTxStatus, "Getting signed price...", "info");
         const signedNav = await getSignedNav();
         
-        // Extract NavData struct and signature
-        const navData = {
-            nav: BigInt(signedNav.navData.nav),
-            timestamp: signedNav.navData.timestamp,
-            deadline: signedNav.navData.deadline,
-            roundId: signedNav.navData.roundId
-        };
+        // Extract NavData struct and signature (V7 compatible)
+        const navData = parseNavData(signedNav);
         const signature = signedNav.signature;
 
         // Ensure we're using signer-connected contract

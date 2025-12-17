@@ -23,11 +23,6 @@
       },
       {
         "internalType": "uint256",
-        "name": "_initialNav",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
         "name": "_maxPerWallet",
         "type": "uint256"
       },
@@ -38,7 +33,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_bufferPercentBps",
+        "name": "_maxLossBps",
         "type": "uint256"
       }
     ],
@@ -227,25 +222,6 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "oldPercent",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newPercent",
-        "type": "uint256"
-      }
-    ],
-    "name": "BufferPercentUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
       },
@@ -304,18 +280,6 @@
         "internalType": "uint256",
         "name": "navUsed",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "toBuffer",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "toPolymarket",
-        "type": "uint256"
       }
     ],
     "name": "Deposit",
@@ -359,7 +323,44 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "newNav",
+        "name": "oldMaxLoss",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newMaxLoss",
+        "type": "uint256"
+      }
+    ],
+    "name": "MaxLossUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalAssets",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "creditedCash",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "creditedPositions",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "pendingCredit",
         "type": "uint256"
       },
       {
@@ -561,6 +562,12 @@
         "internalType": "uint256",
         "name": "shares",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "expectedUsdc",
+        "type": "uint256"
       }
     ],
     "name": "WithdrawalRequested",
@@ -569,19 +576,6 @@
   {
     "inputs": [],
     "name": "MAX_NAV_AGE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "MAX_NAV_CHANGE_BPS",
     "outputs": [
       {
         "internalType": "uint256",
@@ -738,19 +732,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "bufferPercentBps",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -774,7 +755,27 @@
         "components": [
           {
             "internalType": "uint256",
-            "name": "nav",
+            "name": "totalAssets",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "creditedCash",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "creditedPositions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "pendingCredit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "inFlightOnChain",
             "type": "uint256"
           },
           {
@@ -793,7 +794,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct PredictFiSniperVaultV6.NavData",
+        "internalType": "struct PredictFiSniperVaultV7.NavDataV7",
         "name": "navData",
         "type": "tuple"
       },
@@ -832,7 +833,27 @@
         "components": [
           {
             "internalType": "uint256",
-            "name": "nav",
+            "name": "totalAssets",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "creditedCash",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "creditedPositions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "pendingCredit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "inFlightOnChain",
             "type": "uint256"
           },
           {
@@ -851,7 +872,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct PredictFiSniperVaultV6.NavData",
+        "internalType": "struct PredictFiSniperVaultV7.NavDataV7",
         "name": "navData",
         "type": "tuple"
       },
@@ -895,6 +916,19 @@
     "name": "emergencyWithdraw",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "expectedAssets",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -954,11 +988,6 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "_lastNav",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
         "name": "_lastRoundId",
         "type": "uint256"
       },
@@ -974,12 +1003,17 @@
       },
       {
         "internalType": "uint256",
-        "name": "_vaultBalance",
+        "name": "_vaultBuffer",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "_totalDeposited",
+        "name": "_expectedAssets",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_totalForwarded",
         "type": "uint256"
       },
       {
@@ -1004,12 +1038,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_bufferPercentBps",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_totalSentToPolymarket",
+        "name": "_maxLossBps",
         "type": "uint256"
       }
     ],
@@ -1057,19 +1086,6 @@
   },
   {
     "inputs": [],
-    "name": "lastNav",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "lastNavTimestamp",
     "outputs": [
       {
@@ -1097,6 +1113,19 @@
   {
     "inputs": [],
     "name": "maxDepositPerWallet",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "maxLossBps",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1207,7 +1236,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "nav",
+        "name": "totalAssets",
         "type": "uint256"
       }
     ],
@@ -1216,16 +1245,6 @@
       {
         "internalType": "uint256",
         "name": "shares",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "toBuffer",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "toPolymarket",
         "type": "uint256"
       }
     ],
@@ -1241,7 +1260,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "nav",
+        "name": "totalAssets",
         "type": "uint256"
       }
     ],
@@ -1258,7 +1277,33 @@
         "type": "uint256"
       }
     ],
-    "stateMutability": "pure",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "gainAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "recordTradingGain",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "lossAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "recordTradingLoss",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1267,6 +1312,11 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isReconciliation",
+        "type": "bool"
       }
     ],
     "name": "refillBuffer",
@@ -1292,7 +1342,27 @@
         "components": [
           {
             "internalType": "uint256",
-            "name": "nav",
+            "name": "totalAssets",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "creditedCash",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "creditedPositions",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "pendingCredit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "inFlightOnChain",
             "type": "uint256"
           },
           {
@@ -1311,7 +1381,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct PredictFiSniperVaultV6.NavData",
+        "internalType": "struct PredictFiSniperVaultV7.NavDataV7",
         "name": "navData",
         "type": "tuple"
       },
@@ -1329,19 +1399,6 @@
         "type": "uint256"
       }
     ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_bufferPercentBps",
-        "type": "uint256"
-      }
-    ],
-    "name": "setBufferPercent",
-    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1372,6 +1429,32 @@
       }
     ],
     "name": "setDepositsThrottled",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_expectedAssets",
+        "type": "uint256"
+      }
+    ],
+    "name": "setExpectedAssets",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_maxLossBps",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxLoss",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1416,6 +1499,19 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_totalForwarded",
+        "type": "uint256"
+      }
+    ],
+    "name": "setTotalForwarded",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "symbol",
     "outputs": [
@@ -1443,7 +1539,7 @@
   },
   {
     "inputs": [],
-    "name": "totalDeposited",
+    "name": "totalForwardedToPolymarket",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1457,19 +1553,6 @@
   {
     "inputs": [],
     "name": "totalPendingShares",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalSentToPolymarket",
     "outputs": [
       {
         "internalType": "uint256",

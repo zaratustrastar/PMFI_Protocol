@@ -1,0 +1,117 @@
+1) accept that you have 3 asset states, not 2
+
+Right now you only model:
+
+on-chain vault buffer
+
+Polymarket API value
+
+With 100% forwarding + sweep + bridge, you must model:
+
+in-flight on-chain (briefly: USDC sitting at Polymarket Base deposit address)
+
+pending credit / bridging (USDC swept away and not yet visible in API)
+
+credited assets (Polymarket cash + positions visible via API)
+
+This is the core fix.
+
+2) add a “pendingCredit” ledger in your oracle bot
+
+Track amounts forwarded to Polymarket on Base, then reconcile with credited value.
+
+When your vault forwards amount to the Polymarket Base deposit address:
+
+forwardedTotal += amount
+
+When Polymarket API starts showing the funds as credited (cash/positions):
+
+creditedTotal = polymarketCash + liquidationValue(positions) (in USDC terms)
+
+Then compute:
+
+pendingCredit = max(0, forwardedTotal - creditedTotal)
+
+This is the missing bucket during sweep/bridge minutes.
+
+3) change NAV computation to include pendingCredit
+
+Instead of:
+
+totalAssets = vault + polymarketValue
+
+Use:
+
+totalAssets = inFlightOnChain + pendingCredit + creditedAssets
+
+inFlightOnChain = USDC.balanceOf(depositAddress) (often ~0, but harmless)
+
+creditedAssets = polymarketCash + positionsLiquidationValue
+
+Then:
+
+nav = totalAssets * 1e18 / totalShares (keep your scaling as you like)
+
+4) remove the “NAV can’t move > 5%” guardrail
+
+It will always brick you during the sweep/bridge window.
+
+Replace it with a conservation-style bound:
+
+Maintain expectedAssets:
+
+on deposit: expectedAssets += amount
+
+on withdrawal actually paid: expectedAssets -= amountPaid
+
+Then require oracle-reported totalAssets to satisfy:
+
+totalAssets >= expectedAssets * (1 - maxLoss)
+
+maxLoss is a PnL limit (example 5% per hour/day), not per update
+
+This prevents fake “90% drops” while still catching absurd loss reports.
+
+5) change deposits to mint using the latest valid NAV (which includes pendingCredit)
+
+Flow becomes:
+
+user deposits to vault
+
+vault forwards 100% to Polymarket deposit address
+
+user’s deposit() call includes signed navData (computed with pendingCredit)
+
+contract mints shares using that NAV
+
+You do not need to wait for Polymarket API crediting, because pendingCredit keeps NAV correct in the meantime.
+
+6) withdrawals become queued by design (since you have no buffer)
+
+With 0% buffer, you must implement (or keep) a queue:
+
+requestWithdraw(shares)
+
+contract records owed USDC amount at current NAV
+
+user waits until strategy returns USDC on-chain
+
+user calls claimWithdraw() when liquidity is available
+
+To make this autonomous, you need a keeper/relayer that periodically pulls funds back from Polymarket and refills the on-chain payout address.
+
+7) sign a breakdown, not just a single nav number (recommended)
+
+Have the oracle sign:
+
+creditedCash
+
+positionsLiquidationValue
+
+pendingCredit
+
+inFlightOnChain
+
+totalAssets (must equal sum)
+
+timestamp, deadline, roundId

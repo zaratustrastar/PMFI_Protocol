@@ -2,51 +2,59 @@
 
 This project contains TWO main systems:
 
-## 1. pSNIPER Vault (V6) - ERC4626 Vault with Signed NAV Oracle & Auto-Split Deposits
+## 1. pSNIPER Vault (V7) - 3-State Asset Tracking with Conservation Bounds
 
 A production-ready vault for managing USDC investments in Polymarket positions.
 
-**Deployed Address**: `0xAbfb4837c564b5B541A55f56B3796a5514499191` (Base Mainnet - V6.1 with corrected NAV)
+**V7 Upgrade**: Fixes NAV tracking issues from V6 by implementing 3-state asset tracking and conservation bounds.
 
-### V6 Architecture (Signed NAV Oracle - Zero Gas for Oracle + Async Withdrawals)
+### V7 Architecture - 3-State Asset Tracking
 
-**Key Innovations**:
-- Oracle signs NAV data off-chain (free), users include signature in transactions (they pay gas)
-- Auto-split deposits: configurable buffer (5-50%, default 10%), remainder auto-forwards to Polymarket
-- Async withdrawals: `requestWithdraw` → bot refills buffer → `claim`
+**Asset States:**
+1. **inFlightOnChain** - USDC at Polymarket deposit address (usually ~0 after sweep)
+2. **pendingCredit** - Forwarded to PM but not yet visible in API (during bridge)
+3. **creditedAssets** - PM cash + positions visible via API
+
+**Key Changes from V6:**
+- 100% forwarding to Polymarket (no buffer split)
+- Conservation bounds replace 5% NAV change limit
+- Extended NavDataV7 with full asset breakdown
+- Cash-only reconciliation for pendingCredit (avoids market PnL affecting tracking)
+- Safety valves: maxPendingAge and maxPendingRatio
 
 **Components:**
-- **Contract**: `contracts/PredictFiSniperVaultV6.sol` - ERC4626-style vault with auto-split
-- **Bot**: `bot/bot_v6.py` - Zero-gas oracle that signs NAV data
+- **Contract**: `contracts/PredictFiSniperVaultV7.sol` - 3-state tracking vault
+- **Bot**: `bot/bot_v7.py` - NAV oracle with pendingCredit tracking
 - **Frontend**: `frontend/main.js` + `frontend/index.html`
 
-**How it works:**
-1. Bot calculates liquidation NAV from Polymarket orderbooks
-2. Bot signs NavData struct: `{nav, timestamp, deadline, roundId}` + vault address
-3. User calls `/sign-nav` endpoint to get signed data
-4. User includes signature in `deposit()` or `requestWithdraw()` transaction
-5. Contract verifies signature matches `navSigner` address
-6. For withdrawals: user later calls `claim()` with fresh signed NAV when buffer has funds
+**How V7 NAV Works:**
+1. Bot tracks `totalForwarded` (all deposits sent to PM)
+2. Bot reads Polymarket cash balance and positions
+3. `pendingCredit = max(0, totalForwarded - pmCash - withdrawnBack)` (cash-only reconciliation)
+4. `totalAssets = inFlight + pendingCredit + creditedCash + creditedPositions`
+5. Bot signs full breakdown: `{totalAssets, creditedCash, creditedPositions, pendingCredit, inFlight, ...}`
+6. Contract verifies breakdown sums match and conservation bound holds
 
-**Safety Features:**
-- 30-second signature validity window
-- 5% max NAV change between updates
-- Monotonically increasing roundId (replay protection)
-- 1% withdrawal tax to deployer wallet
-- Per-wallet (100 USDC) and total (10k-100k USDC) deposit caps
-- Minimum 5% buffer floor for withdrawal liquidity
+**Conservation Bound (replaces 5% limit):**
+- Track `expectedAssets` (deposits in - withdrawals out)
+- Require: `totalAssets >= expectedAssets * (1 - maxLossBps)`
+- Allows real trading PnL while blocking fake 90% drops
+
+**Safety Valves:**
+- `maxPendingAge`: Pause deposits if any pending > 2 hours
+- `maxPendingRatio`: Pause if pendingCredit > 50% of totalAssets
 
 **Deployment:**
 ```bash
-# Deploy V6 vault
-npx hardhat run scripts/deploy-v6-mainnet.cjs --network base
+# Deploy V7 vault
+npx hardhat run scripts/deploy-v7-mainnet.cjs --network base
 
 # Start bot (from VPS with residential IP for Polymarket API)
-python bot/bot_v6.py
+python bot/bot_v7.py
 ```
 
-**Environment Variables for V6:**
-- `VAULT_V6_ADDRESS` - Deployed vault address (or `VAULT_V4_ADDRESS` for legacy)
+**Environment Variables for V7:**
+- `VAULT_V7_ADDRESS` - Deployed V7 vault address
 - `ORACLE_PRIVATE_KEY` - Same as deployer, signs NAV data
 - `POLYMARKET_PROXY_ADDRESS` - Polymarket wallet with positions
 - `RPC_URL` - Base Mainnet RPC
@@ -57,6 +65,10 @@ Set VPS bot URL in browser console:
 ```javascript
 localStorage.setItem('predictfi_price_api_url', 'http://your-vps-ip:8080')
 ```
+
+### Legacy V6 (Deprecated)
+
+V6 is still available at `contracts/PredictFiSniperVaultV6.sol` but has NAV tracking issues with the 5% change limit when funds are in-flight during Polymarket bridging. Use V7 for new deployments.
 
 ---
 
