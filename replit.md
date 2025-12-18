@@ -8,9 +8,21 @@ Preferred communication style: Simple, everyday language.
 
 # System Architecture
 
-## pSNIPER Vault (V7.1)
+## pSNIPER Vault (V7.2)
 
-The vault features a 3-state asset tracking system to accurately manage USDC within Polymarket. Asset states include `inFlightOnChain`, `pendingCredit`, and `creditedAssets`. The V7.1 upgrade introduces a corrected `pendingCredit` calculation (`max(0, totalForwarded - pmCash - reserved - costBasis - withdrawnBack)`) to prevent double-counting, accounting for Polymarket cash, reserved funds (open orders), and position cost basis. Net Asset Value (NAV) uses liquidation value for positions, while `pendingCredit` uses cost basis for stability. A conservation bound (`totalAssets >= expectedAssets * (1 - maxLossBps)`) replaces a fixed percentage limit, allowing for trading PnL while safeguarding against artificial drops. Safety valves (e.g., `maxPendingAge`, `maxPendingRatio`) pause deposits under adverse conditions.
+The vault features a 3-state asset tracking system to accurately manage USDC within Polymarket. Asset states include `inFlightOnChain`, `pendingCredit`, and `creditedAssets`. 
+
+**V7.2 FIX (Dec 2025)**: Funds now live in exactly ONE bucket at any time - no overlap:
+- `inFlight`: USDC at deposit address on Base (not yet swept)
+- `pendingCredit`: Swept/bridging, not visible yet in PM
+- `cash/reserved/costBasis`: Credited inside PM account
+- `withdrawnBack`: Returned to vault
+
+Formula: `pendingCredit = max(0, totalForwarded - pmCash - reserved - costBasis - inFlight - withdrawnBack)`
+
+This prevents the 30-120 second double-counting window when funds sat at the deposit address but were already counted in `totalForwarded`.
+
+Net Asset Value (NAV) uses liquidation value for positions, while `pendingCredit` uses cost basis for stability. A conservation bound (`totalAssets >= expectedAssets * (1 - maxLossBps)`) replaces a fixed percentage limit, allowing for trading PnL while safeguarding against artificial drops. Safety valves (e.g., `maxPendingAge`, `maxPendingRatio`) pause deposits under adverse conditions.
 
 ## Polymarket Trading Bot
 
