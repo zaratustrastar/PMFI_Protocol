@@ -68,7 +68,27 @@ load_dotenv()
 # CONFIGURATION
 # =============================================================================
 
+# Vault version: explicit env var or auto-detect from address
+# Set VAULT_VERSION=5 to force V5 mode, otherwise V7 is default
+VAULT_VERSION = int(os.getenv("VAULT_VERSION", "7"))
+
+# Vault addresses
+VAULT_V7_ADDRESS_DEFAULT = "0x5f10aF485267A33121D4d877708ef99E7dD04E00"
+VAULT_V7_ADDRESS = os.getenv("VAULT_V7_ADDRESS", "")
 VAULT_V5_ADDRESS = os.getenv("VAULT_V5_ADDRESS", "")
+
+# Select vault address based on version
+if VAULT_VERSION == 5:
+    if not VAULT_V5_ADDRESS:
+        print("❌ VAULT_VERSION=5 but VAULT_V5_ADDRESS not set!")
+        # Don't fail at import, but we'll exit in run_keeper()
+    VAULT_ADDRESS = VAULT_V5_ADDRESS
+    IS_V7 = False
+else:
+    # V7 mode (default)
+    VAULT_ADDRESS = VAULT_V7_ADDRESS or VAULT_V7_ADDRESS_DEFAULT
+    IS_V7 = True
+
 BASE_RPC_URL = os.getenv("BASE_RPC_URL") or os.getenv("RPC_URL", "https://mainnet.base.org")
 USDC_BASE_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 
@@ -77,7 +97,14 @@ POLYMARKET_PRIVATE_KEY = os.getenv("POLYMARKET_PRIVATE_KEY", "")
 
 TREASURY_ADDRESS = os.getenv("TREASURY_ADDRESS", "")
 
+# Bot URL: Select based on vault version
+BOT_V7_URL = os.getenv("BOT_V7_URL", "http://localhost:8080")
 BOT_V5_URL = os.getenv("BOT_V5_URL", "http://localhost:5001")
+BOT_URL = BOT_V7_URL if IS_V7 else BOT_V5_URL
+
+# NAV endpoint: For V7, set this to your VPS bot URL if different from BOT_URL
+# Example: NAV_URL=http://147.182.206.35:8080 for production
+NAV_URL = os.getenv("NAV_URL", BOT_URL)
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
@@ -98,6 +125,34 @@ TREASURY_CRITICAL_THRESHOLD_USDC = 100.0
 # ABIs
 # =============================================================================
 
+# V7 vault ABI (compatible with V7.1 bot)
+# NOTE: V7 does NOT have lastNav() - NAV is computed dynamically from totalAssets
+# getVaultState returns (in order):
+# 0: lastRoundId, 1: lastNavTimestamp, 2: totalSupply, 3: vaultBuffer,
+# 4: expectedAssets, 5: totalForwarded, 6: totalPendingShares, 7: pendingWithdrawalsCount,
+# 8: paused, 9: depositsThrottled, 10: maxLossBps
+VAULT_V7_ABI = [
+    {"inputs": [], "name": "totalSupply", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "totalPendingShares", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "totalForwardedToPolymarket", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "expectedAssets", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "getPendingWithdrawalShares", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "getVaultState", "outputs": [
+        {"name": "_lastRoundId", "type": "uint256"},
+        {"name": "_lastNavTimestamp", "type": "uint256"},
+        {"name": "_totalSupply", "type": "uint256"},
+        {"name": "_vaultBuffer", "type": "uint256"},
+        {"name": "_expectedAssets", "type": "uint256"},
+        {"name": "_totalForwarded", "type": "uint256"},
+        {"name": "_totalPendingShares", "type": "uint256"},
+        {"name": "_pendingWithdrawalsCount", "type": "uint256"},
+        {"name": "_paused", "type": "bool"},
+        {"name": "_depositsThrottled", "type": "bool"},
+        {"name": "_maxLossBps", "type": "uint256"}
+    ], "stateMutability": "view", "type": "function"},
+]
+
+# Legacy V5 ABI (for backward compatibility)
 VAULT_V5_ABI = [
     {"inputs": [], "name": "totalSupply", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
     {"inputs": [], "name": "lastNav", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
@@ -111,6 +166,10 @@ VAULT_V5_ABI = [
         {"type": "uint256"}, {"type": "uint256"}, {"type": "bool"}, {"type": "bool"}, {"type": "uint256"}
     ], "stateMutability": "view", "type": "function"},
 ]
+
+# Select ABI based on vault version (determined at module load time)
+# Note: This will be recalculated in run_keeper() after config is finalized
+VAULT_ABI = VAULT_V7_ABI if IS_V7 else VAULT_V5_ABI
 
 ERC20_ABI = [
     {"inputs": [{"type": "address"}], "name": "balanceOf", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
@@ -277,8 +336,38 @@ class VaultState:
         return self.shortfall / 1e6
 
 
+def get_nav_from_bot() -> int:
+    """Fetch current NAV from bot API. Returns NAV in 1e18 precision.
+    
+    Uses NAV_URL env var which can point to a different host than BOT_URL.
+    For production VPS, set NAV_URL=http://your-vps-ip:8080
+    """
+    # Try multiple endpoints in order of preference
+    endpoints = [
+        (f"{NAV_URL}/nav", "price"),      # V7 bot primary endpoint
+        (f"{NAV_URL}/price", "price"),    # Alias for frontend
+        (f"{NAV_URL}/api/nav", "price"),  # Alternative path
+    ]
+    
+    for url, field_name in endpoints:
+        try:
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                # Try both "price" and "nav" field names
+                nav = int(data.get(field_name, 0) or data.get("nav", 0))
+                if nav > 0:
+                    print(f"   📊 NAV from {url}: ${nav / 1e18:.6f}")
+                    return nav
+        except Exception as e:
+            continue  # Try next endpoint
+    
+    print(f"⚠️  Could not fetch NAV from {NAV_URL}, using default 1.0")
+    return NAV_PRECISION  # Default to $1.00 per share
+
+
 def read_vault_state() -> Optional[VaultState]:
-    """Read current vault state from Base chain."""
+    """Read current vault state from Base chain + NAV from bot (V7) or contract (V5)."""
     global vault_contract, usdc_base
     
     if not vault_contract or not usdc_base:
@@ -287,10 +376,21 @@ def read_vault_state() -> Optional[VaultState]:
     
     try:
         pending_shares = vault_contract.functions.getPendingWithdrawalShares().call()
-        buffer_balance = usdc_base.functions.balanceOf(VAULT_V5_ADDRESS).call()
+        buffer_balance = usdc_base.functions.balanceOf(VAULT_ADDRESS).call()
         
-        state = vault_contract.functions.getVaultState().call()
-        last_nav = state[0]
+        # V7 doesn't store lastNav on-chain, get it from bot API
+        # V5 exposes lastNav() directly on the contract
+        if IS_V7:
+            last_nav = get_nav_from_bot()
+        else:
+            # V5: read NAV from contract
+            try:
+                last_nav = vault_contract.functions.lastNav().call()
+                print(f"   📊 NAV from contract: ${last_nav / 1e18:.6f}")
+            except Exception as e:
+                print(f"⚠️  Could not read lastNav from contract: {e}, falling back to bot")
+                last_nav = get_nav_from_bot()
+        
         total_supply = vault_contract.functions.totalSupply().call()
         
         pending_usdc_value = (pending_shares * last_nav) // NAV_PRECISION if last_nav > 0 else 0
@@ -351,7 +451,7 @@ def send_from_treasury_to_vault(amount_usdc: float) -> bool:
         gas_price = w3_base.eth.gas_price
         
         tx = usdc_base.functions.transfer(
-            Web3.to_checksum_address(VAULT_V5_ADDRESS),
+            Web3.to_checksum_address(VAULT_ADDRESS),
             amount_6dec
         ).build_transaction({
             'from': treasury_addr,
@@ -418,11 +518,11 @@ def check_treasury_thresholds(treasury_balance: float):
 # =============================================================================
 
 def check_kill_switches() -> Tuple[bool, str]:
-    """Check bot_v5 /health endpoint for kill switches."""
+    """Check bot /health endpoint for kill switches."""
     try:
-        response = requests.get(f"{BOT_V5_URL}/health", timeout=10)
+        response = requests.get(f"{BOT_URL}/health", timeout=10)
         if response.status_code != 200:
-            return False, f"Bot V5 health check failed (status {response.status_code})"
+            return False, f"Bot health check failed (status {response.status_code})"
         
         data = response.json()
         status = data.get("status", "unknown")
@@ -1122,17 +1222,31 @@ def run_keeper():
     
     print(f"\n{'='*60}")
     print(f"🚀 LIQUIDITY KEEPER - Treasury-Backed Architecture")
+    print(f"   Version: V{VAULT_VERSION} mode")
     print(f"{'='*60}")
     
-    if not VAULT_V5_ADDRESS:
-        print("❌ VAULT_V5_ADDRESS not set")
+    if not VAULT_ADDRESS:
+        if VAULT_VERSION == 5:
+            print("❌ VAULT_VERSION=5 requires VAULT_V5_ADDRESS to be set")
+        else:
+            print("❌ VAULT_ADDRESS not set (set VAULT_V7_ADDRESS or use default)")
+        sys.exit(1)
+    
+    # Validate address format
+    try:
+        validated_vault = Web3.to_checksum_address(VAULT_ADDRESS)
+        print(f"   ✅ Vault address validated: {validated_vault}")
+    except ValueError as e:
+        print(f"❌ Invalid vault address format: {VAULT_ADDRESS}")
+        print(f"   Error: {e}")
         sys.exit(1)
     
     if not TREASURY_ADDRESS:
         print("⚠️  TREASURY_ADDRESS not set - will use keeper wallet as treasury")
     
     print(f"\nConfiguration:")
-    print(f"   Vault: {VAULT_V5_ADDRESS}")
+    print(f"   Vault: {VAULT_ADDRESS} (V{VAULT_VERSION})")
+    print(f"   Bot URL: {BOT_URL}")
     print(f"   Treasury: {TREASURY_ADDRESS or 'Same as keeper'}")
     print(f"   PM Wallet: {POLYMARKET_PROXY_ADDRESS}")
     print(f"   Base RPC: {BASE_RPC_URL}")
@@ -1149,8 +1263,8 @@ def run_keeper():
     print(f"   ✅ Connected (block {w3_base.eth.block_number})")
     
     vault_contract = w3_base.eth.contract(
-        address=Web3.to_checksum_address(VAULT_V5_ADDRESS),
-        abi=VAULT_V5_ABI
+        address=Web3.to_checksum_address(VAULT_ADDRESS),
+        abi=VAULT_ABI
     )
     
     usdc_base = w3_base.eth.contract(
@@ -1188,8 +1302,8 @@ def run_keeper():
         )
     
     send_telegram_alert(
-        f"🚀 Liquidity Keeper started\n"
-        f"Vault: {VAULT_V5_ADDRESS[:10]}...\n"
+        f"🚀 Liquidity Keeper V{VAULT_VERSION} started\n"
+        f"Vault: {VAULT_ADDRESS[:10]}...\n"
         f"Treasury: ${treasury_bal:.2f} USDC\n"
         f"Mode: {'Active' if treasury_account else 'Read-only'}"
     )
