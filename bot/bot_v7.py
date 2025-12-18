@@ -156,36 +156,45 @@ class PendingCreditTracker:
         self.save_state()
         print(f"📝 Recorded withdrawal back: {amount_usdc/1e6:.2f} USDC")
     
-    def calculate_pending_credit(self, pm_cash_usdc: int, reserved_usdc: int = 0, cost_basis_usdc: int = 0) -> int:
+    def calculate_pending_credit(self, pm_cash_usdc: int, reserved_usdc: int = 0, cost_basis_usdc: int = 0, in_flight_usdc: int = 0) -> int:
         """
         Calculate pending credit using full asset reconciliation.
         
-        FIXED FORMULA (V7.1):
-        pendingCredit = max(0, totalForwarded - pmCash - reserved - costBasis - withdrawnBack)
+        FIXED FORMULA (V7.2):
+        pendingCredit = max(0, totalForwarded - pmCash - reserved - costBasis - withdrawnBack - inFlight)
         
         This prevents double-counting:
         - When you buy tokens, cash goes down but costBasis goes up (net zero change to pending)
         - When you place buy orders, cash goes down but reserved goes up (net zero change to pending)
-        - pendingCredit should only be non-zero when funds are actually in-flight (bridging)
+        - Funds at deposit address are counted in inFlight, NOT pendingCredit
+        - pendingCredit should only be non-zero when funds are swept but not yet visible in PM
+        
+        At any moment, forwarded funds live in exactly ONE of:
+        - inFlight (still at deposit address on Base)
+        - pendingCredit (swept/bridging, not visible yet in PM)
+        - cash/reserved/costBasis (credited and inside PM account)
+        - withdrawnBack (returned on-chain)
         
         Args:
             pm_cash_usdc: Polymarket cash balance (in 6 decimals)
             reserved_usdc: USDC locked in open buy orders (in 6 decimals)
             cost_basis_usdc: Total cost basis of positions (in 6 decimals)
+            in_flight_usdc: USDC at deposit address (in 6 decimals) - V7.2 fix
         """
         self.last_known_pm_cash = pm_cash_usdc
         
-        # Total "accounted for" = cash + reserved + costBasis
-        accounted_for = pm_cash_usdc + reserved_usdc + cost_basis_usdc
+        # Total "accounted for" = cash + reserved + costBasis + inFlight
+        accounted_for = pm_cash_usdc + reserved_usdc + cost_basis_usdc + in_flight_usdc
         
         # Pending = what we sent minus what's accounted for minus what came back
         pending = max(0, self.total_forwarded - accounted_for - self.withdrawn_back)
         
-        print(f"📊 Pending Credit Calculation:")
+        print(f"📊 Pending Credit Calculation (V7.2 - no double-count):")
         print(f"   totalForwarded: ${self.total_forwarded/1e6:.2f}")
         print(f"   - pmCash:       ${pm_cash_usdc/1e6:.2f}")
         print(f"   - reserved:     ${reserved_usdc/1e6:.2f}")
         print(f"   - costBasis:    ${cost_basis_usdc/1e6:.2f}")
+        print(f"   - inFlight:     ${in_flight_usdc/1e6:.2f}")
         print(f"   - withdrawn:    ${self.withdrawn_back/1e6:.2f}")
         print(f"   = pendingCredit: ${pending/1e6:.2f}")
         
@@ -542,10 +551,17 @@ class PolymarketClient:
 
 class NavEngineV7:
     """
-    Calculates NAV with 3-state asset tracking.
+    Calculates NAV with 3-state asset tracking (V7.2 - no double-counting).
     
-    totalAssets = inFlightOnChain + pendingCredit + creditedAssets
-    creditedAssets = pmCash + positionsLiquidationValue
+    totalAssets = inFlightOnChain + pendingCredit + cash + reserved + positionsLiquidationValue
+    
+    Key insight: Funds can only be in ONE bucket at a time:
+    - inFlight: at deposit address on Base
+    - pendingCredit: swept/bridging, not visible yet in PM
+    - cash/reserved/costBasis: credited inside PM
+    - withdrawnBack: returned to vault
+    
+    pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - withdrawnBack
     """
     
     def __init__(self, polymarket_client: PolymarketClient, pending_tracker: PendingCreditTracker):
@@ -570,19 +586,19 @@ class NavEngineV7:
         """
         Calculate full NAV breakdown with 3 asset states.
         
-        V7.1 FIX: Uses proper pendingCredit calculation that subtracts:
-        - pmCash (available cash)
-        - reserved (cash locked in open buy orders)
-        - costBasis (original cost of positions, NOT liquidation value)
+        V7.2 FIX: Subtracts inFlight from pendingCredit to prevent double-counting
+        when funds are at the deposit address.
         
-        NAV uses: cash + reserved + liquidationValue
-        pendingCredit uses: totalForwarded - cash - reserved - costBasis - withdrawn
+        pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - withdrawn
+        totalAssets = inFlight + pendingCredit + cash + reserved + liquidationValue
+        
+        Funds live in exactly ONE bucket at any time - no overlap.
         
         Returns:
             Dict with all asset components in 6 decimals
         """
         print(f"\n{'='*60}")
-        print(f"💰 CALCULATING V7.1 NAV (Fixed pendingCredit)")
+        print(f"💰 CALCULATING V7.2 NAV (No double-count)")
         print(f"{'='*60}")
         
         # 1. Fetch in-flight (at deposit address)
@@ -624,17 +640,18 @@ class NavEngineV7:
         cost_basis_usdc = int(total_cost_basis * 1e6)
         credited_positions = int(positions_liq_value * 1e6)  # Liquidation value for NAV
         
-        # 6. Calculate pending credit using FULL reconciliation (V7.1 fix)
-        # pendingCredit = totalForwarded - cash - reserved - costBasis - withdrawn
+        # 6. Calculate pending credit using FULL reconciliation (V7.2 fix)
+        # pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - withdrawn
+        # This prevents double-counting when funds are at the deposit address
         pending_credit = self.pending_tracker.calculate_pending_credit(
-            credited_cash, reserved_usdc, cost_basis_usdc
+            credited_cash, reserved_usdc, cost_basis_usdc, in_flight
         )
         
         # 7. Total assets for NAV = inFlight + pending + cash + reserved + liquidationValue
         # NOTE: We use liquidation value for NAV (share pricing), NOT cost basis
         total_assets = in_flight + pending_credit + credited_cash + reserved_usdc + credited_positions
         
-        print(f"\n📊 Asset Breakdown (V7.1):")
+        print(f"\n📊 Asset Breakdown (V7.2 - no double-count):")
         print(f"   • In-flight (deposit addr): ${in_flight/1e6:.2f}")
         print(f"   • Pending credit:           ${pending_credit/1e6:.2f}")
         print(f"   • Credited cash:            ${credited_cash/1e6:.2f}")
@@ -643,6 +660,7 @@ class NavEngineV7:
         print(f"   • Positions (cost basis):   ${cost_basis_usdc/1e6:.2f}")
         print(f"   ─────────────────────────────")
         print(f"   • TOTAL ASSETS:             ${total_assets/1e6:.2f}")
+        print(f"   (inFlight + pending subtracted from total to avoid overlap)")
         
         return {
             "in_flight": in_flight,
