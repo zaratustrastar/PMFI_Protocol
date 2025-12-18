@@ -884,11 +884,17 @@ async function handleClaim(requestId) {
         // Get signed NAV from VPS bot
         const signedNav = await getSignedNav();
         
+        // Build full NavDataV7 struct for contract
+        const nd = signedNav.navData;
         const navData = {
-            nav: BigInt(signedNav.navData.nav),
-            timestamp: signedNav.navData.timestamp,
-            deadline: signedNav.navData.deadline,
-            roundId: signedNav.navData.roundId
+            totalAssets: BigInt(nd.totalAssets),
+            creditedCash: BigInt(nd.creditedCash),
+            creditedPositions: BigInt(nd.creditedPositions),
+            pendingCredit: BigInt(nd.pendingCredit),
+            inFlightOnChain: BigInt(nd.inFlightOnChain),
+            timestamp: nd.timestamp,
+            deadline: nd.deadline,
+            roundId: nd.roundId
         };
         const signature = signedNav.signature;
         
