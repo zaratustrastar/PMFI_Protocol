@@ -404,11 +404,9 @@ async function refreshUserStats() {
             const redeemable = await vaultContract.convertToAssets(shares);
             positionValueEl.textContent = `$${formatUSDC(redeemable)}`;
             userStatsEl.classList.remove("hidden");
-            openWithdrawBtn.disabled = false;
         } else {
             positionValueEl.textContent = "$0.00";
             userStatsEl.classList.add("hidden");
-            openWithdrawBtn.disabled = true;
         }
 
     } catch (error) {
@@ -506,7 +504,6 @@ function disconnectWallet() {
     connectBtn.classList.remove("connected");
     
     openDepositBtn.disabled = true;
-    openWithdrawBtn.disabled = true;
     userStatsEl.classList.add("hidden");
     
     // Reinitialize with read-only provider
