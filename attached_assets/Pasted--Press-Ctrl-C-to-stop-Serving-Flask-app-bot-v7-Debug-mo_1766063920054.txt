@@ -1,0 +1,68 @@
+  Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+127.0.0.1 - - [18/Dec/2025 13:16:43] "GET /nav HTTP/1.1" 404 -
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl http://localhost:8080/nav
+cat bot.log | tail -50
+<!doctype html>
+<html lang=en>
+<title>404 Not Found</title>
+<h1>Not Found</h1>
+<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>
+
+📊 Asset Breakdown:
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $5.00
+   • Credited cash:            $0.00
+   • Credited positions:       $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $5.00
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 100.0% exceeds 50%
+❌ Error signing NAV: Unknown format '0x79f0bed5217b9cd86f5cec0d72dc7b7e5849d5381e4210e2e180a499d4af3a93', attempted to normalize to '0x79f0bed5217b9cd86f5cec0d72dc7b7e5849d5381e4210e2e180a499d4af3a93'
+🔄 Generating fresh signed NAV (no valid cache)
+
+============================================================
+💰 CALCULATING V7 NAV (3-State)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions for 0x9cbc5577...
+✅ Found 0 active positions
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+
+📊 Asset Breakdown:
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $5.00
+   • Credited cash:            $0.00
+   • Credited positions:       $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $5.00
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 100.0% exceeds 50%
+❌ Error signing NAV: Unknown format '0x79f0bed5217b9cd86f5cec0d72dc7b7e5849d5381e4210e2e180a499d4af3a93', attempted to normalize to '0x79f0bed5217b9cd86f5cec0d72dc7b7e5849d5381e4210e2e180a499d4af3a93'
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+
+============================================================
+💰 CALCULATING V7 NAV (3-State)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions for 0x9cbc5577...
+✅ Found 0 active positions
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+
+📊 Asset Breakdown:
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $5.00
+   • Credited cash:            $0.00
+   • Credited positions:       $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $5.00
+139.28.91.114 - - [18/Dec/2025 13:18:24] "GET /price HTTP/1.1" 200 -
+127.0.0.1 - - [18/Dec/2025 13:18:26] "GET /nav HTTP/1.1" 404 -
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
