@@ -136,17 +136,21 @@ def test_treasury():
 
 
 def test_vault_state():
-    """Test reading vault state."""
+    """Test reading vault state - supports both V5 and V7."""
     print("\n📊 Testing vault state reading...")
     
-    vault_addr = os.getenv("VAULT_V5_ADDRESS", "")
-    if not vault_addr:
-        print("   ⚠️  VAULT_V5_ADDRESS not set, skipping")
+    from liquidity_keeper import (
+        VAULT_ADDRESS, VAULT_VERSION, IS_V7,
+        VAULT_V5_ABI, VAULT_V7_ABI, ERC20_ABI, 
+        USDC_BASE_ADDRESS, NAV_PRECISION,
+        get_nav_from_bot
+    )
+    
+    if not VAULT_ADDRESS:
+        print("   ⚠️  No vault address configured, skipping")
         return True
     
-    from liquidity_keeper import (
-        VAULT_V5_ABI, ERC20_ABI, USDC_BASE_ADDRESS, NAV_PRECISION
-    )
+    print(f"   Using V{VAULT_VERSION} mode, vault: {VAULT_ADDRESS}")
     
     base_rpc = os.getenv("BASE_RPC_URL") or os.getenv("RPC_URL", "https://mainnet.base.org")
     w3 = Web3(Web3.HTTPProvider(base_rpc))
@@ -156,9 +160,10 @@ def test_vault_state():
         return False
     
     try:
+        abi = VAULT_V7_ABI if IS_V7 else VAULT_V5_ABI
         vault = w3.eth.contract(
-            address=Web3.to_checksum_address(vault_addr),
-            abi=VAULT_V5_ABI
+            address=Web3.to_checksum_address(VAULT_ADDRESS),
+            abi=abi
         )
         usdc = w3.eth.contract(
             address=Web3.to_checksum_address(USDC_BASE_ADDRESS),
@@ -166,14 +171,18 @@ def test_vault_state():
         )
         
         pending = vault.functions.getPendingWithdrawalShares().call()
-        buffer = usdc.functions.balanceOf(vault_addr).call()
-        state = vault.functions.getVaultState().call()
-        last_nav = state[0]
+        buffer = usdc.functions.balanceOf(VAULT_ADDRESS).call()
+        
+        if IS_V7:
+            last_nav = get_nav_from_bot()
+        else:
+            state = vault.functions.getVaultState().call()
+            last_nav = state[0]
         
         pending_usdc = (pending * last_nav) / NAV_PRECISION / 1e6 if last_nav > 0 else 0
         shortfall = max(0, (pending * last_nav // NAV_PRECISION) - buffer) / 1e6
         
-        print(f"   ✅ Vault state read successfully")
+        print(f"   ✅ Vault state read successfully (V{VAULT_VERSION})")
         print(f"      Pending shares: ${pending_usdc:.2f}")
         print(f"      Buffer: ${buffer/1e6:.2f}")
         print(f"      Shortfall: ${shortfall:.2f}")
