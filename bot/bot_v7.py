@@ -876,6 +876,7 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "timestamp": timestamp,
             "deadline": deadline,
             "roundId": new_round_id,
+            "nav": str(nav),
         },
         "signature": "0x" + signature,
         "signer": signer,
