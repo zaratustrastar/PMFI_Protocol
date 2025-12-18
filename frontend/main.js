@@ -295,7 +295,7 @@ function updatePriceDisplay(priceData) {
     if (!priceData) return;
     
     const sharePrice = priceData.price_per_share || 1.0;
-    statsSharePriceEl.textContent = `$${sharePrice.toFixed(4)}`;
+    statsSharePriceEl.textContent = `$${sharePrice.toFixed(2)}`;
     
     const tvl = priceData.total_assets || 0;
     const tvlStr = `$${tvl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -375,11 +375,11 @@ async function refreshVaultStats() {
             }
             
             // Default to $1/share when no API data available
-            statsSharePriceEl.textContent = `$1.0000`;
+            statsSharePriceEl.textContent = `$1.00`;
             tvlValueEl.textContent = `$0.00`;
         } catch (e) {
             console.warn("Could not read contract state:", e);
-            statsSharePriceEl.textContent = `$1.0000`;
+            statsSharePriceEl.textContent = `$1.00`;
             tvlValueEl.textContent = `$0.00`;
         }
 
@@ -838,7 +838,7 @@ async function loadPendingWithdrawals() {
         
         // Render list
         list.innerHTML = pendingRequests.map(req => {
-            const sharesFormatted = Number(ethers.formatUnits(req.shares, 18)).toFixed(4);
+            const sharesFormatted = Number(ethers.formatUnits(req.shares, 18)).toFixed(2);
             const usdValue = (Number(ethers.formatUnits(req.shares, 18)) * sharePrice).toFixed(2);
             const requestDate = new Date(Number(req.requestTime) * 1000).toLocaleString();
             
