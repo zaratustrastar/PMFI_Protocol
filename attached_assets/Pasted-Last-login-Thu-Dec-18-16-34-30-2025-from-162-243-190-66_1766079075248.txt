@@ -1,0 +1,28 @@
+Last login: Thu Dec 18 16:34:30 2025 from 162.243.190.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot
+git pull origin main
+remote: Enumerating objects: 61, done.
+remote: Counting objects: 100% (61/61), done.
+remote: Compressing objects: 100% (6/6), done.
+remote: Total 50 (delta 44), reused 50 (delta 44), pack-reused 0 (from 0)
+Unpacking objects: 100% (50/50), 19.16 KiB | 817.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+ * branch            main       -> FETCH_HEAD
+   cd6f027..cbffe25  main       -> origin/main
+Updating cd6f027..cbffe25
+Fast-forward
+ .replit                                                                                          |   1 +
+ attached_assets/Pasted--Press-Ctrl-C-to-stop-Serving-Flask-app-bot-v7-Debug-mo_1766063920054.txt |  68 +++++++++++++
+ attached_assets/Pasted--venv-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cat_1766064923067.txt |  66 +++++++++++++
+ attached_assets/Pasted-Yes-as-currently-written-it-can-double-count-in-the-sho_1766077811653.txt |  63 ++++++++++++
+ bot/bot_v7.py                                                                                    | 297 ++++++++++++++++++++++++++++++++++++++++++++++++-------
+ frontend/index.html                                                                              |  14 +--
+ frontend/main.js                                                                                 |  11 +--
+ replit.md                                                                                        | 298 ++++++++------------------------------------------------
+ trading_bot/liquidity_keeper.py                                                                  | 144 ++++++++++++++++++++++++---
+ trading_bot/test_liquidity_keeper.py                                                             |  35 ++++---
+ 10 files changed, 661 insertions(+), 336 deletions(-)
+ create mode 100644 attached_assets/Pasted--Press-Ctrl-C-to-stop-Serving-Flask-app-bot-v7-Debug-mo_1766063920054.txt
+ create mode 100644 attached_assets/Pasted--venv-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cat_1766064923067.txt
+ create mode 100644 attached_assets/Pasted-Yes-as-currently-written-it-can-double-count-in-the-sho_1766077811653.txt
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
