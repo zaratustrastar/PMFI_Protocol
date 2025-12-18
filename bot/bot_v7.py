@@ -156,25 +156,52 @@ class PendingCreditTracker:
         self.save_state()
         print(f"📝 Recorded withdrawal back: {amount_usdc/1e6:.2f} USDC")
     
-    def calculate_pending_credit(self, pm_cash_usdc: int) -> int:
+    def calculate_pending_credit(self, pm_cash_usdc: int, reserved_usdc: int = 0, cost_basis_usdc: int = 0) -> int:
         """
-        Calculate pending credit using cash-only reconciliation.
+        Calculate pending credit using full asset reconciliation.
         
-        pendingCredit = max(0, totalForwarded - pmCash - withdrawnBack)
+        FIXED FORMULA (V7.1):
+        pendingCredit = max(0, totalForwarded - pmCash - reserved - costBasis - withdrawnBack)
+        
+        This prevents double-counting:
+        - When you buy tokens, cash goes down but costBasis goes up (net zero change to pending)
+        - When you place buy orders, cash goes down but reserved goes up (net zero change to pending)
+        - pendingCredit should only be non-zero when funds are actually in-flight (bridging)
+        
+        Args:
+            pm_cash_usdc: Polymarket cash balance (in 6 decimals)
+            reserved_usdc: USDC locked in open buy orders (in 6 decimals)
+            cost_basis_usdc: Total cost basis of positions (in 6 decimals)
         """
         self.last_known_pm_cash = pm_cash_usdc
-        pending = max(0, self.total_forwarded - pm_cash_usdc - self.withdrawn_back)
+        
+        # Total "accounted for" = cash + reserved + costBasis
+        accounted_for = pm_cash_usdc + reserved_usdc + cost_basis_usdc
+        
+        # Pending = what we sent minus what's accounted for minus what came back
+        pending = max(0, self.total_forwarded - accounted_for - self.withdrawn_back)
+        
+        print(f"📊 Pending Credit Calculation:")
+        print(f"   totalForwarded: ${self.total_forwarded/1e6:.2f}")
+        print(f"   - pmCash:       ${pm_cash_usdc/1e6:.2f}")
+        print(f"   - reserved:     ${reserved_usdc/1e6:.2f}")
+        print(f"   - costBasis:    ${cost_basis_usdc/1e6:.2f}")
+        print(f"   - withdrawn:    ${self.withdrawn_back/1e6:.2f}")
+        print(f"   = pendingCredit: ${pending/1e6:.2f}")
+        
         return pending
     
-    def get_oldest_pending_age_hours(self, pm_cash_usdc: int) -> float:
-        """Get age of oldest unreconciled deposit in hours."""
+    def get_oldest_pending_age_hours(self, pending_credit: int) -> float:
+        """Get age of oldest unreconciled deposit in hours.
+        
+        Args:
+            pending_credit: Pre-calculated pending credit value
+        """
         if not self.deposit_records:
             return 0.0
         
-        # Find deposits that haven't been credited yet
-        # (simple heuristic: if total_forwarded > pm_cash + withdrawn, some are pending)
-        pending = self.calculate_pending_credit(pm_cash_usdc)
-        if pending <= 0:
+        # If nothing is pending, no deposits are waiting
+        if pending_credit <= 0:
             return 0.0
         
         # Return age of oldest deposit
@@ -208,6 +235,8 @@ cached_nav = {
     "credited_positions": 0,
     "pending_credit": 0,
     "in_flight": 0,
+    "reserved": 0,         # V7.1: Cash locked in open buy orders
+    "cost_basis": 0,       # V7.1: Total cost basis of positions
     "nav": 10**6,
     "round_id": 0,
     "last_calculated": 0,
@@ -239,18 +268,170 @@ def serve_static(filename):
 # =============================================================================
 
 class PolymarketClient:
-    """Read-only client for fetching positions and orderbook data."""
+    """Client for fetching positions, orderbook data, and open orders (with L2 auth)."""
     
     DATA_API_URL = "https://data-api.polymarket.com"
     CLOB_API_URL = "https://clob.polymarket.com"
     
-    def __init__(self, wallet_address: str):
+    def __init__(self, wallet_address: str, private_key: str = None):
         self.wallet_address = wallet_address
+        self.private_key = private_key
+        self.clob_client = None
+        
         self.session = requests.Session()
         self.session.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             "Accept": "application/json",
         })
+        
+        # Initialize CLOB client with L2 auth for fetching open orders
+        if private_key:
+            self._init_clob_client()
+    
+    def _init_clob_client(self):
+        """Initialize CLOB client with L2 auth for authenticated API calls."""
+        try:
+            from py_clob_client.client import ClobClient
+            
+            # Initialize client with private key and proxy wallet
+            self.clob_client = ClobClient(
+                self.CLOB_API_URL,
+                key=self.private_key,
+                chain_id=137,  # Polygon for L2 auth
+                signature_type=1,  # Email/Magic wallet style
+                funder=self.wallet_address
+            )
+            
+            # Derive L2 credentials from private key
+            self.clob_client.set_api_creds(self.clob_client.create_or_derive_api_creds())
+            print("✅ CLOB client initialized with L2 auth (can fetch open orders)")
+        except Exception as e:
+            print(f"⚠️ Could not initialize CLOB client: {e}")
+            self.clob_client = None
+    
+    def fetch_positions_with_cost_basis(self) -> Tuple[List[Dict], float]:
+        """
+        Fetch ALL open positions with cost basis (initialValue).
+        
+        Returns:
+            Tuple of (positions list, total cost basis in USDC)
+        """
+        try:
+            print(f"📡 Fetching positions with cost basis for {self.wallet_address[:10]}...")
+            
+            all_positions = []
+            offset = 0
+            limit = 500
+            total_cost_basis = 0.0
+            
+            while True:
+                url = f"{self.DATA_API_URL}/positions"
+                params = {"user": self.wallet_address, "limit": limit, "offset": offset}
+                
+                response = self.session.get(url, params=params, timeout=30)
+                response.raise_for_status()
+                
+                data = response.json()
+                if not data:
+                    break
+                    
+                all_positions.extend(data)
+                
+                if len(data) < limit:
+                    break
+                offset += limit
+            
+            positions = []
+            for p in all_positions:
+                size = float(p.get("size") or 0)
+                if size <= 0:
+                    continue
+                
+                initial_value = float(p.get("initialValue") or 0)
+                total_cost_basis += initial_value
+                
+                positions.append({
+                    "token_id": p.get("asset") or "",
+                    "title": p.get("title") or "",
+                    "outcome": p.get("outcome") or "",
+                    "size": size,
+                    "current_value": float(p.get("currentValue") or 0),
+                    "initial_value": initial_value,  # Cost basis for this position
+                    "avg_price": float(p.get("avgPrice") or 0),
+                })
+            
+            print(f"✅ Found {len(positions)} active positions, total cost basis: ${total_cost_basis:.2f}")
+            return positions, total_cost_basis
+            
+        except Exception as e:
+            print(f"❌ Error fetching positions: {e}")
+            return [], 0.0
+    
+    def fetch_open_orders(self) -> List[Dict]:
+        """
+        Fetch all open orders (requires L2 auth).
+        
+        Returns:
+            List of open orders
+        """
+        if not self.clob_client:
+            print("⚠️ CLOB client not initialized, cannot fetch open orders (reserved=0)")
+            return []
+        
+        try:
+            print("📡 Fetching open orders via L2 auth...")
+            orders = self.clob_client.get_orders()
+            
+            if orders is None:
+                print("⚠️ CLOB client returned None for orders (auth may have failed)")
+                return []
+            
+            # Filter for open orders - API uses "OPEN" or "PARTIALLY_FILLED" status
+            open_orders = [o for o in orders if o.get("status") in ("OPEN", "PARTIALLY_FILLED", "LIVE")]
+            print(f"✅ Found {len(open_orders)} open orders (total returned: {len(orders)})")
+            
+            # Log warning if all orders were filtered out
+            if len(orders) > 0 and len(open_orders) == 0:
+                statuses = set(o.get("status") for o in orders)
+                print(f"⚠️ All orders filtered out. Statuses found: {statuses}")
+            
+            return open_orders
+            
+        except Exception as e:
+            print(f"❌ Error fetching open orders: {e}")
+            print("⚠️ Reserved balance will be 0 - this may cause pendingCredit to spike when orders are placed")
+            return []
+    
+    def calculate_reserved_balance(self) -> float:
+        """
+        Calculate USDC reserved in open buy orders.
+        
+        Reserved = sum of (unfilled amount × price) for all open buy orders
+        
+        Returns:
+            Reserved balance in USDC
+        """
+        open_orders = self.fetch_open_orders()
+        
+        reserved = 0.0
+        for order in open_orders:
+            side = order.get("side", "").upper()
+            if side != "BUY":
+                continue
+            
+            # Calculate unfilled amount
+            original_size = float(order.get("original_size") or order.get("size") or 0)
+            filled_size = float(order.get("size_matched") or 0)
+            unfilled = original_size - filled_size
+            
+            if unfilled <= 0:
+                continue
+            
+            price = float(order.get("price") or 0)
+            reserved += unfilled * price
+        
+        print(f"🔒 Reserved in open buy orders: ${reserved:.2f}")
+        return reserved
     
     def fetch_positions(self) -> List[Dict]:
         """Fetch ALL open positions with pagination."""
@@ -389,20 +570,28 @@ class NavEngineV7:
         """
         Calculate full NAV breakdown with 3 asset states.
         
+        V7.1 FIX: Uses proper pendingCredit calculation that subtracts:
+        - pmCash (available cash)
+        - reserved (cash locked in open buy orders)
+        - costBasis (original cost of positions, NOT liquidation value)
+        
+        NAV uses: cash + reserved + liquidationValue
+        pendingCredit uses: totalForwarded - cash - reserved - costBasis - withdrawn
+        
         Returns:
             Dict with all asset components in 6 decimals
         """
         print(f"\n{'='*60}")
-        print(f"💰 CALCULATING V7 NAV (3-State)")
+        print(f"💰 CALCULATING V7.1 NAV (Fixed pendingCredit)")
         print(f"{'='*60}")
         
         # 1. Fetch in-flight (at deposit address)
         in_flight = self.fetch_in_flight_balance()
         
-        # 2. Fetch credited assets from Polymarket
-        positions = self.polymarket_client.fetch_positions()
+        # 2. Fetch positions WITH cost basis
+        positions, total_cost_basis = self.polymarket_client.fetch_positions_with_cost_basis()
         
-        # Calculate liquidation value of positions
+        # 3. Calculate liquidation value of positions (for NAV display)
         positions_liq_value = 0.0
         for pos in positions:
             token_id = pos.get("token_id", "")
@@ -423,23 +612,35 @@ class NavEngineV7:
             liq_value = self.polymarket_client.simulate_market_sell(size, bids)
             positions_liq_value += liq_value
         
+        # 4. Fetch cash balance
         pm_cash = self.polymarket_client.fetch_cash_balance()
+        
+        # 5. Fetch reserved balance (cash locked in open buy orders)
+        reserved = self.polymarket_client.calculate_reserved_balance()
         
         # Convert to 6 decimals
         credited_cash = int(pm_cash * 1e6)
-        credited_positions = int(positions_liq_value * 1e6)
+        reserved_usdc = int(reserved * 1e6)
+        cost_basis_usdc = int(total_cost_basis * 1e6)
+        credited_positions = int(positions_liq_value * 1e6)  # Liquidation value for NAV
         
-        # 3. Calculate pending credit using cash-only reconciliation
-        pending_credit = self.pending_tracker.calculate_pending_credit(credited_cash)
+        # 6. Calculate pending credit using FULL reconciliation (V7.1 fix)
+        # pendingCredit = totalForwarded - cash - reserved - costBasis - withdrawn
+        pending_credit = self.pending_tracker.calculate_pending_credit(
+            credited_cash, reserved_usdc, cost_basis_usdc
+        )
         
-        # Total assets
-        total_assets = in_flight + pending_credit + credited_cash + credited_positions
+        # 7. Total assets for NAV = inFlight + pending + cash + reserved + liquidationValue
+        # NOTE: We use liquidation value for NAV (share pricing), NOT cost basis
+        total_assets = in_flight + pending_credit + credited_cash + reserved_usdc + credited_positions
         
-        print(f"\n📊 Asset Breakdown:")
+        print(f"\n📊 Asset Breakdown (V7.1):")
         print(f"   • In-flight (deposit addr): ${in_flight/1e6:.2f}")
         print(f"   • Pending credit:           ${pending_credit/1e6:.2f}")
         print(f"   • Credited cash:            ${credited_cash/1e6:.2f}")
-        print(f"   • Credited positions:       ${credited_positions/1e6:.2f}")
+        print(f"   • Reserved (open orders):   ${reserved_usdc/1e6:.2f}")
+        print(f"   • Positions (liquidation):  ${credited_positions/1e6:.2f}")
+        print(f"   • Positions (cost basis):   ${cost_basis_usdc/1e6:.2f}")
         print(f"   ─────────────────────────────")
         print(f"   • TOTAL ASSETS:             ${total_assets/1e6:.2f}")
         
@@ -447,7 +648,9 @@ class NavEngineV7:
             "in_flight": in_flight,
             "pending_credit": pending_credit,
             "credited_cash": credited_cash,
-            "credited_positions": credited_positions,
+            "reserved": reserved_usdc,
+            "cost_basis": cost_basis_usdc,
+            "credited_positions": credited_positions,  # Liquidation value
             "total_assets": total_assets,
             "positions_count": len(positions),
         }
@@ -515,7 +718,7 @@ def sign_nav_data_v7(
     return signed.signature.hex(), oracle_account.address
 
 
-def check_safety_valves(breakdown: Dict, pm_cash: int) -> Tuple[str, str]:
+def check_safety_valves(breakdown: Dict) -> Tuple[str, str]:
     """
     Check safety valves and return status.
     
@@ -528,8 +731,8 @@ def check_safety_valves(breakdown: Dict, pm_cash: int) -> Tuple[str, str]:
     pending_credit = breakdown.get("pending_credit", 0)
     total_assets = breakdown.get("total_assets", 0)
     
-    # Check max pending age
-    oldest_age = pending_tracker.get_oldest_pending_age_hours(pm_cash)
+    # Check max pending age (now uses pre-calculated pending_credit)
+    oldest_age = pending_tracker.get_oldest_pending_age_hours(pending_credit)
     if oldest_age > MAX_PENDING_AGE_HOURS:
         return "pause", f"Oldest deposit pending {oldest_age:.1f} hours (max {MAX_PENDING_AGE_HOURS}h)"
     
@@ -584,11 +787,13 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "pending_credit": 0,
             "credited_cash": 0,
             "credited_positions": 0,
+            "reserved": 0,
+            "cost_basis": 0,
             "total_assets": 0,
         }
     
-    # Check safety valves
-    safety_status, safety_reason = check_safety_valves(breakdown, breakdown.get("credited_cash", 0))
+    # Check safety valves (V7.1: now uses pending_credit from breakdown)
+    safety_status, safety_reason = check_safety_valves(breakdown)
     if safety_status == "pause":
         print(f"🛑 SAFETY VALVE TRIGGERED: {safety_reason}")
     elif safety_status == "warning":
@@ -628,6 +833,8 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "credited_positions": breakdown["credited_positions"],
             "pending_credit": breakdown["pending_credit"],
             "in_flight": breakdown["in_flight"],
+            "reserved": breakdown.get("reserved", 0),       # V7.1
+            "cost_basis": breakdown.get("cost_basis", 0),   # V7.1
             "nav": nav,
             "round_id": new_round_id,
             "last_calculated": now,
@@ -664,6 +871,8 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "credited_positions_usdc": breakdown["credited_positions"] / 1e6,
             "pending_credit_usdc": breakdown["pending_credit"] / 1e6,
             "in_flight_usdc": breakdown["in_flight"] / 1e6,
+            "reserved_usdc": breakdown.get("reserved", 0) / 1e6,      # V7.1
+            "cost_basis_usdc": breakdown.get("cost_basis", 0) / 1e6,  # V7.1
             "valid_until": deadline,
             "safety_status": safety_status,
             "safety_reason": safety_reason,
@@ -917,8 +1126,10 @@ def main():
     state_file = Path(__file__).parent / "pending_credit_state.json"
     pending_tracker = PendingCreditTracker(str(state_file))
     
-    # Initialize Polymarket client
-    polymarket_client = PolymarketClient(POLYMARKET_PROXY_ADDRESS)
+    # Initialize Polymarket client with private key for L2 auth (open orders)
+    # Use POLYMARKET_PRIVATE_KEY if available, otherwise fall back to ORACLE_PRIVATE_KEY
+    pm_private_key = os.getenv("POLYMARKET_PRIVATE_KEY") or ORACLE_PRIVATE_KEY
+    polymarket_client = PolymarketClient(POLYMARKET_PROXY_ADDRESS, private_key=pm_private_key)
     
     # Initialize NAV engine
     nav_engine = NavEngineV7(polymarket_client, pending_tracker)
