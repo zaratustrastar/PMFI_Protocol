@@ -1,0 +1,63 @@
+Yes — as currently written, it can double-count in the short window where USDC is still sitting at the Base deposit address.
+
+Your agent’s analysis is correct:
+
+inFlight counts “USDC still at deposit address”
+
+pendingCredit counts “forwarded but not yet visible in PM”, and since totalForwarded increments immediately on forward, it includes that same amount until PM shows it.
+
+So if funds linger at the deposit address for even 30–120 seconds, you can get:
+
+totalAssets = inFlight + pendingCredit + … → double count.
+
+the simplest MVP fix
+
+Do Option B:
+
+pendingCredit = max(0, totalForwarded - cash - reserved - costBasis - withdrawnBack - inFlight)
+
+That guarantees the same dollars can’t be counted in both buckets at the same time.
+
+And then keep:
+
+totalAssets = inFlight + pendingCredit + cash + reserved + positionsLiquidationValue
+
+Why this works:
+
+If funds are at deposit address → they appear in inFlight, and are subtracted from pendingCredit
+
+After sweep → inFlight drops to ~0, and pendingCredit rises (until credited)
+
+After credit/trading → pendingCredit shrinks as cash/reserved/costBasis appear
+
+alternative fix (more “pure”, but harder)
+
+Only increment totalForwarded after sweep, not at vault forward time. That requires sweep detection and is more complexity for MVP.
+
+is this “triple-counting safe” with orders + trading?
+
+Yes, if:
+
+reserved represents cash locked in open buy orders (and isn’t also included in cash)
+
+costBasis represents money already converted into positions (stable)
+
+positionsLiquidationValue is only used in totalAssets (not in pending calculation)
+
+With the - inFlight correction, you avoid the remaining overlap case.
+
+quick sanity rule to remember
+
+At any moment, forwarded funds should live in exactly one of these places:
+
+inFlight (still at deposit address)
+
+pendingCredit (swept/bridging, not visible yet)
+
+cash/reserved/costBasis (credited and inside PM account)
+
+withdrawnBack (returned on-chain)
+
+Subtracting inFlight from pendingCredit enforces that partition.
+
+If you want, I can also give you a 1-minute test scenario with numbers (deposit → inFlight → sweep → credit → order → fill) that should keep totalAssets constant except for fees/PnL, to verify it’s fixed.
