@@ -1,0 +1,34 @@
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+git pull origin main
+remote: Enumerating objects: 31, done.
+remote: Counting objects: 100% (31/31), done.
+remote: Compressing objects: 100% (6/6), done.
+remote: Total 21 (delta 15), reused 21 (delta 15), pack-reused 0 (from 0)
+Unpacking objects: 100% (21/21), 5.77 KiB | 394.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+ * branch            main       -> FETCH_HEAD
+   cbffe25..16b889d  main       -> origin/main
+Updating cbffe25..16b889d
+error: The following untracked working tree files would be overwritten by merge:
+        bot/pending_credit_state.json
+Please move or remove them before you merge.
+Aborting
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# rm bot/pending_credit_state.json
+git pull origin main
+From https://github.com/zaratustrastar/PolyNotifyBot
+ * branch            main       -> FETCH_HEAD
+Updating cbffe25..16b889d
+Fast-forward
+ attached_assets/Pasted-Last-login-Thu-Dec-18-16-34-30-2025-from-162-243-190-66_1766079075248.txt | 28 +++++++++++++++++
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-source-ve_1766079268072.txt | 74 +++++++++++++++++++++++++++++++++++++++++++++
+ bot/pending_credit_state.json                                                                    |  5 +++
+ deployments/v7-mainnet.json                                                                      |  8 ++---
+ frontend/main.js                                                                                 |  2 +-
+ scripts/deploy-v7-mainnet.js                                                                     | 94 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ trading_bot/liquidity_keeper.py                                                                  |  2 +-
+ 7 files changed, 207 insertions(+), 6 deletions(-)
+ create mode 100644 attached_assets/Pasted-Last-login-Thu-Dec-18-16-34-30-2025-from-162-243-190-66_1766079075248.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-source-ve_1766079268072.txt
+ create mode 100644 bot/pending_credit_state.json
+ create mode 100644 scripts/deploy-v7-mainnet.js
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
