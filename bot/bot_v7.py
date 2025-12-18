@@ -54,6 +54,16 @@ from eth_account.messages import encode_defunct
 from flask import Flask, jsonify, request as flask_request, send_from_directory
 from flask_cors import CORS
 
+# Cloudflare bypass with curl_cffi (residential proxy support)
+try:
+    from curl_cffi import requests as curl_requests
+    BYPASS_METHOD = "curl_cffi"
+    print("🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)")
+except ImportError:
+    curl_requests = None
+    BYPASS_METHOD = "requests"
+    print("⚠️  curl_cffi not available, using standard requests (may be blocked by Cloudflare)")
+
 load_dotenv()
 
 # =============================================================================
@@ -66,6 +76,9 @@ POLYMARKET_BASE_DEPOSIT = "0xa76a91208FC7CB88420070AF978D12F440cab2F0"
 
 ORACLE_PRIVATE_KEY = os.getenv("ORACLE_PRIVATE_KEY") or os.getenv("KEEPER_PRIVATE_KEY") or os.getenv("PRIVATE_KEY")
 POLYMARKET_PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS")
+
+# Residential proxy for Cloudflare bypass
+PROXY_URL = os.getenv("PROXY_URL", "")
 
 HTTP_PORT = int(os.getenv("BOT_HTTP_PORT", 8080))
 
@@ -286,7 +299,19 @@ class PolymarketClient:
         self.wallet_address = wallet_address
         self.private_key = private_key
         self.clob_client = None
+        self.use_proxy = False
         
+        # Try to use curl_cffi with residential proxy for Cloudflare bypass
+        if BYPASS_METHOD == "curl_cffi" and curl_requests and PROXY_URL:
+            self.use_proxy = True
+            proxy_display = PROXY_URL.split('@')[1] if '@' in PROXY_URL else PROXY_URL
+            print(f"🌐 PolymarketClient using residential proxy: {proxy_display}")
+        elif BYPASS_METHOD == "curl_cffi" and curl_requests:
+            print("🔓 PolymarketClient using curl_cffi (no proxy)")
+        else:
+            print("⚠️ PolymarketClient using standard requests (may be blocked)")
+        
+        # Fallback session for non-proxied requests
         self.session = requests.Session()
         self.session.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -296,6 +321,24 @@ class PolymarketClient:
         # Initialize CLOB client with L2 auth for fetching open orders
         if private_key:
             self._init_clob_client()
+    
+    def _make_request(self, url: str, params: dict = None, timeout: int = 30):
+        """Make HTTP request with Cloudflare bypass if available."""
+        if BYPASS_METHOD == "curl_cffi" and curl_requests:
+            proxies = {"http": PROXY_URL, "https": PROXY_URL} if self.use_proxy and PROXY_URL else None
+            response = curl_requests.get(
+                url,
+                params=params,
+                timeout=timeout,
+                impersonate="chrome120",
+                proxies=proxies
+            )
+            response.raise_for_status()
+            return response.json()
+        else:
+            response = self.session.get(url, params=params, timeout=timeout)
+            response.raise_for_status()
+            return response.json()
     
     def _init_clob_client(self):
         """Initialize CLOB client with L2 auth for authenticated API calls."""
@@ -337,10 +380,7 @@ class PolymarketClient:
                 url = f"{self.DATA_API_URL}/positions"
                 params = {"user": self.wallet_address, "limit": limit, "offset": offset}
                 
-                response = self.session.get(url, params=params, timeout=30)
-                response.raise_for_status()
-                
-                data = response.json()
+                data = self._make_request(url, params=params, timeout=30)
                 if not data:
                     break
                     
@@ -455,10 +495,7 @@ class PolymarketClient:
                 url = f"{self.DATA_API_URL}/positions"
                 params = {"user": self.wallet_address, "limit": limit, "offset": offset}
                 
-                response = self.session.get(url, params=params, timeout=30)
-                response.raise_for_status()
-                
-                data = response.json()
+                data = self._make_request(url, params=params, timeout=30)
                 if not data:
                     break
                     
@@ -494,10 +531,7 @@ class PolymarketClient:
         try:
             url = f"{self.CLOB_API_URL}/book"
             params = {"token_id": token_id}
-            response = self.session.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            
-            data = response.json()
+            data = self._make_request(url, params=params, timeout=10)
             bids = [{"price": float(b.get("price", 0)), "size": float(b.get("size", 0))} for b in data.get("bids", [])]
             asks = [{"price": float(a.get("price", 0)), "size": float(a.get("size", 0))} for a in data.get("asks", [])]
             
@@ -532,10 +566,7 @@ class PolymarketClient:
         try:
             url = f"{self.DATA_API_URL}/balance"
             params = {"user": self.wallet_address}
-            response = self.session.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            
-            data = response.json()
+            data = self._make_request(url, params=params, timeout=10)
             cash = float(data.get("balance", 0)) if data else 0
             print(f"💵 Polymarket cash: ${cash:.2f}")
             return cash
