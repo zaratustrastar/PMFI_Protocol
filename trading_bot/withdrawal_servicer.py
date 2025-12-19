@@ -79,10 +79,11 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 NAV_PRECISION = 10**18
 LOOP_INTERVAL_SECONDS = 60
-MIN_WITHDRAWAL_USDC = 10.0
+MIN_WITHDRAWAL_USDC = 5.0
 MAX_DAILY_WITHDRAWAL_USDC = 50000.0
 MAX_PER_CYCLE_LIQUIDATION_USDC = 2000.0
 MAX_SLIPPAGE_BPS = 300
+WITHDRAWAL_SLIPPAGE_BPS = 50  # 0.5% buffer for bridge fees and rounding
 
 STATE_FILE = os.path.join(os.path.dirname(__file__), "withdrawal_state.json")
 
@@ -940,8 +941,11 @@ def servicer_iteration(
     print(f"   NAV: ${nav:.6f}/share")
     print(f"   Daily withdrawn: ${state.daily_withdrawn_usdc:.2f} / ${MAX_DAILY_WITHDRAWAL_USDC:.2f}")
     
-    needed = pending_usdc - vault_usdc - in_transit_usdc
-    print(f"\n   Needed: ${needed:.2f}")
+    needed_base = pending_usdc - vault_usdc - in_transit_usdc
+    slippage_multiplier = 1 + (WITHDRAWAL_SLIPPAGE_BPS / 10000)
+    needed = needed_base * slippage_multiplier if needed_base > 0 else 0
+    print(f"\n   Needed (base): ${needed_base:.2f}")
+    print(f"   Needed (with {WITHDRAWAL_SLIPPAGE_BPS/100:.1f}% slippage): ${needed:.2f}")
     
     if needed < MIN_WITHDRAWAL_USDC:
         print(f"\n✅ No action needed (needed < ${MIN_WITHDRAWAL_USDC})")
@@ -958,7 +962,7 @@ def servicer_iteration(
         return state
     
     needed = min(needed, max_allowed)
-    print(f"\n⚠️  WITHDRAWAL NEEDED: ${needed:.2f}")
+    print(f"\n⚠️  WITHDRAWAL NEEDED: ${needed:.2f} (includes slippage buffer)")
     
     pm_cash, pm_positions = get_pm_balance()
     print(f"\n📊 Polymarket:")
