@@ -145,6 +145,8 @@ class ServicerState:
     daily_withdrawn_usdc: float = 0.0
     daily_reset_timestamp: float = 0.0
     last_run_timestamp: float = 0.0
+    prev_vault_balance: float = 0.0
+    unclaimed_delta: float = 0.0
 
 
 def load_state() -> ServicerState:
@@ -158,6 +160,8 @@ def load_state() -> ServicerState:
                     daily_withdrawn_usdc=data.get("daily_withdrawn_usdc", 0.0),
                     daily_reset_timestamp=data.get("daily_reset_timestamp", 0.0),
                     last_run_timestamp=data.get("last_run_timestamp", 0.0),
+                    prev_vault_balance=data.get("prev_vault_balance", 0.0),
+                    unclaimed_delta=data.get("unclaimed_delta", 0.0),
                 )
                 now = time.time()
                 if now - state.daily_reset_timestamp > 86400:
@@ -177,6 +181,8 @@ def save_state(state: ServicerState) -> None:
             "daily_withdrawn_usdc": state.daily_withdrawn_usdc,
             "daily_reset_timestamp": state.daily_reset_timestamp,
             "last_run_timestamp": state.last_run_timestamp,
+            "prev_vault_balance": state.prev_vault_balance,
+            "unclaimed_delta": state.unclaimed_delta,
         }
         with open(STATE_FILE, 'w') as f:
             json.dump(data, f, indent=2)
@@ -680,35 +686,58 @@ def poll_bridge_status(request_id: str) -> Tuple[str, Optional[str]]:
 def check_in_transit_arrivals(
     state: ServicerState, 
     w3_base: Web3, 
-    usdc_contract,
-    prev_vault_balance: float = 0.0
+    usdc_contract
 ) -> Tuple[ServicerState, float]:
     """
     Check if any in-transit funds have arrived on Base.
     Uses Relay API + vault balance reconciliation with per-item credit tracking.
     
     SAFETY: Only clears in-transit if BOTH conditions are met:
-    1. Relay API confirms success (relay_confirmed = True)
+    1. Relay API confirms success (relay_confirmed = True) for tracked bridges
     2. balance_credited >= 98% of amount (accumulated across iterations)
     
-    CREDIT DISTRIBUTION:
-    - Balance increases (delta) are distributed in FIFO order (oldest bridge first)
-    - balance_credited persists per-item across iterations
-    - This prevents double-withdrawals: items stay in in_transit until fully confirmed
+    CRITICAL: Only RELAY-CONFIRMED bridges can consume balance delta!
+    Unconfirmed bridges wait for Relay before getting any credit.
+    state.unclaimed_delta accumulates balance increases across iterations,
+    so delta arriving before Relay confirms is preserved for later.
     
-    FIFO RATIONALE:
-    - Bridges initiated earlier should complete earlier (5-10 min typical)
-    - If delta arrives before Relay confirms, it's credited to oldest pending bridge
-    - When Relay confirms, the already-credited amount allows immediate clearance
+    This prevents the out-of-order misattribution bug:
+    - Bridge A ($100) starts, Bridge B ($50) starts
+    - Bridge B lands first (+$50 to vault), but Relay hasn't confirmed either
+    - Delta adds to unclaimed_delta (+$50)
+    - When Relay confirms B, B claims from unclaimed_delta
+    - A continues waiting for its own Relay + balance
+    
+    CREDIT DISTRIBUTION (priority order):
+    1. NEWLY Relay-confirmed bridges get FIRST priority for balance delta
+    2. Already relay-confirmed bridges needing more credit get second priority
+    3. Unconfirmed tracked bridges get NO credit (must wait for Relay)
+    4. Untracked bridges get whatever's left
     
     Returns:
         (updated_state, current_vault_balance)
     """
     current_vault_balance = get_vault_usdc(w3_base, usdc_contract)
-    remaining_balance_increase = current_vault_balance - prev_vault_balance if prev_vault_balance > 0 else 0
     
-    if remaining_balance_increase > 0:
-        print(f"   📈 Vault balance increased: +${remaining_balance_increase:.2f}")
+    new_delta = current_vault_balance - state.prev_vault_balance if state.prev_vault_balance > 0 else 0
+    if new_delta > 0:
+        state.unclaimed_delta += new_delta
+        print(f"   📈 Vault balance increased: +${new_delta:.2f} (unclaimed pool now ${state.unclaimed_delta:.2f})")
+    elif new_delta < 0:
+        drain_amount = min(abs(new_delta), state.unclaimed_delta)
+        excess = abs(new_delta) - drain_amount
+        if drain_amount > 0:
+            state.unclaimed_delta -= drain_amount
+            if excess > 0:
+                print(f"   📉 Vault balance decreased: ${new_delta:.2f} - drained ${drain_amount:.2f} from pool, ${excess:.2f} was already-credited funds (user claim)")
+            else:
+                print(f"   📉 Vault balance decreased: ${new_delta:.2f} - drained ${drain_amount:.2f} from unclaimed pool (pool now ${state.unclaimed_delta:.2f})")
+        else:
+            print(f"   📉 Vault balance decreased: ${new_delta:.2f} (user claimed previously-credited funds)")
+    
+    state.prev_vault_balance = current_vault_balance
+    
+    available_delta = state.unclaimed_delta
     
     if not state.in_transit:
         return state, current_vault_balance
@@ -716,30 +745,30 @@ def check_in_transit_arrivals(
     updated_in_transit = []
     
     pending_items = [item for item in state.in_transit if item.get("status") == "pending"]
-    tracked_items = sorted(
-        [item for item in pending_items if item.get("request_id")],
-        key=lambda x: x.get("initiated_at", 0)
-    )
+    tracked_items = [item for item in pending_items if item.get("request_id")]
     untracked_items = sorted(
         [item for item in pending_items if not item.get("request_id")],
         key=lambda x: x.get("initiated_at", 0)
     )
     
+    newly_confirmed = []
+    already_confirmed = []
+    still_pending = []
+    
     for item in tracked_items:
         request_id = item.get("request_id", "")
         amount = item.get("amount_usdc", 0)
-        initiated_at = item.get("initiated_at", 0)
-        age_seconds = time.time() - initiated_at
         relay_confirmed = item.get("relay_confirmed", False)
-        balance_credited = item.get("balance_credited", 0.0)
         
         if not relay_confirmed:
             bridge_status, error = poll_bridge_status(request_id)
             
             if bridge_status == "success":
                 item["relay_confirmed"] = True
-                relay_confirmed = True
-                print(f"   📡 Relay confirmed ${amount:.2f}")
+                item["just_confirmed"] = True
+                newly_confirmed.append(item)
+                print(f"   📡 Relay JUST confirmed ${amount:.2f} - prioritizing for balance credit")
+                continue
             
             if bridge_status == "failed":
                 print(f"   ❌ Bridge FAILED: ${amount:.2f} - {error}")
@@ -750,21 +779,37 @@ def check_in_transit_arrivals(
                 item["status"] = "failed"
                 item["error"] = error
                 continue
+            
+            still_pending.append(item)
+        else:
+            already_confirmed.append(item)
+    
+    confirmed_bridges = newly_confirmed + already_confirmed
+    
+    for item in confirmed_bridges:
+        amount = item.get("amount_usdc", 0)
+        initiated_at = item.get("initiated_at", 0)
+        age_seconds = time.time() - initiated_at
+        balance_credited = item.get("balance_credited", 0.0)
+        just_confirmed = item.get("just_confirmed", False)
         
         needed_credit = amount - balance_credited
-        if remaining_balance_increase > 0 and needed_credit > 0:
-            credit_now = min(remaining_balance_increase, needed_credit)
+        if available_delta > 0 and needed_credit > 0:
+            credit_now = min(available_delta, needed_credit)
             item["balance_credited"] = balance_credited + credit_now
             balance_credited = item["balance_credited"]
-            remaining_balance_increase -= credit_now
-            print(f"   💰 Credited ${credit_now:.2f} to tracked bridge (total credited: ${balance_credited:.2f}/${amount:.2f})")
+            available_delta -= credit_now
+            priority_note = " (PRIORITY - just confirmed)" if just_confirmed else ""
+            print(f"   💰 Credited ${credit_now:.2f} to CONFIRMED bridge{priority_note} (total: ${balance_credited:.2f}/${amount:.2f})")
         
-        if relay_confirmed and balance_credited >= amount * 0.98:
+        item.pop("just_confirmed", None)
+        
+        if balance_credited >= amount * 0.98:
             print(f"   ✅ Bridge fully confirmed: ${amount:.2f} (Relay + balance verified)")
             send_telegram_alert(f"✅ Bridge complete: ${amount:.2f} arrived in vault")
             continue
         
-        if relay_confirmed and age_seconds > 7200:
+        if age_seconds > 7200:
             print(f"   ⚠️ Relay confirmed but balance not seen after 2hr: ${amount:.2f}")
             send_telegram_alert(
                 f"⚠️ Bridge stale: ${amount:.2f}\n"
@@ -773,12 +818,18 @@ def check_in_transit_arrivals(
                 is_error=True
             )
         
-        status_str = f"relay-confirmed, credited ${balance_credited:.2f}/${amount:.2f}" if relay_confirmed else "awaiting Relay"
-        print(f"   ⏳ In-transit (tracked): ${amount:.2f} ({int(age_seconds/60)}min old, {status_str})")
+        print(f"   ⏳ In-transit (tracked): ${amount:.2f} ({int(age_seconds/60)}min old, relay-confirmed, credited ${balance_credited:.2f}/${amount:.2f})")
         updated_in_transit.append(item)
     
-    if remaining_balance_increase > 0 and untracked_items:
-        print(f"   📊 Balance delta available for untracked: ${remaining_balance_increase:.2f}")
+    for item in still_pending:
+        amount = item.get("amount_usdc", 0)
+        initiated_at = item.get("initiated_at", 0)
+        age_seconds = time.time() - initiated_at
+        print(f"   ⏳ In-transit (tracked): ${amount:.2f} ({int(age_seconds/60)}min old, awaiting Relay - NO CREDIT until confirmed)")
+        updated_in_transit.append(item)
+    
+    if available_delta > 0 and untracked_items:
+        print(f"   📊 Balance delta available for untracked: ${available_delta:.2f}")
     
     for item in untracked_items:
         amount = item.get("amount_usdc", 0)
@@ -787,11 +838,11 @@ def check_in_transit_arrivals(
         balance_credited = item.get("balance_credited", 0.0)
         
         needed_credit = amount - balance_credited
-        if remaining_balance_increase > 0 and needed_credit > 0:
-            credit_now = min(remaining_balance_increase, needed_credit)
+        if available_delta > 0 and needed_credit > 0:
+            credit_now = min(available_delta, needed_credit)
             item["balance_credited"] = balance_credited + credit_now
             balance_credited = item["balance_credited"]
-            remaining_balance_increase -= credit_now
+            available_delta -= credit_now
             print(f"   💰 Credited ${credit_now:.2f} to untracked bridge (total: ${balance_credited:.2f}/${amount:.2f})")
         
         if balance_credited >= amount * 0.98:
@@ -814,6 +865,11 @@ def check_in_transit_arrivals(
         updated_in_transit.append(item)
     
     state.in_transit = updated_in_transit
+    state.unclaimed_delta = available_delta
+    
+    if available_delta > 0:
+        print(f"   📊 Unclaimed delta remaining: ${available_delta:.2f}")
+    
     return state, current_vault_balance
 
 
@@ -853,14 +909,13 @@ def servicer_iteration(
     vault_contract,
     usdc_base_contract,
     state: ServicerState,
-    prev_vault_balance: float = 0.0,
     dry_run: bool = False
-) -> Tuple[ServicerState, float]:
+) -> ServicerState:
     """
     Single iteration of the withdrawal servicer.
     
     Returns:
-        (updated_state, current_vault_balance) - balance for next iteration's reconciliation
+        updated_state - state now tracks prev_vault_balance and unclaimed_delta internally
     """
     print(f"\n{'='*60}")
     print(f"💰 WITHDRAWAL SERVICER - {time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -869,10 +924,10 @@ def servicer_iteration(
     is_safe, reason = check_kill_switches(w3_base, vault_contract)
     if not is_safe:
         print(f"🚫 STOPPED: {reason}")
-        return state, prev_vault_balance
+        return state
     
     state, vault_usdc = check_in_transit_arrivals(
-        state, w3_base, usdc_base_contract, prev_vault_balance
+        state, w3_base, usdc_base_contract
     )
     
     pending_usdc, nav = get_pending_usdc(w3_base, vault_contract)
@@ -890,7 +945,7 @@ def servicer_iteration(
     
     if needed <= MIN_WITHDRAWAL_USDC:
         print(f"\n✅ No action needed (needed < ${MIN_WITHDRAWAL_USDC})")
-        return state, vault_usdc
+        return state
     
     allowed, max_allowed = check_daily_limit(state, needed)
     if not allowed:
@@ -900,7 +955,7 @@ def servicer_iteration(
             f"Pending: ${pending_usdc:.2f}\n"
             f"Will resume tomorrow"
         )
-        return state, vault_usdc
+        return state
     
     needed = min(needed, max_allowed)
     print(f"\n⚠️  WITHDRAWAL NEEDED: ${needed:.2f}")
@@ -959,7 +1014,7 @@ def servicer_iteration(
     state.last_run_timestamp = time.time()
     save_state(state)
     
-    return state, vault_usdc
+    return state
 
 
 def run_servicer(dry_run: bool = False) -> None:
@@ -1000,12 +1055,15 @@ def run_servicer(dry_run: bool = False) -> None:
     )
     
     state = load_state()
-    prev_vault_balance = get_vault_usdc(w3_base, usdc_base_contract)
+    
+    if state.prev_vault_balance == 0:
+        state.prev_vault_balance = get_vault_usdc(w3_base, usdc_base_contract)
     
     print(f"\n✅ Servicer initialized")
     print(f"   Daily withdrawn so far: ${state.daily_withdrawn_usdc:.2f}")
     print(f"   In-transit items: {len(state.in_transit)}")
-    print(f"   Current vault balance: ${prev_vault_balance:.2f}")
+    print(f"   Tracked vault balance: ${state.prev_vault_balance:.2f}")
+    print(f"   Unclaimed delta pool: ${state.unclaimed_delta:.2f}")
     
     send_telegram_alert(
         f"🚀 Withdrawal Servicer started\n"
@@ -1017,12 +1075,11 @@ def run_servicer(dry_run: bool = False) -> None:
     
     while True:
         try:
-            state, prev_vault_balance = servicer_iteration(
+            state = servicer_iteration(
                 w3_base,
                 vault_contract,
                 usdc_base_contract,
                 state,
-                prev_vault_balance=prev_vault_balance,
                 dry_run=dry_run
             )
             consecutive_failures = 0
@@ -1073,10 +1130,11 @@ if __name__ == "__main__":
             abi=ERC20_ABI
         )
         state = load_state()
-        prev_balance = get_vault_usdc(w3_base, usdc_base_contract)
-        state, _ = servicer_iteration(
+        if state.prev_vault_balance == 0:
+            state.prev_vault_balance = get_vault_usdc(w3_base, usdc_base_contract)
+        state = servicer_iteration(
             w3_base, vault_contract, usdc_base_contract, state,
-            prev_vault_balance=prev_balance, dry_run=args.dry_run
+            dry_run=args.dry_run
         )
         save_state(state)
     else:
