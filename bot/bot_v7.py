@@ -70,8 +70,10 @@ load_dotenv()
 # Configuration
 # =============================================================================
 RPC_URL = os.getenv("RPC_URL")
+POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL") or "https://polygon-rpc.com"  # For PM balance queries
 VAULT_V7_ADDRESS = os.getenv("VAULT_V7_ADDRESS") or os.getenv("VAULT_V6_ADDRESS") or ""
 USDC_ADDRESS = os.getenv("USDC_ADDRESS") or "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+USDC_E_POLYGON = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174"  # USDC.e on Polygon (6 decimals)
 POLYMARKET_BASE_DEPOSIT = "0xa76a91208FC7CB88420070AF978D12F440cab2F0"
 
 ORACLE_PRIVATE_KEY = os.getenv("ORACLE_PRIVATE_KEY") or os.getenv("KEEPER_PRIVATE_KEY") or os.getenv("PRIVATE_KEY")
@@ -569,8 +571,14 @@ class PolymarketClient:
         return total_value
     
     def fetch_cash_balance(self) -> float:
-        """Fetch USDC cash balance on Polymarket using L2 authenticated CLOB API."""
-        # Primary method: Use CLOB client with L2 auth (get_balance_allowance with params)
+        """Fetch USDC cash balance on Polymarket. 
+        
+        Tries multiple methods:
+        1. CLOB API get_balance_allowance (requires L2 auth)
+        2. Direct Polygon blockchain query for USDC.e balance
+        3. Data API fallback (may 404)
+        """
+        # Method 1: Use CLOB client with L2 auth (get_balance_allowance with params)
         if self.clob_client and self.BalanceAllowanceParams and self.AssetType:
             try:
                 print("📡 Fetching cash balance via L2 auth...")
@@ -581,13 +589,35 @@ class PolymarketClient:
                 if balance_data:
                     # Balance is returned in USDC units (string format)
                     cash = float(balance_data.get("balance", 0))
-                    print(f"💵 Polymarket cash: ${cash:.2f}")
-                    return cash
+                    if cash > 0:
+                        print(f"💵 Polymarket cash (CLOB): ${cash:.2f}")
+                        return cash
                     
             except Exception as e:
                 print(f"⚠️ CLOB balance fetch failed: {e}")
         
-        # Fallback: Try data API (may 404 but worth trying)
+        # Method 2: Direct Polygon blockchain query for USDC.e balance
+        try:
+            print("📡 Fetching cash balance via Polygon RPC...")
+            polygon_w3 = Web3(Web3.HTTPProvider(POLYGON_RPC_URL))
+            if polygon_w3.is_connected():
+                # Simple ERC20 balanceOf ABI
+                erc20_abi = [{"inputs": [{"type": "address"}], "name": "balanceOf", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"}]
+                usdc_e = polygon_w3.eth.contract(
+                    address=Web3.to_checksum_address(USDC_E_POLYGON),
+                    abi=erc20_abi
+                )
+                balance_raw = usdc_e.functions.balanceOf(Web3.to_checksum_address(self.wallet_address)).call()
+                cash = balance_raw / 1e6  # USDC.e has 6 decimals
+                if cash > 0:
+                    print(f"💵 Polymarket cash (Polygon): ${cash:.2f}")
+                    return cash
+                else:
+                    print(f"💵 Polymarket cash (Polygon): ${cash:.2f}")
+        except Exception as e:
+            print(f"⚠️ Polygon balance fetch failed: {e}")
+        
+        # Method 3: Data API fallback (may 404)
         try:
             url = f"{self.DATA_API_URL}/balance"
             params = {"user": self.wallet_address}
