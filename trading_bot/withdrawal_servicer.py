@@ -1,0 +1,1083 @@
+#!/usr/bin/env python3
+"""
+Withdrawal Servicer - V7.2 Simplified Withdrawal Flow
+
+Algorithm (matches V7.2 "100% to PM" architecture):
+1. Read pending withdrawals in USDC (pendingShares × NAV)
+2. Read vault USDC already on Base
+3. Subtract in-transit USDC (already bridging)
+4. Calculate: needed = pendingUSDC - vaultUSDC - inTransitUSDC
+5. If needed <= 0: nothing to do
+6. Withdraw PM cash (min of needed vs withdrawable)
+7. If cash < needed: liquidate positions (largest/most liquid first)
+8. Bridge to vault address on Base
+9. Track in-transit until arrival
+10. Repeat with rate limits and kill switches
+
+Key differences from liquidity_keeper.py:
+- NO treasury wallet intermediary
+- Funds bridge DIRECTLY to vault address
+- Simple 3-step: PM cash → liquidate if needed → bridge to vault
+"""
+
+import os
+import sys
+import time
+import json
+import subprocess
+from typing import Dict, List, Tuple, Optional
+from dataclasses import dataclass, field
+from decimal import Decimal
+
+from dotenv import load_dotenv
+from web3 import Web3
+from eth_account import Account
+import requests
+
+try:
+    from curl_cffi import requests as curl_requests
+    BYPASS_METHOD = "curl_cffi"
+except ImportError:
+    import requests as curl_requests
+    BYPASS_METHOD = "standard"
+
+try:
+    from relay_bridge import bridge_usdc_polygon_to_base, get_bridge_quote
+    HAS_RELAY_BRIDGE = True
+except ImportError:
+    HAS_RELAY_BRIDGE = False
+    print("⚠️  relay_bridge not available, bridging disabled")
+
+try:
+    from py_clob_client.client import ClobClient
+    from py_clob_client.clob_types import OrderArgs, OrderType
+    from py_clob_client.order_builder.constants import SELL
+    HAS_CLOB_CLIENT = True
+except ImportError:
+    HAS_CLOB_CLIENT = False
+    print("⚠️  py-clob-client not available, liquidation disabled")
+
+load_dotenv()
+
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
+VAULT_ADDRESS = os.getenv("VAULT_V7_ADDRESS", "0xfcfa01291d1e75f71e97c4EE53f675D7622988b4")
+PM_PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS", "")
+PM_PRIVATE_KEY = os.getenv("POLYMARKET_PRIVATE_KEY", "")
+
+BASE_RPC_URL = os.getenv("BASE_RPC_URL") or os.getenv("RPC_URL", "https://mainnet.base.org")
+POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
+PROXY_URL = os.getenv("PROXY_URL", "")
+
+USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+USDC_POLYGON = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+
+NAV_PRECISION = 10**18
+LOOP_INTERVAL_SECONDS = 60
+MIN_WITHDRAWAL_USDC = 10.0
+MAX_DAILY_WITHDRAWAL_USDC = 50000.0
+MAX_PER_CYCLE_LIQUIDATION_USDC = 2000.0
+MAX_SLIPPAGE_BPS = 300
+
+STATE_FILE = os.path.join(os.path.dirname(__file__), "withdrawal_state.json")
+
+# Bot URL for NAV fetching (bot_v7.py running on VPS or localhost)
+BOT_URL = os.getenv("BOT_V7_URL", "http://localhost:8080")
+
+# Relay API for bridge status polling
+RELAY_API_URL = "https://api.relay.link"
+
+# =============================================================================
+# ABIs
+# =============================================================================
+
+VAULT_V7_ABI = [
+    {"inputs": [], "name": "totalPendingShares", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "totalSupply", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "paused", "outputs": [{"type": "bool"}], "stateMutability": "view", "type": "function"},
+    {
+        "inputs": [],
+        "name": "getVaultState",
+        "outputs": [
+            {"name": "_lastRoundId", "type": "uint256"},
+            {"name": "_lastNavTimestamp", "type": "uint256"},
+            {"name": "_totalSupply", "type": "uint256"},
+            {"name": "_vaultBuffer", "type": "uint256"},
+            {"name": "_expectedAssets", "type": "uint256"},
+            {"name": "_totalForwarded", "type": "uint256"},
+            {"name": "_totalPendingShares", "type": "uint256"},
+            {"name": "_pendingWithdrawalsCount", "type": "uint256"},
+            {"name": "_paused", "type": "bool"},
+            {"name": "_depositsThrottled", "type": "bool"},
+            {"name": "_maxLossBps", "type": "uint256"},
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+]
+
+ERC20_ABI = [
+    {"inputs": [{"name": "account", "type": "address"}], "name": "balanceOf", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+]
+
+# =============================================================================
+# STATE TRACKING
+# =============================================================================
+
+@dataclass
+class InTransitItem:
+    """Represents funds currently bridging from Polygon to Base."""
+    request_id: str
+    amount_usdc: float
+    initiated_at: float
+    tx_hash: str = ""
+    status: str = "pending"
+
+@dataclass 
+class ServicerState:
+    """Persistent state for the withdrawal servicer."""
+    in_transit: List[Dict] = field(default_factory=list)
+    daily_withdrawn_usdc: float = 0.0
+    daily_reset_timestamp: float = 0.0
+    last_run_timestamp: float = 0.0
+
+
+def load_state() -> ServicerState:
+    """Load servicer state from disk."""
+    try:
+        if os.path.exists(STATE_FILE):
+            with open(STATE_FILE, 'r') as f:
+                data = json.load(f)
+                state = ServicerState(
+                    in_transit=data.get("in_transit", []),
+                    daily_withdrawn_usdc=data.get("daily_withdrawn_usdc", 0.0),
+                    daily_reset_timestamp=data.get("daily_reset_timestamp", 0.0),
+                    last_run_timestamp=data.get("last_run_timestamp", 0.0),
+                )
+                now = time.time()
+                if now - state.daily_reset_timestamp > 86400:
+                    state.daily_withdrawn_usdc = 0.0
+                    state.daily_reset_timestamp = now
+                return state
+    except Exception as e:
+        print(f"⚠️  Error loading state: {e}")
+    return ServicerState(daily_reset_timestamp=time.time())
+
+
+def save_state(state: ServicerState) -> None:
+    """Save servicer state to disk."""
+    try:
+        data = {
+            "in_transit": state.in_transit,
+            "daily_withdrawn_usdc": state.daily_withdrawn_usdc,
+            "daily_reset_timestamp": state.daily_reset_timestamp,
+            "last_run_timestamp": state.last_run_timestamp,
+        }
+        with open(STATE_FILE, 'w') as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"⚠️  Error saving state: {e}")
+
+
+# =============================================================================
+# TELEGRAM ALERTS
+# =============================================================================
+
+def send_telegram_alert(message: str, is_error: bool = False) -> None:
+    """Send alert to Telegram."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return
+    
+    prefix = "🚨" if is_error else "💰"
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        requests.post(url, json={
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": f"{prefix} [WithdrawalServicer]\n{message}",
+            "parse_mode": "HTML"
+        }, timeout=10)
+    except Exception as e:
+        print(f"⚠️  Telegram send failed: {e}")
+
+
+# =============================================================================
+# BLOCKCHAIN READS
+# =============================================================================
+
+def get_nav_from_bot() -> Tuple[float, Optional[Dict]]:
+    """
+    Fetch current NAV from bot_v7.py /sign-nav endpoint.
+    This uses the actual signed NAV that includes pendingCredit and trading PnL.
+    
+    Returns:
+        (nav_per_share, full_response_dict or None)
+    """
+    try:
+        response = requests.get(f"{BOT_URL}/sign-nav", timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success"):
+                nav_data = data.get("navData", {})
+                total_assets = nav_data.get("totalAssets", 0)
+                total_supply = nav_data.get("totalSupply", 0)
+                
+                if total_supply > 0 and total_assets > 0:
+                    nav = (total_assets / 1e6) / (total_supply / 1e18)
+                    print(f"   NAV from bot /sign-nav: ${nav:.6f} (totalAssets=${total_assets/1e6:.2f})")
+                    return nav, data
+            
+            cached_nav = data.get("cachedNav", 1.0)
+            print(f"   NAV from bot (cached): ${cached_nav:.6f}")
+            return cached_nav, data
+    except Exception as e:
+        print(f"⚠️  Error fetching NAV from bot: {e}")
+    
+    try:
+        response = requests.get(f"{BOT_URL}/price", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            nav = data.get("nav", 1.0)
+            print(f"   NAV from bot /price fallback: ${nav:.6f}")
+            return nav, None
+    except:
+        pass
+    
+    return 1.0, None
+
+
+def get_pending_usdc(w3_base: Web3, vault_contract) -> Tuple[float, float]:
+    """
+    Read pending withdrawals in USDC from vault.
+    
+    Uses bot_v7.py /sign-nav for accurate NAV that includes pendingCredit
+    and trading PnL, then multiplies by pending shares from vault.
+    
+    Returns:
+        (pending_usdc, nav_per_share)
+    """
+    nav_per_share, nav_data = get_nav_from_bot()
+    
+    try:
+        state = vault_contract.functions.getVaultState().call()
+        pending_shares = state[6]
+        
+        print(f"   Pending shares: {pending_shares/1e18:.6f}")
+        
+        pending_usdc = (pending_shares / 1e18) * nav_per_share
+        
+        return pending_usdc, nav_per_share
+        
+    except Exception as e:
+        print(f"⚠️  getVaultState failed: {e}, falling back to direct call")
+        
+        try:
+            pending_shares = vault_contract.functions.totalPendingShares().call()
+            pending_usdc = (pending_shares / 1e18) * nav_per_share
+            return pending_usdc, nav_per_share
+        except Exception as e2:
+            print(f"❌ Error reading pending withdrawals: {e2}")
+            return 0.0, nav_per_share
+
+
+def get_vault_usdc(w3_base: Web3, usdc_contract) -> float:
+    """Read USDC balance in vault on Base."""
+    try:
+        balance = usdc_contract.functions.balanceOf(
+            Web3.to_checksum_address(VAULT_ADDRESS)
+        ).call()
+        return balance / 1e6
+    except Exception as e:
+        print(f"❌ Error reading vault USDC: {e}")
+        return 0.0
+
+
+def get_in_transit_usdc(state: ServicerState) -> float:
+    """Calculate total USDC currently in transit (bridging)."""
+    total = 0.0
+    for item in state.in_transit:
+        if item.get("status") == "pending":
+            total += item.get("amount_usdc", 0.0)
+    return total
+
+
+# =============================================================================
+# POLYMARKET API (with Cloudflare bypass)
+# =============================================================================
+
+def get_pm_balance() -> Tuple[float, float]:
+    """
+    Get Polymarket withdrawable cash and position value.
+    
+    Returns:
+        (withdrawable_cash, position_value)
+    """
+    if not PM_PROXY_ADDRESS:
+        print("❌ PM_PROXY_ADDRESS not set")
+        return 0.0, 0.0
+    
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            "Accept": "application/json",
+        }
+        
+        proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
+        
+        url = f"https://data-api.polymarket.com/value?user={PM_PROXY_ADDRESS.lower()}"
+        
+        if BYPASS_METHOD == "curl_cffi":
+            response = curl_requests.get(
+                url,
+                headers=headers,
+                proxies=proxies,
+                impersonate="chrome120",
+                timeout=30
+            )
+        else:
+            response = requests.get(url, headers=headers, proxies=proxies, timeout=30)
+        
+        if response.status_code != 200:
+            print(f"❌ PM data API returned {response.status_code}")
+            return get_pm_balance_from_rpc()
+        
+        data = response.json()
+        cash = float(data.get("cashBalance", 0))
+        positions = float(data.get("positionValue", 0))
+        
+        return cash, positions
+        
+    except Exception as e:
+        print(f"⚠️  PM data API error: {e}")
+        return get_pm_balance_from_rpc()
+
+
+def get_pm_balance_from_rpc() -> Tuple[float, float]:
+    """Fallback: get PM balance directly from Polygon RPC."""
+    try:
+        w3 = Web3(Web3.HTTPProvider(POLYGON_RPC_URL))
+        if not w3.is_connected():
+            return 0.0, 0.0
+        
+        usdc_contract = w3.eth.contract(
+            address=Web3.to_checksum_address(USDC_POLYGON),
+            abi=ERC20_ABI
+        )
+        
+        balance = usdc_contract.functions.balanceOf(
+            Web3.to_checksum_address(PM_PROXY_ADDRESS)
+        ).call()
+        
+        return balance / 1e6, 0.0
+        
+    except Exception as e:
+        print(f"❌ RPC fallback error: {e}")
+        return 0.0, 0.0
+
+
+def get_positions_for_liquidation() -> List[Dict]:
+    """
+    Get list of positions sorted by liquidation value (largest first).
+    
+    Returns list of dicts with: token_id, size, best_bid, liq_value
+    """
+    if not PM_PROXY_ADDRESS:
+        return []
+    
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            "Accept": "application/json",
+        }
+        proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
+        
+        url = f"https://data-api.polymarket.com/positions?user={PM_PROXY_ADDRESS.lower()}"
+        
+        if BYPASS_METHOD == "curl_cffi":
+            response = curl_requests.get(
+                url,
+                headers=headers,
+                proxies=proxies,
+                impersonate="chrome120",
+                timeout=30
+            )
+        else:
+            response = requests.get(url, headers=headers, proxies=proxies, timeout=30)
+        
+        if response.status_code != 200:
+            return []
+        
+        positions_data = response.json()
+        
+        positions = []
+        for pos in positions_data:
+            size = float(pos.get("size", 0))
+            if size <= 0:
+                continue
+            
+            avg_price = float(pos.get("avgPrice", 0.5))
+            current_price = float(pos.get("curPrice", avg_price))
+            
+            liq_value = size * current_price * 0.95
+            
+            positions.append({
+                "token_id": pos.get("asset"),
+                "outcome": pos.get("outcome", "Unknown"),
+                "size": size,
+                "best_bid": current_price,
+                "liq_value": liq_value,
+            })
+        
+        positions.sort(key=lambda x: x["liq_value"], reverse=True)
+        return positions
+        
+    except Exception as e:
+        print(f"⚠️  Error fetching positions: {e}")
+        return []
+
+
+# =============================================================================
+# WITHDRAWAL & LIQUIDATION
+# =============================================================================
+
+def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tuple[bool, str, float]:
+    """
+    Withdraw PM cash and bridge directly to vault on Base.
+    
+    Uses proxy_withdraw.ts for the withdrawal + bridge operation.
+    
+    Returns:
+        (success, request_id, amount_bridged)
+    """
+    import re
+    
+    if amount_usdc < MIN_WITHDRAWAL_USDC:
+        print(f"⚠️  Amount ${amount_usdc:.2f} below minimum ${MIN_WITHDRAWAL_USDC}")
+        return False, "", 0.0
+    
+    print(f"\n💸 WITHDRAW: ${amount_usdc:.2f} from PM → Vault")
+    
+    cmd_args = [
+        "npx", "tsx", 
+        os.path.join(os.path.dirname(__file__), "proxy_withdraw.ts"),
+        "withdraw", str(amount_usdc)
+    ]
+    if dry_run:
+        cmd_args.append("--dry-run")
+    
+    try:
+        result = subprocess.run(
+            cmd_args,
+            capture_output=True,
+            text=True,
+            timeout=300,
+            env={
+                **os.environ,
+                "TREASURY_ADDRESS": VAULT_ADDRESS,
+            }
+        )
+        
+        output = result.stdout + result.stderr
+        print(f"   Output (first 500 chars): {output[:500]}")
+        
+        request_id = ""
+        request_id_match = re.search(r'requestId["\s:]+([a-f0-9-]+)', output, re.IGNORECASE)
+        if request_id_match:
+            request_id = request_id_match.group(1)
+            print(f"   Extracted requestId: {request_id}")
+        
+        tx_hash = ""
+        tx_hash_match = re.search(r'txHash["\s:]+0x([a-f0-9]+)', output, re.IGNORECASE)
+        if tx_hash_match:
+            tx_hash = "0x" + tx_hash_match.group(1)
+            print(f"   Extracted txHash: {tx_hash[:20]}...")
+        
+        if "success" in output.lower() or result.returncode == 0:
+            if not request_id and not tx_hash:
+                print("⚠️  Withdraw reported success but no requestId/txHash found")
+                send_telegram_alert(
+                    f"⚠️ Bridge initiated but no tracking ID\n"
+                    f"Amount: ${amount_usdc:.2f}\n"
+                    f"Check Relay dashboard manually",
+                    is_error=True
+                )
+            return True, request_id, amount_usdc
+        else:
+            print(f"❌ Withdraw script failed (exit {result.returncode})")
+            send_telegram_alert(
+                f"❌ Withdraw script failed\n"
+                f"Amount: ${amount_usdc:.2f}\n"
+                f"Exit code: {result.returncode}",
+                is_error=True
+            )
+            return False, "", 0.0
+            
+    except subprocess.TimeoutExpired:
+        print("❌ Withdraw script timed out (5 min)")
+        send_telegram_alert(
+            f"❌ Withdraw script timeout\n"
+            f"Amount: ${amount_usdc:.2f}\n"
+            f"Manual check required",
+            is_error=True
+        )
+        return False, "", 0.0
+    except Exception as e:
+        print(f"❌ Withdraw error: {e}")
+        send_telegram_alert(f"❌ Withdraw error: {e}", is_error=True)
+        return False, "", 0.0
+
+
+def liquidate_positions(needed_usdc: float) -> float:
+    """
+    Liquidate positions to get needed USDC.
+    Targets largest/most liquid positions first.
+    Respects slippage limits and per-cycle caps.
+    
+    Returns: USDC obtained from liquidation
+    """
+    if not HAS_CLOB_CLIENT:
+        print("⚠️  CLOB client not available - manual liquidation needed")
+        send_telegram_alert(
+            f"🔥 Liquidation needed: ${needed_usdc:.2f}\n"
+            f"⚠️ Auto-liquidation unavailable",
+            is_error=True
+        )
+        return 0.0
+    
+    capped_needed = min(needed_usdc, MAX_PER_CYCLE_LIQUIDATION_USDC)
+    print(f"\n🔥 LIQUIDATE: Need ${capped_needed:.2f} USDC (capped from ${needed_usdc:.2f})")
+    
+    positions = get_positions_for_liquidation()
+    if not positions:
+        print("   No positions available to liquidate")
+        return 0.0
+    
+    total_obtained = 0.0
+    still_needed = capped_needed
+    
+    for pos in positions:
+        if still_needed <= 0:
+            break
+        
+        if pos["liq_value"] < 5.0:
+            continue
+        
+        size_to_sell = pos["size"]
+        if pos["liq_value"] > still_needed:
+            ratio = still_needed / pos["liq_value"]
+            size_to_sell = pos["size"] * ratio * 1.1
+        
+        min_price = pos["best_bid"] * (1 - MAX_SLIPPAGE_BPS / 10000)
+        
+        print(f"   Selling {size_to_sell:.2f} of {pos['outcome']} @ min ${min_price:.4f}")
+        
+        success, usdc = execute_liquidation_order(
+            pos["token_id"],
+            size_to_sell,
+            min_price
+        )
+        
+        if success:
+            total_obtained += usdc
+            still_needed -= usdc
+    
+    print(f"   Total liquidated: ${total_obtained:.2f}")
+    
+    if total_obtained > 0:
+        send_telegram_alert(
+            f"🔥 Liquidated ${total_obtained:.2f} from positions\n"
+            f"Ready to bridge to vault"
+        )
+    
+    return total_obtained
+
+
+def execute_liquidation_order(token_id: str, size: float, min_price: float) -> Tuple[bool, float]:
+    """Execute a single liquidation order via CLOB."""
+    if not PM_PRIVATE_KEY:
+        return False, 0.0
+    
+    try:
+        host = "https://clob.polymarket.com"
+        client = ClobClient(
+            host,
+            key=PM_PRIVATE_KEY,
+            chain_id=137,
+            funder=PM_PROXY_ADDRESS
+        )
+        
+        order_args = OrderArgs(
+            token_id=token_id,
+            side=SELL,
+            size=size,
+            price=min_price,
+        )
+        
+        signed_order = client.create_order(order_args)
+        resp = client.post_order(signed_order, OrderType.GTC)
+        
+        if resp.get("success"):
+            usdc = size * min_price
+            return True, usdc
+        else:
+            print(f"   ❌ Order failed: {resp}")
+            return False, 0.0
+            
+    except Exception as e:
+        print(f"   ❌ Liquidation order error: {e}")
+        return False, 0.0
+
+
+# =============================================================================
+# BRIDGE STATUS TRACKING
+# =============================================================================
+
+def poll_bridge_status(request_id: str) -> Tuple[str, Optional[str]]:
+    """
+    Poll Relay API for bridge completion status.
+    
+    Args:
+        request_id: The requestId from the bridge quote
+    
+    Returns:
+        (status, error_message)
+        status: "pending", "success", "failed"
+    """
+    if not request_id:
+        return "pending", None
+    
+    try:
+        response = requests.get(
+            f"{RELAY_API_URL}/intents/status/v2",
+            params={"requestId": request_id},
+            timeout=15
+        )
+        
+        if response.status_code != 200:
+            return "pending", None
+        
+        data = response.json()
+        status = data.get("status", "unknown")
+        
+        if status in ("success", "completed"):
+            return "success", None
+        
+        if status in ("failed", "refunded"):
+            error = data.get("error", "Unknown error")
+            return "failed", error
+        
+        return "pending", None
+        
+    except Exception as e:
+        print(f"   ⚠️  Bridge status poll error: {e}")
+        return "pending", None
+
+
+def check_in_transit_arrivals(
+    state: ServicerState, 
+    w3_base: Web3, 
+    usdc_contract,
+    prev_vault_balance: float = 0.0
+) -> Tuple[ServicerState, float]:
+    """
+    Check if any in-transit funds have arrived on Base.
+    Uses Relay API + vault balance reconciliation with per-item credit tracking.
+    
+    SAFETY: Only clears in-transit if BOTH conditions are met:
+    1. Relay API confirms success (relay_confirmed = True)
+    2. balance_credited >= 98% of amount (accumulated across iterations)
+    
+    CREDIT DISTRIBUTION:
+    - Balance increases (delta) are distributed in FIFO order (oldest bridge first)
+    - balance_credited persists per-item across iterations
+    - This prevents double-withdrawals: items stay in in_transit until fully confirmed
+    
+    FIFO RATIONALE:
+    - Bridges initiated earlier should complete earlier (5-10 min typical)
+    - If delta arrives before Relay confirms, it's credited to oldest pending bridge
+    - When Relay confirms, the already-credited amount allows immediate clearance
+    
+    Returns:
+        (updated_state, current_vault_balance)
+    """
+    current_vault_balance = get_vault_usdc(w3_base, usdc_contract)
+    remaining_balance_increase = current_vault_balance - prev_vault_balance if prev_vault_balance > 0 else 0
+    
+    if remaining_balance_increase > 0:
+        print(f"   📈 Vault balance increased: +${remaining_balance_increase:.2f}")
+    
+    if not state.in_transit:
+        return state, current_vault_balance
+    
+    updated_in_transit = []
+    
+    pending_items = [item for item in state.in_transit if item.get("status") == "pending"]
+    tracked_items = sorted(
+        [item for item in pending_items if item.get("request_id")],
+        key=lambda x: x.get("initiated_at", 0)
+    )
+    untracked_items = sorted(
+        [item for item in pending_items if not item.get("request_id")],
+        key=lambda x: x.get("initiated_at", 0)
+    )
+    
+    for item in tracked_items:
+        request_id = item.get("request_id", "")
+        amount = item.get("amount_usdc", 0)
+        initiated_at = item.get("initiated_at", 0)
+        age_seconds = time.time() - initiated_at
+        relay_confirmed = item.get("relay_confirmed", False)
+        balance_credited = item.get("balance_credited", 0.0)
+        
+        if not relay_confirmed:
+            bridge_status, error = poll_bridge_status(request_id)
+            
+            if bridge_status == "success":
+                item["relay_confirmed"] = True
+                relay_confirmed = True
+                print(f"   📡 Relay confirmed ${amount:.2f}")
+            
+            if bridge_status == "failed":
+                print(f"   ❌ Bridge FAILED: ${amount:.2f} - {error}")
+                send_telegram_alert(
+                    f"❌ Bridge failed: ${amount:.2f}\n{error}\nManual intervention needed!",
+                    is_error=True
+                )
+                item["status"] = "failed"
+                item["error"] = error
+                continue
+        
+        needed_credit = amount - balance_credited
+        if remaining_balance_increase > 0 and needed_credit > 0:
+            credit_now = min(remaining_balance_increase, needed_credit)
+            item["balance_credited"] = balance_credited + credit_now
+            balance_credited = item["balance_credited"]
+            remaining_balance_increase -= credit_now
+            print(f"   💰 Credited ${credit_now:.2f} to tracked bridge (total credited: ${balance_credited:.2f}/${amount:.2f})")
+        
+        if relay_confirmed and balance_credited >= amount * 0.98:
+            print(f"   ✅ Bridge fully confirmed: ${amount:.2f} (Relay + balance verified)")
+            send_telegram_alert(f"✅ Bridge complete: ${amount:.2f} arrived in vault")
+            continue
+        
+        if relay_confirmed and age_seconds > 7200:
+            print(f"   ⚠️ Relay confirmed but balance not seen after 2hr: ${amount:.2f}")
+            send_telegram_alert(
+                f"⚠️ Bridge stale: ${amount:.2f}\n"
+                f"Relay confirmed 2hr ago but balance not verified (credited: ${balance_credited:.2f})\n"
+                f"Entry RETAINED - manual check recommended",
+                is_error=True
+            )
+        
+        status_str = f"relay-confirmed, credited ${balance_credited:.2f}/${amount:.2f}" if relay_confirmed else "awaiting Relay"
+        print(f"   ⏳ In-transit (tracked): ${amount:.2f} ({int(age_seconds/60)}min old, {status_str})")
+        updated_in_transit.append(item)
+    
+    if remaining_balance_increase > 0 and untracked_items:
+        print(f"   📊 Balance delta available for untracked: ${remaining_balance_increase:.2f}")
+    
+    for item in untracked_items:
+        amount = item.get("amount_usdc", 0)
+        initiated_at = item.get("initiated_at", 0)
+        age_seconds = time.time() - initiated_at
+        balance_credited = item.get("balance_credited", 0.0)
+        
+        needed_credit = amount - balance_credited
+        if remaining_balance_increase > 0 and needed_credit > 0:
+            credit_now = min(remaining_balance_increase, needed_credit)
+            item["balance_credited"] = balance_credited + credit_now
+            balance_credited = item["balance_credited"]
+            remaining_balance_increase -= credit_now
+            print(f"   💰 Credited ${credit_now:.2f} to untracked bridge (total: ${balance_credited:.2f}/${amount:.2f})")
+        
+        if balance_credited >= amount * 0.98:
+            print(f"   ✅ Bridge confirmed via balance: ${amount:.2f}")
+            send_telegram_alert(f"✅ Bridge complete (balance verified): ${amount:.2f} arrived")
+            continue
+        
+        if age_seconds > 3600:
+            print(f"   ❌ Bridge UNTRACKED and stale (1hr): ${amount:.2f} (credited: ${balance_credited:.2f})")
+            send_telegram_alert(
+                f"❌ Bridge untracked timeout: ${amount:.2f}\n"
+                f"No requestId and 1hr elapsed (credited: ${balance_credited:.2f})\n"
+                f"MANUAL CHECK REQUIRED - this amount will NOT be re-withdrawn automatically",
+                is_error=True
+            )
+            item["status"] = "untracked_timeout"
+            continue
+        
+        print(f"   ⏳ In-transit (UNTRACKED): ${amount:.2f} ({int(age_seconds/60)}min old, credited ${balance_credited:.2f})")
+        updated_in_transit.append(item)
+    
+    state.in_transit = updated_in_transit
+    return state, current_vault_balance
+
+
+# =============================================================================
+# KILL SWITCHES & SAFETY
+# =============================================================================
+
+def check_kill_switches(w3_base: Web3, vault_contract) -> Tuple[bool, str]:
+    """Check if it's safe to proceed with withdrawals."""
+    try:
+        is_paused = vault_contract.functions.paused().call()
+        if is_paused:
+            return False, "Vault is paused"
+    except:
+        pass
+    
+    return True, "All checks passed"
+
+
+def check_daily_limit(state: ServicerState, amount: float) -> Tuple[bool, float]:
+    """Check if withdrawal would exceed daily limit."""
+    remaining = MAX_DAILY_WITHDRAWAL_USDC - state.daily_withdrawn_usdc
+    
+    if remaining <= 0:
+        return False, 0.0
+    
+    allowed = min(amount, remaining)
+    return True, allowed
+
+
+# =============================================================================
+# MAIN SERVICER LOOP
+# =============================================================================
+
+def servicer_iteration(
+    w3_base: Web3,
+    vault_contract,
+    usdc_base_contract,
+    state: ServicerState,
+    prev_vault_balance: float = 0.0,
+    dry_run: bool = False
+) -> Tuple[ServicerState, float]:
+    """
+    Single iteration of the withdrawal servicer.
+    
+    Returns:
+        (updated_state, current_vault_balance) - balance for next iteration's reconciliation
+    """
+    print(f"\n{'='*60}")
+    print(f"💰 WITHDRAWAL SERVICER - {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"{'='*60}")
+    
+    is_safe, reason = check_kill_switches(w3_base, vault_contract)
+    if not is_safe:
+        print(f"🚫 STOPPED: {reason}")
+        return state, prev_vault_balance
+    
+    state, vault_usdc = check_in_transit_arrivals(
+        state, w3_base, usdc_base_contract, prev_vault_balance
+    )
+    
+    pending_usdc, nav = get_pending_usdc(w3_base, vault_contract)
+    in_transit_usdc = get_in_transit_usdc(state)
+    
+    print(f"\n📊 STATUS:")
+    print(f"   Pending withdrawals: ${pending_usdc:.2f}")
+    print(f"   Vault USDC (Base): ${vault_usdc:.2f}")
+    print(f"   In-transit USDC: ${in_transit_usdc:.2f}")
+    print(f"   NAV: ${nav:.6f}/share")
+    print(f"   Daily withdrawn: ${state.daily_withdrawn_usdc:.2f} / ${MAX_DAILY_WITHDRAWAL_USDC:.2f}")
+    
+    needed = pending_usdc - vault_usdc - in_transit_usdc
+    print(f"\n   Needed: ${needed:.2f}")
+    
+    if needed <= MIN_WITHDRAWAL_USDC:
+        print(f"\n✅ No action needed (needed < ${MIN_WITHDRAWAL_USDC})")
+        return state, vault_usdc
+    
+    allowed, max_allowed = check_daily_limit(state, needed)
+    if not allowed:
+        print(f"\n⏳ Daily limit reached. Will retry tomorrow.")
+        send_telegram_alert(
+            f"⏳ Daily withdrawal limit reached\n"
+            f"Pending: ${pending_usdc:.2f}\n"
+            f"Will resume tomorrow"
+        )
+        return state, vault_usdc
+    
+    needed = min(needed, max_allowed)
+    print(f"\n⚠️  WITHDRAWAL NEEDED: ${needed:.2f}")
+    
+    pm_cash, pm_positions = get_pm_balance()
+    print(f"\n📊 Polymarket:")
+    print(f"   Cash: ${pm_cash:.2f}")
+    print(f"   Positions: ${pm_positions:.2f}")
+    
+    withdraw_amount = min(needed, pm_cash)
+    
+    if withdraw_amount >= MIN_WITHDRAWAL_USDC:
+        success, request_id, amount_bridged = withdraw_pm_cash_to_bridge(
+            withdraw_amount, 
+            dry_run=dry_run
+        )
+        
+        if success:
+            state.in_transit.append({
+                "request_id": request_id,
+                "amount_usdc": amount_bridged,
+                "initiated_at": time.time(),
+                "status": "pending",
+            })
+            state.daily_withdrawn_usdc += amount_bridged
+            needed -= amount_bridged
+            
+            send_telegram_alert(
+                f"💸 Bridging ${amount_bridged:.2f} USDC to vault\n"
+                f"Remaining needed: ${needed:.2f}"
+            )
+    
+    if needed >= MIN_WITHDRAWAL_USDC and pm_positions > MIN_WITHDRAWAL_USDC:
+        print(f"\n⚠️  Cash insufficient, need to liquidate ${needed:.2f}")
+        
+        liquidated = liquidate_positions(needed)
+        
+        if liquidated > 0:
+            pm_cash_after, _ = get_pm_balance()
+            
+            if pm_cash_after >= MIN_WITHDRAWAL_USDC:
+                success, request_id, amount_bridged = withdraw_pm_cash_to_bridge(
+                    min(needed, pm_cash_after),
+                    dry_run=dry_run
+                )
+                
+                if success:
+                    state.in_transit.append({
+                        "request_id": request_id,
+                        "amount_usdc": amount_bridged,
+                        "initiated_at": time.time(),
+                        "status": "pending",
+                    })
+                    state.daily_withdrawn_usdc += amount_bridged
+    
+    state.last_run_timestamp = time.time()
+    save_state(state)
+    
+    return state, vault_usdc
+
+
+def run_servicer(dry_run: bool = False) -> None:
+    """Main servicer loop."""
+    print("\n" + "="*60)
+    print("🚀 WITHDRAWAL SERVICER V7.2")
+    print("="*60)
+    print(f"\nConfiguration:")
+    print(f"   Vault: {VAULT_ADDRESS}")
+    print(f"   PM Proxy: {PM_PROXY_ADDRESS[:20]}..." if PM_PROXY_ADDRESS else "   PM Proxy: NOT SET")
+    print(f"   Bot URL: {BOT_URL}")
+    print(f"   Dry run: {dry_run}")
+    print(f"   Min withdrawal: ${MIN_WITHDRAWAL_USDC}")
+    print(f"   Max daily: ${MAX_DAILY_WITHDRAWAL_USDC}")
+    print(f"   Bypass method: {BYPASS_METHOD}")
+    
+    if not VAULT_ADDRESS:
+        print("❌ VAULT_ADDRESS not set")
+        return
+    
+    if not PM_PROXY_ADDRESS:
+        print("❌ POLYMARKET_PROXY_ADDRESS not set")
+        return
+    
+    w3_base = Web3(Web3.HTTPProvider(BASE_RPC_URL))
+    if not w3_base.is_connected():
+        print("❌ Cannot connect to Base RPC")
+        return
+    
+    vault_contract = w3_base.eth.contract(
+        address=Web3.to_checksum_address(VAULT_ADDRESS),
+        abi=VAULT_V7_ABI
+    )
+    
+    usdc_base_contract = w3_base.eth.contract(
+        address=Web3.to_checksum_address(USDC_BASE),
+        abi=ERC20_ABI
+    )
+    
+    state = load_state()
+    prev_vault_balance = get_vault_usdc(w3_base, usdc_base_contract)
+    
+    print(f"\n✅ Servicer initialized")
+    print(f"   Daily withdrawn so far: ${state.daily_withdrawn_usdc:.2f}")
+    print(f"   In-transit items: {len(state.in_transit)}")
+    print(f"   Current vault balance: ${prev_vault_balance:.2f}")
+    
+    send_telegram_alert(
+        f"🚀 Withdrawal Servicer started\n"
+        f"Vault: {VAULT_ADDRESS[:15]}...\n"
+        f"Dry run: {dry_run}"
+    )
+    
+    consecutive_failures = 0
+    
+    while True:
+        try:
+            state, prev_vault_balance = servicer_iteration(
+                w3_base,
+                vault_contract,
+                usdc_base_contract,
+                state,
+                prev_vault_balance=prev_vault_balance,
+                dry_run=dry_run
+            )
+            consecutive_failures = 0
+            
+        except KeyboardInterrupt:
+            print("\n\n👋 Servicer stopped by user")
+            save_state(state)
+            send_telegram_alert("👋 Withdrawal Servicer stopped")
+            break
+            
+        except Exception as e:
+            print(f"❌ Error in iteration: {e}")
+            import traceback
+            traceback.print_exc()
+            consecutive_failures += 1
+            
+            if consecutive_failures >= 5:
+                send_telegram_alert(
+                    f"❌ Servicer failing repeatedly!\n{e}",
+                    is_error=True
+                )
+        
+        print(f"\n💤 Sleeping {LOOP_INTERVAL_SECONDS}s...")
+        time.sleep(LOOP_INTERVAL_SECONDS)
+
+
+# =============================================================================
+# CLI ENTRY POINT
+# =============================================================================
+
+if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="V7.2 Withdrawal Servicer")
+    parser.add_argument("--dry-run", action="store_true", help="Simulate without executing")
+    parser.add_argument("--once", action="store_true", help="Run single iteration and exit")
+    
+    args = parser.parse_args()
+    
+    if args.once:
+        w3_base = Web3(Web3.HTTPProvider(BASE_RPC_URL))
+        vault_contract = w3_base.eth.contract(
+            address=Web3.to_checksum_address(VAULT_ADDRESS),
+            abi=VAULT_V7_ABI
+        )
+        usdc_base_contract = w3_base.eth.contract(
+            address=Web3.to_checksum_address(USDC_BASE),
+            abi=ERC20_ABI
+        )
+        state = load_state()
+        prev_balance = get_vault_usdc(w3_base, usdc_base_contract)
+        state, _ = servicer_iteration(
+            w3_base, vault_contract, usdc_base_contract, state,
+            prev_vault_balance=prev_balance, dry_run=args.dry_run
+        )
+        save_state(state)
+    else:
+        run_servicer(dry_run=args.dry_run)
