@@ -1,0 +1,80 @@
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# export PROXY_URL="http://3p0LTGSt7YVFojo:QWPWl7bhciHo0ZM@92.113.180.106:42563"
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 trading_bot/withdrawal_servicer.py --dry-run --once
+
+============================================================
+💰 WITHDRAWAL SERVICER - 2025-12-19 17:24:55
+============================================================
+⚠️  Error fetching NAV from bot: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /sign-nav (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+   Pending shares: 10.000000
+
+📊 STATUS:
+   Pending withdrawals: $10.00
+   Vault USDC (Base): $0.00
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed: $10.00
+
+✅ No action needed (needed < $10.0)
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 trading_bot/withdrawal_servicer.py --once
+
+============================================================
+💰 WITHDRAWAL SERVICER - 2025-12-19 17:25:41
+============================================================
+⚠️  Error fetching NAV from bot: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /sign-nav (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+   Pending shares: 10.000000
+
+📊 STATUS:
+   Pending withdrawals: $10.00
+   Vault USDC (Base): $0.00
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed: $10.00
+
+✅ No action needed (needed < $10.0)
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot/frontend
+python3 -m http.server 8080
+Serving HTTP on 0.0.0.0 port 8080 (http://0.0.0.0:8080/) ...
+139.28.90.12 - - [19/Dec/2025 17:27:38] "GET / HTTP/1.1" 200 -
+139.28.90.12 - - [19/Dec/2025 17:27:39] "GET /main.js HTTP/1.1" 200 -
+139.28.90.12 - - [19/Dec/2025 17:27:39] "GET /psniper-logo.png HTTP/1.1" 200 -
+139.28.90.12 - - [19/Dec/2025 17:27:39] "GET /abis/usdc.json?v=1766165259444 HTTP/1.1" 200 -
+139.28.90.12 - - [19/Dec/2025 17:27:39] "GET /abis/vault.json?v=1766165259444 HTTP/1.1" 200 -
+139.28.90.12 - - [19/Dec/2025 17:27:40] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:27:40] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:27:40] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:27:40] "GET /favicon.ico HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:27:41] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:27:41] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:27:41] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:27:41] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:27:42] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:27:42] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:27:42] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:27:42] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:27:43] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:27:43] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:27:48] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:27:48] "GET /sign-nav HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:27:55] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:27:55] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:27:56] "GET / HTTP/1.1" 200 -
+139.28.90.12 - - [19/Dec/2025 17:27:57] "GET /psniper-logo.png HTTP/1.1" 200 -
+139.28.90.12 - - [19/Dec/2025 17:27:57] "GET /main.js HTTP/1.1" 200 -
+139.28.90.12 - - [19/Dec/2025 17:27:58] "GET /abis/usdc.json?v=1766165277801 HTTP/1.1" 200 -
+139.28.90.12 - - [19/Dec/2025 17:27:58] "GET /abis/vault.json?v=1766165277801 HTTP/1.1" 200 -
+139.28.90.12 - - [19/Dec/2025 17:27:59] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:27:59] "GET /favicon.ico HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:28:00] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:28:00] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:28:00] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:28:00] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:28:01] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:28:01] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:28:01] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:28:01] "GET /price HTTP/1.1" 404 -
+139.28.90.12 - - [19/Dec/2025 17:28:11] code 404, message File not found
+139.28.90.12 - - [19/Dec/2025 17:28:11] "GET /price HTTP/1.1" 404 -
