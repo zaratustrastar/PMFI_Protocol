@@ -562,13 +562,29 @@ class PolymarketClient:
         return total_value
     
     def fetch_cash_balance(self) -> float:
-        """Fetch USDC cash balance on Polymarket."""
+        """Fetch USDC cash balance on Polymarket using L2 authenticated CLOB API."""
+        # Primary method: Use CLOB client with L2 auth (get_balance_allowance)
+        if self.clob_client:
+            try:
+                print("📡 Fetching cash balance via L2 auth...")
+                balance_data = self.clob_client.get_balance_allowance()
+                
+                if balance_data:
+                    # Balance is returned in USDC units (not micro-units)
+                    cash = float(balance_data.get("balance", 0))
+                    print(f"💵 Polymarket cash: ${cash:.2f}")
+                    return cash
+                    
+            except Exception as e:
+                print(f"⚠️ CLOB balance fetch failed: {e}")
+        
+        # Fallback: Try data API (may 404 but worth trying)
         try:
             url = f"{self.DATA_API_URL}/balance"
             params = {"user": self.wallet_address}
             data = self._make_request(url, params=params, timeout=10)
             cash = float(data.get("balance", 0)) if data else 0
-            print(f"💵 Polymarket cash: ${cash:.2f}")
+            print(f"💵 Polymarket cash (data API): ${cash:.2f}")
             return cash
             
         except Exception as e:
