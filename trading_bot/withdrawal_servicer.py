@@ -943,7 +943,7 @@ def servicer_iteration(
     needed = pending_usdc - vault_usdc - in_transit_usdc
     print(f"\n   Needed: ${needed:.2f}")
     
-    if needed <= MIN_WITHDRAWAL_USDC:
+    if needed < MIN_WITHDRAWAL_USDC:
         print(f"\n✅ No action needed (needed < ${MIN_WITHDRAWAL_USDC})")
         return state
     
