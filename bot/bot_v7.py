@@ -344,6 +344,11 @@ class PolymarketClient:
         """Initialize CLOB client with L2 auth for authenticated API calls."""
         try:
             from py_clob_client.client import ClobClient
+            from py_clob_client.clob_types import BalanceAllowanceParams, AssetType
+            
+            # Store these for later use
+            self.BalanceAllowanceParams = BalanceAllowanceParams
+            self.AssetType = AssetType
             
             # Initialize client with private key and proxy wallet
             self.clob_client = ClobClient(
@@ -356,10 +361,12 @@ class PolymarketClient:
             
             # Derive L2 credentials from private key
             self.clob_client.set_api_creds(self.clob_client.create_or_derive_api_creds())
-            print("✅ CLOB client initialized with L2 auth (can fetch open orders)")
+            print("✅ CLOB client initialized with L2 auth (can fetch open orders and balance)")
         except Exception as e:
             print(f"⚠️ Could not initialize CLOB client: {e}")
             self.clob_client = None
+            self.BalanceAllowanceParams = None
+            self.AssetType = None
     
     def fetch_positions_with_cost_basis(self) -> Tuple[List[Dict], float]:
         """
@@ -563,14 +570,16 @@ class PolymarketClient:
     
     def fetch_cash_balance(self) -> float:
         """Fetch USDC cash balance on Polymarket using L2 authenticated CLOB API."""
-        # Primary method: Use CLOB client with L2 auth (get_balance_allowance)
-        if self.clob_client:
+        # Primary method: Use CLOB client with L2 auth (get_balance_allowance with params)
+        if self.clob_client and self.BalanceAllowanceParams and self.AssetType:
             try:
                 print("📡 Fetching cash balance via L2 auth...")
-                balance_data = self.clob_client.get_balance_allowance()
+                # Must pass BalanceAllowanceParams with asset_type=COLLATERAL for USDC balance
+                params = self.BalanceAllowanceParams(asset_type=self.AssetType.COLLATERAL)
+                balance_data = self.clob_client.get_balance_allowance(params=params)
                 
                 if balance_data:
-                    # Balance is returned in USDC units (not micro-units)
+                    # Balance is returned in USDC units (string format)
                     cash = float(balance_data.get("balance", 0))
                     print(f"💵 Polymarket cash: ${cash:.2f}")
                     return cash
