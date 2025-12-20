@@ -109,6 +109,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     struct WithdrawalRequest {
         address user;
         uint256 shares;
+        uint256 usdcLocked;     // V7.3: USDC amount locked at request time (price fixed)
         uint256 requestTime;
         bool claimed;
     }
@@ -317,7 +318,8 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     }
     
     /**
-     * @notice Request withdrawal - shares are locked, USDC paid later from refills
+     * @notice Request withdrawal - shares are locked, USDC amount fixed at request time
+     * @dev V7.3: Price is locked at request time. User gets exactly usdcLocked at claim.
      * @param shareAmount Amount of pSNIPER shares to redeem
      * @param navData Signed NAV data from oracle
      * @param signature Oracle signature over navData
@@ -333,9 +335,10 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         
         _verifyAndApplyNav(navData, signature);
         
-        // Calculate expected USDC at current NAV (for tracking)
+        // V7.3: Calculate and LOCK the USDC amount at current NAV
+        // This price is fixed - user will receive exactly this amount at claim
         uint256 nav = _calculateNav(navData.totalAssets);
-        uint256 expectedUsdc = (shareAmount * nav) / NAV_PRECISION;
+        uint256 usdcLocked = (shareAmount * nav) / NAV_PRECISION;
         
         // Lock shares in contract
         _transfer(msg.sender, address(this), shareAmount);
@@ -344,6 +347,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         withdrawalQueue.push(WithdrawalRequest({
             user: msg.sender,
             shares: shareAmount,
+            usdcLocked: usdcLocked,    // V7.3: Store locked amount
             requestTime: block.timestamp,
             claimed: false
         }));
@@ -351,21 +355,17 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         userWithdrawals[msg.sender].push(requestId);
         totalPendingShares += shareAmount;
         
-        emit WithdrawalRequested(requestId, msg.sender, shareAmount, expectedUsdc);
+        emit WithdrawalRequested(requestId, msg.sender, shareAmount, usdcLocked);
     }
     
     /**
      * @notice Claim a pending withdrawal (after keeper refills vault buffer)
-     * @dev Uses claim-time NAV - user gets current pro-rata share
+     * @dev V7.3: Uses locked price from request time - no NAV re-verification needed
      * @dev Allowed even when paused - users can always exit
      * @param requestId The withdrawal request ID
-     * @param navData Fresh signed NAV data
-     * @param signature Oracle signature over navData
      */
     function claim(
-        uint256 requestId,
-        NavDataV7 calldata navData,
-        bytes calldata signature
+        uint256 requestId
     ) external nonReentrant {
         require(requestId < withdrawalQueue.length, "Invalid request");
         WithdrawalRequest storage request = withdrawalQueue[requestId];
@@ -374,15 +374,13 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         require(!request.claimed, "Already claimed");
         require(block.timestamp <= request.requestTime + WITHDRAWAL_EXPIRY, "Request expired");
         
-        _verifyAndApplyNav(navData, signature);
-        
-        uint256 nav = _calculateNav(navData.totalAssets);
-        uint256 grossUsdc = (request.shares * nav) / NAV_PRECISION;
+        // V7.3: Use locked USDC amount from request time - no NAV recalculation
+        uint256 grossUsdc = request.usdcLocked;
         uint256 tax = (grossUsdc * WITHDRAWAL_TAX_BPS) / 10000;
         uint256 netUsdc = grossUsdc - tax;
         
         // Check vault has enough USDC (from keeper refills)
-        require(usdc.balanceOf(address(this)) >= grossUsdc, "Insufficient buffer - wait for refill");
+        require(usdc.balanceOf(address(this)) >= grossUsdc, "Not enough USDC in buffer. Try again later when positions are liquidated.");
         
         request.claimed = true;
         totalPendingShares -= request.shares;
@@ -417,7 +415,8 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         usdc.safeTransfer(taxCollector, tax);
         usdc.safeTransfer(msg.sender, netUsdc);
         
-        emit WithdrawalClaimed(requestId, msg.sender, request.shares, netUsdc, tax, nav);
+        // V7.3: Emit with locked amount instead of nav (nav not recalculated at claim)
+        emit WithdrawalClaimed(requestId, msg.sender, request.shares, netUsdc, tax, grossUsdc);
     }
     
     /**
@@ -572,6 +571,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     function getWithdrawalRequest(uint256 requestId) external view returns (
         address user,
         uint256 shares,
+        uint256 usdcLocked,
         uint256 requestTime,
         bool claimed,
         bool expired
@@ -581,6 +581,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         return (
             r.user,
             r.shares,
+            r.usdcLocked,
             r.requestTime,
             r.claimed,
             block.timestamp > r.requestTime + WITHDRAWAL_EXPIRY
