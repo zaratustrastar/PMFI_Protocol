@@ -48,6 +48,9 @@ const RELAYER_URL = 'https://relayer-v2.polymarket.com';
 const MAX_PER_TX_USDC = 5000;
 const MIN_WITHDRAWAL_USDC = 5;
 
+// Bot API URL for updating withdrawal tracker
+const BOT_API_URL = process.env.BOT_API_URL || 'http://localhost:8080';
+
 // ERC20 ABI
 const ERC20_ABI = [
   {
@@ -85,6 +88,40 @@ function log(level: 'INFO' | 'WARN' | 'ERROR', message: string, data?: unknown):
   const timestamp = new Date().toISOString();
   const prefix = level === 'ERROR' ? '❌' : level === 'WARN' ? '⚠️' : '📝';
   console.log(`${timestamp} ${prefix} [SafeProxyWithdraw] ${message}`, data || '');
+}
+
+async function notifyBotWithdrawalBack(amountUsdc: number): Promise<boolean> {
+  const amountRaw = Math.round(amountUsdc * 1e6);
+  log('INFO', `Notifying bot of withdrawal: $${amountUsdc.toFixed(2)} (${amountRaw} raw)`);
+  
+  // Retry up to 3 times
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const response = await fetch(`${BOT_API_URL}/admin/record-withdrawal-back`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: amountRaw }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        log('INFO', `✅ Bot notified - withdrawn_back now: $${data.withdrawn_back?.toFixed(2) || 'unknown'}`);
+        return true;
+      } else {
+        log('WARN', `Attempt ${attempt}/3: Bot returned ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      log('WARN', `Attempt ${attempt}/3: Could not reach bot API at ${BOT_API_URL}`, error);
+    }
+    
+    if (attempt < 3) {
+      await new Promise(r => setTimeout(r, 2000)); // Wait 2s between retries
+    }
+  }
+  
+  log('ERROR', '❌ IMPORTANT: Failed to notify bot after 3 attempts!');
+  log('ERROR', `   Run this manually to sync: curl -X POST ${BOT_API_URL}/admin/record-withdrawal-back -H "Content-Type: application/json" -d '{"amount": ${amountRaw}}'`);
+  return false;
 }
 
 // =============================================================================
@@ -531,6 +568,9 @@ async function withdrawAndBridge(
       log('INFO', `   Bridged: $${bridgeAmount.toFixed(2)} USDC`);
       log('INFO', `   Destination: ${TREASURY_ADDRESS}`);
       
+      // Notify bot to update withdrawn_back tracker
+      await notifyBotWithdrawalBack(bridgeAmount);
+      
       return {
         success: true,
         txHash: bridgeTxHash,
@@ -726,6 +766,9 @@ async function main(): Promise<void> {
           console.log(`   TX: ${bridgeTxHash}`);
           console.log(`   Bridged: $${bridgeAmount.toFixed(2)} USDC`);
           console.log(`   Destination: ${TREASURY_ADDRESS}`);
+          
+          // Notify bot to update withdrawn_back tracker
+          await notifyBotWithdrawalBack(bridgeAmount);
         } else {
           log('WARN', `Bridge status: ${bridgeResult.message}`);
           console.log('Bridge may still be in progress - check Relay dashboard');
