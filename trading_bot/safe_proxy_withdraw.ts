@@ -634,11 +634,116 @@ async function main(): Promise<void> {
       break;
     }
     
+    case 'bridge': {
+      // Bridge EOA balance directly to vault (skip Step 1)
+      log('INFO', '=== Bridge EOA → Base Vault ===');
+      
+      if (!TREASURY_ADDRESS) {
+        log('ERROR', 'TREASURY_ADDRESS not set');
+        process.exit(1);
+      }
+      
+      let cleanKey = POLYMARKET_PRIVATE_KEY.trim();
+      if (!cleanKey.startsWith('0x')) {
+        cleanKey = '0x' + cleanKey;
+      }
+      const account = privateKeyToAccount(cleanKey as Hex);
+      const eoaAddress = account.address;
+      
+      log('INFO', `EOA: ${eoaAddress}`);
+      log('INFO', `Destination: ${TREASURY_ADDRESS}`);
+      
+      // Check EOA balance
+      const eoaBalance = await getEOABalance(eoaAddress);
+      log('INFO', `EOA USDC.e balance: $${eoaBalance.toFixed(6)}`);
+      
+      const MIN_BRIDGE_AMOUNT = 5.0;
+      if (eoaBalance < MIN_BRIDGE_AMOUNT) {
+        log('ERROR', `EOA balance $${eoaBalance.toFixed(2)} below minimum bridge amount ($${MIN_BRIDGE_AMOUNT})`);
+        process.exit(1);
+      }
+      
+      const bridgeAmount = eoaBalance;
+      log('INFO', `Will bridge: $${bridgeAmount.toFixed(6)}`);
+      
+      // Get bridge quote
+      const quote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeAmount);
+      if (!quote) {
+        log('ERROR', 'Failed to get Relay bridge quote');
+        process.exit(1);
+      }
+      
+      log('INFO', `Bridge quote: in=$${Number(quote.amountIn) / 1e6}, out=$${Number(quote.amountOut) / 1e6}, fee=$${quote.feeUsd.toFixed(4)}`);
+      
+      // Approve USDC.e for bridge
+      log('INFO', 'Approving USDC.e for Relay bridge...');
+      const approveData = encodeFunctionData({
+        abi: ERC20_ABI,
+        functionName: 'approve',
+        args: [quote.txData.to as Hex, quote.amountIn],
+      });
+      
+      const wallet = createWalletClient({
+        account,
+        chain: polygon,
+        transport: http(POLYGON_RPC_URL),
+      });
+      
+      try {
+        const approveHash = await wallet.sendTransaction({
+          to: USDC_E_POLYGON as Hex,
+          data: approveData as Hex,
+          gas: BigInt(100_000),
+        });
+        log('INFO', `Approval tx: ${approveHash}`);
+        log('INFO', 'Waiting for approval confirmation...');
+        await new Promise(r => setTimeout(r, 5000));
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : String(error);
+        log('ERROR', 'Approval failed', errMsg);
+        process.exit(1);
+      }
+      
+      // Execute bridge
+      log('INFO', 'Executing Relay bridge deposit...');
+      try {
+        const bridgeTxHash = await wallet.sendTransaction({
+          to: quote.txData.to as Hex,
+          data: quote.txData.data as Hex,
+          value: BigInt(quote.txData.value || '0'),
+          gas: BigInt(300_000),
+        });
+        log('INFO', `Bridge tx submitted: ${bridgeTxHash}`);
+        log('INFO', 'Waiting for bridge tx confirmation...');
+        await new Promise(r => setTimeout(r, 10000));
+        
+        // Poll for completion
+        log('INFO', 'Polling for bridge completion...');
+        const bridgeResult = await pollBridgeStatus(quote.requestId);
+        
+        if (bridgeResult.success) {
+          console.log('\n✅ BRIDGE COMPLETE');
+          console.log(`   TX: ${bridgeTxHash}`);
+          console.log(`   Bridged: $${bridgeAmount.toFixed(2)} USDC`);
+          console.log(`   Destination: ${TREASURY_ADDRESS}`);
+        } else {
+          log('WARN', `Bridge status: ${bridgeResult.message}`);
+          console.log('Bridge may still be in progress - check Relay dashboard');
+        }
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : String(error);
+        log('ERROR', 'Bridge deposit failed', errMsg);
+        process.exit(1);
+      }
+      break;
+    }
+    
     default:
       console.log('Usage: safe_proxy_withdraw.ts <command> [options]');
       console.log('Commands:');
       console.log('  info                    Show proxy info and balances');
       console.log('  withdraw <amount>       Withdraw to vault (--dry-run for simulation)');
+      console.log('  bridge                  Bridge EOA balance directly to vault (skip Step 1)');
       console.log('  test                    Test RelayClient connection');
   }
 }
