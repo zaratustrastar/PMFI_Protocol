@@ -97,6 +97,103 @@ REFRESH_RATE_LIMIT_SECONDS = 5
 last_refresh_request = {}
 
 # =============================================================================
+# RoundId Cache (prevents fallback to 0 on RPC errors)
+# =============================================================================
+class RoundIdCache:
+    """
+    Persists lastRoundId to disk to prevent falling back to 0 on RPC errors.
+    
+    Rules:
+    1. On startup: try chain first, fall back to disk cache
+    2. On RPC error during refresh: use cached value + 1 (ONLY ONCE per RPC outage)
+    3. If both chain and cache fail: refuse to sign (return error)
+    4. Chain value is authoritative - always sync to it on successful reads
+    
+    Key insight: We track 'fallback_used' to prevent runaway increment during outages.
+    Once we've used fallback once, we don't increment again until RPC recovers.
+    """
+    
+    def __init__(self, cache_file: str = "round_id_cache.json"):
+        self.cache_file = Path(cache_file)
+        self.cached_round_id: Optional[int] = None
+        self.last_chain_read: int = 0  # Timestamp of last successful chain read
+        self.fallback_used: bool = False  # True if we already incremented during this outage
+        self._load_from_disk()
+    
+    def _load_from_disk(self):
+        """Load cached roundId from disk on startup."""
+        if self.cache_file.exists():
+            try:
+                with open(self.cache_file, 'r') as f:
+                    data = json.load(f)
+                self.cached_round_id = data.get("last_round_id")
+                self.last_chain_read = data.get("last_chain_read", 0)
+                print(f"📂 Loaded roundId cache from disk: lastRoundId={self.cached_round_id}")
+            except Exception as e:
+                print(f"⚠️ Error loading roundId cache: {e}")
+    
+    def _save_to_disk(self):
+        """Persist roundId to disk."""
+        try:
+            data = {
+                "last_round_id": self.cached_round_id,
+                "last_chain_read": self.last_chain_read,
+                "last_updated": int(time.time())
+            }
+            with open(self.cache_file, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            print(f"⚠️ Error saving roundId cache: {e}")
+    
+    def update_from_chain(self, round_id: int):
+        """Update cache with value read from chain (authoritative source)."""
+        if round_id > 0:
+            # Chain is authoritative - ALWAYS sync to it (fixes drift issue)
+            if self.cached_round_id != round_id:
+                if self.cached_round_id is not None and self.cached_round_id > round_id:
+                    print(f"🔄 Resync: cache was ahead ({self.cached_round_id}) vs chain ({round_id}) - using chain value")
+                self.cached_round_id = round_id
+            self.last_chain_read = int(time.time())
+            self.fallback_used = False  # Reset fallback flag - RPC is working
+            self._save_to_disk()
+            print(f"📝 RoundId cache synced from chain: {round_id}")
+    
+    def get_next_round_id(self, chain_round_id: Optional[int] = None) -> Optional[int]:
+        """
+        Get next roundId to use for signing.
+        
+        Args:
+            chain_round_id: Value read from chain (None if RPC failed)
+            
+        Returns:
+            Next roundId to use, or None if we can't determine a safe value
+        """
+        if chain_round_id is not None and chain_round_id > 0:
+            # Chain read succeeded - this is authoritative
+            self.update_from_chain(chain_round_id)
+            return chain_round_id + 1
+        
+        # Chain read failed - use cache if available
+        if self.cached_round_id is not None and self.cached_round_id > 0:
+            if self.fallback_used:
+                # We already incremented once during this outage - return same value
+                # This prevents runaway drift during prolonged outages
+                next_id = self.cached_round_id + 1
+                print(f"⚠️ RPC still failing, reusing fallback roundId: {next_id}")
+                return next_id
+            else:
+                # First fallback during this outage - increment once
+                next_id = self.cached_round_id + 1
+                self.fallback_used = True
+                print(f"⚠️ RPC failed, using cached roundId + 1: {next_id} (fallback mode)")
+                return next_id
+        
+        # No valid source - refuse to sign
+        print(f"❌ Cannot determine safe roundId: chain read failed and no cache available")
+        return None
+
+
+# =============================================================================
 # Persistent State (for pendingCredit tracking)
 # =============================================================================
 @dataclass
@@ -252,6 +349,7 @@ polymarket_client = None
 nav_engine = None
 oracle_account = None
 pending_tracker = None
+round_id_cache = None  # RoundId cache for RPC failure recovery
 
 cached_nav = {
     "total_assets": 0,
@@ -853,34 +951,41 @@ def check_safety_valves(breakdown: Dict) -> Tuple[str, str]:
 
 def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     """Get current NAV with full breakdown and fresh signature."""
-    global cached_nav, cached_signed_nav, nav_engine, pending_tracker, vault_v7, w3
+    global cached_nav, cached_signed_nav, nav_engine, pending_tracker, vault_v7, w3, round_id_cache
     
     now = int(time.time())
     
     # Get vault state from contract
+    chain_round_id = None  # Track if we got a valid roundId from chain
+    rpc_failed = False
     try:
         if vault_v7:
             total_supply = vault_v7.functions.totalSupply().call()
             vault_buffer = usdc.functions.balanceOf(VAULT_V7_ADDRESS).call() if usdc else 0
-            last_round_id = vault_v7.functions.lastRoundId().call()
+            chain_round_id = vault_v7.functions.lastRoundId().call()
             total_forwarded = vault_v7.functions.totalForwardedToPolymarket().call()
             expected_assets = vault_v7.functions.expectedAssets().call()
             
             # Sync pending tracker with contract
             pending_tracker.sync_from_contract(total_forwarded)
             
-            print(f"📊 On-chain: supply={total_supply/1e18:.4f}, buffer={vault_buffer/1e6:.2f}, forwarded={total_forwarded/1e6:.2f}, lastRoundId={last_round_id}")
+            print(f"📊 On-chain: supply={total_supply/1e18:.4f}, buffer={vault_buffer/1e6:.2f}, forwarded={total_forwarded/1e6:.2f}, lastRoundId={chain_round_id}")
         else:
             total_supply = 0
             vault_buffer = 0
-            last_round_id = 0
             expected_assets = 0
     except Exception as e:
         print(f"❌ Error reading vault state: {e}")
-        total_supply = 0
-        vault_buffer = 0
-        last_round_id = 0
-        expected_assets = 0
+        rpc_failed = True
+        total_supply = cached_nav.get("total_supply", 0)  # Use cached values
+        vault_buffer = cached_nav.get("vault_buffer", 0)
+        expected_assets = cached_nav.get("expected_assets", 0)
+    
+    # Get next roundId using cache (handles RPC failures safely)
+    new_round_id = round_id_cache.get_next_round_id(chain_round_id)
+    if new_round_id is None:
+        # Cannot determine safe roundId - refuse to sign
+        raise ValueError("Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.")
     
     # Calculate NAV breakdown
     if nav_engine:
@@ -909,9 +1014,6 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
         nav = (total_assets * NAV_PRECISION) // total_supply
     else:
         nav = 10**6  # $1.00 per share
-    
-    # Increment round ID
-    new_round_id = last_round_id + 1
     
     timestamp = now
     deadline = now + NAV_VALIDITY_SECONDS
@@ -1171,7 +1273,7 @@ def load_abi(contract_name: str) -> dict:
 
 
 def main():
-    global w3, usdc, vault_v7, polymarket_client, nav_engine, oracle_account, pending_tracker
+    global w3, usdc, vault_v7, polymarket_client, nav_engine, oracle_account, pending_tracker, round_id_cache
     
     print("=" * 60)
     print("🚀 PredictFi Sniper Vault V7 - NAV Signing Bot")
@@ -1230,6 +1332,23 @@ def main():
     # Initialize pending credit tracker
     state_file = Path(__file__).parent / "pending_credit_state.json"
     pending_tracker = PendingCreditTracker(str(state_file))
+    
+    # Initialize roundId cache (prevents fallback to 0 on RPC errors)
+    round_id_cache_file = Path(__file__).parent / "round_id_cache.json"
+    round_id_cache = RoundIdCache(str(round_id_cache_file))
+    
+    # Try to read initial roundId from chain to populate cache
+    try:
+        if vault_v7:
+            initial_round_id = vault_v7.functions.lastRoundId().call()
+            round_id_cache.update_from_chain(initial_round_id)
+            print(f"✅ Initial roundId from chain: {initial_round_id}")
+    except Exception as e:
+        print(f"⚠️ Could not read initial roundId from chain: {e}")
+        if round_id_cache.cached_round_id:
+            print(f"📂 Using cached roundId from disk: {round_id_cache.cached_round_id}")
+        else:
+            print(f"❌ CRITICAL: No roundId available! Bot will refuse to sign until RPC works.")
     
     # Initialize Polymarket client with private key for L2 auth (open orders)
     # Use POLYMARKET_PRIVATE_KEY if available, otherwise fall back to ORACLE_PRIVATE_KEY

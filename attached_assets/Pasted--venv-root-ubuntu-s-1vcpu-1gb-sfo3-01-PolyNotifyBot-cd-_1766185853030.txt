@@ -1,0 +1,49 @@
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBotot
+source venv/bin/activate
+export VAULT_V7_ADDRESS="0xfcfa01291d1e75f71e97c4EE53f675D7622988b4"
+export BASE_RPC_URL="https://mainnet.base.org"
+export ORACLE_PRIVATE_KEY="YOUR_ORACLE_PRIVATE_KEY"
+python3 bot/bot_v7.py
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+============================================================
+🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+   3-State Asset Tracking + Conservation Bounds
+============================================================
+
+📋 Configuration:
+   RPC: https://mainnet.base.org...
+   Vault V7: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4
+   USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+   PM Wallet: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+   PM Deposit: 0xa76a91208FC7CB88420070AF978D12F440cab2F0
+
+✅ Connected to Base (block 39698238)
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1267, in <module>
+    main()
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1210, in main
+    oracle_account = Account.from_key(ORACLE_PRIVATE_KEY)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/venv/lib/python3.12/site-packages/eth_utils/decorators.py", line 31, in _wrapper
+    return self.method(objtype, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/venv/lib/python3.12/site-packages/eth_account/account.py", line 310, in from_key
+    key = self._parse_private_key(private_key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/venv/lib/python3.12/site-packages/eth_utils/decorators.py", line 31, in _wrapper
+    return self.method(objtype, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/venv/lib/python3.12/site-packages/eth_account/account.py", line 894, in _parse_private_key
+    hb_key = HexBytes(key)
+             ^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/venv/lib/python3.12/site-packages/hexbytes/main.py", line 35, in __new__
+    bytesval = to_bytes(val)
+               ^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/venv/lib/python3.12/site-packages/hexbytes/_utils.py", line 17, in to_bytes
+    return hexstr_to_bytes(val)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/venv/lib/python3.12/site-packages/hexbytes/_utils.py", line 54, in hexstr_to_bytes
+    return binascii.unhexlify(ascii_hex)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+binascii.Error: Non-hexadecimal digit found
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
