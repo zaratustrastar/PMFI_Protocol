@@ -35,8 +35,8 @@ const BUILDER_SECRET = process.env.POLYMARKET_BUILDER_SECRET || '';
 const BUILDER_PASSPHRASE = process.env.POLYMARKET_BUILDER_PASSPHRASE || '';
 
 // Contracts
-// Native Circle USDC.e on Polygon (NOT the old bridged USDC at 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174)
-const USDC_E_POLYGON = '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359';
+// Bridged USDC (PoS) on Polygon - this is what Polymarket uses
+const USDC_E_POLYGON = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174';
 const RELAY_API_URL = 'https://api.relay.link';
 const BASE_CHAIN_ID = 8453;
 const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
