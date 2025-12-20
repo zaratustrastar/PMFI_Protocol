@@ -1009,7 +1009,14 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
         print(f"⚠️ SAFETY WARNING: {safety_reason}")
     
     # Calculate NAV per share
-    total_assets = breakdown["total_assets"]
+    # V7.2 FIX: Include vault buffer in total assets
+    # Formula: totalAssets = vaultBuffer + inFlight + pendingCredit + pmCash + reserved + positions
+    # The breakdown contains PM-side assets; vault_buffer is Base-side (mutually exclusive)
+    pm_side_assets = breakdown["total_assets"]
+    total_assets = pm_side_assets + vault_buffer
+    
+    print(f"📊 Total Assets = PM-side ${pm_side_assets/1e6:.2f} + VaultBuffer ${vault_buffer/1e6:.2f} = ${total_assets/1e6:.2f}")
+    
     if total_supply > 0:
         nav = (total_assets * NAV_PRECISION) // total_supply
     else:

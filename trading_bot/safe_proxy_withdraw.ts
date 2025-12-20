@@ -100,7 +100,7 @@ async function notifyBotWithdrawalBack(amountUsdc: number): Promise<boolean> {
       const response = await fetch(`${BOT_API_URL}/admin/record-withdrawal-back`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: amountRaw }),
+        body: JSON.stringify({ amount_usdc: amountRaw }),
       });
       
       if (response.ok) {
