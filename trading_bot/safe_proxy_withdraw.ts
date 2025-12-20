@@ -447,16 +447,24 @@ async function withdrawAndBridge(
   // Step 2: Bridge from EOA to Base vault
   log('INFO', '\n--- Step 2: EOA → Relay Bridge → Base Vault ---');
   
-  // Check EOA balance
+  // Check EOA balance - use ACTUAL balance for bridging (may include prior transfers)
   const eoaBalance = await getEOABalance(eoaAddress);
   log('INFO', `EOA USDC.e balance: $${eoaBalance.toFixed(6)}`);
   
-  if (eoaBalance < sendUsdc * 0.99) { // Allow 1% slippage
-    return { success: false, error: `EOA balance too low after transfer: $${eoaBalance.toFixed(6)}` };
+  // Minimum bridge amount - Relay requires ~$5 minimum
+  const MIN_BRIDGE_AMOUNT = 5.0;
+  
+  if (eoaBalance < MIN_BRIDGE_AMOUNT) {
+    return { success: false, error: `EOA balance $${eoaBalance.toFixed(2)} below minimum bridge amount ($${MIN_BRIDGE_AMOUNT}). Accumulate more before bridging.` };
   }
   
-  // Get bridge quote using actual send amount
-  const quote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, sendUsdc);
+  // Use the FULL EOA balance for bridging (not just what Step 1 transferred)
+  // This handles cases where multiple transfers accumulated or prior Step 1s succeeded
+  const bridgeAmount = eoaBalance;
+  log('INFO', `Will bridge full EOA balance: $${bridgeAmount.toFixed(6)}`);
+  
+  // Get bridge quote using actual EOA balance
+  const quote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeAmount);
   if (!quote) {
     return { success: false, error: 'Failed to get Relay bridge quote' };
   }
@@ -520,7 +528,7 @@ async function withdrawAndBridge(
       log('INFO', '\n✅ FULL WITHDRAWAL COMPLETE');
       log('INFO', `   Step 1 (Safe → EOA): ${withdrawResult.txHash}`);
       log('INFO', `   Step 2 (EOA → Base): ${bridgeTxHash}`);
-      log('INFO', `   Amount: $${amountUsdc} USDC`);
+      log('INFO', `   Bridged: $${bridgeAmount.toFixed(2)} USDC`);
       log('INFO', `   Destination: ${TREASURY_ADDRESS}`);
       
       return {

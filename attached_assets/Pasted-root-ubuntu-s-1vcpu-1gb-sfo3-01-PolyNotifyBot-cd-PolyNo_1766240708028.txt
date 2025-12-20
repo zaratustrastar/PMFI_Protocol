@@ -1,0 +1,69 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+git pull origin main
+remote: Enumerating objects: 14, done.
+remote: Counting objects: 100% (14/14), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 10 (delta 8), reused 10 (delta 8), pack-reused 0 (from 0)
+Unpacking objects: 100% (10/10), 3.28 KiB | 419.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+ * branch            main       -> FETCH_HEAD
+   63a0c24..1136837  main       -> origin/main
+Updating 63a0c24..1136837
+Fast-forward
+ ...47-58-310Z-SafeProxyWithdraw-Approval-fai_1766238928142.txt | 57 ++++++++++++++++++++++
+ ...-transactions-Created-Safe-Transaction-Re_1766238533207.txt | 72 ++++++++++++++++++++++++++++
+ trading_bot/safe_proxy_withdraw.ts                             |  4 ++
+ 3 files changed, 133 insertions(+)
+ create mode 100644 attached_assets/Pasted-2025-12-20T13-47-58-310Z-SafeProxyWithdraw-Approval-fai_1766238928142.txt
+ create mode 100644 attached_assets/Pasted-Executing-safe-transactions-Created-Safe-Transaction-Re_1766238533207.txt
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# TREASURY_ADDRESS=0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 npx tsx trading_bot/safe_proxy_withdraw.ts withdraw 19.99
+[dotenv@17.2.1] injecting env (11) from .env -- tip: 📡 auto-backup env with Radar: https://dotenvx.com/radar
+2025-12-20T14:24:29.826Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2025-12-20T14:24:29.826Z 📝 [SafeProxyWithdraw] Requested amount: $19.99 
+2025-12-20T14:24:29.827Z 📝 [SafeProxyWithdraw] Destination: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 
+2025-12-20T14:24:29.827Z 📝 [SafeProxyWithdraw] Dry run: false 
+2025-12-20T14:24:30.040Z 📝 [SafeProxyWithdraw] Proxy USDC balance: $0.000100 (100 raw) 
+2025-12-20T14:24:30.041Z 📝 [SafeProxyWithdraw] ⚠️ Capping transfer: requested $19.99, sending $0.000100 (available minus dust) 
+2025-12-20T14:24:30.245Z 📝 [SafeProxyWithdraw] EOA address: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-20T14:24:30.246Z 📝 [SafeProxyWithdraw] Proxy address: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2025-12-20T14:24:30.246Z 📝 [SafeProxyWithdraw] Using Builder API credentials 
+2025-12-20T14:24:30.263Z 📝 [SafeProxyWithdraw] 
+--- Step 1: Safe Proxy → EOA --- 
+2025-12-20T14:24:30.264Z 📝 [SafeProxyWithdraw] Withdrawing $0.000100 (100 raw) from Safe proxy to EOA 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-20T14:24:30.274Z 📝 [SafeProxyWithdraw] Executing via Polymarket RelayClient... 
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e0000000000000000000000000000000000000000000000000000000000000064',
+  nonce: '7',
+  signature: '0x7a75c6bf0d4011b40b18f6b4958457d799ae1f37f0caf6364460d48704d4e63d154102c5f4c421c8d59bd00d5e2fa0eb4f1975cc6e8bd15b59bf9dedcd3b133220',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000000000000000000000000000000'
+  },
+  type: 'SAFE',
+  metadata: 'Withdraw $0.0001 USDC to EOA'
+}
+Client side safe request creation took: 0.169 seconds
+2025-12-20T14:24:31.178Z 📝 [SafeProxyWithdraw] Waiting for transaction confirmation... 
+Waiting for transaction 019b3c25-d526-7125-a35c-0dedd7f17750 matching states: STATE_MINED,STATE_CONFIRMED...
+2025-12-20T14:24:35.641Z 📝 [SafeProxyWithdraw] ✅ Transfer complete! 
+2025-12-20T14:24:35.641Z 📝 [SafeProxyWithdraw]    TX Hash: 0xb02e29632a5d7a1c499592b5628fba1c13b7847af02b4e4f4f9053390b4aa899 
+2025-12-20T14:24:35.642Z 📝 [SafeProxyWithdraw]    Proxy: 0x9cbc5577e6f1b3a097d579c6a28d0cdbd247b6a5 
+2025-12-20T14:24:35.642Z 📝 [SafeProxyWithdraw] Waiting 5s for transfer to settle... 
+2025-12-20T14:24:40.645Z 📝 [SafeProxyWithdraw] 
+--- Step 2: EOA → Relay Bridge → Base Vault --- 
+2025-12-20T14:24:40.771Z 📝 [SafeProxyWithdraw] EOA USDC.e balance: $19.989265 
+2025-12-20T14:24:40.771Z 📝 [SafeProxyWithdraw] Getting Relay quote: $0.0001 from 0x5087675E669e6244620013691c05C1De0e8B525e to 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 
+2025-12-20T14:24:41.405Z ❌ [SafeProxyWithdraw] Relay quote failed: 400 - {"message":"no routes found","errorCode":"NO_SWAP_ROUTES_FOUND","requestId":"0x5e52aef81b88fce38e2083a112a6d744be459a71364c7cbd13319099ec710efd","approxSimulatedBlock":39725666} 
+
+❌ FAILED
+Failed to get Relay bridge quote
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
