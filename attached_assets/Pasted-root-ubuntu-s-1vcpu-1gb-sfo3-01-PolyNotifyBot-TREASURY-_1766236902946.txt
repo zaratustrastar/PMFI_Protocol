@@ -1,0 +1,42 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# TREASURY_ADDRESS=0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 npx tsx trading_bot/safe_proxy_withdraw.ts withdraw 19.99
+[dotenv@17.2.1] injecting env (10) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2025-12-20T13:18:36.313Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2025-12-20T13:18:36.314Z 📝 [SafeProxyWithdraw] Amount: $19.99 
+2025-12-20T13:18:36.314Z 📝 [SafeProxyWithdraw] Destination: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 
+2025-12-20T13:18:36.314Z 📝 [SafeProxyWithdraw] Dry run: false 
+2025-12-20T13:18:36.470Z 📝 [SafeProxyWithdraw] Proxy USDC.e balance: $19.99 
+2025-12-20T13:18:36.628Z 📝 [SafeProxyWithdraw] EOA address: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-20T13:18:36.628Z 📝 [SafeProxyWithdraw] Proxy address: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2025-12-20T13:18:36.628Z 📝 [SafeProxyWithdraw] Using Builder API credentials 
+2025-12-20T13:18:36.637Z 📝 [SafeProxyWithdraw] 
+--- Step 1: Safe Proxy → EOA --- 
+2025-12-20T13:18:36.638Z 📝 [SafeProxyWithdraw] Withdrawing $19.99 from Safe proxy to EOA 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-20T13:18:36.642Z 📝 [SafeProxyWithdraw] Executing via Polymarket RelayClient... 
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e00000000000000000000000000000000000000000000000000000000013105f0',
+  nonce: '6',
+  signature: '0x43ecd3998a8403320c85e0edcf5604369d9370e3abeed39b0a661fbe3a0701c959429648bb7e6179e3499b691dc96989c6d8191fe1b21457bdaec7cd776a6a321f',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000000000000000000000000000000'
+  },
+  type: 'SAFE',
+  metadata: 'Withdraw $19.99 USDC to EOA'
+}
+Client side safe request creation took: 0.16 seconds
+2025-12-20T13:18:37.532Z 📝 [SafeProxyWithdraw] Waiting for transaction confirmation... 
+Waiting for transaction 019b3be9-8135-776d-b051-c94f8f8f0885 matching states: STATE_MINED,STATE_CONFIRMED...
+txn 019b3be9-8135-776d-b051-c94f8f8f0885 failed onchain! Transaction hash: 0x5bbf350a05da50b4b1ea1e6f91b18d6b0109a69a417b39838f339968453ceb46
+
+❌ FAILED
+Withdrawal failed: Transaction result was null
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

@@ -1,0 +1,46 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# TREASURY_ADDRESS=0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 npx tsx trading_bot/safe_proxy_withdraw.ts withdraw 19.99
+[dotenv@17.2.1] injecting env (10) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2025-12-20T13:13:23.227Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2025-12-20T13:13:23.227Z 📝 [SafeProxyWithdraw] Amount: $19.99 
+2025-12-20T13:13:23.227Z 📝 [SafeProxyWithdraw] Destination: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 
+2025-12-20T13:13:23.228Z 📝 [SafeProxyWithdraw] Dry run: false 
+2025-12-20T13:13:23.809Z 📝 [SafeProxyWithdraw] Proxy USDC.e balance: $19.99 
+2025-12-20T13:13:23.943Z 📝 [SafeProxyWithdraw] EOA address: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-20T13:13:23.945Z 📝 [SafeProxyWithdraw] Proxy address: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2025-12-20T13:13:23.945Z 📝 [SafeProxyWithdraw] Using Builder API credentials 
+2025-12-20T13:13:23.953Z 📝 [SafeProxyWithdraw] 
+--- Step 1: Safe Proxy → EOA --- 
+2025-12-20T13:13:23.957Z 📝 [SafeProxyWithdraw] Withdrawing $19.99 from Safe proxy to EOA 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-20T13:13:23.963Z 📝 [SafeProxyWithdraw] Executing via Polymarket RelayClient... 
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e00000000000000000000000000000000000000000000000000000000013105f0',
+  nonce: '6',
+  signature: '0x43ecd3998a8403320c85e0edcf5604369d9370e3abeed39b0a661fbe3a0701c959429648bb7e6179e3499b691dc96989c6d8191fe1b21457bdaec7cd776a6a321f',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000000000000000000000000000000'
+  },
+  type: 'SAFE',
+  metadata: 'Withdraw $19.99 USDC to EOA'
+}
+Client side safe request creation took: 0.174 seconds
+request error {
+  error: 'request error',
+  status: 401,
+  statusText: 'Unauthorized',
+  data: { error: 'invalid authorization' }
+}
+2025-12-20T13:13:24.776Z ❌ [SafeProxyWithdraw] RelayClient execute failed {"error":"request error","status":401,"statusText":"Unauthorized","data":{"error":"invalid authorization"}}
+
+❌ FAILED
+Withdrawal failed: {"error":"request error","status":401,"statusText":"Unauthorized","data":{"error":"invalid authorization"}}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
