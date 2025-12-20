@@ -415,8 +415,9 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         usdc.safeTransfer(taxCollector, tax);
         usdc.safeTransfer(msg.sender, netUsdc);
         
-        // V7.3: Emit with locked amount instead of nav (nav not recalculated at claim)
-        emit WithdrawalClaimed(requestId, msg.sender, request.shares, netUsdc, tax, grossUsdc);
+        // V7.3: Calculate effective NAV from locked values for backward-compatible event
+        uint256 effectiveNav = (grossUsdc * NAV_PRECISION) / request.shares;
+        emit WithdrawalClaimed(requestId, msg.sender, request.shares, netUsdc, tax, effectiveNav);
     }
     
     /**
