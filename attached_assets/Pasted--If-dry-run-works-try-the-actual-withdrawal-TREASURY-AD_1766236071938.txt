@@ -1,0 +1,30 @@
+
+# If dry run works, try the actual withdrawal:
+TREASURY_ADDRESS=0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 npx tsx trading_bot/safe_proxy_withdraw.ts withdraw 19.99
+[dotenv@17.2.1] injecting env (10) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+2025-12-20T13:07:08.002Z 📝 [SafeProxyWithdraw] === Safe Proxy Info === 
+2025-12-20T13:07:08.003Z 📝 [SafeProxyWithdraw] Proxy: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2025-12-20T13:07:08.082Z 📝 [SafeProxyWithdraw] EOA: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-20T13:07:08.082Z 📝 [SafeProxyWithdraw] Treasury: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 
+2025-12-20T13:07:08.313Z 📝 [SafeProxyWithdraw] Proxy USDC.e: $19.99 
+2025-12-20T13:07:08.609Z 📝 [SafeProxyWithdraw] EOA USDC.e: $0.00 
+2025-12-20T13:07:08.609Z 📝 [SafeProxyWithdraw] ✅ Builder API credentials configured 
+[dotenv@17.2.1] injecting env (10) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+2025-12-20T13:07:14.439Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2025-12-20T13:07:14.440Z 📝 [SafeProxyWithdraw] Amount: $19.99 
+2025-12-20T13:07:14.440Z 📝 [SafeProxyWithdraw] Destination: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 
+2025-12-20T13:07:14.440Z 📝 [SafeProxyWithdraw] Dry run: true 
+2025-12-20T13:07:14.774Z 📝 [SafeProxyWithdraw] Proxy USDC.e balance: $19.99 
+
+❌ FAILED
+Insufficient balance: have $19.99, need $19.99
+[dotenv@17.2.1] injecting env (10) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2025-12-20T13:07:20.020Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2025-12-20T13:07:20.020Z 📝 [SafeProxyWithdraw] Amount: $19.99 
+2025-12-20T13:07:20.020Z 📝 [SafeProxyWithdraw] Destination: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 
+2025-12-20T13:07:20.021Z 📝 [SafeProxyWithdraw] Dry run: false 
+2025-12-20T13:07:20.338Z 📝 [SafeProxyWithdraw] Proxy USDC.e balance: $19.99 
+
+❌ FAILED
+Insufficient balance: have $19.99, need $19.99
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

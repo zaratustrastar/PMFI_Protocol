@@ -390,11 +390,12 @@ async function withdrawAndBridge(
     return { success: false, error: `Amount $${amountUsdc} exceeds max $${MAX_PER_TX_USDC}` };
   }
   
-  // Check proxy balance
+  // Check proxy balance (allow 0.1 tolerance for floating point precision)
   const proxyBalance = await getProxyBalance();
   log('INFO', `Proxy USDC.e balance: $${proxyBalance.toFixed(2)}`);
   
-  if (proxyBalance < amountUsdc) {
+  const BALANCE_TOLERANCE = 0.1;
+  if (proxyBalance + BALANCE_TOLERANCE < amountUsdc) {
     return { success: false, error: `Insufficient balance: have $${proxyBalance.toFixed(2)}, need $${amountUsdc}` };
   }
   
