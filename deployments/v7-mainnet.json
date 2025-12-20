@@ -1,16 +1,16 @@
 {
   "contract": "PredictFiSniperVaultV7",
-  "address": "0xfcfa01291d1e75f71e97c4EE53f675D7622988b4",
+  "address": "0x7bda93A174107F64C67F83aa54176Ecb245f75F3",
   "network": "base-mainnet",
   "chainId": 8453,
   "deployer": "0x5087675E669e6244620013691c05C1De0e8B525e",
   "navSigner": "0x5087675E669e6244620013691c05C1De0e8B525e",
   "taxCollector": "0x5087675E669e6244620013691c05C1De0e8B525e",
-  "polymarketWallet": "0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5",
+  "polymarketWallet": "0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff",
   "usdcAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-  "maxPerWallet": "100000000000",
-  "maxTotal": "100000000000000",
+  "maxPerWallet": "100000000",
+  "maxTotal": "100000000000",
   "maxLossBps": 1000,
-  "timestamp": "2025-12-18T17:49:56.449Z",
+  "timestamp": "2025-12-20T16:30:20.601Z",
   "polymarketBaseDeposit": "0xa76a91208FC7CB88420070AF978D12F440cab2F0"
 }

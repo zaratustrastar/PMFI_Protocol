@@ -6,7 +6,7 @@
 // CONFIGURATION
 // =============================================================================
 
-const VAULT_ADDRESS = "0xfcfa01291d1e75f71e97c4EE53f675D7622988b4";
+const VAULT_ADDRESS = "0x7bda93A174107F64C67F83aa54176Ecb245f75F3"; // V7.3 - locked pricing
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
