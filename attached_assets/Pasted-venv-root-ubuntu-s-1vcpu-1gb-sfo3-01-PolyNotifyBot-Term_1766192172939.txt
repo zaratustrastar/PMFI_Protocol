@@ -1,0 +1,423 @@
+venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# # Terminal 1 - NAV signing bot
+python3 bot/bot_v7.py
+
+# Terminal 2 - Withdrawal servicer  
+python3 trading_bot/withdrawal_servicer.py
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+============================================================
+🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+   3-State Asset Tracking + Conservation Bounds
+============================================================
+
+📋 Configuration:
+   RPC: https://mainnet.base.org...
+   Vault V7: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4
+   USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+   PM Wallet: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+   PM Deposit: 0xa76a91208FC7CB88420070AF978D12F440cab2F0
+
+✅ Connected to Base (block 39701316)
+🔑 Oracle signer: 0x5087675E669e6244620013691c05C1De0e8B525e
+✅ USDC contract loaded
+✅ Vault V7 contract loaded
+📂 Loaded pending credit state: forwarded=20.00, withdrawn=0.00
+📂 Loaded roundId cache from disk: lastRoundId=4
+📝 RoundId cache synced from chain: 4
+✅ Initial roundId from chain: 4
+🌐 PolymarketClient using residential proxy: 92.113.180.106:42563
+✅ CLOB client initialized with L2 auth (can fetch open orders and balance)
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $19.99
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $20.00
+   - pmCash:       $19.99
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $0.00
+   = pendingCredit: $0.01
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.01
+   • Credited cash:            $19.99
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $20.00
+   (inFlight + pending subtracted from total to avoid overlap)
+✅ Signed NAV: $1.0000/share (round 5) [ok]
+🔄 Starting NAV refresh loop (every 45s)
+============================================================
+🔄 BACKGROUND NAV REFRESH
+
+🚀 Starting HTTP API on port 8080============================================================
+
+   Serving frontend from: /root/PolyNotifyBot/frontend
+   Endpoints:
+   - GET  /             - Frontend UI
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+📊 On-chain: supply=20.0000, buffer=0.00, forwarded=20.00, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+139.47.127.10 - - [20/Dec/2025 00:53:13] "GET /price HTTP/1.1" 200 -
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+139.47.127.10 - - [20/Dec/2025 00:53:14] "GET /price HTTP/1.1" 200 -
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $19.99
+📡 Fetching open orders via L2 auth...
+139.47.127.10 - - [20/Dec/2025 00:53:15] "GET /price HTTP/1.1" 200 -
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $20.00
+   - pmCash:       $19.99
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $0.00
+   = pendingCredit: $0.01
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.01
+   • Credited cash:            $19.99
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $20.00
+   (inFlight + pending subtracted from total to avoid overlap)
+✅ Signed NAV: $1.0000/share (round 5) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.10 - - [20/Dec/2025 00:53:15] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:15] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:16] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:16] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:16] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:17] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:17] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:17] "GET / HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:18] "GET /main.js HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:18] "GET /psniper-logo.png HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:18] "GET /abis/vault.json?v=1766191998468 HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:18] "GET /abis/usdc.json?v=1766191998468 HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:19] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:19] "GET /favicon.ico HTTP/1.1" 404 -
+139.47.127.10 - - [20/Dec/2025 00:53:19] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:19] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:20] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1766192289)
+139.47.127.10 - - [20/Dec/2025 00:53:23] "GET /sign-nav HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:31] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:40] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:50] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:53:51] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:54:00] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=20.0000, buffer=0.00, forwarded=20.00, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+139.47.127.10 - - [20/Dec/2025 00:54:03] "GET /price HTTP/1.1" 200 -
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $19.99
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $20.00
+   - pmCash:       $19.99
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $0.00
+   = pendingCredit: $0.01
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.01
+   • Credited cash:            $19.99
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $20.00
+   (inFlight + pending subtracted from total to avoid overlap)
+✅ Signed NAV: $1.0000/share (round 5) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.10 - - [20/Dec/2025 00:54:10] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:54:20] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:54:21] "GET /price HTTP/1.1" 200 -
+^C
+============================================================
+🚀 WITHDRAWAL SERVICER V7.2
+============================================================
+
+Configuration:
+   Vault: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $0.00
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER - 2025-12-20 00:54:29
+============================================================
+⚠️  Error fetching NAV from bot: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /sign-nav (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+   Pending shares: 20.000000
+
+📊 STATUS:
+   Pending withdrawals: $20.00
+   Vault USDC (Base): $0.00
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $20.00
+   Needed (with 0.5% slippage): $20.10
+
+⚠️  WITHDRAWAL NEEDED: $20.10 (includes slippage buffer)
+⚠️  PM data API error: 'list' object has no attribute 'get'
+
+📊 Polymarket:
+   Cash: $19.99
+   Positions: $0.00
+
+💸 WITHDRAW: $19.99 from PM → Vault
+^C
+
+👋 Servicer stopped by user
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# export RPC_URL="https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5"
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# # Terminal 1 - NAV signing bot
+python3 bot/bot_v7.py
+
+# Terminal 2 - Withdrawal servicer  
+python3 trading_bot/withdrawal_servicer.py
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+============================================================
+🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+   3-State Asset Tracking + Conservation Bounds
+============================================================
+
+📋 Configuration:
+   RPC: https://base-mainnet.g.alchemy...
+   Vault V7: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4
+   USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+   PM Wallet: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+   PM Deposit: 0xa76a91208FC7CB88420070AF978D12F440cab2F0
+
+✅ Connected to Base (block 39701370)
+🔑 Oracle signer: 0x5087675E669e6244620013691c05C1De0e8B525e
+✅ USDC contract loaded
+✅ Vault V7 contract loaded
+📂 Loaded pending credit state: forwarded=20.00, withdrawn=0.00
+📂 Loaded roundId cache from disk: lastRoundId=4
+📝 RoundId cache synced from chain: 4
+✅ Initial roundId from chain: 4
+🌐 PolymarketClient using residential proxy: 92.113.180.106:42563
+✅ CLOB client initialized with L2 auth (can fetch open orders and balance)
+📊 On-chain: supply=20.0000, buffer=0.00, forwarded=20.00, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $19.99
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $20.00
+   - pmCash:       $19.99
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $0.00
+   = pendingCredit: $0.01
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.01
+   • Credited cash:            $19.99
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $20.00
+   (inFlight + pending subtracted from total to avoid overlap)
+✅ Signed NAV: $1.0000/share (round 5) [ok]
+🔄 Starting NAV refresh loop (every 45s)
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+
+🚀 Starting HTTP API on port 8080
+   Serving frontend from: /root/PolyNotifyBot/frontend
+   Endpoints:
+   - GET  /             - Frontend UI
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+📊 On-chain: supply=20.0000, buffer=0.00, forwarded=20.00, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $19.99
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $20.00
+   - pmCash:       $19.99
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $0.00
+   = pendingCredit: $0.01
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.01
+   • Credited cash:            $19.99
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $20.00
+   (inFlight + pending subtracted from total to avoid overlap)
+✅ Signed NAV: $1.0000/share (round 5) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.10 - - [20/Dec/2025 00:55:00] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:19] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:20] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:21] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:21] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:21] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:22] "GET / HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:22] "GET /main.js HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:23] "GET /psniper-logo.png HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:23] "GET /abis/vault.json?v=1766192123117 HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:23] "GET /abis/usdc.json?v=1766192123117 HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:23] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:24] "GET /favicon.ico HTTP/1.1" 404 -
+139.47.127.10 - - [20/Dec/2025 00:55:24] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:24] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:25] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1766192391)
+139.47.127.10 - - [20/Dec/2025 00:55:27] "GET /sign-nav HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:34] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=20.0000, buffer=0.00, forwarded=20.00, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $19.99
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $20.00
+   - pmCash:       $19.99
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $0.00
+   = pendingCredit: $0.01
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.01
+   • Credited cash:            $19.99
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $20.00
+   (inFlight + pending subtracted from total to avoid overlap)
+✅ Signed NAV: $1.0000/share (round 5) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.10 - - [20/Dec/2025 00:55:44] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:54] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [20/Dec/2025 00:55:56] "GET /price HTTP/1.1" 200 -

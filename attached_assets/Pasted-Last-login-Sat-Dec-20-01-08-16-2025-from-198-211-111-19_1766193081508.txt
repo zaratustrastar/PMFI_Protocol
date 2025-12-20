@@ -1,0 +1,77 @@
+Last login: Sat Dec 20 01:08:16 2025 from 198.211.111.194
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot
+source venv/bin/activate
+python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.2
+============================================================
+
+Configuration:
+   Vault: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $0.00
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER - 2025-12-20 01:09:14
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 20.000000
+
+📊 STATUS:
+   Pending withdrawals: $20.00
+   Vault USDC (Base): $0.00
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $20.00
+   Needed (with 0.5% slippage): $20.10
+
+⚠️  WITHDRAWAL NEEDED: $20.10 (includes slippage buffer)
+⚠️  PM data API error: 'list' object has no attribute 'get'
+
+📊 Polymarket:
+   Cash: $19.99
+   Positions: $0.00
+
+💸 WITHDRAW: $19.99 from PM → Vault
+^C
+
+👋 Servicer stopped by user
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+npx tsx trading_bot/proxy_withdraw.ts withdraw 19.99
+Need to install the following packages:
+tsx@4.21.0
+Ok to proceed? (y) y
+
+
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'ethers' imported from /root/PolyNotifyBot/trading_bot/proxy_withdraw.ts
+    at packageResolve (node:internal/modules/esm/resolve:873:9)
+    at moduleResolve (node:internal/modules/esm/resolve:946:18)
+    at defaultResolve (node:internal/modules/esm/resolve:1188:11)
+    at nextResolve (node:internal/modules/esm/hooks:864:28)
+    at resolveBase (file:///root/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/esm/index.mjs?1766193064171:2:3744)
+    at resolveDirectory (file:///root/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/esm/index.mjs?1766193064171:2:4243)
+    at resolveTsPaths (file:///root/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/esm/index.mjs?1766193064171:2:4984)
+    at resolve (file:///root/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/esm/index.mjs?1766193064171:2:5361)
+    at nextResolve (node:internal/modules/esm/hooks:864:28)
+    at Hooks.resolve (node:internal/modules/esm/hooks:306:30) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v20.19.5
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
