@@ -1,0 +1,57 @@
+2025-12-20T13:47:58.310Z ❌ [SafeProxyWithdraw] Approval failed The total cost (gas * gas fee + value) of executing this transaction exceeds the balance of the account.
+
+This error could arise when the account does not have enough funds to:
+ - pay for the total gas fee,
+ - pay for the value to send.
+ 
+The cost of the transaction is calculated as `gas * gas fee + value`, where:
+ - `gas` is the amount of gas needed for transaction to execute,
+ - `gas fee` is the gas fee,
+ - `value` is the amount of ether to send to the recipient.
+ 
+Request Arguments:
+  from:  0x5087675E669e6244620013691c05C1De0e8B525e
+  to:    0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174
+  data:  0x095ea7b30000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa8417400000000000000000000000000000000000000000000000000000000013102ad
+
+Details: insufficient funds for gas * price + value: address 0x5087675E669e6244620013691c05C1De0e8B525e have 0 want 366029808068000000000
+Version: viem@2.43.2
+
+❌ FAILED
+Approval failed: The total cost (gas * gas fee + value) of executing this transaction exceeds the balance of the account.
+
+This error could arise when the account does not have enough funds to:
+ - pay for the total gas fee,
+ - pay for the value to send.
+ 
+The cost of the transaction is calculated as `gas * gas fee + value`, where:
+ - `gas` is the amount of gas needed for transaction to execute,
+ - `gas fee` is the gas fee,
+ - `value` is the amount of ether to send to the recipient.
+ 
+Request Arguments:
+  from:  0x5087675E669e6244620013691c05C1De0e8B525e
+  to:    0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174
+  data:  0x095ea7b30000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa8417400000000000000000000000000000000000000000000000000000000013102ad
+
+Details: insufficient funds for gas * price + value: address 0x5087675E669e6244620013691c05C1De0e8B525e have 0 want 366029808068000000000
+Version: viem@2.43.2
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# TREASURY_ADDRESS=0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 npx tsx trading_bot/relay_bridge.py
+
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".py" for /root/PolyNotifyBot/trading_bot/relay_bridge.py
+    at Object.getFileProtocolModuleFormat [as file:] (node:internal/modules/esm/get_format:189:9)
+    at defaultGetFormat (node:internal/modules/esm/get_format:232:36)
+    at defaultLoad (node:internal/modules/esm/load:145:22)
+    at async nextLoad (node:internal/modules/esm/hooks:864:22)
+    at async load (file:///root/PolyNotifyBot/node_modules/tsx/dist/esm/index.mjs?1766238880176:2:1838)
+    at async nextLoad (node:internal/modules/esm/hooks:864:22)
+    at async Hooks.load (node:internal/modules/esm/hooks:451:20)
+    at async handleMessage (node:internal/modules/esm/worker:196:18) {
+  code: 'ERR_UNKNOWN_FILE_EXTENSION'
+}
+
+Node.js v20.19.5
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

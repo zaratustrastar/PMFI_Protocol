@@ -1,0 +1,72 @@
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e00000000000000000000000000000000000000000000000000000000013102ad',
+  nonce: '6',
+  signature: '0x7e5fe37f9e242b2483d331e1dc0c2dfb52dc7a4c414d86f4454dd6213e461d973654bc8d7ac8fc31f5dc49bfae72481fb587d6b7eb7ca5a496a837110ab174091f',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000000000000000000000000000000'
+  },
+  type: 'SAFE',
+  metadata: 'Withdraw $19.989165 USDC to EOA'
+}
+Client side safe request creation took: 0.17 seconds
+2025-12-20T13:47:46.954Z 📝 [SafeProxyWithdraw] Waiting for transaction confirmation... 
+Waiting for transaction 019b3c04-32e6-7af1-9a64-c2dbefb5031c matching states: STATE_MINED,STATE_CONFIRMED...
+2025-12-20T13:47:51.432Z 📝 [SafeProxyWithdraw] ✅ Transfer complete! 
+2025-12-20T13:47:51.433Z 📝 [SafeProxyWithdraw]    TX Hash: 0xc4802b95185f58bdcb646d4f0d3c8538dee098dc77a3d643d654906a19e008ab 
+2025-12-20T13:47:51.433Z 📝 [SafeProxyWithdraw]    Proxy: 0x9cbc5577e6f1b3a097d579c6a28d0cdbd247b6a5 
+2025-12-20T13:47:51.433Z 📝 [SafeProxyWithdraw] Waiting 5s for transfer to settle... 
+2025-12-20T13:47:56.435Z 📝 [SafeProxyWithdraw] 
+--- Step 2: EOA → Relay Bridge → Base Vault --- 
+2025-12-20T13:47:56.800Z 📝 [SafeProxyWithdraw] EOA USDC.e balance: $19.989165 
+2025-12-20T13:47:56.800Z 📝 [SafeProxyWithdraw] Getting Relay quote: $19.989165 from 0x5087675E669e6244620013691c05C1De0e8B525e to 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4 
+2025-12-20T13:47:57.821Z 📝 [SafeProxyWithdraw] Bridge quote: in=$19.989165, out=$19.94362, fee=$0.0022 
+2025-12-20T13:47:57.821Z 📝 [SafeProxyWithdraw] Approving USDC.e for Relay bridge... 
+2025-12-20T13:47:58.310Z ❌ [SafeProxyWithdraw] Approval failed The total cost (gas * gas fee + value) of executing this transaction exceeds the balance of the account.
+
+This error could arise when the account does not have enough funds to:
+ - pay for the total gas fee,
+ - pay for the value to send.
+ 
+The cost of the transaction is calculated as `gas * gas fee + value`, where:
+ - `gas` is the amount of gas needed for transaction to execute,
+ - `gas fee` is the gas fee,
+ - `value` is the amount of ether to send to the recipient.
+ 
+Request Arguments:
+  from:  0x5087675E669e6244620013691c05C1De0e8B525e
+  to:    0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174
+  data:  0x095ea7b30000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa8417400000000000000000000000000000000000000000000000000000000013102ad
+
+Details: insufficient funds for gas * price + value: address 0x5087675E669e6244620013691c05C1De0e8B525e have 0 want 366029808068000000000
+Version: viem@2.43.2
+
+❌ FAILED
+Approval failed: The total cost (gas * gas fee + value) of executing this transaction exceeds the balance of the account.
+
+This error could arise when the account does not have enough funds to:
+ - pay for the total gas fee,
+ - pay for the value to send.
+ 
+The cost of the transaction is calculated as `gas * gas fee + value`, where:
+ - `gas` is the amount of gas needed for transaction to execute,
+ - `gas fee` is the gas fee,
+ - `value` is the amount of ether to send to the recipient.
+ 
+Request Arguments:
+  from:  0x5087675E669e6244620013691c05C1De0e8B525e
+  to:    0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174
+  data:  0x095ea7b30000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa8417400000000000000000000000000000000000000000000000000000000013102ad
+
+Details: insufficient funds for gas * price + value: address 0x5087675E669e6244620013691c05C1De0e8B525e have 0 want 366029808068000000000
+Version: viem@2.43.2
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
