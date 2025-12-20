@@ -478,9 +478,11 @@ async function withdrawAndBridge(
   });
   
   try {
+    // Use explicit gas limit to avoid bad RPC gas estimates
     const approveHash = await wallet.sendTransaction({
       to: USDC_E_POLYGON as Hex,
       data: approveData as Hex,
+      gas: BigInt(100_000), // 100k gas is plenty for ERC20 approve
     });
     log('INFO', `Approval tx: ${approveHash}`);
     
@@ -497,10 +499,12 @@ async function withdrawAndBridge(
   log('INFO', 'Executing Relay bridge deposit...');
   
   try {
+    // Use explicit gas limit to avoid bad RPC gas estimates
     const bridgeTxHash = await wallet.sendTransaction({
       to: quote.txData.to as Hex,
       data: quote.txData.data as Hex,
       value: BigInt(quote.txData.value || '0'),
+      gas: BigInt(300_000), // 300k gas for bridge contract interaction
     });
     log('INFO', `Bridge tx submitted: ${bridgeTxHash}`);
     
