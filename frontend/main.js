@@ -802,16 +802,18 @@ async function loadPendingWithdrawals() {
         }
         
         // Fetch details for each request
+        // V7.3: getWithdrawalRequest returns [user, shares, usdcLocked, requestTime, claimed, expired]
         const pendingRequests = [];
         for (const requestId of requestIds) {
             const req = await vaultContract.getWithdrawalRequest(requestId);
-            // req = [user, shares, requestTime, claimed, expired]
-            if (!req[3]) { // not claimed
+            // req = [user, shares, usdcLocked, requestTime, claimed, expired]
+            if (!req[4]) { // not claimed
                 pendingRequests.push({
                     id: requestId,
                     shares: req[1],
-                    requestTime: req[2],
-                    expired: req[4]
+                    usdcLocked: req[2],  // V7.3: Locked USDC amount
+                    requestTime: req[3],
+                    expired: req[5]
                 });
             }
         }
@@ -821,29 +823,18 @@ async function loadPendingWithdrawals() {
             return;
         }
         
-        // Get current share price
-        let sharePrice = 1.0;
-        try {
-            if (PRICE_API_URL) {
-                const res = await fetch(`${PRICE_API_URL}/price`);
-                const data = await res.json();
-                sharePrice = data.price_per_share || 1.0;
-            }
-        } catch (e) {
-            console.log("Could not fetch price for pending display");
-        }
-        
-        // Render list
+        // Render list - V7.3: Use locked USDC value (not estimated from current NAV)
         list.innerHTML = pendingRequests.map(req => {
             const sharesFormatted = Number(ethers.formatUnits(req.shares, 18)).toFixed(2);
-            const usdValue = (Number(ethers.formatUnits(req.shares, 18)) * sharePrice).toFixed(2);
+            // V7.3: Show exact locked amount (guaranteed payout)
+            const lockedUsdc = Number(ethers.formatUnits(req.usdcLocked, 6)).toFixed(2);
             const requestDate = new Date(Number(req.requestTime) * 1000).toLocaleString();
             
             return `
                 <div class="pending-item">
                     <div class="pending-info">
                         <div class="pending-shares">${sharesFormatted} pSNIPER</div>
-                        <div class="pending-value">~$${usdValue} USDC</div>
+                        <div class="pending-value">$${lockedUsdc} USDC (locked)</div>
                         <div class="pending-time">Requested: ${requestDate}</div>
                     </div>
                     <button class="claim-btn ${req.expired ? 'expired' : ''}" 
@@ -869,11 +860,6 @@ async function handleClaim(requestId) {
         return;
     }
     
-    if (!PRICE_API_URL) {
-        alert("VPS bot URL not configured");
-        return;
-    }
-    
     const claimBtn = event.target;
     const isExpired = claimBtn.classList.contains('expired');
     
@@ -881,32 +867,15 @@ async function handleClaim(requestId) {
         claimBtn.disabled = true;
         claimBtn.textContent = "Processing...";
         
-        // Get signed NAV from VPS bot
-        const signedNav = await getSignedNav();
-        
-        // Build full NavDataV7 struct for contract
-        const nd = signedNav.navData;
-        const navData = {
-            totalAssets: BigInt(nd.totalAssets),
-            creditedCash: BigInt(nd.creditedCash),
-            creditedPositions: BigInt(nd.creditedPositions),
-            pendingCredit: BigInt(nd.pendingCredit),
-            inFlightOnChain: BigInt(nd.inFlightOnChain),
-            timestamp: nd.timestamp,
-            deadline: nd.deadline,
-            roundId: nd.roundId
-        };
-        const signature = signedNav.signature;
-        
         const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
         
         let tx;
         if (isExpired) {
             // Reclaim expired request - get shares back
-            tx = await signerVaultContract.reclaimExpired(requestId);
+            tx = await signerVaultContract.cancelExpiredWithdrawal(requestId);
         } else {
-            // Normal claim - get USDC
-            tx = await signerVaultContract.claim(requestId, navData, signature);
+            // V7.3: Simplified claim - no NAV needed, price was locked at request time
+            tx = await signerVaultContract.claim(requestId);
         }
         
         await tx.wait();
@@ -918,7 +887,7 @@ async function handleClaim(requestId) {
     } catch (error) {
         console.error("Claim error:", error);
         let errorMsg = error.reason || error.message;
-        if (errorMsg.includes("Insufficient buffer")) {
+        if (errorMsg.includes("Insufficient buffer") || errorMsg.includes("Not enough USDC")) {
             errorMsg = "Not enough USDC in buffer. Try again later when positions are liquidated.";
         }
         alert("Claim failed: " + errorMsg);
