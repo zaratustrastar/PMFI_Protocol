@@ -149,7 +149,7 @@ async function createRelayClient(): Promise<RelayClient> {
 // BALANCE CHECKING
 // =============================================================================
 
-async function getProxyBalance(): Promise<number> {
+async function getProxyBalanceRaw(): Promise<bigint> {
   const response = await fetch(POLYGON_RPC_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -176,8 +176,12 @@ async function getProxyBalance(): Promise<number> {
     throw new Error(`RPC error: ${data.error.message}`);
   }
   
-  const balance = BigInt(data.result);
-  return Number(formatUnits(balance, 6));
+  return BigInt(data.result);
+}
+
+async function getProxyBalance(): Promise<number> {
+  const balanceRaw = await getProxyBalanceRaw();
+  return Number(formatUnits(balanceRaw, 6));
 }
 
 async function getEOABalance(eoaAddress: string): Promise<number> {
@@ -320,18 +324,17 @@ async function pollBridgeStatus(requestId: string): Promise<{ success: boolean; 
 async function withdrawFromProxyToEOA(
   client: RelayClient,
   eoaAddress: string,
-  amountUsdc: number,
+  amountRaw: bigint,
   dryRun: boolean
 ): Promise<{ success: boolean; txHash?: string; error?: string }> {
-  log('INFO', `Withdrawing $${amountUsdc} from Safe proxy to EOA ${eoaAddress}`);
+  const amountUsdc = Number(formatUnits(amountRaw, 6));
+  log('INFO', `Withdrawing $${amountUsdc.toFixed(6)} (${amountRaw} raw) from Safe proxy to EOA ${eoaAddress}`);
   
-  const amount6dec = parseUnits(amountUsdc.toFixed(6), 6);
-  
-  // Encode USDC transfer from proxy to EOA
+  // Encode USDC transfer from proxy to EOA using exact raw amount
   const transferData = encodeFunctionData({
     abi: ERC20_ABI,
     functionName: 'transfer',
-    args: [eoaAddress as Hex, amount6dec],
+    args: [eoaAddress as Hex, amountRaw],
   });
   
   const tx = {
@@ -378,7 +381,7 @@ async function withdrawAndBridge(
   dryRun: boolean
 ): Promise<{ success: boolean; txHash?: string; bridgeRequestId?: string; error?: string }> {
   log('INFO', '=== Starting Safe Proxy Withdrawal ===');
-  log('INFO', `Amount: $${amountUsdc}`);
+  log('INFO', `Requested amount: $${amountUsdc}`);
   log('INFO', `Destination: ${TREASURY_ADDRESS}`);
   log('INFO', `Dry run: ${dryRun}`);
   
@@ -391,13 +394,26 @@ async function withdrawAndBridge(
     return { success: false, error: `Amount $${amountUsdc} exceeds max $${MAX_PER_TX_USDC}` };
   }
   
-  // Check proxy balance (allow 0.1 tolerance for floating point precision)
-  const proxyBalance = await getProxyBalance();
-  log('INFO', `Proxy USDC.e balance: $${proxyBalance.toFixed(2)}`);
+  // Get exact raw balance (no floating point issues)
+  const proxyBalanceRaw = await getProxyBalanceRaw();
+  const proxyBalance = Number(formatUnits(proxyBalanceRaw, 6));
+  log('INFO', `Proxy USDC balance: $${proxyBalance.toFixed(6)} (${proxyBalanceRaw} raw)`);
   
-  const BALANCE_TOLERANCE = 0.1;
-  if (proxyBalance + BALANCE_TOLERANCE < amountUsdc) {
-    return { success: false, error: `Insufficient balance: have $${proxyBalance.toFixed(2)}, need $${amountUsdc}` };
+  // Convert requested amount to raw (6 decimals)
+  const requestedRaw = parseUnits(amountUsdc.toFixed(6), 6);
+  
+  // Cap at available balance minus small dust buffer (100 units = 0.0001 USDC)
+  const DUST_BUFFER = BigInt(100);
+  const maxAvailable = proxyBalanceRaw > DUST_BUFFER ? proxyBalanceRaw - DUST_BUFFER : proxyBalanceRaw;
+  const sendRaw = requestedRaw <= maxAvailable ? requestedRaw : maxAvailable;
+  const sendUsdc = Number(formatUnits(sendRaw, 6));
+  
+  if (sendRaw <= BigInt(0)) {
+    return { success: false, error: `Insufficient balance: have $${proxyBalance.toFixed(6)}` };
+  }
+  
+  if (sendRaw < requestedRaw) {
+    log('INFO', `⚠️ Capping transfer: requested $${amountUsdc}, sending $${sendUsdc.toFixed(6)} (available minus dust)`);
   }
   
   // Create RelayClient
@@ -413,7 +429,7 @@ async function withdrawAndBridge(
   
   // Step 1: Withdraw from Safe proxy to EOA
   log('INFO', '\n--- Step 1: Safe Proxy → EOA ---');
-  const withdrawResult = await withdrawFromProxyToEOA(client, eoaAddress, amountUsdc, dryRun);
+  const withdrawResult = await withdrawFromProxyToEOA(client, eoaAddress, sendRaw, dryRun);
   
   if (!withdrawResult.success) {
     return { success: false, error: `Withdrawal failed: ${withdrawResult.error}` };
@@ -433,14 +449,14 @@ async function withdrawAndBridge(
   
   // Check EOA balance
   const eoaBalance = await getEOABalance(eoaAddress);
-  log('INFO', `EOA USDC.e balance: $${eoaBalance.toFixed(2)}`);
+  log('INFO', `EOA USDC.e balance: $${eoaBalance.toFixed(6)}`);
   
-  if (eoaBalance < amountUsdc * 0.99) { // Allow 1% slippage
-    return { success: false, error: `EOA balance too low after transfer: $${eoaBalance.toFixed(2)}` };
+  if (eoaBalance < sendUsdc * 0.99) { // Allow 1% slippage
+    return { success: false, error: `EOA balance too low after transfer: $${eoaBalance.toFixed(6)}` };
   }
   
-  // Get bridge quote
-  const quote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, amountUsdc);
+  // Get bridge quote using actual send amount
+  const quote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, sendUsdc);
   if (!quote) {
     return { success: false, error: 'Failed to get Relay bridge quote' };
   }

@@ -1,0 +1,63 @@
+Yep — your logs + PolygonScan make it very clear what’s happening:
+
+### the tx is failing because the Safe proxy doesn’t actually have 19.99 USDC.e
+
+On the proxy address **0x9cbc…**, PolygonScan shows the USDC.e balance is **19.989265** (not 19.99). ([Polygon (POL) Blockchain Explorer][1])
+
+But your script tries to transfer exactly **19.99** (i.e. **19,990,000** in 6-decimals). From the tx input it’s calling `transfer(EOA, 0x013105f0)` where `0x013105f0 = 19,990,000`. ([Polygon (POL) Blockchain Explorer][2])
+
+Since **19,989,265 < 19,990,000**, the USDC `transfer()` fails, which makes the Safe `execTransaction()` revert. That’s why there are **no ERC-20 transfer logs** and the tx is “execution reverted”. ([Polygon (POL) Blockchain Explorer][2])
+
+This is a classic “UI rounding” bug:
+
+* your bot prints “Proxy USDC.e balance: $19.99” but it likely rounded up
+* the actual balance has a tiny shortfall (~$0.000735)
+
+---
+
+## how to fix it (MVP-safe)
+
+### 1) never transfer the human amount directly
+
+Convert using exact integer math and cap by balance:
+
+* read `balanceRaw` (integer, 6 decimals)
+* read `requestedRaw = floor(requested * 1e6)`
+* set `sendRaw = min(requestedRaw, balanceRaw)`
+
+### 2) optionally keep a tiny dust buffer
+
+To avoid edge weirdness:
+
+* `sendRaw = min(requestedRaw, balanceRaw - 100)` (i.e. keep 0.0001 USDC)
+
+### 3) show the exact amount you’ll send
+
+Log both:
+
+* requested
+* available
+* final send amount
+
+So you’ll see immediately when it’s being capped.
+
+---
+
+## what to do right now
+
+Try withdrawing **19.98** (or **19.9892**) and it should go through.
+
+If you want the command to “withdraw max”, add a `withdrawMax` mode:
+
+* ignore the user amount and just transfer `balanceRaw - dust`.
+
+---
+
+If you paste the snippet where you format/print `"Proxy USDC.e balance: $19.99"` and where you build `amountRaw`, I’ll rewrite those lines so they can’t ever round up and cause this revert again.
+
+[1]: https://polygonscan.com/address/0x9cbc5577e6f1b3a097d579c6a28d0cdbd247b6a5 "
+	Address: 0x9cbc5577...bd247b6a5 | PolygonScan
+"
+[2]: https://polygonscan.com/tx/0x418f3c4b8d6d2c7dffad0ec5e75217159cf78dcdb97027ae50a2a00909cfc257 "
+	Polygon Transaction Hash: 0x418f3c4b8d... | PolygonScan
+"
