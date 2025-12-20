@@ -1,0 +1,60 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot/frontend# cd ~/PolyNotifyBot/frontend
+npm install
+node server.cjs
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: @openrouter/ai-sdk-provider@1.2.0
+npm warn Found: ai@4.3.19
+npm warn node_modules/ai
+npm warn   ai@"^4.3.16" from the root project
+npm warn   3 more (@mastra/core, @mastra/memory, @mastra/schema-compat)
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer ai@"^5.0.0" from @openrouter/ai-sdk-provider-v5@1.2.0
+npm warn node_modules/@openrouter/ai-sdk-provider-v5
+npm warn   @openrouter/ai-sdk-provider-v5@"npm:@openrouter/ai-sdk-provider@1.2.0" from @mastra/core@0.20.2
+npm warn   node_modules/@mastra/core
+npm warn
+npm warn Conflicting peer dependency: ai@5.0.116
+npm warn node_modules/ai
+npm warn   peer ai@"^5.0.0" from @openrouter/ai-sdk-provider-v5@1.2.0
+npm warn   node_modules/@openrouter/ai-sdk-provider-v5
+npm warn     @openrouter/ai-sdk-provider-v5@"npm:@openrouter/ai-sdk-provider@1.2.0" from @mastra/core@0.20.2
+npm warn     node_modules/@mastra/core
+
+up to date, audited 1333 packages in 6s
+
+214 packages are looking for funding
+  run `npm fund` for details
+
+34 vulnerabilities (25 low, 4 moderate, 5 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+Frontend server running at http://0.0.0.0:3001
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot/frontend# sudo systemctl status nginx
+sudo systemctl restart nginx
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2025-12-04 11:24:44 UTC; 2 weeks 2 days ago
+       Docs: man:nginx(8)
+   Main PID: 268837 (nginx)
+      Tasks: 3 (limit: 4653)
+     Memory: 9.2M (peak: 10.7M)
+        CPU: 31.004s
+     CGroup: /system.slice/nginx.service
+             ├─268837 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─269315 "nginx: worker process"
+             └─269316 "nginx: worker process"
+
+Dec 04 11:24:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+Dec 04 11:24:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started nginx.service - A high performance web server and a reverse proxy server.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot/frontend# 

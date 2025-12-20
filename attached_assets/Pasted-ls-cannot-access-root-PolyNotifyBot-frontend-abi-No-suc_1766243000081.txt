@@ -1,0 +1,48 @@
+ls: cannot access '/root/PolyNotifyBot/frontend/abi/': No such file or directory
+total 428
+drwxr-xr-x 3 root root   4096 Dec 20 14:57 .
+drwxr-xr-x 4 root root   4096 Dec  4 11:19 ..
+drwxr-xr-x 2 root root   4096 Dec 20 14:57 abis
+-rw-r--r-- 1 root root  19949 Dec 20 14:58 index.html
+-rw-r--r-- 1 root root  20162 Dec 20 14:58 index.html.bak
+-rw-r--r-- 1 root root    615 Dec  4 10:53 index.nginx-debian.html
+-rw-r--r-- 1 root root  22219 Dec 20 14:58 logo.png
+-rw-r--r-- 1 root root  22157 Dec 20 14:58 main-v4.js
+-rw-r--r-- 1 root root  21601 Dec 20 14:58 main-v5.js
+-rw-r--r-- 1 root root  34644 Dec 20 14:58 main.js
+-rw-r--r-- 1 root root     14 Dec 20 14:58 main.js.bak
+-rw-r--r-- 1 root root  34508 Dec 20 14:58 main.js.download
+-rw-r--r-- 1 root root 222497 Dec 20 14:58 psniper-logo.png
+-rw-r--r-- 1 root root   1150 Dec 20 14:58 server.cjs
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot/frontend# ls -la /var/www/html/abis/
+total 276
+drwxr-xr-x 2 root root  4096 Dec 20 14:57 .
+drwxr-xr-x 3 root root  4096 Dec 20 14:57 ..
+-rw-r--r-- 1 root root   822 Dec 20 14:58 usdc.json
+-rw-r--r-- 1 root root 26751 Dec 20 14:58 vault-v3.json
+-rw-r--r-- 1 root root 21642 Dec 20 14:58 vault-v4.json
+-rw-r--r-- 1 root root 83950 Dec 20 14:58 vault-v5.json
+-rw-r--r-- 1 root root 38691 Dec 20 14:58 vault.json
+-rw-r--r-- 1 root root 86224 Dec 20 14:58 vaultV7.json
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot/frontend# cat /var/www/html/abis/*.json | head -20
+[
+  {
+    "type": "function",
+    "name": "approve",
+    "inputs": [
+      { "name": "spender", "type": "address" },
+      { "name": "amount", "type": "uint256" }
+    ],
+    "outputs": [{ "type": "bool" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "allowance",
+    "inputs": [
+      { "name": "owner", "type": "address" },
+      { "name": "spender", "type": "address" }
+    ],
+    "outputs": [{ "type": "uint256" }],
+    "stateMutability": "view"
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot/frontend# 

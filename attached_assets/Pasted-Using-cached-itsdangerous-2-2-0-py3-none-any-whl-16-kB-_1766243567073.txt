@@ -1,0 +1,33 @@
+Using cached itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Using cached pydantic-2.12.5-py3-none-any.whl (463 kB)
+Using cached pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+Using cached pyunormalize-17.0.0-py3-none-any.whl (51 kB)
+Using cached types_requests-2.32.4.20250913-py3-none-any.whl (20 kB)
+Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Using cached aiohappyeyeballs-2.6.1-py3-none-any.whl (15 kB)
+Using cached aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+Using cached annotated_types-0.7.0-py3-none-any.whl (13 kB)
+Using cached cytoolz-1.1.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (2.9 MB)
+Using cached eth_keyfile-0.8.1-py3-none-any.whl (7.5 kB)
+Using cached eth_keys-0.7.0-py3-none-any.whl (20 kB)
+Using cached eth_rlp-2.2.0-py3-none-any.whl (4.4 kB)
+Using cached frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (242 kB)
+Using cached multidict-6.7.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (256 kB)
+Using cached parsimonious-0.10.0-py3-none-any.whl (48 kB)
+Using cached propcache-0.4.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (221 kB)
+Using cached pycryptodome-3.23.0-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.3 MB)
+Using cached rlp-4.1.0-py3-none-any.whl (19 kB)
+Using cached typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Using cached yarl-1.22.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (377 kB)
+Using cached regex-2025.11.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (803 kB)
+Using cached toolz-1.1.0-py3-none-any.whl (58 kB)
+Installing collected packages: typing-extensions, types-requests, toolz, regex, pyunormalize, pycryptodome, propcache, multidict, itsdangerous, hexbytes, frozenlist, eth-hash, blinker, annotated-types, aiohappyeyeballs, yarl, typing-inspection, pydantic-core, parsimonious, flask, eth-typing, cytoolz, aiosignal, pydantic, flask-cors, aiohttp, eth-utils, rlp, eth-keys, eth-abi, eth-rlp, eth-keyfile, eth-account, web3
+  Attempting uninstall: typing-extensions
+    Found existing installation: typing_extensions 4.10.0
+ERROR: Cannot uninstall typing_extensions 4.10.0, RECORD file not found. Hint: The package was installed by debian.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 bot/bot_v7.py
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 51, in <module>
+    from web3 import Web3
+ModuleNotFoundError: No module named 'web3'
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
