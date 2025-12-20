@@ -170,7 +170,7 @@ async function main() {
   
   let signedNav;
   try {
-    const response = await fetch(`${BOT_API_URL}/nav/signed`);
+    const response = await fetch(`${BOT_API_URL}/sign-nav`);
     if (!response.ok) {
       throw new Error(`Bot returned ${response.status}: ${await response.text()}`);
     }
