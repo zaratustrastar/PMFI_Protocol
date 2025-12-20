@@ -455,7 +455,8 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
     """
     Withdraw PM cash and bridge directly to vault on Base.
     
-    Uses proxy_withdraw.ts for the withdrawal + bridge operation.
+    Uses safe_proxy_withdraw.ts (with @polymarket/builder-relayer-client) 
+    for Safe proxy wallet support.
     
     Returns:
         (success, request_id, amount_bridged)
@@ -470,7 +471,7 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
     
     cmd_args = [
         "npx", "tsx", 
-        os.path.join(os.path.dirname(__file__), "proxy_withdraw.ts"),
+        os.path.join(os.path.dirname(__file__), "safe_proxy_withdraw.ts"),
         "withdraw", str(amount_usdc)
     ]
     if dry_run:
