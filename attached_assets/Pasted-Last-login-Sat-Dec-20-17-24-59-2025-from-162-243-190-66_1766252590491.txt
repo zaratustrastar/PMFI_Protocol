@@ -1,0 +1,311 @@
+Last login: Sat Dec 20 17:24:59 2025 from 162.243.190.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# nano .env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot
+nano .env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 bot/bot_v7.py
+⚠️  curl_cffi not available, using standard requests (may be blocked by Cloudflare)
+============================================================
+🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+   3-State Asset Tracking + Conservation Bounds
+============================================================
+
+📋 Configuration:
+   RPC: https://mainnet.base.org...
+   Vault V7: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4
+   USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+   PM Wallet: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+   PM Deposit: 0xa76a91208FC7CB88420070AF978D12F440cab2F0
+
+✅ Connected to Base (block 39731535)
+🔑 Oracle signer: 0x5087675E669e6244620013691c05C1De0e8B525e
+✅ USDC contract loaded
+✅ Vault V7 contract loaded
+📂 Loaded pending credit state: forwarded=20.00, withdrawn=20.00
+📂 Loaded roundId cache from disk: lastRoundId=5
+📝 RoundId cache synced from chain: 5
+✅ Initial roundId from chain: 5
+⚠️ PolymarketClient using standard requests (may be blocked)
+⚠️ Could not initialize CLOB client: No module named 'py_clob_client'
+📊 On-chain: supply=10.0000, buffer=10.95, forwarded=20.00, lastRoundId=5
+📝 RoundId cache synced from chain: 5
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+⚠️ CLOB client not initialized, cannot fetch open orders (reserved=0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $20.00
+   - pmCash:       $0.00
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $20.00
+   = pendingCredit: $0.00
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets = PM-side $0.00 + VaultBuffer $10.95 = $10.95
+✅ Signed NAV: $1.0947/share (round 6) [ok]
+🔄 Starting NAV refresh loop (every 45s)
+============================================================
+🔄 BACKGROUND NAV REFRESH
+
+🚀 Starting HTTP API on port 8080============================================================
+
+   Serving frontend from: /root/PolyNotifyBot/frontend
+   Endpoints:
+   - GET  /             - Frontend UI
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📝 RoundId cache synced from chain: 5
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+⚠️ CLOB client not initialized, cannot fetch open orders (reserved=0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $20.00
+   - pmCash:       $0.00
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $20.00
+   = pendingCredit: $0.00
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets = PM-side $0.00 + VaultBuffer $10.95 = $10.95
+✅ Signed NAV: $1.0947/share (round 6) [ok]
+✅ NAV cache updated, sleeping 45s
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+nano .env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+git pull origin main
+remote: Enumerating objects: 175, done.
+remote: Counting objects: 100% (175/175), done.
+remote: Compressing objects: 100% (55/55), done.
+remote: Total 111 (delta 54), reused 107 (delta 50), pack-reused 0 (from 0)
+Receiving objects: 100% (111/111), 1.24 MiB | 10.02 MiB/s, done.
+Resolving deltas: 100% (54/54), completed with 13 local objects.
+From https://github.com/zaratustrastar/PolyNotifyBot
+ * branch            main       -> FETCH_HEAD
+   b2b2bc9..4cc6572  main       -> origin/main
+Updating b2b2bc9..4cc6572
+Fast-forward
+ .../contracts/access/Ownable.sol/Ownable.dbg.json              |   2 +-
+ .../contracts/interfaces/IERC1363.sol/IERC1363.dbg.json        |   2 +-
+ .../contracts/interfaces/IERC4626.sol/IERC4626.dbg.json        |   2 +-
+ .../interfaces/draft-IERC6093.sol/IERC1155Errors.dbg.json      |   2 +-
+ .../interfaces/draft-IERC6093.sol/IERC20Errors.dbg.json        |   2 +-
+ .../interfaces/draft-IERC6093.sol/IERC721Errors.dbg.json       |   2 +-
+ .../contracts/token/ERC20/ERC20.sol/ERC20.dbg.json             |   2 +-
+ .../contracts/token/ERC20/IERC20.sol/IERC20.dbg.json           |   2 +-
+ .../token/ERC20/extensions/ERC4626.sol/ERC4626.dbg.json        |   2 +-
+ .../extensions/IERC20Metadata.sol/IERC20Metadata.dbg.json      |   2 +-
+ .../token/ERC20/utils/SafeERC20.sol/SafeERC20.dbg.json         |   2 +-
+ .../@openzeppelin/contracts/utils/Context.sol/Context.dbg.json |   2 +-
+ .../@openzeppelin/contracts/utils/Panic.sol/Panic.dbg.json     |   2 +-
+ .../utils/ReentrancyGuard.sol/ReentrancyGuard.dbg.json         |   2 +-
+ .../@openzeppelin/contracts/utils/Strings.sol/Strings.dbg.json |   2 +-
+ .../contracts/utils/cryptography/ECDSA.sol/ECDSA.dbg.json      |   2 +-
+ .../MessageHashUtils.sol/MessageHashUtils.dbg.json             |   2 +-
+ .../contracts/utils/introspection/IERC165.sol/IERC165.dbg.json |   2 +-
+ .../@openzeppelin/contracts/utils/math/Math.sol/Math.dbg.json  |   2 +-
+ .../contracts/utils/math/SafeCast.sol/SafeCast.dbg.json        |   2 +-
+ .../contracts/utils/math/SignedMath.sol/SignedMath.dbg.json    |   2 +-
+ artifacts/build-info/0afff921d002da7f92f92a7405152c4a.json     |   1 -
+ artifacts/build-info/3a28cccb9ba2cca26ba23d89c7fa85a7.json     |   1 -
+ artifacts/build-info/40c5b31be9a3552cb8f7e8eea686bd30.json     |   1 -
+ artifacts/build-info/bc89803ce737300d90f45349898ab661.json     |   1 -
+ artifacts/build-info/be1f9d35e3e7983420fbe0eda543dbe0.json     |   1 -
+ artifacts/build-info/cad30e60bd895685645712b666ceffe4.json     |   1 +
+ .../contracts/ISniperStrategy.sol/ISniperStrategy.dbg.json     |   2 +-
+ .../MockSniperStrategy.sol/MockSniperStrategy.dbg.json         |   2 +-
+ artifacts/contracts/MockUSDC.sol/MockUSDC.dbg.json             |   2 +-
+ .../PredictFiSniperVault.sol/PredictFiSniperVault.dbg.json     |   2 +-
+ .../PredictFiSniperVaultV2.sol/PredictFiSniperVaultV2.dbg.json |   2 +-
+ .../PredictFiSniperVaultV3.sol/PredictFiSniperVaultV3.dbg.json |   2 +-
+ .../PredictFiSniperVaultV4.sol/PredictFiSniperVaultV4.dbg.json |   2 +-
+ .../PredictFiSniperVaultV5.sol/PredictFiSniperVaultV5.dbg.json |   2 +-
+ .../PredictFiSniperVaultV6.sol/PredictFiSniperVaultV6.dbg.json |   2 +-
+ .../PredictFiSniperVaultV7.sol/PredictFiSniperVaultV7.dbg.json |   2 +-
+ .../PredictFiSniperVaultV7.sol/PredictFiSniperVaultV7.json     |  66 ++-----
+ artifacts/contracts/TestUSDC.sol/TestUSDC.dbg.json             |   2 +-
+ artifacts/contracts/mocks/MockERC20.sol/MockERC20.dbg.json     |   2 +-
+ cache/solidity-files-cache.json                                |   4 +-
+ contracts/PredictFiSniperVaultV7.sol                           |  34 ++--
+ deployments/v7-mainnet.json                                    |  10 +-
+ frontend/abis/vault.json                                       |  62 ++-----
+ frontend/main.js                                               |  61 ++-----
+ scripts/claim-from-old-vault.ts                                | 250 +++++++++++++++++++++++++++
+ 46 files changed, 346 insertions(+), 213 deletions(-)
+ delete mode 100644 artifacts/build-info/0afff921d002da7f92f92a7405152c4a.json
+ delete mode 100644 artifacts/build-info/3a28cccb9ba2cca26ba23d89c7fa85a7.json
+ delete mode 100644 artifacts/build-info/40c5b31be9a3552cb8f7e8eea686bd30.json
+ delete mode 100644 artifacts/build-info/bc89803ce737300d90f45349898ab661.json
+ delete mode 100644 artifacts/build-info/be1f9d35e3e7983420fbe0eda543dbe0.json
+ create mode 100644 artifacts/build-info/cad30e60bd895685645712b666ceffe4.json
+ create mode 100644 scripts/claim-from-old-vault.ts
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+nano .env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 bot/bot_v7.py
+⚠️  curl_cffi not available, using standard requests (may be blocked by Cloudflare)
+============================================================
+🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+   3-State Asset Tracking + Conservation Bounds
+============================================================
+
+📋 Configuration:
+   RPC: https://mainnet.base.org...
+   Vault V7: 0xfcfa01291d1e75f71e97c4EE53f675D7622988b4
+   USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+   PM Wallet: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+   PM Deposit: 0xa76a91208FC7CB88420070AF978D12F440cab2F0
+
+✅ Connected to Base (block 39731602)
+🔑 Oracle signer: 0x5087675E669e6244620013691c05C1De0e8B525e
+✅ USDC contract loaded
+✅ Vault V7 contract loaded
+📂 Loaded pending credit state: forwarded=20.00, withdrawn=20.00
+📂 Loaded roundId cache from disk: lastRoundId=5
+📝 RoundId cache synced from chain: 5
+✅ Initial roundId from chain: 5
+⚠️ PolymarketClient using standard requests (may be blocked)
+⚠️ Could not initialize CLOB client: No module named 'py_clob_client'
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📝 RoundId cache synced from chain: 5
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+⚠️ CLOB client not initialized, cannot fetch open orders (reserved=0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $20.00
+   - pmCash:       $0.00
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $20.00
+   = pendingCredit: $0.00
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets = PM-side $0.00 + VaultBuffer $0.00 = $0.00
+✅ Signed NAV: $1.0000/share (round 6) [ok]
+🔄 Starting NAV refresh loop (every 45s)
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+
+🚀 Starting HTTP API on port 8080
+   Serving frontend from: /root/PolyNotifyBot/frontend
+   Endpoints:
+   - GET  /             - Frontend UI
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+📊 On-chain: supply=10.0000, buffer=10.95, forwarded=20.00, lastRoundId=5
+📝 RoundId cache synced from chain: 5
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+⚠️ CLOB client not initialized, cannot fetch open orders (reserved=0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $20.00
+   - pmCash:       $0.00
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $20.00
+   = pendingCredit: $0.00
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets = PM-side $0.00 + VaultBuffer $10.95 = $10.95
+✅ Signed NAV: $1.0947/share (round 6) [ok]
+✅ NAV cache updated, sleeping 45s

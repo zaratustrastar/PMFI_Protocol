@@ -1009,13 +1009,29 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
         print(f"⚠️ SAFETY WARNING: {safety_reason}")
     
     # Calculate NAV per share
-    # V7.2 FIX: Include vault buffer in total assets
-    # Formula: totalAssets = vaultBuffer + inFlight + pendingCredit + pmCash + reserved + positions
-    # The breakdown contains PM-side assets; vault_buffer is Base-side (mutually exclusive)
-    pm_side_assets = breakdown["total_assets"]
-    total_assets = pm_side_assets + vault_buffer
+    # V7.3 FIX: Include vault buffer AND reserved INSIDE creditedCash for signing
+    # This ensures: totalAssets = creditedCash + creditedPositions + pendingCredit + inFlight
+    # The contract's asset breakdown check requires this exact equality (only 4 fields)
+    reserved_usdc = breakdown.get("reserved", 0)
+    credited_cash_signed = breakdown["credited_cash"] + vault_buffer + reserved_usdc
+    total_assets = credited_cash_signed + breakdown["credited_positions"] + breakdown["pending_credit"] + breakdown["in_flight"]
     
-    print(f"📊 Total Assets = PM-side ${pm_side_assets/1e6:.2f} + VaultBuffer ${vault_buffer/1e6:.2f} = ${total_assets/1e6:.2f}")
+    # V7.3 ASSERTION: Verify totalAssets equals the sum of 4 signed fields
+    expected_sum = credited_cash_signed + breakdown["credited_positions"] + breakdown["pending_credit"] + breakdown["in_flight"]
+    if total_assets != expected_sum:
+        raise ValueError(f"Asset breakdown mismatch! totalAssets={total_assets} != sum={expected_sum}")
+    
+    print(f"📊 Total Assets Breakdown (V7.3):")
+    print(f"   • PM Cash:        ${breakdown['credited_cash']/1e6:.2f}")
+    print(f"   • Reserved:       ${reserved_usdc/1e6:.2f}")
+    print(f"   • Vault Buffer:   ${vault_buffer/1e6:.2f}")
+    print(f"   • Credited Cash (signed): ${credited_cash_signed/1e6:.2f}")
+    print(f"   • Positions:      ${breakdown['credited_positions']/1e6:.2f}")
+    print(f"   • Pending Credit: ${breakdown['pending_credit']/1e6:.2f}")
+    print(f"   • In-Flight:      ${breakdown['in_flight']/1e6:.2f}")
+    print(f"   ─────────────────────────────")
+    print(f"   • TOTAL ASSETS:   ${total_assets/1e6:.2f}")
+    print(f"   ✅ Breakdown check PASSED")
     
     if total_supply > 0:
         nav = (total_assets * NAV_PRECISION) // total_supply
@@ -1025,10 +1041,10 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     timestamp = now
     deadline = now + NAV_VALIDITY_SECONDS
     
-    # Sign the full breakdown
+    # Sign the full breakdown (credited_cash includes vault buffer)
     signature, signer = sign_nav_data_v7(
         total_assets,
-        breakdown["credited_cash"],
+        credited_cash_signed,
         breakdown["credited_positions"],
         breakdown["pending_credit"],
         breakdown["in_flight"],
@@ -1038,21 +1054,23 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
         VAULT_V7_ADDRESS
     )
     
-    # Update cache
+    # Update cache - IMPORTANT: Keep raw PM cash for pending credit calculations
+    # The signed credited_cash is only used for signing, not for internal accounting
     with nav_lock:
         cached_nav = {
             "total_assets": total_assets,
-            "credited_cash": breakdown["credited_cash"],
+            "credited_cash": breakdown["credited_cash"],  # Raw PM cash, NOT signed
             "credited_positions": breakdown["credited_positions"],
             "pending_credit": breakdown["pending_credit"],
             "in_flight": breakdown["in_flight"],
-            "reserved": breakdown.get("reserved", 0),       # V7.1
-            "cost_basis": breakdown.get("cost_basis", 0),   # V7.1
+            "reserved": reserved_usdc,                    # Separate reserved tracking
+            "cost_basis": breakdown.get("cost_basis", 0),
             "nav": nav,
             "round_id": new_round_id,
             "last_calculated": now,
             "total_supply": total_supply,
             "vault_buffer": vault_buffer,
+            "credited_cash_signed": credited_cash_signed,  # Store signed version separately
             "safety_status": safety_status,
             "safety_reason": safety_reason,
             "expected_assets": expected_assets,
@@ -1064,7 +1082,7 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     result = {
         "navData": {
             "totalAssets": str(total_assets),
-            "creditedCash": str(breakdown["credited_cash"]),
+            "creditedCash": str(credited_cash_signed),
             "creditedPositions": str(breakdown["credited_positions"]),
             "pendingCredit": str(breakdown["pending_credit"]),
             "inFlightOnChain": str(breakdown["in_flight"]),

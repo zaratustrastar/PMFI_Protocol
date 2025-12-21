@@ -1,0 +1,51 @@
+equirement already satisfied: typing-inspection>=0.4.2 in /usr/local/lib/python3.12/dist-packages (from pydantic>=2.0.0->eth-account>=0.13.0->py-clob-client) (0.4.2)
+Requirement already satisfied: iniconfig>=1.0.1 in /usr/local/lib/python3.12/dist-packages (from pytest->poly_eip712_structs>=0.0.1->py-clob-client) (2.3.0)
+Requirement already satisfied: packaging>=22 in /usr/lib/python3/dist-packages (from pytest->poly_eip712_structs>=0.0.1->py-clob-client) (24.0)
+Requirement already satisfied: pluggy<2,>=1.5 in /usr/local/lib/python3.12/dist-packages (from pytest->poly_eip712_structs>=0.0.1->py-clob-client) (1.6.0)
+Requirement already satisfied: pygments>=2.7.2 in /usr/lib/python3/dist-packages (from pytest->poly_eip712_structs>=0.0.1->py-clob-client) (2.17.2)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.12/dist-packages (from requests->py-builder-signing-sdk>=0.0.2->py-clob-client) (3.4.4)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.12/dist-packages (from requests->py-builder-signing-sdk>=0.0.2->py-clob-client) (2.6.2)
+Requirement already satisfied: regex>=2022.3.15 in /usr/local/lib/python3.12/dist-packages (from parsimonious<0.11.0,>=0.10.0->eth-abi>=4.0.0-b.2->eth-account>=0.13.0->py-clob-client) (2025.11.3)
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && python3 trading_bot/auto_trader.py
+✅ Loaded environment variables from .env file
+⚠️  curl_cffi not available, using standard requests (may be blocked by Cloudflare)
+
+🤖 Polymarket Auto-Trading Worker Starting...
+   Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+   Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+   Notifications: Telegram @ponnymarket (sells only)
+   Mode: Queue-based worker
+
+🤖 Initializing Polymarket Trading Bot...
+   Bypass method: standard
+🔑 Deriving trading credentials from private key...
+✅ Trading bot initialized!
+📊 Configuration:
+   Poll Interval: 30s
+   Batch Size: 5 jobs
+
+🔄 Starting worker loop (press Ctrl+C to stop)
+
+
+
+❌ Worker crashed: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "root" does not exist
+
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/auto_trader.py", line 227, in <module>
+    main()
+  File "/root/PolyNotifyBot/trading_bot/auto_trader.py", line 201, in main
+    pending_jobs = get_pending_jobs(limit=batch_size)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/trading_bot/database.py", line 351, in get_pending_jobs
+    conn = get_db_connection()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/trading_bot/database.py", line 13, in get_db_connection
+    return psycopg2.connect(config.DATABASE_URL)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "root" does not exist
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
