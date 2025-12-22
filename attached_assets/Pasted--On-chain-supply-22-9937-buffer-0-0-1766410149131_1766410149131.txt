@@ -1,0 +1,183 @@
+============================================================
+📊 On-chain: supply=22.9937, buffer=0.01, forwarded=34.50, lastRoundId=14
+📝 RoundId cache synced from chain: 14
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+31.44.145.129 - - [22/Dec/2025 13:26:07] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:26:07] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:26:09] "GET /price HTTP/1.1" 200 -
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+31.44.145.129 - - [22/Dec/2025 13:26:09] "GET /price HTTP/1.1" 200 -
+📡 Fetching cash balance via Polygon RPC...
+31.44.145.129 - - [22/Dec/2025 13:26:10] "GET /price HTTP/1.1" 200 -
+💵 Polymarket cash (Polygon): $22.42
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $34.50
+   - pmCash:       $22.42
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $32.05
+   = pendingCredit: $0.00
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $22.42
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $22.42
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $22.42
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.01
+   • Credited Cash (signed): $22.43
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $22.43
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $0.9756/share (round 15) [ok]
+✅ NAV cache updated, sleeping 45s
+31.44.145.129 - - [22/Dec/2025 13:26:19] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:26:20] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1766410265)
+127.0.0.1 - - [22/Dec/2025 13:26:27] "GET /sign-nav HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:26:29] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1766410265)
+127.0.0.1 - - [22/Dec/2025 13:26:37] "GET /sign-nav HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:26:39] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:26:40] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:26:49] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:26:50] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=22.9937, buffer=0.01, forwarded=34.50, lastRoundId=14
+📝 RoundId cache synced from chain: 14
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+31.44.145.129 - - [22/Dec/2025 13:27:00] "GET /price HTTP/1.1" 200 -
+💵 Polymarket cash (Polygon): $22.42
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $34.50
+   - pmCash:       $22.42
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $32.05
+   = pendingCredit: $0.00
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $22.42
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $22.42
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $22.42
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.01
+   • Credited Cash (signed): $22.43
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $22.43
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $0.9756/share (round 15) [ok]
+✅ NAV cache updated, sleeping 45s
+⚡ Returning cached signed NAV (valid until 1766410315)
+127.0.0.1 - - [22/Dec/2025 13:27:02] "GET /sign-nav HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:27:07] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:27:07] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:27:07] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:27:10] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:27:10] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:27:19] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:27:20] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1766410315)
+127.0.0.1 - - [22/Dec/2025 13:27:28] "GET /sign-nav HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:27:29] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1766410315)
+127.0.0.1 - - [22/Dec/2025 13:27:38] "GET /sign-nav HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:27:39] "GET /price HTTP/1.1" 200 -
+31.44.145.129 - - [22/Dec/2025 13:27:40] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=22.9937, buffer=0.01, forwarded=34.50, lastRoundId=14
+📝 RoundId cache synced from chain: 14
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+31.44.145.129 - - [22/Dec/2025 13:27:49] "GET /price HTTP/1.1" 200 -
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+31.44.145.129 - - [22/Dec/2025 13:27:50] "GET /price HTTP/1.1" 200 -
+💵 Polymarket cash (Polygon): $22.42
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $34.50
+   - pmCash:       $22.42
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $32.05
+   = pendingCredit: $0.00
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $22.42
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $22.42
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $22.42
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.01
+   • Credited Cash (signed): $22.43
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $22.43
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $0.9756/share (round 15) [ok]
+✅ NAV cache updated, sleeping 45s

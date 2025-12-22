@@ -126,6 +126,33 @@ ERC20_ABI = [
     {"inputs": [{"name": "account", "type": "address"}], "name": "balanceOf", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
 ]
 
+# Transfer event ABI for scanning USDC transfers
+TRANSFER_EVENT_ABI = {
+    "anonymous": False,
+    "inputs": [
+        {"indexed": True, "name": "from", "type": "address"},
+        {"indexed": True, "name": "to", "type": "address"},
+        {"indexed": False, "name": "value", "type": "uint256"}
+    ],
+    "name": "Transfer",
+    "type": "event"
+}
+
+# Event-driven in-transit configuration
+STALE_THRESHOLD_SECONDS = 180  # 3 minutes before widening log window
+MAX_LOG_LOOKBACK_BLOCKS = 1000  # ~30 min of Base blocks
+DUST_THRESHOLD_USDC = 0.50  # Allow 50 cents absolute difference for matching
+FEE_TOLERANCE_PERCENT = 3.0  # Allow 3% fee deduction for matching (covers Relay fees)
+MAX_PENDING_AGE_SECONDS = 900  # 15 min max before auto-clearing stuck pending item
+
+# Fallback RPC URLs for self-healing
+BASE_RPC_FALLBACKS = [
+    "https://mainnet.base.org",
+    "https://base.llamarpc.com",
+    "https://base.meowrpc.com",
+    "https://1rpc.io/base",
+]
+
 # =============================================================================
 # STATE TRACKING
 # =============================================================================
@@ -304,12 +331,286 @@ def get_vault_usdc(w3_base: Web3, usdc_contract) -> float:
 
 
 def get_in_transit_usdc(state: ServicerState) -> float:
-    """Calculate total USDC currently in transit (bridging)."""
+    """Calculate total USDC currently in transit (bridging) - only PENDING records."""
     total = 0.0
     for item in state.in_transit:
         if item.get("status") == "pending":
             total += item.get("amount_usdc", 0.0)
     return total
+
+
+# =============================================================================
+# EVENT-DRIVEN TRANSFER DETECTION (V7.3)
+# =============================================================================
+
+def get_web3_with_fallback(primary_url: str = None) -> Optional[Web3]:
+    """Try primary RPC, then fallbacks. Returns connected Web3 or None."""
+    urls_to_try = []
+    if primary_url:
+        urls_to_try.append(primary_url)
+    urls_to_try.extend(BASE_RPC_FALLBACKS)
+    
+    for url in urls_to_try:
+        try:
+            w3 = Web3(Web3.HTTPProvider(url, request_kwargs={'timeout': 10}))
+            if w3.is_connected():
+                return w3
+        except Exception:
+            continue
+    return None
+
+
+def scan_transfer_events_to_vault(
+    w3_base: Web3,
+    from_block: int,
+    to_block: int = None
+) -> List[Dict]:
+    """
+    Scan USDC Transfer events where 'to' == vault address.
+    
+    Returns list of transfers: [{block, tx_hash, amount_usdc, timestamp}]
+    """
+    if to_block is None:
+        to_block = w3_base.eth.block_number
+    
+    vault_addr = Web3.to_checksum_address(VAULT_ADDRESS)
+    usdc_addr = Web3.to_checksum_address(USDC_BASE)
+    
+    # ERC20 Transfer event signature: Transfer(address,address,uint256)
+    transfer_topic = Web3.keccak(text="Transfer(address,address,uint256)").hex()
+    
+    # Pad vault address to 32 bytes for indexed parameter
+    vault_topic = "0x" + vault_addr.lower()[2:].zfill(64)
+    
+    try:
+        logs = w3_base.eth.get_logs({
+            "address": usdc_addr,
+            "fromBlock": from_block,
+            "toBlock": to_block,
+            "topics": [
+                transfer_topic,
+                None,  # from: any
+                vault_topic  # to: vault
+            ]
+        })
+        
+        transfers = []
+        for log in logs:
+            amount_raw = int(log["data"].hex(), 16)
+            amount_usdc = amount_raw / 1e6
+            
+            transfers.append({
+                "block": log["blockNumber"],
+                "tx_hash": log["transactionHash"].hex(),
+                "amount_usdc": amount_usdc,
+                "amount_raw": amount_raw,
+            })
+        
+        return transfers
+        
+    except Exception as e:
+        print(f"   ⚠️  Error scanning transfer events: {e}")
+        return []
+
+
+def scan_transfers_with_fallback(
+    w3_base: Web3,
+    from_block: int,
+    to_block: int = None,
+    use_wide_window: bool = False
+) -> List[Dict]:
+    """
+    Scan transfers with fallback RPCs and optional wider window.
+    Self-healing: tries multiple RPCs if primary fails.
+    """
+    # Try primary first
+    transfers = scan_transfer_events_to_vault(w3_base, from_block, to_block)
+    if transfers:
+        return transfers
+    
+    # If stale/no results, try wider window with fallback RPCs
+    if use_wide_window:
+        try:
+            current_block = w3_base.eth.block_number
+            wide_from_block = max(0, current_block - MAX_LOG_LOOKBACK_BLOCKS)
+            
+            for fallback_url in BASE_RPC_FALLBACKS:
+                try:
+                    w3_fallback = Web3(Web3.HTTPProvider(fallback_url, request_kwargs={'timeout': 15}))
+                    if not w3_fallback.is_connected():
+                        continue
+                    
+                    transfers = scan_transfer_events_to_vault(w3_fallback, wide_from_block, current_block)
+                    if transfers:
+                        print(f"   📡 Found {len(transfers)} transfers via fallback RPC")
+                        return transfers
+                except Exception:
+                    continue
+        except Exception as e:
+            print(f"   ⚠️  Wide window scan failed: {e}")
+    
+    return []
+
+
+def match_transfers_to_pending(
+    transfers: List[Dict],
+    pending_items: List[Dict]
+) -> List[Tuple[Dict, Dict]]:
+    """
+    Match incoming transfers to pending in-transit records.
+    
+    Matching rules (relaxed for fee tolerance):
+    1. Transfer amount >= expected * (1 - FEE_TOLERANCE_PERCENT/100) - DUST_THRESHOLD
+    2. Transfer amount <= expected * 1.05 (allow small overage)
+    3. Each transfer can only match one pending item (first match wins)
+    
+    Returns: list of (pending_item, matching_transfer) tuples
+    """
+    matches = []
+    used_transfers = set()
+    
+    # Sort pending by initiated_at (oldest first)
+    sorted_pending = sorted(pending_items, key=lambda x: x.get("initiated_at", 0))
+    
+    for item in sorted_pending:
+        expected_amount = item.get("amount_usdc", 0)
+        
+        # Calculate tolerance: allow up to FEE_TOLERANCE_PERCENT reduction + dust
+        min_acceptable = expected_amount * (1 - FEE_TOLERANCE_PERCENT / 100) - DUST_THRESHOLD_USDC
+        max_acceptable = expected_amount * 1.05  # Small overage allowed
+        
+        for i, transfer in enumerate(transfers):
+            if i in used_transfers:
+                continue
+            
+            transfer_amount = transfer.get("amount_usdc", 0)
+            
+            # Check if amounts match (within tolerance range)
+            if min_acceptable <= transfer_amount <= max_acceptable:
+                matches.append((item, transfer))
+                used_transfers.add(i)
+                break
+    
+    return matches
+
+
+def check_in_transit_via_events(
+    state: ServicerState,
+    w3_base: Web3,
+    usdc_contract
+) -> Tuple[ServicerState, float]:
+    """
+    Event-driven in-transit completion check.
+    
+    Instead of balance reconciliation, directly scans USDC Transfer events
+    to vault address and matches them to pending in-transit records.
+    
+    Self-healing:
+    - Uses fallback RPCs if primary fails
+    - Widens log window for stale records
+    - Never blocks claims - users can still claim if vault has funds
+    
+    Returns:
+        (updated_state, current_vault_balance)
+    """
+    current_vault_balance = get_vault_usdc(w3_base, usdc_contract)
+    
+    if not state.in_transit:
+        return state, current_vault_balance
+    
+    pending_items = [item for item in state.in_transit if item.get("status") == "pending"]
+    if not pending_items:
+        state.in_transit = [item for item in state.in_transit if item.get("status") == "pending"]
+        return state, current_vault_balance
+    
+    # Determine scan window based on oldest pending item
+    now = time.time()
+    oldest_initiated = min(item.get("initiated_at", now) for item in pending_items)
+    age_seconds = now - oldest_initiated
+    is_stale = age_seconds > STALE_THRESHOLD_SECONDS
+    
+    # Calculate from_block (estimate based on 2 sec/block on Base)
+    try:
+        current_block = w3_base.eth.block_number
+        # Look back slightly more than the age of oldest pending item
+        blocks_to_scan = min(int((age_seconds + 60) / 2), MAX_LOG_LOOKBACK_BLOCKS)
+        from_block = max(0, current_block - blocks_to_scan)
+    except Exception as e:
+        print(f"   ⚠️  Error getting block number: {e}")
+        from_block = 0
+    
+    # Scan for transfers
+    transfers = scan_transfers_with_fallback(
+        w3_base, 
+        from_block, 
+        use_wide_window=is_stale
+    )
+    
+    if transfers:
+        print(f"   📡 Found {len(transfers)} USDC transfers to vault since block {from_block}")
+    
+    # Match transfers to pending items
+    matches = match_transfers_to_pending(transfers, pending_items)
+    matched_item_ids = set()
+    
+    for item, transfer in matches:
+        item_id = item.get("request_id") or f"{item.get('initiated_at', 0)}"
+        matched_item_ids.add(item_id)
+        
+        amount = item.get("amount_usdc", 0)
+        print(f"   ✅ Bridge CONFIRMED via event: ${amount:.2f} (tx: {transfer['tx_hash'][:16]}...)")
+        send_telegram_alert(f"✅ Bridge complete: ${amount:.2f} arrived in vault")
+    
+    # Update in_transit list - keep only unmatched pending items
+    updated_in_transit = []
+    for item in state.in_transit:
+        if item.get("status") != "pending":
+            continue
+        
+        item_id = item.get("request_id") or f"{item.get('initiated_at', 0)}"
+        if item_id in matched_item_ids:
+            # This item was matched - don't keep it
+            continue
+        
+        # Still pending
+        amount = item.get("amount_usdc", 0)
+        initiated_at = item.get("initiated_at", 0)
+        age_seconds = now - initiated_at
+        request_id = item.get("request_id", "")
+        
+        # Also check Relay API as backup confirmation
+        if request_id:
+            bridge_status, error = poll_bridge_status(request_id)
+            if bridge_status == "success":
+                print(f"   ✅ Bridge CONFIRMED via Relay API: ${amount:.2f}")
+                send_telegram_alert(f"✅ Bridge complete (Relay): ${amount:.2f} arrived in vault")
+                continue
+            elif bridge_status == "failed":
+                print(f"   ❌ Bridge FAILED: ${amount:.2f} - {error}")
+                send_telegram_alert(f"❌ Bridge failed: ${amount:.2f}\n{error}", is_error=True)
+                item["status"] = "failed"
+                continue
+        
+        # Auto-clear very old pending items (failsafe to prevent permanent stall)
+        if age_seconds > MAX_PENDING_AGE_SECONDS:
+            print(f"   ⚠️ Auto-clearing stale pending: ${amount:.2f} ({int(age_seconds/60)}min old)")
+            send_telegram_alert(
+                f"⚠️ Auto-cleared stale pending bridge: ${amount:.2f}\n"
+                f"Age: {int(age_seconds/60)}min (max {int(MAX_PENDING_AGE_SECONDS/60)}min)\n"
+                f"Funds may have arrived - check vault balance"
+            )
+            continue  # Don't add to updated list
+        
+        # Still waiting
+        if is_stale and age_seconds > STALE_THRESHOLD_SECONDS:
+            print(f"   ⏳ In-transit (stale, self-healing): ${amount:.2f} ({int(age_seconds/60)}min old)")
+        else:
+            print(f"   ⏳ In-transit: ${amount:.2f} ({int(age_seconds/60)}min old)")
+        
+        updated_in_transit.append(item)
+    
+    state.in_transit = updated_in_transit
+    return state, current_vault_balance
 
 
 # =============================================================================
@@ -916,11 +1217,14 @@ def servicer_iteration(
     """
     Single iteration of the withdrawal servicer.
     
+    V7.3: Uses event-driven in-transit detection via USDC Transfer logs.
+    No balance reconciliation - purely matches transfer events to pending records.
+    
     Returns:
-        updated_state - state now tracks prev_vault_balance and unclaimed_delta internally
+        updated_state
     """
     print(f"\n{'='*60}")
-    print(f"💰 WITHDRAWAL SERVICER - {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"💰 WITHDRAWAL SERVICER V7.3 - {time.strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'='*60}")
     
     is_safe, reason = check_kill_switches(w3_base, vault_contract)
@@ -928,7 +1232,8 @@ def servicer_iteration(
         print(f"🚫 STOPPED: {reason}")
         return state
     
-    state, vault_usdc = check_in_transit_arrivals(
+    # V7.3: Event-driven in-transit detection (replaces balance reconciliation)
+    state, vault_usdc = check_in_transit_via_events(
         state, w3_base, usdc_base_contract
     )
     
@@ -951,6 +1256,24 @@ def servicer_iteration(
     if needed < MIN_WITHDRAWAL_USDC:
         print(f"\n✅ No action needed (needed < ${MIN_WITHDRAWAL_USDC})")
         return state
+    
+    # V7.3: Rate limiting - max 1 pending bridge at a time, but allow if pending is stale
+    pending_items = [item for item in state.in_transit if item.get("status") == "pending"]
+    pending_count = len(pending_items)
+    
+    if pending_count > 0:
+        # Check if all pending items are stale (past self-healing threshold)
+        now = time.time()
+        all_stale = all(
+            (now - item.get("initiated_at", 0)) > STALE_THRESHOLD_SECONDS 
+            for item in pending_items
+        )
+        
+        if not all_stale:
+            print(f"\n⏳ Waiting for {pending_count} pending bridge(s) to complete before initiating new one")
+            return state
+        else:
+            print(f"\n⚠️ {pending_count} stale pending bridge(s), allowing new bridge initiation")
     
     allowed, max_allowed = check_daily_limit(state, needed)
     if not allowed:
@@ -1025,7 +1348,7 @@ def servicer_iteration(
 def run_servicer(dry_run: bool = False) -> None:
     """Main servicer loop."""
     print("\n" + "="*60)
-    print("🚀 WITHDRAWAL SERVICER V7.2")
+    print("🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)")
     print("="*60)
     print(f"\nConfiguration:")
     print(f"   Vault: {VAULT_ADDRESS}")

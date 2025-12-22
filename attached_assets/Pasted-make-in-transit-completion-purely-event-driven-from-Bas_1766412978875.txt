@@ -1,0 +1,110 @@
+make “in-transit completion” purely event-driven from Base logs
+1) store an in-transit record when you initiate the bridge
+
+For each bridge/withdraw you start, save:
+
+id
+
+expectedAmountRaw (6 decimals)
+
+createdAt
+
+status = PENDING
+
+(optional) bridgeTxHash if you have it
+
+2) detect completion by scanning USDC Transfer events to the vault
+
+Every loop (e.g., every 5–10 seconds):
+
+query Base USDC contract for Transfer logs where:
+
+to == vaultAddress
+
+blockTimestamp >= createdAt - 30s (small lookback)
+
+sum the amounts
+
+match them to your pending record(s)
+
+Completion rule (MVP-simple):
+
+if you find a single Transfer value >= expectedAmountRaw - dust, mark COMPLETED.
+
+If transfers can be split into multiple transfers:
+
+sum transfers after createdAt until it covers expected.
+
+3) recompute inTransit from pending records only
+
+Never keep one global inTransit number that can get stuck.
+Instead:
+
+inTransitUSDC = sum(expectedAmountRaw for records where status==PENDING)
+
+So even if one record is marked completed, inTransit instantly updates.
+
+make it robust with zero manual steps
+add a short “stale but self-healing” path (no manual clear)
+
+Since typical is 1 minute, use:
+
+STALE_AFTER = 3 minutes
+
+When stale:
+
+don’t clear
+
+just retry log fetch using:
+
+fallback RPC
+
+exponential backoff
+
+wider log window (e.g., last 30 minutes)
+
+And keep scanning until you find the Transfer. No human involved.
+
+don’t block claims
+
+Even if stale:
+
+users can claim if vault has funds
+
+the system is still live
+
+prevent runaway withdrawals without freezing everything
+
+When there’s already 1 pending in-transit record:
+
+allow at most one new bridge initiation per cycle, or
+
+require needed > inTransit + vaultUSDC by a margin
+
+But the key is: if you trust event detection, you won’t hit runaway anyway.
+
+simplest autonomous loop (what your bot should do)
+
+Every 5–10s:
+
+reconcile arrivals
+
+for each pending record:
+
+scan Transfer logs to vault since createdAt
+
+if matched → mark completed
+
+compute needed
+
+needed = pendingUSDC - vaultUSDC - inTransitUSDC
+
+if needed <= 0: stop
+
+initiate one bridge
+
+withdraw/bridge min(needed, perCycleLimit)
+
+create in-transit record
+
+That’s autonomous and doesn’t require manual clear.
