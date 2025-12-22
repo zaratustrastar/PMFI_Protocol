@@ -594,11 +594,6 @@ def check_in_transit_via_events(
         # Auto-clear very old pending items (failsafe to prevent permanent stall)
         if age_seconds > MAX_PENDING_AGE_SECONDS:
             print(f"   ⚠️ Auto-clearing stale pending: ${amount:.2f} ({int(age_seconds/60)}min old)")
-            send_telegram_alert(
-                f"⚠️ Auto-cleared stale pending bridge: ${amount:.2f}\n"
-                f"Age: {int(age_seconds/60)}min (max {int(MAX_PENDING_AGE_SECONDS/60)}min)\n"
-                f"Funds may have arrived - check vault balance"
-            )
             continue  # Don't add to updated list
         
         # Still waiting
