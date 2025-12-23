@@ -67,6 +67,37 @@ except ImportError:
 load_dotenv()
 
 # =============================================================================
+# Private Key Normalization (catches quotes, whitespace, wrong format early)
+# =============================================================================
+def normalize_privkey(raw: str, name: str = "key") -> str:
+    """
+    Normalize and validate a private key.
+    Strips quotes, whitespace, validates hex format.
+    Returns normalized key with 0x prefix or raises ValueError.
+    """
+    if not raw:
+        return ""  # Allow empty for optional keys
+    
+    s = raw.strip().strip('"').strip("'").strip()
+    
+    # Remove 0x prefix for validation
+    if s.startswith("0x") or s.startswith("0X"):
+        s = s[2:]
+    
+    # Validate length
+    if len(s) != 64:
+        raise ValueError(f"{name} wrong length: got {len(s)}, expected 64 hex chars. Value: {repr(raw[:20])}...")
+    
+    # Validate hex
+    try:
+        int(s, 16)
+    except ValueError:
+        raise ValueError(f"{name} contains non-hex characters. Value: {repr(raw[:20])}...")
+    
+    return "0x" + s.lower()
+
+
+# =============================================================================
 # Configuration
 # =============================================================================
 RPC_URL = os.getenv("RPC_URL") or os.getenv("BASE_RPC_URL") or "https://mainnet.base.org"
@@ -76,7 +107,14 @@ USDC_ADDRESS = os.getenv("USDC_ADDRESS") or "0x833589fCD6eDb6E08f4c7C32D4f71b54b
 USDC_E_POLYGON = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174"  # USDC.e on Polygon (6 decimals)
 POLYMARKET_BASE_DEPOSIT = "0xa76a91208FC7CB88420070AF978D12F440cab2F0"
 
-ORACLE_PRIVATE_KEY = os.getenv("ORACLE_PRIVATE_KEY") or os.getenv("KEEPER_PRIVATE_KEY") or os.getenv("PRIVATE_KEY")
+# Normalize private keys at startup (catches bad format immediately)
+_raw_oracle_key = os.getenv("ORACLE_PRIVATE_KEY") or os.getenv("KEEPER_PRIVATE_KEY") or os.getenv("PRIVATE_KEY") or ""
+try:
+    ORACLE_PRIVATE_KEY = normalize_privkey(_raw_oracle_key, "ORACLE_PRIVATE_KEY") if _raw_oracle_key else ""
+except ValueError as e:
+    print(f"❌ {e}")
+    ORACLE_PRIVATE_KEY = ""
+
 POLYMARKET_PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS")
 
 # Residential proxy for Cloudflare bypass
@@ -634,11 +672,46 @@ class PolymarketClient:
             return []
     
     def fetch_orderbook(self, token_id: str) -> Dict:
-        """Fetch orderbook for a token."""
+        """
+        Fetch orderbook for a token.
+        
+        Tries CLOB client native method first (more reliable), 
+        then falls back to HTTP if unavailable.
+        """
+        token_preview = token_id[:20] + "..." if len(token_id) > 20 else token_id
+        
+        # Method 1: Use CLOB client's native get_order_book (preferred)
+        if self.clob_client:
+            try:
+                print(f"   📖 Orderbook via CLOB client: {token_preview}")
+                data = self.clob_client.get_order_book(token_id)
+                
+                bids = [{"price": float(b.get("price", 0)), "size": float(b.get("size", 0))} for b in data.get("bids", [])]
+                asks = [{"price": float(a.get("price", 0)), "size": float(a.get("size", 0))} for a in data.get("asks", [])]
+                
+                bids.sort(key=lambda x: x["price"], reverse=True)
+                asks.sort(key=lambda x: x["price"])
+                
+                print(f"   📊 Got {len(bids)} bids, {len(asks)} asks")
+                return {"bids": bids, "asks": asks}
+                
+            except Exception as e:
+                error_msg = str(e)
+                if "404" in error_msg:
+                    print(f"   ❌ Orderbook 404: token_id may be wrong format or market resolved")
+                    print(f"      Full token: {token_id}")
+                    return {"bids": [], "asks": []}
+                elif "429" in error_msg or "rate" in error_msg.lower():
+                    print(f"   ⚠️  Orderbook rate limited, skipping")
+                    return {"bids": [], "asks": []}
+                else:
+                    print(f"   ⚠️  CLOB client orderbook error: {e}, trying HTTP fallback...")
+        
+        # Method 2: HTTP fallback (may be blocked by Cloudflare without proxy)
         try:
             url = f"{self.CLOB_API_URL}/book"
             params = {"token_id": token_id}
-            print(f"   📖 Orderbook query: token_id={token_id[:20]}..." if len(token_id) > 20 else f"   📖 Orderbook query: token_id={token_id}")
+            print(f"   📖 Orderbook via HTTP: {token_preview}")
             data = self._make_request(url, params=params, timeout=10)
             bids = [{"price": float(b.get("price", 0)), "size": float(b.get("size", 0))} for b in data.get("bids", [])]
             asks = [{"price": float(a.get("price", 0)), "size": float(a.get("size", 0))} for a in data.get("asks", [])]
@@ -653,7 +726,7 @@ class PolymarketClient:
             error_msg = str(e)
             if "404" in error_msg:
                 print(f"   ❌ Orderbook 404: token_id may be wrong format or market resolved")
-                print(f"      Token: {token_id}")
+                print(f"      Full token: {token_id}")
             else:
                 print(f"❌ Error fetching orderbook: {e}")
             return {"bids": [], "asks": []}

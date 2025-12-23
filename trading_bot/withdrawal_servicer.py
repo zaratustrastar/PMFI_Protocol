@@ -65,12 +65,48 @@ _CLOB_CLIENT = None
 load_dotenv()
 
 # =============================================================================
+# PRIVATE KEY NORMALIZATION
+# =============================================================================
+
+def normalize_privkey(raw: str, name: str = "key") -> str:
+    """
+    Normalize and validate a private key.
+    Strips quotes, whitespace, validates hex format.
+    Returns normalized key with 0x prefix or raises ValueError.
+    """
+    if not raw:
+        return ""
+    
+    s = raw.strip().strip('"').strip("'").strip()
+    
+    if s.startswith("0x") or s.startswith("0X"):
+        s = s[2:]
+    
+    if len(s) != 64:
+        raise ValueError(f"{name} wrong length: got {len(s)}, expected 64 hex chars. Value: {repr(raw[:20])}...")
+    
+    try:
+        int(s, 16)
+    except ValueError:
+        raise ValueError(f"{name} contains non-hex characters. Value: {repr(raw[:20])}...")
+    
+    return "0x" + s.lower()
+
+
+# =============================================================================
 # CONFIGURATION
 # =============================================================================
 
 VAULT_ADDRESS = os.getenv("VAULT_V7_ADDRESS", "0xfcfa01291d1e75f71e97c4EE53f675D7622988b4")
 PM_PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS", "")
-PM_PRIVATE_KEY = os.getenv("POLYMARKET_PRIVATE_KEY", "")
+
+# Normalize private key at startup
+_raw_pm_key = os.getenv("POLYMARKET_PRIVATE_KEY", "")
+try:
+    PM_PRIVATE_KEY = normalize_privkey(_raw_pm_key, "POLYMARKET_PRIVATE_KEY") if _raw_pm_key else ""
+except ValueError as e:
+    print(f"❌ {e}")
+    PM_PRIVATE_KEY = ""
 
 # Explicit CLOB API credentials (preferred over derivation)
 PM_API_KEY = os.getenv("POLYMARKET_API_KEY", "")

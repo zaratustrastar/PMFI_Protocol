@@ -1,0 +1,147 @@
+A) When initializing the CLOB client
+
+You had:
+
+⚠️ Could not initialize CLOB client: Non-hexadecimal digit found
+
+Then later you set POLYMARKET_PRIVATE_KEY=0x... and:
+
+✅ CLOB client initialized with L2 auth
+
+So the CLOB client was likely using POLYMARKET_PRIVATE_KEY, and before you set it, it was reading a placeholder like:
+
+"your_private_key_here"
+
+"None"
+
+"..."
+or it contained hidden characters.
+
+B) When initializing ORACLE_PRIVATE_KEY
+
+You also sometimes hit the same error at startup even though it worked in one run.
+
+That almost always happens because the env var is not what you think at runtime:
+
+you launched from a different shell/process where ORACLE_PRIVATE_KEY isn’t set
+
+.env overrides it with a placeholder
+
+there’s a trailing newline / quotes / spaces
+
+you accidentally set something like ORACLE_PRIVATE_KEY=<0x...> or copied a non-visible character
+
+Quick “truth” check (do this once)
+
+Add this right before Account.from_key(...):
+
+import os, re
+
+k = os.getenv("ORACLE_PRIVATE_KEY", "")
+print("ORACLE_PRIVATE_KEY repr:", repr(k))
+print("len:", len(k))
+
+# strict validation
+if not re.fullmatch(r"0x[0-9a-fA-F]{64}", k.strip()):
+    raise ValueError(f"Bad ORACLE_PRIVATE_KEY format: {repr(k)}")
+
+
+Do the same for POLYMARKET_PRIVATE_KEY.
+
+If repr() shows '\n', ' ', quotes, or anything extra — that’s your culprit.
+
+Hardening fix (recommended)
+
+Normalize keys everywhere:
+
+def normalize_privkey(s: str) -> str:
+    if not s:
+        raise ValueError("Missing private key")
+    s = s.strip().strip('"').strip("'")
+    if s.startswith("0x"):
+        s = s[2:]
+    if len(s) != 64:
+        raise ValueError(f"Private key wrong length: {len(s)}")
+    int(s, 16)  # throws if non-hex
+    return "0x" + s.lower()
+
+
+Then:
+
+ORACLE_PRIVATE_KEY = normalize_privkey(os.environ["ORACLE_PRIVATE_KEY"])
+POLYMARKET_PRIVATE_KEY = normalize_privkey(os.environ["POLYMARKET_PRIVATE_KEY"])
+
+
+This turns “mysterious non-hex” into an immediate, readable error.
+
+2) Why orderbook fetch returns HTTP 404
+
+This is not illiquidity.
+
+404 = you’re querying the orderbook with an identifier the CLOB doesn’t recognize
+(wrong token id, wrong parameter name, wrong endpoint path, or wrong environment)
+
+Illiquidity is typically:
+
+200 with bids: [] (empty bids)
+
+Your log says:
+
+❌ Error fetching orderbook: HTTP Error 404
+
+then you print NO BIDS (illiquid)
+
+That’s the bug: you’re treating 404 as “no bids”.
+
+What to do
+A) Log the exact token id and the exact URL you call
+
+Right where you fetch the book:
+
+print("orderbook query token_id:", token_id, type(token_id))
+print("orderbook url:", url)
+
+
+If token_id looks like a condition/market id (not the CTF outcome token id), it will 404.
+
+B) Use the CLOB client method (since L2 auth works now)
+
+You already have:
+
+✅ CLOB client initialized with L2 auth
+
+So instead of raw HTTP calls, use the SDK’s orderbook method (whatever your client exposes), e.g.:
+
+try:
+    ob = clob_client.get_orderbook(token_id)  # or get_book(token_id)
+except HTTPError as e:
+    if e.response.status_code == 404:
+        # wrong token id / delisted token / wrong endpoint
+        raise RuntimeError(f"Orderbook 404 for token_id={token_id} (NOT illiquid)")
+    raise
+
+C) Correct error handling semantics
+
+Make the behavior unambiguous:
+
+404 → BAD_TOKEN_ID (skip + alert + don’t pretend you priced it)
+
+200 & bids empty → ILLIQUID_EMPTY_BOOK
+
+429 / 5xx → TRANSIENT (retry/backoff)
+
+3) Your Base RPC 429 spam (secondary but important)
+
+You’re hitting:
+
+429 Too Many Requests from https://mainnet.base.org/
+
+You’re refreshing every 45s, but you likely do multiple RPC calls per refresh + Flask endpoints also hit it.
+
+Minimum fixes:
+
+add rate limiting / exponential backoff on RPC calls
+
+cache values per refresh cycle (don’t re-read the same state twice)
+
+use a higher-limit RPC (paid / dedicated) if this is production
