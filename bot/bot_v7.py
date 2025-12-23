@@ -69,7 +69,7 @@ load_dotenv()
 # =============================================================================
 # Configuration
 # =============================================================================
-RPC_URL = os.getenv("RPC_URL")
+RPC_URL = os.getenv("RPC_URL") or os.getenv("BASE_RPC_URL") or "https://mainnet.base.org"
 POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL") or "https://polygon-rpc.com"  # For PM balance queries
 VAULT_V7_ADDRESS = os.getenv("VAULT_V7_ADDRESS") or os.getenv("VAULT_V6_ADDRESS") or ""
 USDC_ADDRESS = os.getenv("USDC_ADDRESS") or "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"

@@ -799,6 +799,18 @@ def get_pm_balance() -> Tuple[float, float]:
             return get_pm_balance_from_rpc()
         
         data = response.json()
+        
+        if isinstance(data, list):
+            if len(data) > 0 and isinstance(data[0], dict):
+                data = data[0]
+            else:
+                print(f"⚠️  PM data API returned empty list")
+                return get_pm_balance_from_rpc()
+        
+        if not isinstance(data, dict):
+            print(f"⚠️  PM data API returned unexpected type: {type(data)}")
+            return get_pm_balance_from_rpc()
+        
         cash = float(data.get("cashBalance", 0))
         positions = float(data.get("positionValue", 0))
         
@@ -832,11 +844,57 @@ def get_pm_balance_from_rpc() -> Tuple[float, float]:
         return 0.0, 0.0
 
 
+def get_orderbook_best_bid(token_id: str) -> Tuple[float, float]:
+    """
+    Get best bid price and available size from order book.
+    
+    Returns: (best_bid_price, available_bid_size)
+    """
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            "Accept": "application/json",
+        }
+        proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
+        
+        url = f"https://clob.polymarket.com/book?token_id={token_id}"
+        
+        if BYPASS_METHOD == "curl_cffi":
+            response = curl_requests.get(
+                url,
+                headers=headers,
+                proxies=proxies,
+                impersonate="chrome120",
+                timeout=15
+            )
+        else:
+            response = requests.get(url, headers=headers, proxies=proxies, timeout=15)
+        
+        if response.status_code != 200:
+            return 0.0, 0.0
+        
+        data = response.json()
+        bids = data.get("bids", [])
+        
+        if not bids:
+            return 0.0, 0.0
+        
+        best_bid = bids[0]
+        price = float(best_bid.get("price", 0))
+        size = float(best_bid.get("size", 0))
+        
+        return price, size
+        
+    except Exception as e:
+        print(f"   ⚠️  Error fetching orderbook: {e}")
+        return 0.0, 0.0
+
+
 def get_positions_for_liquidation() -> List[Dict]:
     """
     Get list of positions sorted by liquidation value (largest first).
     
-    Returns list of dicts with: token_id, size, best_bid, liq_value
+    Returns list of dicts with: token_id, size, best_bid, bid_depth, liq_value
     """
     if not PM_PROXY_ADDRESS:
         return []
@@ -862,12 +920,24 @@ def get_positions_for_liquidation() -> List[Dict]:
             response = requests.get(url, headers=headers, proxies=proxies, timeout=30)
         
         if response.status_code != 200:
+            print(f"⚠️  Positions API returned {response.status_code}")
             return []
         
         positions_data = response.json()
         
+        if not isinstance(positions_data, list):
+            if isinstance(positions_data, dict) and "positions" in positions_data:
+                positions_data = positions_data["positions"]
+            elif isinstance(positions_data, dict):
+                positions_data = [positions_data]
+            else:
+                print(f"⚠️  Positions API returned unexpected type: {type(positions_data)}")
+                return []
+        
         positions = []
         for pos in positions_data:
+            if not isinstance(pos, dict):
+                continue
             size = float(pos.get("size", 0))
             if size <= 0:
                 continue
@@ -1017,19 +1087,26 @@ def liquidate_positions(needed_usdc: float) -> float:
         if still_needed <= 0:
             break
         
+        token_id = pos["token_id"]
+        
+        live_bid_price, bid_depth = get_orderbook_best_bid(token_id)
+        if live_bid_price <= 0 or bid_depth <= 0:
+            print(f"   ⚠️  No bid liquidity for {pos['outcome']}, skipping")
+            continue
+        
         size_to_sell = pos["size"]
         if pos["liq_value"] > still_needed:
             ratio = still_needed / pos["liq_value"]
             size_to_sell = pos["size"] * ratio * 1.1
         
-        best_bid = pos["best_bid"]
+        size_to_sell = min(size_to_sell, bid_depth)
         
-        print(f"   MARKET SELL: {size_to_sell:.2f} of {pos['outcome']} @ best bid ${best_bid:.4f}")
+        print(f"   MARKET SELL: {size_to_sell:.2f} of {pos['outcome']} @ live bid ${live_bid_price:.4f} (depth: {bid_depth:.2f})")
         
         success, usdc = execute_liquidation_order(
-            pos["token_id"],
+            token_id,
             size_to_sell,
-            best_bid
+            live_bid_price
         )
         
         if success:
