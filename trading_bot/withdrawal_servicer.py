@@ -50,7 +50,7 @@ except ImportError:
 
 try:
     from py_clob_client.client import ClobClient
-    from py_clob_client.clob_types import OrderArgs, OrderType
+    from py_clob_client.clob_types import OrderArgs, OrderType, MarketOrderArgs
     from py_clob_client.order_builder.constants import SELL
     import py_clob_client.http_helpers.helpers as http_helpers
     HAS_CLOB_CLIENT = True
@@ -1022,14 +1022,14 @@ def liquidate_positions(needed_usdc: float) -> float:
             ratio = still_needed / pos["liq_value"]
             size_to_sell = pos["size"] * ratio * 1.1
         
-        min_price = pos["best_bid"] * (1 - MAX_SLIPPAGE_BPS / 10000)
+        best_bid = pos["best_bid"]
         
-        print(f"   Selling {size_to_sell:.2f} of {pos['outcome']} @ min ${min_price:.4f}")
+        print(f"   MARKET SELL: {size_to_sell:.2f} of {pos['outcome']} @ best bid ${best_bid:.4f}")
         
         success, usdc = execute_liquidation_order(
             pos["token_id"],
             size_to_sell,
-            min_price
+            best_bid
         )
         
         if success:
@@ -1047,8 +1047,23 @@ def liquidate_positions(needed_usdc: float) -> float:
     return total_obtained
 
 
-def execute_liquidation_order(token_id: str, size: float, min_price: float) -> Tuple[bool, float]:
-    """Execute a single liquidation order via patched CLOB client with proxy."""
+def execute_liquidation_order(token_id: str, size: float, best_bid: float) -> Tuple[bool, float]:
+    """
+    Execute a true market sell for liquidation using MarketOrderArgs.
+    
+    Per Polymarket docs and py-clob-client:
+    - Uses MarketOrderArgs with amount (in USDC terms)
+    - Uses create_market_order() for proper market order handling  
+    - Uses FAK (Fill-And-Kill) to allow partial fills if liquidity is limited
+    
+    Args:
+        token_id: The token to sell
+        size: Number of tokens to sell
+        best_bid: Current best bid price (for USDC estimation)
+    
+    Returns:
+        (success, usdc_obtained)
+    """
     client = get_patched_clob_client()
     
     if not client:
@@ -1056,26 +1071,32 @@ def execute_liquidation_order(token_id: str, size: float, min_price: float) -> T
         return False, 0.0
     
     try:
-        order_args = OrderArgs(
+        usdc_amount = size * best_bid
+        
+        market_order_args = MarketOrderArgs(
             token_id=token_id,
+            amount=usdc_amount,
             side=SELL,
-            size=size,
-            price=min_price,
         )
         
-        signed_order = client.create_order(order_args)
-        resp = client.post_order(signed_order, OrderType.GTC)
+        print(f"   📤 Creating market sell: {size:.2f} tokens (~${usdc_amount:.2f})")
+        signed_order = client.create_market_order(market_order_args)
+        resp = client.post_order(signed_order, OrderType.FAK)
         
         if resp.get("success"):
-            usdc = size * min_price
-            print(f"   ✅ Order placed: ${usdc:.2f}")
-            return True, usdc
+            taking = float(resp.get("takingAmount", usdc_amount))
+            print(f"   ✅ MARKET SELL executed: received ${taking:.2f}")
+            return True, taking
         else:
-            print(f"   ❌ Order failed: {resp}")
+            error_msg = resp.get("errorMsg", "Unknown error")
+            print(f"   ❌ Market sell failed: {error_msg}")
+            print(f"   📋 Full response: {resp}")
             return False, 0.0
             
     except Exception as e:
         print(f"   ❌ Liquidation order error: {e}")
+        import traceback
+        traceback.print_exc()
         return False, 0.0
 
 
