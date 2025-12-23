@@ -1,0 +1,53 @@
+   55c32e5..5a0a85d  main       -> origin/main
+Updating 55c32e5..5a0a85d
+Fast-forward
+ attached_assets/Pasted-2-The-real-blocker-you-can-t-place-orders-no-L2-auth-cr_1766507447307.txt | 71 ++++++++++++++++++++++++++++++++++++++++++++++
+ attached_assets/Pasted-WITHDRAWAL-SERVICER-V7-3-2025-12-23-16-27-02--176650747_1766507477906.txt |  1 +
+ bot/bot_v7.py                                                                                    |  2 +-
+ trading_bot/withdrawal_servicer.py                                                               | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++++----
+ 4 files changed, 155 insertions(+), 6 deletions(-)
+ create mode 100644 attached_assets/Pasted-2-The-real-blocker-you-can-t-place-orders-no-L2-auth-cr_1766507447307.txt
+ create mode 100644 attached_assets/Pasted-WITHDRAWAL-SERVICER-V7-3-2025-12-23-16-27-02--176650747_1766507477906.txt
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+============================================================
+🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+   3-State Asset Tracking + Conservation Bounds
+============================================================
+
+📋 Configuration:
+   RPC: https://mainnet.base.org...
+   Vault V7: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+   PM Wallet: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+   PM Deposit: 0xa76a91208FC7CB88420070AF978D12F440cab2F0
+
+✅ Connected to Base (block 39866585)
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1411, in <module>
+    main()
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1337, in main
+    oracle_account = Account.from_key(ORACLE_PRIVATE_KEY)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_utils/decorators.py", line 31, in _wrapper
+    return self.method(objtype, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_account/account.py", line 310, in from_key
+    key = self._parse_private_key(private_key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_utils/decorators.py", line 31, in _wrapper
+    return self.method(objtype, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_account/account.py", line 894, in _parse_private_key
+    hb_key = HexBytes(key)
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hexbytes/main.py", line 35, in __new__
+    bytesval = to_bytes(val)
+               ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hexbytes/_utils.py", line 17, in to_bytes
+    return hexstr_to_bytes(val)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hexbytes/_utils.py", line 54, in hexstr_to_bytes
+    return binascii.unhexlify(ascii_hex)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+binascii.Error: Non-hexadecimal digit found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

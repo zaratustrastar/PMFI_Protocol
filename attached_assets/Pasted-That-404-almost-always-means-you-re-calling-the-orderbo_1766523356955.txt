@@ -1,0 +1,69 @@
+That 404 almost always means you’re calling the orderbook endpoint with the wrong identifier (wrong token id / wrong market id / wrong chain/product), so Polymarket returns “not found” — and then your code interprets that as “no bids”.
+
+Here are the common causes, in the exact order I’d check:
+
+1) You’re using a market id instead of a token id (most common)
+
+Polymarket orderbooks are for CTF outcome tokens (YES/NO tokens), not for the “market id” humans see.
+
+So if you pass:
+
+marketId (or condition id) → 404
+but you must pass:
+
+tokenId for YES (and separately tokenId for NO) → 200
+
+Fix: make sure the variable you pass into get_orderbook() / /book is the YES token id (and NO token id), not the market id.
+
+2) You’re querying the wrong environment
+
+If your code sometimes runs against:
+
+testnet endpoints while holding mainnet token ids (or vice versa) → 404
+Same if you’re mixing Polygon vs “newer” endpoints.
+
+Fix: confirm your CLOB host/base URL is the same one your positions come from.
+
+3) Token got resolved/closed or delisted
+
+Resolved markets can have orderbooks removed/disabled depending on how Polymarket serves it. That can become 404 even if positions still exist in historical endpoints.
+
+Fix: check the market status before orderbook fetch; if resolved/closed, treat as “cannot liquidate via book” and fall back to whatever exit mechanism you support.
+
+4) Proxy / Cloudflare / wrong path
+
+Less common, but a proxy misroute can return a generic 404 HTML page.
+
+Fix: log:
+
+full URL you requested
+
+response body (first 200 chars)
+
+headers content-type
+
+Why it prints “NO BIDS (illiquid)”
+
+Right now your code is treating any orderbook fetch failure as “no bids”. That’s dangerous: a 404 is not illiquidity — it’s “wrong token/endpoint”.
+
+MVP fix: distinguish:
+
+404 → “bad token id / wrong endpoint” (fatal for liquidation)
+
+200 but bids=[] → “illiquid”
+
+5xx/timeout → “temporary outage, retry/backoff”
+
+Fastest way to pinpoint it
+
+Print these 3 values for the failing position:
+
+market_id
+
+yes_token_id
+
+no_token_id
+
+and the exact orderbook URL you call
+
+If you paste one example line from your logs showing those (redact nothing except secrets), I’ll tell you immediately which mismatch it is and what to change.
