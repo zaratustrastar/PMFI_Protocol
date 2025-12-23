@@ -257,10 +257,19 @@ def get_patched_clob_client():
         
         # Derive API credentials from private key
         print("   🔑 Deriving trading credentials from private key...")
-        client.set_api_creds(client.create_or_derive_api_creds())
+        try:
+            creds = client.create_or_derive_api_creds()
+            if creds and hasattr(creds, 'api_key') and creds.api_key:
+                client.set_api_creds(creds)
+                print(f"   ✅ CLOB client ready (API key: {creds.api_key[:8]}...)")
+            else:
+                print(f"   ⚠️  Credential derivation returned: {creds}")
+                print("   ⚠️  CLOB client initialized but may not work for authenticated calls")
+        except Exception as cred_error:
+            print(f"   ❌ Credential derivation failed: {cred_error}")
+            print("   ⚠️  CLOB client initialized but may not work for authenticated calls")
         
         _CLOB_CLIENT = client
-        print("   ✅ CLOB client ready for liquidation")
         return client
         
     except Exception as e:

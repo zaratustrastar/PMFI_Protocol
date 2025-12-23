@@ -1,0 +1,104 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd /root/PolyNotifyBot
+git pull
+remote: Enumerating objects: 17, done.
+remote: Counting objects: 100% (17/17), done.
+remote: Compressing objects: 100% (4/4), done.
+remote: Total 12 (delta 8), reused 12 (delta 8), pack-reused 0 (from 0)
+Unpacking objects: 100% (12/12), 8.29 KiB | 848.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   b12b3de..730e3b1  main       -> origin/main
+Updating b12b3de..730e3b1
+Fast-forward
+ ...ed-NAV-0-8466-share-round-24-ok-NAV-cache-updated-_1766488181711.txt | 428 ++++++++++++++++++++++++
+ ...THDRAWAL-SERVICER-V7-3-Event-Driven--1766486680253_1766486680254.txt | 526 +++++++++++++++++++++++++++++
+ ...rt-requests-from-typing-import-Optional-Dict-List-_1766489244302.txt | 167 ++++++++++
+ ...t-VAULT-V7-ADDRESS-0x7bda93A174107F64C67F83aa54176_1766488085967.txt | 533 ++++++++++++++++++++++++++++++
+ ...ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-echo-PROX_1766487418275.txt | 585 +++++++++++++++++++++++++++++++++
+ trading_bot/polymarket_trader.py                                        |   8 +
+ trading_bot/withdrawal_servicer.py                                      |   8 +
+ 7 files changed, 2255 insertions(+)
+ create mode 100644 attached_assets/Pasted--Signed-NAV-0-8466-share-round-24-ok-NAV-cache-updated-_1766488181711.txt
+ create mode 100644 attached_assets/Pasted--WITHDRAWAL-SERVICER-V7-3-Event-Driven--1766486680253_1766486680254.txt
+ create mode 100644 attached_assets/Pasted--import-requests-from-typing-import-Optional-Dict-List-_1766489244302.txt
+ create mode 100644 attached_assets/Pasted-export-VAULT-V7-ADDRESS-0x7bda93A174107F64C67F83aa54176_1766488085967.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-echo-PROX_1766487418275.txt
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# export POLYMARKET_PRIVATE_KEY="0x18f603cbb14bc4fd179cb546fa143e39b7698be4600e324fc5ab484c5323a7a1"
+export POLYMARKET_PROXY_ADDRESS="0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5"
+export VAULT_V7_ADDRESS="0x7bda93A174107F64C67F83aa54176Ecb245f75F3"
+export PROXY_URL="http://3p0LTGSt7YVFojo:QWPWl7bhciHo0ZM@92.113.180.106:42563"
+
+python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $28.72
+   In-transit items: 0
+   Tracked vault balance: $0.01
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-23 11:35:10
+============================================================
+⚠️  Error fetching NAV from bot: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /sign-nav (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $28.72 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+⚠️  PM data API error: 'list' object has no attribute 'get'
+
+📊 Polymarket:
+   Cash: $0.00
+   Positions: $0.00
+
+⚠️  Cash insufficient, need to liquidate $7.07
+   Positions available: $9.77 across 5 positions
+
+🔥 LIQUIDATE: Need $7.07 USDC (capped from $7.07)
+   Selling 39.06 of Yes @ min $0.1193
+🔧 Initializing patched CLOB client for liquidation...
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   🔑 Deriving trading credentials from private key...
+Couldn't parse created CLOB creds
+   ✅ CLOB client ready for liquidation
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+   Selling 5.21 of Yes @ min $0.5607
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+   Selling 1.96 of Yes @ min $0.4753
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+   Selling 2.94 of No @ min $0.2861
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+   Selling 6.85 of Yes @ min $0.0902
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+   Total liquidated: $0.00
+
+💤 Sleeping 60s...
+^CTraceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 1577, in <module>
+    run_servicer(dry_run=args.dry_run)
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 1542, in run_servicer
+    time.sleep(LOOP_INTERVAL_SECONDS)
+KeyboardInterrupt
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
