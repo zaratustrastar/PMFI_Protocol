@@ -7,6 +7,7 @@ Strategy:
 3. Auto-place ladder sell orders at 200%-1000% profit
 """
 
+import os
 import time
 import json
 from typing import List, Dict, Optional
@@ -48,11 +49,34 @@ class PolymarketTrader:
         if BYPASS_METHOD == "curl_cffi":
             self._patch_client_session()
         
-        # Derive trading API credentials from private key
-        # NOTE: Builder API credentials are for fee rebates/attribution only, NOT for trading
-        # Trading requires SDK credentials derived from your wallet's private key
-        print("🔑 Deriving trading credentials from private key...")
-        self.client.set_api_creds(self.client.create_or_derive_api_creds())
+        # Use explicit API credentials if provided, otherwise try to derive
+        pm_api_key = os.getenv("POLYMARKET_API_KEY", "")
+        pm_api_secret = os.getenv("POLYMARKET_API_SECRET", "")
+        pm_api_passphrase = os.getenv("POLYMARKET_API_PASSPHRASE", "")
+        
+        if pm_api_key and pm_api_secret and pm_api_passphrase:
+            print("🔑 Using explicit API credentials from environment...")
+            from py_clob_client.clob_types import ApiCreds
+            creds = ApiCreds(
+                api_key=pm_api_key,
+                api_secret=pm_api_secret,
+                api_passphrase=pm_api_passphrase
+            )
+            self.client.set_api_creds(creds)
+            print(f"   ✅ API key: {pm_api_key[:8]}...")
+        else:
+            print("🔑 Deriving trading credentials from private key...")
+            try:
+                creds = self.client.create_or_derive_api_creds()
+                if creds and hasattr(creds, 'api_key') and creds.api_key:
+                    self.client.set_api_creds(creds)
+                    print(f"   ✅ Derived API key: {creds.api_key[:8]}...")
+                else:
+                    print(f"   ⚠️  Credential derivation returned: {creds}")
+                    print("   💡 Set POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE")
+            except Exception as e:
+                print(f"   ❌ Credential derivation failed: {e}")
+                print("   💡 Set POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE")
         
         # Track active positions
         self.active_positions = {}  # {order_id: order_details}

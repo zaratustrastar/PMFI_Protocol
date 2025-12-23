@@ -72,6 +72,11 @@ VAULT_ADDRESS = os.getenv("VAULT_V7_ADDRESS", "0xfcfa01291d1e75f71e97c4EE53f675D
 PM_PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS", "")
 PM_PRIVATE_KEY = os.getenv("POLYMARKET_PRIVATE_KEY", "")
 
+# Explicit CLOB API credentials (preferred over derivation)
+PM_API_KEY = os.getenv("POLYMARKET_API_KEY", "")
+PM_API_SECRET = os.getenv("POLYMARKET_API_SECRET", "")
+PM_API_PASSPHRASE = os.getenv("POLYMARKET_API_PASSPHRASE", "")
+
 BASE_RPC_URL = os.getenv("BASE_RPC_URL") or os.getenv("RPC_URL", "https://mainnet.base.org")
 POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
 PROXY_URL = os.getenv("PROXY_URL", "")  # Use socks5:// for SOCKS proxies, http:// for HTTP proxies
@@ -174,20 +179,30 @@ def get_patched_clob_client():
     if not HAS_CLOB_CLIENT:
         return None
     
-    if not PM_PRIVATE_KEY or not PM_PROXY_ADDRESS:
-        print("⚠️  Missing PM_PRIVATE_KEY or PM_PROXY_ADDRESS for CLOB client")
+    # Check if we have explicit API creds or can derive them
+    has_explicit_creds = PM_API_KEY and PM_API_SECRET and PM_API_PASSPHRASE
+    has_derivation_prereqs = PM_PRIVATE_KEY and PM_PROXY_ADDRESS
+    
+    if not has_explicit_creds and not has_derivation_prereqs:
+        print("⚠️  Missing credentials. Either provide:")
+        print("   - POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE, or")
+        print("   - POLYMARKET_PRIVATE_KEY and POLYMARKET_PROXY_ADDRESS for derivation")
         return None
     
     try:
         print("🔧 Initializing patched CLOB client for liquidation...")
         
-        # Create CLOB client
+        # Create CLOB client - private key needed for signing orders even with explicit API creds
+        if not PM_PRIVATE_KEY:
+            print("⚠️  POLYMARKET_PRIVATE_KEY required for signing orders")
+            return None
+            
         client = ClobClient(
             "https://clob.polymarket.com",
             key=PM_PRIVATE_KEY,
             chain_id=137,
             signature_type=1,
-            funder=PM_PROXY_ADDRESS
+            funder=PM_PROXY_ADDRESS or ""
         )
         
         # Patch HTTP helpers with curl_cffi for Cloudflare bypass
@@ -255,19 +270,30 @@ def get_patched_clob_client():
                 print(f"   🌐 Using proxy: {proxy_display}")
             print("   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)")
         
-        # Derive API credentials from private key
-        print("   🔑 Deriving trading credentials from private key...")
-        try:
-            creds = client.create_or_derive_api_creds()
-            if creds and hasattr(creds, 'api_key') and creds.api_key:
-                client.set_api_creds(creds)
-                print(f"   ✅ CLOB client ready (API key: {creds.api_key[:8]}...)")
-            else:
-                print(f"   ⚠️  Credential derivation returned: {creds}")
-                print("   ⚠️  CLOB client initialized but may not work for authenticated calls")
-        except Exception as cred_error:
-            print(f"   ❌ Credential derivation failed: {cred_error}")
-            print("   ⚠️  CLOB client initialized but may not work for authenticated calls")
+        # Use explicit API credentials if provided, otherwise try to derive
+        if PM_API_KEY and PM_API_SECRET and PM_API_PASSPHRASE:
+            print("   🔑 Using explicit API credentials from environment...")
+            from py_clob_client.clob_types import ApiCreds
+            creds = ApiCreds(
+                api_key=PM_API_KEY,
+                api_secret=PM_API_SECRET,
+                api_passphrase=PM_API_PASSPHRASE
+            )
+            client.set_api_creds(creds)
+            print(f"   ✅ CLOB client ready (API key: {PM_API_KEY[:8]}...)")
+        else:
+            print("   🔑 Deriving trading credentials from private key...")
+            try:
+                creds = client.create_or_derive_api_creds()
+                if creds and hasattr(creds, 'api_key') and creds.api_key:
+                    client.set_api_creds(creds)
+                    print(f"   ✅ CLOB client ready (API key: {creds.api_key[:8]}...)")
+                else:
+                    print(f"   ⚠️  Credential derivation returned: {creds}")
+                    print("   💡 Set POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE")
+            except Exception as cred_error:
+                print(f"   ❌ Credential derivation failed: {cred_error}")
+                print("   💡 Set POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE")
         
         _CLOB_CLIENT = client
         return client
