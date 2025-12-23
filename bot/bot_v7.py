@@ -686,8 +686,30 @@ class PolymarketClient:
                 print(f"   📖 Orderbook via CLOB client: {token_preview}")
                 data = self.clob_client.get_order_book(token_id)
                 
-                bids = [{"price": float(b.get("price", 0)), "size": float(b.get("size", 0))} for b in data.get("bids", [])]
-                asks = [{"price": float(a.get("price", 0)), "size": float(a.get("size", 0))} for a in data.get("asks", [])]
+                # Handle both dict and OrderBookSummary object responses
+                if hasattr(data, 'bids') and hasattr(data, 'asks'):
+                    # OrderBookSummary object - access attributes directly
+                    raw_bids = data.bids if data.bids else []
+                    raw_asks = data.asks if data.asks else []
+                else:
+                    # Dict response
+                    raw_bids = data.get("bids", []) if isinstance(data, dict) else []
+                    raw_asks = data.get("asks", []) if isinstance(data, dict) else []
+                
+                # Parse bid/ask entries (could be OrderBookLevel objects or dicts)
+                bids = []
+                for b in raw_bids:
+                    if hasattr(b, 'price') and hasattr(b, 'size'):
+                        bids.append({"price": float(b.price), "size": float(b.size)})
+                    elif isinstance(b, dict):
+                        bids.append({"price": float(b.get("price", 0)), "size": float(b.get("size", 0))})
+                
+                asks = []
+                for a in raw_asks:
+                    if hasattr(a, 'price') and hasattr(a, 'size'):
+                        asks.append({"price": float(a.price), "size": float(a.size)})
+                    elif isinstance(a, dict):
+                        asks.append({"price": float(a.get("price", 0)), "size": float(a.get("size", 0))})
                 
                 bids.sort(key=lambda x: x["price"], reverse=True)
                 asks.sort(key=lambda x: x["price"])

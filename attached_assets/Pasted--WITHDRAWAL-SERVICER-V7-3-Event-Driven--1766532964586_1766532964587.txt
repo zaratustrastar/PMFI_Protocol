@@ -1,0 +1,79 @@
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $0.01
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-23 23:35:30
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+
+📊 Polymarket:
+   Cash: $0.00
+   Positions: $0.00
+
+⚠️  Cash insufficient, need to liquidate $7.07
+   Positions available: $9.25 across 4 positions
+
+🔥 LIQUIDATE: Need $7.07 USDC (capped from $7.07)
+   📖 Orderbook query: 54249369766400104419...
+   📊 Best bid: $0.0010, depth: 214654.00
+   MARKET SELL: 39.06 of Yes @ live bid $0.0010 (depth: 214654.00)
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (funder): 0x5087675E...
+   📋 Proxy wallet: 0x9cbc5577...
+⚠️  Failed to initialize CLOB client (will retry): ClobClient.__init__() got an unexpected keyword argument 'wallet_address'
+   ❌ CLOB client not available
+   📖 Orderbook query: 24210214708827119705...
+   📊 Best bid: $0.0010, depth: 12670.09
+   MARKET SELL: 5.21 of Yes @ live bid $0.0010 (depth: 12670.09)
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (funder): 0x5087675E...
+   📋 Proxy wallet: 0x9cbc5577...
+⚠️  Failed to initialize CLOB client (will retry): ClobClient.__init__() got an unexpected keyword argument 'wallet_address'
+   ❌ CLOB client not available
+   📖 Orderbook query: 99256619221732681838...
+   📊 Best bid: $0.0100, depth: 2678.00
+   MARKET SELL: 2.94 of No @ live bid $0.0100 (depth: 2678.00)
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (funder): 0x5087675E...
+   📋 Proxy wallet: 0x9cbc5577...
+⚠️  Failed to initialize CLOB client (will retry): ClobClient.__init__() got an unexpected keyword argument 'wallet_address'
+   ❌ CLOB client not available
+   📖 Orderbook query: 91100409913715538094...
+   📊 Best bid: $0.0100, depth: 12405.37
+   MARKET SELL: 1.96 of Yes @ live bid $0.0100 (depth: 12405.37)
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (funder): 0x5087675E...
+   📋 Proxy wallet: 0x9cbc5577...
+⚠️  Failed to initialize CLOB client (will retry): ClobClient.__init__() got an unexpected keyword argument 'wallet_address'
+   ❌ CLOB client not available
+   Total liquidated: $0.00
+
+💤 Sleeping 60s...
