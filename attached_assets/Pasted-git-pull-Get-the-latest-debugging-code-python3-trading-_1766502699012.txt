@@ -1,0 +1,74 @@
+git pull  # Get the latest debugging code
+python3 trading_bot/withdrawal_servicer.py
+Already up to date.
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $0.01
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-23 15:10:22
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+⚠️  PM data API error: Failed to perform, curl: (56) CONNECT tunnel failed, response 401. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+
+📊 Polymarket:
+   Cash: $0.00
+   Positions: $0.00
+⚠️  Error fetching positions: Failed to perform, curl: (56) CONNECT tunnel failed, response 401. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+
+💤 Sleeping 60s...
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-23 15:11:24
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+⚠️  PM data API error: Failed to perform, curl: (56) CONNECT tunnel failed, response 401. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+
+📊 Polymarket:
+   Cash: $0.00
+   Positions: $0.00
+⚠️  Error fetching positions: Failed to perform, curl: (56) CONNECT tunnel failed, response 401. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+
+💤 Sleeping 60s...
