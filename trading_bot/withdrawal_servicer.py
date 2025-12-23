@@ -1311,8 +1311,13 @@ def servicer_iteration(
                 f"Remaining needed: ${needed:.2f}"
             )
     
-    if needed >= MIN_WITHDRAWAL_USDC and pm_positions > MIN_WITHDRAWAL_USDC:
+    # Check positions using the same function that liquidation uses (more reliable)
+    positions_for_liq = get_positions_for_liquidation()
+    total_position_value = sum(p.get("liq_value", 0) for p in positions_for_liq)
+    
+    if needed >= MIN_WITHDRAWAL_USDC and total_position_value > MIN_WITHDRAWAL_USDC:
         print(f"\n⚠️  Cash insufficient, need to liquidate ${needed:.2f}")
+        print(f"   Positions available: ${total_position_value:.2f} across {len(positions_for_liq)} positions")
         
         liquidated = liquidate_positions(needed)
         
