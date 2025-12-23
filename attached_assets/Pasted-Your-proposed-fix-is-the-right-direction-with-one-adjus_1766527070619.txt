@@ -1,0 +1,85 @@
+Your proposed fix is the right direction, with one adjustment:
+
+don’t “return None” silently if liquidation is needed — you want a hard, explicit state (“cannot liquidate because L2 auth unavailable”) and then pause / escalate / alert, otherwise you’ll just accumulate pending withdrawals forever.
+
+What to change
+1) Only cache the client after a successful L2 auth check
+
+Minimal, clean pattern:
+
+client = ClobClient(...)
+
+creds = ...
+if creds and getattr(creds, "api_key", None):
+    client.set_api_creds(creds)
+
+# hard verify (this is the key)
+try:
+    client.assert_level_2_auth()
+except Exception as e:
+    print(f"   ❌ L2 auth unavailable: {e}")
+    return None  # or raise, depending on how you want the servicer to behave
+
+print("   ✅ CLOB client ready (L2 auth enabled)")
+_CLOB_CLIENT = client
+return client
+
+
+This ensures you never store a “half-working” client.
+
+2) Don’t swallow derivation failure “silently”
+
+Right now your logs suggest derivation fails but you only print a warning and continue. Make it loud:
+
+include which branch you used (explicit creds vs derived)
+
+log the exception if derivation throws
+
+log whether api_key is empty / missing
+
+3) Make withdrawal logic resilient
+
+In the withdrawal loop:
+
+if liquidation is required AND client is None (or not L2-auth’d), then:
+
+do not attempt orders
+
+emit a single high-severity alert (Telegram/Slack/etc.)
+
+optionally backoff (sleep longer) to avoid spamming
+
+Example guard:
+
+client = get_clob_client()
+if client is None:
+    self.alert("Withdrawal blocked: Polymarket L2 auth unavailable; cannot liquidate positions.")
+    return 0.0
+
+Why your interpretation matches the logs
+
+You said you don’t see the “✅ CLOB client ready” line. That’s consistent with:
+
+the cached _CLOB_CLIENT was created earlier in a path where creds failed,
+
+then reused later without re-running the auth setup branch,
+
+so it can read orderbooks (L1) but can’t post_order (L2).
+
+One more practical root cause to check (because this is why derivation often returns “empty”)
+
+Even with correct logic, derivation can fail because the process lacks the signer material at runtime:
+
+wrong/missing private key env var in the servicer container/systemd unit
+
+wrong chain / endpoint config
+
+derived creds depend on a wallet signature and the signer isn’t available
+
+So after you implement the caching fix, add one log line at startup that confirms (without leaking secrets):
+
+wallet address being used
+
+whether the env var for the private key is set (True/False)
+
+which Polymarket host you’re hitting

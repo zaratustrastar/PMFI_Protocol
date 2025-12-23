@@ -1,0 +1,50 @@
+Yes — that’s the correct approach, with two small but important tweaks to make it robust:
+
+Method name: in most py_clob_client versions the method is create_or_derive_api_key() (not create_or_derive_api_creds()), and it returns an object/dict you pass into set_api_creds().
+Your stack trace shows you’re in py_clob_client/client.py and it’s failing at assert_level_2_auth(), which means set_api_creds() was never called — so adding that is exactly right.
+
+Do it once, not in a tight loop: derive/set creds during client initialization (or cache them) rather than re-deriving every iteration.
+
+Here’s the “safe” patch pattern right after client creation:
+
+# after: client = ClobClient(...)
+
+# Enable L2 auth (required for posting orders)
+try:
+    creds = client.create_or_derive_api_key()   # <- most common name
+    client.set_api_creds(creds)
+except Exception as e:
+    logger.exception("Failed to init Polymarket L2 API creds; cannot post orders")
+    raise
+
+
+If your installed version truly uses create_or_derive_api_creds(), keep your name — but I’d verify by grep:
+
+python -c "import py_clob_client; import inspect; from py_clob_client.client import ClobClient; print([m for m in dir(ClobClient) if 'derive' in m or 'api' in m])"
+
+Also: one more thing to add (so you don’t silently break later)
+
+After setting creds, immediately assert:
+
+client.assert_level_2_auth()
+
+
+So you fail fast at startup instead of during liquidation.
+
+And a practical ops gotcha
+
+Even with the code fix, you’ll still get the same error if the servicer process doesn’t have the private key / signer env vars available (systemd, docker, supervisor). So do a quick runtime check (without printing the key):
+
+confirm it’s present
+
+confirm it’s the same wallet you expect
+
+Summary
+
+Your diagnosis is correct
+
+Adding create_or_derive… + set_api_creds right after client creation is the right fix
+
+Just confirm the method name for your library version and initialize once + assert.
+
+If you paste the exact ClobClient(...) initialization block (a few lines), I’ll give you the exact minimal diff for your file.

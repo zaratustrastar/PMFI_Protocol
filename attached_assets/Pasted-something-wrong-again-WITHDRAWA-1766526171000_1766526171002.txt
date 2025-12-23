@@ -1,0 +1,269 @@
+something wrong again .... ============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-23 21:39:38
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+
+📊 Polymarket:
+   Cash: $0.00
+   Positions: $0.00
+
+⚠️  Cash insufficient, need to liquidate $7.07
+   Positions available: $9.47 across 4 positions
+
+🔥 LIQUIDATE: Need $7.07 USDC (capped from $7.07)
+   📖 Orderbook query: 54249369766400104419...
+   📊 Best bid: $0.0010, depth: 214654.00
+   MARKET SELL: 39.06 of Yes @ live bid $0.0010 (depth: 214654.00)
+   📤 Creating market sell: 39.06 tokens (~$0.04)
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 1206, in execute_liquidation_order
+    resp = client.post_order(signed_order, OrderType.FAK)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 592, in post_order
+    self.assert_level_2_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 795, in assert_level_2_auth
+    raise PolyException(L2_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: API Credentials are needed to interact with this endpoint!
+   📖 Orderbook query: 24210214708827119705...
+   📊 Best bid: $0.0010, depth: 12670.09
+   MARKET SELL: 5.21 of Yes @ live bid $0.0010 (depth: 12670.09)
+   📤 Creating market sell: 5.21 tokens (~$0.01)
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 1206, in execute_liquidation_order
+    resp = client.post_order(signed_order, OrderType.FAK)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 592, in post_order
+    self.assert_level_2_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 795, in assert_level_2_auth
+    raise PolyException(L2_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: API Credentials are needed to interact with this endpoint!
+   📖 Orderbook query: 99256619221732681838...
+   📊 Best bid: $0.0100, depth: 2686.52
+   MARKET SELL: 2.94 of No @ live bid $0.0100 (depth: 2686.52)
+   📤 Creating market sell: 2.94 tokens (~$0.03)
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 1206, in execute_liquidation_order
+    resp = client.post_order(signed_order, OrderType.FAK)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 592, in post_order
+    self.assert_level_2_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 795, in assert_level_2_auth
+    raise PolyException(L2_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: API Credentials are needed to interact with this endpoint!
+   📖 Orderbook query: 91100409913715538094...
+   📊 Best bid: $0.0100, depth: 12415.26
+   MARKET SELL: 1.96 of Yes @ live bid $0.0100 (depth: 12415.26)
+   📤 Creating market sell: 1.96 tokens (~$0.02)
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 1206, in execute_liquidation_order
+    resp = client.post_order(signed_order, OrderType.FAK)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 592, in post_order
+    self.assert_level_2_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 795, in assert_level_2_auth
+    raise PolyException(L2_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: API Credentials are needed to interact with this endpoint!
+   Total liquidated: $0.00
+
+💤 Sleeping 60s...============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-23 21:39:38
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+
+📊 Polymarket:
+   Cash: $0.00
+   Positions: $0.00
+
+⚠️  Cash insufficient, need to liquidate $7.07
+   Positions available: $9.47 across 4 positions
+
+🔥 LIQUIDATE: Need $7.07 USDC (capped from $7.07)
+   📖 Orderbook query: 54249369766400104419...
+   📊 Best bid: $0.0010, depth: 214654.00
+   MARKET SELL: 39.06 of Yes @ live bid $0.0010 (depth: 214654.00)
+   📤 Creating market sell: 39.06 tokens (~$0.04)
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 1206, in execute_liquidation_order
+    resp = client.post_order(signed_order, OrderType.FAK)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 592, in post_order
+    self.assert_level_2_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 795, in assert_level_2_auth
+    raise PolyException(L2_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: API Credentials are needed to interact with this endpoint!
+   📖 Orderbook query: 24210214708827119705...
+   📊 Best bid: $0.0010, depth: 12670.09
+   MARKET SELL: 5.21 of Yes @ live bid $0.0010 (depth: 12670.09)
+   📤 Creating market sell: 5.21 tokens (~$0.01)
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 1206, in execute_liquidation_order
+    resp = client.post_order(signed_order, OrderType.FAK)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 592, in post_order
+    self.assert_level_2_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 795, in assert_level_2_auth
+    raise PolyException(L2_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: API Credentials are needed to interact with this endpoint!
+   📖 Orderbook query: 99256619221732681838...
+   📊 Best bid: $0.0100, depth: 2686.52
+   MARKET SELL: 2.94 of No @ live bid $0.0100 (depth: 2686.52)
+   📤 Creating market sell: 2.94 tokens (~$0.03)
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 1206, in execute_liquidation_order
+    resp = client.post_order(signed_order, OrderType.FAK)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 592, in post_order
+    self.assert_level_2_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 795, in assert_level_2_auth
+    raise PolyException(L2_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: API Credentials are needed to interact with this endpoint!
+   📖 Orderbook query: 91100409913715538094...
+   📊 Best bid: $0.0100, depth: 12415.26
+   MARKET SELL: 1.96 of Yes @ live bid $0.0100 (depth: 12415.26)
+   📤 Creating market sell: 1.96 tokens (~$0.02)
+   ❌ Liquidation order error: API Credentials are needed to interact with this endpoint!
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 1206, in execute_liquidation_order
+    resp = client.post_order(signed_order, OrderType.FAK)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 592, in post_order
+    self.assert_level_2_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 795, in assert_level_2_auth
+    raise PolyException(L2_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: API Credentials are needed to interact with this endpoint!
+   Total liquidated: $0.00
+
+💤 Sleeping 60s...
+
+You’ve got two separate problems in that log:
+
+1) Withdrawal servicer is trying to place orders without Polymarket L2 auth
+
+This is the core error:
+
+py_clob_client.exceptions.PolyException: API Credentials are needed to interact with this endpoint!
+
+Meaning: in withdrawal_servicer.py, your ClobClient was created but never got L2 API creds set, so post_order() refuses.
+
+Your bot_v7.py does initialize L2 auth successfully (“✅ CLOB client initialized with L2 auth …”), but the withdrawal servicer doesn’t.
+
+Fix (in code): set L2 creds on the CLOB client before posting orders
+
+In withdrawal_servicer.py wherever you build the client, you want something like:
+
+from py_clob_client.client import ClobClient
+
+host = "https://clob.polymarket.com"  # or whatever you're using
+chain_id = 137  # Polygon for polymarket CLOB (usually)
+
+pk = os.environ["POLYMARKET_PRIVATE_KEY"]  # or a dedicated TRADING key
+
+client = ClobClient(host, chain_id=chain_id, private_key=pk)
+
+# This is the missing step:
+creds = client.create_or_derive_api_key()
+client.set_api_creds(creds)
+
+# now post_order() will work
+
+
+If you already have explicit API creds (key/secret/passphrase), you can set them directly instead of deriving, but the above pattern is the common “just use PK” flow.
+
+Fix (ops): make sure the servicer has the env var
+
+Your logs show you exported POLYMARKET_PRIVATE_KEY for bot_v7.py, but the servicer process might be running in a different shell/systemd/docker env.
+
+Quick check inside the servicer runtime:
+
+echo $POLYMARKET_PRIVATE_KEY
+
+
+If empty, that’s why it can’t auth.
+
+Important security note: you pasted a real-looking private key in the logs. Assume it’s compromised and rotate it.
+
+2) Your servicer is using a bad NAV cache ($1.0000) while bot is producing ~$0.80
+
+Servicer says:
+
+NAV from bot (cached): $1.000000
+
+But your bot logs clearly show signed NAV around 0.80–0.81/share once buffer is included.
+
+That $1.00 NAV happens in your bot when it can’t read full on-chain state (you have tons of):
+429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+
+So the bot sometimes falls back to an incomplete state (buffer read fails → totals wrong → NAV snaps to 1.0).
+
+Fix: don’t let servicer act on stale/invalid NAV
+
+Add a hard guard in the withdrawal servicer:
+
+only accept NAV if:
+
+bot cache timestamp is fresh (e.g. updated < 90s ago)
+
+bot also returns a “status ok” / “breakdown check passed”
+
+roundId matches expected
+
+if NAV is missing/1.0 while on-chain buffer/supply indicate otherwise → pause withdrawals and alert.
+
+Fix: stop hammering https://mainnet.base.org (429)
+
+Use a higher-limit RPC (paid or better free), and also:
+
+increase polling interval
+
+add exponential backoff on 429
+
+cache reads that don’t change every loop (USDC decimals, contract instances, etc.)
+
+batch/multicall where possible
+
+Right now the bot is half-blind intermittently, and your servicer is trusting its cached NAV.
+
+What to do right now (fast path)
+
+Fix L2 auth in withdrawal_servicer.py (add create_or_derive_api_key() + set_api_creds()).
+
+Ensure the servicer process actually has POLYMARKET_PRIVATE_KEY in its environment (systemd/docker env file).
+
+Add a safety check: if bot NAV cache is stale or bot recently hit 429 → do not liquidate / do not service withdrawals.
+
+Switch to a better Base RPC + add backoff.
+
+If you paste the snippet where withdrawal_servicer.py creates ClobClient (just that function), I’ll tell you the exact lines to change.

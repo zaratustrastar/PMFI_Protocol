@@ -306,6 +306,13 @@ def get_patched_clob_client():
                 print(f"   🌐 Using proxy: {proxy_display}")
             print("   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)")
         
+        # Startup diagnostics (without leaking secrets)
+        wallet_preview = PM_PROXY_ADDRESS[:10] + "..." if PM_PROXY_ADDRESS else "NOT SET"
+        pk_present = bool(PM_PRIVATE_KEY and len(PM_PRIVATE_KEY) > 10)
+        print(f"   📋 Wallet: {wallet_preview}")
+        print(f"   📋 Private key present: {pk_present}")
+        print(f"   📋 CLOB host: https://clob.polymarket.com")
+        
         # Use explicit API credentials if provided, otherwise try to derive
         if PM_API_KEY and PM_API_SECRET and PM_API_PASSPHRASE:
             print("   🔑 Using explicit API credentials from environment...")
@@ -316,20 +323,30 @@ def get_patched_clob_client():
                 api_passphrase=PM_API_PASSPHRASE
             )
             client.set_api_creds(creds)
-            print(f"   ✅ CLOB client ready (API key: {PM_API_KEY[:8]}...)")
         else:
             print("   🔑 Deriving trading credentials from private key...")
             try:
                 creds = client.create_or_derive_api_creds()
                 if creds and hasattr(creds, 'api_key') and creds.api_key:
                     client.set_api_creds(creds)
-                    print(f"   ✅ CLOB client ready (API key: {creds.api_key[:8]}...)")
+                    print(f"   ✅ Credentials derived (API key: {creds.api_key[:8]}...)")
                 else:
-                    print(f"   ⚠️  Credential derivation returned: {creds}")
+                    print(f"   ❌ Credential derivation returned empty: {creds}")
                     print("   💡 Set POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE")
+                    return None
             except Exception as cred_error:
                 print(f"   ❌ Credential derivation failed: {cred_error}")
                 print("   💡 Set POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE")
+                return None
+        
+        # CRITICAL: Verify L2 auth works before caching - fail fast
+        try:
+            client.assert_level_2_auth()
+            print("   ✅ L2 auth verified - CLOB client ready for trading")
+        except Exception as auth_error:
+            print(f"   ❌ L2 auth check failed: {auth_error}")
+            print("   💡 Cannot post orders without L2 auth")
+            return None
         
         _CLOB_CLIENT = client
         return client
