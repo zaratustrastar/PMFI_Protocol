@@ -74,7 +74,7 @@ PM_PRIVATE_KEY = os.getenv("POLYMARKET_PRIVATE_KEY", "")
 
 BASE_RPC_URL = os.getenv("BASE_RPC_URL") or os.getenv("RPC_URL", "https://mainnet.base.org")
 POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
-PROXY_URL = os.getenv("PROXY_URL", "")
+PROXY_URL = os.getenv("PROXY_URL", "")  # Use socks5:// for SOCKS proxies, http:// for HTTP proxies
 
 USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 USDC_POLYGON = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"

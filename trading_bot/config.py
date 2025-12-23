@@ -32,7 +32,8 @@ POLL_INTERVAL_SECONDS = 10  # Check for filled orders every 10 seconds
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 # Proxy settings (optional - for residential IP bypass)
-# Format: "http://username:password@proxy.example.com:port"
+# Format: Use socks5:// for SOCKS proxies, http:// for HTTP proxies
+# Example: "socks5://username:password@proxy.example.com:port"
 # Leave empty to use direct connection
 PROXY_URL = os.getenv("PROXY_URL", "")
 
