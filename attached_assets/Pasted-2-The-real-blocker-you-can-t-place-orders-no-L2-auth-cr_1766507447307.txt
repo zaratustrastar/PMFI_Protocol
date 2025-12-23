@@ -1,0 +1,71 @@
+2) The real blocker: you can’t place orders (no L2 auth creds)
+
+This is why nothing happens:
+
+PolyException: API Credentials are needed to interact with this endpoint!
+
+That means your bot is not authenticated for Polymarket CLOB trading, so it cannot submit sell orders.
+
+Also you see:
+
+Deriving trading credentials from private key... Couldn't parse created CLOB creds
+
+So the “derive creds from private key” path is failing, and you’re not providing explicit ones.
+
+✅ Fix: stop relying on derivation. Provide explicit CLOB API credentials and make sure the client uses them.
+
+You need these env vars (names may match what your code prints):
+
+POLYMARKET_API_KEY
+
+POLYMARKET_API_SECRET
+
+POLYMARKET_API_PASSPHRASE
+
+Then ensure your CLOB client is initialized with those and assert_level_2_auth() passes.
+
+If you don’t have these keys yet: generate them in Polymarket settings / developer API (or whatever flow they currently use).
+
+3) Your PM data fetch is broken (so your “Cash: 0, Positions: 0” is unreliable)
+
+You’re getting:
+
+PM data API error: 'list' object has no attribute 'get'
+
+That means you’re parsing something as a dict but it’s a list (or you got an error response shaped differently). Because of this, the servicer is printing Cash: $0, Positions: $0 even though it also claims “Positions available: $8.64 across 5 positions”. So your data layer is inconsistent.
+
+✅ Fix:
+
+log the raw JSON for that endpoint once (sanitized)
+
+handle both shapes:
+
+if response is list, iterate
+
+if response is dict, use .get
+
+Until this is fixed, your “needed” and liquidation decisions can be wrong.
+
+4) “Market sell” sizing looks wrong in the first line
+
+Example:
+
+Selling 39.06 Yes @ best bid $0.1414
+
+then ~$5.52
+
+If the price is 0.1414, then 39.06 * 0.1414 ≈ 5.52 — consistent.
+
+But you still need liquidity-aware sizing:
+
+if you’re using FOK/FAK and best bid size is smaller than your size, it will fail even with creds.
+
+You should cap size to available bid depth (or switch to IOC partial fills).
+
+(Your log doesn’t show bid size, so you might be blind-selling.)
+
+✅ MVP improvement:
+
+fetch top-of-book bid size and cap sell_size = min(position_size, bid_size)
+
+or use IOC if supported.
