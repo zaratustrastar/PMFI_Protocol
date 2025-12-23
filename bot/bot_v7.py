@@ -638,6 +638,7 @@ class PolymarketClient:
         try:
             url = f"{self.CLOB_API_URL}/book"
             params = {"token_id": token_id}
+            print(f"   📖 Orderbook query: token_id={token_id[:20]}..." if len(token_id) > 20 else f"   📖 Orderbook query: token_id={token_id}")
             data = self._make_request(url, params=params, timeout=10)
             bids = [{"price": float(b.get("price", 0)), "size": float(b.get("size", 0))} for b in data.get("bids", [])]
             asks = [{"price": float(a.get("price", 0)), "size": float(a.get("size", 0))} for a in data.get("asks", [])]
@@ -645,10 +646,16 @@ class PolymarketClient:
             bids.sort(key=lambda x: x["price"], reverse=True)
             asks.sort(key=lambda x: x["price"])
             
+            print(f"   📊 Got {len(bids)} bids, {len(asks)} asks")
             return {"bids": bids, "asks": asks}
             
         except Exception as e:
-            print(f"❌ Error fetching orderbook: {e}")
+            error_msg = str(e)
+            if "404" in error_msg:
+                print(f"   ❌ Orderbook 404: token_id may be wrong format or market resolved")
+                print(f"      Token: {token_id}")
+            else:
+                print(f"❌ Error fetching orderbook: {e}")
             return {"bids": [], "asks": []}
     
     def simulate_market_sell(self, size: float, bids: List[Dict]) -> float:
@@ -797,19 +804,30 @@ class NavEngineV7:
             token_id = pos.get("token_id", "")
             size = pos.get("size", 0)
             mid_value = pos.get("current_value", 0)
+            outcome = pos.get("outcome", "?")
             
             if not token_id:
+                print(f"   ⚠️  {outcome}: No token_id, using mid value ${mid_value:.2f}")
                 positions_liq_value += mid_value
                 continue
+            
+            # Debug: Show token_id format
+            is_numeric = token_id.isdigit() or (token_id.startswith("0x") and len(token_id) > 40)
+            token_preview = token_id[:25] + "..." if len(token_id) > 25 else token_id
+            if not is_numeric and len(token_id) < 50:
+                print(f"   ⚠️  {outcome}: token_id looks like market_id, not CTF token: {token_id}")
             
             orderbook = self.polymarket_client.fetch_orderbook(token_id)
             bids = orderbook.get("bids", [])
             
             if not bids:
-                print(f"   ❌ {pos['outcome']}: {size:.1f} - NO BIDS (illiquid)")
+                print(f"   ❌ {outcome}: {size:.1f} - NO BIDS (illiquid)")
+                # Use mid value as fallback for illiquid positions
+                positions_liq_value += mid_value
                 continue
             
             liq_value = self.polymarket_client.simulate_market_sell(size, bids)
+            print(f"   ✅ {outcome}: {size:.1f} → liq value ${liq_value:.2f}")
             positions_liq_value += liq_value
         
         # 4. Fetch cash balance

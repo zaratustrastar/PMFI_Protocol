@@ -858,6 +858,8 @@ def get_orderbook_best_bid(token_id: str) -> Tuple[float, float]:
         proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
         
         url = f"https://clob.polymarket.com/book?token_id={token_id}"
+        token_preview = token_id[:20] + "..." if len(token_id) > 20 else token_id
+        print(f"   📖 Orderbook query: {token_preview}")
         
         if BYPASS_METHOD == "curl_cffi":
             response = curl_requests.get(
@@ -870,19 +872,26 @@ def get_orderbook_best_bid(token_id: str) -> Tuple[float, float]:
         else:
             response = requests.get(url, headers=headers, proxies=proxies, timeout=15)
         
-        if response.status_code != 200:
+        if response.status_code == 404:
+            print(f"   ❌ Orderbook 404: token_id may be wrong format or market resolved")
+            print(f"      Full token: {token_id}")
+            return 0.0, 0.0
+        elif response.status_code != 200:
+            print(f"   ⚠️  Orderbook returned {response.status_code}")
             return 0.0, 0.0
         
         data = response.json()
         bids = data.get("bids", [])
         
         if not bids:
+            print(f"   📊 No bids available (market illiquid)")
             return 0.0, 0.0
         
         best_bid = bids[0]
         price = float(best_bid.get("price", 0))
         size = float(best_bid.get("size", 0))
         
+        print(f"   📊 Best bid: ${price:.4f}, depth: {size:.2f}")
         return price, size
         
     except Exception as e:
