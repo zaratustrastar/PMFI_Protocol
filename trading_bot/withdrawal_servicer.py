@@ -242,6 +242,14 @@ def get_patched_clob_client():
             http_helpers.post = patched_post
             http_helpers.delete = patched_delete
             
+            # CRITICAL: Also patch the direct imports in py_clob_client.client
+            # The client.py imports `from .http_helpers.helpers import post, get, delete`
+            # which creates local bindings that don't update when we patch http_helpers
+            import py_clob_client.client as clob_client_module
+            clob_client_module.get = patched_get
+            clob_client_module.post = patched_post
+            clob_client_module.delete = patched_delete
+            
             if PROXY_URL:
                 proxy_display = PROXY_URL.split('@')[1] if '@' in PROXY_URL else PROXY_URL
                 print(f"   🌐 Using proxy: {proxy_display}")

@@ -173,6 +173,14 @@ class PolymarketTrader:
         http_helpers.post = patched_post
         http_helpers.delete = patched_delete
         
+        # CRITICAL: Also patch the direct imports in py_clob_client.client
+        # The client.py imports `from .http_helpers.helpers import post, get, delete`
+        # which creates local bindings that don't update when we patch http_helpers
+        import py_clob_client.client as clob_client_module
+        clob_client_module.get = patched_get
+        clob_client_module.post = patched_post
+        clob_client_module.delete = patched_delete
+        
         print("   🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)")
     
     def calculate_order_size(self, price: float) -> float:
