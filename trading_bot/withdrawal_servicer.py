@@ -52,10 +52,15 @@ try:
     from py_clob_client.client import ClobClient
     from py_clob_client.clob_types import OrderArgs, OrderType
     from py_clob_client.order_builder.constants import SELL
+    import py_clob_client.http_helpers.helpers as http_helpers
     HAS_CLOB_CLIENT = True
 except ImportError:
     HAS_CLOB_CLIENT = False
+    http_helpers = None
     print("⚠️  py-clob-client not available, liquidation disabled")
+
+# Module-level patched CLOB client (initialized once, retries on failure)
+_CLOB_CLIENT = None
 
 load_dotenv()
 
@@ -152,6 +157,108 @@ BASE_RPC_FALLBACKS = [
     "https://base.meowrpc.com",
     "https://1rpc.io/base",
 ]
+
+
+def get_patched_clob_client():
+    """
+    Get or create a CLOB client with curl_cffi proxy patching for Cloudflare bypass.
+    Initialized once per process. Retries on transient failures.
+    """
+    global _CLOB_CLIENT
+    
+    # Return cached client if already initialized successfully
+    if _CLOB_CLIENT is not None:
+        return _CLOB_CLIENT
+    
+    # These are permanent failures - no retry
+    if not HAS_CLOB_CLIENT:
+        return None
+    
+    if not PM_PRIVATE_KEY or not PM_PROXY_ADDRESS:
+        print("⚠️  Missing PM_PRIVATE_KEY or PM_PROXY_ADDRESS for CLOB client")
+        return None
+    
+    try:
+        print("🔧 Initializing patched CLOB client for liquidation...")
+        
+        # Create CLOB client
+        client = ClobClient(
+            "https://clob.polymarket.com",
+            key=PM_PRIVATE_KEY,
+            chain_id=137,
+            signature_type=1,
+            funder=PM_PROXY_ADDRESS
+        )
+        
+        # Patch HTTP helpers with curl_cffi for Cloudflare bypass
+        if BYPASS_METHOD == "curl_cffi" and http_helpers:
+            proxy_config = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
+            
+            def get_browser_headers(original_headers: dict = None) -> dict:
+                browser_headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'application/json, text/plain, */*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Referer': 'https://polymarket.com/',
+                    'Origin': 'https://polymarket.com',
+                }
+                if original_headers:
+                    browser_headers.update(original_headers)
+                return browser_headers
+            
+            def patched_get(endpoint: str, headers: dict = None, params: dict = None):
+                response = curl_requests.get(
+                    endpoint,
+                    headers=get_browser_headers(headers),
+                    params=params,
+                    impersonate="chrome120",
+                    proxies=proxy_config,
+                    timeout=30,
+                )
+                return response.json() if response.text else {}
+            
+            def patched_post(endpoint: str, headers: dict = None, body: dict = None):
+                response = curl_requests.post(
+                    endpoint,
+                    headers=get_browser_headers(headers),
+                    json=body,
+                    impersonate="chrome120",
+                    proxies=proxy_config,
+                    timeout=30,
+                )
+                return response.json() if response.text else {}
+            
+            def patched_delete(endpoint: str, headers: dict = None):
+                response = curl_requests.delete(
+                    endpoint,
+                    headers=get_browser_headers(headers),
+                    impersonate="chrome120",
+                    proxies=proxy_config,
+                    timeout=30,
+                )
+                return response.json() if response.text else {}
+            
+            http_helpers.get = patched_get
+            http_helpers.post = patched_post
+            http_helpers.delete = patched_delete
+            
+            if PROXY_URL:
+                proxy_display = PROXY_URL.split('@')[1] if '@' in PROXY_URL else PROXY_URL
+                print(f"   🌐 Using proxy: {proxy_display}")
+            print("   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)")
+        
+        # Derive API credentials from private key
+        print("   🔑 Deriving trading credentials from private key...")
+        client.set_api_creds(client.create_or_derive_api_creds())
+        
+        _CLOB_CLIENT = client
+        print("   ✅ CLOB client ready for liquidation")
+        return client
+        
+    except Exception as e:
+        print(f"⚠️  Failed to initialize CLOB client (will retry): {e}")
+        return None
+
 
 # =============================================================================
 # STATE TRACKING
@@ -898,19 +1005,14 @@ def liquidate_positions(needed_usdc: float) -> float:
 
 
 def execute_liquidation_order(token_id: str, size: float, min_price: float) -> Tuple[bool, float]:
-    """Execute a single liquidation order via CLOB."""
-    if not PM_PRIVATE_KEY:
+    """Execute a single liquidation order via patched CLOB client with proxy."""
+    client = get_patched_clob_client()
+    
+    if not client:
+        print("   ❌ CLOB client not available")
         return False, 0.0
     
     try:
-        host = "https://clob.polymarket.com"
-        client = ClobClient(
-            host,
-            key=PM_PRIVATE_KEY,
-            chain_id=137,
-            funder=PM_PROXY_ADDRESS
-        )
-        
         order_args = OrderArgs(
             token_id=token_id,
             side=SELL,
@@ -923,6 +1025,7 @@ def execute_liquidation_order(token_id: str, size: float, min_price: float) -> T
         
         if resp.get("success"):
             usdc = size * min_price
+            print(f"   ✅ Order placed: ${usdc:.2f}")
             return True, usdc
         else:
             print(f"   ❌ Order failed: {resp}")
