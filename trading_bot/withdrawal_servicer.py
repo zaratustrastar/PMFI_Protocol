@@ -232,13 +232,24 @@ def get_patched_clob_client():
         if not PM_PRIVATE_KEY:
             print("⚠️  POLYMARKET_PRIVATE_KEY required for signing orders")
             return None
+        
+        # Derive EOA address from private key - this is the "funder" that registered API creds
+        from eth_account import Account
+        normalized_key = normalize_privkey(PM_PRIVATE_KEY)
+        if not normalized_key:
+            print("⚠️  Invalid POLYMARKET_PRIVATE_KEY format")
+            return None
+        eoa_address = Account.from_key(normalized_key).address
+        print(f"   📋 EOA (funder): {eoa_address[:10]}...")
+        print(f"   📋 Proxy wallet: {PM_PROXY_ADDRESS[:10]}..." if PM_PROXY_ADDRESS else "   📋 Proxy wallet: NOT SET")
             
         client = ClobClient(
             "https://clob.polymarket.com",
-            key=PM_PRIVATE_KEY,
+            key=normalized_key,
             chain_id=137,
             signature_type=1,
-            funder=PM_PROXY_ADDRESS or ""
+            funder=eoa_address,
+            wallet_address=PM_PROXY_ADDRESS,
         )
         
         # Patch HTTP helpers with curl_cffi for Cloudflare bypass
