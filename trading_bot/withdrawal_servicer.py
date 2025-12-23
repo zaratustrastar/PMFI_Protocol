@@ -867,9 +867,6 @@ def liquidate_positions(needed_usdc: float) -> float:
         if still_needed <= 0:
             break
         
-        if pos["liq_value"] < 5.0:
-            continue
-        
         size_to_sell = pos["size"]
         if pos["liq_value"] > still_needed:
             ratio = still_needed / pos["liq_value"]
