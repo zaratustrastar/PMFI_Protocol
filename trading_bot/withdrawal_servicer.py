@@ -257,35 +257,64 @@ def get_patched_clob_client():
                     browser_headers.update(original_headers)
                 return browser_headers
             
-            def patched_get(endpoint: str, headers: dict = None, params: dict = None):
+            def patched_get(endpoint: str, headers: dict = None, params: dict = None, **kwargs):
+                # Remove keys we handle explicitly, pass rest through
+                kwargs.pop('proxies', None)  # We use our proxy_config
+                timeout = kwargs.pop('timeout', 30)
                 response = curl_requests.get(
                     endpoint,
                     headers=get_browser_headers(headers),
                     params=params,
                     impersonate="chrome120",
                     proxies=proxy_config,
-                    timeout=30,
+                    timeout=timeout,
+                    **kwargs,
                 )
                 return response.json() if response.text else {}
             
-            def patched_post(endpoint: str, headers: dict = None, body: dict = None):
+            def patched_post(endpoint: str, headers: dict = None, body: dict = None, data=None, json=None, **kwargs):
+                # py-clob-client may pass data= or json= or body=
+                # Normalize to json for curl_requests
+                payload = json or body
+                raw_data = None
+                if payload is None and data is not None:
+                    # data might be a dict or JSON string
+                    if isinstance(data, dict):
+                        payload = data
+                    elif isinstance(data, (str, bytes)):
+                        try:
+                            import json as _json
+                            payload = _json.loads(data)
+                        except:
+                            raw_data = data  # Keep as raw data if not JSON
+                
+                # Remove keys we handle explicitly, pass rest through
+                kwargs.pop('proxies', None)  # We use our proxy_config
+                timeout = kwargs.pop('timeout', 30)
+                
                 response = curl_requests.post(
                     endpoint,
                     headers=get_browser_headers(headers),
-                    json=body,
+                    json=payload,
+                    data=raw_data,
                     impersonate="chrome120",
                     proxies=proxy_config,
-                    timeout=30,
+                    timeout=timeout,
+                    **kwargs,
                 )
                 return response.json() if response.text else {}
             
-            def patched_delete(endpoint: str, headers: dict = None):
+            def patched_delete(endpoint: str, headers: dict = None, **kwargs):
+                # Remove keys we handle explicitly, pass rest through
+                kwargs.pop('proxies', None)  # We use our proxy_config
+                timeout = kwargs.pop('timeout', 30)
                 response = curl_requests.delete(
                     endpoint,
                     headers=get_browser_headers(headers),
                     impersonate="chrome120",
                     proxies=proxy_config,
-                    timeout=30,
+                    timeout=timeout,
+                    **kwargs,
                 )
                 return response.json() if response.text else {}
             

@@ -1,0 +1,180 @@
+• Positions (liquidation):  $9.28
+   • Positions (cost basis):   $10.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $9.28
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $8.70
+   • Credited Cash (signed): $8.70
+   • Positions:      $9.28
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $17.98
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $0.8088/share (round 24) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.10 - - [23/Dec/2025 22:08:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:08:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:08:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:08:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:08:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:08:41] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1766528005)
+127.0.0.1 - - [23/Dec/2025 22:09:08] "GET /sign-nav HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=22.2334, buffer=8.70, forwarded=68.50, lastRoundId=23
+📝 RoundId cache synced from chain: 23
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 4 active positions, total cost basis: $10.00
+   📖 Orderbook via CLOB client: 54249369766400104419...
+   ⚠️  CLOB client orderbook error: 'OrderBookSummary' object has no attribute 'get', trying HTTP fallback...
+   📖 Orderbook via HTTP: 54249369766400104419...
+   📊 Got 25 bids, 38 asks
+   ✅ Yes: 39.1 → liq value $5.31
+   📖 Orderbook via CLOB client: 24210214708827119705...
+   ⚠️  CLOB client orderbook error: 'OrderBookSummary' object has no attribute 'get', trying HTTP fallback...
+   📖 Orderbook via HTTP: 24210214708827119705...
+   📊 Got 53 bids, 70 asks
+   ✅ Yes: 5.2 → liq value $2.01
+   📖 Orderbook via CLOB client: 99256619221732681838...
+   ⚠️  CLOB client orderbook error: 'OrderBookSummary' object has no attribute 'get', trying HTTP fallback...
+   📖 Orderbook via HTTP: 99256619221732681838...
+   📊 Got 31 bids, 48 asks
+   ✅ No: 2.9 → liq value $1.00
+   📖 Orderbook via CLOB client: 91100409913715538094...
+   ⚠️  CLOB client orderbook error: 'OrderBookSummary' object has no attribute 'get', trying HTTP fallback...
+   📖 Orderbook via HTTP: 91100409913715538094...
+   📊 Got 31 bids, 34 asks
+   ✅ Yes: 2.0 → liq value $0.96
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $68.50
+   - pmCash:       $0.00
+   - reserved:     $0.00
+   - costBasis:    $10.00
+   - inFlight:     $0.00
+   - withdrawn:    $75.98
+   = pendingCredit: $0.00
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $9.28
+   • Positions (cost basis):   $10.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $9.28
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $8.70
+   • Credited Cash (signed): $8.70
+   • Positions:      $9.28
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $17.98
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $0.8088/share (round 24) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.10 - - [23/Dec/2025 22:09:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:09:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:09:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:09:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:09:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:09:41] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=22.2334, buffer=8.70, forwarded=68.50, lastRoundId=23
+📝 RoundId cache synced from chain: 23
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 4 active positions, total cost basis: $10.00
+   📖 Orderbook via CLOB client: 54249369766400104419...
+   ⚠️  CLOB client orderbook error: 'OrderBookSummary' object has no attribute 'get', trying HTTP fallback...
+   📖 Orderbook via HTTP: 54249369766400104419...
+   📊 Got 25 bids, 38 asks
+   ✅ Yes: 39.1 → liq value $5.31
+   📖 Orderbook via CLOB client: 24210214708827119705...
+   ⚠️  CLOB client orderbook error: 'OrderBookSummary' object has no attribute 'get', trying HTTP fallback...
+   📖 Orderbook via HTTP: 24210214708827119705...
+   📊 Got 54 bids, 70 asks
+   ✅ Yes: 5.2 → liq value $2.01
+   📖 Orderbook via CLOB client: 99256619221732681838...
+   ⚠️  CLOB client orderbook error: 'OrderBookSummary' object has no attribute 'get', trying HTTP fallback...
+   📖 Orderbook via HTTP: 99256619221732681838...
+   📊 Got 31 bids, 48 asks
+   ✅ No: 2.9 → liq value $1.00
+   📖 Orderbook via CLOB client: 91100409913715538094...
+   ⚠️  CLOB client orderbook error: 'OrderBookSummary' object has no attribute 'get', trying HTTP fallback...
+   📖 Orderbook via HTTP: 91100409913715538094...
+   📊 Got 31 bids, 34 asks
+   ✅ Yes: 2.0 → liq value $0.96
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $68.50
+   - pmCash:       $0.00
+   - reserved:     $0.00
+   - costBasis:    $10.00
+   - inFlight:     $0.00
+   - withdrawn:    $75.98
+   = pendingCredit: $0.00
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $9.28
+   • Positions (cost basis):   $10.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $9.28
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $8.70
+   • Credited Cash (signed): $8.70
+   • Positions:      $9.28
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $17.98
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $0.8088/share (round 24) [ok]
+✅ NAV cache updated, sleeping 45s
+⚡ Returning cached signed NAV (valid until 1766528110)
+127.0.0.1 - - [23/Dec/2025 22:10:20] "GET /sign-nav HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:10:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:10:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:10:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:10:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:10:41] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [23/Dec/2025 22:10:41] "GET /price HTTP/1.1" 200 -

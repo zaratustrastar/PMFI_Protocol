@@ -1,0 +1,102 @@
+py_clob_client is calling a post(...) function with a data= kwarg, but your patched_post() wrapper doesn’t accept data, so Python throws:
+
+TypeError: patched_post() got an unexpected keyword argument 'data'
+
+What’s happening
+
+Inside py_clob_client/client.py (in post_order) it likely does something like:
+
+post(url, headers=headers, data=payload, timeout=..., proxies=...)
+
+
+Your patch probably replaced requests.post (or whatever post reference they use) with:
+
+def patched_post(url, json=None, headers=None, timeout=None, proxies=None):
+    ...
+
+
+So when data=... arrives → boom.
+
+Fix (recommended): make your patched_post signature compatible
+1) Accept **kwargs + explicitly accept data
+
+Do this so you’ll never break when the library adds parameters:
+
+def patched_post(url, *, data=None, json=None, headers=None, params=None, timeout=None, proxies=None, **kwargs):
+    # If library passes `data` as dict/str/bytes, forward correctly
+    # If both data and json are None, keep behavior consistent
+
+    # Example using curl_cffi:
+    # curl_cffi.requests.post(url, data=data, json=json, headers=headers, params=params, timeout=timeout, proxies=proxies, **kwargs)
+    return curl_requests.post(
+        url,
+        data=data,
+        json=json,
+        headers=headers,
+        params=params,
+        timeout=timeout,
+        proxies=proxies,
+        **kwargs,
+    )
+
+
+If your patch uses curl_cffi.requests you can forward both data and json safely.
+
+2) If your patched client only supports JSON, convert data → json
+
+Sometimes py_clob_client passes JSON-encoded text via data. In that case:
+
+import json as _json
+
+def patched_post(url, *, data=None, json=None, headers=None, params=None, timeout=None, proxies=None, **kwargs):
+    if json is None and data is not None:
+        # If `data` is already a dict, treat as json.
+        if isinstance(data, (dict, list)):
+            json = data
+            data = None
+        # If `data` is a JSON string/bytes, decode and treat as json.
+        elif isinstance(data, (str, bytes, bytearray)):
+            try:
+                json = _json.loads(data)
+                data = None
+            except Exception:
+                pass  # keep as raw data if not JSON
+
+    return curl_requests.post(url, data=data, json=json, headers=headers, params=params,
+                              timeout=timeout, proxies=proxies, **kwargs)
+
+
+This makes your patch work regardless of whether the library uses data= or json=.
+
+Also check your patch target
+
+The error says:
+
+get_patched_clob_client.<locals>.patched_post()
+
+and stack shows py_clob_client/client.py calling post(...).
+
+That means you probably patched the function post that py_clob_client imported, like:
+
+from requests import post
+
+
+In that case you must patch the exact symbol in the py_clob_client.client module (not global requests.post), e.g.:
+
+import py_clob_client.client as clob_client_mod
+clob_client_mod.post = patched_post
+
+
+If you patched requests.post only, but py_clob_client.client cached post earlier, it won’t use your replacement.
+
+Quick minimal change
+
+If you want the smallest possible fix: just change your patched function to accept data=None, **kwargs and forward:
+
+def patched_post(url, headers=None, data=None, json=None, timeout=None, proxies=None, **kwargs):
+    return curl_requests.post(url, headers=headers, data=data, json=json, timeout=timeout, proxies=proxies, **kwargs)
+
+
+That alone will stop the crash.
+
+If you paste your current get_patched_clob_client() / patched_post() code (just that function), I’ll rewrite it exactly in your style so it matches py_clob_client’s expected call signature and works with your curl_cffi proxy/TLS setup.
