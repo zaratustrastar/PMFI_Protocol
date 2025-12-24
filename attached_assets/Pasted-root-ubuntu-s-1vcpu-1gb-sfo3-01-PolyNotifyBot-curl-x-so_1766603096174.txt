@@ -1,0 +1,76 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -x socks5://3p0LTGSt7YVFojo:QWPWl7bhciHo0ZM@92.113.180.106:42563 https://clob.polymarket.com/health
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# pip install py-clob-client
+python3 << 'PY'
+from py_clob_client.client import ClobClient
+
+client = ClobClient(
+    "https://clob.polymarket.com",
+    key="YOUR_FULL_PRIVATE_KEY",
+    chain_id=137,
+    signature_type=1,
+    funder="0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5"
+)
+
+creds = client.create_or_derive_api_creds()
+print("POLYMARKET_API_KEY=" + creds.api_key)
+print("POLYMARKET_API_SECRET=" + creds.api_secret)
+print("POLYMARKET_API_PASSPHRASE=" + creds.api_passphrase)
+PY
+error: externally-managed-environment
+
+× This environment is externally managed
+╰─> To install Python packages system-wide, try apt install
+    python3-xyz, where xyz is the package you are trying to
+    install.
+    
+    If you wish to install a non-Debian-packaged Python package,
+    create a virtual environment using python3 -m venv path/to/venv.
+    Then use path/to/venv/bin/python and path/to/venv/bin/pip. Make
+    sure you have python3-full installed.
+    
+    If you wish to install a non-Debian packaged Python application,
+    it may be easiest to use pipx install xyz, which will manage a
+    virtual environment for you. Make sure you have pipx installed.
+    
+    See /usr/share/doc/python3.12/README.venv for more information.
+
+note: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.
+hint: See PEP 668 for the detailed specification.
+Traceback (most recent call last):
+  File "<stdin>", line 3, in <module>
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 139, in __init__
+    self.signer = Signer(key, chain_id) if key else None
+                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/signer.py", line 9, in __init__
+    self.account = Account.from_key(private_key)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_utils/decorators.py", line 31, in _wrapper
+    return self.method(objtype, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_account/account.py", line 310, in from_key
+    key = self._parse_private_key(private_key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_utils/decorators.py", line 31, in _wrapper
+    return self.method(objtype, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_account/account.py", line 894, in _parse_private_key
+    hb_key = HexBytes(key)
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hexbytes/main.py", line 35, in __new__
+    bytesval = to_bytes(val)
+               ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hexbytes/_utils.py", line 17, in to_bytes
+    return hexstr_to_bytes(val)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hexbytes/_utils.py", line 54, in hexstr_to_bytes
+    return binascii.unhexlify(ascii_hex)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+binascii.Error: Non-hexadecimal digit found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

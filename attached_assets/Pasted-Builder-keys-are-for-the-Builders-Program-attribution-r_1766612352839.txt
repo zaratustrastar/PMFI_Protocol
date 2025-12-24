@@ -1,0 +1,125 @@
+Builder keys are for the Builders Program / attribution / relayer stuff, not for authenticating a normal trading client to POST /order. To place orders you need CLOB L2 auth (API key + secret + passphrase) for the trading account you’re placing orders from. Polymarket Documentation+1
+the exact “happy path” to execute a market sell
+1) initialize the CLOB client correctly (EOA vs proxy wallet)
+Polymarket’s docs show 3 valid init patterns, depending on how the account is set up:
+
+
+Email/Magic account (proxy wallet) → signature_type=1 and funder=POLYMARKET_PROXY_ADDRESS
+
+
+Browser wallet (proxy wallet) → signature_type=2 and funder=POLYMARKET_PROXY_ADDRESS
+
+
+Direct EOA trading → no signature_type, no funder Polymarket Documentation+1
+
+
+2) enable L2 trading auth (this is what “posts orders”)
+Call:
+client.set_api_creds(client.create_or_derive_api_creds())
+
+This is explicitly in the “Place Single Order” docs. Polymarket Documentation
+That call gives you the L2 headers required for POST /order. Polymarket Documentation+1
+3) create a marketable sell and send it as FAK
+CLOB “market orders” are just limit orders priced through the book (marketable), then posted with FAK (Fill-and-Kill) so whatever fills immediately fills, and the rest is cancelled. Polymarket Documentation
+Example (sell) skeleton:
+from py_clob_client.client import ClobClient
+from py_clob_client.clob_types import OrderArgs, OrderType
+from py_clob_client.order_builder.constants import SELL
+
+host = "https://clob.polymarket.com"
+chain_id = 137
+
+client = ClobClient(
+    host,
+    key=PRIVATE_KEY,
+    chain_id=chain_id,
+    signature_type=1,              # or 2, depending on login method
+    funder=PROXY_WALLET_ADDRESS,   # if using a proxy wallet
+)
+
+client.set_api_creds(client.create_or_derive_api_creds())
+
+order_args = OrderArgs(
+    token_id=TOKEN_ID,
+    side=SELL,
+    size=SIZE_IN_SHARES,
+    price=MARKETABLE_PRICE,  # set at/under best bid for sells to make it marketable
+)
+
+signed = client.create_order(order_args)
+resp = client.post_order(signed, OrderType.FAK)
+print(resp)
+
+Order types (including FAK) are defined in the order endpoint docs. Polymarket Documentation
+
+why your “Builder key fallback” is breaking you
+Your log shows:
+
+
+“Falling back to Builder API credentials…”
+
+
+then Unauthorized/Invalid api key
+
+
+That’s expected: builder keys ≠ trading L2 creds. You should remove the fallback entirely and instead make create_or_derive_api_creds() succeed for the correct account. Polymarket Documentation+1
+how to map your current errors to the real root cause
+Based on what you pasted, these are the usual causes:
+
+
+“Couldn’t parse created CLOB creds”
+
+
+create_or_derive_api_creds() isn’t returning valid creds for the account you’re trying to trade from (often because the client is initialized with the wrong signature_type, wrong key format, or wrong funder/proxy setup). Polymarket Documentation+1
+
+
+
+
+“invalid signature”
+
+
+almost always means your signed order doesn’t match what Polymarket expects:
+
+
+wrong signature_type for that login method (1 vs 2)
+
+
+signing key doesn’t correspond to the account
+
+
+funder/proxy address mismatch (maker/funder vs signer) Polymarket Documentation+1
+
+
+
+
+
+
+“invalid amounts, maker and taker amount must be higher than 0”
+
+
+you’re trying to sell such a tiny notional (like $0.01–$0.04) that rounding in maker/taker amounts hits zero. You need to enforce a minimum order size/notional before attempting liquidation. (Your logs show sells like ~$0.01.) Polymarket Documentation
+
+
+
+
+
+quick fix to your earlier dotenv crash (so you can print creds)
+Your load_dotenv() failed because find_dotenv() can assert in certain stdin/embedded contexts. Use an explicit path:
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="/root/PolyNotifyBot/.env")
+
+(or dotenv_path=".env" if you’re in the repo root).
+
+If you want the fastest path to get unstuck without sharing secrets, paste these non-sensitive things and I’ll tell you exactly which init block to use and what to delete:
+
+
+how you log into that Polymarket account: email/magic vs metamask/browser wallet
+
+
+whether the funds are actually on the proxy wallet (the address you deposit USDC to) Polymarket Documentation
+
+
+your current ClobClient(...) constructor line (with addresses partially masked)
+
+
+And: delete the builder-key fallback. It’s leading you away from the only auth that actually posts orders.
