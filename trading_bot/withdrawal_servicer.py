@@ -234,11 +234,13 @@ def get_patched_clob_client():
             print("⚠️  POLYMARKET_PRIVATE_KEY required for signing orders")
             return None
         
-        # Normalize the private key
+        # Normalize the private key - strip 0x prefix for py-clob-client
         normalized_key = normalize_privkey(PM_PRIVATE_KEY)
         if not normalized_key:
             print("⚠️  Invalid POLYMARKET_PRIVATE_KEY format")
             return None
+        # py-clob-client works with both formats, but docs recommend without 0x
+        key_for_client = normalized_key[2:] if normalized_key.startswith("0x") else normalized_key
         
         # Derive EOA address from private key - for diagnostics only
         from eth_account import Account
@@ -249,10 +251,10 @@ def get_patched_clob_client():
         # For Polymarket proxy wallets:
         # - signature_type=1: Magic/email wallet (EOA signs for proxy)
         # - funder: PROXY address (where funds are held on Polymarket)
-        # - key: Private key of the EOA that controls the proxy
+        # - key: Private key of the EOA that controls the proxy (without 0x prefix)
         client = ClobClient(
             "https://clob.polymarket.com",
-            key=normalized_key,
+            key=key_for_client,
             chain_id=137,
             signature_type=1,
             funder=PM_PROXY_ADDRESS,
@@ -1225,7 +1227,18 @@ def liquidate_positions(needed_usdc: float) -> float:
         
         size_to_sell = min(size_to_sell, bid_depth)
         
+        # Calculate expected USDC value
+        expected_usdc = size_to_sell * live_bid_price
+        
+        # Skip dust orders - Polymarket rejects orders with amounts that round to 0
+        if expected_usdc < 1.0:
+            print(f"   ⏭️  Skip dust order: {size_to_sell:.2f} tokens @ ${live_bid_price:.4f} = ${expected_usdc:.4f} (min $1.00)")
+            continue
+        
+        # Debug: log token_id for verification
+        print(f"   🧾 token_id: {token_id}")
         print(f"   MARKET SELL: {size_to_sell:.2f} of {pos['outcome']} @ live bid ${live_bid_price:.4f} (depth: {bid_depth:.2f})")
+        print(f"   💰 Expected USDC: ${expected_usdc:.2f}")
         
         success, usdc = execute_liquidation_order(
             token_id,
