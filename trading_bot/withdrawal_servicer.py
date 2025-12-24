@@ -114,6 +114,13 @@ PM_API_KEY = os.getenv("POLYMARKET_API_KEY", "")
 PM_API_SECRET = os.getenv("POLYMARKET_API_SECRET", "")
 PM_API_PASSPHRASE = os.getenv("POLYMARKET_API_PASSPHRASE", "")
 
+# Signature type for Polymarket CLOB:
+#   0 = Standard EOA (MetaMask hardware wallet, direct signing)
+#   1 = Magic/Email wallet (EOA signs for Magic proxy)
+#   2 = Browser wallet proxy (MetaMask browser extension -> Polymarket proxy)
+# Default to 2 for MetaMask browser wallet users
+PM_SIGNATURE_TYPE = int(os.getenv("POLYMARKET_SIGNATURE_TYPE", "2"))
+
 BASE_RPC_URL = os.getenv("BASE_RPC_URL") or os.getenv("RPC_URL", "https://mainnet.base.org")
 POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
 PROXY_URL = os.getenv("PROXY_URL", "")  # Use socks5:// for SOCKS proxies, http:// for HTTP proxies
@@ -249,14 +256,17 @@ def get_patched_clob_client():
         print(f"   📋 Proxy wallet (funder): {PM_PROXY_ADDRESS[:10]}..." if PM_PROXY_ADDRESS else "   📋 Proxy wallet: NOT SET")
         
         # For Polymarket proxy wallets:
-        # - signature_type=1: Magic/email wallet (EOA signs for proxy)
+        # - signature_type=0: Standard EOA (direct signing, no proxy)
+        # - signature_type=1: Magic/email wallet (EOA signs for Magic proxy)
+        # - signature_type=2: Browser wallet proxy (MetaMask browser -> PM proxy)
         # - funder: PROXY address (where funds are held on Polymarket)
         # - key: Private key of the EOA that controls the proxy (without 0x prefix)
+        print(f"   📋 Signature type: {PM_SIGNATURE_TYPE} ({'EOA' if PM_SIGNATURE_TYPE == 0 else 'Magic' if PM_SIGNATURE_TYPE == 1 else 'Browser proxy'})")
         client = ClobClient(
             "https://clob.polymarket.com",
             key=key_for_client,
             chain_id=137,
-            signature_type=1,
+            signature_type=PM_SIGNATURE_TYPE,
             funder=PM_PROXY_ADDRESS,
         )
         
