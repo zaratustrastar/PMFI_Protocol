@@ -1,0 +1,84 @@
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $0.01
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-24 22:40:32
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+
+📊 Polymarket:
+   Cash: $0.00
+   Positions: $0.00
+
+⚠️  Cash insufficient, need to liquidate $7.07
+   Positions available: $11.87 across 4 positions
+
+🔥 LIQUIDATE: Need $7.07 USDC (capped from $7.07)
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '205968'}, {'price': '0.002', 'size': '5600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.1930, size at best: 111.69, total depth: 216670.01
+   🧾 token_id: 54249369766400104419205542728143119489671274016778013571742452580191616443190
+   MARKET SELL: 40.70 of Yes @ live bid $0.1930 (depth: 111.69)
+   💰 Expected USDC: $7.86
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (signer): 0x5087675E...
+   📋 Proxy wallet (funder): 0x9cbc5577...
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   📋 Wallet: 0x9cbc5577...
+   📋 Private key present: True
+   📋 CLOB host: https://clob.polymarket.com
+   🔑 Using pre-derived API credentials from env vars...
+   ✅ Credentials loaded (key: c4a3fd29...)
+   ✅ L2 auth verified - CLOB client ready for trading
+   📤 Creating market sell: 40.70 tokens (~$7.86)
+   ❌ Market sell failed: Unknown error
+   📋 Full response: {'error': 'invalid signature'}
+   📖 Orderbook query: 24210214708827119705...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '13242.99'}, {'price': '0.002', 'size': '666'}, {'price': '0.003', 'size': '5.48'}]
+   📊 Best bid: $0.5310, size at best: 232.78, total depth: 77080.02
+   🧾 token_id: 24210214708827119705103412942759646021313884975536714519528526437599094716822
+   MARKET SELL: 5.21 of Yes @ live bid $0.5310 (depth: 232.78)
+   💰 Expected USDC: $2.76
+   📤 Creating market sell: 5.21 tokens (~$2.76)
+   ❌ Market sell failed: Unknown error
+   📋 Full response: {'error': 'invalid signature'}
+   📖 Orderbook query: 91100409913715538094...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '12405.37'}, {'price': '0.02', 'size': '6505.05'}, {'price': '0.03', 'size': '24.67'}]
+   📊 Best bid: $0.4900, size at best: 2108.03, total depth: 60315.23
+   ⏭️  Skip dust order: 1.96 tokens @ $0.4900 = $0.9607 (min $1.00)
+   📖 Orderbook query: 99256619221732681838...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '2678'}, {'price': '0.02', 'size': '8.56'}, {'price': '0.04', 'size': '3261.48'}]
+   📊 Best bid: $0.2900, size at best: 170.00, total depth: 24353.46
+   ⏭️  Skip dust order: 2.94 tokens @ $0.2900 = $0.8529 (min $1.00)
+   Total liquidated: $0.00
+
+💤 Sleeping 60s...
