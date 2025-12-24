@@ -1,0 +1,62 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot && git pull
+python3 -c "
+from py_clob_client.client import ClobClient
+import os
+
+client = ClobClient(
+    'https://clob.polymarket.com',
+    key='YOUR_PRIVATE_KEY_WITHOUT_0x',
+    chain_id=137,
+    signature_type=2,  # <-- CHANGED FROM 1 TO 2
+    funder='0x9cbc5577e6f1B3a097...'  # Your proxy address
+)
+
+creds = client.create_or_derive_api_creds()
+print(f'POLYMARKET_API_KEY={creds.api_key}')
+print(f'POLYMARKET_API_SECRET={creds.api_secret}')
+print(f'POLYMARKET_API_PASSPHRASE={creds.api_passphrase}')
+"
+remote: Enumerating objects: 13, done.
+remote: Counting objects: 100% (13/13), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 9 (delta 7), reused 9 (delta 7), pack-reused 0 (from 0)
+Unpacking objects: 100% (9/9), 3.05 KiB | 260.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   9861345..4364c3f  main       -> origin/main
+Updating 9861345..4364c3f
+Fast-forward
+ ...THDRAWAL-SERVICER-V7-3-Event-Driven--1766616101680_1766616101681.txt | 84 ++++++++++++++++++++++++++++++++++
+ trading_bot/withdrawal_servicer.py                                      | 14 +++++-
+ 2 files changed, 96 insertions(+), 2 deletions(-)
+ create mode 100644 attached_assets/Pasted--WITHDRAWAL-SERVICER-V7-3-Event-Driven--1766616101680_1766616101681.txt
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 139, in __init__
+    self.signer = Signer(key, chain_id) if key else None
+                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/signer.py", line 9, in __init__
+    self.account = Account.from_key(private_key)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_utils/decorators.py", line 31, in _wrapper
+    return self.method(objtype, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_account/account.py", line 310, in from_key
+    key = self._parse_private_key(private_key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_utils/decorators.py", line 31, in _wrapper
+    return self.method(objtype, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_account/account.py", line 894, in _parse_private_key
+    hb_key = HexBytes(key)
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hexbytes/main.py", line 35, in __new__
+    bytesval = to_bytes(val)
+               ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hexbytes/_utils.py", line 17, in to_bytes
+    return hexstr_to_bytes(val)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hexbytes/_utils.py", line 54, in hexstr_to_bytes
+    return binascii.unhexlify(ascii_hex)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+binascii.Error: Non-hexadecimal digit found
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
