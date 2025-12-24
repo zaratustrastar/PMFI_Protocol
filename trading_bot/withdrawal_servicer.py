@@ -108,11 +108,11 @@ except ValueError as e:
     print(f"❌ {e}")
     PM_PRIVATE_KEY = ""
 
-# Builder API credentials (required for proxy wallet trading)
-# Get these from https://polymarket.com/settings?tab=builder
-PM_BUILDER_API_KEY = os.getenv("POLYMARKET_BUILDER_API_KEY", "")
-PM_BUILDER_SECRET = os.getenv("POLYMARKET_BUILDER_SECRET", "")
-PM_BUILDER_PASSPHRASE = os.getenv("POLYMARKET_BUILDER_PASSPHRASE", "")
+# CLOB L2 API credentials (for trading - derived from create_or_derive_api_creds)
+# These can be pre-derived and stored in .env to avoid Cloudflare blocking
+PM_API_KEY = os.getenv("POLYMARKET_API_KEY", "")
+PM_API_SECRET = os.getenv("POLYMARKET_API_SECRET", "")
+PM_API_PASSPHRASE = os.getenv("POLYMARKET_API_PASSPHRASE", "")
 
 BASE_RPC_URL = os.getenv("BASE_RPC_URL") or os.getenv("RPC_URL", "https://mainnet.base.org")
 POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
@@ -359,44 +359,47 @@ def get_patched_clob_client():
         print(f"   📋 Private key present: {pk_present}")
         print(f"   📋 CLOB host: https://clob.polymarket.com")
         
-        # For proxy wallet trading (signature_type=1), we need to derive credentials
-        # from the EOA's private key. This creates API credentials specifically for
-        # trading on behalf of the proxy wallet.
-        # 
-        # Primary: Derive credentials using create_or_derive_api_creds()
-        # Fallback: Use Builder API keys if derivation fails (for Cloudflare issues)
+        # For proxy wallet trading (signature_type=1), we need L2 CLOB credentials.
+        # Priority:
+        # 1. Use pre-derived credentials from env vars (POLYMARKET_API_KEY/SECRET/PASSPHRASE)
+        # 2. Try to derive credentials using create_or_derive_api_creds() (may fail due to Cloudflare)
+        
+        from py_clob_client.clob_types import ApiCreds
+        
         creds = None
-        derivation_error = None
         
-        print("   🔑 Deriving API credentials for proxy wallet trading...")
-        try:
-            creds = client.create_or_derive_api_creds()
-            if creds and hasattr(creds, 'api_key') and creds.api_key:
-                client.set_api_creds(creds)
-                print(f"   ✅ Credentials derived successfully (key: {creds.api_key[:8]}...)")
-            else:
-                derivation_error = f"Empty response: {creds}"
-                print(f"   ⚠️  Credential derivation returned empty, trying fallback...")
-        except Exception as cred_error:
-            derivation_error = str(cred_error)
-            print(f"   ⚠️  Credential derivation failed: {derivation_error}")
-        
-        # Fallback to Builder credentials if derivation failed
-        if derivation_error and PM_BUILDER_API_KEY and PM_BUILDER_SECRET and PM_BUILDER_PASSPHRASE:
-            print("   🔑 Falling back to Builder API credentials...")
-            from py_clob_client.clob_types import ApiCreds
+        # FIRST: Check for pre-derived credentials in env vars
+        if PM_API_KEY and PM_API_SECRET and PM_API_PASSPHRASE:
+            print("   🔑 Using pre-derived API credentials from env vars...")
             creds = ApiCreds(
-                api_key=PM_BUILDER_API_KEY,
-                api_secret=PM_BUILDER_SECRET,
-                api_passphrase=PM_BUILDER_PASSPHRASE
+                api_key=PM_API_KEY,
+                api_secret=PM_API_SECRET,
+                api_passphrase=PM_API_PASSPHRASE
             )
             client.set_api_creds(creds)
-            print(f"   ✅ Builder credentials set (key: {PM_BUILDER_API_KEY[:8]}...)")
-        elif derivation_error:
-            print(f"   ❌ No credentials available")
-            print("   💡 Derivation failed and no Builder credentials configured")
-            print("   💡 Check if your residential proxy is working")
-            return None
+            print(f"   ✅ Credentials loaded (key: {PM_API_KEY[:8]}...)")
+        else:
+            # FALLBACK: Try to derive credentials (may fail due to Cloudflare)
+            print("   🔑 No pre-derived creds, attempting derivation...")
+            try:
+                creds = client.create_or_derive_api_creds()
+                if creds and hasattr(creds, 'api_key') and creds.api_key:
+                    client.set_api_creds(creds)
+                    print(f"   ✅ Credentials derived successfully (key: {creds.api_key[:8]}...)")
+                    print(f"   💡 TIP: Save these to .env to avoid Cloudflare issues:")
+                    print(f"      POLYMARKET_API_KEY={creds.api_key}")
+                    print(f"      POLYMARKET_API_SECRET={creds.api_secret}")
+                    print(f"      POLYMARKET_API_PASSPHRASE={creds.api_passphrase}")
+                else:
+                    print(f"   ❌ Credential derivation returned empty")
+                    print("   💡 Run derivation locally and add to .env:")
+                    print("      POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE")
+                    return None
+            except Exception as cred_error:
+                print(f"   ❌ Credential derivation failed: {cred_error}")
+                print("   💡 Run derivation locally and add to .env:")
+                print("      POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE")
+                return None
         
         # CRITICAL: Verify L2 auth works before caching - fail fast
         try:
