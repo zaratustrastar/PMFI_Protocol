@@ -257,10 +257,6 @@ def get_patched_clob_client():
             funder=PM_PROXY_ADDRESS,
         )
         
-        # Also set wallet address to ensure orders target the correct account
-        if PM_PROXY_ADDRESS:
-            client.set_wallet_address(PM_PROXY_ADDRESS)
-        
         # Patch HTTP helpers with curl_cffi for Cloudflare bypass
         if BYPASS_METHOD == "curl_cffi" and http_helpers:
             proxy_config = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
