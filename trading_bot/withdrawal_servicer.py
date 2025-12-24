@@ -216,21 +216,14 @@ def get_patched_clob_client():
     if not HAS_CLOB_CLIENT:
         return None
     
-    # Check if we have Builder API creds (required for proxy wallet trading)
-    has_builder_creds = PM_BUILDER_API_KEY and PM_BUILDER_SECRET and PM_BUILDER_PASSPHRASE
-    has_signing_prereqs = PM_PRIVATE_KEY and PM_PROXY_ADDRESS
-    
-    if not has_builder_creds:
-        print("⚠️  Missing Builder API credentials. For proxy wallet trading:")
-        print("   💡 1. Go to https://polymarket.com/settings?tab=builder")
-        print("   💡 2. Create Builder API keys")
-        print("   💡 3. Set POLYMARKET_BUILDER_API_KEY, POLYMARKET_BUILDER_SECRET, POLYMARKET_BUILDER_PASSPHRASE")
+    # Check if we have signing prerequisites for proxy wallet trading
+    # API credentials will be derived from the private key
+    if not PM_PRIVATE_KEY:
+        print("⚠️  Missing POLYMARKET_PRIVATE_KEY (EOA that controls the proxy)")
         return None
     
-    if not has_signing_prereqs:
-        print("⚠️  Missing signing credentials:")
-        print("   - POLYMARKET_PRIVATE_KEY (EOA that controls proxy)")
-        print("   - POLYMARKET_PROXY_ADDRESS (your Polymarket proxy wallet)")
+    if not PM_PROXY_ADDRESS:
+        print("⚠️  Missing POLYMARKET_PROXY_ADDRESS (your Polymarket proxy wallet)")
         return None
     
     try:
@@ -366,10 +359,31 @@ def get_patched_clob_client():
         print(f"   📋 Private key present: {pk_present}")
         print(f"   📋 CLOB host: https://clob.polymarket.com")
         
-        # Use Builder API credentials (required for proxy wallet trading)
-        # Get these from https://polymarket.com/settings?tab=builder
-        if PM_BUILDER_API_KEY and PM_BUILDER_SECRET and PM_BUILDER_PASSPHRASE:
-            print("   🔑 Using Builder API credentials for proxy wallet...")
+        # For proxy wallet trading (signature_type=1), we need to derive credentials
+        # from the EOA's private key. This creates API credentials specifically for
+        # trading on behalf of the proxy wallet.
+        # 
+        # Primary: Derive credentials using create_or_derive_api_creds()
+        # Fallback: Use Builder API keys if derivation fails (for Cloudflare issues)
+        creds = None
+        derivation_error = None
+        
+        print("   🔑 Deriving API credentials for proxy wallet trading...")
+        try:
+            creds = client.create_or_derive_api_creds()
+            if creds and hasattr(creds, 'api_key') and creds.api_key:
+                client.set_api_creds(creds)
+                print(f"   ✅ Credentials derived successfully (key: {creds.api_key[:8]}...)")
+            else:
+                derivation_error = f"Empty response: {creds}"
+                print(f"   ⚠️  Credential derivation returned empty, trying fallback...")
+        except Exception as cred_error:
+            derivation_error = str(cred_error)
+            print(f"   ⚠️  Credential derivation failed: {derivation_error}")
+        
+        # Fallback to Builder credentials if derivation failed
+        if derivation_error and PM_BUILDER_API_KEY and PM_BUILDER_SECRET and PM_BUILDER_PASSPHRASE:
+            print("   🔑 Falling back to Builder API credentials...")
             from py_clob_client.clob_types import ApiCreds
             creds = ApiCreds(
                 api_key=PM_BUILDER_API_KEY,
@@ -377,12 +391,11 @@ def get_patched_clob_client():
                 api_passphrase=PM_BUILDER_PASSPHRASE
             )
             client.set_api_creds(creds)
-        else:
-            print("   ❌ Builder credentials not found!")
-            print("   💡 For proxy wallet trading, you need Builder API credentials:")
-            print("   💡 1. Go to https://polymarket.com/settings?tab=builder")
-            print("   💡 2. Create Builder API keys")
-            print("   💡 3. Set POLYMARKET_BUILDER_API_KEY, POLYMARKET_BUILDER_SECRET, POLYMARKET_BUILDER_PASSPHRASE")
+            print(f"   ✅ Builder credentials set (key: {PM_BUILDER_API_KEY[:8]}...)")
+        elif derivation_error:
+            print(f"   ❌ No credentials available")
+            print("   💡 Derivation failed and no Builder credentials configured")
+            print("   💡 Check if your residential proxy is working")
             return None
         
         # CRITICAL: Verify L2 auth works before caching - fail fast
