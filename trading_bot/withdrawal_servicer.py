@@ -108,10 +108,11 @@ except ValueError as e:
     print(f"❌ {e}")
     PM_PRIVATE_KEY = ""
 
-# Explicit CLOB API credentials (preferred over derivation)
-PM_API_KEY = os.getenv("POLYMARKET_API_KEY", "")
-PM_API_SECRET = os.getenv("POLYMARKET_API_SECRET", "")
-PM_API_PASSPHRASE = os.getenv("POLYMARKET_API_PASSPHRASE", "")
+# Builder API credentials (required for proxy wallet trading)
+# Get these from https://polymarket.com/settings?tab=builder
+PM_BUILDER_API_KEY = os.getenv("POLYMARKET_BUILDER_API_KEY", "")
+PM_BUILDER_SECRET = os.getenv("POLYMARKET_BUILDER_SECRET", "")
+PM_BUILDER_PASSPHRASE = os.getenv("POLYMARKET_BUILDER_PASSPHRASE", "")
 
 BASE_RPC_URL = os.getenv("BASE_RPC_URL") or os.getenv("RPC_URL", "https://mainnet.base.org")
 POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
@@ -215,14 +216,21 @@ def get_patched_clob_client():
     if not HAS_CLOB_CLIENT:
         return None
     
-    # Check if we have explicit API creds or can derive them
-    has_explicit_creds = PM_API_KEY and PM_API_SECRET and PM_API_PASSPHRASE
-    has_derivation_prereqs = PM_PRIVATE_KEY and PM_PROXY_ADDRESS
+    # Check if we have Builder API creds (required for proxy wallet trading)
+    has_builder_creds = PM_BUILDER_API_KEY and PM_BUILDER_SECRET and PM_BUILDER_PASSPHRASE
+    has_signing_prereqs = PM_PRIVATE_KEY and PM_PROXY_ADDRESS
     
-    if not has_explicit_creds and not has_derivation_prereqs:
-        print("⚠️  Missing credentials. Either provide:")
-        print("   - POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE, or")
-        print("   - POLYMARKET_PRIVATE_KEY and POLYMARKET_PROXY_ADDRESS for derivation")
+    if not has_builder_creds:
+        print("⚠️  Missing Builder API credentials. For proxy wallet trading:")
+        print("   💡 1. Go to https://polymarket.com/settings?tab=builder")
+        print("   💡 2. Create Builder API keys")
+        print("   💡 3. Set POLYMARKET_BUILDER_API_KEY, POLYMARKET_BUILDER_SECRET, POLYMARKET_BUILDER_PASSPHRASE")
+        return None
+    
+    if not has_signing_prereqs:
+        print("⚠️  Missing signing credentials:")
+        print("   - POLYMARKET_PRIVATE_KEY (EOA that controls proxy)")
+        print("   - POLYMARKET_PROXY_ADDRESS (your Polymarket proxy wallet)")
         return None
     
     try:
@@ -358,31 +366,24 @@ def get_patched_clob_client():
         print(f"   📋 Private key present: {pk_present}")
         print(f"   📋 CLOB host: https://clob.polymarket.com")
         
-        # Use explicit API credentials if provided, otherwise try to derive
-        if PM_API_KEY and PM_API_SECRET and PM_API_PASSPHRASE:
-            print("   🔑 Using explicit API credentials from environment...")
+        # Use Builder API credentials (required for proxy wallet trading)
+        # Get these from https://polymarket.com/settings?tab=builder
+        if PM_BUILDER_API_KEY and PM_BUILDER_SECRET and PM_BUILDER_PASSPHRASE:
+            print("   🔑 Using Builder API credentials for proxy wallet...")
             from py_clob_client.clob_types import ApiCreds
             creds = ApiCreds(
-                api_key=PM_API_KEY,
-                api_secret=PM_API_SECRET,
-                api_passphrase=PM_API_PASSPHRASE
+                api_key=PM_BUILDER_API_KEY,
+                api_secret=PM_BUILDER_SECRET,
+                api_passphrase=PM_BUILDER_PASSPHRASE
             )
             client.set_api_creds(creds)
         else:
-            print("   🔑 Deriving trading credentials from private key...")
-            try:
-                creds = client.create_or_derive_api_creds()
-                if creds and hasattr(creds, 'api_key') and creds.api_key:
-                    client.set_api_creds(creds)
-                    print(f"   ✅ Credentials derived (API key: {creds.api_key[:8]}...)")
-                else:
-                    print(f"   ❌ Credential derivation returned empty: {creds}")
-                    print("   💡 Set POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE")
-                    return None
-            except Exception as cred_error:
-                print(f"   ❌ Credential derivation failed: {cred_error}")
-                print("   💡 Set POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE")
-                return None
+            print("   ❌ Builder credentials not found!")
+            print("   💡 For proxy wallet trading, you need Builder API credentials:")
+            print("   💡 1. Go to https://polymarket.com/settings?tab=builder")
+            print("   💡 2. Create Builder API keys")
+            print("   💡 3. Set POLYMARKET_BUILDER_API_KEY, POLYMARKET_BUILDER_SECRET, POLYMARKET_BUILDER_PASSPHRASE")
+            return None
         
         # CRITICAL: Verify L2 auth works before caching - fail fast
         try:
