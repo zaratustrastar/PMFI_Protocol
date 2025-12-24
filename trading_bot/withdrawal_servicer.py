@@ -1004,12 +1004,34 @@ def get_orderbook_best_bid(token_id: str) -> Tuple[float, float]:
             print(f"   📊 No bids available (market illiquid)")
             return 0.0, 0.0
         
-        best_bid = bids[0]
-        price = float(best_bid.get("price", 0))
-        size = float(best_bid.get("size", 0))
+        # Debug: show raw bid data (first 3 entries)
+        print(f"   🔍 Raw bids (first 3): {bids[:3]}")
         
-        print(f"   📊 Best bid: ${price:.4f}, depth: {size:.2f}")
-        return price, size
+        # Find the BEST (highest price) bid - don't assume bids[0] is sorted
+        best_bid = None
+        best_price = 0.0
+        total_depth = 0.0
+        
+        for bid in bids:
+            bid_price = float(bid.get("price", 0))
+            bid_size = float(bid.get("size", 0))
+            
+            # Track total depth at prices >= 10% of best price (for slippage estimation)
+            if bid_price > best_price:
+                best_price = bid_price
+                best_bid = bid
+            
+            # Accumulate size for depth calculation
+            total_depth += bid_size
+        
+        if not best_bid or best_price <= 0:
+            print(f"   📊 No valid bids found")
+            return 0.0, 0.0
+        
+        best_size = float(best_bid.get("size", 0))
+        
+        print(f"   📊 Best bid: ${best_price:.4f}, size at best: {best_size:.2f}, total depth: {total_depth:.2f}")
+        return best_price, best_size
         
     except Exception as e:
         print(f"   ⚠️  Error fetching orderbook: {e}")
