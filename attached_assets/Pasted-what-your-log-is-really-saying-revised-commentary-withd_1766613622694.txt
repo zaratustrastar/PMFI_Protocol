@@ -1,0 +1,171 @@
+what your log is really saying (revised commentary)
+✅ withdrawal math is fine
+You need $7.07, you have $8.70 on Base, so you need to raise about $7 from Polymarket and send it back.
+✅ L2 auth is not the blocker anymore
+You load API creds from env and assert_level_2_auth() passes.
+So you’re allowed to POST orders.
+❌ but the order payload you POST is rejected as “invalid signature”
+That means: the server is receiving an order with a signature that does not match what it expects.
+This is almost never Cloudflare / proxy / TLS. It’s almost always one of these:
+
+
+signing with the wrong private key
+
+
+using the wrong signature_type
+
+
+using the wrong chain_id for signing
+
+
+signing as one address (EOA) but order says it’s from another (proxy/funder mismatch)
+
+
+API credentials belong to a different identity than the signer/funder configuration (less common, but possible)
+
+
+❌ plus: you’re trying to sell dust
+Example:
+5.21 tokens @ $0.0010 = $0.00521
+That becomes 0 in integer base units → server rejects:
+maker and taker amount must be higher than 0
+So even after signature is fixed, your liquidation loop will still be noisy unless you add a minimum notional / minimum amount guard.
+
+the core fix: make signer + funder + signature settings consistent
+You have:
+
+
+EOA (signer): 0x5087...
+
+
+proxy wallet (funder): 0x9cbc...
+
+
+you pass funder=0x9cbc...
+
+
+you set “wallet: 0x9cbc...”
+
+
+you sign with POLYMARKET_PRIVATE_KEY (EOA)
+
+
+That can be correct — but only if your py_clob_client version expects this exact flow.
+The biggest red flag: earlier you had set_wallet_address calls and then it error’d because the method didn’t exist. That means your library version differs from the code assumptions. That can easily cause signature to be built with the wrong address.
+What I want you to do (fastest path)
+Run these 3 commands on the VPS and use their output to adjust your init (no secrets leaked):
+1) confirm library version
+python3 -c "import py_clob_client; print(py_clob_client.__version__)"
+
+2) inspect ClobClient constructor signature (tells us supported params)
+python3 - <<'PY'
+import inspect
+from py_clob_client.client import ClobClient
+print(inspect.signature(ClobClient.__init__))
+PY
+
+3) list wallet-related methods (tells us what to call, if anything)
+python3 - <<'PY'
+from py_clob_client.client import ClobClient
+print([m for m in dir(ClobClient) if "wallet" in m.lower() or "address" in m.lower() or "funder" in m.lower()])
+PY
+
+This tells us exactly what the client supports in your version. Then you can stop guessing.
+
+in the meantime: the most likely signature bug + patch
+most likely cause
+Your code is building orders where the “maker” / “signer” address in the payload doesn’t match the signature.
+This happens when you:
+
+
+set some “wallet” to proxy, but signature is created by EOA,
+
+
+or you pass key incorrectly (0x stripping issues),
+
+
+or signature_type is wrong for this flow.
+
+
+patch to try immediately (safe + minimal)
+Do not override wallet address at all.
+Let the library derive everything from key + funder.
+So your init should be strictly:
+client = ClobClient(
+    "https://clob.polymarket.com",
+    key=normalized_private_key,   # no "0x" if library expects raw hex
+    chain_id=137,
+    signature_type=1,             # keep for now
+    funder=PM_PROXY_ADDRESS,      # proxy that actually holds collateral
+)
+client.set_api_creds(creds)
+client.assert_level_2_auth()
+
+And remove any “set wallet address” / “wallet=proxy” local overrides in your wrapper.
+If your patched wrapper is injecting wallet=proxy somewhere into the POST payload or headers, stop doing that too.
+if it still says invalid signature after that
+Try switching signature_type:
+
+
+if you’re on signature_type=1 now, try 0
+
+
+or if your library exposes enums/constants, use those
+
+
+Because a wrong signature type is a classic “everything looks correct, but server says invalid signature” symptom.
+
+fix the “invalid amounts” error (you need this anyway)
+Add a hard minimum notional guard before placing any sell:
+
+
+skip anything where expected_usdc < 1.00 (or even < 2.00)
+
+
+also skip if calculated maker/taker amount rounds to 0
+
+
+Example:
+expected_usdc = size * best_bid
+if expected_usdc < 1.0:
+    print(f"   ⏭️  Skip dust order (${expected_usdc:.4f})")
+    return 0.0
+
+This will eliminate that error line completely.
+
+also: your liquidation logic is selling the wrong thing first
+You need $7.07, but you’re placing orders worth $0.04, $0.01, $0.02…
+Even if signatures worked, that loop will take forever and hit dust limits.
+Change ordering:
+
+
+sort positions by bid_price * size_available descending
+
+
+sell the high-value position(s) first until you reach $7.07
+
+
+
+quick checklist (do these in order)
+
+
+confirm NAV signer is running (done)
+
+
+run the 3 introspection commands above
+
+
+simplify CLOB init: no wallet override, only key + funder + signature_type + chain_id
+
+
+if still invalid signature: flip signature_type (1 → 0 or 0 → 1)
+
+
+add minimum notional guard (skip < $1)
+
+
+reorder liquidation by value so you can actually raise $7+
+
+
+
+If you paste the output of those 3 introspection commands, I’ll tell you exactly which init signature your installed library expects and the exact code lines to change (so you stop getting “invalid signature”).

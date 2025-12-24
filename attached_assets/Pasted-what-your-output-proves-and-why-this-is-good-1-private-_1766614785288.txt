@@ -1,0 +1,202 @@
+what your output proves (and why this is good)
+1. private key is correct
+address: 0x5087675E669e6244620013691c05C1De0e8B525e
+
+
+Both 0x and non-0x formats resolve to the same EOA.
+So key formatting is not the problem anymore.
+
+2. correct Polymarket trading identity
+EOA signer: 0x5087675E...
+Proxy funder: 0x9cbc5577...
+
+
+This is exactly how Polymarket proxy trading works:
+
+EOA signs orders
+
+Proxy wallet is the funder (USDC + positions)
+
+Good.
+
+3. API credentials are now derived correctly
+
+You derived API creds using:
+
+ClobClient(
+    host,
+    key=EOA,
+    signature_type=1,
+    funder=PROXY
+)
+
+
+That is the only correct way to derive creds for proxy trading.
+
+So these creds:
+
+POLYMARKET_API_KEY=...
+POLYMARKET_API_SECRET=...
+POLYMARKET_API_PASSPHRASE=...
+
+
+are valid and correct.
+
+so why are market sells still failing?
+
+Now we move from identity bugs → order construction bugs.
+
+You’re no longer blocked by auth.
+The remaining errors tell us what’s wrong.
+
+interpreting your errors
+❌ invalid signature
+
+This now almost certainly means:
+
+the order payload being signed does not match what the CLOB expects
+
+This usually comes from one of these:
+
+wrong token_id (very common)
+
+wrong side / price / size precision
+
+mixing YES/NO token direction incorrectly
+
+signing as proxy instead of EOA (code bug)
+
+using price 0 or too small amounts
+
+You already saw both signature and amount errors — that’s a hint.
+
+❌ invalid amounts, maker and taker amount must be higher than 0
+
+This one is clear:
+
+You are trying to sell dust.
+
+Example from your logs:
+
+~$0.01
+~$0.02
+
+
+Polymarket will reject these.
+
+immediate fixes you should apply
+1. enforce a minimum liquidation value
+
+Do not place orders below ~$1.
+
+Add this guard before creating the order:
+
+if expected_usdc < 1.0:
+    print(f"   ⏭️  Skip dust order (${expected_usdc:.4f})")
+    return 0.0
+
+
+This will eliminate:
+
+invalid amounts
+
+many invalid signature errors (because amount rounding breaks signatures)
+
+2. confirm you are using the CTF token ID
+
+This is critical.
+
+Polymarket positions API often returns multiple IDs:
+
+market id
+
+condition id
+
+CTF token id (long numeric string)
+
+Your orderbook queries like:
+
+54249369766400104419...
+
+
+look correct — but you must confirm:
+
+Add one debug line before placing the order:
+
+print("   🧾 token_id used for order:", token_id)
+
+
+Then manually check in Polymarket UI (or Gamma API) that:
+
+this token ID matches the YES/NO share you actually hold
+
+If you sign an order for a token you don’t own → invalid signature.
+
+3. ensure order is signed by EOA, not proxy
+
+Your client must be created like this (no exceptions):
+
+client = ClobClient(
+    "https://clob.polymarket.com",
+    key=EOA_PRIVATE_KEY,          # signer
+    chain_id=137,
+    signature_type=1,
+    funder=PROXY_ADDRESS,         # funds
+)
+client.set_api_creds(creds)
+client.assert_level_2_auth()
+
+
+Never:
+
+pass proxy private key
+
+override wallet address
+
+sign with funder
+
+Your introspection already showed:
+
+set_wallet_address does not exist
+So don’t try to fake it.
+
+do you need Builder Keys?
+
+No. Absolutely not.
+
+Builder keys:
+
+❌ do not sign trades
+
+❌ do not represent wallets
+
+❌ will always fail for market orders
+
+You were right to remove them.
+
+correct mental model (lock this in)
+role	wallet
+signs orders	EOA (0x5087…)
+holds USDC & positions	proxy (0x9cbc…)
+API creds	derived from EOA + funder
+market sell	signed by EOA, paid by proxy
+
+You are now aligned with Polymarket’s intended flow.
+
+next step (to unblock you fast)
+
+Please paste one single liquidation attempt with:
+
+token_id
+
+side (YES / NO)
+
+size
+
+price
+
+expected_usdc
+
+I’ll tell you exactly which field is wrong and why the signature fails.
+
+You are past the hard part — this is now just order correctness.

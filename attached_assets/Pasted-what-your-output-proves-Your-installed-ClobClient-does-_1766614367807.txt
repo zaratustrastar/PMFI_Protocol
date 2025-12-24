@@ -1,0 +1,155 @@
+what your output proves
+
+Your installed ClobClient does not have set_wallet_address (and no wallet/funder setter methods at all).
+Only get_address() exists. So any code that tries to call set_wallet_address() will crash (as you saw).
+
+The client supports funder= in the constructor, which is the correct way to do proxy/funder trading in your version:
+
+ClobClient(host, chain_id, key, creds, signature_type, funder, builder_config)
+
+
+So: stop trying to “set wallet address” after creation. You can’t in this version.
+
+why you still get invalid signature
+
+With Polymarket CLOB, invalid signature almost always means:
+
+you’re signing orders with an EOA key that doesn’t match what the server expects for that request, OR
+
+your orders are being signed with the wrong “mode” (signature_type) / wrong proxy (“funder”) combination, OR
+
+your API creds were derived under a different config than you’re using to trade (most common in your situation).
+
+Given your setup (EOA signer + proxy funder), the most likely issue is:
+
+✅ you generated/loaded API creds that don’t correspond to the exact trading identity/config you’re using now
+
+If you generated POLYMARKET_API_KEY/SECRET/PASSPHRASE earlier using a client without signature_type=1 and/or without funder=..., then later you try to trade with a new client with funder/proxy mode, the server can reject signatures because auth + signing context are inconsistent.
+
+do this now (step-by-step)
+1) confirm what address your private key actually corresponds to
+
+Run:
+
+python3 - <<'PY'
+import os
+from dotenv import load_dotenv
+from py_clob_client.client import ClobClient
+
+load_dotenv()
+
+pk = os.getenv("POLYMARKET_PRIVATE_KEY", "").strip()
+for candidate in [pk, pk.replace("0x","").strip()]:
+    try:
+        c = ClobClient("https://clob.polymarket.com", key=candidate, chain_id=137)
+        print("key format ok:", "0x..." if candidate.startswith("0x") else "no-0x", "address:", c.get_address())
+    except Exception as e:
+        print("key format failed:", "0x..." if candidate.startswith("0x") else "no-0x", e)
+PY
+
+
+Pick the format that works cleanly and gives the expected EOA (0x5087...).
+
+2) regenerate API creds using the same constructor config you will trade with
+
+This is the big one.
+
+Run this once on the VPS (and then put the printed values into .env):
+
+python3 - <<'PY'
+import os
+from dotenv import load_dotenv
+from py_clob_client.client import ClobClient
+
+load_dotenv()
+
+pk = os.getenv("POLYMARKET_PRIVATE_KEY", "").strip()
+proxy = os.getenv("POLYMARKET_PROXY_ADDRESS", "").strip()
+
+# use the same key normalization you confirmed in step 1
+pk_norm = pk.replace("0x","").strip()
+
+client = ClobClient(
+    "https://clob.polymarket.com",
+    key=pk_norm,
+    chain_id=137,
+    signature_type=1,
+    funder=proxy,
+)
+
+print("EOA signer:", client.get_address())
+print("Proxy funder:", proxy)
+
+creds = client.create_or_derive_api_creds()
+print("\nSET THESE IN .env:\n")
+print(f"POLYMARKET_API_KEY={creds.api_key}")
+print(f"POLYMARKET_API_SECRET={creds.api_secret}")
+print(f"POLYMARKET_API_PASSPHRASE={creds.api_passphrase}")
+PY
+
+
+Important: This ensures the API creds are derived in the same “proxy/funder signing mode” you use for market sells.
+
+Then restart your servicer so it loads the new creds.
+
+3) patch your servicer init accordingly (remove wallet overrides completely)
+
+Your client init should be only:
+
+client = ClobClient(
+    "https://clob.polymarket.com",
+    key=pk_norm,
+    chain_id=137,
+    signature_type=1,
+    funder=PM_PROXY_ADDRESS,
+)
+client.set_api_creds(creds)
+client.assert_level_2_auth()
+
+
+✅ Do not call set_wallet_address() anywhere (your library doesn’t support it).
+
+fix the “invalid amounts must be higher than 0” too
+
+You’re trying to sell dust like $0.005.
+
+Add a guard before placing any order:
+
+if expected_usdc < 1.0:
+    print(f"   ⏭️  Skip dust order (${expected_usdc:.4f})")
+    return 0.0
+
+
+This will remove that error entirely.
+
+about “builder keys”
+
+You’re right: you generally should not be using builder keys for trading orders here.
+Builder keys are commonly for builder endpoints / infra access, not for executing trades on behalf of a wallet. Your logs already showed:
+Unauthorized/Invalid api key when using builder fallback.
+
+So: remove builder fallback and rely only on derived API creds from your EOA/proxy config.
+
+one more thing: your “version” check failed
+
+Your package doesn’t expose __version__. Use this instead:
+
+python3 -c "import importlib.metadata as m; print(m.version('py-clob-client'))"
+
+
+(If that errors, run: python3 -c "import importlib.metadata as m; print([d.metadata['Name'] for d in m.distributions() if 'clob' in d.metadata['Name'].lower()])" and we’ll see the exact distribution name.)
+
+if you do steps 1–3 and still see invalid signature
+
+Paste:
+
+the output of step (1) (just the addresses and which key format worked)
+
+the output lines:
+
+EOA signer: ...
+
+Proxy funder: ...
+from step (2)
+
+No secrets needed — and with that I can tell you exactly which of the three (key formatting vs signature_type vs funder mode) is still mismatched

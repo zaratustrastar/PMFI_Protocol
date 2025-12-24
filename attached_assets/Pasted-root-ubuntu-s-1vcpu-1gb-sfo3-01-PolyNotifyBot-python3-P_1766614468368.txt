@@ -1,0 +1,63 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 - <<'PY'
+import os
+from dotenv import load_dotenv
+from py_clob_client.client import ClobClient
+
+load_dotenv()
+
+pk = os.getenv("POLYMARKET_PRIVATE_KEY", "").strip()
+for candidate in [pk, pk.replace("0x","").strip()]:
+    try:
+        c = ClobClient("https://clob.polymarket.com", key=candidate, chain_id=137)
+        print("key format ok:", "0x..." if candidate.startswith("0x") else "no-0x", "address:", c.get_address())
+    except Exception as e:
+        print("key format failed:", "0x..." if candidate.startswith("0x") else "no-0x", e)
+PY
+Traceback (most recent call last):
+  File "<stdin>", line 5, in <module>
+  File "/usr/local/lib/python3.12/dist-packages/dotenv/main.py", line 374, in load_dotenv
+    dotenv_path = find_dotenv()
+                  ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/dotenv/main.py", line 322, in find_dotenv
+    assert frame.f_back is not None
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 - <<'PY'
+import os
+from dotenv import load_dotenv
+from py_clob_client.client import ClobClient
+
+load_dotenv()
+
+pk = os.getenv("POLYMARKET_PRIVATE_KEY", "").strip()
+proxy = os.getenv("POLYMARKET_PROXY_ADDRESS", "").strip()
+
+pk_norm = pk.replace("0x","").strip()
+
+client = ClobClient(
+    "https://clob.polymarket.com",
+    key=pk_norm,
+    chain_id=137,
+    signature_type=1,
+    funder=proxy,
+)
+
+print("EOA signer:", client.get_address())
+print("Proxy funder:", proxy)
+
+creds = client.create_or_derive_api_creds()
+print("\nSET THESE IN .env:\n")
+print(f"POLYMARKET_API_KEY={creds.api_key}")
+print(f"POLYMARKET_API_SECRET={creds.api_secret}")
+print(f"POLYMARKET_API_PASSPHRASE={creds.api_passphrase}")
+PY
+Traceback (most recent call last):
+  File "<stdin>", line 5, in <module>
+  File "/usr/local/lib/python3.12/dist-packages/dotenv/main.py", line 374, in load_dotenv
+    dotenv_path = find_dotenv()
+                  ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/dotenv/main.py", line 322, in find_dotenv
+    assert frame.f_back is not None
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
