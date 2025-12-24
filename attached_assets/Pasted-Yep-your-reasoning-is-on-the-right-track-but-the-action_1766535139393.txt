@@ -1,0 +1,138 @@
+Yep — your reasoning is on the right track, but the *actionable* fix right now is even simpler:
+
+### 1) The immediate blocker is 100% this line
+
+`client.set_wallet_address(PM_PROXY_ADDRESS)`
+
+Your installed `py_clob_client` **does not have** `set_wallet_address`, so your bot can never finish initializing the client. That’s why you now see:
+
+`'ClobClient' object has no attribute 'set_wallet_address'`
+
+✅ **Fix right now:** **delete that call**.
+If your constructor already supports `funder=...`, that’s the intended way to set the “funder/proxy” wallet.
+
+So your init becomes:
+
+```python
+client = ClobClient(
+    "https://clob.polymarket.com",
+    key=normalized_key,     # EOA private key (signer)
+    chain_id=137,
+    signature_type=1,
+    funder=PM_PROXY_ADDRESS # proxy wallet (holds funds)
+)
+
+# REMOVE THIS (your version doesn't have it):
+# client.set_wallet_address(PM_PROXY_ADDRESS)
+```
+
+That will at least get you past the current crash and back to actual trading errors (if any).
+
+---
+
+## 2) Why you previously got “invalid signature”
+
+You had a working authenticated client, but the API rejected the order signature. That usually happens when **the address used for signing / order payload doesn’t match what the server expects**.
+
+In your case you explicitly have two identities:
+
+* **EOA signer**: `0x5087…`
+* **proxy/funder**: `0x9cbc…`
+
+Depending on the `py_clob_client` version, one of these must be treated as the “trading address”, and the other as the “funder”. If you force the proxy wallet as “wallet address” in a way the library doesn’t support, you get signature mismatch.
+
+So step-by-step:
+
+* **Remove `set_wallet_address`**
+* Ensure the constructor is the *only* place you set funder/proxy
+* Then check if the library expects `signature_type=1` (some versions do, some don’t)
+
+---
+
+## 3) Make your code version-proof (recommended)
+
+Drop-in helper that adapts to whatever `ClobClient.__init__` supports:
+
+```python
+import inspect
+from py_clob_client.client import ClobClient
+
+def make_clob_client(host, pk, chain_id, proxy_addr=None):
+    sig = inspect.signature(ClobClient.__init__)
+    kwargs = {}
+
+    # common params
+    if "key" in sig.parameters:
+        kwargs["key"] = pk
+    if "chain_id" in sig.parameters:
+        kwargs["chain_id"] = chain_id
+
+    # only include if supported in your version
+    if "signature_type" in sig.parameters:
+        kwargs["signature_type"] = 1
+
+    # proxy/funder support varies by version
+    if proxy_addr:
+        if "funder" in sig.parameters:
+            kwargs["funder"] = proxy_addr
+        elif "wallet" in sig.parameters:
+            kwargs["wallet"] = proxy_addr
+        elif "address" in sig.parameters:
+            kwargs["address"] = proxy_addr
+
+    return ClobClient(host, **kwargs)
+```
+
+Then use:
+
+```python
+client = make_clob_client(
+    "https://clob.polymarket.com",
+    normalized_key,
+    137,
+    proxy_addr=PM_PROXY_ADDRESS
+)
+```
+
+This prevents you from calling methods/kwargs that don’t exist in the installed version.
+
+---
+
+## 4) The introspection command you should run (same as before)
+
+This will tell us exactly what your version supports:
+
+```bash
+python3 - <<'PY'
+import py_clob_client
+from py_clob_client.client import ClobClient
+import inspect
+
+print("py_clob_client version:", getattr(py_clob_client, "__version__", "unknown"))
+print("has set_wallet_address:", hasattr(ClobClient, "set_wallet_address"))
+print("wallet-ish methods:", [m for m in dir(ClobClient) if "wallet" in m.lower() or "funder" in m.lower()])
+print("ClobClient.__init__ signature:", inspect.signature(ClobClient.__init__))
+PY
+```
+
+Paste that output and I’ll tell you **exactly** which field you should use (`funder` vs `wallet` vs `address`) and whether `signature_type` should be passed.
+
+---
+
+## 5) One extra thing (small but important): “amounts must be higher than 0”
+
+You also saw:
+`invalid amounts, maker and taker amount must be higher than 0`
+
+That’s because you’re trying to sell dust like `~$0.01`. Many venues enforce minimums / rounding. After we fix the client init, you should add a guard:
+
+* skip liquidation attempts below e.g. `$1` or below some token min
+* or batch positions until meaningful notional
+
+---
+
+### What to do now
+
+1. **Remove `client.set_wallet_address(...)`**
+2. Restart bot and see what the next failure is (likely signature/min-size related)
+3. Run the introspection command and paste output — then I’ll give you the precise final init (one correct version, not guesswork).
