@@ -1215,7 +1215,13 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
 
 def liquidate_positions(needed_usdc: float) -> float:
     """
-    Liquidate positions to get needed USDC.
+    Liquidate positions to get needed USDC using sweep loop.
+    
+    Instead of selling once at best bid, we sweep through bid levels:
+    1. Sell up to best bid depth
+    2. Refresh orderbook to get new best bid
+    3. Repeat until target USDC reached or price drops below slippage limit
+    
     Targets largest/most liquid positions first.
     Respects slippage limits and per-cycle caps.
     
@@ -1241,48 +1247,100 @@ def liquidate_positions(needed_usdc: float) -> float:
     total_obtained = 0.0
     still_needed = capped_needed
     
+    # Sweep loop constants
+    MAX_SWEEPS_PER_POSITION = 20  # Max iterations per position to prevent infinite loops
+    MIN_USD_PER_ORDER = 1.0       # Skip dust orders
+    MAX_SLIPPAGE_BPS = 5000       # 50% max slippage from initial price (positions may be low-value)
+    SWEEP_DELAY_SECONDS = 0.3    # Rate limiting between orders
+    
     for pos in positions:
         if still_needed <= 0:
             break
         
         token_id = pos["token_id"]
+        remaining_tokens = pos["size"]
+        position_obtained = 0.0
         
-        live_bid_price, bid_depth = get_orderbook_best_bid(token_id)
-        if live_bid_price <= 0 or bid_depth <= 0:
+        # Get initial best bid as reference for slippage protection
+        initial_bid_price, _ = get_orderbook_best_bid(token_id)
+        if initial_bid_price <= 0:
             print(f"   ⚠️  No bid liquidity for {pos['outcome']}, skipping")
             continue
         
-        size_to_sell = pos["size"]
-        if pos["liq_value"] > still_needed:
-            ratio = still_needed / pos["liq_value"]
-            size_to_sell = pos["size"] * ratio * 1.1
+        min_acceptable_price = initial_bid_price * (1 - MAX_SLIPPAGE_BPS / 10000)
+        print(f"   🧾 Position: {pos['outcome']} | {remaining_tokens:.2f} tokens | ref bid: ${initial_bid_price:.4f}")
+        print(f"   🔄 Starting sweep (min price: ${min_acceptable_price:.4f}, max {MAX_SWEEPS_PER_POSITION} iterations)")
         
-        size_to_sell = min(size_to_sell, bid_depth)
-        
-        # Calculate expected USDC value
-        expected_usdc = size_to_sell * live_bid_price
-        
-        # Skip dust orders - Polymarket rejects orders with amounts that round to 0
-        if expected_usdc < 1.0:
-            print(f"   ⏭️  Skip dust order: {size_to_sell:.2f} tokens @ ${live_bid_price:.4f} = ${expected_usdc:.4f} (min $1.00)")
-            continue
-        
-        # Debug: log token_id for verification
-        print(f"   🧾 token_id: {token_id}")
-        print(f"   MARKET SELL: {size_to_sell:.2f} of {pos['outcome']} @ live bid ${live_bid_price:.4f} (depth: {bid_depth:.2f})")
-        print(f"   💰 Expected USDC: ${expected_usdc:.2f}")
-        
-        success, usdc = execute_liquidation_order(
-            token_id,
-            size_to_sell,
-            live_bid_price
-        )
-        
-        if success:
-            total_obtained += usdc
-            still_needed -= usdc
+        for sweep_i in range(MAX_SWEEPS_PER_POSITION):
+            if still_needed <= 0:
+                print(f"   ✅ Target USDC reached")
+                break
+            
+            if remaining_tokens <= 0:
+                print(f"   ✅ Position fully sold")
+                break
+            
+            # Refresh orderbook to get current best bid
+            live_bid_price, bid_depth = get_orderbook_best_bid(token_id)
+            
+            if live_bid_price <= 0 or bid_depth <= 0:
+                print(f"   ⚠️  No more bid liquidity, stopping sweep")
+                break
+            
+            # Slippage protection: stop if price dropped too much
+            if live_bid_price < min_acceptable_price:
+                print(f"   ⚠️  Price ${live_bid_price:.4f} below min ${min_acceptable_price:.4f}, stopping sweep")
+                break
+            
+            # Calculate how much to sell this iteration
+            # Sell minimum of: remaining tokens, bid depth, or what we need for target USDC
+            tokens_for_target = max(0, still_needed / live_bid_price) if live_bid_price > 0 else 0
+            
+            # Guard against negative/zero values
+            if tokens_for_target <= 0:
+                print(f"   ✅ No more tokens needed for target")
+                break
+            
+            size_to_sell = min(remaining_tokens, bid_depth, tokens_for_target * 1.1)  # 10% buffer
+            size_to_sell = max(0, size_to_sell)  # Ensure non-negative
+            expected_usdc = size_to_sell * live_bid_price
+            
+            # Skip dust orders - if order is too small, move to next position
+            # Note: we can't sweep deeper because FAK only fills at best bid level,
+            # and we can't eat through best bid if it's < $1 (Polymarket rejects)
+            if expected_usdc < MIN_USD_PER_ORDER:
+                print(f"   ⏭️  Dust at top-of-book: {size_to_sell:.2f} tokens @ ${live_bid_price:.4f} = ${expected_usdc:.2f} (min $1)")
+                print(f"      Moving to next position (can't sweep through < $1 orders)")
+                break
+            
+            print(f"   [{sweep_i+1}] SELL {size_to_sell:.2f} @ ${live_bid_price:.4f} (depth: {bid_depth:.2f})")
+            
+            success, usdc = execute_liquidation_order(
+                token_id,
+                size_to_sell,
+                live_bid_price
+            )
+            
+            if success and usdc > 0:
+                position_obtained += usdc
+                total_obtained += usdc
+                still_needed -= usdc  # Update immediately so we can stop when target reached
+                remaining_tokens = max(0.0, remaining_tokens - size_to_sell)  # Clamp to prevent negative
+                print(f"       ✅ Received ${usdc:.2f} (total: ${total_obtained:.2f}, still need: ${max(0, still_needed):.2f})")
+                
+                # Check if we've reached target
+                if still_needed <= 0:
+                    print(f"   ✅ Target USDC reached!")
+                    break
+                
+                # Rate limiting to avoid hammering the API
+                time.sleep(SWEEP_DELAY_SECONDS)
+            else:
+                print(f"       ⚠️  No fill, stopping sweep for this position")
+                break
+        print(f"   📊 Position sweep done: ${position_obtained:.2f} obtained")
     
-    print(f"   Total liquidated: ${total_obtained:.2f}")
+    print(f"\n   💰 Total liquidated: ${total_obtained:.2f}")
     
     if total_obtained > 0:
         send_telegram_alert(

@@ -1,0 +1,127 @@
+Yep — your diagnosis is basically correct: you’re artificially capping the sell to the top-of-book depth, so you only ever dump what’s sitting on the best bid level.
+
+But the fix depends on how Polymarket’s CLOB “market” order works in py_clob_client:
+
+If post_order(..., OrderType.FAK) is a “marketable limit” (Fill-and-Kill) at a given price, then one order only fills up to the liquidity available at or above that price. It will not automatically walk down the book unless you set a limit price that crosses deeper levels.
+
+Some exchanges have true “market order” semantics. Polymarket’s CLOB (and this SDK) generally behaves closer to marketable limit + FAK, so to “sweep” you either:
+
+Place multiple FAK sells, refreshing the best bid each time, until you reach your target, or
+
+Place one aggressive limit sell at a low enough price to cross multiple levels (dangerous unless you bound slippage).
+
+So: removing min(size_to_sell, bid_depth) is necessary but not sufficient if you still only submit one FAK at the best bid.
+
+The right approach: loop + sweep with slippage guard
+What to change conceptually
+
+Decide how much USDC you need (you already do).
+
+Sell in a loop:
+
+read best bid + depth
+
+sell up to that depth (or remaining amount)
+
+repeat until target filled or no liquidity / price falls below your minimum acceptable price
+
+This gives you “sweep” behavior without exposing yourself to unlimited slippage.
+
+Why this is safer
+
+It guarantees you:
+
+sell more than top-of-book
+
+stop if price collapses
+
+don’t accidentally dump into a thin book at terrible prices
+
+Concrete patch (minimal, works with your existing structure)
+
+Replace the single “one-shot sell” logic with something like:
+
+MAX_SWEEPS = 20                 # prevents infinite loops
+MIN_USD_PER_CHILD = 1.00        # skip dust
+MAX_SLIPPAGE_BPS = 50           # 0.50% or whatever you want
+MIN_BID_PRICE = ref_price * (1 - MAX_SLIPPAGE_BPS / 10_000)
+
+remaining_tokens = size_to_sell
+sold_tokens_total = 0.0
+received_usd_est = 0.0
+
+for i in range(MAX_SWEEPS):
+    if remaining_tokens <= 0:
+        break
+
+    ob = client.get_order_book(token_id)  # or however you query
+    best_bid = float(ob.bids[0].price)
+    bid_depth = float(ob.bids[0].size)
+
+    if best_bid < MIN_BID_PRICE:
+        print(f"   ⚠️ Stop: bid {best_bid} below min {MIN_BID_PRICE}")
+        break
+
+    child_size = min(remaining_tokens, bid_depth)
+
+    child_usd_est = child_size * best_bid
+    if child_usd_est < MIN_USD_PER_CHILD:
+        print(f"   ⚠️ Stop: child order too small (~${child_usd_est:.2f})")
+        break
+
+    signed_order = client.create_market_order(
+        token_id=token_id,
+        side="SELL",
+        size=child_size
+    )
+    resp = client.post_order(signed_order, OrderType.FAK)
+
+    # IMPORTANT: verify fill. Different SDKs return different fields.
+    filled = float(resp.get("filled_size", 0) or resp.get("size_filled", 0) or 0)
+
+    if filled <= 0:
+        print("   ⚠️ No fill; stopping sweep.")
+        break
+
+    remaining_tokens -= filled
+    sold_tokens_total += filled
+    received_usd_est += filled * best_bid
+
+    # small sleep helps avoid rate limiting / stale book
+    time.sleep(0.2)
+
+print(f"   ✅ Swept sells: sold {sold_tokens_total:.4f}/{size_to_sell:.4f} tokens (~${received_usd_est:.2f})")
+
+Key point
+
+Notice we still sell up to bid_depth per iteration — but we repeat, so we sweep multiple levels.
+
+Quick “minimal change” if you want to keep the cap line
+
+You can keep:
+
+size_to_sell = min(size_to_sell, bid_depth)
+
+
+…but wrap the whole “sell once” into a loop that runs until the remaining amount is done. That’s the least invasive change.
+
+Alternative: one order that crosses multiple levels (not recommended unless you must)
+
+If the SDK lets you place a limit sell with a price, you can set a worst acceptable price (best_bid minus slippage buffer) and submit one FAK limit that can match multiple bid levels down to that price.
+
+Pros: fewer requests
+Cons: easy to miscalculate and dump too low if your min price is wrong
+
+The loop approach is safer.
+
+One more thing to check
+
+If your logs show:
+
+position 40.70
+
+best bid depth 15.30
+
+sold exactly 15.30
+
+That strongly suggests the SDK order was only marketable at that best bid level. Sweeping requires multiple child orders or a deeper-crossing limit.
