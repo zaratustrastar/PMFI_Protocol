@@ -1,0 +1,154 @@
+You’re *very* likely on the right track, but from what you pasted there are a few classic “looks fixed but still wrong” spots in sweep loops. Since I can’t see your exact diff here, use this as a **verification checklist** (and I’ll tell you exactly what to look for in logs to confirm it’s correct).
+
+## 1) The “still_needed” / progress accounting must be updated from **actual fills**, not estimates
+
+✅ Correct:
+
+* After each `post_order`, read **filled size** (or filled notional if provided)
+* Decrease `still_needed` based on what actually filled
+
+❌ Wrong (common):
+
+* `still_needed -= child_size * best_bid` without checking fill
+* If FAK partially fills or fills 0, you’ll think you progressed when you didn’t
+
+What to check in logs:
+
+* After each order, print `filled_size`, and only then print “received” and “still need”.
+* If you see “✅ Received …” when the exchange response shows 0 fill → bug.
+
+## 2) If an order fills 0, you must **stop** (not continue)
+
+You already noticed this: “continue won’t help”. Exactly.
+
+✅ Correct behavior:
+
+* If `filled_size == 0`: break out of sweep for that token (or stop liquidation for that token)
+
+Reason:
+
+* Same top-of-book, same post, same result → infinite loop / rate-limit.
+
+## 3) Your “target tokens for USDC” must never go negative (and never exceed remaining position)
+
+You mentioned “negative tokens_for_target” — great catch.
+
+✅ Correct:
+
+```python
+tokens_for_target = max(0, still_needed / best_bid)
+child_size = min(remaining_tokens, bid_depth, tokens_for_target)
+```
+
+Also:
+
+* If `tokens_for_target == 0`: you should **break** (target reached)
+
+## 4) Slippage guard should be based on a sane reference and correct direction
+
+You said “50% slippage protection” (min price = ref_bid * 0.5). That works mechanically, but double-check:
+
+✅ Correct:
+
+* For selling, you stop if price goes **below** min price:
+
+  * `if best_bid < min_price: break`
+
+Common mistake:
+
+* Using ask, or reversing the inequality.
+
+Also: 50% is huge. It’s “safe from infinite sweep”, but not safe from bad fills. Consider starting at 0.5%–2% once everything works.
+
+## 5) You must reduce **remaining_tokens** by actual filled, not by requested
+
+✅ Correct:
+
+```python
+remaining_tokens -= filled_size
+```
+
+❌ Wrong:
+
+```python
+remaining_tokens -= child_size
+```
+
+If partial fill happens, you’ll “lose” tokens in your accounting and stop too early.
+
+## 6) “Target reached” should be based on `still_needed <= 0` (with epsilon)
+
+Floating point can make you hover around tiny negatives.
+
+✅ Correct:
+
+```python
+if still_needed <= 0.01: break
+```
+
+## 7) Stop conditions must prevent runaway orders
+
+Make sure you have all of these:
+
+* max iterations per position (you said 20 ✅)
+* min USD per child order (avoid dust / “amount must be higher than 0” errors)
+* break on 0 fill
+* break on bid below min
+
+That “invalid amounts, maker and taker amount must be higher than 0” error you had earlier is exactly what happens when you try to sell microscopic sizes due to rounding. Add:
+
+✅ Guard:
+
+```python
+if child_size <= 0 or child_usd_est < 1.0: break
+```
+
+## 8) Verify you’re reading the **right field** from `post_order` response
+
+This is *the* biggest silent failure.
+
+Depending on your SDK version, the fill field might be one of:
+
+* `filled_size`
+* `size_filled`
+* `taker_amount_filled`
+* etc.
+
+If you pick the wrong key, you’ll treat fills as 0 and break too early (or worse: treat as filled when it wasn’t).
+
+**Fast check**: on one successful sell, print the whole response once (sanitize). Confirm which field increments.
+
+---
+
+# How to prove it’s correct in 2 minutes (no guessing)
+
+Add these debug prints for one position:
+
+* Before placing order:
+
+  * `iter, best_bid, bid_depth, still_needed, remaining_tokens, child_size, est_usd`
+* After response:
+
+  * `filled_size, status, order_id (if any), still_needed_new, remaining_tokens_new`
+
+If the loop is correct, you’ll see:
+
+* `still_needed` monotonically decreases (or stops on 0 fill)
+* `remaining_tokens` decreases by the exact filled amount
+* stops when target reached or price floor hit
+
+---
+
+# One important note: your “Received $X” should use **actual trade fill price(s)** (if available)
+
+If the API does not return the average fill price, your “received” is only an estimate. That’s OK for control flow if you use filled size + current bid, but it can drift.
+
+Better if available:
+
+* use actual `filled_notional` / `proceeds` / `taker_amount_filled`.
+
+---
+
+## If you paste ONE thing, I can confirm 100% if it’s right
+
+Paste the sweep loop block (just that function), and one sample successful `post_order` response (redact ids). Then I’ll tell you exactly what’s correct/incorrect and how to make it bulletproof.

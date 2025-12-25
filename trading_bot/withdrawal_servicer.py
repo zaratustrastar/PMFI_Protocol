@@ -939,7 +939,8 @@ def get_pm_balance() -> Tuple[float, float]:
             return get_pm_balance_from_rpc()
         
         cash = float(data.get("cashBalance", 0))
-        positions = float(data.get("positionValue", 0))
+        # API returns "value" for position value, not "positionValue"
+        positions = float(data.get("value", 0))
         
         return cash, positions
         
@@ -1315,28 +1316,40 @@ def liquidate_positions(needed_usdc: float) -> float:
             
             print(f"   [{sweep_i+1}] SELL {size_to_sell:.2f} @ ${live_bid_price:.4f} (depth: {bid_depth:.2f})")
             
-            success, usdc = execute_liquidation_order(
+            success, usdc, tokens_filled = execute_liquidation_order(
                 token_id,
                 size_to_sell,
                 live_bid_price
             )
             
-            if success and usdc > 0:
+            if success and usdc > 0 and tokens_filled > 0:
                 position_obtained += usdc
                 total_obtained += usdc
                 still_needed -= usdc  # Update immediately so we can stop when target reached
-                remaining_tokens = max(0.0, remaining_tokens - size_to_sell)  # Clamp to prevent negative
-                print(f"       ✅ Received ${usdc:.2f} (total: ${total_obtained:.2f}, still need: ${max(0, still_needed):.2f})")
+                # Use actual tokens filled from order response (handles partial fills correctly)
+                remaining_tokens = max(0.0, remaining_tokens - tokens_filled)
+                print(f"       ✅ Received ${usdc:.2f} ({tokens_filled:.2f} tokens filled)")
+                print(f"          Total: ${total_obtained:.2f}, still need: ${max(0, still_needed):.2f}, remaining tokens: {remaining_tokens:.2f}")
                 
                 # Check if we've reached target
                 if still_needed <= 0:
                     print(f"   ✅ Target USDC reached!")
                     break
                 
+                # Check if position is exhausted
+                if remaining_tokens <= 0.01:
+                    print(f"   ✅ Position exhausted, moving to next")
+                    break
+                
                 # Rate limiting to avoid hammering the API
                 time.sleep(SWEEP_DELAY_SECONDS)
+            elif success and (usdc <= 0 or tokens_filled <= 0):
+                # FAK returned success but no actual fill - stop sweeping this position
+                print(f"       ⚠️  Order success but no fill (usdc=${usdc:.2f}, tokens={tokens_filled:.2f})")
+                print(f"       💡 Likely no liquidity at this price level, stopping sweep")
+                break
             else:
-                print(f"       ⚠️  No fill, stopping sweep for this position")
+                print(f"       ⚠️  Order failed, stopping sweep for this position")
                 break
         print(f"   📊 Position sweep done: ${position_obtained:.2f} obtained")
     
@@ -1351,7 +1364,7 @@ def liquidate_positions(needed_usdc: float) -> float:
     return total_obtained
 
 
-def execute_liquidation_order(token_id: str, size: float, best_bid: float) -> Tuple[bool, float]:
+def execute_liquidation_order(token_id: str, size: float, best_bid: float) -> Tuple[bool, float, float]:
     """
     Execute a true market sell for liquidation using MarketOrderArgs.
     
@@ -1366,13 +1379,13 @@ def execute_liquidation_order(token_id: str, size: float, best_bid: float) -> Tu
         best_bid: Current best bid price (for USDC estimation)
     
     Returns:
-        (success, usdc_obtained)
+        (success, usdc_obtained, tokens_filled)
     """
     client = get_patched_clob_client()
     
     if not client:
         print("   ❌ CLOB client not available")
-        return False, 0.0
+        return False, 0.0, 0.0
     
     try:
         usdc_amount = size * best_bid
@@ -1388,20 +1401,42 @@ def execute_liquidation_order(token_id: str, size: float, best_bid: float) -> Tu
         resp = client.post_order(signed_order, OrderType.FAK)
         
         if resp.get("success"):
-            taking = float(resp.get("takingAmount", usdc_amount))
-            print(f"   ✅ MARKET SELL executed: received ${taking:.2f}")
-            return True, taking
+            status = resp.get("status", "unknown")
+            
+            # Get USDC received (takingAmount for sell = USDC we get)
+            # Note: Polymarket returns amounts as decimal strings e.g. "14.925372"
+            taking_str = resp.get("takingAmount", "0")
+            taking = float(taking_str) if taking_str else 0.0
+            
+            # NOTE: makingAmount is UNRELIABLE - it echoes requested size even on partial/zero fills
+            # We only trust takingAmount (USDC actually received) as ground truth
+            making_str = resp.get("makingAmount", "0")
+            
+            print(f"   📋 Response: status={status}, takingAmount={taking_str}, makingAmount={making_str}")
+            
+            # CRITICAL: For FAK orders, verify we actually got USDC
+            # If takingAmount is 0 or very small, the order didn't fill
+            if taking <= 0.001:
+                print(f"   ⚠️  Order accepted but NO FILL (takingAmount={taking_str})")
+                return True, 0.0, 0.0  # Success=true but 0 fill triggers the guard in caller
+            
+            # ALWAYS calculate tokens from USDC received / price (don't trust makingAmount)
+            # This handles partial fills correctly since we only count what we actually received
+            tokens_filled = taking / best_bid if best_bid > 0 else 0.0
+            print(f"   ✅ MARKET SELL filled: ${taking:.2f} USDC (~{tokens_filled:.2f} tokens @ ${best_bid:.4f})")
+            
+            return True, taking, tokens_filled
         else:
             error_msg = resp.get("errorMsg", "Unknown error")
             print(f"   ❌ Market sell failed: {error_msg}")
             print(f"   📋 Full response: {resp}")
-            return False, 0.0
+            return False, 0.0, 0.0
             
     except Exception as e:
         print(f"   ❌ Liquidation order error: {e}")
         import traceback
         traceback.print_exc()
-        return False, 0.0
+        return False, 0.0, 0.0
 
 
 # =============================================================================
