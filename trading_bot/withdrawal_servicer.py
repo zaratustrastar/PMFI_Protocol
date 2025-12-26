@@ -892,6 +892,7 @@ def check_in_transit_via_events(
 def get_pm_balance() -> Tuple[float, float]:
     """
     Get Polymarket withdrawable cash and position value.
+    Uses CLOB API /wallets/{address}/balances for accurate data.
     
     Returns:
         (withdrawable_cash, position_value)
@@ -908,7 +909,8 @@ def get_pm_balance() -> Tuple[float, float]:
         
         proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
         
-        url = f"https://data-api.polymarket.com/value?user={PM_PROXY_ADDRESS.lower()}"
+        # Use CLOB API for accurate cash + positions (not data-api which misses cash)
+        url = f"https://clob.polymarket.com/wallets/{PM_PROXY_ADDRESS.lower()}/balances"
         
         if BYPASS_METHOD == "curl_cffi":
             response = curl_requests.get(
@@ -922,30 +924,35 @@ def get_pm_balance() -> Tuple[float, float]:
             response = requests.get(url, headers=headers, proxies=proxies, timeout=30)
         
         if response.status_code != 200:
-            print(f"❌ PM data API returned {response.status_code}")
+            print(f"❌ PM CLOB API returned {response.status_code}")
             return get_pm_balance_from_rpc()
         
         data = response.json()
         
-        if isinstance(data, list):
-            if len(data) > 0 and isinstance(data[0], dict):
-                data = data[0]
-            else:
-                print(f"⚠️  PM data API returned empty list")
-                return get_pm_balance_from_rpc()
-        
         if not isinstance(data, dict):
-            print(f"⚠️  PM data API returned unexpected type: {type(data)}")
+            print(f"⚠️  PM CLOB API returned unexpected type: {type(data)}")
             return get_pm_balance_from_rpc()
         
-        cash = float(data.get("cashBalance", 0))
-        # API returns "value" for position value, not "positionValue"
-        positions = float(data.get("value", 0))
+        # Response is nested: { "balances": { "cash": {...}, "positions": [...] } }
+        balances = data.get("balances", data)  # Fallback to top-level if no "balances" key
         
+        # Parse cash balance from balances.cash.availableBalance
+        cash_data = balances.get("cash", {})
+        cash = float(cash_data.get("availableBalance", 0)) if isinstance(cash_data, dict) else 0.0
+        
+        # Parse positions value - sum of all positions
+        positions_data = balances.get("positions", [])
+        positions = 0.0
+        if isinstance(positions_data, list):
+            for pos in positions_data:
+                if isinstance(pos, dict):
+                    positions += float(pos.get("value", 0))
+        
+        print(f"   📊 CLOB balances: cash=${cash:.2f}, positions=${positions:.2f}")
         return cash, positions
         
     except Exception as e:
-        print(f"⚠️  PM data API error: {e}")
+        print(f"⚠️  PM CLOB API error: {e}")
         return get_pm_balance_from_rpc()
 
 
@@ -1818,7 +1825,8 @@ def servicer_iteration(
     positions_for_liq = get_positions_for_liquidation()
     total_position_value = sum(p.get("liq_value", 0) for p in positions_for_liq)
     
-    if needed >= MIN_WITHDRAWAL_USDC and total_position_value > MIN_WITHDRAWAL_USDC:
+    # Liquidate if we still need funds and have ANY positions (not just > $5)
+    if needed >= MIN_WITHDRAWAL_USDC and total_position_value > 0.01:
         print(f"\n⚠️  Cash insufficient, need to liquidate ${needed:.2f}")
         print(f"   Positions available: ${total_position_value:.2f} across {len(positions_for_liq)} positions")
         
