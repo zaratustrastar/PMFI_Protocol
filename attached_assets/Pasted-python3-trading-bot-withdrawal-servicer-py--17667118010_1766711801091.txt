@@ -1,0 +1,96 @@
+python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $0.01
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-26 01:15:55
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+   📊 PM balances: cash=$0.00, positions=$3.49
+
+📊 Polymarket:
+   Cash: $0.00
+   Positions: $3.49
+
+⚠️  Cash insufficient, need to liquidate $7.07
+   Positions available: $3.31 across 4 positions
+
+🔥 LIQUIDATE: Need $7.07 USDC (capped from $7.07)
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0800, size at best: 36.10, total depth: 209296.65
+   🧾 Position: Yes | 11.82 tokens | ref bid: $0.0800
+   🔄 Starting sweep (min price: $0.0400, max 20 iterations)
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0800, size at best: 36.10, total depth: 209296.65
+   ⏭️  Dust at top-of-book: 11.82 tokens @ $0.0800 = $0.95 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 91100409913715538094...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '12405.4'}, {'price': '0.02', 'size': '6505'}, {'price': '0.03', 'size': '24.67'}]
+   📊 Best bid: $0.4900, size at best: 5224.21, total depth: 52997.28
+   🧾 Position: Yes | 1.96 tokens | ref bid: $0.4900
+   🔄 Starting sweep (min price: $0.2450, max 20 iterations)
+   📖 Orderbook query: 91100409913715538094...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '12405.4'}, {'price': '0.02', 'size': '6505'}, {'price': '0.03', 'size': '24.67'}]
+   📊 Best bid: $0.4900, size at best: 5224.21, total depth: 52997.28
+   ⏭️  Dust at top-of-book: 1.96 tokens @ $0.4900 = $0.96 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 99256619221732681838...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '2693'}, {'price': '0.02', 'size': '8.94'}, {'price': '0.04', 'size': '3261.48'}]
+   📊 Best bid: $0.2700, size at best: 156.97, total depth: 18410.44
+   🧾 Position: No | 2.94 tokens | ref bid: $0.2700
+   🔄 Starting sweep (min price: $0.1350, max 20 iterations)
+   📖 Orderbook query: 99256619221732681838...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '2693'}, {'price': '0.02', 'size': '8.94'}, {'price': '0.04', 'size': '3261.48'}]
+   📊 Best bid: $0.2700, size at best: 156.97, total depth: 18410.44
+   ⏭️  Dust at top-of-book: 2.94 tokens @ $0.2700 = $0.79 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 24210214708827119705...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '12679.26'}, {'price': '0.002', 'size': '671.39'}, {'price': '0.003', 'size': '500'}]
+   📊 Best bid: $0.5680, size at best: 7.49, total depth: 70978.29
+   🧾 Position: Yes | 1.15 tokens | ref bid: $0.5680
+   🔄 Starting sweep (min price: $0.2840, max 20 iterations)
+   📖 Orderbook query: 24210214708827119705...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '12679.26'}, {'price': '0.002', 'size': '671.39'}, {'price': '0.003', 'size': '500'}]
+   📊 Best bid: $0.5680, size at best: 7.49, total depth: 70978.29
+   ⏭️  Dust at top-of-book: 1.15 tokens @ $0.5680 = $0.65 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+
+   💰 Total liquidated: $0.00
+
+💤 Sleeping 60s...

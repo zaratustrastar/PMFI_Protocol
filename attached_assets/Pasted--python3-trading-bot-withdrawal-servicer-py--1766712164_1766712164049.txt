@@ -1,0 +1,142 @@
+
+python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $0.01
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-26 01:21:27
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (signer): 0x5087675E...
+   📋 Proxy wallet (funder): 0x9cbc5577...
+   📋 Signature type: 2 (Browser proxy)
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   📋 Wallet: 0x9cbc5577...
+   📋 Private key present: True
+   📋 CLOB host: https://clob.polymarket.com
+   🔑 Using pre-derived API credentials from env vars...
+   ✅ Credentials loaded (key: c4a3fd29...)
+   ✅ L2 auth verified - CLOB client ready for trading
+   ⚠️ CLOB balance error: ClobClient.get_balance_allowance() got an unexpected keyword argument 'asset_type', falling back to RPC
+   📊 PM balances: cash=$5.28, positions=$3.49
+
+📊 Polymarket:
+   Cash: $5.28
+   Positions: $3.49
+
+💸 WITHDRAW: $5.28 from PM → Vault
+   Output (first 2000 chars): [dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+2025-12-26T01:21:34.605Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2025-12-26T01:21:34.606Z 📝 [SafeProxyWithdraw] Requested amount: $5.2812 
+2025-12-26T01:21:34.606Z 📝 [SafeProxyWithdraw] Destination: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3 
+2025-12-26T01:21:34.606Z 📝 [SafeProxyWithdraw] Dry run: false 
+2025-12-26T01:21:34.804Z 📝 [SafeProxyWithdraw] Proxy USDC balance: $5.281200 (5281200 raw) 
+2025-12-26T01:21:34.804Z 📝 [SafeProxyWithdraw] ⚠️ Capping transfer: requested $5.2812, sending $5.281100 (available minus dust) 
+2025-12-26T01:21:34.944Z 📝 [SafeProxyWithdraw] EOA address: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-26T01:21:34.944Z 📝 [SafeProxyWithdraw] Proxy address: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2025-12-26T01:21:34.944Z ⚠️ [SafeProxyWithdraw] Builder API credentials not set - using direct EOA mode 
+2025-12-26T01:21:34.955Z 📝 [SafeProxyWithdraw] 
+--- Step 1: Safe Proxy → EOA --- 
+2025-12-26T01:21:34.956Z 📝 [SafeProxyWithdraw] Withdrawing $5.281100 (5281100 raw) from Safe proxy to EOA 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-26T01:21:34.961Z 📝 [SafeProxyWithdraw] Executing via Polymarket RelayClient... 
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e000000000000000000000000000000000000000000000000000000000050954c',
+  nonce: '18',
+  signature: '0x48e2ebd2452905bf5c1e5f657236eb300723e80af2958ec46b80588d0890a3e1196dcaa532fcf79f2f896beecae6494def98c34d546e7a401bf52d212ffdc6731f',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+❌ Withdraw script failed (exit 1)
+
+⚠️  Cash insufficient, need to liquidate $7.07
+   Positions available: $3.32 across 4 positions
+
+🔥 LIQUIDATE: Need $7.07 USDC (capped from $7.07)
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0800, size at best: 78.88, total depth: 208172.47
+   🧾 Position: Yes | 11.82 tokens | ref bid: $0.0800
+   🔄 Starting sweep (min price: $0.0400, max 20 iterations)
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0800, size at best: 78.88, total depth: 208172.47
+   ⏭️  Dust at top-of-book: 11.82 tokens @ $0.0800 = $0.95 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 91100409913715538094...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '12405.4'}, {'price': '0.02', 'size': '6505'}, {'price': '0.03', 'size': '24.67'}]
+   📊 Best bid: $0.4900, size at best: 5224.21, total depth: 51865.28
+   🧾 Position: Yes | 1.96 tokens | ref bid: $0.4900
+   🔄 Starting sweep (min price: $0.2450, max 20 iterations)
+   📖 Orderbook query: 91100409913715538094...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '12405.4'}, {'price': '0.02', 'size': '6505'}, {'price': '0.03', 'size': '24.67'}]
+   📊 Best bid: $0.4900, size at best: 5224.21, total depth: 51865.28
+   ⏭️  Dust at top-of-book: 1.96 tokens @ $0.4900 = $0.96 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 99256619221732681838...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '2693'}, {'price': '0.02', 'size': '8.94'}, {'price': '0.04', 'size': '3261.48'}]
+   📊 Best bid: $0.2700, size at best: 150.12, total depth: 18403.59
+   🧾 Position: No | 2.94 tokens | ref bid: $0.2700
+   🔄 Starting sweep (min price: $0.1350, max 20 iterations)
+   📖 Orderbook query: 99256619221732681838...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '2693'}, {'price': '0.02', 'size': '8.94'}, {'price': '0.04', 'size': '3261.48'}]
+   📊 Best bid: $0.2700, size at best: 150.12, total depth: 18403.59
+   ⏭️  Dust at top-of-book: 2.94 tokens @ $0.2700 = $0.79 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 24210214708827119705...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '12679.26'}, {'price': '0.002', 'size': '671.39'}, {'price': '0.003', 'size': '500'}]
+   📊 Best bid: $0.5680, size at best: 7.49, total depth: 68090.56
+   🧾 Position: Yes | 1.15 tokens | ref bid: $0.5680
+   🔄 Starting sweep (min price: $0.2840, max 20 iterations)
+   📖 Orderbook query: 24210214708827119705...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '12679.26'}, {'price': '0.002', 'size': '671.39'}, {'price': '0.003', 'size': '500'}]
+   📊 Best bid: $0.5680, size at best: 7.49, total depth: 68090.56
+   ⏭️  Dust at top-of-book: 1.15 tokens @ $0.5680 = $0.65 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+
+   💰 Total liquidated: $0.00
+
+💤 Sleeping 60s...

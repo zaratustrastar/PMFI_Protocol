@@ -928,35 +928,13 @@ def get_pm_balance() -> Tuple[float, float]:
         print(f"   ⚠️ CLOB balance error: {e}, falling back to RPC")
         cash, _ = get_pm_balance_from_rpc()
     
-    # Get position value via data-api (simpler, no auth needed)
+    # Get position value using VWAP sweep (accurate liquidation value for NAV)
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-            "Accept": "application/json",
-        }
-        
-        proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
-        url = f"https://data-api.polymarket.com/value?user={PM_PROXY_ADDRESS.lower()}"
-        
-        if BYPASS_METHOD == "curl_cffi":
-            response = curl_requests.get(
-                url,
-                headers=headers,
-                proxies=proxies,
-                impersonate="chrome120",
-                timeout=30
-            )
-        else:
-            response = requests.get(url, headers=headers, proxies=proxies, timeout=30)
-        
-        if response.status_code == 200:
-            data = response.json()
-            if isinstance(data, list) and len(data) > 0:
-                data = data[0]
-            if isinstance(data, dict):
-                positions = float(data.get("value", 0))
+        positions_list = get_positions_for_liquidation()
+        positions = sum(p.get("liq_value", 0) for p in positions_list)
     except Exception as e:
-        print(f"   ⚠️ Position value API error: {e}")
+        print(f"   ⚠️ Position VWAP valuation error: {e}")
+        positions = 0.0
     
     print(f"   📊 PM balances: cash=${cash:.2f}, positions=${positions:.2f}")
     return cash, positions
@@ -983,6 +961,137 @@ def get_pm_balance_from_rpc() -> Tuple[float, float]:
     except Exception as e:
         print(f"❌ RPC fallback error: {e}")
         return 0.0, 0.0
+
+
+def get_orderbook_bids(token_id: str, verbose: bool = True) -> List[Tuple[float, float]]:
+    """
+    Get full bid ladder from orderbook, sorted highest to lowest price.
+    
+    Returns: List of (price, size) tuples sorted by price descending
+    """
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            "Accept": "application/json",
+        }
+        proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
+        
+        url = f"https://clob.polymarket.com/book?token_id={token_id}"
+        
+        if BYPASS_METHOD == "curl_cffi":
+            response = curl_requests.get(
+                url,
+                headers=headers,
+                proxies=proxies,
+                impersonate="chrome120",
+                timeout=15
+            )
+        else:
+            response = requests.get(url, headers=headers, proxies=proxies, timeout=15)
+        
+        if response.status_code != 200:
+            return []
+        
+        data = response.json()
+        raw_bids = data.get("bids", [])
+        
+        if not raw_bids:
+            return []
+        
+        bid_ladder = []
+        for bid in raw_bids:
+            price = float(bid.get("price", 0))
+            size = float(bid.get("size", 0))
+            if price > 0 and size > 0:
+                bid_ladder.append((price, size))
+        
+        bid_ladder.sort(key=lambda x: x[0], reverse=True)
+        return bid_ladder
+        
+    except Exception as e:
+        if verbose:
+            print(f"   ⚠️  Error fetching orderbook bids: {e}")
+        return []
+
+
+def calculate_liquidation_value(token_id: str, size: float, verbose: bool = True, strict_mode: bool = False) -> float:
+    """
+    Calculate USDC proceeds from selling 'size' tokens using VWAP sweep.
+    
+    Two modes:
+    - strict_mode=False (default): For NAV calculation - values ALL positions with VWAP + haircut
+    - strict_mode=True: For withdrawal gating - applies $1 min notional filter
+    
+    Both modes apply:
+    - VWAP sweep through bid levels (depth-aware)
+    - Taker fee deduction (1%)
+    - Slippage haircut (4%)
+    - Unfilled remainder valued at 0
+    
+    Returns: Net USDC proceeds after fees/haircut
+    """
+    if size <= 0:
+        return 0.0
+    
+    bids = get_orderbook_bids(token_id, verbose=False)
+    
+    if not bids:
+        if verbose:
+            print(f"      ⚠️  No bids for VWAP calculation")
+        return 0.0
+    
+    best_price = bids[0][0] if bids else 0.0
+    top_of_book_value = size * best_price
+    
+    # In strict mode (for withdrawal gating), apply $1 minimum notional
+    # Polymarket can't execute orders < $1
+    if strict_mode and top_of_book_value < 1.0:
+        if verbose:
+            print(f"      ⚠️  Dust position: ${top_of_book_value:.2f} < $1 min (not liquidatable)")
+        return 0.0
+    
+    remaining = size
+    gross_proceeds = 0.0
+    
+    for price, depth in bids:
+        if remaining <= 0:
+            break
+        fill = min(remaining, depth)
+        gross_proceeds += fill * price
+        remaining -= fill
+    
+    if verbose and remaining > 0:
+        print(f"      ⚠️  Insufficient depth: {remaining:.2f} tokens unfilled (valued at $0)")
+    
+    # Apply taker fee (1%) and slippage haircut (4%) = 5% total conservative deduction
+    TAKER_FEE_PCT = 0.01
+    SLIPPAGE_HAIRCUT_PCT = 0.04
+    net_proceeds = gross_proceeds * (1.0 - TAKER_FEE_PCT - SLIPPAGE_HAIRCUT_PCT)
+    
+    return net_proceeds
+
+
+def get_liquidatable_cash() -> float:
+    """
+    Calculate total immediately liquidatable cash (for withdrawal gating).
+    
+    Uses strict mode: only counts positions >= $1 that can actually be sold.
+    This is separate from NAV which tracks economic value.
+    
+    Returns: Total USDC that can be obtained from liquidation right now
+    """
+    positions = get_positions_for_liquidation()
+    total = 0.0
+    
+    for pos in positions:
+        token_id = pos.get("token_id")
+        size = pos.get("size", 0)
+        if token_id and size > 0:
+            # Use strict mode - only count liquidatable positions
+            liq_value = calculate_liquidation_value(token_id, size, verbose=False, strict_mode=True)
+            total += liq_value
+    
+    return total
 
 
 def get_orderbook_best_bid(token_id: str) -> Tuple[float, float]:
@@ -1114,16 +1223,22 @@ def get_positions_for_liquidation() -> List[Dict]:
             if size <= 0:
                 continue
             
-            avg_price = float(pos.get("avgPrice", 0.5))
-            current_price = float(pos.get("curPrice", avg_price))
+            token_id = pos.get("asset")
+            if not token_id:
+                continue
             
-            liq_value = size * current_price * 0.95
+            # Use VWAP sweep for accurate liquidation value (what you'd actually get)
+            liq_value = calculate_liquidation_value(token_id, size, verbose=False)
+            
+            # Get best bid for reference (used in liquidation execution)
+            bids = get_orderbook_bids(token_id, verbose=False)
+            best_bid = bids[0][0] if bids else 0.0
             
             positions.append({
-                "token_id": pos.get("asset"),
+                "token_id": token_id,
                 "outcome": pos.get("outcome", "Unknown"),
                 "size": size,
-                "best_bid": current_price,
+                "best_bid": best_bid,
                 "liq_value": liq_value,
             })
         
@@ -1253,10 +1368,30 @@ def liquidate_positions(needed_usdc: float) -> float:
     capped_needed = min(needed_usdc, MAX_PER_CYCLE_LIQUIDATION_USDC)
     print(f"\n🔥 LIQUIDATE: Need ${capped_needed:.2f} USDC (capped from ${needed_usdc:.2f})")
     
-    positions = get_positions_for_liquidation()
-    if not positions:
+    all_positions = get_positions_for_liquidation()
+    if not all_positions:
         print("   No positions available to liquidate")
         return 0.0
+    
+    # Pre-filter to only liquidatable positions (>= $1 at top-of-book)
+    # This ensures we don't waste time attempting to sell dust
+    positions = []
+    for pos in all_positions:
+        token_id = pos.get("token_id")
+        size = pos.get("size", 0)
+        if token_id and size > 0:
+            bids = get_orderbook_bids(token_id, verbose=False)
+            if bids:
+                best_bid = bids[0][0]
+                top_of_book_value = size * best_bid
+                if top_of_book_value >= 1.0:
+                    positions.append(pos)
+    
+    if not positions:
+        print("   All positions are dust (<$1) - cannot liquidate")
+        return 0.0
+    
+    print(f"   {len(positions)} of {len(all_positions)} positions are liquidatable (>=$1)")
     
     total_obtained = 0.0
     still_needed = capped_needed
@@ -1800,9 +1935,11 @@ def servicer_iteration(
     print(f"\n⚠️  WITHDRAWAL NEEDED: ${needed:.2f} (includes slippage buffer)")
     
     pm_cash, pm_positions = get_pm_balance()
+    liquidatable_positions = get_liquidatable_cash()
     print(f"\n📊 Polymarket:")
     print(f"   Cash: ${pm_cash:.2f}")
-    print(f"   Positions: ${pm_positions:.2f}")
+    print(f"   Positions (NAV): ${pm_positions:.2f}")
+    print(f"   Liquidatable: ${liquidatable_positions:.2f} (>=$1 positions only)")
     
     withdraw_amount = min(needed, pm_cash)
     
@@ -1827,34 +1964,53 @@ def servicer_iteration(
                 f"Remaining needed: ${needed:.2f}"
             )
     
-    # Check positions using the same function that liquidation uses (more reliable)
+    # Check positions using strict liquidatable value (only >=$1 positions can be sold)
     positions_for_liq = get_positions_for_liquidation()
-    total_position_value = sum(p.get("liq_value", 0) for p in positions_for_liq)
+    total_position_nav = sum(p.get("liq_value", 0) for p in positions_for_liq)
     
-    # Liquidate if we still need funds and have ANY positions (not just > $5)
-    if needed >= MIN_WITHDRAWAL_USDC and total_position_value > 0.01:
+    # Use strict liquidatable cash for gating (not NAV) - only count what can actually be sold
+    # This prevents locking withdrawals at amounts we can't realize
+    if needed >= MIN_WITHDRAWAL_USDC and liquidatable_positions > 0.01:
+        # Cap liquidation attempt to what's actually liquidatable (not NAV)
+        # This prevents attempting to liquidate dust positions that will fail
+        liquidation_target = min(needed, liquidatable_positions)
         print(f"\n⚠️  Cash insufficient, need to liquidate ${needed:.2f}")
-        print(f"   Positions available: ${total_position_value:.2f} across {len(positions_for_liq)} positions")
+        print(f"   Liquidatable: ${liquidatable_positions:.2f} (NAV: ${total_position_nav:.2f})")
+        print(f"   Targeting: ${liquidation_target:.2f} (capped to liquidatable)")
         
-        liquidated = liquidate_positions(needed)
+        liquidated = liquidate_positions(liquidation_target)
+    elif needed >= MIN_WITHDRAWAL_USDC and total_position_nav > 0.01:
+        # NAV shows positions but they're all dust (<$1) - can't liquidate
+        print(f"\n⚠️  Cash insufficient but positions are dust (each <$1)")
+        print(f"   NAV value: ${total_position_nav:.2f} (not immediately liquidatable)")
+        print(f"   Waiting for markets to resolve or positions to become liquidatable")
+        liquidated = 0.0
+    else:
+        liquidated = 0.0
+    
+    if needed >= MIN_WITHDRAWAL_USDC and liquidated > 0:
+        pm_cash_after, _ = get_pm_balance()
         
-        if liquidated > 0:
-            pm_cash_after, _ = get_pm_balance()
+        if pm_cash_after >= MIN_WITHDRAWAL_USDC:
+            success, request_id, amount_bridged = withdraw_pm_cash_to_bridge(
+                min(needed, pm_cash_after),
+                dry_run=dry_run
+            )
             
-            if pm_cash_after >= MIN_WITHDRAWAL_USDC:
-                success, request_id, amount_bridged = withdraw_pm_cash_to_bridge(
-                    min(needed, pm_cash_after),
-                    dry_run=dry_run
-                )
+            if success:
+                state.in_transit.append({
+                    "request_id": request_id,
+                    "amount_usdc": amount_bridged,
+                    "initiated_at": time.time(),
+                    "status": "pending",
+                })
+                state.daily_withdrawn_usdc += amount_bridged
+                needed -= amount_bridged  # Track remaining to prevent double-counting
                 
-                if success:
-                    state.in_transit.append({
-                        "request_id": request_id,
-                        "amount_usdc": amount_bridged,
-                        "initiated_at": time.time(),
-                        "status": "pending",
-                    })
-                    state.daily_withdrawn_usdc += amount_bridged
+                send_telegram_alert(
+                    f"💸 Post-liquidation bridge: ${amount_bridged:.2f} USDC\n"
+                    f"Remaining needed: ${needed:.2f}"
+                )
     
     state.last_run_timestamp = time.time()
     save_state(state)

@@ -1,0 +1,93 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# nano .env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $0.01
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-26 01:53:04
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (signer): 0x5087675E...
+   📋 Proxy wallet (funder): 0x9cbc5577...
+   📋 Signature type: 2 (Browser proxy)
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   📋 Wallet: 0x9cbc5577...
+   📋 Private key present: True
+   📋 CLOB host: https://clob.polymarket.com
+   🔑 Using pre-derived API credentials from env vars...
+   ✅ Credentials loaded (key: c4a3fd29...)
+   ✅ L2 auth verified - CLOB client ready for trading
+   ⚠️ CLOB balance error: ClobClient.get_balance_allowance() got an unexpected keyword argument 'asset_type', falling back to RPC
+   📊 PM balances: cash=$5.28, positions=$3.53
+
+📊 Polymarket:
+   Cash: $5.28
+   Positions: $3.53
+
+💸 WITHDRAW: $5.28 from PM → Vault
+   Output (first 2000 chars): [dotenv@17.2.1] injecting env (0) from .env -- tip: 📡 version env with Radar: https://dotenvx.com/radar
+2025-12-26T01:53:12.177Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2025-12-26T01:53:12.177Z 📝 [SafeProxyWithdraw] Requested amount: $5.2812 
+2025-12-26T01:53:12.177Z 📝 [SafeProxyWithdraw] Destination: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3 
+2025-12-26T01:53:12.177Z 📝 [SafeProxyWithdraw] Dry run: false 
+2025-12-26T01:53:12.388Z 📝 [SafeProxyWithdraw] Proxy USDC balance: $5.281200 (5281200 raw) 
+2025-12-26T01:53:12.389Z 📝 [SafeProxyWithdraw] ⚠️ Capping transfer: requested $5.2812, sending $5.281100 (available minus dust) 
+2025-12-26T01:53:12.528Z 📝 [SafeProxyWithdraw] EOA address: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-26T01:53:12.529Z 📝 [SafeProxyWithdraw] Proxy address: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2025-12-26T01:53:12.531Z 📝 [SafeProxyWithdraw] Using Builder API credentials 
+2025-12-26T01:53:12.541Z 📝 [SafeProxyWithdraw] 
+--- Step 1: Safe Proxy → EOA --- 
+2025-12-26T01:53:12.543Z 📝 [SafeProxyWithdraw] Withdrawing $5.281100 (5281100 raw) from Safe proxy to EOA 0x5087675E669e6244620013691c05C1De0e8B525e 
+2025-12-26T01:53:12.548Z 📝 [SafeProxyWithdraw] Executing via Polymarket RelayClient... 
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e000000000000000000000000000000000000000000000000000000000050954c',
+  nonce: '18',
+  signature: '0x48e2ebd2452905bf5c1e5f657236eb300723e80af2958ec46b80588d0890a3e1196dcaa532fcf79f2f896beecae6494def98c34d546e7a401bf52d212ffdc6731f',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x00000000
+   Extracted requestId: 0
+   Extracted txHash: 0x015fe410f05fefcaa5...
+
+💤 Sleeping 60s...
