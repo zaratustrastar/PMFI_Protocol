@@ -1,0 +1,214 @@
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $0.01
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2025-12-26 00:26:08
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 15.730000
+
+📊 STATUS:
+   Pending withdrawals: $15.73
+   Vault USDC (Base): $8.70
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $7.03
+   Needed (with 0.5% slippage): $7.07
+
+⚠️  WITHDRAWAL NEEDED: $7.07 (includes slippage buffer)
+❌ PM CLOB API returned 404
+
+📊 Polymarket:
+   Cash: $3.90
+   Positions: $0.00
+
+⚠️  Cash insufficient, need to liquidate $7.07
+   Positions available: $4.71 across 4 positions
+
+🔥 LIQUIDATE: Need $7.07 USDC (capped from $7.07)
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 111.83, total depth: 211656.23
+   🧾 Position: Yes | 30.16 tokens | ref bid: $0.0750
+   🔄 Starting sweep (min price: $0.0375, max 20 iterations)
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 111.83, total depth: 211656.23
+   [1] SELL 30.16 @ $0.0750 (depth: 111.83)
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (signer): 0x5087675E...
+   📋 Proxy wallet (funder): 0x9cbc5577...
+   📋 Signature type: 2 (Browser proxy)
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   📋 Wallet: 0x9cbc5577...
+   📋 Private key present: True
+   📋 CLOB host: https://clob.polymarket.com
+   🔑 Using pre-derived API credentials from env vars...
+   ✅ Credentials loaded (key: c4a3fd29...)
+   ✅ L2 auth verified - CLOB client ready for trading
+   📤 Creating market sell: 30.16 tokens (~$2.26)
+   📋 Response: status=matched, takingAmount=0.1695, makingAmount=2.26
+   ✅ MARKET SELL filled: $0.17 USDC (~2.26 tokens @ $0.0750)
+       ✅ Received $0.17 (2.26 tokens filled)
+          Total: $0.17, still need: $6.90, remaining tokens: 27.90
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 47.74, total depth: 210910.14
+   [2] SELL 27.90 @ $0.0750 (depth: 47.74)
+   📤 Creating market sell: 27.90 tokens (~$2.09)
+   📋 Response: status=matched, takingAmount=0.15675, makingAmount=2.09
+   ✅ MARKET SELL filled: $0.16 USDC (~2.09 tokens @ $0.0750)
+       ✅ Received $0.16 (2.09 tokens filled)
+          Total: $0.33, still need: $6.74, remaining tokens: 25.81
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 45.65, total depth: 210888.05
+   [3] SELL 25.81 @ $0.0750 (depth: 45.65)
+   📤 Creating market sell: 25.81 tokens (~$1.94)
+   📋 Response: status=matched, takingAmount=0.14475, makingAmount=1.93
+   ✅ MARKET SELL filled: $0.14 USDC (~1.93 tokens @ $0.0750)
+       ✅ Received $0.14 (1.93 tokens filled)
+          Total: $0.47, still need: $6.59, remaining tokens: 23.88
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 43.72, total depth: 210886.12
+   [4] SELL 23.88 @ $0.0750 (depth: 43.72)
+   📤 Creating market sell: 23.88 tokens (~$1.79)
+   📋 Response: status=matched, takingAmount=0.13425, makingAmount=1.79
+   ✅ MARKET SELL filled: $0.13 USDC (~1.79 tokens @ $0.0750)
+       ✅ Received $0.13 (1.79 tokens filled)
+          Total: $0.61, still need: $6.46, remaining tokens: 22.09
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 41.93, total depth: 210904.33
+   [5] SELL 22.09 @ $0.0750 (depth: 41.93)
+   📤 Creating market sell: 22.09 tokens (~$1.66)
+   📋 Response: status=matched, takingAmount=0.12375, makingAmount=1.65
+   ✅ MARKET SELL filled: $0.12 USDC (~1.65 tokens @ $0.0750)
+       ✅ Received $0.12 (1.65 tokens filled)
+          Total: $0.73, still need: $6.34, remaining tokens: 20.44
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 40.28, total depth: 210902.68
+   [6] SELL 20.44 @ $0.0750 (depth: 40.28)
+   📤 Creating market sell: 20.44 tokens (~$1.53)
+   📋 Response: status=matched, takingAmount=0.11475, makingAmount=1.53
+   ✅ MARKET SELL filled: $0.11 USDC (~1.53 tokens @ $0.0750)
+       ✅ Received $0.11 (1.53 tokens filled)
+          Total: $0.84, still need: $6.22, remaining tokens: 18.91
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 38.75, total depth: 210901.15
+   [7] SELL 18.91 @ $0.0750 (depth: 38.75)
+   📤 Creating market sell: 18.91 tokens (~$1.42)
+   📋 Response: status=matched, takingAmount=0.10575, makingAmount=1.41
+   ✅ MARKET SELL filled: $0.11 USDC (~1.41 tokens @ $0.0750)
+       ✅ Received $0.11 (1.41 tokens filled)
+          Total: $0.95, still need: $6.12, remaining tokens: 17.50
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 37.34, total depth: 210899.74
+   [8] SELL 17.50 @ $0.0750 (depth: 37.34)
+   📤 Creating market sell: 17.50 tokens (~$1.31)
+   📋 Response: status=matched, takingAmount=0.09825, makingAmount=1.31
+   ✅ MARKET SELL filled: $0.10 USDC (~1.31 tokens @ $0.0750)
+       ✅ Received $0.10 (1.31 tokens filled)
+          Total: $1.05, still need: $6.02, remaining tokens: 16.19
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 81.73, total depth: 210944.13
+   [9] SELL 16.19 @ $0.0750 (depth: 81.73)
+   📤 Creating market sell: 16.19 tokens (~$1.21)
+   📋 Response: status=matched, takingAmount=0.09075, makingAmount=1.21
+   ✅ MARKET SELL filled: $0.09 USDC (~1.21 tokens @ $0.0750)
+       ✅ Received $0.09 (1.21 tokens filled)
+          Total: $1.14, still need: $5.93, remaining tokens: 14.98
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 80.52, total depth: 210942.92
+   [10] SELL 14.98 @ $0.0750 (depth: 80.52)
+   📤 Creating market sell: 14.98 tokens (~$1.12)
+   📋 Response: status=matched, takingAmount=0.084, makingAmount=1.12
+   ✅ MARKET SELL filled: $0.08 USDC (~1.12 tokens @ $0.0750)
+       ✅ Received $0.08 (1.12 tokens filled)
+          Total: $1.22, still need: $5.84, remaining tokens: 13.86
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 79.40, total depth: 210941.80
+   [11] SELL 13.86 @ $0.0750 (depth: 79.40)
+   📤 Creating market sell: 13.86 tokens (~$1.04)
+   📋 Response: status=matched, takingAmount=0.07725, makingAmount=1.03
+   ✅ MARKET SELL filled: $0.08 USDC (~1.03 tokens @ $0.0750)
+       ✅ Received $0.08 (1.03 tokens filled)
+          Total: $1.30, still need: $5.77, remaining tokens: 12.83
+   📖 Orderbook query: 54249369766400104419...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '199654'}, {'price': '0.002', 'size': '3600'}, {'price': '0.003', 'size': '1449.47'}]
+   📊 Best bid: $0.0750, size at best: 78.37, total depth: 210940.77
+   ⏭️  Dust at top-of-book: 12.83 tokens @ $0.0750 = $0.96 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $1.30 obtained
+   📖 Orderbook query: 91100409913715538094...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '12405.4'}, {'price': '0.02', 'size': '6505'}, {'price': '0.03', 'size': '24.67'}]
+   📊 Best bid: $0.4900, size at best: 3251.00, total depth: 51463.07
+   🧾 Position: Yes | 1.96 tokens | ref bid: $0.4900
+   🔄 Starting sweep (min price: $0.2450, max 20 iterations)
+   📖 Orderbook query: 91100409913715538094...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '12405.4'}, {'price': '0.02', 'size': '6505'}, {'price': '0.03', 'size': '24.67'}]
+   📊 Best bid: $0.4900, size at best: 3251.00, total depth: 51463.07
+   ⏭️  Dust at top-of-book: 1.96 tokens @ $0.4900 = $0.96 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 99256619221732681838...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '2678'}, {'price': '0.02', 'size': '8.94'}, {'price': '0.04', 'size': '3261.48'}]
+   📊 Best bid: $0.2700, size at best: 29.98, total depth: 18125.45
+   🧾 Position: No | 2.94 tokens | ref bid: $0.2700
+   🔄 Starting sweep (min price: $0.1350, max 20 iterations)
+   📖 Orderbook query: 99256619221732681838...
+   🔍 Raw bids (first 3): [{'price': '0.01', 'size': '2678'}, {'price': '0.02', 'size': '8.94'}, {'price': '0.04', 'size': '3261.48'}]
+   📊 Best bid: $0.2700, size at best: 29.98, total depth: 18125.45
+   ⏭️  Dust at top-of-book: 2.94 tokens @ $0.2700 = $0.79 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 24210214708827119705...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '12679.26'}, {'price': '0.002', 'size': '671.39'}, {'price': '0.003', 'size': '500'}]
+   📊 Best bid: $0.5430, size at best: 6.00, total depth: 66939.17
+   🧾 Position: Yes | 1.15 tokens | ref bid: $0.5430
+   🔄 Starting sweep (min price: $0.2715, max 20 iterations)
+   📖 Orderbook query: 24210214708827119705...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '12679.26'}, {'price': '0.002', 'size': '671.39'}, {'price': '0.003', 'size': '500'}]
+   📊 Best bid: $0.5430, size at best: 6.00, total depth: 66933.98
+   ⏭️  Dust at top-of-book: 1.15 tokens @ $0.5430 = $0.62 (min $1)
+      Moving to next position (can't sweep through < $1 orders)
+   📊 Position sweep done: $0.00 obtained
+
+   💰 Total liquidated: $1.30
+❌ PM CLOB API returned 404
+
+💸 WITHDRAW: $5.20 from PM → Vault
+   Output (first 500 chars): [dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2025-12-26T00:26:55.828Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2025-12-26T00:26:55.829Z 📝 [SafeProxyWithdraw] Requested amount: $5.20141 
+2025-12-26T00:26:55.829Z 📝 [SafeProxyWithdraw] Destination: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3 
+2025-12-26T00:26:55.829Z 📝 [SafeProxyWithdraw] Dry run: false 
+2025-12-26T00:26:56.173Z 📝 [SafeProxyWithdraw] Proxy USDC balance: $5.201
+❌ Withdraw script failed (exit 1)
+
+💤 Sleeping 60s...
