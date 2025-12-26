@@ -1,0 +1,78 @@
+Yep — the **right** way to get Polymarket “cash” for trading is **not** the data-api `/value` endpoint. That endpoint is inconsistent (and often only returns total position value). Instead, use the **CLOB L2 balance endpoint** via the official client:
+
+### what “cash balance” actually is (in CLOB terms)
+
+On Polymarket CLOB, your “cash” is **collateral balance** (USDC) held in the CLOB system for the authenticated trading account.
+
+In the Polymarket docs, this is exposed via **L2 method** `getBalanceAllowance()` with `asset_type = COLLATERAL`. ([Polymarket Documentation][1])
+
+---
+
+## correct approach (python): get collateral balance from CLOB (L2)
+
+You must initialize the client exactly like L2 methods require: **signer key + api creds + signature_type + funder**. The docs show proxy-wallet trading uses `signature_type=2` with `funder=<proxy address>`. ([Polymarket Documentation][1])
+
+```python
+import os
+from py_clob_client.client import ClobClient
+from py_clob_client.clob_types import ApiCreds, AssetType
+
+client = ClobClient(
+    host="https://clob.polymarket.com",
+    chain_id=137,
+    key=os.getenv("POLYMARKET_PRIVATE_KEY"),          # EOA signer private key
+    creds=ApiCreds(
+        api_key=os.getenv("POLYMARKET_API_KEY"),
+        api_secret=os.getenv("POLYMARKET_API_SECRET"),
+        api_passphrase=os.getenv("POLYMARKET_API_PASSPHRASE"),
+    ),
+    signature_type=2,                                 # proxy wallet (Safe) per docs
+    funder=os.getenv("POLYMARKET_PROXY_ADDRESS"),      # proxy wallet address
+)
+
+# collateral (USDC) “cash”
+resp = client.get_balance_allowance({"asset_type": AssetType.COLLATERAL})
+print("collateral balance:", resp["balance"])
+print("collateral allowance:", resp["allowance"])
+```
+
+That `balance` is the number you want to print as **Cash** in your servicer.
+
+> If you also want balances for positions (conditional tokens), you can query `asset_type=CONDITIONAL` + `token_id`. That’s the same method. ([Polymarket Documentation][1])
+
+---
+
+## why your current `data-api /value?user=...` keeps showing $0.00
+
+Because it’s not a “cash ledger” endpoint and (in practice) it often returns only a total value metric. It may omit cashBalance entirely, even if your wallet has USDC somewhere (on-chain or CLOB collateral).
+
+So: use **CLOB L2** for collateral cash; use **data-api** only as a convenience for “position value” if you want.
+
+---
+
+## eoa vs proxy: which address should “cash” be tied to?
+
+For trading with a proxy wallet setup:
+
+* **EOA (0x5087…)** = the **signer** (signs orders)
+* **Proxy (0x9cbc…)** = the **funder / trading account** (pays collateral, holds positions)
+
+So your “cash” for withdrawals/liquidations should be the **proxy’s collateral balance** (via the L2-authenticated client initialized with `funder=proxy`). That’s also how the docs describe L2 initialization for proxy wallets. ([Polymarket Documentation][1])
+
+---
+
+## and no — builder keys should not be used for trading
+
+Builder keys are for “builder” APIs; trading (placing orders, balances, etc.) uses **user API creds (L2 headers)**. The L2 methods page explicitly frames these as “methods require user API credentials (L2 headers) … for placing trades”. ([Polymarket Documentation][1])
+
+---
+
+### quick sanity checks (to stop guessing)
+
+1. **Verify you’re using signature_type=2 for proxy** (docs example uses 2). ([Polymarket Documentation][1])
+2. Call `get_balance_allowance(COLLATERAL)` and print it.
+3. Make sure the returned balance is non-zero before attempting liquidation.
+
+If you paste the output of `get_balance_allowance(COLLATERAL)` and confirm what signature_type you’re currently using in your running servicer, I can tell you exactly what to change in the servicer code path (and where) so “Cash” becomes reliable and liquidation logic stops fighting phantom $0.00 balances.
+
+[1]: https://docs.polymarket.com/developers/CLOB/clients/methods-l2 "L2 Methods - Polymarket Documentation"
