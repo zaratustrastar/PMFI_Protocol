@@ -1018,17 +1018,11 @@ def calculate_liquidation_value(token_id: str, size: float, verbose: bool = True
     """
     Calculate USDC proceeds from selling 'size' tokens using VWAP sweep.
     
-    Two modes:
-    - strict_mode=False (default): For NAV calculation - values ALL positions with VWAP + haircut
-    - strict_mode=True: For withdrawal gating - applies $1 min notional filter
+    Uses depth-aware VWAP sweep through orderbook bid levels.
+    No fees/haircuts applied (Polymarket has no taker fees).
+    Unfilled remainder valued at 0.
     
-    Both modes apply:
-    - VWAP sweep through bid levels (depth-aware)
-    - Taker fee deduction (1%)
-    - Slippage haircut (4%)
-    - Unfilled remainder valued at 0
-    
-    Returns: Net USDC proceeds after fees/haircut
+    Returns: USDC proceeds from liquidation
     """
     if size <= 0:
         return 0.0
@@ -1038,16 +1032,6 @@ def calculate_liquidation_value(token_id: str, size: float, verbose: bool = True
     if not bids:
         if verbose:
             print(f"      ⚠️  No bids for VWAP calculation")
-        return 0.0
-    
-    best_price = bids[0][0] if bids else 0.0
-    top_of_book_value = size * best_price
-    
-    # In strict mode (for withdrawal gating), apply $1 minimum notional
-    # Polymarket can't execute orders < $1
-    if strict_mode and top_of_book_value < 1.0:
-        if verbose:
-            print(f"      ⚠️  Dust position: ${top_of_book_value:.2f} < $1 min (not liquidatable)")
         return 0.0
     
     remaining = size
@@ -1063,22 +1047,15 @@ def calculate_liquidation_value(token_id: str, size: float, verbose: bool = True
     if verbose and remaining > 0:
         print(f"      ⚠️  Insufficient depth: {remaining:.2f} tokens unfilled (valued at $0)")
     
-    # Apply taker fee (1%) and slippage haircut (4%) = 5% total conservative deduction
-    TAKER_FEE_PCT = 0.01
-    SLIPPAGE_HAIRCUT_PCT = 0.04
-    net_proceeds = gross_proceeds * (1.0 - TAKER_FEE_PCT - SLIPPAGE_HAIRCUT_PCT)
-    
-    return net_proceeds
+    return gross_proceeds
 
 
 def get_liquidatable_cash() -> float:
     """
-    Calculate total immediately liquidatable cash (for withdrawal gating).
+    Calculate total immediately liquidatable cash from positions.
+    Uses VWAP sweep through orderbook depth.
     
-    Uses strict mode: only counts positions >= $1 that can actually be sold.
-    This is separate from NAV which tracks economic value.
-    
-    Returns: Total USDC that can be obtained from liquidation right now
+    Returns: Total USDC that can be obtained from liquidation
     """
     positions = get_positions_for_liquidation()
     total = 0.0
@@ -1087,8 +1064,7 @@ def get_liquidatable_cash() -> float:
         token_id = pos.get("token_id")
         size = pos.get("size", 0)
         if token_id and size > 0:
-            # Use strict mode - only count liquidatable positions
-            liq_value = calculate_liquidation_value(token_id, size, verbose=False, strict_mode=True)
+            liq_value = calculate_liquidation_value(token_id, size, verbose=False)
             total += liq_value
     
     return total
@@ -1368,37 +1344,19 @@ def liquidate_positions(needed_usdc: float) -> float:
     capped_needed = min(needed_usdc, MAX_PER_CYCLE_LIQUIDATION_USDC)
     print(f"\n🔥 LIQUIDATE: Need ${capped_needed:.2f} USDC (capped from ${needed_usdc:.2f})")
     
-    all_positions = get_positions_for_liquidation()
-    if not all_positions:
+    positions = get_positions_for_liquidation()
+    if not positions:
         print("   No positions available to liquidate")
         return 0.0
     
-    # Pre-filter to only liquidatable positions (>= $1 at top-of-book)
-    # This ensures we don't waste time attempting to sell dust
-    positions = []
-    for pos in all_positions:
-        token_id = pos.get("token_id")
-        size = pos.get("size", 0)
-        if token_id and size > 0:
-            bids = get_orderbook_bids(token_id, verbose=False)
-            if bids:
-                best_bid = bids[0][0]
-                top_of_book_value = size * best_bid
-                if top_of_book_value >= 1.0:
-                    positions.append(pos)
-    
-    if not positions:
-        print("   All positions are dust (<$1) - cannot liquidate")
-        return 0.0
-    
-    print(f"   {len(positions)} of {len(all_positions)} positions are liquidatable (>=$1)")
+    print(f"   {len(positions)} positions available for liquidation")
     
     total_obtained = 0.0
     still_needed = capped_needed
     
     # Sweep loop constants
     MAX_SWEEPS_PER_POSITION = 20  # Max iterations per position to prevent infinite loops
-    MIN_USD_PER_ORDER = 1.0       # Skip dust orders
+    MIN_USD_PER_ORDER = 0.01      # Minimal threshold for order sanity check
     MAX_SLIPPAGE_BPS = 5000       # 50% max slippage from initial price (positions may be low-value)
     SWEEP_DELAY_SECONDS = 0.3    # Rate limiting between orders
     
@@ -1454,12 +1412,9 @@ def liquidate_positions(needed_usdc: float) -> float:
             size_to_sell = max(0, size_to_sell)  # Ensure non-negative
             expected_usdc = size_to_sell * live_bid_price
             
-            # Skip dust orders - if order is too small, move to next position
-            # Note: we can't sweep deeper because FAK only fills at best bid level,
-            # and we can't eat through best bid if it's < $1 (Polymarket rejects)
+            # Skip if order value is essentially zero
             if expected_usdc < MIN_USD_PER_ORDER:
-                print(f"   ⏭️  Dust at top-of-book: {size_to_sell:.2f} tokens @ ${live_bid_price:.4f} = ${expected_usdc:.2f} (min $1)")
-                print(f"      Moving to next position (can't sweep through < $1 orders)")
+                print(f"   ⏭️  Order too small: {size_to_sell:.2f} tokens @ ${live_bid_price:.4f} = ${expected_usdc:.4f}")
                 break
             
             print(f"   [{sweep_i+1}] SELL {size_to_sell:.2f} @ ${live_bid_price:.4f} (depth: {bid_depth:.2f})")
