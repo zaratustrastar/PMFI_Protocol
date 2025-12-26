@@ -1894,7 +1894,7 @@ def servicer_iteration(
     print(f"\n📊 Polymarket:")
     print(f"   Cash: ${pm_cash:.2f}")
     print(f"   Positions (NAV): ${pm_positions:.2f}")
-    print(f"   Liquidatable: ${liquidatable_positions:.2f} (>=$1 positions only)")
+    print(f"   Liquidatable: ${liquidatable_positions:.2f} (VWAP)")
     
     withdraw_amount = min(needed, pm_cash)
     
@@ -1919,26 +1919,16 @@ def servicer_iteration(
                 f"Remaining needed: ${needed:.2f}"
             )
     
-    # Check positions using strict liquidatable value (only >=$1 positions can be sold)
-    positions_for_liq = get_positions_for_liquidation()
-    total_position_nav = sum(p.get("liq_value", 0) for p in positions_for_liq)
-    
-    # Use strict liquidatable cash for gating (not NAV) - only count what can actually be sold
-    # This prevents locking withdrawals at amounts we can't realize
+    # Check if liquidation needed
     if needed >= MIN_WITHDRAWAL_USDC and liquidatable_positions > 0.01:
-        # Cap liquidation attempt to what's actually liquidatable (not NAV)
-        # This prevents attempting to liquidate dust positions that will fail
         liquidation_target = min(needed, liquidatable_positions)
         print(f"\n⚠️  Cash insufficient, need to liquidate ${needed:.2f}")
-        print(f"   Liquidatable: ${liquidatable_positions:.2f} (NAV: ${total_position_nav:.2f})")
-        print(f"   Targeting: ${liquidation_target:.2f} (capped to liquidatable)")
+        print(f"   Liquidatable: ${liquidatable_positions:.2f}")
+        print(f"   Targeting: ${liquidation_target:.2f}")
         
         liquidated = liquidate_positions(liquidation_target)
-    elif needed >= MIN_WITHDRAWAL_USDC and total_position_nav > 0.01:
-        # NAV shows positions but they're all dust (<$1) - can't liquidate
-        print(f"\n⚠️  Cash insufficient but positions are dust (each <$1)")
-        print(f"   NAV value: ${total_position_nav:.2f} (not immediately liquidatable)")
-        print(f"   Waiting for markets to resolve or positions to become liquidatable")
+    elif needed >= MIN_WITHDRAWAL_USDC:
+        print(f"\n⚠️  Cash insufficient and no liquidatable positions")
         liquidated = 0.0
     else:
         liquidated = 0.0
