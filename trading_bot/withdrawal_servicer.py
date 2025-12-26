@@ -891,8 +891,10 @@ def check_in_transit_via_events(
 
 def get_pm_balance() -> Tuple[float, float]:
     """
-    Get Polymarket withdrawable cash and position value.
-    Uses data-api.polymarket.com/value endpoint.
+    Get Polymarket withdrawable cash (collateral) and position value.
+    
+    Uses CLOB L2 get_balance_allowance(COLLATERAL) for accurate cash balance.
+    Falls back to data-api for position value.
     
     Returns:
         (withdrawable_cash, position_value)
@@ -901,6 +903,32 @@ def get_pm_balance() -> Tuple[float, float]:
         print("❌ PM_PROXY_ADDRESS not set")
         return 0.0, 0.0
     
+    cash = 0.0
+    positions = 0.0
+    
+    # Get cash balance via CLOB L2 API (authoritative for collateral)
+    try:
+        if HAS_CLOB_CLIENT:
+            client = get_patched_clob_client()
+            if client:
+                from py_clob_client.clob_types import AssetType
+                resp = client.get_balance_allowance(asset_type=AssetType.COLLATERAL)
+                if resp and isinstance(resp, dict):
+                    cash = float(resp.get("balance", 0))
+                    print(f"   📊 CLOB collateral: ${cash:.2f}")
+                else:
+                    print(f"   ⚠️ CLOB balance response empty/invalid: {resp}")
+            else:
+                print("   ⚠️ CLOB client not available, falling back to RPC")
+                cash, _ = get_pm_balance_from_rpc()
+        else:
+            print("   ⚠️ py-clob-client not installed, falling back to RPC")
+            cash, _ = get_pm_balance_from_rpc()
+    except Exception as e:
+        print(f"   ⚠️ CLOB balance error: {e}, falling back to RPC")
+        cash, _ = get_pm_balance_from_rpc()
+    
+    # Get position value via data-api (simpler, no auth needed)
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
@@ -908,8 +936,6 @@ def get_pm_balance() -> Tuple[float, float]:
         }
         
         proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
-        
-        # Use data-api for cash + position value
         url = f"https://data-api.polymarket.com/value?user={PM_PROXY_ADDRESS.lower()}"
         
         if BYPASS_METHOD == "curl_cffi":
@@ -923,34 +949,17 @@ def get_pm_balance() -> Tuple[float, float]:
         else:
             response = requests.get(url, headers=headers, proxies=proxies, timeout=30)
         
-        if response.status_code != 200:
-            print(f"❌ PM data API returned {response.status_code}")
-            return get_pm_balance_from_rpc()
-        
-        data = response.json()
-        
-        # Handle list response (API sometimes returns [{}])
-        if isinstance(data, list):
-            if len(data) > 0 and isinstance(data[0], dict):
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, list) and len(data) > 0:
                 data = data[0]
-            else:
-                print(f"⚠️  PM data API returned empty list")
-                return get_pm_balance_from_rpc()
-        
-        if not isinstance(data, dict):
-            print(f"⚠️  PM data API returned unexpected type: {type(data)}")
-            return get_pm_balance_from_rpc()
-        
-        # Parse cashBalance and value (position value)
-        cash = float(data.get("cashBalance", 0))
-        positions = float(data.get("value", 0))
-        
-        print(f"   📊 PM balances: cash=${cash:.2f}, positions=${positions:.2f}")
-        return cash, positions
-        
+            if isinstance(data, dict):
+                positions = float(data.get("value", 0))
     except Exception as e:
-        print(f"⚠️  PM data API error: {e}")
-        return get_pm_balance_from_rpc()
+        print(f"   ⚠️ Position value API error: {e}")
+    
+    print(f"   📊 PM balances: cash=${cash:.2f}, positions=${positions:.2f}")
+    return cash, positions
 
 
 def get_pm_balance_from_rpc() -> Tuple[float, float]:
