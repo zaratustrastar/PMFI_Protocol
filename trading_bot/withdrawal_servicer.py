@@ -654,7 +654,7 @@ def scan_transfer_events_to_vault(
     usdc_addr = Web3.to_checksum_address(USDC_BASE)
     
     # ERC20 Transfer event signature: Transfer(address,address,uint256)
-    transfer_topic = Web3.keccak(text="Transfer(address,address,uint256)").hex()
+    transfer_topic = "0x" + Web3.keccak(text="Transfer(address,address,uint256)").hex()
     
     # Pad vault address to 32 bytes for indexed parameter
     vault_topic = "0x" + vault_addr.lower()[2:].zfill(64)
