@@ -185,7 +185,7 @@ class RoundIdCache:
     
     def update_from_chain(self, round_id: int):
         """Update cache with value read from chain (authoritative source)."""
-        if round_id > 0:
+        if round_id >= 0:
             # Chain is authoritative - ALWAYS sync to it (fixes drift issue)
             if self.cached_round_id != round_id:
                 if self.cached_round_id is not None and self.cached_round_id > round_id:
@@ -206,8 +206,8 @@ class RoundIdCache:
         Returns:
             Next roundId to use, or None if we can't determine a safe value
         """
-        if chain_round_id is not None and chain_round_id > 0:
-            # Chain read succeeded - this is authoritative
+        if chain_round_id is not None and chain_round_id >= 0:
+            # Chain read succeeded - this is authoritative (0 is valid for fresh contracts)
             self.update_from_chain(chain_round_id)
             return chain_round_id + 1
         
