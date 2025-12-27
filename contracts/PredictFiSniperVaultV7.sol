@@ -64,6 +64,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     uint256 public constant PENDING_RATIO_PAUSE = 3000;   // 30% - pause deposits
     uint256 public constant PENDING_RATIO_CAP = 1000;     // 10% - cap single deposit
     uint256 public constant MAX_DEPOSIT_DURING_LIMBO = 1000 * 1e6;  // $1000 max during limbo
+    uint256 public constant CLAIM_SLIPPAGE_BPS = 50;  // 0.5% slippage tolerance for bridge fees
     
     // Polymarket's official Base USDC deposit address
     address public constant POLYMARKET_BASE_DEPOSIT = 0xa76a91208FC7CB88420070AF978D12F440cab2F0;
@@ -376,11 +377,16 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         
         // V7.3: Use locked USDC amount from request time - no NAV recalculation
         uint256 grossUsdc = request.usdcLocked;
-        uint256 tax = (grossUsdc * WITHDRAWAL_TAX_BPS) / 10000;
-        uint256 netUsdc = grossUsdc - tax;
+        uint256 vaultBalance = usdc.balanceOf(address(this));
         
-        // Check vault has enough USDC (from keeper refills)
-        require(usdc.balanceOf(address(this)) >= grossUsdc, "Not enough USDC in buffer. Try again later when positions are liquidated.");
+        // V7.3.1: Allow 0.5% slippage for bridge/relay fees
+        uint256 minRequired = grossUsdc - (grossUsdc * CLAIM_SLIPPAGE_BPS) / 10000;
+        require(vaultBalance >= minRequired, "Not enough USDC in buffer. Try again later when positions are liquidated.");
+        
+        // Pay out actual available (capped at locked amount)
+        uint256 actualGross = vaultBalance >= grossUsdc ? grossUsdc : vaultBalance;
+        uint256 tax = (actualGross * WITHDRAWAL_TAX_BPS) / 10000;
+        uint256 netUsdc = actualGross - tax;
         
         request.claimed = true;
         totalPendingShares -= request.shares;
@@ -396,7 +402,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         // Burn the locked shares
         _burn(address(this), request.shares);
         
-        // Update conservation tracking
+        // Update conservation tracking (use locked amount, not actual payout, to maintain invariant)
         if (grossUsdc > expectedAssets) {
             expectedAssets = 0;
         } else {
