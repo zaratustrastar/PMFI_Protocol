@@ -1,0 +1,77 @@
+the key point
+
+On Polymarket/Polygon you effectively have one collateral bucket (USDC.e in the proxy wallet), and reserved is just a subset of that collateral that’s locked by open BUY orders.
+
+So:
+
+If cash = total proxy USDC balance (most common), then:
+
+cash already includes the reserved portion
+
+cash + reserved = double counting
+
+If cash = free/spendable (excluding reserved), then:
+
+cash + reserved is OK
+
+but you must be 100% sure your API method returns “free” not “total”
+
+Your current implementation snippet suggests fetch_cash_balance() is pulling balance from get_balance_allowance(...) or Polygon balanceOf(proxy) — both usually represent total, not “free”.
+
+That means your totalAssets = cash + reserved + ... is very likely overstating assets.
+
+what to change (clean, always-correct accounting)
+
+Define explicitly:
+
+collateral_total = total USDC.e in proxy wallet (Polygon balanceOf or CLOB balance)
+
+reserved = USDC locked in open BUY orders
+
+cash_free = collateral_total - reserved (for operational “can I buy?” logic only)
+
+Then make NAV use disjoint buckets:
+
+pending credit (bridging / not yet visible)
+
+If your invariant is:
+
+totalForwarded ≈ inFlight + pendingCredit + collateral_total + costBasis + withdrawnBack
+
+then:
+
+pendingCredit = max(0,
+    totalForwarded
+    - inFlight
+    - withdrawnBack
+    - collateral_total
+    - costBasis
+)
+
+total assets (NAV)
+totalAssets = (
+    inFlight
+    + pendingCredit
+    + collateral_total          # do NOT add reserved separately
+    + positionsLiquidationValue # VWAP liquidation value
+)
+
+
+Reserved should not appear as a separate additive asset in NAV if collateral_total already includes it.
+
+does deposit/withdraw “locking” change this?
+
+No. Locking prevents timing manipulation and inconsistent snapshots, but it doesn’t fix a double-counting formula. Even with perfect locking, adding reserved on top of a “total collateral” number will inflate NAV.
+
+how to confirm in 2 minutes (no guessing)
+
+Do this:
+
+Print collateral_total (your current cash) and reserved
+
+Place a large BUY order that stays unfilled
+
+If cash drops when you place the order, it’s “free cash”.
+If cash does not drop but reserved increases, your cash is “total collateral”.
+
+Given your code path (Polygon balanceOf fallback), your cash is almost certainly total collateral.
