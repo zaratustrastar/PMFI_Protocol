@@ -6,11 +6,11 @@
 // CONFIGURATION
 // =============================================================================
 
-const VAULT_ADDRESS = "0x20dd0e29a533326D16Af73689cB3EDDF9D244ED5"; // V7.3 - locked pricing
+const VAULT_ADDRESS = "0xf2603a9645294033F3463C5b22C878530E26EeA3"; // V7.3.1 - claim slippage
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
-const BASE_MAINNET_RPC = "https://mainnet.base.org";
+const BASE_MAINNET_RPC = "https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5";
 const BASE_MAINNET_CHAIN_ID = 8453;
 
 // VPS Price API Configuration
