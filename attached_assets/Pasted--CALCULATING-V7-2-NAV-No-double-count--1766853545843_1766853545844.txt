@@ -1,0 +1,200 @@
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $68.50
+   - pmCash:       $0.00
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $0.00
+   = pendingCredit: $68.50
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $68.50
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $68.50
+   (inFlight + pending subtracted from total to avoid overlap)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 100.0% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $68.50
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $68.50
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 24) [pause]
+🔄 Starting NAV refresh loop (every 45s)
+============================================================
+🔄 BACKGROUND NAV REFRESH
+
+🚀 Starting HTTP API on port 8080============================================================
+
+   Serving frontend from: /root/PolyNotifyBot/frontend
+   Endpoints:
+   - GET  /             - Frontend UI
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+45.144.13.69 - - [27/Dec/2025 16:37:24] "GET / HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:24] "GET /main.js HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:25] "GET /psniper-logo.png HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:25] "GET /abis/usdc.json?v=1766853445073 HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:25] "GET /abis/vault.json?v=1766853445073 HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:26] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:26] "GET /favicon.ico HTTP/1.1" 404 -
+45.144.13.69 - - [27/Dec/2025 16:37:26] "GET /price HTTP/1.1" 200 -
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+⚠️ RPC still failing, reusing fallback roundId: 24
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+45.144.13.69 - - [27/Dec/2025 16:37:26] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:28] "GET /price HTTP/1.1" 200 -
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+45.144.13.69 - - [27/Dec/2025 16:37:29] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:29] "GET / HTTP/1.1" 200 -
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+45.144.13.69 - - [27/Dec/2025 16:37:30] "GET /main.js HTTP/1.1" 200 -
+💵 Polymarket cash (Polygon): $0.00
+45.144.13.69 - - [27/Dec/2025 16:37:30] "GET /psniper-logo.png HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:30] "GET /abis/usdc.json?v=1766853450318 HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:30] "GET /abis/vault.json?v=1766853450318 HTTP/1.1" 200 -
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $68.50
+   - pmCash:       $0.00
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $0.00
+   = pendingCredit: $68.50
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $68.50
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $68.50
+   (inFlight + pending subtracted from total to avoid overlap)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 100.0% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $68.50
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $68.50
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 24) [pause]
+✅ NAV cache updated, sleeping 45s
+45.144.13.69 - - [27/Dec/2025 16:37:31] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:31] "GET /favicon.ico HTTP/1.1" 404 -
+45.144.13.69 - - [27/Dec/2025 16:37:31] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:32] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:41] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:37:51] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:38:01] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:38:02] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:38:11] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, lastRoundId=0
+⚠️ RPC still failing, reusing fallback roundId: 24
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+45.144.13.69 - - [27/Dec/2025 16:38:20] "GET /price HTTP/1.1" 200 -
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+45.144.13.69 - - [27/Dec/2025 16:38:21] "GET /price HTTP/1.1" 200 -
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $68.50
+   - pmCash:       $0.00
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $0.00
+   = pendingCredit: $68.50
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $68.50
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $68.50
+   (inFlight + pending subtracted from total to avoid overlap)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 100.0% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $68.50
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $68.50
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 24) [pause]
+✅ NAV cache updated, sleeping 45s
+45.144.13.69 - - [27/Dec/2025 16:38:29] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:38:29] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:38:31] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:38:32] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:38:41] "GET /price HTTP/1.1" 200 -

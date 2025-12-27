@@ -1,0 +1,139 @@
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ NAV refresh error: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+45.144.13.69 - - [27/Dec/2025 16:41:18] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:18] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:20] "GET / HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:20] "GET /main.js HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:21] "GET /psniper-logo.png HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:21] "GET /abis/vault.json?v=1766853681180 HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:21] "GET /abis/usdc.json?v=1766853681180 HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:22] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:22] "GET /favicon.ico HTTP/1.1" 404 -
+45.144.13.69 - - [27/Dec/2025 16:41:22] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:23] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:28] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:29] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:33] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:42] "GET /price HTTP/1.1" 200 -
+139.135.60.49 - - [27/Dec/2025 16:41:50] "GET /boaform/admin/formLogin?username=user&psd=user HTTP/1.0" 404 -
+45.144.13.69 - - [27/Dec/2025 16:41:53] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:41:53] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+45.144.13.69 - - [27/Dec/2025 16:42:03] "GET /price HTTP/1.1" 200 -
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, lastRoundId=0
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ NAV refresh error: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+45.144.13.69 - - [27/Dec/2025 16:42:12] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:42:22] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:42:23] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:42:29] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:42:29] "GET /price HTTP/1.1" 200 -
+🔄 Generating fresh signed NAV (no valid cache)
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, lastRoundId=0
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ Error signing NAV: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1302, in sign_nav
+    result = get_signed_nav_data_v7()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1101, in get_signed_nav_data_v7
+    raise ValueError("Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.")
+ValueError: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+127.0.0.1 - - [27/Dec/2025 16:42:41] "GET /sign-nav HTTP/1.1" 500 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+45.144.13.69 - - [27/Dec/2025 16:42:53] "GET /price HTTP/1.1" 200 -
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, lastRoundId=0
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ NAV refresh error: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+🔄 Generating fresh signed NAV (no valid cache)
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ Error signing NAV: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1302, in sign_nav
+    result = get_signed_nav_data_v7()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1101, in get_signed_nav_data_v7
+    raise ValueError("Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.")
+ValueError: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+127.0.0.1 - - [27/Dec/2025 16:43:08] "GET /sign-nav HTTP/1.1" 500 -
+127.0.0.1 - - [27/Dec/2025 16:43:08] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:43:15] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:43:22] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:43:23] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:43:28] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:43:29] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:43:32] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:43:42] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, lastRoundId=0
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ NAV refresh error: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+45.144.13.69 - - [27/Dec/2025 16:43:52] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:43:53] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:44:02] "GET /price HTTP/1.1" 200 -
+🔄 Generating fresh signed NAV (no valid cache)
+45.144.13.69 - - [27/Dec/2025 16:44:12] "GET /price HTTP/1.1" 200 -
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ Error signing NAV: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1302, in sign_nav
+    result = get_signed_nav_data_v7()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1101, in get_signed_nav_data_v7
+    raise ValueError("Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.")
+ValueError: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+127.0.0.1 - - [27/Dec/2025 16:44:15] "GET /sign-nav HTTP/1.1" 500 -
+127.0.0.1 - - [27/Dec/2025 16:44:15] "GET /price HTTP/1.1" 200 -
+🔄 Generating fresh signed NAV (no valid cache)
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ Error signing NAV: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1302, in sign_nav
+    result = get_signed_nav_data_v7()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1101, in get_signed_nav_data_v7
+    raise ValueError("Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.")
+ValueError: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+45.144.13.69 - - [27/Dec/2025 16:44:19] "GET /sign-nav HTTP/1.1" 500 -
+45.144.13.69 - - [27/Dec/2025 16:44:22] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:44:23] "GET /price HTTP/1.1" 200 -
+🔄 Generating fresh signed NAV (no valid cache)
+45.144.13.69 - - [27/Dec/2025 16:44:29] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:44:29] "GET /price HTTP/1.1" 200 -
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, lastRoundId=0
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ Error signing NAV: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1302, in sign_nav
+    result = get_signed_nav_data_v7()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/PolyNotifyBot/bot/bot_v7.py", line 1101, in get_signed_nav_data_v7
+    raise ValueError("Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.")
+ValueError: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+45.144.13.69 - - [27/Dec/2025 16:44:30] "GET /sign-nav HTTP/1.1" 500 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+45.144.13.69 - - [27/Dec/2025 16:44:32] "GET /price HTTP/1.1" 200 -
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ NAV refresh error: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+45.144.13.69 - - [27/Dec/2025 16:44:42] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:44:52] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:44:53] "GET /price HTTP/1.1" 200 -
+45.144.13.69 - - [27/Dec/2025 16:45:02] "GET /price HTTP/1.1" 200 -

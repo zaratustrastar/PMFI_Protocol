@@ -1,0 +1,57 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# nano .env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# unset VAULT_V7_ADDRESS
+rm -f bot/pending_credit_state.json bot/round_id_cache.json
+python3 bot/bot_v7.py
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+============================================================
+🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+   3-State Asset Tracking + Conservation Bounds
+============================================================
+
+📋 Configuration:
+   RPC: https://mainnet.base.org...
+   Vault V7: 0x20dd0e29a533326D16Af73689cB3EDDF9D244ED5
+   USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+   PM Wallet: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+   PM Deposit: 0xa76a91208FC7CB88420070AF978D12F440cab2F0
+
+✅ Connected to Base (block 40037831)
+🔑 Oracle signer: 0x5087675E669e6244620013691c05C1De0e8B525e
+✅ USDC contract loaded
+✅ Vault V7 contract loaded
+✅ Initial roundId from chain: 0
+🌐 PolymarketClient using residential proxy: 92.113.180.106:42563
+✅ CLOB client initialized with L2 auth (can fetch open orders and balance)
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+❌ Cannot determine safe roundId: chain read failed and no cache available
+⚠️ Initial NAV calculation failed: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+🔄 Starting NAV refresh loop (every 45s)
+============================================================
+🔄 BACKGROUND NAV REFRESH
+
+🚀 Starting HTTP API on port 8080============================================================
+
+   Serving frontend from: /root/PolyNotifyBot/frontend
+   Endpoints:
+   - GET  /             - Frontend UI
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+❌ Cannot determine safe roundId: chain read failed and no cache available
+❌ NAV refresh error: Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.
+139.47.127.10 - - [27/Dec/2025 19:50:19] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [27/Dec/2025 19:50:19] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [27/Dec/2025 19:50:20] "GET /price HTTP/1.1" 200 -
+139.47.127.10 - - [27/Dec/2025 19:50:20] "GET /price HTTP/1.1" 200 -
