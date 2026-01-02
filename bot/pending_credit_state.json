@@ -1,5 +1,6 @@
 {
-  "total_forwarded": 0,
+  "total_forwarded": 101320000,
   "withdrawn_back": 0,
-  "last_known_pm_cash": 0
+  "deposit_records": [],
+  "last_updated": 1767370549
 }
