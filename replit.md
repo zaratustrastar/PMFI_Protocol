@@ -12,21 +12,27 @@ Preferred communication style: Simple, everyday language.
 
 The vault features a 3-state asset tracking system to accurately manage USDC within Polymarket. Asset states include `inFlightOnChain`, `pendingCredit`, and `creditedAssets`. 
 
-**V7.3.2 FIX (Jan 2026)**: Uses on-chain `expectedAssets` instead of cumulative `totalForwarded`.
+**V7.3.2 FIX (Jan 2026)**: Two critical changes:
+1. Uses on-chain `expectedAssets` instead of cumulative `totalForwarded`
+2. Uses position **liquidation value** (mark-to-market) instead of cost basis
 
 BUCKET INVARIANT: Funds live in exactly ONE bucket at any time - no overlap:
 - `inFlight`: USDC at deposit address on Base (not yet swept)
 - `pendingCredit`: Swept/bridging, not visible yet in PM
-- `cash/reserved/costBasis`: Credited inside PM account
+- `cash/reserved/positionsValue`: Credited inside PM account
 - `vaultBuffer`: USDC in vault contract (claimable withdrawals) - **on-chain truth**
 
-Formula: `pendingCredit = max(0, expectedAssets - pmCash - reserved - costBasis - inFlight - vaultBuffer)`
+Formula: `pendingCredit = max(0, expectedAssets - pmCash - reserved - positionsLiqValue - inFlight - vaultBuffer)`
 
-**Why V7.3.2?** The previous V7.3.1 used `totalForwarded` which is cumulative and never decreases. When users claim funds from vaultBuffer, those funds exit the system but `totalForwarded` stayed high, causing massive pending credit inflation and $6/share NAV after claims. `expectedAssets` correctly decreases when claims happen.
+**Why V7.3.2?** 
+1. **totalForwarded bug**: V7.3.1 used `totalForwarded` which is cumulative and never decreases. When users claim funds from vaultBuffer, those funds exit the system but `totalForwarded` stayed high, causing massive pending credit inflation and $6/share NAV after claims. `expectedAssets` correctly decreases when claims happen.
+2. **costBasis bug**: Using cost basis created phantom pending when `recordTradingGain()` was called (expectedAssets increased but costBasis stayed the same). Using liquidation value keeps all buckets on the same mark-to-market basis.
+
+**Key Invariant**: `expectedAssets ≈ pmCash + positionsValue + vaultBuffer + reserved + inFlight + pending`
 
 **Current Contract**: `0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D` (Base Mainnet)
 
-Net Asset Value (NAV) uses liquidation value for positions, while `pendingCredit` uses cost basis for stability. A conservation bound (`totalAssets >= expectedAssets * (1 - maxLossBps)`) replaces a fixed percentage limit, allowing for trading PnL while safeguarding against artificial drops. Safety valves (e.g., `maxPendingAge`, `maxPendingRatio`) pause deposits under adverse conditions.
+Both NAV calculation and `pendingCredit` now use liquidation value (mark-to-market) for positions. A conservation bound (`totalAssets >= expectedAssets * (1 - maxLossBps)`) replaces a fixed percentage limit, allowing for trading PnL while safeguarding against artificial drops. Safety valves (e.g., `maxPendingAge`, `maxPendingRatio`) pause deposits under adverse conditions. Negative pending is clamped to 0 with a warning log.
 
 ## Polymarket Trading Bot
 

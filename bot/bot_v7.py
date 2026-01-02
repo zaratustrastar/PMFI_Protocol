@@ -306,24 +306,31 @@ class PendingCreditTracker:
         self.save_state()
         print(f"📝 Recorded withdrawal back: {amount_usdc/1e6:.2f} USDC")
     
-    def calculate_pending_credit(self, pm_cash_usdc: int, reserved_usdc: int = 0, cost_basis_usdc: int = 0, in_flight_usdc: int = 0, vault_buffer_usdc: int = 0, expected_assets_usdc: int = 0) -> int:
+    def calculate_pending_credit(self, pm_cash_usdc: int, reserved_usdc: int = 0, positions_liq_value_usdc: int = 0, in_flight_usdc: int = 0, vault_buffer_usdc: int = 0, expected_assets_usdc: int = 0) -> int:
         """
         Calculate pending credit using full asset reconciliation.
         
         FIXED FORMULA (V7.3.2):
-        pendingCredit = max(0, expectedAssets - pmCash - reserved - costBasis - inFlight - vaultBuffer)
+        pendingCredit = max(0, expectedAssets - pmCash - reserved - positionsLiqValue - inFlight - vaultBuffer)
         
-        V7.3.2 FIX: Use on-chain expectedAssets instead of cumulative totalForwarded.
-        expectedAssets correctly decreases when users claim funds, while totalForwarded
-        is cumulative and never decreases - causing massive pending credit inflation after claims.
+        V7.3.2 FIX:
+        1. Use on-chain expectedAssets instead of cumulative totalForwarded.
+           expectedAssets correctly decreases when users claim funds, while totalForwarded
+           is cumulative and never decreases - causing massive pending credit inflation after claims.
         
-        NOTE: Uses costBasis (not liquidation value) for stable pending credit:
-        - Unrealized PnL doesn't affect pending credit calculation
-        - If positions lose value, no phantom pending appears
-        - If recordTradingGain/Loss is used, admin must adjust expectedAssets accordingly
+        2. Use position LIQUIDATION VALUE (mark-to-market) instead of cost basis.
+           This keeps all buckets on the same "as-of-now" basis:
+           - When recordTradingGain($10) is called, expectedAssets goes up by $10
+           - But positionsLiqValue also reflects that gain (market price increased)
+           - Net effect on pending = $0 (no phantom pending)
+           
+           With cost basis, only expectedAssets would change, creating phantom pending.
+        
+        KEY INVARIANT (should hold approximately):
+        expectedAssets ≈ pmCash + positionsValue + vaultBuffer + reserved + inFlight + pending
         
         This prevents double-counting:
-        - When you buy tokens, cash goes down but costBasis goes up (net zero change to pending)
+        - When you buy tokens, cash goes down but positionsValue goes up (net zero change to pending)
         - When you place buy orders, cash goes down but reserved goes up (net zero change to pending)
         - Funds at deposit address are counted in inFlight, NOT pendingCredit
         - Funds in vault buffer are on-chain, NOT pendingCredit
@@ -333,37 +340,46 @@ class PendingCreditTracker:
         BUCKET INVARIANT: At any moment, system assets live in exactly ONE of:
         - inFlight (still at deposit address on Base)
         - pendingCredit (swept/bridging, not visible yet in PM)
-        - cash/reserved/costBasis (credited and inside PM account)
+        - cash/reserved/positionsValue (credited and inside PM account)
         - vaultBuffer (on-chain in vault, claimable)
         
         Args:
             pm_cash_usdc: Polymarket cash balance (in 6 decimals)
             reserved_usdc: USDC locked in open buy orders (in 6 decimals)
-            cost_basis_usdc: Total cost basis of positions (in 6 decimals)
+            positions_liq_value_usdc: Liquidation value of positions (in 6 decimals) - NOT cost basis
             in_flight_usdc: USDC at deposit address (in 6 decimals)
             vault_buffer_usdc: USDC in vault buffer on-chain (in 6 decimals)
             expected_assets_usdc: Contract's expectedAssets (in 6 decimals) - V7.3.2 fix
         """
         self.last_known_pm_cash = pm_cash_usdc
         
-        # Total "accounted for" = cash + reserved + costBasis + inFlight + vaultBuffer
-        # NOTE: Uses costBasis (not liquidation value) for stable pending credit
-        accounted_for = pm_cash_usdc + reserved_usdc + cost_basis_usdc + in_flight_usdc + vault_buffer_usdc
+        # Total "accounted for" = cash + reserved + positionsLiqValue + inFlight + vaultBuffer
+        # NOTE: Uses liquidation value (mark-to-market), NOT cost basis
+        accounted_for = pm_cash_usdc + reserved_usdc + positions_liq_value_usdc + in_flight_usdc + vault_buffer_usdc
         
         # Pending = expectedAssets minus what's accounted for
         # V7.3.2: Use expectedAssets (decreases on claims) instead of totalForwarded (cumulative)
-        pending = max(0, expected_assets_usdc - accounted_for)
+        raw_pending = expected_assets_usdc - accounted_for
         
-        print(f"📊 Pending Credit Calculation (V7.3.2 - expectedAssets from chain):")
-        print(f"   expectedAssets: ${expected_assets_usdc/1e6:.2f}")
-        print(f"   - pmCash:       ${pm_cash_usdc/1e6:.2f}")
-        print(f"   - reserved:     ${reserved_usdc/1e6:.2f}")
-        print(f"   - costBasis:    ${cost_basis_usdc/1e6:.2f}")
-        print(f"   - inFlight:     ${in_flight_usdc/1e6:.2f}")
-        print(f"   - vaultBuffer:  ${vault_buffer_usdc/1e6:.2f}")
-        print(f"   = pendingCredit: ${pending/1e6:.2f}")
+        # Guard: Clamp negative pending to 0 with warning (indicates bucket overlap or stale reads)
+        if raw_pending < 0:
+            print(f"   ⚠️ NEGATIVE PENDING WARNING: raw={raw_pending/1e6:.2f} (clamped to 0)")
+            print(f"      This usually means positions gained value beyond expectedAssets or bucket overlap")
+            print(f"      Buckets: cash={pm_cash_usdc/1e6:.2f}, pos={positions_liq_value_usdc/1e6:.2f}, reserved={reserved_usdc/1e6:.2f}, inFlight={in_flight_usdc/1e6:.2f}, buffer={vault_buffer_usdc/1e6:.2f}")
+            pending = 0
+        else:
+            pending = raw_pending
         
-        # INVARIANT CHECK: Sum of all buckets should equal expectedAssets (within rounding + PnL tolerance)
+        print(f"📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):")
+        print(f"   expectedAssets:   ${expected_assets_usdc/1e6:.2f}")
+        print(f"   - pmCash:         ${pm_cash_usdc/1e6:.2f}")
+        print(f"   - reserved:       ${reserved_usdc/1e6:.2f}")
+        print(f"   - positionsLiq:   ${positions_liq_value_usdc/1e6:.2f}")
+        print(f"   - inFlight:       ${in_flight_usdc/1e6:.2f}")
+        print(f"   - vaultBuffer:    ${vault_buffer_usdc/1e6:.2f}")
+        print(f"   = pendingCredit:  ${pending/1e6:.2f}")
+        
+        # INVARIANT CHECK: Sum of all buckets should equal expectedAssets (within rounding)
         total_buckets = pending + accounted_for
         bucket_diff = abs(total_buckets - expected_assets_usdc)
         if bucket_diff > 1000:  # Allow $0.001 rounding tolerance
@@ -963,11 +979,11 @@ class NavEngineV7:
         credited_positions = int(positions_liq_value * 1e6)  # Liquidation value for NAV
         
         # 6. Calculate pending credit using FULL reconciliation (V7.3.2 fix)
-        # pendingCredit = expectedAssets - cash - reserved - costBasis - inFlight - vaultBuffer
+        # pendingCredit = expectedAssets - cash - reserved - positionsLiqValue - inFlight - vaultBuffer
         # Uses expectedAssets (decreases on claims) instead of totalForwarded (cumulative)
-        # Uses costBasis (not liquidation value) for stable pending credit through PnL swings
+        # Uses liquidation value (not cost basis) to keep all buckets on same mark-to-market basis
         pending_credit = self.pending_tracker.calculate_pending_credit(
-            credited_cash, reserved_usdc, cost_basis_usdc, in_flight, vault_buffer, expected_assets
+            credited_cash, reserved_usdc, credited_positions, in_flight, vault_buffer, expected_assets
         )
         
         # 7. Total assets for NAV = inFlight + pending + cash + reserved + liquidationValue
