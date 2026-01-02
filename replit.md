@@ -8,11 +8,11 @@ Preferred communication style: Simple, everyday language.
 
 # System Architecture
 
-## pSNIPER Vault (V7.3.1)
+## pSNIPER Vault (V7.3.2)
 
 The vault features a 3-state asset tracking system to accurately manage USDC within Polymarket. Asset states include `inFlightOnChain`, `pendingCredit`, and `creditedAssets`. 
 
-**V7.3.1 FIX (Jan 2026)**: Uses on-chain `vaultBuffer` instead of manually tracked `withdrawnBack`.
+**V7.3.2 FIX (Jan 2026)**: Uses on-chain `expectedAssets` instead of cumulative `totalForwarded`.
 
 BUCKET INVARIANT: Funds live in exactly ONE bucket at any time - no overlap:
 - `inFlight`: USDC at deposit address on Base (not yet swept)
@@ -20,9 +20,9 @@ BUCKET INVARIANT: Funds live in exactly ONE bucket at any time - no overlap:
 - `cash/reserved/costBasis`: Credited inside PM account
 - `vaultBuffer`: USDC in vault contract (claimable withdrawals) - **on-chain truth**
 
-Formula: `pendingCredit = max(0, totalForwarded - pmCash - reserved - costBasis - inFlight - vaultBuffer)`
+Formula: `pendingCredit = max(0, expectedAssets - pmCash - reserved - costBasis - inFlight - vaultBuffer)`
 
-**Why V7.3.1?** The previous `withdrawnBack` was manually tracked in a JSON cache file. When cache was deleted or not updated by withdrawal servicer, NAV double-counted funds. `vaultBuffer` is read directly from chain, eliminating synchronization bugs.
+**Why V7.3.2?** The previous V7.3.1 used `totalForwarded` which is cumulative and never decreases. When users claim funds from vaultBuffer, those funds exit the system but `totalForwarded` stayed high, causing massive pending credit inflation and $6/share NAV after claims. `expectedAssets` correctly decreases when claims happen.
 
 **Current Contract**: `0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D` (Base Mainnet)
 

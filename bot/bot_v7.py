@@ -306,47 +306,56 @@ class PendingCreditTracker:
         self.save_state()
         print(f"📝 Recorded withdrawal back: {amount_usdc/1e6:.2f} USDC")
     
-    def calculate_pending_credit(self, pm_cash_usdc: int, reserved_usdc: int = 0, cost_basis_usdc: int = 0, in_flight_usdc: int = 0, vault_buffer_usdc: int = 0) -> int:
+    def calculate_pending_credit(self, pm_cash_usdc: int, reserved_usdc: int = 0, cost_basis_usdc: int = 0, in_flight_usdc: int = 0, vault_buffer_usdc: int = 0, expected_assets_usdc: int = 0) -> int:
         """
         Calculate pending credit using full asset reconciliation.
         
-        FIXED FORMULA (V7.3.1):
-        pendingCredit = max(0, totalForwarded - pmCash - reserved - costBasis - inFlight - vaultBuffer)
+        FIXED FORMULA (V7.3.2):
+        pendingCredit = max(0, expectedAssets - pmCash - reserved - costBasis - inFlight - vaultBuffer)
         
-        V7.3.1 FIX: Use on-chain vault_buffer instead of manually tracked withdrawn_back.
-        vault_buffer is the canonical source of truth for funds returned to vault.
+        V7.3.2 FIX: Use on-chain expectedAssets instead of cumulative totalForwarded.
+        expectedAssets correctly decreases when users claim funds, while totalForwarded
+        is cumulative and never decreases - causing massive pending credit inflation after claims.
+        
+        NOTE: Uses costBasis (not liquidation value) for stable pending credit:
+        - Unrealized PnL doesn't affect pending credit calculation
+        - If positions lose value, no phantom pending appears
+        - If recordTradingGain/Loss is used, admin must adjust expectedAssets accordingly
         
         This prevents double-counting:
         - When you buy tokens, cash goes down but costBasis goes up (net zero change to pending)
         - When you place buy orders, cash goes down but reserved goes up (net zero change to pending)
         - Funds at deposit address are counted in inFlight, NOT pendingCredit
         - Funds in vault buffer are on-chain, NOT pendingCredit
+        - When users CLAIM, expectedAssets decreases, keeping pending accurate
         - pendingCredit should only be non-zero when funds are swept but not yet visible in PM
         
-        BUCKET INVARIANT: At any moment, forwarded funds live in exactly ONE of:
+        BUCKET INVARIANT: At any moment, system assets live in exactly ONE of:
         - inFlight (still at deposit address on Base)
         - pendingCredit (swept/bridging, not visible yet in PM)
         - cash/reserved/costBasis (credited and inside PM account)
-        - vaultBuffer (returned on-chain to vault, claimable)
+        - vaultBuffer (on-chain in vault, claimable)
         
         Args:
             pm_cash_usdc: Polymarket cash balance (in 6 decimals)
             reserved_usdc: USDC locked in open buy orders (in 6 decimals)
             cost_basis_usdc: Total cost basis of positions (in 6 decimals)
             in_flight_usdc: USDC at deposit address (in 6 decimals)
-            vault_buffer_usdc: USDC in vault buffer on-chain (in 6 decimals) - V7.3.1 fix
+            vault_buffer_usdc: USDC in vault buffer on-chain (in 6 decimals)
+            expected_assets_usdc: Contract's expectedAssets (in 6 decimals) - V7.3.2 fix
         """
         self.last_known_pm_cash = pm_cash_usdc
         
         # Total "accounted for" = cash + reserved + costBasis + inFlight + vaultBuffer
+        # NOTE: Uses costBasis (not liquidation value) for stable pending credit
         accounted_for = pm_cash_usdc + reserved_usdc + cost_basis_usdc + in_flight_usdc + vault_buffer_usdc
         
-        # Pending = what we sent minus what's accounted for
-        # NOTE: vault_buffer replaces withdrawn_back - it's the canonical on-chain source
-        pending = max(0, self.total_forwarded - accounted_for)
+        # Pending = expectedAssets minus what's accounted for
+        # V7.3.2: Use expectedAssets (decreases on claims) instead of totalForwarded (cumulative)
+        pending = max(0, expected_assets_usdc - accounted_for)
         
-        print(f"📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):")
-        print(f"   totalForwarded: ${self.total_forwarded/1e6:.2f}")
+        print(f"📊 Pending Credit Calculation (V7.3.2 - expectedAssets from chain):")
+        print(f"   expectedAssets: ${expected_assets_usdc/1e6:.2f}")
         print(f"   - pmCash:       ${pm_cash_usdc/1e6:.2f}")
         print(f"   - reserved:     ${reserved_usdc/1e6:.2f}")
         print(f"   - costBasis:    ${cost_basis_usdc/1e6:.2f}")
@@ -354,11 +363,11 @@ class PendingCreditTracker:
         print(f"   - vaultBuffer:  ${vault_buffer_usdc/1e6:.2f}")
         print(f"   = pendingCredit: ${pending/1e6:.2f}")
         
-        # INVARIANT CHECK: Sum of all buckets should equal totalForwarded (within rounding)
+        # INVARIANT CHECK: Sum of all buckets should equal expectedAssets (within rounding + PnL tolerance)
         total_buckets = pending + accounted_for
-        bucket_diff = abs(total_buckets - self.total_forwarded)
+        bucket_diff = abs(total_buckets - expected_assets_usdc)
         if bucket_diff > 1000:  # Allow $0.001 rounding tolerance
-            print(f"   ⚠️ BUCKET INVARIANT WARNING: buckets={total_buckets/1e6:.2f} != forwarded={self.total_forwarded/1e6:.2f}")
+            print(f"   ⚠️ BUCKET INVARIANT WARNING: buckets={total_buckets/1e6:.2f} != expectedAssets={expected_assets_usdc/1e6:.2f}")
         
         return pending
     
@@ -849,7 +858,7 @@ class PolymarketClient:
 
 class NavEngineV7:
     """
-    Calculates NAV with 3-state asset tracking (V7.3.1 - no double-counting).
+    Calculates NAV with 3-state asset tracking (V7.3.2 - no double-counting).
     
     totalAssets = inFlightOnChain + pendingCredit + cash + reserved + positionsLiquidationValue
     
@@ -859,8 +868,8 @@ class NavEngineV7:
     - cash/reserved/costBasis: credited inside PM
     - vaultBuffer: returned to vault (on-chain truth)
     
-    V7.3.1 FIX: Uses on-chain vaultBuffer instead of manually tracked withdrawnBack.
-    pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - vaultBuffer
+    V7.3.2 FIX: Uses expectedAssets (decreases on claims) instead of totalForwarded (cumulative).
+    pendingCredit = expectedAssets - cash - reserved - costBasis - inFlight - vaultBuffer
     """
     
     def __init__(self, polymarket_client: PolymarketClient, pending_tracker: PendingCreditTracker):
@@ -881,25 +890,26 @@ class NavEngineV7:
             print(f"❌ Error fetching in-flight balance: {e}")
             return 0
     
-    def calculate_nav_breakdown(self, vault_buffer: int = 0) -> Dict:
+    def calculate_nav_breakdown(self, vault_buffer: int = 0, expected_assets: int = 0) -> Dict:
         """
         Calculate full NAV breakdown with 3 asset states.
         
-        V7.3.1 FIX: Uses vault_buffer (on-chain) instead of withdrawn_back (manual tracking).
+        V7.3.2 FIX: Uses expectedAssets (decreases on claims) instead of totalForwarded.
         
-        pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - vaultBuffer
+        pendingCredit = expectedAssets - cash - reserved - costBasis - inFlight - vaultBuffer
         totalAssets = inFlight + pendingCredit + cash + reserved + liquidationValue
         
         BUCKET INVARIANT: Funds live in exactly ONE bucket at any time - no overlap.
         
         Args:
             vault_buffer: USDC balance in vault on Base (on-chain, in 6 decimals)
+            expected_assets: Contract's expectedAssets (on-chain, in 6 decimals) - V7.3.2 fix
         
         Returns:
             Dict with all asset components in 6 decimals
         """
         print(f"\n{'='*60}")
-        print(f"💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)")
+        print(f"💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)")
         print(f"{'='*60}")
         
         # 1. Fetch in-flight (at deposit address)
@@ -952,11 +962,12 @@ class NavEngineV7:
         cost_basis_usdc = int(total_cost_basis * 1e6)
         credited_positions = int(positions_liq_value * 1e6)  # Liquidation value for NAV
         
-        # 6. Calculate pending credit using FULL reconciliation (V7.3.1 fix)
-        # pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - vaultBuffer
-        # Uses vault_buffer (on-chain truth) instead of withdrawn_back (manual tracking)
+        # 6. Calculate pending credit using FULL reconciliation (V7.3.2 fix)
+        # pendingCredit = expectedAssets - cash - reserved - costBasis - inFlight - vaultBuffer
+        # Uses expectedAssets (decreases on claims) instead of totalForwarded (cumulative)
+        # Uses costBasis (not liquidation value) for stable pending credit through PnL swings
         pending_credit = self.pending_tracker.calculate_pending_credit(
-            credited_cash, reserved_usdc, cost_basis_usdc, in_flight, vault_buffer
+            credited_cash, reserved_usdc, cost_basis_usdc, in_flight, vault_buffer, expected_assets
         )
         
         # 7. Total assets for NAV = inFlight + pending + cash + reserved + liquidationValue
@@ -964,17 +975,18 @@ class NavEngineV7:
         # NOTE: vault_buffer is NOT added here - it's already included in creditedCash at signing time
         total_assets = in_flight + pending_credit + credited_cash + reserved_usdc + credited_positions
         
-        print(f"\n📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):")
+        print(f"\n📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):")
         print(f"   • In-flight (deposit addr): ${in_flight/1e6:.2f}")
         print(f"   • Pending credit:           ${pending_credit/1e6:.2f}")
         print(f"   • Credited cash:            ${credited_cash/1e6:.2f}")
         print(f"   • Reserved (open orders):   ${reserved_usdc/1e6:.2f}")
         print(f"   • Vault buffer (on-chain):  ${vault_buffer/1e6:.2f}")
+        print(f"   • Expected assets:          ${expected_assets/1e6:.2f}")
         print(f"   • Positions (liquidation):  ${credited_positions/1e6:.2f}")
         print(f"   • Positions (cost basis):   ${cost_basis_usdc/1e6:.2f}")
         print(f"   ─────────────────────────────")
         print(f"   • TOTAL ASSETS:             ${total_assets/1e6:.2f}")
-        print(f"   (vaultBuffer subtracted from pending, added to creditedCash at signing)")
+        print(f"   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)")
         
         return {
             "in_flight": in_flight,
@@ -1099,7 +1111,7 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             # Sync pending tracker with contract
             pending_tracker.sync_from_contract(total_forwarded)
             
-            print(f"📊 On-chain: supply={total_supply/1e18:.4f}, buffer={vault_buffer/1e6:.2f}, forwarded={total_forwarded/1e6:.2f}, lastRoundId={chain_round_id}")
+            print(f"📊 On-chain: supply={total_supply/1e18:.4f}, buffer={vault_buffer/1e6:.2f}, forwarded={total_forwarded/1e6:.2f}, expected={expected_assets/1e6:.2f}, lastRoundId={chain_round_id}")
         else:
             total_supply = 0
             vault_buffer = 0
@@ -1117,9 +1129,9 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
         # Cannot determine safe roundId - refuse to sign
         raise ValueError("Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.")
     
-    # Calculate NAV breakdown (V7.3.1: pass vault_buffer for correct pending credit calc)
+    # Calculate NAV breakdown (V7.3.2: pass vault_buffer AND expected_assets)
     if nav_engine:
-        breakdown = nav_engine.calculate_nav_breakdown(vault_buffer)
+        breakdown = nav_engine.calculate_nav_breakdown(vault_buffer, expected_assets)
     else:
         breakdown = {
             "in_flight": 0,

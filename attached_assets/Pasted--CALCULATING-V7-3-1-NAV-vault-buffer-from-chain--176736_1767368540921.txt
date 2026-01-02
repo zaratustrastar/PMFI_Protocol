@@ -1,0 +1,544 @@
+💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)
+============================================================
+46.234.149.222 - - [02/Jan/2026 15:35:27] "GET /price HTTP/1.1" 200 -
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+46.234.149.222 - - [02/Jan/2026 15:35:27] "GET /price HTTP/1.1" 200 -
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $15.55
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):
+   totalForwarded: $96.00
+   - pmCash:       $15.55
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - vaultBuffer:  $80.33
+   = pendingCredit: $0.12
+
+📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.12
+   • Credited cash:            $15.55
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $80.33
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $15.67
+   (vaultBuffer subtracted from pending, added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $15.55
+   • Reserved:       $0.00
+   • Vault Buffer:   $80.33
+   • Credited Cash (signed): $95.88
+   • Positions:      $0.00
+   • Pending Credit: $0.12
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $96.00
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 4) [ok]
+✅ NAV cache updated, sleeping 45s
+46.234.149.222 - - [02/Jan/2026 15:35:31] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:35:35] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:35:41] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:35:42] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:35:43] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1767368426)
+46.234.149.222 - - [02/Jan/2026 15:35:44] "GET /sign-nav HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:35:47] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:35:51] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:35:52] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:01] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:02] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:04] "GET /price HTTP/1.1" 200 -
+🔄 Syncing forwarded from contract: +5.32 USDC
+📊 On-chain: supply=16.8867, buffer=0.33, forwarded=101.32, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)
+============================================================
+✈️ In-flight (at deposit addr): $5.32
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $15.55
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):
+   totalForwarded: $101.32
+   - pmCash:       $15.55
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $5.32
+   - vaultBuffer:  $0.33
+   = pendingCredit: $80.12
+
+📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):
+   • In-flight (deposit addr): $5.32
+   • Pending credit:           $80.12
+   • Credited cash:            $15.55
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.33
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $100.99
+   (vaultBuffer subtracted from pending, added to creditedCash at signing)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 79.3% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $15.55
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.33
+   • Credited Cash (signed): $15.88
+   • Positions:      $0.00
+   • Pending Credit: $80.12
+   • In-Flight:      $5.32
+   ─────────────────────────────
+   • TOTAL ASSETS:   $101.32
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $6.0000/share (round 5) [pause]
+46.234.149.222 - - [02/Jan/2026 15:36:07] "POST /price/refresh HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:07] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:11] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:12] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:13] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=16.8867, buffer=0.33, forwarded=101.32, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)
+============================================================
+✈️ In-flight (at deposit addr): $5.32
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $15.55
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):
+   totalForwarded: $101.32
+   - pmCash:       $15.55
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $5.32
+   - vaultBuffer:  $0.33
+   = pendingCredit: $80.12
+
+📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):
+   • In-flight (deposit addr): $5.32
+   • Pending credit:           $80.12
+   • Credited cash:            $15.55
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.33
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $100.99
+   (vaultBuffer subtracted from pending, added to creditedCash at signing)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 79.3% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $15.55
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.33
+   • Credited Cash (signed): $15.88
+   • Positions:      $0.00
+   • Pending Credit: $80.12
+   • In-Flight:      $5.32
+   ─────────────────────────────
+   • TOTAL ASSETS:   $101.32
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $6.0000/share (round 5) [pause]
+✅ NAV cache updated, sleeping 45s
+46.234.149.222 - - [02/Jan/2026 15:36:17] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:21] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:22] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:31] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:32] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1767368473)
+46.234.149.222 - - [02/Jan/2026 15:36:34] "GET /sign-nav HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:42] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:42] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:43] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:48] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:52] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:36:52] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=16.8867, buffer=0.33, forwarded=101.32, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $20.84
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):
+   totalForwarded: $101.32
+   - pmCash:       $20.84
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - vaultBuffer:  $0.33
+   = pendingCredit: $80.15
+
+📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $80.15
+   • Credited cash:            $20.84
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.33
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $100.99
+   (vaultBuffer subtracted from pending, added to creditedCash at signing)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 79.4% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $20.84
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.33
+   • Credited Cash (signed): $21.17
+   • Positions:      $0.00
+   • Pending Credit: $80.15
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $101.32
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $6.0000/share (round 5) [pause]
+✅ NAV cache updated, sleeping 45s
+46.234.149.222 - - [02/Jan/2026 15:37:01] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:37:02] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:37:11] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:37:13] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:37:14] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:37:18] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:37:22] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:37:22] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:37:33] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:37:43] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:37:44] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=16.8867, buffer=0.33, forwarded=101.32, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+46.234.149.222 - - [02/Jan/2026 15:37:48] "GET /price HTTP/1.1" 200 -
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $20.84
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):
+   totalForwarded: $101.32
+   - pmCash:       $20.84
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - vaultBuffer:  $0.33
+   = pendingCredit: $80.15
+
+📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $80.15
+   • Credited cash:            $20.84
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.33
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $100.99
+   (vaultBuffer subtracted from pending, added to creditedCash at signing)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 79.4% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $20.84
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.33
+   • Credited Cash (signed): $21.17
+   • Positions:      $0.00
+   • Pending Credit: $80.15
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $101.32
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $6.0000/share (round 5) [pause]
+✅ NAV cache updated, sleeping 45s
+46.234.149.222 - - [02/Jan/2026 15:37:53] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:38:03] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:38:13] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:38:18] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:38:22] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:38:27] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:38:27] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:38:32] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=16.8867, buffer=0.33, forwarded=101.32, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $20.84
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):
+   totalForwarded: $101.32
+   - pmCash:       $20.84
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - vaultBuffer:  $0.33
+   = pendingCredit: $80.15
+
+📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $80.15
+   • Credited cash:            $20.84
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.33
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $100.99
+   (vaultBuffer subtracted from pending, added to creditedCash at signing)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 79.4% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $20.84
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.33
+   • Credited Cash (signed): $21.17
+   • Positions:      $0.00
+   • Pending Credit: $80.15
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $101.32
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $6.0000/share (round 5) [pause]
+✅ NAV cache updated, sleeping 45s
+46.234.149.222 - - [02/Jan/2026 15:38:42] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1767368613)
+127.0.0.1 - - [02/Jan/2026 15:38:44] "GET /sign-nav HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:38:48] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:38:52] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:02] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1767368613)
+127.0.0.1 - - [02/Jan/2026 15:39:10] "GET /sign-nav HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:12] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=16.8867, buffer=0.33, forwarded=101.32, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $20.84
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):
+   totalForwarded: $101.32
+   - pmCash:       $20.84
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - vaultBuffer:  $0.33
+   = pendingCredit: $80.15
+
+📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $80.15
+   • Credited cash:            $20.84
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.33
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $100.99
+   (vaultBuffer subtracted from pending, added to creditedCash at signing)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 79.4% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $20.84
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.33
+   • Credited Cash (signed): $21.17
+   • Positions:      $0.00
+   • Pending Credit: $80.15
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $101.32
+   ✅ Breakdown check PASSED
+46.234.149.222 - - [02/Jan/2026 15:39:22] "GET /price HTTP/1.1" 200 -
+✅ Signed NAV: $6.0000/share (round 5) [pause]
+✅ NAV cache updated, sleeping 45s
+46.234.149.222 - - [02/Jan/2026 15:39:22] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:25] "GET / HTTP/1.1" 304 -
+46.234.149.222 - - [02/Jan/2026 15:39:25] "GET /main.js HTTP/1.1" 304 -
+46.234.149.222 - - [02/Jan/2026 15:39:25] "GET /psniper-logo.png HTTP/1.1" 304 -
+46.234.149.222 - - [02/Jan/2026 15:39:25] "GET /abis/vault.json?v=1767368365374 HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:25] "GET /abis/usdc.json?v=1767368365374 HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:26] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:26] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:27] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:27] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:27] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:37] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:47] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:57] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:39:57] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:40:07] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=16.8867, buffer=0.33, forwarded=101.32, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $20.84
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):
+   totalForwarded: $101.32
+   - pmCash:       $20.84
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - vaultBuffer:  $0.33
+   = pendingCredit: $80.15
+
+📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $80.15
+   • Credited cash:            $20.84
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.33
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $100.99
+   (vaultBuffer subtracted from pending, added to creditedCash at signing)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 79.4% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $20.84
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.33
+   • Credited Cash (signed): $21.17
+   • Positions:      $0.00
+   • Pending Credit: $80.15
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $101.32
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $6.0000/share (round 5) [pause]
+✅ NAV cache updated, sleeping 45s
+⚡ Returning cached signed NAV (valid until 1767368707)
+127.0.0.1 - - [02/Jan/2026 15:40:10] "GET /sign-nav HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:40:17] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:40:27] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:40:27] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:40:27] "GET /price HTTP/1.1" 200 -
+46.234.149.222 - - [02/Jan/2026 15:40:27] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=16.8867, buffer=0.33, forwarded=101.32, lastRoundId=4
+📝 RoundId cache synced from chain: 4
+
+============================================================
+💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $20.84
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):
+   totalForwarded: $101.32
+   - pmCash:       $20.84
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - vaultBuffer:  $0.33
+   = pendingCredit: $80.15
+
+📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $80.15
+   • Credited cash:            $20.84
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.33
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $100.99
+   (vaultBuffer subtracted from pending, added to creditedCash at signing)
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 79.4% exceeds 50%
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $20.84
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.33
+   • Credited Cash (signed): $21.17
+   • Positions:      $0.00
+   • Pending Credit: $80.15
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $101.32
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $6.0000/share (round 5) [pause]
+✅ NAV cache updated, sleeping 45s
+46.234.149.222 - - [02/Jan/2026 15:40:58] "GET /price HTTP/1.1" 200 -
