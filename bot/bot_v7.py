@@ -306,47 +306,59 @@ class PendingCreditTracker:
         self.save_state()
         print(f"📝 Recorded withdrawal back: {amount_usdc/1e6:.2f} USDC")
     
-    def calculate_pending_credit(self, pm_cash_usdc: int, reserved_usdc: int = 0, cost_basis_usdc: int = 0, in_flight_usdc: int = 0) -> int:
+    def calculate_pending_credit(self, pm_cash_usdc: int, reserved_usdc: int = 0, cost_basis_usdc: int = 0, in_flight_usdc: int = 0, vault_buffer_usdc: int = 0) -> int:
         """
         Calculate pending credit using full asset reconciliation.
         
-        FIXED FORMULA (V7.2):
-        pendingCredit = max(0, totalForwarded - pmCash - reserved - costBasis - withdrawnBack - inFlight)
+        FIXED FORMULA (V7.3.1):
+        pendingCredit = max(0, totalForwarded - pmCash - reserved - costBasis - inFlight - vaultBuffer)
+        
+        V7.3.1 FIX: Use on-chain vault_buffer instead of manually tracked withdrawn_back.
+        vault_buffer is the canonical source of truth for funds returned to vault.
         
         This prevents double-counting:
         - When you buy tokens, cash goes down but costBasis goes up (net zero change to pending)
         - When you place buy orders, cash goes down but reserved goes up (net zero change to pending)
         - Funds at deposit address are counted in inFlight, NOT pendingCredit
+        - Funds in vault buffer are on-chain, NOT pendingCredit
         - pendingCredit should only be non-zero when funds are swept but not yet visible in PM
         
-        At any moment, forwarded funds live in exactly ONE of:
+        BUCKET INVARIANT: At any moment, forwarded funds live in exactly ONE of:
         - inFlight (still at deposit address on Base)
         - pendingCredit (swept/bridging, not visible yet in PM)
         - cash/reserved/costBasis (credited and inside PM account)
-        - withdrawnBack (returned on-chain)
+        - vaultBuffer (returned on-chain to vault, claimable)
         
         Args:
             pm_cash_usdc: Polymarket cash balance (in 6 decimals)
             reserved_usdc: USDC locked in open buy orders (in 6 decimals)
             cost_basis_usdc: Total cost basis of positions (in 6 decimals)
-            in_flight_usdc: USDC at deposit address (in 6 decimals) - V7.2 fix
+            in_flight_usdc: USDC at deposit address (in 6 decimals)
+            vault_buffer_usdc: USDC in vault buffer on-chain (in 6 decimals) - V7.3.1 fix
         """
         self.last_known_pm_cash = pm_cash_usdc
         
-        # Total "accounted for" = cash + reserved + costBasis + inFlight
-        accounted_for = pm_cash_usdc + reserved_usdc + cost_basis_usdc + in_flight_usdc
+        # Total "accounted for" = cash + reserved + costBasis + inFlight + vaultBuffer
+        accounted_for = pm_cash_usdc + reserved_usdc + cost_basis_usdc + in_flight_usdc + vault_buffer_usdc
         
-        # Pending = what we sent minus what's accounted for minus what came back
-        pending = max(0, self.total_forwarded - accounted_for - self.withdrawn_back)
+        # Pending = what we sent minus what's accounted for
+        # NOTE: vault_buffer replaces withdrawn_back - it's the canonical on-chain source
+        pending = max(0, self.total_forwarded - accounted_for)
         
-        print(f"📊 Pending Credit Calculation (V7.2 - no double-count):")
+        print(f"📊 Pending Credit Calculation (V7.3.1 - vault_buffer from chain):")
         print(f"   totalForwarded: ${self.total_forwarded/1e6:.2f}")
         print(f"   - pmCash:       ${pm_cash_usdc/1e6:.2f}")
         print(f"   - reserved:     ${reserved_usdc/1e6:.2f}")
         print(f"   - costBasis:    ${cost_basis_usdc/1e6:.2f}")
         print(f"   - inFlight:     ${in_flight_usdc/1e6:.2f}")
-        print(f"   - withdrawn:    ${self.withdrawn_back/1e6:.2f}")
+        print(f"   - vaultBuffer:  ${vault_buffer_usdc/1e6:.2f}")
         print(f"   = pendingCredit: ${pending/1e6:.2f}")
+        
+        # INVARIANT CHECK: Sum of all buckets should equal totalForwarded (within rounding)
+        total_buckets = pending + accounted_for
+        bucket_diff = abs(total_buckets - self.total_forwarded)
+        if bucket_diff > 1000:  # Allow $0.001 rounding tolerance
+            print(f"   ⚠️ BUCKET INVARIANT WARNING: buckets={total_buckets/1e6:.2f} != forwarded={self.total_forwarded/1e6:.2f}")
         
         return pending
     
@@ -837,17 +849,18 @@ class PolymarketClient:
 
 class NavEngineV7:
     """
-    Calculates NAV with 3-state asset tracking (V7.2 - no double-counting).
+    Calculates NAV with 3-state asset tracking (V7.3.1 - no double-counting).
     
     totalAssets = inFlightOnChain + pendingCredit + cash + reserved + positionsLiquidationValue
     
-    Key insight: Funds can only be in ONE bucket at a time:
+    BUCKET INVARIANT: Funds can only be in ONE bucket at a time:
     - inFlight: at deposit address on Base
     - pendingCredit: swept/bridging, not visible yet in PM
     - cash/reserved/costBasis: credited inside PM
-    - withdrawnBack: returned to vault
+    - vaultBuffer: returned to vault (on-chain truth)
     
-    pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - withdrawnBack
+    V7.3.1 FIX: Uses on-chain vaultBuffer instead of manually tracked withdrawnBack.
+    pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - vaultBuffer
     """
     
     def __init__(self, polymarket_client: PolymarketClient, pending_tracker: PendingCreditTracker):
@@ -868,23 +881,25 @@ class NavEngineV7:
             print(f"❌ Error fetching in-flight balance: {e}")
             return 0
     
-    def calculate_nav_breakdown(self) -> Dict:
+    def calculate_nav_breakdown(self, vault_buffer: int = 0) -> Dict:
         """
         Calculate full NAV breakdown with 3 asset states.
         
-        V7.2 FIX: Subtracts inFlight from pendingCredit to prevent double-counting
-        when funds are at the deposit address.
+        V7.3.1 FIX: Uses vault_buffer (on-chain) instead of withdrawn_back (manual tracking).
         
-        pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - withdrawn
+        pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - vaultBuffer
         totalAssets = inFlight + pendingCredit + cash + reserved + liquidationValue
         
-        Funds live in exactly ONE bucket at any time - no overlap.
+        BUCKET INVARIANT: Funds live in exactly ONE bucket at any time - no overlap.
+        
+        Args:
+            vault_buffer: USDC balance in vault on Base (on-chain, in 6 decimals)
         
         Returns:
             Dict with all asset components in 6 decimals
         """
         print(f"\n{'='*60}")
-        print(f"💰 CALCULATING V7.2 NAV (No double-count)")
+        print(f"💰 CALCULATING V7.3.1 NAV (vault_buffer from chain)")
         print(f"{'='*60}")
         
         # 1. Fetch in-flight (at deposit address)
@@ -937,27 +952,29 @@ class NavEngineV7:
         cost_basis_usdc = int(total_cost_basis * 1e6)
         credited_positions = int(positions_liq_value * 1e6)  # Liquidation value for NAV
         
-        # 6. Calculate pending credit using FULL reconciliation (V7.2 fix)
-        # pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - withdrawn
-        # This prevents double-counting when funds are at the deposit address
+        # 6. Calculate pending credit using FULL reconciliation (V7.3.1 fix)
+        # pendingCredit = totalForwarded - cash - reserved - costBasis - inFlight - vaultBuffer
+        # Uses vault_buffer (on-chain truth) instead of withdrawn_back (manual tracking)
         pending_credit = self.pending_tracker.calculate_pending_credit(
-            credited_cash, reserved_usdc, cost_basis_usdc, in_flight
+            credited_cash, reserved_usdc, cost_basis_usdc, in_flight, vault_buffer
         )
         
         # 7. Total assets for NAV = inFlight + pending + cash + reserved + liquidationValue
         # NOTE: We use liquidation value for NAV (share pricing), NOT cost basis
+        # NOTE: vault_buffer is NOT added here - it's already included in creditedCash at signing time
         total_assets = in_flight + pending_credit + credited_cash + reserved_usdc + credited_positions
         
-        print(f"\n📊 Asset Breakdown (V7.2 - no double-count):")
+        print(f"\n📊 Asset Breakdown (V7.3.1 - vault_buffer from chain):")
         print(f"   • In-flight (deposit addr): ${in_flight/1e6:.2f}")
         print(f"   • Pending credit:           ${pending_credit/1e6:.2f}")
         print(f"   • Credited cash:            ${credited_cash/1e6:.2f}")
         print(f"   • Reserved (open orders):   ${reserved_usdc/1e6:.2f}")
+        print(f"   • Vault buffer (on-chain):  ${vault_buffer/1e6:.2f}")
         print(f"   • Positions (liquidation):  ${credited_positions/1e6:.2f}")
         print(f"   • Positions (cost basis):   ${cost_basis_usdc/1e6:.2f}")
         print(f"   ─────────────────────────────")
         print(f"   • TOTAL ASSETS:             ${total_assets/1e6:.2f}")
-        print(f"   (inFlight + pending subtracted from total to avoid overlap)")
+        print(f"   (vaultBuffer subtracted from pending, added to creditedCash at signing)")
         
         return {
             "in_flight": in_flight,
@@ -1100,9 +1117,9 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
         # Cannot determine safe roundId - refuse to sign
         raise ValueError("Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.")
     
-    # Calculate NAV breakdown
+    # Calculate NAV breakdown (V7.3.1: pass vault_buffer for correct pending credit calc)
     if nav_engine:
-        breakdown = nav_engine.calculate_nav_breakdown()
+        breakdown = nav_engine.calculate_nav_breakdown(vault_buffer)
     else:
         breakdown = {
             "in_flight": 0,

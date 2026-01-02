@@ -1,0 +1,104 @@
+============================================================
+🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+   3-State Asset Tracking + Conservation Bounds
+============================================================
+
+📋 Configuration:
+   RPC: https://mainnet.base.org...
+   Vault V7: 0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D
+   USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+   PM Wallet: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+   PM Deposit: 0xa76a91208FC7CB88420070AF978D12F440cab2F0
+
+✅ Connected to Base (block 40162076)
+🔑 Oracle signer: 0x5087675E669e6244620013691c05C1De0e8B525e
+✅ USDC contract loaded
+✅ Vault V7 contract loaded
+📂 Loaded pending credit state: forwarded=96.00, withdrawn=0.00
+📂 Loaded roundId cache from disk: lastRoundId=2
+📝 RoundId cache synced from chain: 2
+✅ Initial roundId from chain: 2
+🌐 PolymarketClient using residential proxy: 92.113.180.106:42563
+✅ CLOB client initialized with L2 auth (can fetch open orders and balance)
+❌ Error reading vault state: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📝 RoundId cache synced from chain: 2
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $95.95
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.2 - no double-count):
+   totalForwarded: $96.00
+   - pmCash:       $95.95
+   - reserved:     $0.00
+   - costBasis:    $0.00
+   - inFlight:     $0.00
+   - withdrawn:    $0.00
+   = pendingCredit: $0.05
+
+📊 Asset Breakdown (V7.2 - no double-count):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.05
+   • Credited cash:            $95.95
+   • Reserved (open orders):   $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $96.00
+   (inFlight + pending subtracted from total to avoid overlap)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $95.95
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $95.95
+   • Positions:      $0.00
+   • Pending Credit: $0.05
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $96.00
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 3) [ok]
+🔄 Starting NAV refresh loop (every 45s)
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+
+🚀 Starting HTTP API on port 8080
+   Serving frontend from: /root/PolyNotifyBot/frontend
+   Endpoints:
+   - GET  /             - Frontend UI
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+139.47.127.142 - - [30/Dec/2025 16:51:52] "GET /price HTTP/1.1" 200 -
+📊 On-chain: supply=96.0000, buffer=0.00, forwarded=96.00, lastRoundId=2
+📝 RoundId cache synced from chain: 2
+
+============================================================
+💰 CALCULATING V7.2 NAV (No double-count)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $95.95
