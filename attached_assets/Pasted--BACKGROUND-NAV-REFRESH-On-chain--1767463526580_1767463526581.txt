@@ -1,0 +1,517 @@
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, expected=0.00, lastRoundId=0
+📝 RoundId cache synced from chain: 0
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+139.47.127.142 - - [03/Jan/2026 17:59:53] "GET /price HTTP/1.1" 200 -
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $0.00
+   - pmCash:         $0.00
+   - reserved:       $0.00
+   - positionsLiq:   $0.00
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $0.00
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 1) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.142 - - [03/Jan/2026 17:59:54] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:00:03] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:00:13] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:00:23] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:00:24] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1767463491)
+127.0.0.1 - - [03/Jan/2026 18:00:27] "GET /sign-nav HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:00:33] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, expected=0.00, lastRoundId=0
+📝 RoundId cache synced from chain: 0
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $0.00
+   - pmCash:         $0.00
+   - reserved:       $0.00
+   - positionsLiq:   $0.00
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $0.00
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 1) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.142 - - [03/Jan/2026 18:00:43] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:00:53] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:00:53] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1767463539)
+139.47.127.142 - - [03/Jan/2026 18:01:00] "GET /sign-nav HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:01:03] "GET /price HTTP/1.1" 200 -
+^Croot@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl http://localhost:8080/sign-nav
+curl: (7) Failed to connect to localhost port 8080 after 0 ms: Couldn't connect to server
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 bot/bot_v7.py
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+============================================================
+🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+   3-State Asset Tracking + Conservation Bounds
+============================================================
+
+📋 Configuration:
+   RPC: https://base-mainnet.g.alchemy...
+   Vault V7: 0x2C992CbA94DcAe5f184BF54018D2DBaBdB39A836
+   USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+   PM Wallet: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+   PM Deposit: 0xa76a91208FC7CB88420070AF978D12F440cab2F0
+
+✅ Connected to Base (block 40336979)
+🔑 Oracle signer: 0x5087675E669e6244620013691c05C1De0e8B525e
+✅ USDC contract loaded
+✅ Vault V7 contract loaded
+📂 Loaded pending credit state: forwarded=0.00, withdrawn=0.00
+📂 Loaded roundId cache from disk: lastRoundId=0
+📝 RoundId cache synced from chain: 0
+✅ Initial roundId from chain: 0
+🌐 PolymarketClient using residential proxy: 92.113.180.106:42563
+✅ CLOB client initialized with L2 auth (can fetch open orders and balance)
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, expected=0.00, lastRoundId=0
+📝 RoundId cache synced from chain: 0
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $0.00
+   - pmCash:         $0.00
+   - reserved:       $0.00
+   - positionsLiq:   $0.00
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $0.00
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 1) [ok]
+🔄 Starting NAV refresh loop (every 45s)
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+
+🚀 Starting HTTP API on port 8080
+   Serving frontend from: /root/PolyNotifyBot/frontend
+   Endpoints:
+   - GET  /             - Frontend UI
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, expected=0.00, lastRoundId=0
+📝 RoundId cache synced from chain: 0
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $0.00
+   - pmCash:         $0.00
+   - reserved:       $0.00
+   - positionsLiq:   $0.00
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $0.00
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 1) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.142 - - [03/Jan/2026 18:01:53] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:01:54] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:03] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:07] "GET / HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:07] "GET /main.js HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:08] "GET /psniper-logo.png HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:08] "GET /abis/vault.json?v=1767463327942 HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:08] "GET /abis/usdc.json?v=1767463327942 HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:09] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:09] "GET /favicon.ico HTTP/1.1" 404 -
+139.47.127.142 - - [03/Jan/2026 18:02:09] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:09] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1767463610)
+139.47.127.142 - - [03/Jan/2026 18:02:15] "GET /sign-nav HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:19] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1767463610)
+127.0.0.1 - - [03/Jan/2026 18:02:27] "GET /sign-nav HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:29] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, expected=0.00, lastRoundId=0
+📝 RoundId cache synced from chain: 0
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+139.47.127.142 - - [03/Jan/2026 18:02:39] "GET /price HTTP/1.1" 200 -
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $0.00
+   - pmCash:         $0.00
+   - reserved:       $0.00
+   - positionsLiq:   $0.00
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $0.00
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 1) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.142 - - [03/Jan/2026 18:02:40] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:49] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:02:59] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:03:09] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:03:10] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:03:19] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, expected=0.00, lastRoundId=0
+📝 RoundId cache synced from chain: 0
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $0.00
+   - pmCash:         $0.00
+   - reserved:       $0.00
+   - positionsLiq:   $0.00
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $0.00
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 1) [ok]
+✅ NAV cache updated, sleeping 45s
+⚡ Returning cached signed NAV (valid until 1767463704)
+127.0.0.1 - - [03/Jan/2026 18:03:28] "GET /sign-nav HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:03:29] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:03:39] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:03:40] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:03:49] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:03:59] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:04:10] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, expected=0.00, lastRoundId=0
+📝 RoundId cache synced from chain: 0
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $0.00
+   - pmCash:         $0.00
+   - reserved:       $0.00
+   - positionsLiq:   $0.00
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $0.00
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 1) [ok]
+✅ NAV cache updated, sleeping 45s
+⚡ Returning cached signed NAV (valid until 1767463752)
+127.0.0.1 - - [03/Jan/2026 18:04:28] "GET /sign-nav HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:04:29] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [03/Jan/2026 18:04:40] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=0.0000, buffer=0.00, forwarded=0.00, expected=0.00, lastRoundId=0
+📝 RoundId cache synced from chain: 0
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 0 active positions, total cost basis: $0.00
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+✅ Found 0 open orders (total returned: 0)
+🔒 Reserved in open buy orders: $0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $0.00
+   - pmCash:         $0.00
+   - reserved:       $0.00
+   - positionsLiq:   $0.00
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $0.00
+   • Positions (liquidation):  $0.00
+   • Positions (cost basis):   $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $0.00
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $0.00
+   • Positions:      $0.00
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $0.00
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 1) [ok]
+✅ NAV cache updated, sleeping 45s
