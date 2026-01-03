@@ -6,7 +6,7 @@
 // CONFIGURATION
 // =============================================================================
 
-const VAULT_ADDRESS = "0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D"; // V7.3.1 - fresh deploy
+const VAULT_ADDRESS = "0x2C992CbA94DcAe5f184BF54018D2DBaBdB39A836"; // V7.3.2 - fresh deploy
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
