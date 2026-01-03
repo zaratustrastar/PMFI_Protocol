@@ -6,7 +6,7 @@
 // CONFIGURATION
 // =============================================================================
 
-const VAULT_ADDRESS = "0x2C992CbA94DcAe5f184BF54018D2DBaBdB39A836"; // V7.3.2 - fresh deploy
+const VAULT_ADDRESS = "0x5Ae7395Ca8ab044159133E2e23f421aE8f94055F"; // V7.3.3 - claim invalidates roundId
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;

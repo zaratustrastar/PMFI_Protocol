@@ -375,6 +375,10 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         require(!request.claimed, "Already claimed");
         require(block.timestamp <= request.requestTime + WITHDRAWAL_EXPIRY, "Request expired");
         
+        // V7.3.3: Invalidate any cached NAV signatures to prevent stale pricing
+        // This fixes the race condition where deposit+claim can use same roundId
+        lastRoundId += 1;
+        
         // V7.3: Use locked USDC amount from request time - no NAV recalculation
         uint256 grossUsdc = request.usdcLocked;
         uint256 vaultBalance = usdc.balanceOf(address(this));
