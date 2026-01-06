@@ -1,0 +1,425 @@
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $123.52
+📡 Fetching open orders via L2 auth...
+❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+⚠️ Reserved balance will be 0 - this may cause pendingCredit to spike when orders are placed
+🔒 Reserved in open buy orders: $0.00
+   ⚠️ NEGATIVE PENDING WARNING: raw=-136.76 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=123.52, pos=13.24, reserved=0.00, inFlight=0.00, buffer=0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $0.00
+   - pmCash:         $123.52
+   - reserved:       $0.00
+   - positionsLiq:   $13.24
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=136.76 != expectedAssets=0.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $123.52
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $0.00
+   • Positions (liquidation):  $13.24
+   • Positions (cost basis):   $38.25
+   ─────────────────────────────
+   • TOTAL ASSETS:             $136.76
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $123.52
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $123.52
+   • Positions:      $13.24
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $136.76
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.0000/share (round 24) [ok]
+🔄 Starting NAV refresh loop (every 45s)
+============================================================
+🔄 BACKGROUND NAV REFRESH
+
+🚀 Starting HTTP API on port 8080============================================================
+
+   Serving frontend from: /root/PolyNotifyBot/frontend
+   Endpoints:
+   - GET  /             - Frontend UI
+   - GET  /health       - Health check
+   - GET  /price        - Cached price (for UI)
+   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)
+   - GET  /sign-nav/debug - Debug NAV calculation
+
+   Press Ctrl+C to stop
+
+ * Serving Flask app 'bot_v7'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://147.182.206.35:8080
+Press CTRL+C to quit
+📊 On-chain: supply=6.5034, buffer=1.04, forwarded=68.50, expected=7.17, lastRoundId=23
+📝 RoundId cache synced from chain: 23
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 27 active positions, total cost basis: $38.25
+   📖 Orderbook via CLOB client: 10005801238810329487...
+   📊 Got 1 bids, 21 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 5 bids, 24 asks
+   ✅ Yes: 100.0 → liq value $0.53
+   📖 Orderbook via CLOB client: 40038877019441858362...
+   📊 Got 1 bids, 25 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 42810017353446864055...
+   📊 Got 1 bids, 22 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 56731142114663046400...
+   📊 Got 1 bids, 26 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 3 bids, 23 asks
+   ✅ Yes: 100.0 → liq value $0.23
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 4 bids, 19 asks
+   ✅ Yes: 100.0 → liq value $0.63
+   📖 Orderbook via CLOB client: 67075362951724750382...
+   📊 Got 3 bids, 20 asks
+   ✅ Yes: 100.0 → liq value $0.40
+   📖 Orderbook via CLOB client: 73417376433342850446...
+   📊 Got 1 bids, 22 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 79016402615192548846...
+   📊 Got 1 bids, 19 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 80786849447030592615...
+   📊 Got 1 bids, 31 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 90876821322295764907...
+   📊 Got 4 bids, 22 asks
+   ✅ Yes: 100.0 → liq value $0.37
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 4 bids, 17 asks
+   ✅ Yes: 95.0 → liq value $0.94
+   📖 Orderbook via CLOB client: 80851385106070066940...
+   📊 Got 5 bids, 30 asks
+   ✅ No: 90.0 → liq value $0.90
+   📖 Orderbook via CLOB client: 69219266610788696018...
+   📊 Got 3 bids, 27 asks
+   ✅ Yes: 80.0 → liq value $0.80
+   📖 Orderbook via CLOB client: 27032177112608038709...
+   📊 Got 3 bids, 16 asks
+   ✅ Yes: 70.0 → liq value $0.70
+   📖 Orderbook via CLOB client: 74903450898938171468...
+   📊 Got 3 bids, 22 asks
+   ✅ Yes: 70.0 → liq value $0.70
+   📖 Orderbook via CLOB client: 99286372427232189430...
+   📊 Got 5 bids, 22 asks
+   ✅ Yes: 70.0 → liq value $0.70
+   📖 Orderbook via CLOB client: 19435502575740154903...
+   📊 Got 3 bids, 13 asks
+   ✅ Yes: 55.7 → liq value $1.11
+   📖 Orderbook via CLOB client: 58818912093362786189...
+   📊 Got 5 bids, 15 asks
+   ✅ Yes: 55.7 → liq value $0.71
+   📖 Orderbook via CLOB client: 69005500229593258251...
+   📊 Got 2 bids, 11 asks
+   ✅ Yes: 26.7 → liq value $0.53
+   📖 Orderbook via CLOB client: 10524048139400353945...
+   📊 Got 5 bids, 14 asks
+   ✅ Yes: 25.0 → liq value $0.50
+   📖 Orderbook via CLOB client: 57453793323091279438...
+   📊 Got 2 bids, 8 asks
+   ✅ Yes: 15.0 → liq value $0.30
+   📖 Orderbook via CLOB client: 20259827323402177040...
+   📊 Got 6 bids, 10 asks
+   ✅ Yes: 10.0 → liq value $1.50
+   📖 Orderbook via CLOB client: 25036670176666715349...
+   📊 Got 3 bids, 10 asks
+   ✅ Yes: 10.0 → liq value $0.80
+   📖 Orderbook via CLOB client: 48759687213914870144...
+   📊 Got 3 bids, 10 asks
+   ✅ Yes: 8.8 → liq value $0.27
+   📖 Orderbook via CLOB client: 10663096673585939539...
+   📊 Got 2 bids, 11 asks
+   ✅ Yes: 1.0 → liq value $0.02
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $123.52
+📡 Fetching open orders via L2 auth...
+139.47.127.142 - - [05/Jan/2026 14:59:52] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 14:59:53] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:00:52] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:00:53] "GET /price HTTP/1.1" 200 -
+❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+⚠️ Reserved balance will be 0 - this may cause pendingCredit to spike when orders are placed
+🔒 Reserved in open buy orders: $0.00
+   ⚠️ NEGATIVE PENDING WARNING: raw=-130.73 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=123.52, pos=13.33, reserved=0.00, inFlight=0.00, buffer=1.04
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $7.17
+   - pmCash:         $123.52
+   - reserved:       $0.00
+   - positionsLiq:   $13.33
+   - inFlight:       $0.00
+   - vaultBuffer:    $1.04
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=137.90 != expectedAssets=7.17
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $123.52
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $1.04
+   • Expected assets:          $7.17
+   • Positions (liquidation):  $13.33
+   • Positions (cost basis):   $38.25
+   ─────────────────────────────
+   • TOTAL ASSETS:             $136.85
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $123.52
+   • Reserved:       $0.00
+   • Vault Buffer:   $1.04
+   • Credited Cash (signed): $124.57
+   • Positions:      $13.33
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $137.90
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $21.2040/share (round 24) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.142 - - [05/Jan/2026 15:01:52] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:01:53] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=6.5034, buffer=1.04, forwarded=68.50, expected=7.17, lastRoundId=23
+📝 RoundId cache synced from chain: 23
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 27 active positions, total cost basis: $38.25
+   📖 Orderbook via CLOB client: 10005801238810329487...
+   📊 Got 1 bids, 20 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 5 bids, 24 asks
+   ✅ Yes: 100.0 → liq value $0.53
+   📖 Orderbook via CLOB client: 40038877019441858362...
+   📊 Got 1 bids, 25 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 42810017353446864055...
+   📊 Got 1 bids, 22 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 56731142114663046400...
+   📊 Got 1 bids, 26 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 3 bids, 23 asks
+   ✅ Yes: 100.0 → liq value $0.23
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 4 bids, 19 asks
+   ✅ Yes: 100.0 → liq value $0.63
+   📖 Orderbook via CLOB client: 67075362951724750382...
+   📊 Got 3 bids, 21 asks
+   ✅ Yes: 100.0 → liq value $0.40
+   📖 Orderbook via CLOB client: 73417376433342850446...
+   📊 Got 1 bids, 21 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 79016402615192548846...
+   📊 Got 1 bids, 18 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 80786849447030592615...
+   📊 Got 1 bids, 31 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 90876821322295764907...
+   📊 Got 4 bids, 22 asks
+   ✅ Yes: 100.0 → liq value $0.37
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 4 bids, 17 asks
+   ✅ Yes: 95.0 → liq value $0.94
+   📖 Orderbook via CLOB client: 80851385106070066940...
+   📊 Got 5 bids, 30 asks
+   ✅ No: 90.0 → liq value $0.90
+   📖 Orderbook via CLOB client: 69219266610788696018...
+   📊 Got 3 bids, 27 asks
+   ✅ Yes: 80.0 → liq value $0.80
+   📖 Orderbook via CLOB client: 27032177112608038709...
+   📊 Got 3 bids, 16 asks
+   ✅ Yes: 70.0 → liq value $0.70
+   📖 Orderbook via CLOB client: 74903450898938171468...
+   📊 Got 3 bids, 22 asks
+   ✅ Yes: 70.0 → liq value $0.70
+   📖 Orderbook via CLOB client: 99286372427232189430...
+   📊 Got 5 bids, 22 asks
+   ✅ Yes: 70.0 → liq value $0.70
+   📖 Orderbook via CLOB client: 19435502575740154903...
+   📊 Got 3 bids, 13 asks
+   ✅ Yes: 55.7 → liq value $1.11
+   📖 Orderbook via CLOB client: 58818912093362786189...
+   📊 Got 5 bids, 15 asks
+   ✅ Yes: 55.7 → liq value $0.71
+   📖 Orderbook via CLOB client: 69005500229593258251...
+   📊 Got 2 bids, 11 asks
+   ✅ Yes: 26.7 → liq value $0.53
+   📖 Orderbook via CLOB client: 10524048139400353945...
+   📊 Got 5 bids, 14 asks
+   ✅ Yes: 25.0 → liq value $0.50
+   📖 Orderbook via CLOB client: 57453793323091279438...
+   📊 Got 2 bids, 8 asks
+   ✅ Yes: 15.0 → liq value $0.30
+   📖 Orderbook via CLOB client: 20259827323402177040...
+   📊 Got 6 bids, 10 asks
+   ✅ Yes: 10.0 → liq value $1.50
+   📖 Orderbook via CLOB client: 25036670176666715349...
+   📊 Got 3 bids, 10 asks
+   ✅ Yes: 10.0 → liq value $0.80
+   📖 Orderbook via CLOB client: 48759687213914870144...
+   📊 Got 3 bids, 10 asks
+   ✅ Yes: 8.8 → liq value $0.27
+   📖 Orderbook via CLOB client: 10663096673585939539...
+   📊 Got 3 bids, 12 asks
+   ✅ Yes: 1.0 → liq value $0.02
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $123.52
+📡 Fetching open orders via L2 auth...
+139.47.127.142 - - [05/Jan/2026 15:02:52] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:02:53] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:03:52] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:03:53] "GET /price HTTP/1.1" 200 -
+❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+⚠️ Reserved balance will be 0 - this may cause pendingCredit to spike when orders are placed
+🔒 Reserved in open buy orders: $0.00
+   ⚠️ NEGATIVE PENDING WARNING: raw=-130.73 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=123.52, pos=13.33, reserved=0.00, inFlight=0.00, buffer=1.04
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $7.17
+   - pmCash:         $123.52
+   - reserved:       $0.00
+   - positionsLiq:   $13.33
+   - inFlight:       $0.00
+   - vaultBuffer:    $1.04
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=137.90 != expectedAssets=7.17
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $123.52
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $1.04
+   • Expected assets:          $7.17
+   • Positions (liquidation):  $13.33
+   • Positions (cost basis):   $38.25
+   ─────────────────────────────
+   • TOTAL ASSETS:             $136.85
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $123.52
+   • Reserved:       $0.00
+   • Vault Buffer:   $1.04
+   • Credited Cash (signed): $124.57
+   • Positions:      $13.33
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $137.90
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $21.2040/share (round 24) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.142 - - [05/Jan/2026 15:04:26] "GET / HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:04:27] "GET /main.js HTTP/1.1" 304 -
+139.47.127.142 - - [05/Jan/2026 15:04:27] "GET /psniper-logo.png HTTP/1.1" 304 -
+139.47.127.142 - - [05/Jan/2026 15:04:27] "GET /abis/vault.json?v=1767625467302 HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:04:27] "GET /abis/usdc.json?v=1767625467302 HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:04:27] "GET /favicon.ico HTTP/1.1" 404 -
+139.47.127.142 - - [05/Jan/2026 15:04:28] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:04:28] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:04:28] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:04:38] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:04:48] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:04:52] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:04:53] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+139.47.127.142 - - [05/Jan/2026 15:04:58] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [05/Jan/2026 15:05:00] "GET /price HTTP/1.1" 200 -
+📊 On-chain: supply=6.5034, buffer=1.04, forwarded=68.50, expected=7.17, lastRoundId=23
+📝 RoundId cache synced from chain: 23
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+139.47.127.142 - - [05/Jan/2026 15:05:08] "GET /price HTTP/1.1" 200 -
+✅ Found 27 active positions, total cost basis: $38.25
+   📖 Orderbook via CLOB client: 10005801238810329487...
+   📊 Got 1 bids, 20 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 5 bids, 24 asks
+   ✅ Yes: 100.0 → liq value $0.53
+   📖 Orderbook via CLOB client: 40038877019441858362...
+   📊 Got 1 bids, 25 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 42810017353446864055...
+   📊 Got 1 bids, 23 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 56731142114663046400...
+   📊 Got 1 bids, 26 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 2 bids, 23 asks
+   ✅ Yes: 100.0 → liq value $0.20
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 3 bids, 18 asks
+   ✅ Yes: 100.0 → liq value $0.60
+   📖 Orderbook via CLOB client: 67075362951724750382...
+   📊 Got 3 bids, 21 asks
+   ✅ Yes: 100.0 → liq value $0.40
+   📖 Orderbook via CLOB client: 73417376433342850446...
+   📊 Got 1 bids, 21 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 79016402615192548846...
+   📊 Got 1 bids, 18 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 80786849447030592615...
+   📊 Got 1 bids, 31 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 90876821322295764907...
+   📊 Got 4 bids, 22 asks
+   ✅ Yes: 100.0 → liq value $0.37
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 4 bids, 17 asks
+   ✅ Yes: 95.0 → liq value $0.94
+   📖 Orderbook via CLOB client: 80851385106070066940...
+   📊 Got 5 bids, 30 asks
+   ✅ No: 90.0 → liq value $0.90
+   📖 Orderbook via CLOB client: 69219266610788696018...
+   📊 Got 3 bids, 27 asks
+   ✅ Yes: 80.0 → liq value $0.80
+   📖 Orderbook via CLOB client: 27032177112608038709...
+   📊 Got 3 bids, 16 asks

@@ -1,0 +1,75 @@
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 17 active positions, total cost basis: $20.14
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 4 bids, 21 asks
+   ✅ Yes: 100.0 → liq value $0.33
+   📖 Orderbook via CLOB client: 56731142114663046400...
+   📊 Got 0 bids, 8 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 3 bids, 20 asks
+   ✅ Yes: 100.0 → liq value $0.23
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 2 bids, 16 asks
+   ✅ Yes: 100.0 → liq value $0.15
+   📖 Orderbook via CLOB client: 80786849447030592615...
+   📊 Got 1 bids, 20 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 90876821322295764907...
+   📊 Got 2 bids, 18 asks
+   ✅ Yes: 100.0 → liq value $0.13
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 4 bids, 16 asks
+   ✅ Yes: 95.0 → liq value $0.82
+   📖 Orderbook via CLOB client: 10005801238810329487...
+   📊 Got 5 bids, 13 asks
+   ✅ Yes: 46.0 → liq value $0.71
+   📖 Orderbook via CLOB client: 67075362951724750382...
+   📊 Got 2 bids, 11 asks
+   ✅ Yes: 31.0 → liq value $0.62
+   📖 Orderbook via CLOB client: 79016402615192548846...
+   📊 Got 2 bids, 10 asks
+   ✅ Yes: 31.0 → liq value $0.62
+   📖 Orderbook via CLOB client: 80851385106070066940...
+   📊 Got 12 bids, 19 asks
+   ✅ No: 30.0 → liq value $0.62
+   📖 Orderbook via CLOB client: 10524048139400353945...
+   📊 Got 2 bids, 6 asks
+   ✅ Yes: 20.0 → liq value $0.40
+   📖 Orderbook via CLOB client: 19435502575740154903...
+   📊 Got 3 bids, 9 asks
+   ✅ Yes: 20.0 → liq value $0.60
+   📖 Orderbook via CLOB client: 27032177112608038709...
+   📊 Got 3 bids, 10 asks
+   ✅ Yes: 20.0 → liq value $0.60
+   📖 Orderbook via CLOB client: 57453793323091279438...
+   📊 Got 2 bids, 9 asks
+   ✅ Yes: 20.0 → liq value $0.40
+   📖 Orderbook via CLOB client: 58818912093362786189...
+   📊 Got 3 bids, 9 asks
+   ✅ Yes: 20.0 → liq value $0.60
+   📖 Orderbook via CLOB client: 20259827323402177040...
+   📊 Got 4 bids, 7 asks
+   ✅ Yes: 10.0 → liq value $0.40
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $141.54
+📡 Fetching open orders via L2 auth...
+31.44.153.197 - - [05/Jan/2026 12:05:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:05:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:06:05] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:06:15] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:06:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:06:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:06:25] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:06:25] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:06:35] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:06:45] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:06:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:06:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:07:04] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 12:07:15] "GET /price HTTP/1.1" 200 -

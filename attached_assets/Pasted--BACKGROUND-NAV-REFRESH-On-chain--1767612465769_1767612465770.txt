@@ -1,0 +1,414 @@
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=51.0000, buffer=0.00, forwarded=131.00, expected=51.00, lastRoundId=7
+📝 RoundId cache synced from chain: 7
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 7 active positions, total cost basis: $10.61
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 1 bids, 11 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 1 bids, 10 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 0 bids, 6 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 90876821322295764907...
+   📊 Got 1 bids, 9 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 1 bids, 3 asks
+   ✅ Yes: 90.0 → liq value $0.90
+   📖 Orderbook via CLOB client: 25457499761929304714...
+   📊 Got 6 bids, 0 asks
+   ✅ No: 25.0 → liq value $24.75
+   📖 Orderbook via CLOB client: 20259827323402177040...
+   📊 Got 2 bids, 3 asks
+   ✅ Yes: 20.0 → liq value $0.40
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $58.68
+📡 Fetching open orders via L2 auth...
+✅ Found 230 open orders (total returned: 230)
+🔒 Reserved in open buy orders: $37.50
+   ⚠️ NEGATIVE PENDING WARNING: raw=-74.23 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=58.68, pos=29.05, reserved=37.50, inFlight=0.00, buffer=0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $51.00
+   - pmCash:         $58.68
+   - reserved:       $37.50
+   - positionsLiq:   $29.05
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=125.23 != expectedAssets=51.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $58.68
+   • Reserved (open orders):   $37.50
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $51.00
+   • Positions (liquidation):  $29.05
+   • Positions (cost basis):   $10.61
+   ─────────────────────────────
+   • TOTAL ASSETS:             $125.23
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $58.68
+   • Reserved:       $37.50
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $96.18
+   • Positions:      $29.05
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $125.23
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $2.4554/share (round 8) [ok]
+✅ NAV cache updated, sleeping 45s
+31.44.153.197 - - [05/Jan/2026 11:23:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:23:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:24:05] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:24:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:24:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:24:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:24:27] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:24:28] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:24:35] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=51.0000, buffer=0.00, forwarded=131.00, expected=51.00, lastRoundId=7
+📝 RoundId cache synced from chain: 7
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 7 active positions, total cost basis: $10.61
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 1 bids, 11 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 0 bids, 10 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 0 bids, 8 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 90876821322295764907...
+   📊 Got 1 bids, 9 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 1 bids, 3 asks
+   ✅ Yes: 90.0 → liq value $0.90
+   📖 Orderbook via CLOB client: 25457499761929304714...
+   📊 Got 8 bids, 0 asks
+   ✅ No: 25.0 → liq value $24.75
+   📖 Orderbook via CLOB client: 20259827323402177040...
+   📊 Got 2 bids, 3 asks
+   ✅ Yes: 20.0 → liq value $0.40
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $58.68
+📡 Fetching open orders via L2 auth...
+✅ Found 239 open orders (total returned: 239)
+🔒 Reserved in open buy orders: $38.80
+   ⚠️ NEGATIVE PENDING WARNING: raw=-74.53 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=58.68, pos=28.05, reserved=38.80, inFlight=0.00, buffer=0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $51.00
+   - pmCash:         $58.68
+   - reserved:       $38.80
+   - positionsLiq:   $28.05
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=125.53 != expectedAssets=51.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $58.68
+   • Reserved (open orders):   $38.80
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $51.00
+   • Positions (liquidation):  $28.05
+   • Positions (cost basis):   $10.61
+   ─────────────────────────────
+   • TOTAL ASSETS:             $125.53
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $58.68
+   • Reserved:       $38.80
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $97.48
+   • Positions:      $28.05
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $125.53
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $2.4613/share (round 8) [ok]
+✅ NAV cache updated, sleeping 45s
+31.44.153.197 - - [05/Jan/2026 11:24:45] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:24:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:24:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:25:05] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:25:15] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:25:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:25:21] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=51.0000, buffer=0.00, forwarded=131.00, expected=51.00, lastRoundId=7
+📝 RoundId cache synced from chain: 7
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 7 active positions, total cost basis: $10.61
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 1 bids, 11 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 0 bids, 10 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 0 bids, 9 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 90876821322295764907...
+31.44.153.197 - - [05/Jan/2026 11:25:25] "GET /price HTTP/1.1" 200 -
+   📊 Got 1 bids, 10 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 1 bids, 3 asks
+   ✅ Yes: 90.0 → liq value $0.90
+   📖 Orderbook via CLOB client: 25457499761929304714...
+   📊 Got 9 bids, 0 asks
+   ✅ No: 25.0 → liq value $24.75
+   📖 Orderbook via CLOB client: 20259827323402177040...
+31.44.153.197 - - [05/Jan/2026 11:25:25] "GET /price HTTP/1.1" 200 -
+   📊 Got 2 bids, 3 asks
+   ✅ Yes: 20.0 → liq value $0.40
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $58.68
+📡 Fetching open orders via L2 auth...
+✅ Found 261 open orders (total returned: 261)
+🔒 Reserved in open buy orders: $43.00
+   ⚠️ NEGATIVE PENDING WARNING: raw=-128.73 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=58.68, pos=78.05, reserved=43.00, inFlight=0.00, buffer=0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $51.00
+   - pmCash:         $58.68
+   - reserved:       $43.00
+   - positionsLiq:   $78.05
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=179.73 != expectedAssets=51.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $58.68
+   • Reserved (open orders):   $43.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $51.00
+   • Positions (liquidation):  $78.05
+   • Positions (cost basis):   $10.61
+   ─────────────────────────────
+   • TOTAL ASSETS:             $179.73
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $58.68
+   • Reserved:       $43.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $101.68
+   • Positions:      $78.05
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $179.73
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $3.5241/share (round 8) [ok]
+✅ NAV cache updated, sleeping 45s
+31.44.153.197 - - [05/Jan/2026 11:25:35] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:25:45] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:25:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:25:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:26:07] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=51.0000, buffer=0.00, forwarded=131.00, expected=51.00, lastRoundId=7
+📝 RoundId cache synced from chain: 7
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 6 active positions, total cost basis: $10.00
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 1 bids, 11 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 0 bids, 11 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 0 bids, 10 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 90876821322295764907...
+   📊 Got 1 bids, 10 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 1 bids, 3 asks
+   ✅ Yes: 90.0 → liq value $0.90
+   📖 Orderbook via CLOB client: 20259827323402177040...
+   📊 Got 2 bids, 3 asks
+   ✅ Yes: 20.0 → liq value $0.40
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $83.43
+📡 Fetching open orders via L2 auth...
+✅ Found 284 open orders (total returned: 284)
+🔒 Reserved in open buy orders: $47.60
+   ⚠️ NEGATIVE PENDING WARNING: raw=-133.33 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=83.43, pos=53.30, reserved=47.60, inFlight=0.00, buffer=0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $51.00
+   - pmCash:         $83.43
+   - reserved:       $47.60
+   - positionsLiq:   $53.30
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=184.33 != expectedAssets=51.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $83.43
+   • Reserved (open orders):   $47.60
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $51.00
+   • Positions (liquidation):  $53.30
+   • Positions (cost basis):   $10.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $184.33
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $83.43
+   • Reserved:       $47.60
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $131.03
+   • Positions:      $53.30
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $184.33
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $3.6143/share (round 8) [ok]
+✅ NAV cache updated, sleeping 45s
+31.44.153.197 - - [05/Jan/2026 11:26:15] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:26:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:26:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:26:25] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:26:25] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:26:35] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:26:45] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:26:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:26:55] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=51.0000, buffer=0.00, forwarded=131.00, expected=51.00, lastRoundId=7
+📝 RoundId cache synced from chain: 7
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 6 active positions, total cost basis: $10.00
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 1 bids, 11 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 0 bids, 11 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 0 bids, 10 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 90876821322295764907...
+   📊 Got 1 bids, 10 asks
+   ✅ Yes: 100.0 → liq value $1.00
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 1 bids, 3 asks
+   ✅ Yes: 90.0 → liq value $0.90
+   📖 Orderbook via CLOB client: 20259827323402177040...
+   📊 Got 2 bids, 3 asks
+   ✅ Yes: 20.0 → liq value $0.40
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $83.43
+📡 Fetching open orders via L2 auth...
+✅ Found 305 open orders (total returned: 305)
+🔒 Reserved in open buy orders: $51.50
+   ⚠️ NEGATIVE PENDING WARNING: raw=-137.23 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=83.43, pos=53.30, reserved=51.50, inFlight=0.00, buffer=0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $51.00
+   - pmCash:         $83.43
+   - reserved:       $51.50
+   - positionsLiq:   $53.30
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=188.23 != expectedAssets=51.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $83.43
+   • Reserved (open orders):   $51.50
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $51.00
+   • Positions (liquidation):  $53.30
+   • Positions (cost basis):   $10.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $188.23
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $83.43
+   • Reserved:       $51.50
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $134.93
+   • Positions:      $53.30
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $188.23
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $3.6907/share (round 8) [ok]
+✅ NAV cache updated, sleeping 45s
+31.44.153.197 - - [05/Jan/2026 11:27:05] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:27:15] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:27:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:27:21] "GET /price HTTP/1.1" 200 -

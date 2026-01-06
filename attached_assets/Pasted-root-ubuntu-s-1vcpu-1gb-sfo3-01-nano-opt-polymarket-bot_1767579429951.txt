@@ -1,0 +1,95 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# nano /opt/polymarket-bot/.env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo grep -r "0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff" /etc /opt /root /home 2>/dev/null
+/opt/polymarket-bot/attached_assets/Pasted-Last-login-Fri-Nov-14-15-05-16-on-ttys000-georgyarsentyev-Georgys-MacBook-Air-cd-Desktop-YOUR-F-1763129671889_1763129671890.txt:POLYMARKET_PROXY_ADDRESS=0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+/opt/polymarket-bot/attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Check-if-the-process-is-still-alive-systemctl-status-polymarket-1763687945541_1763687945542.txt:-bash: export: `0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff': not a valid identifier
+/opt/polymarket-bot/attached_assets/Pasted-Last-login-Sun-Nov-16-02-47-56-on-ttys000-georgyarsentyev-Georgys-MacBook-Air-cd-trading-bot--1763257856559_1763257856560.txt:POLYMARKET_PROXY_ADDRESS=0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+/opt/polymarket-bot/.env.systemd:POLYMARKET_PROXY_ADDRESS= 0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+/root/PolyNotifyBot/deployments/v6-mainnet.json:    "polymarketWallet": "0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff",
+/root/PolyNotifyBot/attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-pkill-f-b_1766006627943.txt:❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+/root/PolyNotifyBot/attached_assets/Pasted-Last-login-Fri-Nov-14-15-05-16-on-ttys000-georgyarsentyev-Georgys-MacBook-Air-cd-Desktop-YOUR-F-1763129671889_1763129671890.txt:POLYMARKET_PROXY_ADDRESS=0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+/root/PolyNotifyBot/attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Check-if-the-process-is-still-alive-systemctl-status-polymarket-1763687945541_1763687945542.txt:-bash: export: `0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff': not a valid identifier
+/root/PolyNotifyBot/attached_assets/Pasted-Last-login-Sun-Nov-16-02-47-56-on-ttys000-georgyarsentyev-Georgys-MacBook-Air-cd-trading-bot--1763257856559_1763257856560.txt:POLYMARKET_PROXY_ADDRESS=0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+/root/PolyNotifyBot/attached_assets/Pasted-EOF-python-bot-bot-v7-py-PredictFi--1765988371881_1765988371882.txt:   PM Wallet: 0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+/root/PolyNotifyBot/attached_assets/Pasted--Configuration-RPC-https-mainnet-base-org-Vault-V7-0xE5_1765988472398.txt:   PM Wallet: 0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff
+/root/PolyNotifyBot/attached_assets/Pasted-You-re-very-close-but-the-conclusion-neither-private-ke_1765724160268.txt:const PROXY = "0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff";
+/root/PolyNotifyBot/trading_bot/test_proxy_usdc_transfer.ts:const DEFAULT_PROXY = '0x4eCD29f6b1d336dA51a90E835CC211eDEABFc9ff';
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo grep -r "0x0ceab8e1bf3b" /etc /opt /root /home 2>/dev/null
+/opt/polymarket-bot/attached_assets/Pasted-Last-login-Fri-Nov-14-15-05-16-on-ttys000-georgyarsentyev-Georgys-MacBook-Air-cd-Desktop-YOUR-F-1763129671889_1763129671890.txt:POLYMARKET_PRIVATE_KEY=0x0ceab8e1bf3b8009d2c5bf5496f2980aac9380bc1b7375d2ac1d1898895e33c8
+/opt/polymarket-bot/attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Check-if-the-process-is-still-alive-systemctl-status-polymarket-1763687945541_1763687945542.txt:-bash: export: `0x0ceab8e1bf3b8009d2c5bf5496f2980aac9380bc1b7375d2ac1d1898895e33c8': not a valid identifier
+/opt/polymarket-bot/attached_assets/Pasted-Last-login-Sun-Nov-16-02-47-56-on-ttys000-georgyarsentyev-Georgys-MacBook-Air-cd-trading-bot--1763257856559_1763257856560.txt:POLYMARKET_PRIVATE_KEY=0x0ceab8e1bf3b8009d2c5bf5496f2980aac9380bc1b7375d2ac1d1898895e33c8
+/opt/polymarket-bot/.env.systemd:POLYMARKET_PRIVATE_KEY= 0x0ceab8e1bf3b8009d2c5bf5496f2980aac9380bc1b7375d2ac1d1898895e33c8
+/root/PolyNotifyBot/attached_assets/Pasted-Last-login-Fri-Nov-14-15-05-16-on-ttys000-georgyarsentyev-Georgys-MacBook-Air-cd-Desktop-YOUR-F-1763129671889_1763129671890.txt:POLYMARKET_PRIVATE_KEY=0x0ceab8e1bf3b8009d2c5bf5496f2980aac9380bc1b7375d2ac1d1898895e33c8
+/root/PolyNotifyBot/attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-Check-if-the-process-is-still-alive-systemctl-status-polymarket-1763687945541_1763687945542.txt:-bash: export: `0x0ceab8e1bf3b8009d2c5bf5496f2980aac9380bc1b7375d2ac1d1898895e33c8': not a valid identifier
+/root/PolyNotifyBot/attached_assets/Pasted-Last-login-Sun-Nov-16-02-47-56-on-ttys000-georgyarsentyev-Georgys-MacBook-Air-cd-trading-bot--1763257856559_1763257856560.txt:POLYMARKET_PRIVATE_KEY=0x0ceab8e1bf3b8009d2c5bf5496f2980aac9380bc1b7375d2ac1d1898895e33c8
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cat /etc/systemd/system/polymarket*.service
+# Check running process environment
+ps aux | grep -E "polymarket|market_monitor|order_monitor" | grep -v grep
+# Get PID from above, then:
+sudo cat /proc/<PID>/environ | tr '\0' '\n' | grep POLYMARKET
+# Check crontab
+crontab -l
+sudo crontab -l
+[Unit]
+Description=Polymarket Order Monitor - Monitors Fills and Places Sells
+After=network.target postgresql.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/polymarket-bot/trading_bot
+
+# Load environment variables
+EnvironmentFile=/opt/polymarket-bot/.env.systemd
+Environment="PYTHONUNBUFFERED=1"
+
+# Use virtual environment Python
+ExecStart=/opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+
+# Auto-restart on failure
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=polymarket-monitor
+
+[Install]
+WantedBy=multi-user.target
+[Unit]
+Description=Polymarket Trading Worker - Processes Job Queue
+After=network.target postgresql.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/polymarket-bot/trading_bot
+
+# Load environment variables
+EnvironmentFile=/opt/polymarket-bot/.env.systemd
+Environment="PYTHONUNBUFFERED=1"
+
+# Use virtual environment Python
+ExecStart=/opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+
+# Auto-restart on failure
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=polymarket-worker
+
+[Install]
+WantedBy=multi-user.target
+root      625376  0.8  1.4 105384 58008 ?        Ss    2025 245:59 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+root      691961  2.5  1.6 111000 64568 ?        Ss    2025 634:17 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+-bash: PID: No such file or directory
+* * * * * cd /opt/polymarket-bot && export $(cat .env | grep -v '^#' | xargs) && python3 trading_bot/market_monitor.py >> /var/log/market_monitor.log 2>&1
+* * * * * cd /opt/polymarket-bot && export $(cat .env | grep -v '^#' | xargs) && python3 trading_bot/market_monitor.py >> /var/log/market_monitor.log 2>&1
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

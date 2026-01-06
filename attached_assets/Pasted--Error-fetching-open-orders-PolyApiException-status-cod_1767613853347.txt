@@ -1,0 +1,222 @@
+❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+⚠️ Reserved balance will be 0 - this may cause pendingCredit to spike when orders are placed
+🔒 Reserved in open buy orders: $0.00
+   ⚠️ NEGATIVE PENDING WARNING: raw=-34.83 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=83.68, pos=2.16, reserved=0.00, inFlight=0.00, buffer=0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $51.00
+   - pmCash:         $83.68
+   - reserved:       $0.00
+   - positionsLiq:   $2.16
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=85.83 != expectedAssets=51.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $83.68
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $51.00
+   • Positions (liquidation):  $2.16
+   • Positions (cost basis):   $10.30
+   ─────────────────────────────
+   • TOTAL ASSETS:             $85.83
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $83.68
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $83.68
+   • Positions:      $2.16
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $85.83
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.6830/share (round 8) [ok]
+✅ NAV cache updated, sleeping 45s
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=51.0000, buffer=0.00, forwarded=131.00, expected=51.00, lastRoundId=7
+📝 RoundId cache synced from chain: 7
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 8 active positions, total cost basis: $10.95
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 2 bids, 20 asks
+   ✅ Yes: 100.0 → liq value $0.20
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 2 bids, 20 asks
+   ✅ Yes: 100.0 → liq value $0.20
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 2 bids, 14 asks
+   ✅ Yes: 100.0 → liq value $0.12
+   📖 Orderbook via CLOB client: 90876821322295764907...
+   📊 Got 1 bids, 17 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 3 bids, 15 asks
+   ✅ Yes: 95.0 → liq value $0.55
+   📖 Orderbook via CLOB client: 19435502575740154903...
+   📊 Got 3 bids, 7 asks
+   ✅ Yes: 20.0 → liq value $0.60
+   📖 Orderbook via CLOB client: 58818912093362786189...
+   📊 Got 3 bids, 8 asks
+   ✅ Yes: 20.0 → liq value $0.60
+   📖 Orderbook via CLOB client: 20259827323402177040...
+   📊 Got 3 bids, 5 asks
+   ✅ Yes: 10.0 → liq value $0.30
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $83.03
+📡 Fetching open orders via L2 auth...
+31.44.153.197 - - [05/Jan/2026 11:46:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:46:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:46:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:46:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:46:58] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:47:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:47:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:47:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:47:21] "GET /price HTTP/1.1" 200 -
+❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+⚠️ Reserved balance will be 0 - this may cause pendingCredit to spike when orders are placed
+🔒 Reserved in open buy orders: $0.00
+   ⚠️ NEGATIVE PENDING WARNING: raw=-34.70 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=83.03, pos=2.67, reserved=0.00, inFlight=0.00, buffer=0.00
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $51.00
+   - pmCash:         $83.03
+   - reserved:       $0.00
+   - positionsLiq:   $2.67
+   - inFlight:       $0.00
+   - vaultBuffer:    $0.00
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=85.70 != expectedAssets=51.00
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $83.03
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $0.00
+   • Expected assets:          $51.00
+   • Positions (liquidation):  $2.67
+   • Positions (cost basis):   $10.95
+   ─────────────────────────────
+   • TOTAL ASSETS:             $85.70
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $83.03
+   • Reserved:       $0.00
+   • Vault Buffer:   $0.00
+   • Credited Cash (signed): $83.03
+   • Positions:      $2.67
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $85.70
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $1.6804/share (round 8) [ok]
+✅ NAV cache updated, sleeping 45s
+31.44.153.197 - - [05/Jan/2026 11:48:11] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:48:12] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:48:15] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:48:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:48:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:48:23] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:48:25] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:48:25] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:48:35] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:48:45] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:48:55] "GET /price HTTP/1.1" 200 -
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+31.44.153.197 - - [05/Jan/2026 11:48:55] "GET /price HTTP/1.1" 200 -
+📊 On-chain: supply=51.0000, buffer=0.00, forwarded=131.00, expected=51.00, lastRoundId=7
+📝 RoundId cache synced from chain: 7
+
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 15 active positions, total cost basis: $17.01
+   📖 Orderbook via CLOB client: 25893845422717931685...
+   📊 Got 4 bids, 20 asks
+   ✅ Yes: 100.0 → liq value $0.33
+   📖 Orderbook via CLOB client: 63489439920991810203...
+   📊 Got 3 bids, 19 asks
+   ✅ Yes: 100.0 → liq value $0.23
+   📖 Orderbook via CLOB client: 66088176274580478108...
+   📊 Got 3 bids, 14 asks
+   ✅ Yes: 100.0 → liq value $0.18
+   📖 Orderbook via CLOB client: 90876821322295764907...
+   📊 Got 1 bids, 17 asks
+   ✅ Yes: 100.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 26223602945756104846...
+   📊 Got 4 bids, 15 asks
+   ✅ Yes: 95.0 → liq value $0.82
+   📖 Orderbook via CLOB client: 63616070915415747373...
+   📊 Got 2 bids, 2 asks
+   ✅ No: 70.0 → liq value $1.40
+   📖 Orderbook via CLOB client: 10005801238810329487...
+   📊 Got 2 bids, 8 asks
+   ✅ Yes: 41.0 → liq value $0.70
+   📖 Orderbook via CLOB client: 67075362951724750382...
+   📊 Got 2 bids, 6 asks
+   ✅ Yes: 31.0 → liq value $0.62
+   📖 Orderbook via CLOB client: 79016402615192548846...
+   📊 Got 2 bids, 5 asks
+   ✅ Yes: 31.0 → liq value $0.62
+   📖 Orderbook via CLOB client: 10524048139400353945...
+   📊 Got 2 bids, 6 asks
+   ✅ Yes: 20.0 → liq value $0.40
+   📖 Orderbook via CLOB client: 19435502575740154903...
+   📊 Got 3 bids, 9 asks
+   ✅ Yes: 20.0 → liq value $0.60
+   📖 Orderbook via CLOB client: 57453793323091279438...
+   📊 Got 2 bids, 6 asks
+   ✅ Yes: 20.0 → liq value $0.40
+   📖 Orderbook via CLOB client: 58818912093362786189...
+   📊 Got 3 bids, 7 asks
+   ✅ Yes: 20.0 → liq value $0.60
+   📖 Orderbook via CLOB client: 80786849447030592615...
+   📊 Got 2 bids, 2 asks
+   ✅ Yes: 20.0 → liq value $0.40
+   📖 Orderbook via CLOB client: 20259827323402177040...
+   📊 Got 4 bids, 6 asks
+   ✅ Yes: 10.0 → liq value $0.40
+📡 Fetching cash balance via L2 auth...
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $76.97
+📡 Fetching open orders via L2 auth...
+31.44.153.197 - - [05/Jan/2026 11:49:04] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:49:15] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:49:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:49:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:49:25] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:49:25] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:49:35] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:49:45] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:49:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:49:55] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:50:04] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:50:15] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:50:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:50:21] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:50:25] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:50:25] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:50:35] "GET /price HTTP/1.1" 200 -
+31.44.153.197 - - [05/Jan/2026 11:50:45] "GET /price HTTP/1.1" 200 -
