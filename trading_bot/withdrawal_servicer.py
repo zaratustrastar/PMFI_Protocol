@@ -155,6 +155,7 @@ VAULT_V7_ABI = [
     {"inputs": [], "name": "totalPendingShares", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
     {"inputs": [], "name": "totalSupply", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
     {"inputs": [], "name": "paused", "outputs": [{"type": "bool"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "nextWithdrawalIndex", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
     {
         "inputs": [],
         "name": "getVaultState",
@@ -170,6 +171,20 @@ VAULT_V7_ABI = [
             {"name": "_paused", "type": "bool"},
             {"name": "_depositsThrottled", "type": "bool"},
             {"name": "_maxLossBps", "type": "uint256"},
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{"name": "requestId", "type": "uint256"}],
+        "name": "getWithdrawalRequest",
+        "outputs": [
+            {"name": "user", "type": "address"},
+            {"name": "shares", "type": "uint256"},
+            {"name": "usdcLocked", "type": "uint256"},
+            {"name": "requestTime", "type": "uint256"},
+            {"name": "claimed", "type": "bool"},
+            {"name": "expired", "type": "bool"},
         ],
         "stateMutability": "view",
         "type": "function"
@@ -565,8 +580,9 @@ def get_pending_usdc(w3_base: Web3, vault_contract) -> Tuple[float, float]:
     """
     Read pending withdrawals in USDC from vault.
     
-    Uses bot_v7.py /sign-nav for accurate NAV that includes pendingCredit
-    and trading PnL, then multiplies by pending shares from vault.
+    V7.3.3 FIX: Reads actual usdcLocked values from pending withdrawal requests
+    instead of recalculating with current NAV. This ensures the servicer bridges
+    the exact amount locked in the contract, not a recalculated estimate.
     
     Returns:
         (pending_usdc, nav_per_share)
@@ -576,23 +592,98 @@ def get_pending_usdc(w3_base: Web3, vault_contract) -> Tuple[float, float]:
     try:
         state = vault_contract.functions.getVaultState().call()
         pending_shares = state[6]
+        pending_count = state[7]
         
         print(f"   Pending shares: {pending_shares/1e18:.6f}")
+        print(f"   Pending withdrawals count: {pending_count}")
         
-        pending_usdc = (pending_shares / 1e18) * nav_per_share
+        if pending_count == 0 or pending_shares == 0:
+            return 0.0, nav_per_share
+        
+        pending_usdc = get_pending_usdc_from_queue(vault_contract, pending_count)
+        print(f"   Actual usdcLocked from queue: ${pending_usdc:.2f}")
         
         return pending_usdc, nav_per_share
         
     except Exception as e:
-        print(f"⚠️  getVaultState failed: {e}, falling back to direct call")
+        print(f"⚠️  getVaultState failed: {e}, falling back to queue iteration")
         
         try:
-            pending_shares = vault_contract.functions.totalPendingShares().call()
-            pending_usdc = (pending_shares / 1e18) * nav_per_share
+            pending_usdc = get_pending_usdc_from_queue(vault_contract)
             return pending_usdc, nav_per_share
         except Exception as e2:
             print(f"❌ Error reading pending withdrawals: {e2}")
             return 0.0, nav_per_share
+
+
+def get_pending_usdc_from_queue(vault_contract, pending_count: int = None) -> float:
+    """
+    Iterate through withdrawal queue and sum usdcLocked for unclaimed requests.
+    
+    V7.3.3: This is the correct way to calculate pending USDC - read the actual
+    locked values from the contract instead of recalculating with current NAV.
+    
+    The queue structure: requests are added sequentially, nextWithdrawalIndex points
+    to the first unprocessed request. We iterate exactly pending_count requests
+    starting from nextWithdrawalIndex.
+    
+    Args:
+        vault_contract: Web3 contract instance
+        pending_count: Number of pending requests (from getVaultState)
+    
+    Returns:
+        Total usdcLocked for all unclaimed, non-expired requests (in USDC, not raw)
+    """
+    total_usdc_locked = 0
+    
+    try:
+        next_idx = vault_contract.functions.nextWithdrawalIndex().call()
+        print(f"   Next withdrawal index: {next_idx}")
+        
+        if pending_count is None or pending_count == 0:
+            state = vault_contract.functions.getVaultState().call()
+            pending_count = state[7]
+        
+        if pending_count == 0:
+            print(f"   No pending requests")
+            return 0.0
+        
+        print(f"   Iterating {pending_count} pending requests...")
+        
+        checked = 0
+        found = 0
+        request_id = next_idx
+        
+        while found < pending_count and checked < 200:
+            try:
+                user, shares, usdc_locked, request_time, claimed, expired = \
+                    vault_contract.functions.getWithdrawalRequest(request_id).call()
+                
+                checked += 1
+                
+                if not claimed and not expired:
+                    total_usdc_locked += usdc_locked
+                    found += 1
+                    print(f"      Request #{request_id}: {shares/1e18:.4f} shares, ${usdc_locked/1e6:.2f} locked")
+                elif claimed:
+                    pass
+                
+                request_id += 1
+                
+            except Exception as e:
+                if "Invalid request" in str(e) or "revert" in str(e).lower():
+                    print(f"   Reached end of queue at request {request_id}")
+                    break
+                print(f"      ⚠️ Error reading request {request_id}: {e}")
+                request_id += 1
+                checked += 1
+        
+        print(f"   Checked {checked} requests, found {found} pending, total locked: ${total_usdc_locked/1e6:.2f}")
+        return total_usdc_locked / 1e6
+        
+    except Exception as e:
+        print(f"❌ Error iterating withdrawal queue: {e}")
+        return 0.0
 
 
 def get_vault_usdc(w3_base: Web3, usdc_contract) -> float:
