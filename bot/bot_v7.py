@@ -310,8 +310,9 @@ class PendingCreditTracker:
         """
         Calculate pending credit using full asset reconciliation.
         
-        FIXED FORMULA (V7.3.2):
-        pendingCredit = max(0, expectedAssets - pmCash - reserved - positionsLiqValue - inFlight - vaultBuffer)
+        FIXED FORMULA (V7.3.3):
+        pendingCredit = max(0, expectedAssets - pmCash - positionsLiqValue - inFlight - vaultBuffer)
+        NOTE: Reserved is NOT subtracted - Polygon balanceOf already represents total on-chain cash.
         
         V7.3.2 FIX:
         1. Use on-chain expectedAssets instead of cumulative totalForwarded.
@@ -327,11 +328,12 @@ class PendingCreditTracker:
            With cost basis, only expectedAssets would change, creating phantom pending.
         
         KEY INVARIANT (should hold approximately):
-        expectedAssets ≈ pmCash + positionsValue + vaultBuffer + reserved + inFlight + pending
+        expectedAssets ≈ pmCash + positionsValue + vaultBuffer + inFlight + pending
+        NOTE: Reserved is excluded - it's tracked for monitoring only, not NAV math.
         
         This prevents double-counting:
         - When you buy tokens, cash goes down but positionsValue goes up (net zero change to pending)
-        - When you place buy orders, cash goes down but reserved goes up (net zero change to pending)
+        - Open orders don't affect on-chain cash (Polygon balanceOf stays the same until order fills)
         - Funds at deposit address are counted in inFlight, NOT pendingCredit
         - Funds in vault buffer are on-chain, NOT pendingCredit
         - When users CLAIM, expectedAssets decreases, keeping pending accurate
@@ -353,9 +355,10 @@ class PendingCreditTracker:
         """
         self.last_known_pm_cash = pm_cash_usdc
         
-        # Total "accounted for" = cash + reserved + positionsLiqValue + inFlight + vaultBuffer
+        # Total "accounted for" = cash + positionsLiqValue + inFlight + vaultBuffer
         # NOTE: Uses liquidation value (mark-to-market), NOT cost basis
-        accounted_for = pm_cash_usdc + reserved_usdc + positions_liq_value_usdc + in_flight_usdc + vault_buffer_usdc
+        # NOTE: Reserved is EXCLUDED - Polygon balanceOf is the source of truth for cash
+        accounted_for = pm_cash_usdc + positions_liq_value_usdc + in_flight_usdc + vault_buffer_usdc
         
         # Pending = expectedAssets minus what's accounted for
         # V7.3.2: Use expectedAssets (decreases on claims) instead of totalForwarded (cumulative)
@@ -810,30 +813,17 @@ class PolymarketClient:
     def fetch_cash_balance(self) -> float:
         """Fetch USDC cash balance on Polymarket. 
         
-        Tries multiple methods:
-        1. CLOB API get_balance_allowance (requires L2 auth)
-        2. Direct Polygon blockchain query for USDC.e balance
-        3. Data API fallback (may 404)
-        """
-        # Method 1: Use CLOB client with L2 auth (get_balance_allowance with params)
-        if self.clob_client and self.BalanceAllowanceParams and self.AssetType:
-            try:
-                print("📡 Fetching cash balance via L2 auth...")
-                # Must pass BalanceAllowanceParams with asset_type=COLLATERAL for USDC balance
-                params = self.BalanceAllowanceParams(asset_type=self.AssetType.COLLATERAL)
-                balance_data = self.clob_client.get_balance_allowance(params=params)
-                
-                if balance_data:
-                    # Balance is returned in USDC units (string format)
-                    cash = float(balance_data.get("balance", 0))
-                    if cash > 0:
-                        print(f"💵 Polymarket cash (CLOB): ${cash:.2f}")
-                        return cash
-                    
-            except Exception as e:
-                print(f"⚠️ CLOB balance fetch failed: {e}")
+        V7.3.3: Uses Polygon RPC as PRIMARY source (consistent on-chain truth).
+        CLOB API is skipped because it may return different semantics (available vs total).
         
-        # Method 2: Direct Polygon blockchain query for USDC.e balance
+        Tries methods:
+        1. Direct Polygon blockchain query for USDC.e balance (PRIMARY)
+        2. Data API fallback (may 404)
+        """
+        # V7.3.3: Skip CLOB API - go straight to Polygon RPC for consistency
+        # CLOB balance may differ from on-chain (available vs total), causing NAV jumps
+        
+        # Method 1 (PRIMARY): Direct Polygon blockchain query for USDC.e balance
         try:
             print("📡 Fetching cash balance via Polygon RPC...")
             polygon_w3 = Web3(Web3.HTTPProvider(POLYGON_RPC_URL))
@@ -876,7 +866,8 @@ class NavEngineV7:
     """
     Calculates NAV with 3-state asset tracking (V7.3.2 - no double-counting).
     
-    totalAssets = inFlightOnChain + pendingCredit + cash + reserved + positionsLiquidationValue
+    totalAssets = inFlightOnChain + pendingCredit + cash + positionsLiquidationValue
+    NOTE: Reserved is excluded - Polygon balanceOf is the source of truth for cash.
     
     BUCKET INVARIANT: Funds can only be in ONE bucket at a time:
     - inFlight: at deposit address on Base
@@ -884,8 +875,9 @@ class NavEngineV7:
     - cash/reserved/costBasis: credited inside PM
     - vaultBuffer: returned to vault (on-chain truth)
     
-    V7.3.2 FIX: Uses expectedAssets (decreases on claims) instead of totalForwarded (cumulative).
-    pendingCredit = expectedAssets - cash - reserved - costBasis - inFlight - vaultBuffer
+    V7.3.3 FIX: Uses expectedAssets (decreases on claims) instead of totalForwarded (cumulative).
+    pendingCredit = expectedAssets - cash - positionsLiqValue - inFlight - vaultBuffer
+    NOTE: Reserved is excluded from NAV math - Polygon balanceOf is the source of truth for cash.
     """
     
     def __init__(self, polymarket_client: PolymarketClient, pending_tracker: PendingCreditTracker):
@@ -910,10 +902,11 @@ class NavEngineV7:
         """
         Calculate full NAV breakdown with 3 asset states.
         
-        V7.3.2 FIX: Uses expectedAssets (decreases on claims) instead of totalForwarded.
+        V7.3.3 FIX: Uses expectedAssets (decreases on claims) instead of totalForwarded.
+        Reserved is excluded from NAV math - Polygon balanceOf is the source of truth for cash.
         
-        pendingCredit = expectedAssets - cash - reserved - costBasis - inFlight - vaultBuffer
-        totalAssets = inFlight + pendingCredit + cash + reserved + liquidationValue
+        pendingCredit = expectedAssets - cash - positionsLiqValue - inFlight - vaultBuffer
+        totalAssets = inFlight + pendingCredit + cash + liquidationValue
         
         BUCKET INVARIANT: Funds live in exactly ONE bucket at any time - no overlap.
         
@@ -986,10 +979,11 @@ class NavEngineV7:
             credited_cash, reserved_usdc, credited_positions, in_flight, vault_buffer, expected_assets
         )
         
-        # 7. Total assets for NAV = inFlight + pending + cash + reserved + liquidationValue
+        # 7. Total assets for NAV = inFlight + pending + cash + liquidationValue
         # NOTE: We use liquidation value for NAV (share pricing), NOT cost basis
         # NOTE: vault_buffer is NOT added here - it's already included in creditedCash at signing time
-        total_assets = in_flight + pending_credit + credited_cash + reserved_usdc + credited_positions
+        # NOTE: reserved is EXCLUDED - Polygon balanceOf is the source of truth for cash
+        total_assets = in_flight + pending_credit + credited_cash + credited_positions
         
         print(f"\n📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):")
         print(f"   • In-flight (deposit addr): ${in_flight/1e6:.2f}")
@@ -1167,11 +1161,12 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
         print(f"⚠️ SAFETY WARNING: {safety_reason}")
     
     # Calculate NAV per share
-    # V7.3 FIX: Include vault buffer AND reserved INSIDE creditedCash for signing
+    # V7.3.3 FIX: Include vault buffer INSIDE creditedCash for signing
+    # Reserved is EXCLUDED - Polygon balanceOf is the source of truth for cash
     # This ensures: totalAssets = creditedCash + creditedPositions + pendingCredit + inFlight
     # The contract's asset breakdown check requires this exact equality (only 4 fields)
-    reserved_usdc = breakdown.get("reserved", 0)
-    credited_cash_signed = breakdown["credited_cash"] + vault_buffer + reserved_usdc
+    reserved_usdc = breakdown.get("reserved", 0)  # Keep for logging only
+    credited_cash_signed = breakdown["credited_cash"] + vault_buffer  # No reserved!
     total_assets = credited_cash_signed + breakdown["credited_positions"] + breakdown["pending_credit"] + breakdown["in_flight"]
     
     # V7.3 ASSERTION: Verify totalAssets equals the sum of 4 signed fields
