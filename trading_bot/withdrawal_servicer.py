@@ -1431,7 +1431,7 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
         return False, "", 0.0
 
 
-def liquidate_positions(needed_usdc: float) -> float:
+def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> float:
     """
     Liquidate positions to get needed USDC using sweep loop.
     
@@ -1440,8 +1440,15 @@ def liquidate_positions(needed_usdc: float) -> float:
     2. Refresh orderbook to get new best bid
     3. Repeat until target USDC reached or price drops below slippage limit
     
+    V7.3.3 FIX: Now rechecks PM cash after each fill. If new cash appeared
+    (from user claims or deposits), we exit early to avoid over-liquidating.
+    
     Targets largest/most liquid positions first.
     Respects slippage limits and per-cycle caps.
+    
+    Args:
+        needed_usdc: Amount of USDC needed
+        initial_pm_cash: PM cash balance at start (for detecting new cash arrivals)
     
     Returns: USDC obtained from liquidation
     """
@@ -1456,6 +1463,7 @@ def liquidate_positions(needed_usdc: float) -> float:
     
     capped_needed = min(needed_usdc, MAX_PER_CYCLE_LIQUIDATION_USDC)
     print(f"\n🔥 LIQUIDATE: Need ${capped_needed:.2f} USDC (capped from ${needed_usdc:.2f})")
+    print(f"   Initial PM cash: ${initial_pm_cash:.2f}")
     
     positions = get_positions_for_liquidation()
     if not positions:
@@ -1467,11 +1475,23 @@ def liquidate_positions(needed_usdc: float) -> float:
     total_obtained = 0.0
     still_needed = capped_needed
     
+    # V7.3.3 FIX: Upfront guard - ALWAYS reduce target by available cash, regardless of MIN threshold
+    # This prevents over-liquidation when any amount of cash is available
+    if initial_pm_cash >= still_needed:
+        print(f"   💵 Upfront check: PM cash ${initial_pm_cash:.2f} >= need ${still_needed:.2f}, skipping liquidation!")
+        print(f"   ℹ️  Caller should withdraw cash instead")
+        return 0.0  # Signal to caller: no liquidation needed, use cash
+    elif initial_pm_cash > 0.01:  # Any meaningful cash reduces the target (not MIN_WITHDRAWAL)
+        # Partial coverage: reduce the liquidation target by available cash
+        print(f"   💵 Partial cash available: ${initial_pm_cash:.2f}, reducing liquidation target from ${still_needed:.2f}")
+        still_needed -= initial_pm_cash
+        print(f"   📉 New liquidation target: ${still_needed:.2f}")
+    
     # Sweep loop constants
     MAX_SWEEPS_PER_POSITION = 20  # Max iterations per position to prevent infinite loops
     MIN_USD_PER_ORDER = 0.01      # Minimal threshold for order sanity check
     MAX_SLIPPAGE_BPS = 5000       # 50% max slippage from initial price (positions may be low-value)
-    SWEEP_DELAY_SECONDS = 0.3    # Rate limiting between orders
+    SWEEP_DELAY_SECONDS = 0.5    # Rate limiting between orders (0.5s for API safety)
     
     for pos in positions:
         if still_needed <= 0:
@@ -1499,6 +1519,19 @@ def liquidate_positions(needed_usdc: float) -> float:
             if remaining_tokens <= 0:
                 print(f"   ✅ Position fully sold")
                 break
+            
+            # V7.3.3 FIX: Check PM cash BEFORE placing any order to catch late-arriving funds
+            try:
+                current_pm_cash, _ = get_pm_balance()
+                new_cash = current_pm_cash - initial_pm_cash - total_obtained
+                if new_cash > 0.50:
+                    print(f"   💵 Pre-order check: ${new_cash:.2f} new cash detected!")
+                    still_needed -= new_cash
+                    if still_needed <= 0:
+                        print(f"   ✅ New cash covers need, aborting liquidation before order!")
+                        return total_obtained
+            except Exception as e:
+                print(f"   ⚠️ Pre-order cash check failed: {e}")
             
             # Refresh orderbook to get current best bid
             live_bid_price, bid_depth = get_orderbook_best_bid(token_id)
@@ -1546,6 +1579,20 @@ def liquidate_positions(needed_usdc: float) -> float:
                 remaining_tokens = max(0.0, remaining_tokens - tokens_filled)
                 print(f"       ✅ Received ${usdc:.2f} ({tokens_filled:.2f} tokens filled)")
                 print(f"          Total: ${total_obtained:.2f}, still need: ${max(0, still_needed):.2f}, remaining tokens: {remaining_tokens:.2f}")
+                
+                # V7.3.3 FIX: Recheck PM cash after each fill to detect new deposits/claims
+                # This prevents over-liquidation when cash arrives mid-loop
+                try:
+                    current_pm_cash, _ = get_pm_balance()
+                    new_cash = current_pm_cash - initial_pm_cash - total_obtained
+                    if new_cash > 0.50:  # Threshold to avoid noise from rounding
+                        print(f"       💵 New cash detected! ${new_cash:.2f} arrived (likely claim or deposit)")
+                        still_needed -= new_cash
+                        if still_needed <= 0:
+                            print(f"   ✅ New cash covers remaining need, stopping liquidation early!")
+                            return total_obtained
+                except Exception as e:
+                    print(f"       ⚠️ Cash recheck failed: {e} (continuing)")
                 
                 # Check if we've reached target
                 if still_needed <= 0:
@@ -2034,12 +2081,66 @@ def servicer_iteration(
     
     # Check if liquidation needed
     if needed >= MIN_WITHDRAWAL_USDC and liquidatable_positions > 0.01:
-        liquidation_target = min(needed, liquidatable_positions)
-        print(f"\n⚠️  Cash insufficient, need to liquidate ${needed:.2f}")
-        print(f"   Liquidatable: ${liquidatable_positions:.2f}")
-        print(f"   Targeting: ${liquidation_target:.2f}")
+        # V7.3.3: Re-fetch PM cash to check if new deposits/claims arrived since initial withdrawal
+        pm_cash_before_liq, _ = get_pm_balance()
         
-        liquidated = liquidate_positions(liquidation_target)
+        # If new cash appeared, try to withdraw it first before liquidating
+        if pm_cash_before_liq >= MIN_WITHDRAWAL_USDC:
+            print(f"\n💵 New cash available: ${pm_cash_before_liq:.2f}, attempting withdrawal before liquidation")
+            withdraw_amt = min(needed, pm_cash_before_liq)
+            success, request_id, amount_bridged = withdraw_pm_cash_to_bridge(withdraw_amt, dry_run=dry_run)
+            
+            if success:
+                state.in_transit.append({
+                    "request_id": request_id,
+                    "amount_usdc": amount_bridged,
+                    "initiated_at": time.time(),
+                    "status": "pending",
+                })
+                state.daily_withdrawn_usdc += amount_bridged
+                needed -= amount_bridged
+                
+                send_telegram_alert(
+                    f"💸 Pre-liquidation bridge: ${amount_bridged:.2f} USDC\n"
+                    f"Remaining needed: ${needed:.2f}"
+                )
+        
+        # Recheck if liquidation still needed after potential withdrawal
+        if needed >= MIN_WITHDRAWAL_USDC:
+            liquidation_target = min(needed, liquidatable_positions)
+            print(f"\n⚠️  Cash insufficient, need to liquidate ${needed:.2f}")
+            print(f"   Liquidatable: ${liquidatable_positions:.2f}")
+            print(f"   Targeting: ${liquidation_target:.2f}")
+            
+            # Re-fetch PM cash again for accurate baseline in liquidation loop
+            pm_cash_at_liq_start, _ = get_pm_balance()
+            liquidated = liquidate_positions(liquidation_target, initial_pm_cash=pm_cash_at_liq_start)
+            
+            # V7.3.3: If liquidate_positions returned 0, it may mean cash became sufficient
+            # during the call. Try one more cash withdrawal.
+            if liquidated == 0 and needed >= MIN_WITHDRAWAL_USDC:
+                pm_cash_post_check, _ = get_pm_balance()
+                if pm_cash_post_check >= MIN_WITHDRAWAL_USDC:
+                    print(f"   💵 Post-liquidation-check: ${pm_cash_post_check:.2f} available, attempting bridge")
+                    success, request_id, amount_bridged = withdraw_pm_cash_to_bridge(
+                        min(needed, pm_cash_post_check), dry_run=dry_run
+                    )
+                    if success:
+                        state.in_transit.append({
+                            "request_id": request_id,
+                            "amount_usdc": amount_bridged,
+                            "initiated_at": time.time(),
+                            "status": "pending",
+                        })
+                        state.daily_withdrawn_usdc += amount_bridged
+                        needed -= amount_bridged
+                        send_telegram_alert(
+                            f"💸 Cash-only bridge (no liquidation needed): ${amount_bridged:.2f} USDC\n"
+                            f"Remaining needed: ${needed:.2f}"
+                        )
+        else:
+            print(f"   ✅ Cash withdrawal covered the need, no liquidation required")
+            liquidated = 0.0
     elif needed >= MIN_WITHDRAWAL_USDC:
         print(f"\n⚠️  Cash insufficient and no liquidatable positions")
         liquidated = 0.0
