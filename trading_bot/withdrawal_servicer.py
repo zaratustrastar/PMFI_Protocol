@@ -1297,6 +1297,19 @@ def get_positions_for_liquidation() -> List[Dict]:
             # Use VWAP sweep for accurate liquidation value (what you'd actually get)
             liq_value = calculate_liquidation_value(token_id, size, verbose=False)
             
+            # V7.3.3 FIX: Fallback to API-reported value when orderbook fails
+            # This prevents large positions from being ranked below dust when bids are unavailable
+            api_value = float(pos.get("value", 0))
+            avg_price = float(pos.get("avgPrice", 0))
+            fallback_value = api_value if api_value > 0 else (size * avg_price)
+            
+            # Use liq_value if available, otherwise fall back to API value
+            effective_liq_value = liq_value if liq_value > 0 else fallback_value
+            used_fallback = liq_value <= 0 and fallback_value > 0
+            
+            if used_fallback:
+                print(f"   ⚠️ Orderbook unavailable for {pos.get('outcome', 'Unknown')[:30]}, using API value ${fallback_value:.2f}")
+            
             # Get best bid for reference (used in liquidation execution)
             bids = get_orderbook_bids(token_id, verbose=False)
             best_bid = bids[0][0] if bids else 0.0
@@ -1306,10 +1319,19 @@ def get_positions_for_liquidation() -> List[Dict]:
                 "outcome": pos.get("outcome", "Unknown"),
                 "size": size,
                 "best_bid": best_bid,
-                "liq_value": liq_value,
+                "liq_value": effective_liq_value,
+                "used_fallback": used_fallback,
             })
         
+        # Sort by effective liquidation value (largest first)
         positions.sort(key=lambda x: x["liq_value"], reverse=True)
+        
+        # Log top positions for debugging
+        print(f"   📊 Top positions for liquidation (sorted by value):")
+        for i, p in enumerate(positions[:5]):
+            fallback_note = " (API fallback)" if p.get("used_fallback") else ""
+            print(f"      {i+1}. {p['outcome'][:35]}: {p['size']:.2f} tokens, ${p['liq_value']:.2f}{fallback_note}")
+        
         return positions
         
     except Exception as e:
