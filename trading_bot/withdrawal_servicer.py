@@ -2138,6 +2138,10 @@ def servicer_iteration(
                             f"💸 Cash-only bridge (no liquidation needed): ${amount_bridged:.2f} USDC\n"
                             f"Remaining needed: ${needed:.2f}"
                         )
+                # V7.3.3 FIX: Set needed=0 to prevent double bridge via post-liquidation block
+                # This is the cash-only path - no further bridging needed
+                needed = 0.0
+                print(f"   ✅ Cash-only bridge complete, skipping post-liquidation bridge")
         else:
             print(f"   ✅ Cash withdrawal covered the need, no liquidation required")
             liquidated = 0.0
