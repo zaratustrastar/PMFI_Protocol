@@ -1021,12 +1021,37 @@ def get_pm_balance() -> Tuple[float, float]:
         print(f"   ⚠️ CLOB balance error: {e}, falling back to RPC")
         cash, _ = get_pm_balance_from_rpc()
     
-    # Get position value using VWAP sweep (accurate liquidation value for NAV)
+    # Get position value from data-api (no orderbook calls - fast and doesn't hit rate limits)
     try:
-        positions_list = get_positions_for_liquidation()
-        positions = sum(p.get("liq_value", 0) for p in positions_list)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            "Accept": "application/json",
+        }
+        proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
+        
+        url = f"https://data-api.polymarket.com/positions?user={PM_PROXY_ADDRESS.lower()}"
+        
+        if BYPASS_METHOD == "curl_cffi":
+            response = curl_requests.get(
+                url,
+                headers=headers,
+                proxies=proxies,
+                impersonate="chrome120",
+                timeout=30
+            )
+        else:
+            response = requests.get(url, headers=headers, proxies=proxies, timeout=30)
+        
+        if response.status_code == 200:
+            positions_data = response.json()
+            if isinstance(positions_data, list):
+                positions = sum(float(p.get("value", 0)) for p in positions_data if isinstance(p, dict))
+            elif isinstance(positions_data, dict) and "positions" in positions_data:
+                positions = sum(float(p.get("value", 0)) for p in positions_data["positions"] if isinstance(p, dict))
+        else:
+            print(f"   ⚠️ Positions API returned {response.status_code}")
     except Exception as e:
-        print(f"   ⚠️ Position VWAP valuation error: {e}")
+        print(f"   ⚠️ Position valuation error: {e}")
         positions = 0.0
     
     print(f"   📊 PM balances: cash=${cash:.2f}, positions=${positions:.2f}")
@@ -1300,8 +1325,20 @@ def get_positions_for_liquidation() -> List[Dict]:
             if not token_id:
                 continue
             
-            # Use VWAP sweep for accurate liquidation value (what you'd actually get)
-            liq_value = calculate_liquidation_value(token_id, size, verbose=False)
+            # Get orderbook bids ONCE (avoid duplicate API calls)
+            bids = get_orderbook_bids(token_id, verbose=False)
+            best_bid = bids[0][0] if bids else 0.0
+            
+            # Calculate VWAP liquidation value inline (reuse bids)
+            liq_value = 0.0
+            if bids:
+                remaining = size
+                for price, depth in bids:
+                    if remaining <= 0:
+                        break
+                    fill = min(remaining, depth)
+                    liq_value += fill * price
+                    remaining -= fill
             
             # V7.3.3 FIX: Fallback to API-reported value when orderbook fails
             # This prevents large positions from being ranked below dust when bids are unavailable
@@ -1315,10 +1352,6 @@ def get_positions_for_liquidation() -> List[Dict]:
             
             if used_fallback:
                 print(f"   ⚠️ Orderbook unavailable for {pos.get('outcome', 'Unknown')[:30]}, using API value ${fallback_value:.2f}")
-            
-            # Get best bid for reference (used in liquidation execution)
-            bids = get_orderbook_bids(token_id, verbose=False)
-            best_bid = bids[0][0] if bids else 0.0
             
             positions.append({
                 "token_id": token_id,
