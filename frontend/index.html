@@ -611,6 +611,80 @@
             text-align: center;
             padding: 20px;
         }
+
+        /* Coming Soon Strategy Cards */
+        .coming-soon-section {
+            margin-top: 48px;
+        }
+
+        .coming-soon-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            color: #8b949e;
+            letter-spacing: -0.3px;
+        }
+
+        .coming-soon-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .coming-soon-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .coming-soon-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .teaser-card {
+            background: linear-gradient(180deg, rgba(30,35,50,0.6) 0%, rgba(20,25,35,0.6) 100%);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .teaser-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(126,231,135,0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .teaser-ticker {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: #484f58;
+            letter-spacing: -0.3px;
+            margin-bottom: 8px;
+        }
+
+        .teaser-soon {
+            font-size: 11px;
+            font-weight: 500;
+            color: #30363d;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
     </style>
 </head>
 <body>
@@ -669,6 +743,36 @@
             <h3 class="section-title">Pending Withdrawals</h3>
             <div id="pendingWithdrawalsList" class="pending-list">
                 <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Coming Soon Strategies -->
+        <div class="coming-soon-section">
+            <div class="coming-soon-grid">
+                <div class="teaser-card">
+                    <div class="teaser-ticker">pARBITRAGE</div>
+                    <div class="teaser-soon">soon ...</div>
+                </div>
+                <div class="teaser-card">
+                    <div class="teaser-ticker">pVOLATILITY</div>
+                    <div class="teaser-soon">soon ...</div>
+                </div>
+                <div class="teaser-card">
+                    <div class="teaser-ticker">pCOPY</div>
+                    <div class="teaser-soon">soon ...</div>
+                </div>
+                <div class="teaser-card">
+                    <div class="teaser-ticker">pLP</div>
+                    <div class="teaser-soon">soon ...</div>
+                </div>
+                <div class="teaser-card">
+                    <div class="teaser-ticker">pENDSPIEL</div>
+                    <div class="teaser-soon">soon ...</div>
+                </div>
+                <div class="teaser-card">
+                    <div class="teaser-ticker">pINSIDER</div>
+                    <div class="teaser-soon">soon ...</div>
+                </div>
             </div>
         </div>
     </main>
