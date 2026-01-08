@@ -1002,8 +1002,10 @@ def get_pm_balance() -> Tuple[float, float]:
         if HAS_CLOB_CLIENT:
             client = get_patched_clob_client()
             if client:
-                from py_clob_client.clob_types import AssetType
-                resp = client.get_balance_allowance(asset_type=AssetType.COLLATERAL)
+                from py_clob_client.clob_types import AssetType, BalanceAllowanceParams
+                # Use BalanceAllowanceParams object (py-clob-client 0.34+)
+                params = BalanceAllowanceParams(asset_type=AssetType.COLLATERAL)
+                resp = client.get_balance_allowance(params)
                 if resp and isinstance(resp, dict):
                     cash = float(resp.get("balance", 0))
                     print(f"   📊 CLOB collateral: ${cash:.2f}")
@@ -1062,8 +1064,10 @@ def get_orderbook_bids(token_id: str, verbose: bool = True) -> List[Tuple[float,
     """
     try:
         headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Accept": "application/json",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cache-Control": "no-cache",
         }
         proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
         
@@ -1081,6 +1085,8 @@ def get_orderbook_bids(token_id: str, verbose: bool = True) -> List[Tuple[float,
             response = requests.get(url, headers=headers, proxies=proxies, timeout=15)
         
         if response.status_code != 200:
+            if verbose:
+                print(f"   ⚠️  Orderbook API returned {response.status_code} for token {token_id[:20]}...")
             return []
         
         data = response.json()
