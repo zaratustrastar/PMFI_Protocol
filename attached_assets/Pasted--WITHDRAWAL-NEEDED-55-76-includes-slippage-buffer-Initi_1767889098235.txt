@@ -1,0 +1,32 @@
+⚠️  WITHDRAWAL NEEDED: $55.76 (includes slippage buffer)
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (signer): 0x5087675E...
+   📋 Proxy wallet (funder): 0x9cbc5577...
+   📋 Signature type: 2 (Browser proxy)
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   📋 Wallet: 0x9cbc5577...
+   📋 Private key present: True
+   📋 CLOB host: https://clob.polymarket.com
+   🔑 Using pre-derived API credentials from env vars...
+   ✅ Credentials loaded (key: c4a3fd29...)
+   ✅ L2 auth verified - CLOB client ready for trading
+   ⚠️ CLOB balance error: ClobClient.get_balance_allowance() got an unexpected keyword argument 'asset_type', falling back to RPC
+   ⚠️ Orderbook unavailable for Yes, using API value $1.90
+   ⚠️ Orderbook unavailable for Yes, using API value $1.90
+^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A^[[A   ⚠️ Orderbook unavailable for Yes, using API value $1.89
+   ⚠️ Orderbook unavailable for Yes, using API value $1.75
+^[[B^[[B^[[B   ⚠️ Orderbook unavailable for Yes, using API value $0.80
+   ⚠️ Orderbook unavailable for Yes, using API value $0.77
+   📊 Top positions for liquidation (sorted by value):
+      1. Yes: 16.66 tokens, $16.64
+      2. Yes: 99.90 tokens, $1.90 (API fallback)
+      3. Yes: 99.80 tokens, $1.90 (API fallback)
+      4. Yes: 99.50 tokens, $1.89 (API fallback)
+      5. Yes: 90.00 tokens, $1.75 (API fallback)
+   📊 PM balances: cash=$1.22, positions=$55.24
+   ⚠️ Orderbook unavailable for Yes, using API value $1.90
+   ⚠️ Orderbook unavailable for Yes, using API value $1.90
+   ⚠️ Orderbook unavailable for Yes, using API value $1.89
+   ⚠️ Orderbook unavailable for Yes, using API value $1.75
+^[[A^[[A
