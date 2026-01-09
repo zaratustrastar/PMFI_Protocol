@@ -1,0 +1,133 @@
+### 1) total **positions liq value** (from the list you pasted)
+
+I summed every line that has `→ liq value $X` and **ignored the illiquid “NO BIDS” lines** (since they don’t include a liq value).
+
+**Total liquidatable value = $57.98**
+
+---
+
+### 2) are any positions counted twice (or more) in that list?
+
+From what you pasted, **I don’t see any repeated “Orderbook via CLOB client: <id>…” market IDs** in the sequence, which strongly suggests **no duplicates** *at the market/token-id level*.
+
+That said, **your print format is missing the actual token_id/position_id per line**, so the only safe way to guarantee “no duplicates” is:
+
+* when you build the list, include the **token_id (or market_id)** in each row
+
+* dedupe by that key:
+
+* **Unique key to dedupe by:** `(token_id)` or `(market_id, outcome)`
+
+* **Not safe to dedupe by:** `(outcome, size)` because many different markets can share the same size like `Yes: 99.8`
+
+If you paste just the list of the CLOB token IDs you queried (those huge numbers), I can tell you exactly if any repeats exist.
+
+---
+
+### 3) about the error: `get_balance_allowance() got an unexpected keyword argument 'asset_type'`
+
+This is almost certainly **a calling-convention mismatch** with your installed `py-clob-client` version.
+
+In the Polymarket CLOB docs, the concept is “get balance+allowance for an asset type” (`COLLATERAL` / `CONDITIONAL`). ([Polymarket Documentation][1])
+But in *Python*, many versions of the client expect a **single params object** (or dict) rather than keyword args — so `asset_type=...` blows up.
+
+**Instead of:**
+
+```py
+resp = client.get_balance_allowance(asset_type=AssetType.COLLATERAL)
+```
+
+**Use one of these patterns (depending on your version):**
+
+```py
+# pattern A: pass params object
+from py_clob_client.clob_types import BalanceAllowanceParams, AssetType
+resp = client.get_balance_allowance(BalanceAllowanceParams(asset_type=AssetType.COLLATERAL))
+
+# pattern B: pass dict (some versions)
+resp = client.get_balance_allowance({"asset_type": AssetType.COLLATERAL})
+```
+
+(Your exception text matches exactly what happens when the method signature is `get_balance_allowance(params)` but you pass kwarg `asset_type`.)
+
+---
+
+### 4) what might be incorrect in this log (the **CLOB=$293680.00 vs RPC=$0.29** mismatch)?
+
+This mismatch is *way too big* to be “real funds moved” — it’s usually one (or more) of these:
+
+#### A) you’re checking the **wrong address on-chain**
+
+Your log shows:
+
+* **EOA (signer):** `0x5087…`
+* **Proxy wallet (funder):** `0x9cbc…`
+* **signature_type=2 (proxy)**
+
+For proxy setups, the **funder/proxy** is the address that “holds the funds” for Polymarket trading (per their client guidance). ([GitHub][2])
+
+But your RPC snippet checks:
+
+```py
+balanceOf(PM_PROXY_ADDRESS)
+```
+
+If `PM_PROXY_ADDRESS` is *not* the **funder** (`0x9cbc…`), you’ll read near-zero and think you’re broke.
+
+**Fix:** ensure the address you query on-chain is the same wallet that actually holds USDC for trading (in your case, very likely the **funder/proxy**).
+
+#### B) you’re parsing the CLOB “balance” in the wrong units
+
+CLOB returns `balance` as a **string**. ([Polymarket Documentation][1])
+Many systems return collateral balances in “minor units” (cents or 6-decimals) — and your number `293680` is *suspiciously* like:
+
+* **$2,936.80** if it’s cents
+* **$0.293680** if it’s 6-decimals (less likely given the formatting you printed)
+
+**Fix:** print the raw `resp` and confirm what unit it’s in before `float(...)`. Use `Decimal`, and only scale once you know the unit.
+
+#### C) you might be accidentally using **allowance** as “balance”
+
+Response contains both:
+
+* `balance`
+* `allowance` ([Polymarket Documentation][1])
+
+If your code ever picks the wrong field (or a dict gets reshaped), you can display an allowance number as if it’s cash.
+
+**Fix:** log both explicitly:
+
+```py
+print("raw resp:", resp)
+print("balance:", resp["balance"], "allowance:", resp["allowance"])
+```
+
+---
+
+### 5) quick “sanity checklist” (fast to pinpoint the bug)
+
+1. Print:
+
+* `client.funder`
+* `PM_PROXY_ADDRESS`
+* the address you use in `balanceOf(...)`
+
+They must match (for proxy setups, it should almost always be the **funder**).
+
+2. Print the **raw** CLOB response:
+
+* confirm whether `balance="293680"` means cents, micros, or dollars.
+
+3. Confirm you’re calling `get_balance_allowance(...)` in the **supported way** for your installed version (params object / dict, not kwarg).
+
+---
+
+If you paste:
+
+* what `PM_PROXY_ADDRESS` is set to, and
+* one raw `resp` you get back from `get_balance_allowance(...)`
+
+…I can tell you immediately whether the mismatch is (A) wrong address, (B) wrong unit scaling, or (C) wrong field.
+
+[1]: https://docs.polymarket.com/developers/CLOB/clients/methods-l2 "L2 Methods - Polymarket Documentation"
+[2]: https://github.com/Polymarket/py-clob-client "GitHub - Polymarket/py-clob-client: Python client for the Polymarket CLOB"
