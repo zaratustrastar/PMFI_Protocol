@@ -984,8 +984,8 @@ def get_pm_balance() -> Tuple[float, float]:
     """
     Get Polymarket withdrawable cash (collateral) and position value.
     
-    Uses CLOB L2 get_balance_allowance(COLLATERAL) for accurate cash balance.
-    Falls back to data-api for position value.
+    V7.3.3 FIX: Uses Polygon RPC as PRIMARY source for on-chain USDC balance (like bot_v7).
+    CLOB API is only used as a sanity check - it can return stale data.
     
     Returns:
         (withdrawable_cash, position_value)
@@ -997,7 +997,15 @@ def get_pm_balance() -> Tuple[float, float]:
     cash = 0.0
     positions = 0.0
     
-    # Get cash balance via CLOB L2 API (authoritative for collateral)
+    # PRIMARY: Get cash balance via Polygon RPC (on-chain truth)
+    try:
+        cash, _ = get_pm_balance_from_rpc()
+        print(f"   📊 On-chain USDC (Polygon RPC): ${cash:.2f}")
+    except Exception as e:
+        print(f"   ❌ RPC balance error: {e}")
+        cash = 0.0
+    
+    # SANITY CHECK: Compare with CLOB API (optional, may be stale)
     try:
         if HAS_CLOB_CLIENT:
             client = get_patched_clob_client()
@@ -1005,20 +1013,21 @@ def get_pm_balance() -> Tuple[float, float]:
                 from py_clob_client.clob_types import BalanceAllowanceParams, AssetType
                 params = BalanceAllowanceParams(asset_type=AssetType.COLLATERAL)
                 resp = client.get_balance_allowance(params)
-                if resp and hasattr(resp, 'balance'):
-                    cash = float(resp.balance) if resp.balance else 0.0
-                    print(f"   📊 CLOB collateral: ${cash:.2f}")
-                else:
-                    print(f"   ⚠️ CLOB balance response empty/invalid: {resp}")
-            else:
-                print("   ⚠️ CLOB client not available, falling back to RPC")
-                cash, _ = get_pm_balance_from_rpc()
-        else:
-            print("   ⚠️ py-clob-client not installed, falling back to RPC")
-            cash, _ = get_pm_balance_from_rpc()
+                clob_balance = 0.0
+                if resp:
+                    if isinstance(resp, dict):
+                        clob_balance = float(resp.get('balance', 0))
+                    elif hasattr(resp, 'balance'):
+                        clob_balance = float(resp.balance) if resp.balance else 0.0
+                
+                if clob_balance > 0:
+                    delta = abs(cash - clob_balance)
+                    if delta > 1.0:
+                        print(f"   ⚠️ CLOB/RPC mismatch: CLOB=${clob_balance:.2f} vs RPC=${cash:.2f} (delta ${delta:.2f})")
+                    else:
+                        print(f"   ✅ CLOB confirms: ${clob_balance:.2f}")
     except Exception as e:
-        print(f"   ⚠️ CLOB balance error: {e}, falling back to RPC")
-        cash, _ = get_pm_balance_from_rpc()
+        print(f"   ⚠️ CLOB sanity check failed: {e}")
     
     # Get position value using VWAP sweep (accurate liquidation value for NAV)
     try:
