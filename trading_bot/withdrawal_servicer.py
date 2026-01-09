@@ -1002,10 +1002,11 @@ def get_pm_balance() -> Tuple[float, float]:
         if HAS_CLOB_CLIENT:
             client = get_patched_clob_client()
             if client:
-                from py_clob_client.clob_types import AssetType
-                resp = client.get_balance_allowance(asset_type=AssetType.COLLATERAL)
-                if resp and isinstance(resp, dict):
-                    cash = float(resp.get("balance", 0))
+                from py_clob_client.clob_types import BalanceAllowanceParams, AssetType
+                params = BalanceAllowanceParams(asset_type=AssetType.COLLATERAL)
+                resp = client.get_balance_allowance(params)
+                if resp and hasattr(resp, 'balance'):
+                    cash = float(resp.balance) if resp.balance else 0.0
                     print(f"   📊 CLOB collateral: ${cash:.2f}")
                 else:
                     print(f"   ⚠️ CLOB balance response empty/invalid: {resp}")
