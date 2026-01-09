@@ -1068,8 +1068,58 @@ def get_orderbook_bids(token_id: str, verbose: bool = True) -> List[Tuple[float,
     """
     Get full bid ladder from orderbook, sorted highest to lowest price.
     
+    V7.3.3 FIX: Uses authenticated CLOB client (like bot_v7) instead of raw HTTP.
+    This avoids Cloudflare blocking that caused "Orderbook unavailable" errors.
+    
     Returns: List of (price, size) tuples sorted by price descending
     """
+    token_preview = token_id[:20] + "..." if len(token_id) > 20 else token_id
+    
+    # Method 1: Use patched CLOB client's native get_order_book (preferred - like bot_v7)
+    try:
+        client = get_patched_clob_client()
+        if client:
+            if verbose:
+                print(f"   📖 Orderbook via CLOB client: {token_preview}")
+            data = client.get_order_book(token_id)
+            
+            # Handle both dict and OrderBookSummary object responses
+            if hasattr(data, 'bids') and hasattr(data, 'asks'):
+                raw_bids = data.bids if data.bids else []
+            else:
+                raw_bids = data.get("bids", []) if isinstance(data, dict) else []
+            
+            # Parse bid entries (could be OrderBookLevel objects or dicts)
+            bid_ladder = []
+            for b in raw_bids:
+                if hasattr(b, 'price') and hasattr(b, 'size'):
+                    price = float(b.price)
+                    size = float(b.size)
+                else:
+                    price = float(b.get("price", 0))
+                    size = float(b.get("size", 0))
+                if price > 0 and size > 0:
+                    bid_ladder.append((price, size))
+            
+            bid_ladder.sort(key=lambda x: x[0], reverse=True)
+            
+            if verbose:
+                print(f"   📊 Got {len(bid_ladder)} bids")
+            
+            if bid_ladder:
+                return bid_ladder
+            
+    except Exception as e:
+        error_msg = str(e)
+        if "404" in error_msg:
+            if verbose:
+                print(f"   ❌ Orderbook 404: token_id may be wrong format or market resolved")
+            return []
+        else:
+            if verbose:
+                print(f"   ⚠️ CLOB client orderbook error: {e}, trying HTTP fallback...")
+    
+    # Method 2: HTTP fallback (may be blocked by Cloudflare)
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
