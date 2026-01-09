@@ -222,6 +222,52 @@ BASE_RPC_FALLBACKS = [
     "https://1rpc.io/base",
 ]
 
+POLYGON_RPC_FALLBACKS = [
+    "https://polygon-rpc.com",
+    "https://polygon.llamarpc.com",
+    "https://1rpc.io/matic",
+]
+
+
+def get_onchain_proxy_balance() -> float:
+    """
+    Get the actual on-chain USDC.e balance of the PM proxy wallet on Polygon.
+    This is the SOURCE OF TRUTH - use this instead of CLOB API balance.
+    
+    Returns: USDC balance (float, 6 decimals)
+    """
+    if not PM_PROXY_ADDRESS:
+        print("⚠️  PM_PROXY_ADDRESS not set, cannot check on-chain balance")
+        return 0.0
+    
+    rpcs_to_try = [POLYGON_RPC_URL] + POLYGON_RPC_FALLBACKS
+    
+    for rpc_url in rpcs_to_try:
+        try:
+            w3 = Web3(Web3.HTTPProvider(rpc_url, request_kwargs={'timeout': 10}))
+            if not w3.is_connected():
+                continue
+            
+            usdc_contract = w3.eth.contract(
+                address=Web3.to_checksum_address(USDC_POLYGON),
+                abi=ERC20_ABI
+            )
+            
+            balance_raw = usdc_contract.functions.balanceOf(
+                Web3.to_checksum_address(PM_PROXY_ADDRESS)
+            ).call()
+            
+            balance_usdc = balance_raw / 1e6
+            print(f"   💰 On-chain proxy balance: ${balance_usdc:.2f} (via {rpc_url[:40]}...)")
+            return balance_usdc
+            
+        except Exception as e:
+            print(f"   ⚠️ RPC {rpc_url[:30]}... failed: {e}")
+            continue
+    
+    print("❌ All Polygon RPCs failed for balance check")
+    return 0.0
+
 
 def get_patched_clob_client():
     """
@@ -1366,6 +1412,9 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
     Uses safe_proxy_withdraw.ts (with @polymarket/builder-relayer-client) 
     for Safe proxy wallet support.
     
+    V7.3.3 FIX: Now checks ON-CHAIN balance first (source of truth) instead of
+    trusting CLOB API balance which can be stale/incorrect.
+    
     Returns:
         (success, request_id, amount_bridged)
     """
@@ -1377,10 +1426,26 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
     
     print(f"\n💸 WITHDRAW: ${amount_usdc:.2f} from PM → Vault")
     
+    onchain_balance = get_onchain_proxy_balance()
+    
+    if onchain_balance < MIN_WITHDRAWAL_USDC:
+        print(f"❌ On-chain balance ${onchain_balance:.2f} is below minimum ${MIN_WITHDRAWAL_USDC}")
+        print(f"   CLOB may show higher balance but on-chain is the source of truth")
+        print(f"   Positions may need to settle first, or liquidation is required")
+        return False, "", 0.0
+    
+    actual_amount = min(amount_usdc, onchain_balance)
+    if actual_amount < MIN_WITHDRAWAL_USDC:
+        print(f"❌ On-chain balance ${onchain_balance:.2f} is insufficient for minimum withdrawal")
+        return False, "", 0.0
+    
+    if actual_amount < amount_usdc:
+        print(f"   ⚠️ Capped to on-chain balance: ${actual_amount:.2f} (requested ${amount_usdc:.2f})")
+    
     cmd_args = [
         "npx", "tsx", 
         os.path.join(os.path.dirname(__file__), "safe_proxy_withdraw.ts"),
-        "withdraw", str(amount_usdc)
+        "withdraw", str(actual_amount)
     ]
     if dry_run:
         cmd_args.append("--dry-run")
@@ -1417,16 +1482,16 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
                 print("⚠️  Withdraw reported success but no requestId/txHash found")
                 send_telegram_alert(
                     f"⚠️ Bridge initiated but no tracking ID\n"
-                    f"Amount: ${amount_usdc:.2f}\n"
+                    f"Amount: ${actual_amount:.2f}\n"
                     f"Check Relay dashboard manually",
                     is_error=True
                 )
-            return True, request_id, amount_usdc
+            return True, request_id, actual_amount
         else:
             print(f"❌ Withdraw script failed (exit {result.returncode})")
             send_telegram_alert(
                 f"❌ Withdraw script failed\n"
-                f"Amount: ${amount_usdc:.2f}\n"
+                f"Amount: ${actual_amount:.2f}\n"
                 f"Exit code: {result.returncode}",
                 is_error=True
             )
@@ -1436,7 +1501,7 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
         print("❌ Withdraw script timed out (5 min)")
         send_telegram_alert(
             f"❌ Withdraw script timeout\n"
-            f"Amount: ${amount_usdc:.2f}\n"
+            f"Amount: ${actual_amount:.2f}\n"
             f"Manual check required",
             is_error=True
         )
