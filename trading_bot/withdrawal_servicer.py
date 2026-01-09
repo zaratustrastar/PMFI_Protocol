@@ -1174,20 +1174,19 @@ def calculate_liquidation_value(token_id: str, size: float, verbose: bool = True
 
 def get_liquidatable_cash() -> float:
     """
-    Calculate total immediately liquidatable cash from positions.
-    Uses VWAP sweep through orderbook depth.
+    Estimate total liquidatable cash from positions using API-reported values.
     
-    Returns: Total USDC that can be obtained from liquidation
+    OPTIMIZED: Uses API values (no orderbook calls) to avoid rate limiting.
+    This is an estimate - actual liquidation proceeds may vary.
+    
+    Returns: Estimated USDC that can be obtained from liquidation
     """
     positions = get_positions_for_liquidation()
     total = 0.0
     
     for pos in positions:
-        token_id = pos.get("token_id")
-        size = pos.get("size", 0)
-        if token_id and size > 0:
-            liq_value = calculate_liquidation_value(token_id, size, verbose=False)
-            total += liq_value
+        # Use API-reported value (already calculated in get_positions_for_liquidation)
+        total += pos.get("api_value", 0)
     
     return total
 
@@ -1271,9 +1270,12 @@ def get_orderbook_best_bid(token_id: str) -> Tuple[float, float]:
 
 def get_positions_for_liquidation() -> List[Dict]:
     """
-    Get list of positions sorted by liquidation value (largest first).
+    Get list of positions sorted by API-reported value (largest first).
     
-    Returns list of dicts with: token_id, size, best_bid, bid_depth, liq_value
+    OPTIMIZED: Does NOT fetch orderbooks - uses API values for sorting.
+    Orderbooks are fetched lazily only for positions we actually sell.
+    
+    Returns list of dicts with: token_id, size, api_value, outcome
     """
     if not PM_PROXY_ADDRESS:
         return []
@@ -1325,51 +1327,26 @@ def get_positions_for_liquidation() -> List[Dict]:
             if not token_id:
                 continue
             
-            # Get orderbook bids ONCE (avoid duplicate API calls)
-            bids = get_orderbook_bids(token_id, verbose=False)
-            best_bid = bids[0][0] if bids else 0.0
-            
-            # Calculate VWAP liquidation value inline (reuse bids)
-            liq_value = 0.0
-            if bids:
-                remaining = size
-                for price, depth in bids:
-                    if remaining <= 0:
-                        break
-                    fill = min(remaining, depth)
-                    liq_value += fill * price
-                    remaining -= fill
-            
-            # V7.3.3 FIX: Fallback to API-reported value when orderbook fails
-            # This prevents large positions from being ranked below dust when bids are unavailable
+            # Use API-reported value for sorting (NO orderbook calls here)
             api_value = float(pos.get("value", 0))
             avg_price = float(pos.get("avgPrice", 0))
-            fallback_value = api_value if api_value > 0 else (size * avg_price)
-            
-            # Use liq_value if available, otherwise fall back to API value
-            effective_liq_value = liq_value if liq_value > 0 else fallback_value
-            used_fallback = liq_value <= 0 and fallback_value > 0
-            
-            if used_fallback:
-                print(f"   ⚠️ Orderbook unavailable for {pos.get('outcome', 'Unknown')[:30]}, using API value ${fallback_value:.2f}")
+            estimated_value = api_value if api_value > 0 else (size * avg_price)
             
             positions.append({
                 "token_id": token_id,
                 "outcome": pos.get("outcome", "Unknown"),
                 "size": size,
-                "best_bid": best_bid,
-                "liq_value": effective_liq_value,
-                "used_fallback": used_fallback,
+                "api_value": estimated_value,
             })
         
-        # Sort by effective liquidation value (largest first)
-        positions.sort(key=lambda x: x["liq_value"], reverse=True)
+        # Sort by API-reported value (largest first) - prioritize high-value positions
+        positions.sort(key=lambda x: x["api_value"], reverse=True)
         
         # Log top positions for debugging
-        print(f"   📊 Top positions for liquidation (sorted by value):")
-        for i, p in enumerate(positions[:5]):
-            fallback_note = " (API fallback)" if p.get("used_fallback") else ""
-            print(f"      {i+1}. {p['outcome'][:35]}: {p['size']:.2f} tokens, ${p['liq_value']:.2f}{fallback_note}")
+        if positions:
+            print(f"   📊 Top positions for liquidation (sorted by API value):")
+            for i, p in enumerate(positions[:5]):
+                print(f"      {i+1}. {p['outcome'][:35]}: {p['size']:.2f} tokens, ~${p['api_value']:.2f}")
         
         return positions
         
@@ -1504,27 +1481,26 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
     print(f"\n🔥 LIQUIDATE: Need ${capped_needed:.2f} USDC (capped from ${needed_usdc:.2f})")
     print(f"   Initial PM cash: ${initial_pm_cash:.2f}")
     
+    total_obtained = 0.0
+    still_needed = capped_needed
+    
+    # V7.3.3 FIX: Check cash FIRST before fetching positions (avoids unnecessary API calls)
+    if initial_pm_cash >= still_needed:
+        print(f"   💵 Upfront check: PM cash ${initial_pm_cash:.2f} >= need ${still_needed:.2f}, skipping liquidation!")
+        print(f"   ℹ️  Caller should withdraw cash instead")
+        return 0.0  # Signal to caller: no liquidation needed, use cash
+    elif initial_pm_cash > 0.01:  # Any meaningful cash reduces the target
+        print(f"   💵 Partial cash available: ${initial_pm_cash:.2f}, reducing liquidation target from ${still_needed:.2f}")
+        still_needed -= initial_pm_cash
+        print(f"   📉 New liquidation target: ${still_needed:.2f}")
+    
+    # Only fetch positions AFTER we've confirmed liquidation is needed
     positions = get_positions_for_liquidation()
     if not positions:
         print("   No positions available to liquidate")
         return 0.0
     
     print(f"   {len(positions)} positions available for liquidation")
-    
-    total_obtained = 0.0
-    still_needed = capped_needed
-    
-    # V7.3.3 FIX: Upfront guard - ALWAYS reduce target by available cash, regardless of MIN threshold
-    # This prevents over-liquidation when any amount of cash is available
-    if initial_pm_cash >= still_needed:
-        print(f"   💵 Upfront check: PM cash ${initial_pm_cash:.2f} >= need ${still_needed:.2f}, skipping liquidation!")
-        print(f"   ℹ️  Caller should withdraw cash instead")
-        return 0.0  # Signal to caller: no liquidation needed, use cash
-    elif initial_pm_cash > 0.01:  # Any meaningful cash reduces the target (not MIN_WITHDRAWAL)
-        # Partial coverage: reduce the liquidation target by available cash
-        print(f"   💵 Partial cash available: ${initial_pm_cash:.2f}, reducing liquidation target from ${still_needed:.2f}")
-        still_needed -= initial_pm_cash
-        print(f"   📉 New liquidation target: ${still_needed:.2f}")
     
     # Sweep loop constants
     MAX_SWEEPS_PER_POSITION = 20  # Max iterations per position to prevent infinite loops
@@ -2093,7 +2069,7 @@ def servicer_iteration(
     print(f"\n📊 Polymarket:")
     print(f"   Cash: ${pm_cash:.2f}")
     print(f"   Positions (NAV): ${pm_positions:.2f}")
-    print(f"   Liquidatable: ${liquidatable_positions:.2f} (VWAP)")
+    print(f"   Liquidatable: ~${liquidatable_positions:.2f} (API est)")
     
     withdraw_amount = min(needed, pm_cash)
     
