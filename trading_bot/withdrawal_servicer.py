@@ -1016,9 +1016,9 @@ def get_pm_balance() -> Tuple[float, float]:
                 clob_balance = 0.0
                 if resp:
                     if isinstance(resp, dict):
-                        clob_balance = float(resp.get('balance', 0))
+                        clob_balance = float(resp.get('balance', 0)) / 1e6  # micro-USDC to USDC
                     elif hasattr(resp, 'balance'):
-                        clob_balance = float(resp.balance) if resp.balance else 0.0
+                        clob_balance = float(resp.balance) / 1e6 if resp.balance else 0.0  # micro-USDC to USDC
                 
                 if clob_balance > 0:
                     delta = abs(cash - clob_balance)
