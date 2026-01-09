@@ -222,52 +222,6 @@ BASE_RPC_FALLBACKS = [
     "https://1rpc.io/base",
 ]
 
-POLYGON_RPC_FALLBACKS = [
-    "https://polygon-rpc.com",
-    "https://polygon.llamarpc.com",
-    "https://1rpc.io/matic",
-]
-
-
-def get_onchain_proxy_balance() -> float:
-    """
-    Get the actual on-chain USDC.e balance of the PM proxy wallet on Polygon.
-    This is the SOURCE OF TRUTH - use this instead of CLOB API balance.
-    
-    Returns: USDC balance (float, 6 decimals)
-    """
-    if not PM_PROXY_ADDRESS:
-        print("⚠️  PM_PROXY_ADDRESS not set, cannot check on-chain balance")
-        return 0.0
-    
-    rpcs_to_try = [POLYGON_RPC_URL] + POLYGON_RPC_FALLBACKS
-    
-    for rpc_url in rpcs_to_try:
-        try:
-            w3 = Web3(Web3.HTTPProvider(rpc_url, request_kwargs={'timeout': 10}))
-            if not w3.is_connected():
-                continue
-            
-            usdc_contract = w3.eth.contract(
-                address=Web3.to_checksum_address(USDC_POLYGON),
-                abi=ERC20_ABI
-            )
-            
-            balance_raw = usdc_contract.functions.balanceOf(
-                Web3.to_checksum_address(PM_PROXY_ADDRESS)
-            ).call()
-            
-            balance_usdc = balance_raw / 1e6
-            print(f"   💰 On-chain proxy balance: ${balance_usdc:.2f} (via {rpc_url[:40]}...)")
-            return balance_usdc
-            
-        except Exception as e:
-            print(f"   ⚠️ RPC {rpc_url[:30]}... failed: {e}")
-            continue
-    
-    print("❌ All Polygon RPCs failed for balance check")
-    return 0.0
-
 
 def get_patched_clob_client():
     """
@@ -1048,10 +1002,8 @@ def get_pm_balance() -> Tuple[float, float]:
         if HAS_CLOB_CLIENT:
             client = get_patched_clob_client()
             if client:
-                from py_clob_client.clob_types import AssetType, BalanceAllowanceParams
-                # Use BalanceAllowanceParams object (py-clob-client 0.34+)
-                params = BalanceAllowanceParams(asset_type=AssetType.COLLATERAL)
-                resp = client.get_balance_allowance(params)
+                from py_clob_client.clob_types import AssetType
+                resp = client.get_balance_allowance(asset_type=AssetType.COLLATERAL)
                 if resp and isinstance(resp, dict):
                     cash = float(resp.get("balance", 0))
                     print(f"   📊 CLOB collateral: ${cash:.2f}")
@@ -1067,37 +1019,12 @@ def get_pm_balance() -> Tuple[float, float]:
         print(f"   ⚠️ CLOB balance error: {e}, falling back to RPC")
         cash, _ = get_pm_balance_from_rpc()
     
-    # Get position value from data-api (no orderbook calls - fast and doesn't hit rate limits)
+    # Get position value using VWAP sweep (accurate liquidation value for NAV)
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-            "Accept": "application/json",
-        }
-        proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
-        
-        url = f"https://data-api.polymarket.com/positions?user={PM_PROXY_ADDRESS.lower()}"
-        
-        if BYPASS_METHOD == "curl_cffi":
-            response = curl_requests.get(
-                url,
-                headers=headers,
-                proxies=proxies,
-                impersonate="chrome120",
-                timeout=30
-            )
-        else:
-            response = requests.get(url, headers=headers, proxies=proxies, timeout=30)
-        
-        if response.status_code == 200:
-            positions_data = response.json()
-            if isinstance(positions_data, list):
-                positions = sum(float(p.get("value", 0)) for p in positions_data if isinstance(p, dict))
-            elif isinstance(positions_data, dict) and "positions" in positions_data:
-                positions = sum(float(p.get("value", 0)) for p in positions_data["positions"] if isinstance(p, dict))
-        else:
-            print(f"   ⚠️ Positions API returned {response.status_code}")
+        positions_list = get_positions_for_liquidation()
+        positions = sum(p.get("liq_value", 0) for p in positions_list)
     except Exception as e:
-        print(f"   ⚠️ Position valuation error: {e}")
+        print(f"   ⚠️ Position VWAP valuation error: {e}")
         positions = 0.0
     
     print(f"   📊 PM balances: cash=${cash:.2f}, positions=${positions:.2f}")
@@ -1135,10 +1062,8 @@ def get_orderbook_bids(token_id: str, verbose: bool = True) -> List[Tuple[float,
     """
     try:
         headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
             "Accept": "application/json",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Cache-Control": "no-cache",
         }
         proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
         
@@ -1156,8 +1081,6 @@ def get_orderbook_bids(token_id: str, verbose: bool = True) -> List[Tuple[float,
             response = requests.get(url, headers=headers, proxies=proxies, timeout=15)
         
         if response.status_code != 200:
-            if verbose:
-                print(f"   ⚠️  Orderbook API returned {response.status_code} for token {token_id[:20]}...")
             return []
         
         data = response.json()
@@ -1220,19 +1143,20 @@ def calculate_liquidation_value(token_id: str, size: float, verbose: bool = True
 
 def get_liquidatable_cash() -> float:
     """
-    Estimate total liquidatable cash from positions using API-reported values.
+    Calculate total immediately liquidatable cash from positions.
+    Uses VWAP sweep through orderbook depth.
     
-    OPTIMIZED: Uses API values (no orderbook calls) to avoid rate limiting.
-    This is an estimate - actual liquidation proceeds may vary.
-    
-    Returns: Estimated USDC that can be obtained from liquidation
+    Returns: Total USDC that can be obtained from liquidation
     """
     positions = get_positions_for_liquidation()
     total = 0.0
     
     for pos in positions:
-        # Use API-reported value (already calculated in get_positions_for_liquidation)
-        total += pos.get("api_value", 0)
+        token_id = pos.get("token_id")
+        size = pos.get("size", 0)
+        if token_id and size > 0:
+            liq_value = calculate_liquidation_value(token_id, size, verbose=False)
+            total += liq_value
     
     return total
 
@@ -1316,12 +1240,9 @@ def get_orderbook_best_bid(token_id: str) -> Tuple[float, float]:
 
 def get_positions_for_liquidation() -> List[Dict]:
     """
-    Get list of positions sorted by API-reported value (largest first).
+    Get list of positions sorted by liquidation value (largest first).
     
-    OPTIMIZED: Does NOT fetch orderbooks - uses API values for sorting.
-    Orderbooks are fetched lazily only for positions we actually sell.
-    
-    Returns list of dicts with: token_id, size, api_value, outcome
+    Returns list of dicts with: token_id, size, best_bid, bid_depth, liq_value
     """
     if not PM_PROXY_ADDRESS:
         return []
@@ -1373,26 +1294,43 @@ def get_positions_for_liquidation() -> List[Dict]:
             if not token_id:
                 continue
             
-            # Use API-reported value for sorting (NO orderbook calls here)
+            # Use VWAP sweep for accurate liquidation value (what you'd actually get)
+            liq_value = calculate_liquidation_value(token_id, size, verbose=False)
+            
+            # V7.3.3 FIX: Fallback to API-reported value when orderbook fails
+            # This prevents large positions from being ranked below dust when bids are unavailable
             api_value = float(pos.get("value", 0))
             avg_price = float(pos.get("avgPrice", 0))
-            estimated_value = api_value if api_value > 0 else (size * avg_price)
+            fallback_value = api_value if api_value > 0 else (size * avg_price)
+            
+            # Use liq_value if available, otherwise fall back to API value
+            effective_liq_value = liq_value if liq_value > 0 else fallback_value
+            used_fallback = liq_value <= 0 and fallback_value > 0
+            
+            if used_fallback:
+                print(f"   ⚠️ Orderbook unavailable for {pos.get('outcome', 'Unknown')[:30]}, using API value ${fallback_value:.2f}")
+            
+            # Get best bid for reference (used in liquidation execution)
+            bids = get_orderbook_bids(token_id, verbose=False)
+            best_bid = bids[0][0] if bids else 0.0
             
             positions.append({
                 "token_id": token_id,
                 "outcome": pos.get("outcome", "Unknown"),
                 "size": size,
-                "api_value": estimated_value,
+                "best_bid": best_bid,
+                "liq_value": effective_liq_value,
+                "used_fallback": used_fallback,
             })
         
-        # Sort by API-reported value (largest first) - prioritize high-value positions
-        positions.sort(key=lambda x: x["api_value"], reverse=True)
+        # Sort by effective liquidation value (largest first)
+        positions.sort(key=lambda x: x["liq_value"], reverse=True)
         
         # Log top positions for debugging
-        if positions:
-            print(f"   📊 Top positions for liquidation (sorted by API value):")
-            for i, p in enumerate(positions[:5]):
-                print(f"      {i+1}. {p['outcome'][:35]}: {p['size']:.2f} tokens, ~${p['api_value']:.2f}")
+        print(f"   📊 Top positions for liquidation (sorted by value):")
+        for i, p in enumerate(positions[:5]):
+            fallback_note = " (API fallback)" if p.get("used_fallback") else ""
+            print(f"      {i+1}. {p['outcome'][:35]}: {p['size']:.2f} tokens, ${p['liq_value']:.2f}{fallback_note}")
         
         return positions
         
@@ -1412,9 +1350,6 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
     Uses safe_proxy_withdraw.ts (with @polymarket/builder-relayer-client) 
     for Safe proxy wallet support.
     
-    V7.3.3 FIX: Now checks ON-CHAIN balance first (source of truth) instead of
-    trusting CLOB API balance which can be stale/incorrect.
-    
     Returns:
         (success, request_id, amount_bridged)
     """
@@ -1426,26 +1361,10 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
     
     print(f"\n💸 WITHDRAW: ${amount_usdc:.2f} from PM → Vault")
     
-    onchain_balance = get_onchain_proxy_balance()
-    
-    if onchain_balance < MIN_WITHDRAWAL_USDC:
-        print(f"❌ On-chain balance ${onchain_balance:.2f} is below minimum ${MIN_WITHDRAWAL_USDC}")
-        print(f"   CLOB may show higher balance but on-chain is the source of truth")
-        print(f"   Positions may need to settle first, or liquidation is required")
-        return False, "", 0.0
-    
-    actual_amount = min(amount_usdc, onchain_balance)
-    if actual_amount < MIN_WITHDRAWAL_USDC:
-        print(f"❌ On-chain balance ${onchain_balance:.2f} is insufficient for minimum withdrawal")
-        return False, "", 0.0
-    
-    if actual_amount < amount_usdc:
-        print(f"   ⚠️ Capped to on-chain balance: ${actual_amount:.2f} (requested ${amount_usdc:.2f})")
-    
     cmd_args = [
         "npx", "tsx", 
         os.path.join(os.path.dirname(__file__), "safe_proxy_withdraw.ts"),
-        "withdraw", str(actual_amount)
+        "withdraw", str(amount_usdc)
     ]
     if dry_run:
         cmd_args.append("--dry-run")
@@ -1482,16 +1401,16 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
                 print("⚠️  Withdraw reported success but no requestId/txHash found")
                 send_telegram_alert(
                     f"⚠️ Bridge initiated but no tracking ID\n"
-                    f"Amount: ${actual_amount:.2f}\n"
+                    f"Amount: ${amount_usdc:.2f}\n"
                     f"Check Relay dashboard manually",
                     is_error=True
                 )
-            return True, request_id, actual_amount
+            return True, request_id, amount_usdc
         else:
             print(f"❌ Withdraw script failed (exit {result.returncode})")
             send_telegram_alert(
                 f"❌ Withdraw script failed\n"
-                f"Amount: ${actual_amount:.2f}\n"
+                f"Amount: ${amount_usdc:.2f}\n"
                 f"Exit code: {result.returncode}",
                 is_error=True
             )
@@ -1501,7 +1420,7 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
         print("❌ Withdraw script timed out (5 min)")
         send_telegram_alert(
             f"❌ Withdraw script timeout\n"
-            f"Amount: ${actual_amount:.2f}\n"
+            f"Amount: ${amount_usdc:.2f}\n"
             f"Manual check required",
             is_error=True
         )
@@ -1546,26 +1465,27 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
     print(f"\n🔥 LIQUIDATE: Need ${capped_needed:.2f} USDC (capped from ${needed_usdc:.2f})")
     print(f"   Initial PM cash: ${initial_pm_cash:.2f}")
     
-    total_obtained = 0.0
-    still_needed = capped_needed
-    
-    # V7.3.3 FIX: Check cash FIRST before fetching positions (avoids unnecessary API calls)
-    if initial_pm_cash >= still_needed:
-        print(f"   💵 Upfront check: PM cash ${initial_pm_cash:.2f} >= need ${still_needed:.2f}, skipping liquidation!")
-        print(f"   ℹ️  Caller should withdraw cash instead")
-        return 0.0  # Signal to caller: no liquidation needed, use cash
-    elif initial_pm_cash > 0.01:  # Any meaningful cash reduces the target
-        print(f"   💵 Partial cash available: ${initial_pm_cash:.2f}, reducing liquidation target from ${still_needed:.2f}")
-        still_needed -= initial_pm_cash
-        print(f"   📉 New liquidation target: ${still_needed:.2f}")
-    
-    # Only fetch positions AFTER we've confirmed liquidation is needed
     positions = get_positions_for_liquidation()
     if not positions:
         print("   No positions available to liquidate")
         return 0.0
     
     print(f"   {len(positions)} positions available for liquidation")
+    
+    total_obtained = 0.0
+    still_needed = capped_needed
+    
+    # V7.3.3 FIX: Upfront guard - ALWAYS reduce target by available cash, regardless of MIN threshold
+    # This prevents over-liquidation when any amount of cash is available
+    if initial_pm_cash >= still_needed:
+        print(f"   💵 Upfront check: PM cash ${initial_pm_cash:.2f} >= need ${still_needed:.2f}, skipping liquidation!")
+        print(f"   ℹ️  Caller should withdraw cash instead")
+        return 0.0  # Signal to caller: no liquidation needed, use cash
+    elif initial_pm_cash > 0.01:  # Any meaningful cash reduces the target (not MIN_WITHDRAWAL)
+        # Partial coverage: reduce the liquidation target by available cash
+        print(f"   💵 Partial cash available: ${initial_pm_cash:.2f}, reducing liquidation target from ${still_needed:.2f}")
+        still_needed -= initial_pm_cash
+        print(f"   📉 New liquidation target: ${still_needed:.2f}")
     
     # Sweep loop constants
     MAX_SWEEPS_PER_POSITION = 20  # Max iterations per position to prevent infinite loops
@@ -2134,7 +2054,7 @@ def servicer_iteration(
     print(f"\n📊 Polymarket:")
     print(f"   Cash: ${pm_cash:.2f}")
     print(f"   Positions (NAV): ${pm_positions:.2f}")
-    print(f"   Liquidatable: ~${liquidatable_positions:.2f} (API est)")
+    print(f"   Liquidatable: ${liquidatable_positions:.2f} (VWAP)")
     
     withdraw_amount = min(needed, pm_cash)
     
