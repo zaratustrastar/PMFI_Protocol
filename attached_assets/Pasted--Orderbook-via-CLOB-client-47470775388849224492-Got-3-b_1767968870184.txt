@@ -1,0 +1,73 @@
+   📖 Orderbook via CLOB client: 47470775388849224492...
+   📊 Got 3 bids, 14 asks
+   ✅ No: 1.0 → liq value $0.07
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.00
+❌ Error fetching cash: HTTP Error 404: 
+📡 Fetching open orders via L2 auth...
+45.144.12.0 - - [09/Jan/2026 14:25:29] "GET / HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:25:29] "GET /main.js HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:25:29] "GET /psniper-logo.png HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:25:30] "GET /abis/usdc.json?v=1767968729907 HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:25:30] "GET /abis/vault.json?v=1767968729907 HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:25:30] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:25:31] "GET /favicon.ico HTTP/1.1" 404 -
+45.144.12.0 - - [09/Jan/2026 14:25:31] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:25:31] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:25:38] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:25:42] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:25:52] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:26:02] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:26:03] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:26:12] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:26:22] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:26:32] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:26:33] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1767968850)
+127.0.0.1 - - [09/Jan/2026 14:26:36] "GET /sign-nav HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:26:38] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:27:03] "GET /price HTTP/1.1" 200 -
+❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+⚠️ Reserved balance will be 0 - this may cause pendingCredit to spike when orders are placed
+🔒 Reserved in open buy orders: $0.00
+   ⚠️ NEGATIVE PENDING WARNING: raw=-72.24 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=0.00, pos=36.60, reserved=0.00, inFlight=0.00, buffer=43.77
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $8.12
+   - pmCash:         $0.00
+   - reserved:       $0.00
+   - positionsLiq:   $36.60
+   - inFlight:       $0.00
+   - vaultBuffer:    $43.77
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=80.36 != expectedAssets=8.12
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.00
+   • Reserved (open orders):   $0.00
+   • Vault buffer (on-chain):  $43.77
+   • Expected assets:          $8.12
+   • Positions (liquidation):  $36.60
+   • Positions (cost basis):   $121.03
+   ─────────────────────────────
+   • TOTAL ASSETS:             $36.60
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.00
+   • Reserved:       $0.00
+   • Vault Buffer:   $43.77
+   • Credited Cash (signed): $43.77
+   • Positions:      $36.60
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $80.36
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $3.0909/share (round 11) [ok]
+✅ NAV cache updated, sleeping 45s
+45.144.12.0 - - [09/Jan/2026 14:27:33] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:27:38] "GET /price HTTP/1.1" 200 -
+45.144.12.0 - - [09/Jan/2026 14:27:38] "GET /price HTTP/1.1" 200 -

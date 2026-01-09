@@ -1,0 +1,206 @@
+
+💸 WITHDRAW: $29.74 from PM → Vault
+   Output (first 2000 chars): [dotenv@17.2.1] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+2026-01-09T14:29:09.697Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2026-01-09T14:29:09.697Z 📝 [SafeProxyWithdraw] Requested amount: $29.744409134999994 
+2026-01-09T14:29:09.697Z 📝 [SafeProxyWithdraw] Destination: 0x5Ae7395Ca8ab044159133E2e23f421aE8f94055F 
+2026-01-09T14:29:09.697Z 📝 [SafeProxyWithdraw] Dry run: false 
+2026-01-09T14:29:09.855Z 📝 [SafeProxyWithdraw] Proxy USDC balance: $0.000150 (150 raw) 
+2026-01-09T14:29:09.856Z 📝 [SafeProxyWithdraw] ⚠️ Capping transfer: requested $29.744409134999994, sending $0.000050 (available minus dust) 
+2026-01-09T14:29:10.036Z 📝 [SafeProxyWithdraw] EOA address: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2026-01-09T14:29:10.037Z 📝 [SafeProxyWithdraw] Proxy address: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2026-01-09T14:29:10.037Z 📝 [SafeProxyWithdraw] Using Builder API credentials 
+2026-01-09T14:29:10.054Z 📝 [SafeProxyWithdraw] 
+--- Step 1: Safe Proxy → EOA --- 
+2026-01-09T14:29:10.054Z 📝 [SafeProxyWithdraw] Withdrawing $0.000050 (50 raw) from Safe proxy to EOA 0x5087675E669e6244620013691c05C1De0e8B525e 
+2026-01-09T14:29:10.061Z 📝 [SafeProxyWithdraw] Executing via Polymarket RelayClient... 
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e0000000000000000000000000000000000000000000000000000000000000032',
+  nonce: '55',
+  signature: '0x5bf66472c771b02e9dc0a0e37dee98382eee995536f37711593681fd7113dd804be18f570e879e95330b6e2de407ec00e6f2c1bada5ed47b9025bd930047d8ff1f',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    
+❌ Withdraw script failed (exit 1)
+   ✅ Cash-only bridge complete, skipping post-liquidation bridge
+
+💤 Sleeping 60s...
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2026-01-09 14:30:22
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 25.000000
+   Pending withdrawals count: 1
+   Next withdrawal index: 3
+   Iterating 1 pending requests...
+      Request #3: 25.0000 shares, $73.36 locked
+   Checked 1 requests, found 1 pending, total locked: $73.36
+   Actual usdcLocked from queue: $73.36
+
+📊 STATUS:
+   Pending withdrawals: $73.36
+   Vault USDC (Base): $43.77
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $26.03 / $50000.00
+
+   Needed (base): $29.60
+   Needed (with 0.5% slippage): $29.74
+
+⚠️  WITHDRAWAL NEEDED: $29.74 (includes slippage buffer)
+   📊 CLOB collateral: $100.00
+   📊 PM balances: cash=$100.00, positions=$0.00
+   📊 Top positions for liquidation (sorted by API value):
+      1. Yes: 99.39 tokens, ~$1.94
+      2. Yes: 99.34 tokens, ~$1.94
+      3. No: 99.99 tokens, ~$1.90
+      4. Yes: 99.98 tokens, ~$1.90
+      5. No: 99.95 tokens, ~$1.90
+
+📊 Polymarket:
+   Cash: $100.00
+   Positions (NAV): $0.00
+   Liquidatable: ~$117.08 (API est)
+
+💸 WITHDRAW: $29.74 from PM → Vault
+   Output (first 2000 chars): [dotenv@17.2.1] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+2026-01-09T14:30:31.670Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2026-01-09T14:30:31.670Z 📝 [SafeProxyWithdraw] Requested amount: $29.744409134999994 
+2026-01-09T14:30:31.671Z 📝 [SafeProxyWithdraw] Destination: 0x5Ae7395Ca8ab044159133E2e23f421aE8f94055F 
+2026-01-09T14:30:31.671Z 📝 [SafeProxyWithdraw] Dry run: false 
+2026-01-09T14:30:31.871Z 📝 [SafeProxyWithdraw] Proxy USDC balance: $0.000100 (100 raw) 
+2026-01-09T14:30:31.872Z 📝 [SafeProxyWithdraw] ⚠️ Capping transfer: requested $29.744409134999994, sending $0.000100 (available minus dust) 
+2026-01-09T14:30:32.060Z 📝 [SafeProxyWithdraw] EOA address: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2026-01-09T14:30:32.062Z 📝 [SafeProxyWithdraw] Proxy address: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2026-01-09T14:30:32.062Z 📝 [SafeProxyWithdraw] Using Builder API credentials 
+2026-01-09T14:30:32.071Z 📝 [SafeProxyWithdraw] 
+--- Step 1: Safe Proxy → EOA --- 
+2026-01-09T14:30:32.072Z 📝 [SafeProxyWithdraw] Withdrawing $0.000100 (100 raw) from Safe proxy to EOA 0x5087675E669e6244620013691c05C1De0e8B525e 
+2026-01-09T14:30:32.079Z 📝 [SafeProxyWithdraw] Executing via Polymarket RelayClient... 
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e0000000000000000000000000000000000000000000000000000000000000064',
+  nonce: '56',
+  signature: '0x8b6dc9b9da782b4c9397e8293c952bafa7a362029a0b060fa086137be3f9a03754d4cbfa017c7035d984fa050798e618b61bad6a2f92d3925c776cedc643637520',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+   
+❌ Withdraw script failed (exit 1)
+   📊 CLOB collateral: $0.00
+   📊 PM balances: cash=$0.00, positions=$0.00
+
+⚠️  Cash insufficient, need to liquidate $29.74
+   Liquidatable: $117.08
+   Targeting: $29.74
+   📊 CLOB collateral: $0.00
+   📊 PM balances: cash=$0.00, positions=$0.00
+
+🔥 LIQUIDATE: Need $29.74 USDC (capped from $29.74)
+   Initial PM cash: $0.00
+   📊 Top positions for liquidation (sorted by API value):
+      1. Yes: 99.39 tokens, ~$1.94
+      2. Yes: 99.34 tokens, ~$1.94
+      3. No: 99.99 tokens, ~$1.90
+      4. Yes: 99.98 tokens, ~$1.90
+      5. No: 99.95 tokens, ~$1.90
+   100 positions available for liquidation
+   📖 Orderbook query: 10341844789609823315...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '8173.82'}, {'price': '0.002', 'size': '16.53'}]
+   📊 Best bid: $0.0020, size at best: 16.53, total depth: 8190.35
+   🧾 Position: Yes | 99.39 tokens | ref bid: $0.0020
+   🔄 Starting sweep (min price: $0.0010, max 20 iterations)
+   📊 CLOB collateral: $0.00
+   📊 PM balances: cash=$0.00, positions=$0.00
+   📖 Orderbook query: 10341844789609823315...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '8173.82'}, {'price': '0.002', 'size': '16.53'}]
+   📊 Best bid: $0.0020, size at best: 16.53, total depth: 8190.35
+   [1] SELL 16.53 @ $0.0020 (depth: 16.53)
+   📤 Creating market sell: 16.53 tokens (~$0.03)
+   📋 Response: status=matched, takingAmount=0.00006, makingAmount=0.03
+   ⚠️  Order accepted but NO FILL (takingAmount=0.00006)
+       ⚠️  Order success but no fill (usdc=$0.00, tokens=0.00)
+       💡 Likely no liquidity at this price level, stopping sweep
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 47270467249276705541...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '26276.62'}]
+   📊 Best bid: $0.0010, size at best: 26276.62, total depth: 26276.62
+   🧾 Position: Yes | 99.34 tokens | ref bid: $0.0010
+   🔄 Starting sweep (min price: $0.0005, max 20 iterations)
+   📊 CLOB collateral: $0.00
+   📊 PM balances: cash=$0.00, positions=$0.00
+   📖 Orderbook query: 47270467249276705541...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '26276.62'}]
+   📊 Best bid: $0.0010, size at best: 26276.62, total depth: 26276.62
+   [1] SELL 99.34 @ $0.0010 (depth: 26276.62)
+   📤 Creating market sell: 99.34 tokens (~$0.10)
+   📋 Response: status=matched, takingAmount=0.00009, makingAmount=0.09
+   ⚠️  Order accepted but NO FILL (takingAmount=0.00009)
+       ⚠️  Order success but no fill (usdc=$0.00, tokens=0.00)
+       💡 Likely no liquidity at this price level, stopping sweep
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 35587333994576608221...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '1517'}, {'price': '0.002', 'size': '150'}, {'price': '0.01', 'size': '36.5'}]
+   📊 Best bid: $0.0100, size at best: 36.50, total depth: 1703.50
+   🧾 Position: No | 99.99 tokens | ref bid: $0.0100
+   🔄 Starting sweep (min price: $0.0050, max 20 iterations)
+   📊 CLOB collateral: $60.00
+   📊 PM balances: cash=$60.00, positions=$0.00
+   💵 Pre-order check: $60.00 new cash detected!
+   ✅ New cash covers need, aborting liquidation before order!
+   📊 CLOB collateral: $60.00
+   📊 PM balances: cash=$60.00, positions=$0.00
+   💵 Post-liquidation-check: $60.00 available, attempting bridge
+
+💸 WITHDRAW: $29.74 from PM → Vault
+   Output (first 2000 chars): [dotenv@17.2.1] injecting env (0) from .env -- tip: 📡 version env with Radar: https://dotenvx.com/radar
+2026-01-09T14:31:08.989Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2026-01-09T14:31:08.989Z 📝 [SafeProxyWithdraw] Requested amount: $29.744409134999994 
+2026-01-09T14:31:08.990Z 📝 [SafeProxyWithdraw] Destination: 0x5Ae7395Ca8ab044159133E2e23f421aE8f94055F 
+2026-01-09T14:31:08.990Z 📝 [SafeProxyWithdraw] Dry run: false 
+2026-01-09T14:31:09.138Z 📝 [SafeProxyWithdraw] Proxy USDC balance: $0.000150 (150 raw) 
+2026-01-09T14:31:09.138Z 📝 [SafeProxyWithdraw] ⚠️ Capping transfer: requested $29.744409134999994, sending $0.000050 (available minus dust) 
+2026-01-09T14:31:09.280Z 📝 [SafeProxyWithdraw] EOA address: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2026-01-09T14:31:09.280Z 📝 [SafeProxyWithdraw] Proxy address: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2026-01-09T14:31:09.280Z 📝 [SafeProxyWithdraw] Using Builder API credentials 
+2026-01-09T14:31:09.293Z 📝 [SafeProxyWithdraw] 
+--- Step 1: Safe Proxy → EOA --- 
+2026-01-09T14:31:09.297Z 📝 [SafeProxyWithdraw] Withdrawing $0.000050 (50 raw) from Safe proxy to EOA 0x5087675E669e6244620013691c05C1De0e8B525e 
+2026-01-09T14:31:09.303Z 📝 [SafeProxyWithdraw] Executing via Polymarket RelayClient... 
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e0000000000000000000000000000000000000000000000000000000000000032',
+  nonce: '57',
+  signature: '0x5a0ab92d9860b8e75cdce728b09e6512d4e2f641813ebacc5e50e5ed2405611726b986499c526157f08634f0ce63d14a2b8389c77d4ef86aab2f82c57d5eca531f',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiv
+❌ Withdraw script failed (exit 1)
+   ✅ Cash-only bridge complete, skipping post-liquidation bridge
+
+💤 Sleeping 60s...

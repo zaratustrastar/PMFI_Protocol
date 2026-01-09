@@ -1,0 +1,185 @@
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $26.03
+   In-transit items: 0
+   Tracked vault balance: $1.04
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2026-01-09 14:22:39
+============================================================
+⚠️  Error fetching NAV from bot: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /sign-nav (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+   Pending shares: 0.000000
+   Pending withdrawals count: 0
+
+📊 STATUS:
+   Pending withdrawals: $0.00
+   Vault USDC (Base): $1.04
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $26.03 / $50000.00
+
+   Needed (base): $-1.04
+   Needed (with 0.5% slippage): $0.00
+
+✅ No action needed (needed < $5.0)
+
+💤 Sleeping 60s...
+^CTraceback (most recent call last):
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 2320, in <module>
+    run_servicer(dry_run=args.dry_run)
+  File "/root/PolyNotifyBot/trading_bot/withdrawal_servicer.py", line 2285, in run_servicer
+    time.sleep(LOOP_INTERVAL_SECONDS)
+KeyboardInterrupt
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# unset VAULT_V7_ADDRESS
+unset RPC_URL
+unset BASE_RPC_URL
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+
+python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x5Ae7395Ca8ab044159133E2e23f421aE8f94055F
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $26.03
+   In-transit items: 0
+   Tracked vault balance: $1.04
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2026-01-09 14:22:57
+============================================================
+⚠️  Error fetching NAV from bot: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /sign-nav (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+   Pending shares: 25.000000
+   Pending withdrawals count: 1
+   Next withdrawal index: 3
+   Iterating 1 pending requests...
+      Request #3: 25.0000 shares, $73.36 locked
+   Checked 1 requests, found 1 pending, total locked: $73.36
+   Actual usdcLocked from queue: $73.36
+
+📊 STATUS:
+   Pending withdrawals: $73.36
+   Vault USDC (Base): $43.77
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $26.03 / $50000.00
+
+   Needed (base): $29.60
+   Needed (with 0.5% slippage): $29.74
+
+⚠️  WITHDRAWAL NEEDED: $29.74 (includes slippage buffer)
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (signer): 0x5087675E...
+   📋 Proxy wallet (funder): 0x9cbc5577...
+   📋 Signature type: 2 (Browser proxy)
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   📋 Wallet: 0x9cbc5577...
+   📋 Private key present: True
+   📋 CLOB host: https://clob.polymarket.com
+   🔑 Using pre-derived API credentials from env vars...
+   ✅ Credentials loaded (key: c4a3fd29...)
+   ✅ L2 auth verified - CLOB client ready for trading
+   📊 CLOB collateral: $0.00
+   📊 PM balances: cash=$0.00, positions=$0.00
+   📊 Top positions for liquidation (sorted by API value):
+      1. Yes: 99.80 tokens, ~$1.95
+      2. Yes: 99.70 tokens, ~$1.94
+      3. No: 99.99 tokens, ~$1.90
+      4. Yes: 99.98 tokens, ~$1.90
+      5. No: 99.95 tokens, ~$1.90
+
+📊 Polymarket:
+   Cash: $0.00
+   Positions (NAV): $0.00
+   Liquidatable: ~$117.09 (API est)
+   📊 CLOB collateral: $0.00
+   📊 PM balances: cash=$0.00, positions=$0.00
+
+⚠️  Cash insufficient, need to liquidate $29.74
+   Liquidatable: $117.09
+   Targeting: $29.74
+   📊 CLOB collateral: $0.00
+   📊 PM balances: cash=$0.00, positions=$0.00
+
+🔥 LIQUIDATE: Need $29.74 USDC (capped from $29.74)
+   Initial PM cash: $0.00
+   📊 Top positions for liquidation (sorted by API value):
+      1. Yes: 99.80 tokens, ~$1.95
+      2. Yes: 99.70 tokens, ~$1.94
+      3. No: 99.99 tokens, ~$1.90
+      4. Yes: 99.98 tokens, ~$1.90
+      5. No: 99.95 tokens, ~$1.90
+   100 positions available for liquidation
+   📖 Orderbook query: 10341844789609823315...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '8173.82'}, {'price': '0.002', 'size': '243.17'}]
+   📊 Best bid: $0.0020, size at best: 243.17, total depth: 8416.99
+   🧾 Position: Yes | 99.80 tokens | ref bid: $0.0020
+   🔄 Starting sweep (min price: $0.0010, max 20 iterations)
+   📊 CLOB collateral: $0.00
+   📊 PM balances: cash=$0.00, positions=$0.00
+   📖 Orderbook query: 10341844789609823315...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '8173.82'}, {'price': '0.002', 'size': '243.17'}]
+   📊 Best bid: $0.0020, size at best: 243.17, total depth: 8416.99
+   [1] SELL 99.80 @ $0.0020 (depth: 243.17)
+   📤 Creating market sell: 99.80 tokens (~$0.20)
+   📋 Response: status=matched, takingAmount=0.00038, makingAmount=0.19
+   ⚠️  Order accepted but NO FILL (takingAmount=0.00038)
+       ⚠️  Order success but no fill (usdc=$0.00, tokens=0.00)
+       💡 Likely no liquidity at this price level, stopping sweep
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 47270467249276705541...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '26500.19'}]
+   📊 Best bid: $0.0010, size at best: 26500.19, total depth: 26500.19
+   🧾 Position: Yes | 99.70 tokens | ref bid: $0.0010
+   🔄 Starting sweep (min price: $0.0005, max 20 iterations)
+   📊 CLOB collateral: $0.00
+   📊 PM balances: cash=$0.00, positions=$0.00
+   📖 Orderbook query: 47270467249276705541...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '26403.22'}]
+   📊 Best bid: $0.0010, size at best: 26403.22, total depth: 26403.22
+   [1] SELL 99.70 @ $0.0010 (depth: 26403.22)
+   📤 Creating market sell: 99.70 tokens (~$0.10)
+   📋 Response: status=matched, takingAmount=0.00009, makingAmount=0.09
+   ⚠️  Order accepted but NO FILL (takingAmount=0.00009)
+       ⚠️  Order success but no fill (usdc=$0.00, tokens=0.00)
+       💡 Likely no liquidity at this price level, stopping sweep
+   📊 Position sweep done: $0.00 obtained
+   📖 Orderbook query: 35587333994576608221...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '1517'}, {'price': '0.002', 'size': '150'}, {'price': '0.01', 'size': '36.5'}]
+   📊 Best bid: $0.0100, size at best: 36.50, total depth: 1703.50
+   🧾 Position: No | 99.99 tokens | ref bid: $0.0100
+   🔄 Starting sweep (min price: $0.0050, max 20 iterations)
+   📊 CLOB collateral: $380.00
+   📊 PM balances: cash=$380.00, positions=$0.00
+   💵 Pre-order check: $380.00 new cash detected!
+   ✅ New cash covers need, aborting liquidation before order!
+   📊 CLOB collateral: $380.00
+   📊 PM balances: cash=$380.00, positions=$0.00
+   💵 Post-liquidation-check: $380.00 available, attempting bridge
+
+💸 WITHDRAW: $29.74 from PM → Vault
