@@ -135,6 +135,19 @@ REFRESH_RATE_LIMIT_SECONDS = 5
 last_refresh_request = {}
 
 # =============================================================================
+# Liquidation Reservation System (for withdrawal servicer)
+# =============================================================================
+import uuid
+
+RESERVATION_TTL_SECONDS = 120  # Reservations expire after 2 minutes
+MAX_SLIPPAGE_BPS = 100  # 1% max slippage by default
+MIN_LIQUIDATION_USDC = 0.10  # Don't bother with dust
+
+# In-memory reservation store: {reservation_id: {token_id, size, expires_at, limit_price}}
+liquidation_reservations = {}
+reservation_lock = threading.Lock()
+
+# =============================================================================
 # RoundId Cache (prevents fallback to 0 on RPC errors)
 # =============================================================================
 class RoundIdCache:
@@ -1401,6 +1414,327 @@ def record_withdrawal_back():
         
         pending_tracker.record_withdrawal_back(amount)
         return jsonify({"success": True, "withdrawn_back": pending_tracker.withdrawn_back / 1e6})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# =============================================================================
+# Liquidation Plan Endpoints (for withdrawal servicer)
+# =============================================================================
+
+def cleanup_expired_reservations():
+    """Remove expired reservations."""
+    now = int(time.time())
+    with reservation_lock:
+        expired = [rid for rid, r in liquidation_reservations.items() if r["expires_at"] < now]
+        for rid in expired:
+            del liquidation_reservations[rid]
+        if expired:
+            print(f"🧹 Cleaned up {len(expired)} expired reservations")
+
+
+def get_reserved_size(token_id: str) -> float:
+    """Get total size currently reserved for a token."""
+    cleanup_expired_reservations()
+    with reservation_lock:
+        return sum(
+            r["size"] for r in liquidation_reservations.values()
+            if r["token_id"] == token_id
+        )
+
+
+@flask_app.route('/pm-cash', methods=['GET'])
+def get_pm_cash():
+    """Get current Polymarket cash balance."""
+    try:
+        if polymarket_client:
+            cash = polymarket_client.fetch_cash_balance()
+            return jsonify({
+                "cash_usdc": cash,
+                "source": "polygon_rpc",
+                "timestamp": int(time.time())
+            })
+        return jsonify({"error": "Polymarket client not initialized"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@flask_app.route('/liquidation-plan', methods=['GET'])
+def get_liquidation_plan():
+    """
+    Get a liquidation plan to raise the requested USDC amount.
+    
+    Query params:
+      - need_usdc: Amount of USDC to raise (required)
+      - max_positions: Max positions to include in plan (default 5)
+      - max_slippage_bps: Max slippage in basis points (default 100 = 1%)
+    
+    Returns a plan with legs (positions to sell) including:
+      - token_id, size, limit_price, expected_usdc, reservation_id
+    """
+    try:
+        need_usdc = float(flask_request.args.get('need_usdc', 0))
+        max_positions = int(flask_request.args.get('max_positions', 5))
+        max_slippage_bps = int(flask_request.args.get('max_slippage_bps', MAX_SLIPPAGE_BPS))
+        
+        if need_usdc <= 0:
+            return jsonify({"error": "need_usdc must be positive"}), 400
+        
+        if not polymarket_client:
+            return jsonify({"error": "Polymarket client not initialized"}), 500
+        
+        print(f"\n📊 LIQUIDATION PLAN REQUEST: need ${need_usdc:.2f}, max_pos={max_positions}, max_slip={max_slippage_bps}bps")
+        
+        # Fetch all positions and orderbooks
+        positions = polymarket_client.fetch_positions_with_cost_basis()[0]
+        if not positions:
+            return jsonify({
+                "plan_id": str(uuid.uuid4()),
+                "need_usdc": need_usdc,
+                "legs": [],
+                "total_expected_usdc": 0,
+                "shortfall": need_usdc,
+                "message": "No positions available for liquidation"
+            })
+        
+        # Score and rank positions by liquidation attractiveness
+        scored_positions = []
+        for pos in positions:
+            token_id = pos.get("token_id")
+            size = pos.get("size", 0)
+            if not token_id or size <= 0:
+                continue
+            
+            # Get orderbook
+            orderbook = polymarket_client.fetch_orderbook(token_id)
+            bids = orderbook.get("bids", [])
+            
+            if not bids:
+                continue  # Skip positions with no bids
+            
+            best_bid = bids[0]["price"]
+            
+            # Calculate available size (minus reservations)
+            reserved = get_reserved_size(token_id)
+            available_size = max(0, size - reserved)
+            if available_size <= 0:
+                continue
+            
+            # Calculate depth at/near best bid (within slippage tolerance)
+            min_acceptable_price = best_bid * (1 - max_slippage_bps / 10000)
+            available_depth = sum(b["size"] for b in bids if b["price"] >= min_acceptable_price)
+            
+            # How much can we actually sell?
+            sellable_size = min(available_size, available_depth)
+            if sellable_size <= 0:
+                continue
+            
+            # Calculate expected USDC from VWAP sweep
+            expected_usdc = polymarket_client.simulate_market_sell(sellable_size, bids)
+            if expected_usdc < MIN_LIQUIDATION_USDC:
+                continue
+            
+            # Calculate limit price (worst acceptable price with slippage)
+            limit_price = min_acceptable_price
+            
+            scored_positions.append({
+                "token_id": token_id,
+                "outcome": pos.get("outcome", "Unknown"),
+                "title": pos.get("title", "")[:50],
+                "size": sellable_size,
+                "best_bid": best_bid,
+                "limit_price": limit_price,
+                "expected_usdc": expected_usdc,
+                "depth": available_depth,
+                "score": expected_usdc,  # Simple: prioritize by expected value
+            })
+        
+        # Sort by score (highest value first)
+        scored_positions.sort(key=lambda x: x["score"], reverse=True)
+        
+        # Build plan legs until we have enough
+        legs = []
+        total_expected = 0.0
+        remaining_need = need_usdc
+        
+        for pos in scored_positions[:max_positions]:
+            if remaining_need <= 0:
+                break
+            
+            # How much of this position do we need?
+            needed_size = pos["size"]
+            if pos["expected_usdc"] > remaining_need:
+                # Partial: scale down to just what we need
+                ratio = remaining_need / pos["expected_usdc"]
+                needed_size = pos["size"] * ratio
+            
+            # Create reservation
+            reservation_id = str(uuid.uuid4())[:8]
+            expires_at = int(time.time()) + RESERVATION_TTL_SECONDS
+            
+            with reservation_lock:
+                liquidation_reservations[reservation_id] = {
+                    "token_id": pos["token_id"],
+                    "size": needed_size,
+                    "limit_price": pos["limit_price"],
+                    "expires_at": expires_at,
+                    "created_at": int(time.time())
+                }
+            
+            # Calculate expected USDC for this size
+            expected_usdc = (needed_size / pos["size"]) * pos["expected_usdc"] if pos["size"] > 0 else 0
+            
+            legs.append({
+                "token_id": pos["token_id"],
+                "outcome": pos["outcome"],
+                "title": pos["title"],
+                "side": "SELL",
+                "size": round(needed_size, 2),
+                "best_bid": pos["best_bid"],
+                "limit_price": round(pos["limit_price"], 4),
+                "expected_usdc": round(expected_usdc, 2),
+                "reservation_id": reservation_id,
+                "expires_at": expires_at
+            })
+            
+            total_expected += expected_usdc
+            remaining_need -= expected_usdc
+        
+        plan_id = str(uuid.uuid4())
+        shortfall = max(0, need_usdc - total_expected)
+        
+        result = {
+            "plan_id": plan_id,
+            "need_usdc": round(need_usdc, 2),
+            "legs": legs,
+            "total_expected_usdc": round(total_expected, 2),
+            "shortfall": round(shortfall, 2),
+            "assumptions": {
+                "max_slippage_bps": max_slippage_bps,
+                "reservation_ttl_seconds": RESERVATION_TTL_SECONDS
+            }
+        }
+        
+        print(f"   📋 Plan {plan_id}: {len(legs)} legs, expected ${total_expected:.2f}, shortfall ${shortfall:.2f}")
+        return jsonify(result)
+        
+    except Exception as e:
+        import traceback
+        print(f"❌ Liquidation plan error: {e}")
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@flask_app.route('/liquidation-result', methods=['POST'])
+def post_liquidation_result():
+    """
+    Report execution result for a liquidation leg.
+    
+    Body:
+      - reservation_id: The reservation to release
+      - status: "filled", "partial", "failed", "cancelled"
+      - filled_size: Actual size filled (for partial fills)
+      - filled_usdc: Actual USDC received
+    
+    This releases the reservation so the size becomes available again.
+    """
+    try:
+        data = flask_request.json
+        reservation_id = data.get("reservation_id")
+        status = data.get("status", "unknown")
+        filled_size = float(data.get("filled_size", 0))
+        filled_usdc = float(data.get("filled_usdc", 0))
+        
+        if not reservation_id:
+            return jsonify({"error": "reservation_id required"}), 400
+        
+        with reservation_lock:
+            if reservation_id in liquidation_reservations:
+                reservation = liquidation_reservations[reservation_id]
+                del liquidation_reservations[reservation_id]
+                
+                print(f"📝 Liquidation result: {reservation_id} → {status}")
+                print(f"   Token: {reservation['token_id'][:20]}...")
+                print(f"   Reserved: {reservation['size']:.2f}, Filled: {filled_size:.2f}, USDC: ${filled_usdc:.2f}")
+                
+                return jsonify({
+                    "success": True,
+                    "reservation_released": True,
+                    "token_id": reservation["token_id"],
+                    "status": status
+                })
+            else:
+                return jsonify({
+                    "success": True,
+                    "reservation_released": False,
+                    "message": "Reservation not found (may have expired)"
+                })
+                
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@flask_app.route('/liquidation-reservations', methods=['GET'])
+def get_reservations():
+    """Debug endpoint to see active reservations."""
+    cleanup_expired_reservations()
+    with reservation_lock:
+        return jsonify({
+            "count": len(liquidation_reservations),
+            "reservations": [
+                {
+                    "id": rid,
+                    "token_id": r["token_id"][:20] + "...",
+                    "size": r["size"],
+                    "limit_price": r["limit_price"],
+                    "expires_in": r["expires_at"] - int(time.time())
+                }
+                for rid, r in liquidation_reservations.items()
+            ]
+        })
+
+
+@flask_app.route('/orderbook', methods=['GET'])
+def get_orderbook_endpoint():
+    """
+    V7.3.4: Fetch fresh orderbook for a token.
+    
+    Query params:
+      - token_id: The token to get orderbook for
+    
+    Returns:
+      - best_bid: Current best bid price
+      - best_ask: Current best ask price
+      - bids: Top bids (limited)
+    """
+    try:
+        global polymarket_client
+        
+        token_id = flask_request.args.get('token_id')
+        if not token_id:
+            return jsonify({"error": "token_id required"}), 400
+        
+        if not polymarket_client:
+            return jsonify({"error": "PolymarketClient not initialized"}), 500
+        
+        orderbook = polymarket_client.fetch_orderbook(token_id)
+        if not orderbook:
+            return jsonify({"error": "Failed to fetch orderbook"}), 500
+        
+        bids = orderbook.get("bids", [])
+        asks = orderbook.get("asks", [])
+        
+        best_bid = float(bids[0]["price"]) if bids else 0
+        best_ask = float(asks[0]["price"]) if asks else 1
+        
+        return jsonify({
+            "token_id": token_id,
+            "best_bid": best_bid,
+            "best_ask": best_ask,
+            "bids": bids[:10],
+            "asks": asks[:10]
+        })
+        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

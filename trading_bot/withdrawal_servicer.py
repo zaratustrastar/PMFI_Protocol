@@ -1491,23 +1491,139 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
         return False, "", 0.0
 
 
+def get_orderbook_from_bot(token_id: str) -> Optional[Dict]:
+    """
+    Fetch fresh orderbook data from bot_v7.
+    
+    V7.3.4: Used before each order to get live best_bid for slippage protection.
+    Orderbook is REQUIRED - caller should handle None/error cases.
+    
+    Returns: Dict with 'best_bid', 'bids', etc or dict with 'error' key
+    """
+    try:
+        url = f"{BOT_URL}/orderbook"
+        response = requests.get(url, params={"token_id": token_id}, timeout=10)
+        
+        if response.status_code != 200:
+            error_text = response.text[:100] if response.text else "Unknown"
+            return {"error": f"HTTP {response.status_code}: {error_text}"}
+        
+        data = response.json()
+        if "error" in data:
+            return {"error": data["error"]}
+        
+        return data
+    except requests.exceptions.Timeout:
+        return {"error": "Orderbook request timeout"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def get_liquidation_plan_from_bot(needed_usdc: float, max_positions: int = 5) -> Optional[Dict]:
+    """
+    Get a liquidation plan from bot_v7's /liquidation-plan endpoint.
+    
+    This delegates position selection and orderbook analysis to bot_v7,
+    which has working orderbook fetching. We only handle execution here.
+    
+    Returns: Plan dict with legs, or None if unavailable
+    """
+    try:
+        url = f"{BOT_URL}/liquidation-plan"
+        params = {
+            "need_usdc": needed_usdc,
+            "max_positions": max_positions,
+            "max_slippage_bps": 100  # 1% max slippage
+        }
+        
+        print(f"   📡 Requesting liquidation plan from bot_v7...")
+        response = requests.get(url, params=params, timeout=30)
+        
+        if response.status_code != 200:
+            print(f"   ❌ bot_v7 returned {response.status_code}: {response.text}")
+            return None
+        
+        plan = response.json()
+        if "error" in plan:
+            print(f"   ❌ bot_v7 error: {plan['error']}")
+            return None
+        
+        print(f"   ✅ Got plan: {len(plan.get('legs', []))} legs, expected ${plan.get('total_expected_usdc', 0):.2f}")
+        return plan
+        
+    except Exception as e:
+        print(f"   ❌ Failed to get liquidation plan: {e}")
+        return None
+
+
+def report_liquidation_result(reservation_id: str, status: str, filled_size: float, filled_usdc: float) -> bool:
+    """Report execution result back to bot_v7 to release reservation."""
+    try:
+        url = f"{BOT_URL}/liquidation-result"
+        data = {
+            "reservation_id": reservation_id,
+            "status": status,
+            "filled_size": filled_size,
+            "filled_usdc": filled_usdc
+        }
+        
+        response = requests.post(url, json=data, timeout=10)
+        return response.status_code == 200
+        
+    except Exception as e:
+        print(f"   ⚠️ Failed to report result: {e}")
+        return False
+
+
+def report_once(reservation_id: str, status: str, filled_size: float, filled_usdc: float, 
+                reported_ids: set) -> bool:
+    """
+    V7.3.4: Report reservation result exactly once.
+    
+    Checks if reservation was already reported; if so, skips the call.
+    This prevents double-cancellation issues.
+    """
+    if not reservation_id:
+        return True
+    
+    if reservation_id in reported_ids:
+        print(f"   ⏭️ Skipping already-reported reservation {reservation_id[:8]}...")
+        return True
+    
+    result = report_liquidation_result(reservation_id, status, filled_size, filled_usdc)
+    if result:
+        reported_ids.add(reservation_id)
+    return result
+
+
+def get_pm_cash_from_bot() -> float:
+    """Get PM cash balance from bot_v7's /pm-cash endpoint."""
+    try:
+        response = requests.get(f"{BOT_URL}/pm-cash", timeout=10)
+        if response.status_code == 200:
+            return response.json().get("cash_usdc", 0.0)
+        return 0.0
+    except Exception:
+        return 0.0
+
+
 def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> float:
     """
-    Liquidate positions to get needed USDC using sweep loop.
+    Liquidate positions to get needed USDC.
     
-    Instead of selling once at best bid, we sweep through bid levels:
-    1. Sell up to best bid depth
-    2. Refresh orderbook to get new best bid
-    3. Repeat until target USDC reached or price drops below slippage limit
+    V7.3.4 REFACTOR: Delegates position selection to bot_v7 via /liquidation-plan.
+    Bot_v7 has working orderbook fetching, so we avoid duplicating that logic.
     
-    V7.3.3 FIX: Now rechecks PM cash after each fill. If new cash appeared
-    (from user claims or deposits), we exit early to avoid over-liquidating.
+    Flow:
+    1. Request liquidation plan from bot_v7 (positions, sizes, limit prices)
+    2. Execute each leg with limit price protection (pre-trade check)
+    3. Report results back to bot_v7 to release reservations
+    4. Repeat if shortfall remains (max 3 rounds)
     
-    Targets largest/most liquid positions first.
-    Respects slippage limits and per-cycle caps.
+    INVARIANT: total_obtained will never exceed needed_usdc (usdcLocked cap)
     
     Args:
-        needed_usdc: Amount of USDC needed
+        needed_usdc: Amount of USDC needed (must match withdrawal's usdcLocked)
         initial_pm_cash: PM cash balance at start (for detecting new cash arrivals)
     
     Returns: USDC obtained from liquidation
@@ -1521,162 +1637,310 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
         )
         return 0.0
     
+    # V7.3.4 FIX: Store original cap to enforce usdcLocked invariant
+    original_cap = needed_usdc  # This is the withdrawal's usdcLocked
+    
     capped_needed = min(needed_usdc, MAX_PER_CYCLE_LIQUIDATION_USDC)
-    print(f"\n🔥 LIQUIDATE: Need ${capped_needed:.2f} USDC (capped from ${needed_usdc:.2f})")
+    print(f"\n🔥 LIQUIDATE V7.3.4: Need ${capped_needed:.2f} USDC (capped from ${needed_usdc:.2f})")
     print(f"   Initial PM cash: ${initial_pm_cash:.2f}")
+    print(f"   usdcLocked cap: ${original_cap:.2f} (will not exceed)")
     
-    positions = get_positions_for_liquidation()
-    if not positions:
-        print("   No positions available to liquidate")
-        return 0.0
-    
-    print(f"   {len(positions)} positions available for liquidation")
-    
-    total_obtained = 0.0
+    # Upfront guard - reduce target by available cash
     still_needed = capped_needed
-    
-    # V7.3.3 FIX: Upfront guard - ALWAYS reduce target by available cash, regardless of MIN threshold
-    # This prevents over-liquidation when any amount of cash is available
     if initial_pm_cash >= still_needed:
-        print(f"   💵 Upfront check: PM cash ${initial_pm_cash:.2f} >= need ${still_needed:.2f}, skipping liquidation!")
-        print(f"   ℹ️  Caller should withdraw cash instead")
-        return 0.0  # Signal to caller: no liquidation needed, use cash
-    elif initial_pm_cash > 0.01:  # Any meaningful cash reduces the target (not MIN_WITHDRAWAL)
-        # Partial coverage: reduce the liquidation target by available cash
-        print(f"   💵 Partial cash available: ${initial_pm_cash:.2f}, reducing liquidation target from ${still_needed:.2f}")
+        print(f"   💵 PM cash ${initial_pm_cash:.2f} >= need ${still_needed:.2f}, skipping liquidation!")
+        return 0.0
+    elif initial_pm_cash > 0.01:
+        print(f"   💵 Partial cash ${initial_pm_cash:.2f}, reducing target from ${still_needed:.2f}")
         still_needed -= initial_pm_cash
         print(f"   📉 New liquidation target: ${still_needed:.2f}")
     
-    # Sweep loop constants
-    MAX_SWEEPS_PER_POSITION = 20  # Max iterations per position to prevent infinite loops
-    MIN_USD_PER_ORDER = 0.01      # Minimal threshold for order sanity check
-    MAX_SLIPPAGE_BPS = 5000       # 50% max slippage from initial price (positions may be low-value)
-    SWEEP_DELAY_SECONDS = 0.5    # Rate limiting between orders (0.5s for API safety)
+    total_obtained = 0.0
+    max_rounds = 3  # Max iterations to prevent infinite loops
+    consecutive_failures = 0  # V7.3.4: Hoist outside round loop for overall circuit breaker
+    reported_reservation_ids = set()  # V7.3.4: Track all reported reservations to prevent double-cancellation
     
-    for pos in positions:
-        if still_needed <= 0:
+    for round_num in range(max_rounds):
+        if still_needed <= 0.50:  # Close enough
             break
         
-        token_id = pos["token_id"]
-        remaining_tokens = pos["size"]
-        position_obtained = 0.0
+        print(f"\n   📋 ROUND {round_num + 1}: Still need ${still_needed:.2f}")
         
-        # Get initial best bid as reference for slippage protection
-        initial_bid_price, _ = get_orderbook_best_bid(token_id)
-        if initial_bid_price <= 0:
-            print(f"   ⚠️  No bid liquidity for {pos['outcome']}, skipping")
-            continue
+        # Get liquidation plan from bot_v7
+        plan = get_liquidation_plan_from_bot(still_needed)
+        if not plan or not plan.get("legs"):
+            print("   ⚠️ No liquidation plan available")
+            send_telegram_alert(
+                f"⚠️ Cannot get liquidation plan\n"
+                f"Still need: ${still_needed:.2f}\n"
+                f"Manual intervention may be required",
+                is_error=True
+            )
+            break
         
-        min_acceptable_price = initial_bid_price * (1 - MAX_SLIPPAGE_BPS / 10000)
-        print(f"   🧾 Position: {pos['outcome']} | {remaining_tokens:.2f} tokens | ref bid: ${initial_bid_price:.4f}")
-        print(f"   🔄 Starting sweep (min price: ${min_acceptable_price:.4f}, max {MAX_SWEEPS_PER_POSITION} iterations)")
+        legs = plan["legs"]
+        plan_id = plan.get('plan_id', 'unknown')
+        plan_expected = plan.get('total_expected_usdc', 0)
+        plan_shortfall = plan.get('shortfall', 0)
+        print(f"   📊 Plan {plan_id[:8]}: {len(legs)} legs, expected ${plan_expected:.2f}, shortfall ${plan_shortfall:.2f}")
         
-        for sweep_i in range(MAX_SWEEPS_PER_POSITION):
-            if still_needed <= 0:
-                print(f"   ✅ Target USDC reached")
-                break
-            
-            if remaining_tokens <= 0:
-                print(f"   ✅ Position fully sold")
-                break
-            
-            # V7.3.3 FIX: Check PM cash BEFORE placing any order to catch late-arriving funds
-            try:
-                current_pm_cash, _ = get_pm_balance()
-                new_cash = current_pm_cash - initial_pm_cash - total_obtained
-                if new_cash > 0.50:
-                    print(f"   💵 Pre-order check: ${new_cash:.2f} new cash detected!")
-                    still_needed -= new_cash
-                    if still_needed <= 0:
-                        print(f"   ✅ New cash covers need, aborting liquidation before order!")
-                        return total_obtained
-            except Exception as e:
-                print(f"   ⚠️ Pre-order cash check failed: {e}")
-            
-            # Refresh orderbook to get current best bid
-            live_bid_price, bid_depth = get_orderbook_best_bid(token_id)
-            
-            if live_bid_price <= 0 or bid_depth <= 0:
-                print(f"   ⚠️  No more bid liquidity, stopping sweep")
-                break
-            
-            # Slippage protection: stop if price dropped too much
-            if live_bid_price < min_acceptable_price:
-                print(f"   ⚠️  Price ${live_bid_price:.4f} below min ${min_acceptable_price:.4f}, stopping sweep")
-                break
-            
-            # Calculate how much to sell this iteration
-            # Sell minimum of: remaining tokens, bid depth, or what we need for target USDC
-            tokens_for_target = max(0, still_needed / live_bid_price) if live_bid_price > 0 else 0
-            
-            # Guard against negative/zero values
-            if tokens_for_target <= 0:
-                print(f"   ✅ No more tokens needed for target")
-                break
-            
-            size_to_sell = min(remaining_tokens, bid_depth, tokens_for_target * 1.1)  # 10% buffer
-            size_to_sell = max(0, size_to_sell)  # Ensure non-negative
-            expected_usdc = size_to_sell * live_bid_price
-            
-            # Skip if order value is essentially zero
-            if expected_usdc < MIN_USD_PER_ORDER:
-                print(f"   ⏭️  Order too small: {size_to_sell:.2f} tokens @ ${live_bid_price:.4f} = ${expected_usdc:.4f}")
-                break
-            
-            print(f"   [{sweep_i+1}] SELL {size_to_sell:.2f} @ ${live_bid_price:.4f} (depth: {bid_depth:.2f})")
-            
-            success, usdc, tokens_filled = execute_liquidation_order(
-                token_id,
-                size_to_sell,
-                live_bid_price
+        # Track which legs were executed for cleanup (must be before shortfall check)
+        executed_leg_indices = set()
+        
+        # V7.3.4 FIX: If plan has significant shortfall, alert immediately and stop
+        if plan_shortfall > still_needed * 0.5:  # Plan can only cover <50% of need
+            print(f"   ⚠️ Plan shortfall too high: ${plan_shortfall:.2f} (>50% of ${still_needed:.2f})")
+            send_telegram_alert(
+                f"⚠️ Liquidation plan has major shortfall\n"
+                f"Need: ${still_needed:.2f}\n"
+                f"Plan can provide: ${plan_expected:.2f}\n"
+                f"Shortfall: ${plan_shortfall:.2f}\n"
+                f"Insufficient liquidity - manual intervention needed",
+                is_error=True
             )
             
-            if success and usdc > 0 and tokens_filled > 0:
-                position_obtained += usdc
-                total_obtained += usdc
-                still_needed -= usdc  # Update immediately so we can stop when target reached
-                # Use actual tokens filled from order response (handles partial fills correctly)
-                remaining_tokens = max(0.0, remaining_tokens - tokens_filled)
-                print(f"       ✅ Received ${usdc:.2f} ({tokens_filled:.2f} tokens filled)")
-                print(f"          Total: ${total_obtained:.2f}, still need: ${max(0, still_needed):.2f}, remaining tokens: {remaining_tokens:.2f}")
-                
-                # V7.3.3 FIX: Recheck PM cash after each fill to detect new deposits/claims
-                # This prevents over-liquidation when cash arrives mid-loop
-                try:
-                    current_pm_cash, _ = get_pm_balance()
-                    new_cash = current_pm_cash - initial_pm_cash - total_obtained
-                    if new_cash > 0.50:  # Threshold to avoid noise from rounding
-                        print(f"       💵 New cash detected! ${new_cash:.2f} arrived (likely claim or deposit)")
+            # Cancel ALL reservations in this rejected plan and mark as handled
+            for i, leg in enumerate(legs):
+                res_id = leg.get("reservation_id", "")
+                if res_id:
+                    report_once(res_id, "cancelled", 0, 0, reported_reservation_ids)
+                    executed_leg_indices.add(i)
+            
+            break
+        
+        # Execute each leg
+        for leg_idx, leg in enumerate(legs):
+            if still_needed <= 0.50:
+                # Cancel remaining unexecuted legs and mark as handled
+                for remaining_idx in range(leg_idx, len(legs)):
+                    if remaining_idx not in executed_leg_indices:
+                        res_id = legs[remaining_idx].get("reservation_id", "")
+                        if res_id:
+                            report_once(res_id, "cancelled", 0, 0, reported_reservation_ids)
+                            executed_leg_indices.add(remaining_idx)  # Mark as handled
+                break
+            
+            token_id = leg["token_id"]
+            size = leg["size"]
+            limit_price = leg.get("limit_price", leg.get("best_bid", 0))
+            reservation_id = leg.get("reservation_id", "")
+            outcome = leg.get("outcome", "Unknown")
+            
+            if not token_id or size <= 0 or limit_price <= 0:
+                print(f"   ⚠️ Invalid leg: {leg}")
+                continue
+            
+            # V7.3.4 FIX: Scale order size to not exceed usdcLocked cap
+            # Use bot_v7's expected_usdc (VWAP-based) which is more accurate than size * limit_price
+            remaining_cap = original_cap - total_obtained
+            expected_leg_usdc = leg.get("expected_usdc", size * limit_price)
+            
+            if remaining_cap <= 0.50:
+                print(f"   ✅ Cap reached, releasing remaining reservations")
+                report_once(reservation_id, "cancelled", 0, 0, reported_reservation_ids)
+                break
+            
+            if expected_leg_usdc > remaining_cap:
+                # Scale down the order size proportionally to stay within cap
+                scale_factor = remaining_cap / expected_leg_usdc
+                original_size = size
+                size = size * scale_factor
+                expected_leg_usdc = remaining_cap  # Update expectation
+                print(f"   📉 Scaling order: {original_size:.2f} → {size:.2f} tokens (cap ${remaining_cap:.2f})")
+            
+            print(f"   🎯 Leg: {outcome[:30]} | {size:.2f} tokens @ limit ${limit_price:.4f}")
+            
+            # Check PM cash before each order to catch late-arriving funds
+            try:
+                current_cash = get_pm_cash_from_bot()
+                if current_cash > 0:
+                    new_cash = current_cash - initial_pm_cash - total_obtained
+                    if new_cash > 0.50:
+                        print(f"   💵 New cash ${new_cash:.2f} detected, reducing target")
                         still_needed -= new_cash
                         if still_needed <= 0:
-                            print(f"   ✅ New cash covers remaining need, stopping liquidation early!")
+                            report_once(reservation_id, "cancelled", 0, 0, reported_reservation_ids)
+                            print(f"   ✅ Cash covers need, stopping!")
                             return total_obtained
-                except Exception as e:
-                    print(f"       ⚠️ Cash recheck failed: {e} (continuing)")
+            except Exception as e:
+                print(f"   ⚠️ Cash check failed: {e}")
+            
+            # Execute the sell order with try/finally to ensure reservation cleanup
+            try:
+                # V7.3.4 FIX: Fetch FRESH best_bid from bot_v7 - REQUIRED, no fallback
+                # The plan's cached best_bid may be stale by the time we execute
+                fresh_ob = get_orderbook_from_bot(token_id)
                 
-                # Check if we've reached target
-                if still_needed <= 0:
-                    print(f"   ✅ Target USDC reached!")
-                    break
+                if not fresh_ob or fresh_ob.get("error"):
+                    error_msg = fresh_ob.get("error") if fresh_ob else "No response"
+                    print(f"   ❌ ORDERBOOK FETCH FAILED: {error_msg}")
+                    consecutive_failures += 1
+                    send_telegram_alert(
+                        f"⚠️ Orderbook fetch failed\n"
+                        f"Plan: {plan_id[:8]}, Leg: {leg_idx + 1}/{len(legs)}\n"
+                        f"Reservation: {reservation_id[:8]}...\n"
+                        f"Token: {token_id[:20]}...\n"
+                        f"Error: {error_msg}",
+                        is_error=True
+                    )
+                    report_once(reservation_id, "cancelled", 0, 0, reported_reservation_ids)  # Cancel, not failed
+                    executed_leg_indices.add(leg_idx)  # Mark as handled
+                    
+                    # V7.3.4: Halt on 2+ consecutive failures - likely systemic issue
+                    if consecutive_failures >= 2:
+                        print(f"   🚨 {consecutive_failures} consecutive failures - HALTING")
+                        send_telegram_alert(
+                            f"🚨 Liquidation halted: {consecutive_failures} consecutive orderbook failures\n"
+                            f"Plan: {plan_id[:8]}\n"
+                            f"Total obtained: ${total_obtained:.2f}\n"
+                            f"Still needed: ${still_needed:.2f}\n"
+                            f"Manual intervention required",
+                            is_error=True
+                        )
+                        
+                        # Cancel remaining reservations in this plan
+                        for remaining_leg in legs[leg_idx + 1:]:
+                            remaining_res_id = remaining_leg.get("reservation_id", "")
+                            if remaining_res_id:
+                                report_once(remaining_res_id, "cancelled", 0, 0, reported_reservation_ids)
+                        
+                        return total_obtained
+                    continue  # Skip this leg, try next
                 
-                # Check if position is exhausted
-                if remaining_tokens <= 0.01:
-                    print(f"   ✅ Position exhausted, moving to next")
-                    break
+                # Reset failure counter on successful fetch
+                consecutive_failures = 0
                 
-                # Rate limiting to avoid hammering the API
-                time.sleep(SWEEP_DELAY_SECONDS)
-            elif success and (usdc <= 0 or tokens_filled <= 0):
-                # FAK returned success but no actual fill - stop sweeping this position
-                print(f"       ⚠️  Order success but no fill (usdc=${usdc:.2f}, tokens={tokens_filled:.2f})")
-                print(f"       💡 Likely no liquidity at this price level, stopping sweep")
-                break
-            else:
-                print(f"       ⚠️  Order failed, stopping sweep for this position")
-                break
-        print(f"   📊 Position sweep done: ${position_obtained:.2f} obtained")
+                best_bid = fresh_ob.get("best_bid", 0)
+                if best_bid <= 0:
+                    print(f"   ❌ EMPTY ORDERBOOK: no bids available")
+                    send_telegram_alert(
+                        f"⚠️ Empty orderbook - HALTING\n"
+                        f"Plan: {plan_id[:8]}, Leg: {leg_idx + 1}/{len(legs)}\n"
+                        f"Reservation: {reservation_id[:8]}...\n"
+                        f"Token: {token_id[:20]}...\n"
+                        f"Total obtained: ${total_obtained:.2f}",
+                        is_error=True
+                    )
+                    report_once(reservation_id, "cancelled", 0, 0, reported_reservation_ids)
+                    
+                    # Cancel remaining reservations in this plan
+                    for remaining_leg in legs[leg_idx + 1:]:
+                        remaining_res_id = remaining_leg.get("reservation_id", "")
+                        if remaining_res_id:
+                            report_once(remaining_res_id, "cancelled", 0, 0, reported_reservation_ids)
+                    
+                    return total_obtained  # Empty orderbook is critical - halt
+                
+                print(f"   📊 Fresh best_bid: ${best_bid:.4f} (limit: ${limit_price:.4f})")
+                
+                success, usdc, tokens_filled, slippage_breach = execute_liquidation_order(
+                    token_id,
+                    size,
+                    best_bid,
+                    limit_price  # V7.3.4: Pass limit price for slippage protection
+                )
+                
+                # V7.3.4 FIX: Halt on slippage breach to prevent further adverse fills
+                if slippage_breach:
+                    print(f"   🚨 SLIPPAGE BREACH - HALTING ALL LIQUIDATION")
+                    send_telegram_alert(
+                        f"🚨 SLIPPAGE BREACH - HALTING!\n"
+                        f"Plan: {plan_id[:8]}, Leg: {leg_idx + 1}/{len(legs)}\n"
+                        f"Reservation: {reservation_id[:8]}...\n"
+                        f"Token: {token_id[:20]}...\n"
+                        f"Best bid: ${best_bid:.4f}, Limit: ${limit_price:.4f}\n"
+                        f"Total obtained: ${total_obtained + usdc:.2f}",
+                        is_error=True
+                    )
+                    # Still record any fill we got, but cancel the reservation
+                    if usdc > 0:
+                        report_once(reservation_id, "filled", tokens_filled, usdc, reported_reservation_ids)
+                        total_obtained += usdc
+                    else:
+                        report_once(reservation_id, "cancelled", 0, 0, reported_reservation_ids)
+                    
+                    # Cancel any remaining reservations in this plan
+                    for remaining_leg in legs[leg_idx + 1:]:
+                        remaining_res_id = remaining_leg.get("reservation_id", "")
+                        if remaining_res_id:
+                            report_once(remaining_res_id, "cancelled", 0, 0, reported_reservation_ids)
+                    
+                    return total_obtained  # Early exit, stop all liquidation
+                
+                # Report result back to bot_v7
+                if success and usdc > 0:
+                    # V7.3.4 FIX: Enforce usdcLocked cap - never exceed original request
+                    remaining_cap = original_cap - total_obtained
+                    actual_usdc = usdc
+                    actual_tokens = tokens_filled
+                    
+                    if usdc > remaining_cap:
+                        # Clamp USDC and adjust tokens proportionally
+                        clamp_ratio = remaining_cap / usdc
+                        actual_usdc = remaining_cap
+                        actual_tokens = tokens_filled * clamp_ratio
+                        print(f"   ⚠️ Cap enforcement: clamping ${usdc:.2f} → ${actual_usdc:.2f} ({actual_tokens:.2f} tokens)")
+                    
+                    report_once(reservation_id, "filled", actual_tokens, actual_usdc, reported_reservation_ids)
+                    executed_leg_indices.add(leg_idx)
+                    total_obtained += actual_usdc
+                    # V7.3.4: Recompute still_needed from original_cap to stay coherent with cap
+                    still_needed = max(0, original_cap - total_obtained)
+                    consecutive_failures = 0  # Reset on success
+                    print(f"   ✅ Filled: ${actual_usdc:.2f} USDC ({actual_tokens:.2f} tokens)")
+                    print(f"      Total: ${total_obtained:.2f}, still need: ${still_needed:.2f}")
+                elif success:
+                    # V7.3.4: Zero fill = treat as cancellation, not partial
+                    report_once(reservation_id, "cancelled", 0, 0, reported_reservation_ids)
+                    executed_leg_indices.add(leg_idx)
+                    consecutive_failures = 0  # Reset - order submitted successfully
+                    print(f"   ⚠️ Order success but no fill (reservation cancelled)")
+                else:
+                    report_once(reservation_id, "failed", 0, 0, reported_reservation_ids)
+                    executed_leg_indices.add(leg_idx)
+                    print(f"   ❌ Order failed")
+            except Exception as exec_error:
+                # Ensure reservation is released on any exception
+                print(f"   ❌ Execution error: {exec_error}")
+                report_once(reservation_id, "failed", 0, 0, reported_reservation_ids)
+                executed_leg_indices.add(leg_idx)
+            
+            # Rate limiting
+            time.sleep(0.5)
+        
+        # V7.3.4 FIX: Cancel any unexecuted legs at end of round
+        # Only cancel legs that were not yet handled (not in executed_leg_indices)
+        for i, leg in enumerate(legs):
+            if i not in executed_leg_indices:
+                res_id = leg.get("reservation_id", "")
+                if res_id:
+                    print(f"   🧹 Cleaning up unexecuted leg {i + 1} reservation")
+                    report_once(res_id, "cancelled", 0, 0, reported_reservation_ids)
+        
+        # V7.3.4: Reset consecutive_failures after each round
+        consecutive_failures = 0
+        
+        # V7.3.4: Recompute still_needed for next round
+        still_needed = max(0, original_cap - total_obtained)
+        
+        # V7.3.4 FIX: Check if cap reached - stop if we've hit the limit
+        if total_obtained >= original_cap - 0.50 or still_needed < 0.50:
+            print(f"   ✅ usdcLocked cap reached: ${total_obtained:.2f} >= ${original_cap:.2f}")
+            break
     
+    # V7.3.4 FIX: Shortfall handling with alert
+    # Use original_cap for consistency (capped_needed is redundant)
+    shortfall = max(0, original_cap - total_obtained)
     print(f"\n   💰 Total liquidated: ${total_obtained:.2f}")
+    
+    if shortfall > 1.0:
+        print(f"   ⚠️ SHORTFALL: ${shortfall:.2f} could not be liquidated")
+        send_telegram_alert(
+            f"⚠️ Liquidation shortfall: ${shortfall:.2f}\n"
+            f"Obtained: ${total_obtained:.2f} / ${original_cap:.2f}\n"
+            f"May need manual intervention or more liquidity",
+            is_error=True
+        )
     
     if total_obtained > 0:
         send_telegram_alert(
@@ -1687,9 +1951,13 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
     return total_obtained
 
 
-def execute_liquidation_order(token_id: str, size: float, best_bid: float) -> Tuple[bool, float, float]:
+def execute_liquidation_order(token_id: str, size: float, best_bid: float, limit_price: float = 0.0) -> Tuple[bool, float, float, bool]:
     """
-    Execute a true market sell for liquidation using MarketOrderArgs.
+    Execute a market sell for liquidation with slippage protection.
+    
+    V7.3.4 FIX: Enforces limit_price check before order execution.
+    If current best bid is below limit_price, order is rejected.
+    Post-fill: detects slippage breach and returns halt signal.
     
     Per Polymarket docs and py-clob-client:
     - Uses MarketOrderArgs with amount (in USDC terms)
@@ -1700,17 +1968,31 @@ def execute_liquidation_order(token_id: str, size: float, best_bid: float) -> Tu
         token_id: The token to sell
         size: Number of tokens to sell
         best_bid: Current best bid price (for USDC estimation)
+        limit_price: Minimum acceptable price (slippage floor)
     
     Returns:
-        (success, usdc_obtained, tokens_filled)
+        (success, usdc_obtained, tokens_filled, slippage_breach)
+        slippage_breach: True if fill was >10% worse than limit_price (caller should halt)
     """
     client = get_patched_clob_client()
     
     if not client:
         print("   ❌ CLOB client not available")
-        return False, 0.0, 0.0
+        return False, 0.0, 0.0, False
     
     try:
+        # V7.3.4 FIX: Enforce slippage protection BEFORE order execution
+        if limit_price > 0 and best_bid < limit_price:
+            print(f"   ⚠️ PRE-TRADE SLIPPAGE: best_bid ${best_bid:.4f} < limit ${limit_price:.4f}")
+            send_telegram_alert(
+                f"⚠️ Pre-trade slippage rejection\n"
+                f"Best bid: ${best_bid:.4f}\n"
+                f"Limit: ${limit_price:.4f}\n"
+                f"Order not submitted",
+                is_error=True
+            )
+            return False, 0.0, 0.0, True  # True = slippage breach, should halt
+        
         usdc_amount = size * best_bid
         
         market_order_args = MarketOrderArgs(
@@ -1719,7 +2001,7 @@ def execute_liquidation_order(token_id: str, size: float, best_bid: float) -> Tu
             side=SELL,
         )
         
-        print(f"   📤 Creating market sell: {size:.2f} tokens (~${usdc_amount:.2f})")
+        print(f"   📤 Creating market sell: {size:.2f} tokens (~${usdc_amount:.2f}) [limit: ${limit_price:.4f}]")
         signed_order = client.create_market_order(market_order_args)
         resp = client.post_order(signed_order, OrderType.FAK)
         
@@ -1741,25 +2023,55 @@ def execute_liquidation_order(token_id: str, size: float, best_bid: float) -> Tu
             # If takingAmount is 0 or very small, the order didn't fill
             if taking <= 0.001:
                 print(f"   ⚠️  Order accepted but NO FILL (takingAmount={taking_str})")
-                return True, 0.0, 0.0  # Success=true but 0 fill triggers the guard in caller
+                return True, 0.0, 0.0, False  # Success=true but 0 fill triggers the guard in caller
             
-            # ALWAYS calculate tokens from USDC received / price (don't trust makingAmount)
-            # This handles partial fills correctly since we only count what we actually received
+            # V7.3.4 FIX: Post-fill slippage verification
+            # Compare expected USDC (if we got limit_price) vs actual USDC received
+            # FAK response doesn't give actual tokens sold, only USDC received (takingAmount)
+            expected_usdc = size * limit_price if limit_price > 0 else size * best_bid
+            slippage_pct = ((expected_usdc - taking) / expected_usdc * 100) if expected_usdc > 0 else 0
+            slippage_breach = False
+            
+            # V7.3.4 FIX: Tightened thresholds
+            # >2% slippage = breach (halt), 1-2% = warning
+            # This ensures withdrawals never settle materially below locked NAV
+            if limit_price > 0 and taking < expected_usdc * 0.98:  # >2% slippage = breach
+                slippage_breach = True
+                print(f"   🚨 SLIPPAGE BREACH: expected ${expected_usdc:.2f}, got ${taking:.2f} ({slippage_pct:.1f}% slip)")
+                send_telegram_alert(
+                    f"🚨 SLIPPAGE BREACH - HALTING!\n"
+                    f"Expected: ${expected_usdc:.2f} (at limit ${limit_price:.4f})\n"
+                    f"Actual: ${taking:.2f}\n"
+                    f"Slippage: {slippage_pct:.1f}%\n"
+                    f"⚠️ Liquidation halted - manual review required",
+                    is_error=True
+                )
+            elif limit_price > 0 and taking < expected_usdc * 0.99:  # 1-2% slippage = warning
+                print(f"   ⚠️ SLIPPAGE WARNING: expected ${expected_usdc:.2f}, got ${taking:.2f} ({slippage_pct:.1f}% slip)")
+                send_telegram_alert(
+                    f"⚠️ Slippage warning\n"
+                    f"Expected: ${expected_usdc:.2f}\n"
+                    f"Actual: ${taking:.2f}\n"
+                    f"Slippage: {slippage_pct:.1f}%",
+                    is_error=True
+                )
+            
+            # Estimate tokens filled from USDC received / reference price
             tokens_filled = taking / best_bid if best_bid > 0 else 0.0
-            print(f"   ✅ MARKET SELL filled: ${taking:.2f} USDC (~{tokens_filled:.2f} tokens @ ${best_bid:.4f})")
+            print(f"   ✅ MARKET SELL filled: ${taking:.2f} USDC (~{tokens_filled:.2f} tokens, {slippage_pct:.1f}% slip)")
             
-            return True, taking, tokens_filled
+            return True, taking, tokens_filled, slippage_breach
         else:
             error_msg = resp.get("errorMsg", "Unknown error")
             print(f"   ❌ Market sell failed: {error_msg}")
             print(f"   📋 Full response: {resp}")
-            return False, 0.0, 0.0
+            return False, 0.0, 0.0, False
             
     except Exception as e:
         print(f"   ❌ Liquidation order error: {e}")
         import traceback
         traceback.print_exc()
-        return False, 0.0, 0.0
+        return False, 0.0, 0.0, False
 
 
 # =============================================================================

@@ -1,0 +1,62 @@
+  📊 PM balances: cash=$0.43, positions=$29.56
+   📖 Orderbook query: 97570355656198855765...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '22263.99'}, {'price': '0.002', 'size': '16025'}, {'price': '0.003', 'size': '3192.2'}]
+   📊 Best bid: $0.0190, size at best: 320.68, total depth: 51118.99
+   [1] SELL 59.80 @ $0.0190 (depth: 320.68)
+   📤 Creating market sell: 59.80 tokens (~$1.14)
+   📋 Response: status=matched, takingAmount=0.02147, makingAmount=1.13
+   ✅ MARKET SELL filled: $0.02 USDC (~1.13 tokens @ $0.0190)
+       ✅ Received $0.02 (1.13 tokens filled)
+          Total: $0.02, still need: $15.46, remaining tokens: 58.67
+   📊 On-chain USDC (Polygon RPC): $0.43
+   ✅ CLOB confirms: $0.43
+   ⚠️ Orderbook unavailable for Yes, using API value $1.89
+   ⚠️ Orderbook unavailable for Yes, using API value $1.93
+   ⚠️ Orderbook unavailable for Yes, using API value $1.92
+   ⚠️ Orderbook unavailable for Yes, using API value $1.75
+   ⚠️ Orderbook unavailable for Yes, using API value $1.69
+   ⚠️ Orderbook unavailable for Yes, using API value $0.90
+   ⚠️ Orderbook unavailable for Yes, using API value $0.80
+   ⚠️ Orderbook unavailable for Yes, using API value $0.43
+   ⚠️ Orderbook unavailable for Yes, using API value $0.40
+   📊 Top positions for liquidation (sorted by value):
+      1. Yes: 98.80 tokens, $1.93 (API fallback)
+      2. Yes: 98.41 tokens, $1.92 (API fallback)
+      3. Yes: 99.70 tokens, $1.89 (API fallback)
+      4. Yes: 90.00 tokens, $1.75 (API fallback)
+      5. Yes: 88.76 tokens, $1.69 (API fallback)
+   📊 PM balances: cash=$0.43, positions=$27.97
+   📊 On-chain USDC (Polygon RPC): $0.45
+   ✅ CLOB confirms: $0.45
+   ⚠️ Orderbook unavailable for Yes, using API value $1.89
+   ⚠️ Orderbook unavailable for Yes, using API value $1.93
+   ⚠️ Orderbook unavailable for Yes, using API value $1.92
+   ⚠️ Orderbook unavailable for Yes, using API value $1.75
+   ⚠️ Orderbook unavailable for Yes, using API value $1.69
+   ⚠️ Orderbook unavailable for Yes, using API value $0.90
+   ⚠️ Orderbook unavailable for Yes, using API value $0.80
+   ⚠️ Orderbook unavailable for Yes, using API value $0.43
+   ⚠️ Orderbook unavailable for Yes, using API value $0.40
+   📊 Top positions for liquidation (sorted by value):
+      1. Yes: 98.80 tokens, $1.93 (API fallback)
+      2. Yes: 98.41 tokens, $1.92 (API fallback)
+      3. Yes: 99.70 tokens, $1.89 (API fallback)
+      4. Yes: 90.00 tokens, $1.75 (API fallback)
+      5. Yes: 88.76 tokens, $1.69 (API fallback)
+   📊 PM balances: cash=$0.45, positions=$27.60
+   📖 Orderbook query: 97570355656198855765...
+   🔍 Raw bids (first 3): [{'price': '0.001', 'size': '22263.99'}, {'price': '0.002', 'size': '16025'}, {'price': '0.003', 'size': '3192.2'}]
+   📊 Best bid: $0.0180, size at best: 80.40, total depth: 51183.31
+   [2] SELL 58.67 @ $0.0180 (depth: 80.40)
+   📤 Creating market sell: 58.67 tokens (~$1.06)
+   📋 Response: status=matched, takingAmount=0.0189, makingAmount=1.05
+   ✅ MARKET SELL filled: $0.02 USDC (~1.05 tokens @ $0.0180)
+       ✅ Received $0.02 (1.05 tokens filled)
+          Total: $0.04, still need: $15.45, remaining tokens: 57.62
+   📊 On-chain USDC (Polygon RPC): $0.45
+   ✅ CLOB confirms: $0.45
+   ⚠️ Orderbook unavailable for Yes, using API value $1.89
+   ⚠️ Orderbook unavailable for Yes, using API value $1.93
+   ⚠️ Orderbook unavailable for Yes, using API value $1.92
+   ⚠️ Orderbook unavailable for Yes, using API value $1.75
+   ⚠️ Orderbook unavailable for Yes, using API value $1.69

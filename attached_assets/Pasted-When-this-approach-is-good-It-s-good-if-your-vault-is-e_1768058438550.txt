@@ -1,0 +1,137 @@
+When this approach is good
+
+It’s good if your vault is effectively a market-making/positions portfolio and withdrawals must be funded by selling positions. In that world, “sell-to-raise-cash on demand” is normal.
+
+You get:
+
+single valuation + orderbook logic (bot_v7) instead of duplicated logic
+
+simpler servicer (it just executes sells and reconciles cash)
+
+faster iteration on liquidation heuristics without touching withdrawal logic
+
+The main traps you must design around
+1) Fairness and “locked withdraw price”
+
+If your protocol locks a withdrawal amount/price at request time (like usdcLocked), the servicer must honor that.
+Otherwise users can be exposed to NAV drift during liquidation (or, worse, bot glitches).
+
+Rule: withdrawal servicer should target sum(usdcLocked of due requests) + buffer, not “live NAV × shares”.
+
+2) Slippage, partial fills, and illiquidity
+
+“Best position to liquidate” cannot mean “highest liq value” only. It should incorporate:
+
+depth at/near best bid for the size you need
+
+expected slippage (VWAP over depth)
+
+probability of partial fill / no fill
+
+minimum acceptable price / max slippage guardrails
+
+Rule: only liquidate if bot_v7 provides a quote plan (price limits + expected fill) and servicer enforces it.
+
+3) Concurrency / double-selling
+
+If two withdrawals run at once, they can both “select the same best position” and oversell.
+
+Rule: you need an idempotent “reservation/lock” mechanism:
+
+bot_v7 returns a reservation_id with TTL
+
+servicer must include it when placing the order
+
+bot_v7 marks that position/size as reserved until filled/expired/cancelled
+
+If you don’t want bot_v7 to hold state, do it on-chain (harder) or in a shared DB/redis lock.
+
+4) Separation of concerns: reads vs writes
+
+Your separation is good as long as bot_v7 does not execute trades.
+But bot_v7 should still own execution guidance (limits, sizing, failover choice), because that’s tightly coupled to orderbook interpretation.
+
+5) “Cash check” must be authoritative
+
+Polling /pm-cash is fine, but the servicer should rely on:
+
+on-chain cash balance (or the canonical source of cash custody)
+
+plus “pending settlement” state if applicable
+
+Otherwise you’ll get race conditions where cash hasn’t arrived yet but you keep selling.
+
+A safer version of your flow
+
+Instead of “best position” (single), make it “liquidation plan” (multi-step), but still simple.
+
+Endpoint 1: plan liquidation
+
+GET /liquidation-plan?need_usdc=30&max_positions=3
+
+Returns something like:
+
+{
+  "plan_id": "abc123",
+  "need_usdc": 30.0,
+  "legs": [
+    {
+      "token_id": "...",
+      "side": "SELL",
+      "size": 16.7,
+      "limit_price": 0.995,
+      "expected_usdc": 16.64,
+      "worst_case_usdc": 16.40,
+      "reservation_id": "r1",
+      "expires_at": 1767878000
+    }
+  ],
+  "assumptions": {
+    "max_slippage_bps": 50,
+    "quote_time_ms": 250
+  }
+}
+
+Endpoint 2: mark execution result
+
+POST /liquidation-result
+Servicer posts fills (or failure), bot updates internal inventory / reservation state.
+
+Servicer loop
+
+compute need_usdc = sum(usdcLocked due) + buffer − available_cash
+
+request /liquidation-plan
+
+execute each leg with strict limit prices
+
+wait for settlement / cash update (with timeout + backoff)
+
+repeat if still short, but cap total sells per run
+
+Selection logic “best position”
+
+If you still want a single /best-position-to-liquidate, it should choose based on something like:
+
+maximize: expected_usdc_raised_per_unit_time
+subject to:
+
+fill probability high (has depth)
+
+slippage under threshold
+
+not reserved
+
+not below dust threshold
+
+respects risk constraints (don’t liquidate hedges that keep portfolio safe unless necessary)
+
+In practice, the heuristic is often:
+
+positions with deep best bid and low spread
+
+positions with largest reliable depth at best bid (or within X ticks)
+
+avoid “NO BIDS” entirely (obviously)
+
+avoid tiny dust unless it’s the final top-up
