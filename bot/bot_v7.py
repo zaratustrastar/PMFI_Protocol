@@ -1739,6 +1739,111 @@ def get_orderbook_endpoint():
         return jsonify({"error": str(e)}), 500
 
 
+@flask_app.route('/positions', methods=['GET'])
+def get_positions_endpoint():
+    """
+    V7.3.4: Get all positions with liquidation values.
+    
+    This endpoint exposes the position valuation that bot_v7 already computes,
+    so withdrawal_servicer doesn't need to duplicate orderbook fetching.
+    
+    Returns:
+      - positions: List of positions with token_id, size, liq_value, outcome, best_bid
+      - total_liq_value: Sum of all liquidation values
+      - cash: Current PM cash balance
+    """
+    try:
+        global polymarket_client
+        
+        if not polymarket_client:
+            return jsonify({"error": "PolymarketClient not initialized"}), 500
+        
+        # Fetch positions with cost basis (includes size, token_id, outcome, etc.)
+        positions_data, total_cost_basis = polymarket_client.fetch_positions_with_cost_basis()
+        
+        print(f"📊 /positions: Got {len(positions_data)} positions from fetch_positions_with_cost_basis()")
+        
+        if not positions_data:
+            return jsonify({
+                "positions": [],
+                "total_liq_value": 0,
+                "cash": polymarket_client.fetch_cash_balance(),
+                "timestamp": int(time.time())
+            })
+        
+        # Calculate liquidation value for each position using orderbook
+        positions_result = []
+        total_liq_value = 0.0
+        
+        for pos in positions_data:
+            token_id = pos.get("token_id")
+            size = pos.get("size", 0)
+            outcome = pos.get("outcome", "Unknown")
+            
+            # V7.3.4: Defensive schema check
+            if not token_id:
+                print(f"   ⚠️ Position missing token_id, keys: {list(pos.keys())[:5]}")
+                continue
+            if size <= 0:
+                continue
+            
+            # Fetch orderbook and calculate liquidation value
+            orderbook = polymarket_client.fetch_orderbook(token_id)
+            bids = orderbook.get("bids", []) if orderbook else []
+            
+            if bids:
+                # VWAP sweep through bids
+                remaining = size
+                liq_value = 0.0
+                best_bid = float(bids[0]["price"])
+                
+                for bid in bids:
+                    if remaining <= 0:
+                        break
+                    bid_price = float(bid["price"])
+                    bid_size = float(bid["size"])
+                    fill = min(remaining, bid_size)
+                    liq_value += fill * bid_price
+                    remaining -= fill
+                
+                positions_result.append({
+                    "token_id": token_id,
+                    "outcome": outcome[:50],
+                    "size": round(size, 2),
+                    "liq_value": round(liq_value, 2),
+                    "best_bid": round(best_bid, 4),
+                    "has_bids": True
+                })
+                total_liq_value += liq_value
+            else:
+                # No bids - illiquid position
+                positions_result.append({
+                    "token_id": token_id,
+                    "outcome": outcome[:50],
+                    "size": round(size, 2),
+                    "liq_value": 0,
+                    "best_bid": 0,
+                    "has_bids": False
+                })
+        
+        # Sort by liquidation value (highest first)
+        positions_result.sort(key=lambda x: x["liq_value"], reverse=True)
+        
+        print(f"📊 /positions: Returning {len(positions_result)} positions, total_liq_value=${total_liq_value:.2f}")
+        
+        return jsonify({
+            "positions": positions_result,
+            "total_liq_value": round(total_liq_value, 2),
+            "cash": polymarket_client.fetch_cash_balance(),
+            "timestamp": int(time.time())
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
 # =============================================================================
 # Background NAV Refresh
 # =============================================================================

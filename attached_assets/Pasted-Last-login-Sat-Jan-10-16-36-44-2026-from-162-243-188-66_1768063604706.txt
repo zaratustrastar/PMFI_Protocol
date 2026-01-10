@@ -1,0 +1,121 @@
+Last login: Sat Jan 10 16:36:44 2026 from 162.243.188.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot
+
+python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $1.04
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2026-01-10 16:45:47
+============================================================
+^C
+
+👋 Servicer stopped by user
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# BOT_URL=http://147.182.206.35:8080 python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x7bda93A174107F64C67F83aa54176Ecb245f75F3
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $1.04
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2026-01-10 16:46:00
+============================================================
+^C
+
+👋 Servicer stopped by user
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# unset VAULT_V7_ADDRESS
+unset RPC_URL
+unset BASE_RPC_URL
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+
+python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x5Ae7395Ca8ab044159133E2e23f421aE8f94055F
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $0.00
+   In-transit items: 0
+   Tracked vault balance: $1.04
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2026-01-10 16:46:24
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 25.000000
+   Pending withdrawals count: 1
+   Next withdrawal index: 3
+   Iterating 1 pending requests...
+      Request #3: 25.0000 shares, $73.36 locked
+   Checked 1 requests, found 1 pending, total locked: $73.36
+   Actual usdcLocked from queue: $73.36
+
+📊 STATUS:
+   Pending withdrawals: $73.36
+   Vault USDC (Base): $43.77
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $29.60
+   Needed (with 0.5% slippage): $29.74
+
+⚠️  WITHDRAWAL NEEDED: $29.74 (includes slippage buffer)
+   📊 On-chain USDC (Polygon RPC): $0.92
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (signer): 0x5087675E...
+   📋 Proxy wallet (funder): 0x9cbc5577...
+   📋 Signature type: 2 (Browser proxy)
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   📋 Wallet: 0x9cbc5577...
+   📋 Private key present: True
+   📋 CLOB host: https://clob.polymarket.com
+   🔑 Using pre-derived API credentials from env vars...
+   ✅ Credentials loaded (key: c4a3fd29...)
+   ✅ L2 auth verified - CLOB client ready for trading
+   ✅ CLOB confirms: $0.92
+   ⚠️ Orderbook unavailable for Yes, using API value $1.89

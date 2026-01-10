@@ -1029,13 +1029,34 @@ def get_pm_balance() -> Tuple[float, float]:
     except Exception as e:
         print(f"   ⚠️ CLOB sanity check failed: {e}")
     
-    # Get position value using VWAP sweep (accurate liquidation value for NAV)
+    # V7.3.4: Get position values from bot_v7 (avoids duplicate orderbook fetching)
+    positions = 0.0
     try:
-        positions_list = get_positions_for_liquidation()
-        positions = sum(p.get("liq_value", 0) for p in positions_list)
+        positions_list, total_liq_value, bot_cash = get_positions_from_bot()
+        
+        if total_liq_value > 0:
+            positions = total_liq_value
+            # Log top positions for visibility
+            if positions_list:
+                print(f"   📊 Top positions (from bot_v7):")
+                for i, p in enumerate(positions_list[:5]):
+                    bid_note = "" if p.get("has_bids") else " (no bids)"
+                    print(f"      {i+1}. {p['outcome'][:35]}: {p['size']:.2f} tokens, ${p['liq_value']:.2f}{bid_note}")
+        else:
+            # V7.3.4: Fallback to local calculation if bot returns zero
+            print(f"   ⚠️ Bot returned zero position value, using local fallback")
+            local_positions = get_positions_for_liquidation()
+            positions = sum(p.get("liq_value", 0) for p in local_positions)
+            if positions > 0:
+                print(f"   ✅ Local fallback found ${positions:.2f} in positions")
     except Exception as e:
-        print(f"   ⚠️ Position VWAP valuation error: {e}")
-        positions = 0.0
+        print(f"   ⚠️ Position valuation error (bot_v7): {e}")
+        # Fallback to local calculation
+        try:
+            local_positions = get_positions_for_liquidation()
+            positions = sum(p.get("liq_value", 0) for p in local_positions)
+        except Exception as e2:
+            print(f"   ⚠️ Local fallback also failed: {e2}")
     
     print(f"   📊 PM balances: cash=${cash:.2f}, positions=${positions:.2f}")
     return cash, positions
@@ -1203,22 +1224,12 @@ def calculate_liquidation_value(token_id: str, size: float, verbose: bool = True
 
 def get_liquidatable_cash() -> float:
     """
-    Calculate total immediately liquidatable cash from positions.
-    Uses VWAP sweep through orderbook depth.
+    V7.3.4: Get total liquidatable value from bot_v7.
     
     Returns: Total USDC that can be obtained from liquidation
     """
-    positions = get_positions_for_liquidation()
-    total = 0.0
-    
-    for pos in positions:
-        token_id = pos.get("token_id")
-        size = pos.get("size", 0)
-        if token_id and size > 0:
-            liq_value = calculate_liquidation_value(token_id, size, verbose=False)
-            total += liq_value
-    
-    return total
+    positions_list, total_liq_value, _ = get_positions_from_bot()
+    return total_liq_value
 
 
 def get_orderbook_best_bid(token_id: str) -> Tuple[float, float]:
@@ -1605,6 +1616,31 @@ def get_pm_cash_from_bot() -> float:
         return 0.0
     except Exception:
         return 0.0
+
+
+def get_positions_from_bot() -> Tuple[List[Dict], float, float]:
+    """
+    V7.3.4: Get positions with liquidation values from bot_v7.
+    
+    This replaces local orderbook fetching - bot_v7 already has working
+    CLOB access and does VWAP sweeps for position valuation.
+    
+    Returns: (positions_list, total_liq_value, cash)
+    """
+    try:
+        response = requests.get(f"{BOT_URL}/positions", timeout=60)  # May take time for many positions
+        if response.status_code == 200:
+            data = response.json()
+            positions = data.get("positions", [])
+            total_liq = data.get("total_liq_value", 0)
+            cash = data.get("cash", 0)
+            return positions, total_liq, cash
+        else:
+            print(f"   ⚠️ Bot positions endpoint returned {response.status_code}")
+            return [], 0.0, 0.0
+    except Exception as e:
+        print(f"   ⚠️ Failed to get positions from bot: {e}")
+        return [], 0.0, 0.0
 
 
 def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> float:
