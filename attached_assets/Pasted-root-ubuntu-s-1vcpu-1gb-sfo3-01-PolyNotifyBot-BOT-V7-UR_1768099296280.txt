@@ -1,0 +1,188 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# BOT_V7_URL=http://147.182.206.35:8080 python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x5Ae7395Ca8ab044159133E2e23f421aE8f94055F
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://147.182.206.35:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $6.09
+   In-transit items: 0
+   Tracked vault balance: $1.04
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2026-01-11 02:36:44
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 25.000000
+   Pending withdrawals count: 1
+   Next withdrawal index: 3
+   Iterating 1 pending requests...
+      Request #3: 25.0000 shares, $73.36 locked
+   Checked 1 requests, found 1 pending, total locked: $73.36
+   Actual usdcLocked from queue: $73.36
+
+📊 STATUS:
+   Pending withdrawals: $73.36
+   Vault USDC (Base): $52.29
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $6.09 / $50000.00
+
+   Needed (base): $21.08
+   Needed (with 0.5% slippage): $21.18
+
+⚠️  WITHDRAWAL NEEDED: $21.18 (includes slippage buffer)
+   📊 On-chain USDC (Polygon RPC): $0.99
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (signer): 0x5087675E...
+   📋 Proxy wallet (funder): 0x9cbc5577...
+   📋 Signature type: 2 (Browser proxy)
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   📋 Wallet: 0x9cbc5577...
+   📋 Private key present: True
+   📋 CLOB host: https://clob.polymarket.com
+   🔑 Using pre-derived API credentials from env vars...
+   ✅ Credentials loaded (key: c4a3fd29...)
+   ✅ L2 auth verified - CLOB client ready for trading
+   ✅ CLOB confirms: $0.99
+   📊 Top positions (from bot_v7):
+      1. Yes: 10.00 tokens, $2.70
+      2. Yes: 38.50 tokens, $2.66
+      3. Yes: 81.12 tokens, $1.32
+      4. Yes: 99.70 tokens, $0.70
+      5. Yes: 88.76 tokens, $0.62
+   📊 PM balances: cash=$0.99, positions=$26.21
+
+📊 Polymarket:
+   Cash: $0.99
+   Positions (NAV): $26.21
+   Liquidatable: $26.21 (VWAP)
+   📊 On-chain USDC (Polygon RPC): $0.99
+   ✅ CLOB confirms: $0.99
+   📊 Top positions (from bot_v7):
+      1. Yes: 10.00 tokens, $2.70
+      2. Yes: 38.50 tokens, $2.66
+      3. Yes: 81.12 tokens, $1.32
+      4. Yes: 99.70 tokens, $0.70
+      5. Yes: 88.76 tokens, $0.62
+   📊 PM balances: cash=$0.99, positions=$26.21
+
+⚠️  Cash insufficient, need to liquidate $21.18
+   Liquidatable: $26.21
+   Targeting: $21.18
+   📊 On-chain USDC (Polygon RPC): $0.99
+   ✅ CLOB confirms: $0.99
+   📊 Top positions (from bot_v7):
+      1. Yes: 38.50 tokens, $2.81
+      2. Yes: 10.00 tokens, $2.70
+      3. Yes: 81.12 tokens, $1.32
+      4. Yes: 99.70 tokens, $0.70
+      5. Yes: 88.76 tokens, $0.62
+   📊 PM balances: cash=$0.99, positions=$26.36
+
+🔥 LIQUIDATE V7.3.4: Need $21.18 USDC (capped from $21.18)
+   Initial PM cash: $0.99
+   usdcLocked cap: $21.18 (will not exceed)
+   💵 Partial cash $0.99, reducing target from $21.18
+   📉 New liquidation target: $20.19
+
+   📋 ROUND 1: Still need $20.19
+   📡 Requesting liquidation plan from bot_v7...
+   ✅ Got plan: 5 legs, expected $5.22
+   📊 Plan 47ae2552: 5 legs, expected $5.22, shortfall $14.97
+   ⚠️ Plan shortfall too high: $14.97 (>50% of $20.19)
+
+   💰 Total liquidated: $0.00
+   ⚠️ SHORTFALL: $21.18 could not be liquidated
+   📊 On-chain USDC (Polygon RPC): $0.99
+   ✅ CLOB confirms: $0.99
+   📊 Top positions (from bot_v7):
+      1. Yes: 10.00 tokens, $2.70
+      2. Yes: 38.50 tokens, $2.66
+      3. Yes: 81.12 tokens, $1.32
+      4. Yes: 99.70 tokens, $0.70
+      5. Yes: 88.76 tokens, $0.62
+   📊 PM balances: cash=$0.99, positions=$26.18
+   ✅ Cash-only bridge complete, skipping post-liquidation bridge
+
+💤 Sleeping 60s...
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2026-01-11 02:39:53
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 25.000000
+   Pending withdrawals count: 1
+   Next withdrawal index: 3
+   Iterating 1 pending requests...
+      Request #3: 25.0000 shares, $73.36 locked
+   Checked 1 requests, found 1 pending, total locked: $73.36
+   Actual usdcLocked from queue: $73.36
+
+📊 STATUS:
+   Pending withdrawals: $73.36
+   Vault USDC (Base): $52.29
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $6.09 / $50000.00
+
+   Needed (base): $21.08
+   Needed (with 0.5% slippage): $21.18
+
+⚠️  WITHDRAWAL NEEDED: $21.18 (includes slippage buffer)
+   📊 On-chain USDC (Polygon RPC): $0.99
+   ✅ CLOB confirms: $0.99
+   📊 Top positions (from bot_v7):
+      1. Yes: 10.00 tokens, $2.70
+      2. Yes: 38.50 tokens, $2.62
+      3. Yes: 81.12 tokens, $1.32
+      4. Yes: 99.70 tokens, $0.70
+      5. Yes: 88.76 tokens, $0.62
+   📊 PM balances: cash=$0.99, positions=$26.25
+
+📊 Polymarket:
+   Cash: $0.99
+   Positions (NAV): $26.25
+   Liquidatable: $26.25 (VWAP)
+   📊 On-chain USDC (Polygon RPC): $0.99
+   ✅ CLOB confirms: $0.99
+   📊 Top positions (from bot_v7):
+      1. Yes: 10.00 tokens, $2.70
+      2. Yes: 38.50 tokens, $2.62
+      3. Yes: 81.12 tokens, $1.32
+      4. Yes: 99.70 tokens, $0.70
+      5. Yes: 88.76 tokens, $0.62
+   📊 PM balances: cash=$0.99, positions=$26.34
+
+⚠️  Cash insufficient, need to liquidate $21.18
+   Liquidatable: $26.25
+   Targeting: $21.18
+   📊 On-chain USDC (Polygon RPC): $0.99
+   ✅ CLOB confirms: $0.99
+   📊 Top positions (from bot_v7):
+      1. Yes: 10.00 tokens, $2.70
+      2. Yes: 38.50 tokens, $2.59
+      3. Yes: 81.12 tokens, $1.32
+      4. Yes: 99.70 tokens, $0.70
+      5. Yes: 88.76 tokens, $0.62
+   📊 PM balances: cash=$0.99, positions=$26.34
+
+🔥 LIQUIDATE V7.3.4: Need $21.18 USDC (capped from $21.18)
+   Initial PM cash: $0.99
+   usdcLocked cap: $21.18 (will not exceed)
+   💵 Partial cash $0.99, reducing target from $21.18
+   📉 New liquidation target: $20.19
+
+   📋 ROUND 1: Still need $20.19
+   📡 Requesting liquidation plan from bot_v7...

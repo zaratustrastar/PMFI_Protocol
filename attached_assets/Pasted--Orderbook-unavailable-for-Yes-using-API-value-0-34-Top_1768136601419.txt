@@ -1,0 +1,61 @@
+⚠️ Orderbook unavailable for Yes, using API value $0.34
+   📊 Top positions for liquidation (sorted by value):
+      1. Yes: 98.80 tokens, $1.93 (API fallback)
+      2. Yes: 38.50 tokens, $1.92
+      3. Yes: 98.41 tokens, $1.92 (API fallback)
+      4. Yes: 99.70 tokens, $1.89 (API fallback)
+      5. Yes: 90.93 tokens, $1.73 (API fallback)
+   ✅ Local fallback found $41.31 in positions
+   📊 PM balances: cash=$0.00, positions=$41.31
+
+📊 Polymarket:
+   Cash: $0.00
+   Positions (NAV): $41.31
+   Liquidatable: $18.32 (VWAP)
+   📊 On-chain USDC (Polygon RPC): $0.00
+   ✅ CLOB confirms: $0.00
+   📊 Top positions (from bot_v7):
+      1. Yes: 38.50 tokens, $1.92
+      2. Yes: 88.01 tokens, $1.14
+      3. Yes: 69.13 tokens, $0.80
+      4. Yes: 99.98 tokens, $0.60
+      5. Yes: 10.00 tokens, $0.60
+   📊 PM balances: cash=$0.00, positions=$18.35
+
+⚠️  Cash insufficient, need to liquidate $11.88
+   Liquidatable: $18.32
+   Targeting: $11.88
+   📊 On-chain USDC (Polygon RPC): $0.00
+   ✅ CLOB confirms: $0.00
+   📊 Top positions (from bot_v7):
+      1. Yes: 38.50 tokens, $1.92
+      2. Yes: 88.01 tokens, $1.14
+      3. Yes: 69.13 tokens, $0.80
+      4. Yes: 99.98 tokens, $0.60
+      5. Yes: 10.00 tokens, $0.60
+   📊 PM balances: cash=$0.00, positions=$18.40
+
+🔥 LIQUIDATE V7.3.4: Need $11.88 USDC (capped from $11.88)
+   Initial PM cash: $0.00
+   usdcLocked cap: $11.88 (will not exceed)
+
+   📋 ROUND 1: Still need $11.88
+   📡 Requesting liquidation plan from bot_v7...
+   ✅ Got plan: 5 legs, expected $4.78
+   📊 Plan 8dfd394b: 5 legs, expected $4.78, shortfall $7.10
+   ⚠️ Plan shortfall too high: $7.10 (>50% of $11.88)
+
+   💰 Total liquidated: $0.00
+   ⚠️ SHORTFALL: $11.88 could not be liquidated
+   📊 On-chain USDC (Polygon RPC): $0.00
+   ✅ CLOB confirms: $0.00
+   📊 Top positions (from bot_v7):
+      1. Yes: 38.50 tokens, $1.92
+      2. Yes: 88.01 tokens, $1.14
+      3. Yes: 69.13 tokens, $0.80
+      4. Yes: 99.98 tokens, $0.60
+      5. Yes: 10.00 tokens, $0.60
+   📊 PM balances: cash=$0.00, positions=$18.44
+   ✅ Cash-only bridge complete, skipping post-liquidation bridge
+
+💤 Sleeping 60s...
