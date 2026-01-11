@@ -1,0 +1,454 @@
+============================================================
+💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+============================================================
+✈️ In-flight (at deposit addr): $0.00
+📡 Fetching positions with cost basis for 0x9cbc5577...
+✅ Found 131 active positions, total cost basis: $104.79
+   📖 Orderbook via CLOB client: 16356388326588765230...
+   📊 Got 0 bids, 0 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 45752347844115199896...
+   📊 Got 0 bids, 0 asks
+   ❌ Yes: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 52975817482966274006...
+   📊 Got 0 bids, 3 asks
+   ❌ No: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 34493981133416706006...
+   📊 Got 0 bids, 4 asks
+   ❌ No: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 98930852304720878664...
+   📊 Got 0 bids, 4 asks
+   ❌ No: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 26977822289522313132...
+   📊 Got 0 bids, 31 asks
+   ❌ No: 100.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 30219114369792036222...
+   📊 Got 1 bids, 46 asks
+   ✅ Yes: 99.8 → liq value $0.10
+   📖 Orderbook via CLOB client: 33832620771406066042...
+   📊 Got 1 bids, 47 asks
+   ✅ Yes: 99.8 → liq value $0.10
+   📖 Orderbook via CLOB client: 10855039177719706744...
+   📊 Got 2 bids, 51 asks
+   ✅ Yes: 99.7 → liq value $0.20
+   📖 Orderbook via CLOB client: 15942190390120782683...
+   ❌ Orderbook 404: token_id may be wrong format or market resolved
+      Full token: 15942190390120782683112857809269240990912733860738945267501657198141982955039
+   ❌ Yes: 99.7 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 35587333994576608221...
+   📊 Got 1 bids, 24 asks
+   ✅ No: 99.6 → liq value $0.10
+   📖 Orderbook via CLOB client: 47270467249276705541...
+   ❌ Orderbook 404: token_id may be wrong format or market resolved
+      Full token: 47270467249276705541404755657778728908971647196326939106410009930625633137122
+   ❌ Yes: 98.8 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 10341844789609823315...
+   ❌ Orderbook 404: token_id may be wrong format or market resolved
+      Full token: 103418447896098233157515770766928693303121464868809052382578178344001163498772
+   ❌ Yes: 98.4 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 48479042198650536694...
+   📊 Got 1 bids, 41 asks
+   ✅ Yes: 95.3 → liq value $0.10
+   📖 Orderbook via CLOB client: 27667746457318023791...
+   📊 Got 0 bids, 30 asks
+   ❌ Yes: 90.9 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 29603946020322417493...
+   📊 Got 0 bids, 5 asks
+   ❌ Yes: 90.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 95229956874594622405...
+   📊 Got 1 bids, 25 asks
+   ✅ Yes: 90.0 → liq value $0.07
+   📖 Orderbook via CLOB client: 94107432535142230689...
+   📊 Got 1 bids, 29 asks
+   ✅ No: 90.0 → liq value $0.09
+   📖 Orderbook via CLOB client: 91294937226763443521...
+   📊 Got 1 bids, 26 asks
+   ✅ Yes: 90.0 → liq value $0.09
+   📖 Orderbook via CLOB client: 75526159557562290921...
+   📊 Got 1 bids, 26 asks
+   ✅ Yes: 90.0 → liq value $0.09
+   📖 Orderbook via CLOB client: 60582488123256604215...
+   📊 Got 1 bids, 31 asks
+   ✅ Yes: 90.0 → liq value $0.09
+   📖 Orderbook via CLOB client: 14300545701561876918...
+   📊 Got 1 bids, 27 asks
+   ✅ No: 90.0 → liq value $0.09
+   📖 Orderbook via CLOB client: 98740784555752056551...
+   📊 Got 0 bids, 34 asks
+   ❌ No: 89.5 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 18642014007382986249...
+   📊 Got 0 bids, 50 asks
+   ❌ Yes: 88.8 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 90344746868296667545...
+   📊 Got 2 bids, 52 asks
+   ✅ Yes: 85.5 → liq value $0.17
+   📖 Orderbook via CLOB client: 34519071641072636673...
+   📊 Got 0 bids, 46 asks
+   ❌ Yes: 85.2 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 92232685649070612819...
+   📊 Got 0 bids, 52 asks
+   ❌ Yes: 80.2 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 17045034913375255470...
+   📊 Got 0 bids, 28 asks
+   ❌ No: 79.9 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 60253842717001938953...
+   📊 Got 0 bids, 32 asks
+   ❌ No: 79.9 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 70882251099492120142...
+   📊 Got 3 bids, 50 asks
+   ✅ Yes: 75.6 → liq value $0.23
+   📖 Orderbook via CLOB client: 14521672628949724593...
+   📊 Got 0 bids, 31 asks
+   ❌ Yes: 73.9 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 29650436048719214514...
+   📊 Got 1 bids, 21 asks
+   ✅ No: 73.3 → liq value $0.07
+   📖 Orderbook via CLOB client: 43551957386808869612...
+   📊 Got 1 bids, 24 asks
+   ✅ Yes: 70.0 → liq value $0.07
+   📖 Orderbook via CLOB client: 44888978787869845154...
+   📊 Got 1 bids, 22 asks
+   ✅ Yes: 70.0 → liq value $0.07
+   📖 Orderbook via CLOB client: 16693936417471853755...
+   📊 Got 3 bids, 22 asks
+   ✅ Yes: 70.0 → liq value $0.16
+   📖 Orderbook via CLOB client: 66841861044102523310...
+   📊 Got 4 bids, 11 asks
+   ✅ No: 70.0 → liq value $0.28
+   📖 Orderbook via CLOB client: 33144743255125191866...
+   📊 Got 1 bids, 4 asks
+   ✅ Yes: 70.0 → liq value $0.70
+   📖 Orderbook via CLOB client: 10591551992159529727...
+   📊 Got 2 bids, 41 asks
+   ✅ Yes: 69.8 → liq value $0.14
+   📖 Orderbook via CLOB client: 16697992587210061986...
+   📊 Got 5 bids, 47 asks
+   ✅ Yes: 69.1 → liq value $0.48
+   📖 Orderbook via CLOB client: 27679590115663567542...
+   📊 Got 0 bids, 48 asks
+   ❌ Yes: 66.6 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 13459858129087586346...
+   📊 Got 1 bids, 47 asks
+   ✅ Yes: 66.0 → liq value $0.07
+   📖 Orderbook via CLOB client: 32607909496713814919...
+   📊 Got 7 bids, 51 asks
+   ✅ Yes: 61.2 → liq value $0.49
+   📖 Orderbook via CLOB client: 16547848952911032428...
+   📊 Got 6 bids, 54 asks
+   ✅ Yes: 61.2 → liq value $0.41
+   📖 Orderbook via CLOB client: 49050035808871316009...
+   📊 Got 3 bids, 23 asks
+   ✅ Yes: 60.0 → liq value $0.24
+   📖 Orderbook via CLOB client: 66986759513706631685...
+   📊 Got 1 bids, 21 asks
+   ✅ Yes: 50.0 → liq value $0.05
+   📖 Orderbook via CLOB client: 93747158057966120598...
+   📊 Got 1 bids, 21 asks
+   ✅ No: 50.0 → liq value $0.05
+   📖 Orderbook via CLOB client: 32571167155995699415...
+   📊 Got 1 bids, 19 asks
+   ✅ Yes: 50.0 → liq value $0.05
+   📖 Orderbook via CLOB client: 45549703486802369588...
+   📊 Got 1 bids, 36 asks
+   ✅ Yes: 49.9 → liq value $0.05
+   📖 Orderbook via CLOB client: 93666105469319181966...
+   📊 Got 0 bids, 27 asks
+   ❌ Yes: 49.8 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 10444568520457863846...
+   📊 Got 0 bids, 50 asks
+   ❌ Yes: 43.1 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 10920155190279957795...
+   📊 Got 0 bids, 49 asks
+   ❌ Yes: 40.1 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 97570355656198855765...
+   📊 Got 27 bids, 36 asks
+   ✅ Yes: 38.5 → liq value $3.80
+   📖 Orderbook via CLOB client: 58818912093362786189...
+   📊 Got 0 bids, 25 asks
+   ❌ Yes: 35.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 41057483651610090488...
+   📊 Got 1 bids, 23 asks
+   ✅ No: 34.9 → liq value $0.03
+   📖 Orderbook via CLOB client: 43216133557527417980...
+   📊 Got 1 bids, 46 asks
+   ✅ No: 34.4 → liq value $0.03
+   📖 Orderbook via CLOB client: 94938536209529404471...
+   📊 Got 0 bids, 20 asks
+   ❌ Yes: 32.7 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 10691035044691829079...
+   📊 Got 6 bids, 31 asks
+   ✅ Yes: 31.1 → liq value $0.34
+   📖 Orderbook via CLOB client: 96757157553275361082...
+   📊 Got 1 bids, 15 asks
+   ✅ No: 30.4 → liq value $0.03
+   📖 Orderbook via CLOB client: 79869279784759084131...
+   📊 Got 2 bids, 21 asks
+   ✅ Yes: 30.0 → liq value $0.09
+   📖 Orderbook via CLOB client: 11137803699634616505...
+   📊 Got 1 bids, 20 asks
+   ✅ Yes: 30.0 → liq value $0.03
+   📖 Orderbook via CLOB client: 38679005156205701324...
+   📊 Got 0 bids, 27 asks
+   ❌ Yes: 30.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 16995564866344444604...
+   📊 Got 5 bids, 52 asks
+   ✅ Yes: 29.3 → liq value $0.15
+   📖 Orderbook via CLOB client: 11047784735965113323...
+   📊 Got 6 bids, 37 asks
+   ✅ Yes: 28.1 → liq value $0.17
+   📖 Orderbook via CLOB client: 55046328057071461035...
+   📊 Got 0 bids, 22 asks
+   ❌ No: 22.6 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 89847990538670376844...
+   📊 Got 7 bids, 15 asks
+   ✅ Yes: 20.0 → liq value $0.48
+   📖 Orderbook via CLOB client: 10319281219525190586...
+   📊 Got 0 bids, 6 asks
+   ❌ Yes: 20.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 11075914840683181873...
+   📊 Got 1 bids, 18 asks
+   ✅ No: 20.0 → liq value $0.02
+   📖 Orderbook via CLOB client: 20951692376421625477...
+   📊 Got 1 bids, 2 asks
+   ✅ Yes: 20.0 → liq value $0.20
+   📖 Orderbook via CLOB client: 22852406676123446048...
+   📊 Got 3 bids, 17 asks
+   ✅ Yes: 20.0 → liq value $0.20
+   📖 Orderbook via CLOB client: 48240269087656904784...
+   ❌ Orderbook 404: token_id may be wrong format or market resolved
+      Full token: 48240269087656904784739988732768518357838406289116928079089688194965574306204
+   ❌ Yes: 20.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 59669519253717983031...
+   📊 Got 0 bids, 5 asks
+   ❌ Yes: 20.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 62562886148733061137...
+   📊 Got 5 bids, 9 asks
+   ✅ Yes: 20.0 → liq value $0.40
+   📖 Orderbook via CLOB client: 65417530727635052346...
+   📊 Got 0 bids, 23 asks
+   ❌ Yes: 20.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 68786008058317240485...
+   📊 Got 4 bids, 17 asks
+   ✅ Yes: 20.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 69308106641057297084...
+   📊 Got 0 bids, 3 asks
+   ❌ No: 20.0 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 73433507867078953951...
+   📊 Got 4 bids, 18 asks
+   ✅ Yes: 20.0 → liq value $0.15
+   📖 Orderbook via CLOB client: 73860307266510315719...
+   📊 Got 2 bids, 18 asks
+   ✅ Yes: 20.0 → liq value $0.04
+   📖 Orderbook via CLOB client: 79986239226733520410...
+   📊 Got 3 bids, 18 asks
+   ✅ Yes: 20.0 → liq value $0.06
+   📖 Orderbook via CLOB client: 94669297350827790798...
+   📊 Got 2 bids, 7 asks
+   ✅ Yes: 20.0 → liq value $0.40
+   📖 Orderbook via CLOB client: 96258046892762387099...
+   📊 Got 6 bids, 13 asks
+   ✅ Yes: 20.0 → liq value $0.22
+   📖 Orderbook via CLOB client: 20591544690242341999...
+   📊 Got 3 bids, 44 asks
+   ✅ Yes: 19.7 → liq value $0.06
+   📖 Orderbook via CLOB client: 35344641193745559395...
+   📊 Got 6 bids, 16 asks
+   ✅ No: 16.2 → liq value $0.21
+   📖 Orderbook via CLOB client: 74406634026103061082...
+   📊 Got 1 bids, 19 asks
+   ✅ Yes: 16.1 → liq value $0.02
+   📖 Orderbook via CLOB client: 10278439804131158987...
+   📊 Got 0 bids, 23 asks
+   ❌ Yes: 16.1 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 89706022440383625793...
+   📊 Got 0 bids, 20 asks
+   ❌ Yes: 15.8 - NO BIDS (illiquid)
+   📖 Orderbook via CLOB client: 49484929788676647484...
+   📊 Got 2 bids, 3 asks
+   ✅ No: 15.0 → liq value $0.30
+   📖 Orderbook via CLOB client: 12808355889376625449...
+   📊 Got 5 bids, 61 asks
+   ✅ Yes: 15.0 → liq value $0.07
+   📖 Orderbook via CLOB client: 49230795908093746938...
+   📊 Got 3 bids, 16 asks
+   ✅ No: 14.1 → liq value $0.14
+   📖 Orderbook via CLOB client: 10872636952297825131...
+   📊 Got 1 bids, 59 asks
+   ✅ Yes: 13.7 → liq value $0.01
+   📖 Orderbook via CLOB client: 11322285185290617543...
+   📊 Got 8 bids, 30 asks
+   ✅ Yes: 12.6 → liq value $0.13
+   📖 Orderbook via CLOB client: 10489874539469347387...
+   📊 Got 2 bids, 24 asks
+   ✅ No: 10.3 → liq value $0.02
+   📖 Orderbook via CLOB client: 53354498009686645718...
+   📊 Got 1 bids, 54 asks
+   ✅ Yes: 10.3 → liq value $0.01
+   📖 Orderbook via CLOB client: 11108539967482000854...
+   📊 Got 1 bids, 21 asks
+   ✅ Yes: 10.0 → liq value $0.01
+   📖 Orderbook via CLOB client: 11392720866663203696...
+   📊 Got 2 bids, 10 asks
+   ✅ No: 10.0 → liq value $0.50
+   📖 Orderbook via CLOB client: 66029440016499673060...
+   📊 Got 2 bids, 19 asks
+   ✅ Yes: 10.0 → liq value $0.02
+   📖 Orderbook via CLOB client: 97046753660766284925...
+   📊 Got 2 bids, 28 asks
+   ✅ Yes: 10.0 → liq value $0.02
+   📖 Orderbook via CLOB client: 77842356988056748640...
+   📊 Got 3 bids, 57 asks
+   ✅ Yes: 9.3 → liq value $0.03
+   📖 Orderbook via CLOB client: 26198783526884053440...
+   📊 Got 7 bids, 17 asks
+   ✅ No: 8.4 → liq value $0.09
+   📖 Orderbook via CLOB client: 67792808877190286179...
+   📊 Got 5 bids, 30 asks
+   ✅ No: 8.2 → liq value $0.06
+   📖 Orderbook via CLOB client: 77362575556222156763...
+   📊 Got 3 bids, 45 asks
+   ✅ No: 7.8 → liq value $0.02
+   📖 Orderbook via CLOB client: 41386248556727777348...
+   📊 Got 4 bids, 31 asks
+   ✅ Yes: 7.4 → liq value $0.03
+   📖 Orderbook via CLOB client: 11385271833032192136...
+   📊 Got 3 bids, 17 asks
+   ✅ No: 5.2 → liq value $0.02
+   📖 Orderbook via CLOB client: 47930510739307173663...
+   📊 Got 3 bids, 2 asks
+   ✅ Yes: 5.1 → liq value $0.15
+   📖 Orderbook via CLOB client: 42269436775875161395...
+   📊 Got 5 bids, 8 asks
+   ✅ Yes: 5.0 → liq value $0.25
+   📖 Orderbook via CLOB client: 10663096673585939539...
+   📊 Got 10 bids, 36 asks
+   ✅ Yes: 4.4 → liq value $0.05
+   📖 Orderbook via CLOB client: 62107005015355258428...
+   📊 Got 4 bids, 4 asks
+   ✅ No: 3.5 → liq value $0.14
+   📖 Orderbook via CLOB client: 67005542846306251298...
+   📊 Got 2 bids, 4 asks
+   ✅ Dinamo Minsk: 2.0 → liq value $0.04
+   📖 Orderbook via CLOB client: 35215120451981144796...
+   📊 Got 2 bids, 4 asks
+   ✅ Shanghai Dragons: 2.0 → liq value $0.04
+   📖 Orderbook via CLOB client: 10996003921794260500...
+   📊 Got 2 bids, 4 asks
+   ✅ Belleville Senators: 2.0 → liq value $0.04
+   📖 Orderbook via CLOB client: 74033730293351113467...
+   📊 Got 4 bids, 4 asks
+   ✅ No: 2.0 → liq value $0.08
+   📖 Orderbook via CLOB client: 43773558406909680470...
+   📊 Got 2 bids, 4 asks
+   ✅ Charlotte Checkers: 2.0 → liq value $0.04
+   📖 Orderbook via CLOB client: 74015100029744223682...
+   📊 Got 2 bids, 4 asks
+   ✅ Brynaes: 2.0 → liq value $0.04
+   📖 Orderbook via CLOB client: 11078487353986594077...
+   📊 Got 3 bids, 4 asks
+   ✅ Under: 2.0 → liq value $0.06
+   📖 Orderbook via CLOB client: 65770845882617736955...
+   📊 Got 5 bids, 8 asks
+   ✅ Yes: 2.0 → liq value $0.10
+   📖 Orderbook via CLOB client: 12969721434294279593...
+   📊 Got 4 bids, 4 asks
+   ✅ No: 2.0 → liq value $0.08
+   📖 Orderbook via CLOB client: 88608339087032426069...
+   📊 Got 3 bids, 4 asks
+   ✅ Under: 2.0 → liq value $0.06
+   📖 Orderbook via CLOB client: 11285172598993673316...
+   📊 Got 5 bids, 28 asks
+   ✅ No: 1.5 → liq value $0.02
+   📖 Orderbook via CLOB client: 59833099021389057467...
+   📊 Got 2 bids, 4 asks
+   ✅ Utica Comets: 1.5 → liq value $0.03
+   📖 Orderbook via CLOB client: 82204570522211101098...
+   📊 Got 2 bids, 4 asks
+   ✅ HV 71: 1.5 → liq value $0.03
+   📖 Orderbook via CLOB client: 68855606160744125522...
+   📊 Got 2 bids, 4 asks
+   ✅ Bern: 1.5 → liq value $0.03
+   📖 Orderbook via CLOB client: 10523257335514472586...
+   📊 Got 3 bids, 4 asks
+   ✅ Under: 1.5 → liq value $0.04
+   📖 Orderbook via CLOB client: 78668813888411753175...
+   📊 Got 3 bids, 4 asks
+   ✅ Under: 1.5 → liq value $0.04
+   📖 Orderbook via CLOB client: 91411531555963180670...
+   📊 Got 2 bids, 4 asks
+   ✅ Salavat Yulaev Ufa: 1.5 → liq value $0.03
+   📖 Orderbook via CLOB client: 38886982100940520663...
+   📊 Got 2 bids, 4 asks
+   ✅ Grand Rapids Griffins: 1.5 → liq value $0.03
+   📖 Orderbook via CLOB client: 75814730465647364866...
+   📊 Got 10 bids, 25 asks
+   ✅ No: 1.2 → liq value $0.15
+   📖 Orderbook via CLOB client: 10683709369556637328...
+   📊 Got 1 bids, 5 asks
+   ✅ No: 1.0 → liq value $0.03
+   📖 Orderbook via CLOB client: 12537914396154732680...
+   📊 Got 1 bids, 8 asks
+   ✅ No: 1.0 → liq value $0.04
+   📖 Orderbook via CLOB client: 47470775388849224492...
+   📊 Got 7 bids, 18 asks
+   ✅ No: 1.0 → liq value $0.02
+   📖 Orderbook via CLOB client: 60757766081594311936...
+   📊 Got 3 bids, 5 asks
+   ✅ No: 1.0 → liq value $0.03
+   📖 Orderbook via CLOB client: 10087385958697375387...
+   📊 Got 3 bids, 4 asks
+   ✅ No: 1.0 → liq value $0.03
+   📖 Orderbook via CLOB client: 70918384332281149996...
+   📊 Got 3 bids, 6 asks
+   ✅ No: 1.0 → liq value $0.04
+📡 Fetching cash balance via Polygon RPC...
+💵 Polymarket cash (Polygon): $0.12
+📡 Fetching open orders via L2 auth...
+✅ Found 426 open orders (total returned: 426)
+🔒 Reserved in open buy orders: $5.20
+   ⚠️ NEGATIVE PENDING WARNING: raw=-373.82 (clamped to 0)
+      This usually means positions gained value beyond expectedAssets or bucket overlap
+      Buckets: cash=0.12, pos=332.01, reserved=5.20, inFlight=0.00, buffer=69.82
+📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+   expectedAssets:   $28.12
+   - pmCash:         $0.12
+   - reserved:       $5.20
+   - positionsLiq:   $332.01
+   - inFlight:       $0.00
+   - vaultBuffer:    $69.82
+   = pendingCredit:  $0.00
+   ⚠️ BUCKET INVARIANT WARNING: buckets=401.94 != expectedAssets=28.12
+
+📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $0.00
+   • Credited cash:            $0.12
+   • Reserved (open orders):   $5.20
+   • Vault buffer (on-chain):  $69.82
+   • Expected assets:          $28.12
+   • Positions (liquidation):  $332.01
+   • Positions (cost basis):   $104.79
+   ─────────────────────────────
+   • TOTAL ASSETS:             $332.12
+   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+📊 Total Assets Breakdown (V7.3):
+   • PM Cash:        $0.12
+   • Reserved:       $5.20
+   • Vault Buffer:   $69.82
+   • Credited Cash (signed): $69.94
+   • Positions:      $332.01
+   • Pending Credit: $0.00
+   • In-Flight:      $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:   $401.94
+   ✅ Breakdown check PASSED
+✅ Signed NAV: $12.4580/share (round 12) [ok]
+✅ NAV cache updated, sleeping 45s
+139.47.127.142 - - [11/Jan/2026 22:07:35] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [11/Jan/2026 22:07:36] "GET /price HTTP/1.1" 200 -
+⚡ Returning cached signed NAV (valid until 1768169518)
+147.182.206.35 - - [11/Jan/2026 22:07:56] "GET /sign-nav HTTP/1.1" 200 -
+139.47.127.142 - - [11/Jan/2026 22:07:57] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [11/Jan/2026 22:07:57] "GET /price HTTP/1.1" 200 -
+139.47.127.142 - - [11/Jan/2026 22:08:04] "GET /price HTTP/1.1" 200 -
+======================

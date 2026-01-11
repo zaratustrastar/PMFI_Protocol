@@ -963,9 +963,9 @@ class NavEngineV7:
             bids = orderbook.get("bids", [])
             
             if not bids:
-                print(f"   ❌ {outcome}: {size:.1f} - NO BIDS (illiquid)")
-                # Use mid value as fallback for illiquid positions
-                positions_liq_value += mid_value
+                print(f"   ❌ {outcome}: {size:.1f} - NO BIDS (illiquid, valued at $0)")
+                # V7.3.4 FIX: Positions with no bids are valued at $0 (conservative)
+                # Previously used API mid_value which inflates NAV for unsellable positions
                 continue
             
             liq_value = self.polymarket_client.simulate_market_sell(size, bids)
