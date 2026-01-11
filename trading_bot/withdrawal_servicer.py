@@ -2512,11 +2512,21 @@ def servicer_iteration(
                 )
         
         # Recheck if liquidation still needed after potential withdrawal
-        if needed >= MIN_WITHDRAWAL_USDC:
-            liquidation_target = min(needed, liquidatable_positions)
+        # V7.3.4 FIX: Always target at least MIN_WITHDRAWAL_USDC to prevent sub-$5 stuck withdrawals
+        # If we need $4.33, we liquidate $5 and bridge $5 (surplus stays in vault)
+        if needed > 0:
+            # Ensure we meet minimum bridge threshold
+            liquidation_target = max(needed, MIN_WITHDRAWAL_USDC)
+            # But don't exceed what's liquidatable
+            liquidation_target = min(liquidation_target, liquidatable_positions)
+            
+            if liquidation_target < MIN_WITHDRAWAL_USDC and liquidatable_positions >= MIN_WITHDRAWAL_USDC:
+                # Edge case: need < $5 but have >= $5 liquidatable - force to $5
+                liquidation_target = MIN_WITHDRAWAL_USDC
+            
             print(f"\n⚠️  Cash insufficient, need to liquidate ${needed:.2f}")
             print(f"   Liquidatable: ${liquidatable_positions:.2f}")
-            print(f"   Targeting: ${liquidation_target:.2f}")
+            print(f"   Targeting: ${liquidation_target:.2f} (min ${MIN_WITHDRAWAL_USDC})")
             
             # Re-fetch PM cash again for accurate baseline in liquidation loop
             pm_cash_at_liq_start, _ = get_pm_balance()
