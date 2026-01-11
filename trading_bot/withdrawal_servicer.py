@@ -2420,9 +2420,15 @@ def servicer_iteration(
     print(f"\n   Needed (base): ${needed_base:.2f}")
     print(f"   Needed (with {WITHDRAWAL_SLIPPAGE_BPS/100:.1f}% slippage): ${needed:.2f}")
     
-    if needed < MIN_WITHDRAWAL_USDC:
-        print(f"\n✅ No action needed (needed < ${MIN_WITHDRAWAL_USDC})")
+    # V7.3.4 FIX: If shortfall exists but is less than $5, bump up to $5 minimum
+    # This prevents users getting stuck with sub-$5 withdrawals that never get serviced
+    # Surplus stays in vault buffer for future withdrawals
+    if needed <= 0:
+        print(f"\n✅ No action needed (no shortfall)")
         return state
+    elif needed < MIN_WITHDRAWAL_USDC:
+        print(f"\n⚠️ Shortfall ${needed:.2f} < ${MIN_WITHDRAWAL_USDC} minimum, bumping to ${MIN_WITHDRAWAL_USDC}")
+        needed = MIN_WITHDRAWAL_USDC
     
     # V7.3: Rate limiting - max 1 pending bridge at a time, but allow if pending is stale
     pending_items = [item for item in state.in_transit if item.get("status") == "pending"]
