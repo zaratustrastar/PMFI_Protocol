@@ -1,0 +1,78 @@
+💰 WITHDRAWAL SERVICER V7.3 - 2026-01-11 23:08:14
+============================================================
+   NAV from bot (cached): $1.000000
+   Pending shares: 25.000000
+   Pending withdrawals count: 1
+   Next withdrawal index: 3
+   Iterating 1 pending requests...
+      Request #3: 25.0000 shares, $73.36 locked
+   Checked 1 requests, found 1 pending, total locked: $73.36
+   Actual usdcLocked from queue: $73.36
+
+📊 STATUS:
+   Pending withdrawals: $73.36
+   Vault USDC (Base): $69.82
+   In-transit USDC: $0.00
+   NAV: $1.000000/share
+   Daily withdrawn: $0.00 / $50000.00
+
+   Needed (base): $3.54
+   Needed (with 0.5% slippage): $3.56
+
+⚠️ Shortfall $3.56 < $5.0 minimum, bumping to $5.0
+
+⚠️  WITHDRAWAL NEEDED: $5.00 (includes slippage buffer)
+   📊 On-chain USDC (Polygon RPC): $5.98
+   ✅ CLOB confirms: $5.98
+   📊 Top positions (from bot_v7):
+      1. Yes: 5.07 tokens, $1.01
+      2. Yes: 75.61 tokens, $0.68
+      3. Yes: 61.25 tokens, $0.49
+      4. Yes: 69.13 tokens, $0.48
+      5. Yes: 20.00 tokens, $0.48
+   📊 PM balances: cash=$5.98, positions=$12.68
+
+📊 Polymarket:
+   Cash: $5.98
+   Positions (NAV): $12.68
+   Liquidatable: $12.68 (VWAP)
+
+💸 WITHDRAW: $5.00 from PM → Vault
+   Output (first 2000 chars): [dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+2026-01-11T23:09:07.299Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2026-01-11T23:09:07.300Z 📝 [SafeProxyWithdraw] Requested amount: $5 
+2026-01-11T23:09:07.300Z 📝 [SafeProxyWithdraw] Destination: 0x5Ae7395Ca8ab044159133E2e23f421aE8f94055F 
+2026-01-11T23:09:07.300Z 📝 [SafeProxyWithdraw] Dry run: false 
+2026-01-11T23:09:07.475Z 📝 [SafeProxyWithdraw] Proxy USDC balance: $5.975003 (5975003 raw) 
+2026-01-11T23:09:07.605Z 📝 [SafeProxyWithdraw] EOA address: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2026-01-11T23:09:07.611Z 📝 [SafeProxyWithdraw] Proxy address: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2026-01-11T23:09:07.611Z 📝 [SafeProxyWithdraw] Using Builder API credentials 
+2026-01-11T23:09:07.618Z 📝 [SafeProxyWithdraw] 
+--- Step 1: Safe Proxy → EOA --- 
+2026-01-11T23:09:07.621Z 📝 [SafeProxyWithdraw] Withdrawing $5.000000 (5000000 raw) from Safe proxy to EOA 0x5087675E669e6244620013691c05C1De0e8B525e 
+2026-01-11T23:09:07.624Z 📝 [SafeProxyWithdraw] Executing via Polymarket RelayClient... 
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e00000000000000000000000000000000000000000000000000000000004c4b40',
+  nonce: '78',
+  signature: '0x63599aebc032528c08f0392d9faf01adb3634686911e466cd728fb5d6afbe2571926972f435ec5f74adacf2bc2165138c41c60224aad5e561e310c069647fe471f',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000000000000000000000000000000'
+  },
+  type: 'SAFE',
+  metadata: 'Withdraw $5 USDC to EOA'
+}
+Client side safe request creation to
+   Extracted requestId: 0
+   Extracted txHash: 0x9e5abf17b628bc0f21...
+
+💤 Sleeping 60s...

@@ -1697,7 +1697,7 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
     reported_reservation_ids = set()  # V7.3.4: Track all reported reservations to prevent double-cancellation
     
     for round_num in range(max_rounds):
-        if still_needed <= 0.50:  # Close enough
+        if still_needed <= 0.05:  # V7.3.4: Lowered from $0.50 to $0.05 to complete small liquidations
             break
         
         print(f"\n   📋 ROUND {round_num + 1}: Still need ${still_needed:.2f}")
@@ -1723,10 +1723,10 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
         # Track which legs were executed for cleanup
         executed_leg_indices = set()
         
-        # V7.3.4 FIX: Removed 50% shortfall threshold - execute whatever liquidity is available
-        # We'll loop through multiple rounds to accumulate partial liquidations
-        # Only warn if plan_expected is very low (less than $0.50)
-        if plan_expected < 0.50:
+        # V7.3.4 FIX: Lowered threshold from $0.50 to $0.05 to allow small liquidations
+        # This is critical for meeting the $5 minimum bridge requirement when close to target
+        # Bot already filters dust positions < $0.10, so anything that comes through should execute
+        if plan_expected < 0.05:
             print(f"   ⚠️ Plan has negligible expected value: ${plan_expected:.2f}")
             # Cancel reservations and try next round
             for i, leg in enumerate(legs):
@@ -1742,7 +1742,7 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
         
         # Execute each leg
         for leg_idx, leg in enumerate(legs):
-            if still_needed <= 0.50:
+            if still_needed <= 0.05:  # V7.3.4: Lowered from $0.50
                 # Cancel remaining unexecuted legs and mark as handled
                 for remaining_idx in range(leg_idx, len(legs)):
                     if remaining_idx not in executed_leg_indices:
@@ -1767,7 +1767,7 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
             remaining_cap = original_cap - total_obtained
             expected_leg_usdc = leg.get("expected_usdc", size * limit_price)
             
-            if remaining_cap <= 0.50:
+            if remaining_cap <= 0.05:  # V7.3.4: Lowered from $0.50
                 print(f"   ✅ Cap reached, releasing remaining reservations")
                 report_once(reservation_id, "cancelled", 0, 0, reported_reservation_ids)
                 break
@@ -1956,7 +1956,7 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
         still_needed = max(0, original_cap - total_obtained)
         
         # V7.3.4 FIX: Check if cap reached - stop if we've hit the limit
-        if total_obtained >= original_cap - 0.50 or still_needed < 0.50:
+        if total_obtained >= original_cap - 0.05 or still_needed < 0.05:
             print(f"   ✅ usdcLocked cap reached: ${total_obtained:.2f} >= ${original_cap:.2f}")
             break
     
