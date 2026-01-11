@@ -1692,7 +1692,7 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
         print(f"   📉 New liquidation target: ${still_needed:.2f}")
     
     total_obtained = 0.0
-    max_rounds = 3  # Max iterations to prevent infinite loops
+    max_rounds = 10  # V7.3.4: Increased to allow more rounds for thin liquidity
     consecutive_failures = 0  # V7.3.4: Hoist outside round loop for overall circuit breaker
     reported_reservation_ids = set()  # V7.3.4: Track all reported reservations to prevent double-cancellation
     
@@ -1720,29 +1720,25 @@ def liquidate_positions(needed_usdc: float, initial_pm_cash: float = 0.0) -> flo
         plan_shortfall = plan.get('shortfall', 0)
         print(f"   📊 Plan {plan_id[:8]}: {len(legs)} legs, expected ${plan_expected:.2f}, shortfall ${plan_shortfall:.2f}")
         
-        # Track which legs were executed for cleanup (must be before shortfall check)
+        # Track which legs were executed for cleanup
         executed_leg_indices = set()
         
-        # V7.3.4 FIX: If plan has significant shortfall, alert immediately and stop
-        if plan_shortfall > still_needed * 0.5:  # Plan can only cover <50% of need
-            print(f"   ⚠️ Plan shortfall too high: ${plan_shortfall:.2f} (>50% of ${still_needed:.2f})")
-            send_telegram_alert(
-                f"⚠️ Liquidation plan has major shortfall\n"
-                f"Need: ${still_needed:.2f}\n"
-                f"Plan can provide: ${plan_expected:.2f}\n"
-                f"Shortfall: ${plan_shortfall:.2f}\n"
-                f"Insufficient liquidity - manual intervention needed",
-                is_error=True
-            )
-            
-            # Cancel ALL reservations in this rejected plan and mark as handled
+        # V7.3.4 FIX: Removed 50% shortfall threshold - execute whatever liquidity is available
+        # We'll loop through multiple rounds to accumulate partial liquidations
+        # Only warn if plan_expected is very low (less than $0.50)
+        if plan_expected < 0.50:
+            print(f"   ⚠️ Plan has negligible expected value: ${plan_expected:.2f}")
+            # Cancel reservations and try next round
             for i, leg in enumerate(legs):
                 res_id = leg.get("reservation_id", "")
                 if res_id:
                     report_once(res_id, "cancelled", 0, 0, reported_reservation_ids)
                     executed_leg_indices.add(i)
-            
-            break
+            consecutive_failures += 1
+            if consecutive_failures >= 3:
+                print(f"   ❌ 3 consecutive low-value plans - no liquidity available")
+                break
+            continue  # Try next round
         
         # Execute each leg
         for leg_idx, leg in enumerate(legs):
