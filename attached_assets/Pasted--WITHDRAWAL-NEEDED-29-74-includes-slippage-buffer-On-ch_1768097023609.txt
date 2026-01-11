@@ -1,0 +1,125 @@
+⚠️  WITHDRAWAL NEEDED: $29.74 (includes slippage buffer)
+   📊 On-chain USDC (Polygon RPC): $6.09
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (signer): 0x5087675E...
+   📋 Proxy wallet (funder): 0x9cbc5577...
+   📋 Signature type: 2 (Browser proxy)
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   📋 Wallet: 0x9cbc5577...
+   📋 Private key present: True
+   📋 CLOB host: https://clob.polymarket.com
+   🔑 Using pre-derived API credentials from env vars...
+   ✅ Credentials loaded (key: c4a3fd29...)
+   ✅ L2 auth verified - CLOB client ready for trading
+   ✅ CLOB confirms: $6.09
+   ⚠️ Failed to get positions from bot: HTTPConnectionPool(host='147.182.206.35', port=8080): Max retries exceeded with url: /positions (Caused by NewConnectionError("HTTPConnection(host='147.182.206.35', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+   ⚠️ Bot returned zero position value, using local fallback
+   ⚠️ Orderbook unavailable for Yes, using API value $1.89
+   ⚠️ Orderbook unavailable for Yes, using API value $1.93
+   ⚠️ Orderbook unavailable for Yes, using API value $1.92
+   ⚠️ Orderbook unavailable for Yes, using API value $1.69
+   ⚠️ Orderbook unavailable for Yes, using API value $1.62
+   ⚠️ Orderbook unavailable for Yes, using API value $1.52
+   ⚠️ Orderbook unavailable for No, using API value $1.30
+   ⚠️ Orderbook unavailable for Yes, using API value $1.20
+   ⚠️ Orderbook unavailable for Yes, using API value $0.90
+   ⚠️ Orderbook unavailable for Yes, using API value $1.00
+   ⚠️ Orderbook unavailable for Yes, using API value $0.80
+   ⚠️ Orderbook unavailable for Yes, using API value $0.34
+   ⚠️ Orderbook unavailable for Yes, using API value $0.40
+   ⚠️ Orderbook unavailable for Yes, using API value $0.40
+   📊 Top positions for liquidation (sorted by value):
+      1. Yes: 49.73 tokens, $3.88
+      2. Yes: 98.80 tokens, $1.93 (API fallback)
+      3. Yes: 98.41 tokens, $1.92 (API fallback)
+      4. Yes: 99.70 tokens, $1.89 (API fallback)
+      5. Yes: 88.76 tokens, $1.69 (API fallback)
+   ✅ Local fallback found $38.66 in positions
+   📊 PM balances: cash=$6.09, positions=$38.66
+
+📊 Polymarket:
+   Cash: $6.09
+   Positions (NAV): $38.66
+   Liquidatable: $26.50 (VWAP)
+
+💸 WITHDRAW: $6.09 from PM → Vault
+   Output (first 2000 chars): [dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+2026-01-11T02:00:44.564Z 📝 [SafeProxyWithdraw] === Starting Safe Proxy Withdrawal === 
+2026-01-11T02:00:44.564Z 📝 [SafeProxyWithdraw] Requested amount: $6.085693 
+2026-01-11T02:00:44.564Z 📝 [SafeProxyWithdraw] Destination: 0x5Ae7395Ca8ab044159133E2e23f421aE8f94055F 
+2026-01-11T02:00:44.564Z 📝 [SafeProxyWithdraw] Dry run: false 
+2026-01-11T02:00:44.722Z 📝 [SafeProxyWithdraw] Proxy USDC balance: $6.085693 (6085693 raw) 
+2026-01-11T02:00:44.724Z 📝 [SafeProxyWithdraw] ⚠️ Capping transfer: requested $6.085693, sending $6.085593 (available minus dust) 
+2026-01-11T02:00:44.840Z 📝 [SafeProxyWithdraw] EOA address: 0x5087675E669e6244620013691c05C1De0e8B525e 
+2026-01-11T02:00:44.840Z 📝 [SafeProxyWithdraw] Proxy address: 0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5 
+2026-01-11T02:00:44.840Z 📝 [SafeProxyWithdraw] Using Builder API credentials 
+2026-01-11T02:00:44.851Z 📝 [SafeProxyWithdraw] 
+--- Step 1: Safe Proxy → EOA --- 
+2026-01-11T02:00:44.852Z 📝 [SafeProxyWithdraw] Withdrawing $6.085593 (6085593 raw) from Safe proxy to EOA 0x5087675E669e6244620013691c05C1De0e8B525e 
+2026-01-11T02:00:44.858Z 📝 [SafeProxyWithdraw] Executing via Polymarket RelayClient... 
+Executing safe transactions...
+Created Safe Transaction Request: 
+{
+  from: '0x5087675E669e6244620013691c05C1De0e8B525e',
+  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  proxyWallet: '0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5',
+  data: '0xa9059cbb0000000000000000000000005087675e669e6244620013691c05c1de0e8b525e00000000000000000000000000000000000000000000000000000000005cdbd9',
+  nonce: '72',
+  signature: '0x49e84db570b9d9c5c48b8eef70e83c5b368734cf60ff82a801bc6f0989a4665132c89dacaea4522266f00c67f13b3aebe51f056c3322cd4af18acc74104ffdc020',
+  signatureParams: {
+    gasPrice: '0',
+    operation: '0',
+    safeTxnGas: '0',
+    baseGas: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000
+   Extracted requestId: 0
+   Extracted txHash: 0x5013fd3b17704fdcdf...
+   📊 On-chain USDC (Polygon RPC): $0.00
+   ✅ CLOB confirms: $0.00
+   📊 Top positions (from bot_v7):
+      1. Yes: 49.73 tokens, $4.03
+      2. Yes: 10.00 tokens, $2.70
+      3. Yes: 81.12 tokens, $1.02
+      4. Yes: 99.70 tokens, $0.70
+      5. Yes: 20.00 tokens, $0.70
+   📊 PM balances: cash=$0.00, positions=$26.60
+
+⚠️  Cash insufficient, need to liquidate $23.66
+   Liquidatable: $26.50
+   Targeting: $23.66
+   📊 On-chain USDC (Polygon RPC): $0.00
+   ✅ CLOB confirms: $0.00
+   📊 Top positions (from bot_v7):
+      1. Yes: 49.73 tokens, $4.03
+      2. Yes: 10.00 tokens, $2.70
+      3. Yes: 20.00 tokens, $1.08
+      4. Yes: 81.12 tokens, $1.02
+      5. Yes: 99.70 tokens, $0.70
+   📊 PM balances: cash=$0.00, positions=$27.16
+
+🔥 LIQUIDATE V7.3.4: Need $23.66 USDC (capped from $23.66)
+   Initial PM cash: $0.00
+   usdcLocked cap: $23.66 (will not exceed)
+
+   📋 ROUND 1: Still need $23.66
+   📡 Requesting liquidation plan from bot_v7...
+   ✅ Got plan: 5 legs, expected $8.95
+   📊 Plan d58fcf2d: 5 legs, expected $8.95, shortfall $14.71
+   ⚠️ Plan shortfall too high: $14.71 (>50% of $23.66)
+
+   💰 Total liquidated: $0.00
+   ⚠️ SHORTFALL: $23.66 could not be liquidated
+   📊 On-chain USDC (Polygon RPC): $0.00
+   ✅ CLOB confirms: $0.00
+   📊 Top positions (from bot_v7):
+      1. Yes: 49.73 tokens, $4.03
+      2. Yes: 10.00 tokens, $2.70
+      3. Yes: 81.12 tokens, $1.02
+      4. Yes: 20.00 tokens, $0.92
+      5. Yes: 99.70 tokens, $0.70
+   📊 PM balances: cash=$0.00, positions=$27.00
+   ✅ Cash-only bridge complete, skipping post-liquidation bridge
+
+💤 Sleeping 60s...

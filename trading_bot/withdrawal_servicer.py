@@ -2029,11 +2029,13 @@ def execute_liquidation_order(token_id: str, size: float, best_bid: float, limit
             )
             return False, 0.0, 0.0, True  # True = slippage breach, should halt
         
-        usdc_amount = size * best_bid
+        usdc_amount = size * best_bid  # For logging only
         
+        # V7.3.4 FIX: For SELL orders, amount = TOKEN count (not USDC value)
+        # The API interprets amount as tokens when selling
         market_order_args = MarketOrderArgs(
             token_id=token_id,
-            amount=usdc_amount,
+            amount=size,  # Token count, not USDC!
             side=SELL,
         )
         

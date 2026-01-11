@@ -1,0 +1,72 @@
+👋 Servicer stopped by user
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl http://147.182.206.35:8080/health
+{"oracle_address":"0x5087675E669e6244620013691c05C1De0e8B525e","safety_status":"ok","status":"ok","timestamp":1768097170,"version":"v7"}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 trading_bot/withdrawal_servicer.py
+
+============================================================
+🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+============================================================
+
+Configuration:
+   Vault: 0x5Ae7395Ca8ab044159133E2e23f421aE8f94055F
+   PM Proxy: 0x9cbc5577e6f1B3a097...
+   Bot URL: http://localhost:8080
+   Dry run: False
+   Min withdrawal: $5.0
+   Max daily: $50000.0
+   Bypass method: curl_cffi
+
+✅ Servicer initialized
+   Daily withdrawn so far: $6.09
+   In-transit items: 1
+   Tracked vault balance: $1.04
+   Unclaimed delta pool: $0.00
+
+============================================================
+💰 WITHDRAWAL SERVICER V7.3 - 2026-01-11 02:07:24
+============================================================
+   📡 Found 1 USDC transfers to vault since block 40653733
+   ⏳ In-transit (stale, self-healing): $6.09 (6min old)
+   NAV from bot (cached): $1.000000
+   Pending shares: 25.000000
+   Pending withdrawals count: 1
+   Next withdrawal index: 3
+   Iterating 1 pending requests...
+      Request #3: 25.0000 shares, $73.36 locked
+   Checked 1 requests, found 1 pending, total locked: $73.36
+   Actual usdcLocked from queue: $73.36
+
+📊 STATUS:
+   Pending withdrawals: $73.36
+   Vault USDC (Base): $52.29
+   In-transit USDC: $6.09
+   NAV: $1.000000/share
+   Daily withdrawn: $6.09 / $50000.00
+
+   Needed (base): $14.99
+   Needed (with 0.5% slippage): $15.07
+
+⚠️ 1 stale pending bridge(s), allowing new bridge initiation
+
+⚠️  WITHDRAWAL NEEDED: $15.07 (includes slippage buffer)
+   📊 On-chain USDC (Polygon RPC): $0.00
+🔧 Initializing patched CLOB client for liquidation...
+   📋 EOA (signer): 0x5087675E...
+   📋 Proxy wallet (funder): 0x9cbc5577...
+   📋 Signature type: 2 (Browser proxy)
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP with curl_cffi (Chrome 120 TLS)
+   📋 Wallet: 0x9cbc5577...
+   📋 Private key present: True
+   📋 CLOB host: https://clob.polymarket.com
+   🔑 Using pre-derived API credentials from env vars...
+   ✅ Credentials loaded (key: c4a3fd29...)
+   ✅ L2 auth verified - CLOB client ready for trading
+   ✅ CLOB confirms: $0.00
+   📊 Top positions (from bot_v7):
+      1. Yes: 49.73 tokens, $4.48
+      2. Yes: 10.00 tokens, $2.70
+      3. Yes: 81.12 tokens, $1.22
+      4. Yes: 99.70 tokens, $0.70
+      5. Yes: 99.98 tokens, $0.60
+   📊 PM balances: cash=$0.00, positions=$27.71
