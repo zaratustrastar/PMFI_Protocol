@@ -39,6 +39,84 @@ function addReferralCode(url: string): string {
 }
 
 /**
+ * Check if a market should be skipped from trading based on keywords
+ * Filters: tennis totals, crypto price markets, stock markets
+ */
+function shouldSkipForTrading(market: any): { skip: boolean; reason?: string } {
+  const name = (market.question || market.name || market.title || "").toLowerCase();
+  const slug = (market.slug || "").toLowerCase();
+  const tags = (market.tags || []).map((t: any) => String(t).toLowerCase());
+  const haystack = [name, slug, ...tags].join(" ");
+
+  // Tennis totals (sets/games)
+  const TENNIS_TOTALS_KEYWORDS = [
+    "sets total",
+    "games total",
+    "total sets",
+    "total games",
+    "o/u sets",
+    "o/u games",
+  ];
+  
+  // Crypto price markets
+  const CRYPTO_KEYWORDS = [
+    "btc",
+    "bitcoin",
+    "eth",
+    "ethereum",
+    "sol",
+    "solana",
+    "xrp",
+    "ripple",
+    "crypto",
+    "doge",
+    "dogecoin",
+  ];
+  
+  // Stock market keywords
+  const STOCK_KEYWORDS = [
+    "stock",
+    "s&p",
+    "s&p 500",
+    "nasdaq",
+    "dow jones",
+    "nyse",
+    "share price",
+    "market cap",
+    "aapl",
+    "googl",
+    "msft",
+    "amzn",
+    "tsla",
+    "nvda",
+    "meta",
+  ];
+
+  // Check tennis totals
+  for (const keyword of TENNIS_TOTALS_KEYWORDS) {
+    if (haystack.includes(keyword)) {
+      return { skip: true, reason: `tennis totals (${keyword})` };
+    }
+  }
+  
+  // Check crypto - skip ALL crypto-related markets
+  for (const keyword of CRYPTO_KEYWORDS) {
+    if (haystack.includes(keyword)) {
+      return { skip: true, reason: `crypto market (${keyword})` };
+    }
+  }
+  
+  // Check stocks
+  for (const keyword of STOCK_KEYWORDS) {
+    if (haystack.includes(keyword)) {
+      return { skip: true, reason: `stock market (${keyword})` };
+    }
+  }
+
+  return { skip: false };
+}
+
+/**
  * Check if a market is an up/down short-term market
  */
 function isUpDownMarket(market: any): boolean {
@@ -248,8 +326,9 @@ ${escapedDescription ? `📊 ${escapedDescription}
           // Queue this market for automated trading ONLY if it passes all filters
           const isUpDown = isUpDownMarket(market);
           const durationCheck = isShortDurationMarket(market);
+          const skipCheck = shouldSkipForTrading(market);
           
-          // Skip trading if it's an up/down market OR too short duration
+          // Skip trading if it's an up/down market OR too short duration OR matches skip keywords
           if (isUpDown) {
             logger?.info("⏭️ [monitorAndPost] Skipped trading queue (up/down market)", {
               marketId: market.id,
@@ -261,6 +340,12 @@ ${escapedDescription ? `📊 ${escapedDescription}
               question: market.question.substring(0, 100),
               durationHours: durationCheck.durationHours,
               minRequired: 15,
+            });
+          } else if (skipCheck.skip) {
+            logger?.info("⏭️ [monitorAndPost] Skipped trading queue (keyword filter)", {
+              marketId: market.id,
+              question: market.question.substring(0, 100),
+              reason: skipCheck.reason,
             });
           } else {
             // Market passed all filters - queue for trading
