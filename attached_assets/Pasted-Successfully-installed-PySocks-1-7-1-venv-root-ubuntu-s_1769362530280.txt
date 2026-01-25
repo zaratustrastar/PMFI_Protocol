@@ -1,0 +1,63 @@
+Successfully installed PySocks-1.7.1
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# curl -v -x socks5://3p0LTGSt7YVFojo:QWPWl7bhciHo0ZM@92.113.180.106:42563 https://ipv4.icanhazip.com
+*   Trying 92.113.180.106:42563...
+* Connected to 92.113.180.106 (92.113.180.106) port 42563
+* Host ipv4.icanhazip.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 104.16.184.241, 104.16.185.241
+* SOCKS5 connect to 104.16.184.241:443 (locally resolved)
+* SOCKS5 request granted.
+* Connected to 92.113.180.106 (92.113.180.106) port 42563
+* ALPN: curl offers h2,http/1.1
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / id-ecPublicKey
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=icanhazip.com
+*  start date: Dec 17 00:49:08 2025 GMT
+*  expire date: Mar 17 01:48:59 2026 GMT
+*  subjectAltName: host "ipv4.icanhazip.com" matched cert's "*.icanhazip.com"
+*  issuer: C=US; O=Google Trust Services; CN=WE1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA256
+*   Certificate level 1: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA384
+*   Certificate level 2: Public key type EC/secp384r1 (384/192 Bits/secBits), signed using ecdsa-with-SHA384
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://ipv4.icanhazip.com/
+* [HTTP/2] [1] [:method: GET]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: ipv4.icanhazip.com]
+* [HTTP/2] [1] [:path: /]
+* [HTTP/2] [1] [user-agent: curl/8.5.0]
+* [HTTP/2] [1] [accept: */*]
+> GET / HTTP/2
+> Host: ipv4.icanhazip.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* old SSL session ID is stale, removing
+< HTTP/2 200 
+< date: Sun, 25 Jan 2026 17:35:08 GMT
+< content-type: text/plain
+< content-length: 15
+< cf-ray: 9c39867f5f590391-MAD
+< access-control-allow-origin: *
+< access-control-allow-methods: GET
+< set-cookie: __cf_bm=uGJMVtq_nD1V0QyPJGfVrWqGYKpnRCEL0IawEpZSR_A-1769362508-1.0.1.1-GU.PE0irUE6rMRaWn_FPYyW.oljQ9vLVk8ZQE_RNMej1ycCzSL2p3QdvY0ZiVRvLiCVNxKGD3tPHE9r6kBqL4BfkI_Nwfco9DPlbNlHH9pk; path=/; expires=Sun, 25-Jan-26 18:05:08 GMT; domain=.icanhazip.com; HttpOnly; Secure; SameSite=None
+< server: cloudflare
+< alt-svc: h3=":443"; ma=86400
+< 
+92.113.180.106
+* Connection #0 to host 92.113.180.106 left intact
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# 

@@ -1,0 +1,44 @@
+2inject.js:1 Port connected
+(index):2 Denying load of chrome-extension://dngmlblcodfobpdpecaadgfbcggfjfnm/src/extension/inpage/index.js. Resources must be listed in the web_accessible_resources manifest key in order to be loaded by pages outside the extension.Understand this error
+content.js:2 Check phishing by URL: Passed.
+chrome-extension://invalid/:1  Failed to load resource: net::ERR_FAILEDUnderstand this error
+setup-wallet-sdk.injected-script.7b0af2dc.js:4 Uncaught Error: SubtleCrypto not available!
+    at new r.default (setup-wallet-sdk.injected-script.7b0af2dc.js:4:18183)
+    at <static_initializer> (setup-wallet-sdk.injected-script.7b0af2dc.js:4:12140)
+    at aW2qG.7b4926ed2a17a610 (setup-wallet-sdk.injected-script.7b0af2dc.js:4:12029)
+    at u (setup-wallet-sdk.injected-script.7b0af2dc.js:1:705)
+    at d (setup-wallet-sdk.injected-script.7b0af2dc.js:1:809)
+    at 2ePMB.cb0a218793837510 (setup-wallet-sdk.injected-script.7b0af2dc.js:4:10958)
+    at u (setup-wallet-sdk.injected-script.7b0af2dc.js:1:705)
+    at d (setup-wallet-sdk.injected-script.7b0af2dc.js:1:809)
+    at eep0i.bdf95f731612d918 (setup-wallet-sdk.injected-script.7b0af2dc.js:4:5042)
+    at u (setup-wallet-sdk.injected-script.7b0af2dc.js:1:705)Understand this error
+(index):1 Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.Understand this error
+main.js:44 ABIs loaded, VAULT_ABI is array: true
+main.js:374 Total supply: 7.263925489353519 pSNIPER (TVL requires price API)
+main.js:976 No Price API URL configured. Set via localStorage: localStorage.setItem('predictfi_price_api_url', 'http://your-vps:8080')
+:8080/favicon.ico:1  Failed to load resource: the server responded with a status of 404 (NOT FOUND)Understand this error
+main.js:374 Total supply: 7.263925489353519 pSNIPER (TVL requires price API)
+inject.js:1 Port disconnected, reconnecting...
+inject.js:1 Port connected
+inject.js:1 Port disconnected, reconnecting...
+inject.js:1 Port connected
+content.js:1 Disconnected from polkadot{.js}-0x6e10e163a1550e8d-content
+3main.js:374 Total supply: 7.263925489353519 pSNIPER (TVL requires price API)
+inject.js:1 Port disconnected, reconnecting...
+inject.js:1 Port connected
+inject.js:1 Port disconnected, reconnecting...
+inject.js:1 Port connected
+inject.js:1 Port disconnected, reconnecting...
+inject.js:1 Port connected
+inject.js:1 Port disconnected, reconnecting...
+inject.js:1 Port connected
+inject.js:1 Port disconnected, reconnecting...
+inject.js:1 Port connected
+inject.js:1 Port disconnected, reconnecting...
+inject.js:1 Port connected
+inject.js:1 Port disconnected, reconnecting...
+inject.js:1 Port connected
+inject.js:1 Port disconnected, reconnecting...
+inject.js:1 Port connected
+5main.js:374 Total supply: 7.263925489353519 pSNIPER (TVL requires price API)

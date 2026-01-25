@@ -1,0 +1,75 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# cd /opt/polymarket-bot/trading_bot
+python3 -c "
+from polymarket_trader import PolymarketTrader
+trader = PolymarketTrader()
+print('✅ Connected successfully!' if trader.client else '❌ Failed')
+"
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+🤖 Initializing Polymarket Trading Bot...
+   Bypass method: curl_cffi
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+🔑 Deriving trading credentials from private key...
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 253, in create_or_derive_api_creds
+    return self.create_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 210, in create_api_key
+    self.assert_level_1_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 788, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+  File "/opt/polymarket-bot/trading_bot/polymarket_trader.py", line 55, in __init__
+    self.client.set_api_creds(self.client.create_or_derive_api_creds())
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 255, in create_or_derive_api_creds
+    return self.derive_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 231, in derive_api_key
+    self.assert_level_1_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 788, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
+Error in sys.excepthook:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 228, in partial_apport_excepthook
+    return apport_excepthook(binary, exc_type, exc_obj, exc_tb)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 114, in apport_excepthook
+    report["ExecutableTimestamp"] = str(int(os.stat(binary).st_mtime))
+                                            ^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/opt/polymarket-bot/trading_bot/-c'
+
+Original exception was:
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 253, in create_or_derive_api_creds
+    return self.create_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 210, in create_api_key
+    self.assert_level_1_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 788, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+  File "/opt/polymarket-bot/trading_bot/polymarket_trader.py", line 55, in __init__
+    self.client.set_api_creds(self.client.create_or_derive_api_creds())
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 255, in create_or_derive_api_creds
+    return self.derive_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 231, in derive_api_key
+    self.assert_level_1_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 788, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# curl 'https://gamma-api.polymarket.com/users/0xd1EdE018CF5724268C8881888A2D0822E8e765aF'
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# 

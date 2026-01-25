@@ -1,0 +1,280 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# systemctl daemon-reload
+systemctl restart inngest mastra polymarket-monitor polymarket-worker
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# systemctl status polymarket-monitor polymarket-worker
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Sun 2026-01-25 17:13:19 UTC; 5s ago
+    Process: 1885828 ExecStart=/opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py (code=exited, status=1/FAILURE)
+   Main PID: 1885828 (code=exited, status=1/FAILURE)
+        CPU: 745ms
+
+● polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue
+     Loaded: loaded (/etc/systemd/system/polymarket-worker.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Sun 2026-01-25 17:13:20 UTC; 5s ago
+    Process: 1885829 ExecStart=/opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py (code=exited, status=1/FAILURE)
+   Main PID: 1885829 (code=exited, status=1/FAILURE)
+        CPU: 762ms
+
+Jan 25 17:13:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Trading worker logs
+journalctl -u polymarket-worker -f --no-pager
+
+# Monitor logs
+journalctl -u polymarket-monitor -f --no-pager
+Jan 25 17:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885848]:     key = self._parse_private_key(private_key)
+Jan 25 17:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885848]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885848]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_utils/decorators.py", line 31, in _wrapper
+Jan 25 17:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885848]:     return self.method(objtype, *args, **kwargs)
+Jan 25 17:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885848]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885848]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 899, in _parse_private_key
+Jan 25 17:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885848]:     raise ValueError(
+Jan 25 17:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885848]: ValueError: The private key must be exactly 32 bytes long, instead of 22 bytes.
+Jan 25 17:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Jan 25 17:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Jan 25 17:13:52 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 29.
+Jan 25 17:13:52 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]: ✅ Loaded environment variables from .env file
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]: 🤖 Polymarket Auto-Trading Worker Starting...
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:    Notifications: Telegram @ponnymarket (sells only)
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:    Mode: Queue-based worker
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]: 🤖 Initializing Polymarket Trading Bot...
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:    Bypass method: curl_cffi
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]: Traceback (most recent call last):
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 897, in _parse_private_key
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     return self._keys.PrivateKey(hb_key)
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_keys/datatypes.py", line 244, in __init__
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     validate_private_key_bytes(private_key_bytes)
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_keys/validation.py", line 81, in validate_private_key_bytes
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     validate_bytes_length(value, 32, "private key")
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_keys/validation.py", line 52, in validate_bytes_length
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     raise ValidationError(
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]: eth_utils.exceptions.ValidationError: Unexpected private key length: Expected 32, but got 22 bytes
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]: The above exception was the direct cause of the following exception:
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]: Traceback (most recent call last):
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 223, in <module>
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     main()
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 183, in main
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     trader = PolymarketTrader()
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:              ^^^^^^^^^^^^^^^^^^
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/polymarket_trader.py", line 39, in __init__
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     self.client = ClobClient(
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:                   ^^^^^^^^^^^
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 132, in __init__
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     self.signer = Signer(key, chain_id) if key else None
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:                   ^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/signer.py", line 9, in __init__
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     self.account = Account.from_key(private_key)
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_utils/decorators.py", line 31, in _wrapper
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     return self.method(objtype, *args, **kwargs)
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 310, in from_key
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     key = self._parse_private_key(private_key)
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_utils/decorators.py", line 31, in _wrapper
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     return self.method(objtype, *args, **kwargs)
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 899, in _parse_private_key
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]:     raise ValueError(
+Jan 25 17:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885872]: ValueError: The private key must be exactly 32 bytes long, instead of 22 bytes.
+Jan 25 17:13:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Jan 25 17:13:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Jan 25 17:14:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 30.
+Jan 25 17:14:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Jan 25 17:14:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]: ✅ Loaded environment variables from .env file
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]: 🤖 Polymarket Auto-Trading Worker Starting...
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:    Notifications: Telegram @ponnymarket (sells only)
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:    Mode: Queue-based worker
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]: 🤖 Initializing Polymarket Trading Bot...
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:    Bypass method: curl_cffi
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]: Traceback (most recent call last):
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 897, in _parse_private_key
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     return self._keys.PrivateKey(hb_key)
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_keys/datatypes.py", line 244, in __init__
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     validate_private_key_bytes(private_key_bytes)
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_keys/validation.py", line 81, in validate_private_key_bytes
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     validate_bytes_length(value, 32, "private key")
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_keys/validation.py", line 52, in validate_bytes_length
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     raise ValidationError(
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]: eth_utils.exceptions.ValidationError: Unexpected private key length: Expected 32, but got 22 bytes
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]: The above exception was the direct cause of the following exception:
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]: Traceback (most recent call last):
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 223, in <module>
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     main()
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 183, in main
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     trader = PolymarketTrader()
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:              ^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/polymarket_trader.py", line 39, in __init__
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     self.client = ClobClient(
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:                   ^^^^^^^^^^^
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 132, in __init__
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     self.signer = Signer(key, chain_id) if key else None
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:                   ^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/signer.py", line 9, in __init__
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     self.account = Account.from_key(private_key)
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_utils/decorators.py", line 31, in _wrapper
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     return self.method(objtype, *args, **kwargs)
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 310, in from_key
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     key = self._parse_private_key(private_key)
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_utils/decorators.py", line 31, in _wrapper
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     return self.method(objtype, *args, **kwargs)
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 899, in _parse_private_key
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]:     raise ValueError(
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885891]: ValueError: The private key must be exactly 32 bytes long, instead of 22 bytes.
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Jan 25 17:14:05 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 31.
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]: ✅ Loaded environment variables from .env file
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]: 🤖 Polymarket Auto-Trading Worker Starting...
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:    Notifications: Telegram @ponnymarket (sells only)
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:    Mode: Queue-based worker
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]: 🤖 Initializing Polymarket Trading Bot...
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:    Bypass method: curl_cffi
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]: Traceback (most recent call last):
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 897, in _parse_private_key
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     return self._keys.PrivateKey(hb_key)
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_keys/datatypes.py", line 244, in __init__
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     validate_private_key_bytes(private_key_bytes)
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_keys/validation.py", line 81, in validate_private_key_bytes
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     validate_bytes_length(value, 32, "private key")
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_keys/validation.py", line 52, in validate_bytes_length
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     raise ValidationError(
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]: eth_utils.exceptions.ValidationError: Unexpected private key length: Expected 32, but got 22 bytes
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]: The above exception was the direct cause of the following exception:
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]: Traceback (most recent call last):
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 223, in <module>
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     main()
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 183, in main
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     trader = PolymarketTrader()
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:              ^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/polymarket_trader.py", line 39, in __init__
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     self.client = ClobClient(
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:                   ^^^^^^^^^^^
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/client.py", line 132, in __init__
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     self.signer = Signer(key, chain_id) if key else None
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:                   ^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/signer.py", line 9, in __init__
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     self.account = Account.from_key(private_key)
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_utils/decorators.py", line 31, in _wrapper
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     return self.method(objtype, *args, **kwargs)
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 310, in from_key
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     key = self._parse_private_key(private_key)
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_utils/decorators.py", line 31, in _wrapper
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     return self.method(objtype, *args, **kwargs)
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 899, in _parse_private_key
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]:     raise ValueError(
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1885899]: ValueError: The private key must be exactly 32 bytes long, instead of 22 bytes.
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+^C
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1885898]:     key = self._parse_private_key(private_key)
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1885898]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1885898]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_utils/decorators.py", line 31, in _wrapper
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1885898]:     return self.method(objtype, *args, **kwargs)
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1885898]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1885898]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/eth_account/account.py", line 899, in _parse_private_key
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1885898]:     raise ValueError(
+Jan 25 17:14:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1885898]: ValueError: The private key must be exactly 32 bytes long, instead of 22 bytes.
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Jan 25 17:14:16 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+cd /opt/polymarket-bot/trading_bot
+python3 -c "
+from polymarket_trader import PolymarketTrader
+trader = PolymarketTrader()
+print('✅ Connected successfully!' if trader.client else '❌ Failed')
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd /opt/polymarket-bot/trading_bot
+python3 -c "
+from polymarket_trader import PolymarketTrader
+trader = PolymarketTrader()
+print('✅ Connected successfully!' if trader.client else '❌ Failed')
+"
+🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+🤖 Initializing Polymarket Trading Bot...
+   Bypass method: curl_cffi
+   🌐 Using proxy: 92.113.180.106:42563
+   🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+🔑 Deriving trading credentials from private key...
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 253, in create_or_derive_api_creds
+    return self.create_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 210, in create_api_key
+    self.assert_level_1_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 788, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+  File "/opt/polymarket-bot/trading_bot/polymarket_trader.py", line 55, in __init__
+    self.client.set_api_creds(self.client.create_or_derive_api_creds())
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 255, in create_or_derive_api_creds
+    return self.derive_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 231, in derive_api_key
+    self.assert_level_1_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 788, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
+Error in sys.excepthook:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 228, in partial_apport_excepthook
+    return apport_excepthook(binary, exc_type, exc_obj, exc_tb)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 114, in apport_excepthook
+    report["ExecutableTimestamp"] = str(int(os.stat(binary).st_mtime))
+                                            ^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/opt/polymarket-bot/trading_bot/-c'
+
+Original exception was:
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 253, in create_or_derive_api_creds
+    return self.create_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 210, in create_api_key
+    self.assert_level_1_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 788, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+py_clob_client.exceptions.PolyException: A private key is needed to interact with this endpoint!
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+  File "/opt/polymarket-bot/trading_bot/polymarket_trader.py", line 55, in __init__
+    self.client.set_api_creds(self.client.create_or_derive_api_creds())
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 255, in create_or_derive_api_creds
+    return self.derive_api_key(nonce)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 231, in derive_api_key
+    self.assert_level_1_auth()
+  File "/usr/local/lib/python3.12/dist-packages/py_clob_client/client.py", line 788, in assert_level_1_auth
+    raise PolyException(L1_AUTH_UNAVAILABLE)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# curl 'https://gamma-api.polymarket.com/users/0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0'
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# 

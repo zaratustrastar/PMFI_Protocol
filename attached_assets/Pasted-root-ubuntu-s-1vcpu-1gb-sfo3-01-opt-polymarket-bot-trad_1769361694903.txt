@@ -1,0 +1,50 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# # Trading worker logs
+journalctl -u polymarket-worker -f --no-pager
+
+# Monitor logs
+journalctl -u polymarket-monitor -f --no-pager
+Jan 25 17:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886247]:     creds_raw = get(endpoint, headers=headers)
+Jan 25 17:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886247]:                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886247]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/http_helpers/helpers.py", line 58, in get
+Jan 25 17:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886247]:     return request(endpoint, GET, headers, data)
+Jan 25 17:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886247]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886247]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/py_clob_client/http_helpers/helpers.py", line 50, in request
+Jan 25 17:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886247]:     raise PolyApiException(error_msg="Request exception!")
+Jan 25 17:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886247]: py_clob_client.exceptions.PolyApiException: PolyApiException[status_code=None, error_message=Request exception!]
+Jan 25 17:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Jan 25 17:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Jan 25 17:20:28 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 64.
+Jan 25 17:20:28 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]: ✅ Loaded environment variables from .env file
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]: 🤖 Polymarket Auto-Trading Worker Starting...
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:    Notifications: Telegram @ponnymarket (sells only)
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:    Mode: Queue-based worker
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]: 🤖 Initializing Polymarket Trading Bot...
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:    Bypass method: curl_cffi
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:    🌐 Using proxy: 92.113.180.106:42563
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:    🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+Jan 25 17:20:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]: 🔑 Deriving trading credentials from private key...
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]: Traceback (most recent call last):
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/urllib3/connection.py", line 198, in _new_conn
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:     sock = connection.create_connection(
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/urllib3/util/connection.py", line 85, in create_connection
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:     raise err
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/urllib3/util/connection.py", line 73, in create_connection
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:     sock.connect(sa)
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]: ConnectionRefusedError: [Errno 111] Connection refused
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]: The above exception was the direct cause of the following exception:
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]: Traceback (most recent call last):
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 773, in urlopen
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:     self._prepare_proxy(conn)
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 1042, in _prepare_proxy
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:     conn.connect()
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/urllib3/connection.py", line 753, in connect
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:     self.sock = sock = self._new_conn()
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:                        ^^^^^^^^^^^^^^^^
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/urllib3/connection.py", line 213, in _new_conn
+Jan 25 17:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1886255]:     raise NewConnectionError(
+J

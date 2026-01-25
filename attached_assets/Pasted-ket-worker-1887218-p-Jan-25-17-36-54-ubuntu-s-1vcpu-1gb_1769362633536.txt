@@ -1,0 +1,40 @@
+ket-worker[1887218]:   </p>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:   <script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();</script>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: </div><!-- /.error-footer -->
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:     </div><!-- /#cf-error-details -->
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:   </div><!-- /#cf-wrapper -->
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:   <script>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:   window._cf_translation = {};
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:   
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:   
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: </script>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: </body>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: </html>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: ]
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:    ❌ Buy @ $0.0300 error: PolyApiException[status_code=403, error_message=<!DOCTYPE html>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <!--[if gt IE 8]><!--> <html class="no-js" lang="en-US"> <!--<![endif]-->
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <head>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <title>Attention Required! | Cloudflare</title>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <meta charset="UTF-8" />
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <meta name="robots" content="noindex, nofollow" />
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <meta name="viewport" content="width=device-width,initial-scale=1" />
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <link rel="stylesheet" id="cf_styles-css" href="/cdn-cgi/styles/cf.errors.css" />
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <!--[if lt IE 9]><link rel="stylesheet" id='cf_styles-ie-css' href="/cdn-cgi/styles/cf.errors.ie.css" /><![endif]-->
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <style>body{margin:0;padding:0}</style>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <!--[if gte IE 10]><!-->
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <script>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:   if (!navigator.cookieEnabled) {
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:     window.addEventListener('DOMContentLoaded', function () {
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:       var cookieEl = document.getElementById('cookie-alert');
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:       cookieEl.style.display = 'block';
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:     })
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]:   }
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: </script>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <!--<![endif]-->
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: </head>
+Jan 25 17:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887218]: <body>

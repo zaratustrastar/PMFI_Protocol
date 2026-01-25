@@ -1,0 +1,256 @@
+="blocked_why_detail">This website is using a security service to protect itself from online attacks. The action you just performed triggered the security solution. There are several actions that could trigger this block including submitting a certain word or phrase, a SQL command or malformed data.</p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           <div class="cf-column">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <h2 data-translate="blocked_resolve_headline">What can I do to resolve this?</h2>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <p data-translate="blocked_resolve_detail">You can email the site owner to let them know you were blocked. Please include what you were doing when this page came up and the Cloudflare Ray ID found at the bottom of this page.</p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       </div><!-- /.section -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <p class="text-13">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-item sm:block sm:mb-1">Cloudflare Ray ID: <strong class="font-semibold">9c39a1ab29ee306f</strong></span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-separator sm:hidden">&bull;</span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       Your IP:
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <span class="hidden" id="cf-footer-ip">147.182.206.35</span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <span class="cf-footer-separator sm:hidden">&bull;</span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     </span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-item sm:block sm:mb-1"><span>Performance &amp; security by</span> <a rel="noopener noreferrer" href="https://www.cloudflare.com/5xx-error-landing" id="brand_link" target="_blank">Cloudflare</a></span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   </p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();</script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </div><!-- /.error-footer -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     </div><!-- /#cf-error-details -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   </div><!-- /#cf-wrapper -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   window._cf_translation = {};
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </body>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </html>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: ]
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:    ❌ Buy @ $0.0160 error: PolyApiException[status_code=403, error_message=<!DOCTYPE html>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if gt IE 8]><!--> <html class="no-js" lang="en-US"> <!--<![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <head>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <title>Attention Required! | Cloudflare</title>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta charset="UTF-8" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta name="robots" content="noindex, nofollow" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta name="viewport" content="width=device-width,initial-scale=1" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <link rel="stylesheet" id="cf_styles-css" href="/cdn-cgi/styles/cf.errors.css" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if lt IE 9]><link rel="stylesheet" id='cf_styles-ie-css' href="/cdn-cgi/styles/cf.errors.ie.css" /><![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <style>body{margin:0;padding:0}</style>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if gte IE 10]><!-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   if (!navigator.cookieEnabled) {
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     window.addEventListener('DOMContentLoaded', function () {
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       var cookieEl = document.getElementById('cookie-alert');
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       cookieEl.style.display = 'block';
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     })
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   }
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--<![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </head>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <body>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <div id="cf-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <div class="cf-alert cf-alert-error cf-cookie-error" id="cookie-alert" data-translate="enable_cookies">Please enable cookies.</div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <div id="cf-error-details" class="cf-error-details-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-wrapper cf-header cf-error-overview">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <h1 data-translate="block_headline">Sorry, you have been blocked</h1>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <h2 class="cf-subheadline"><span data-translate="unable_to_access">You are unable to access</span> polymarket.com</h2>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       </div><!-- /.header -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-section cf-highlight">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <div class="cf-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           <div class="cf-screenshot-container cf-screenshot-full">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:               <span class="cf-no-screenshot error"></span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       </div><!-- /.captcha-container -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-section cf-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <div class="cf-columns two">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           <div class="cf-column">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <h2 data-translate="blocked_why_headline">Why have I been blocked?</h2>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <p data-translate="blocked_why_detail">This website is using a security service to protect itself from online attacks. The action you just performed triggered the security solution. There are several actions that could trigger this block including submitting a certain word or phrase, a SQL command or malformed data.</p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           <div class="cf-column">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <h2 data-translate="blocked_resolve_headline">What can I do to resolve this?</h2>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <p data-translate="blocked_resolve_detail">You can email the site owner to let them know you were blocked. Please include what you were doing when this page came up and the Cloudflare Ray ID found at the bottom of this page.</p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       </div><!-- /.section -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <p class="text-13">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-item sm:block sm:mb-1">Cloudflare Ray ID: <strong class="font-semibold">9c39a1abb865f9d4</strong></span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-separator sm:hidden">&bull;</span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       Your IP:
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <span class="hidden" id="cf-footer-ip">147.182.206.35</span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <span class="cf-footer-separator sm:hidden">&bull;</span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     </span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-item sm:block sm:mb-1"><span>Performance &amp; security by</span> <a rel="noopener noreferrer" href="https://www.cloudflare.com/5xx-error-landing" id="brand_link" target="_blank">Cloudflare</a></span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   </p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();</script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </div><!-- /.error-footer -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     </div><!-- /#cf-error-details -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   </div><!-- /#cf-wrapper -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   window._cf_translation = {};
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </body>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </html>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: ]
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:    ❌ Buy @ $0.0180 error: PolyApiException[status_code=403, error_message=<!DOCTYPE html>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if gt IE 8]><!--> <html class="no-js" lang="en-US"> <!--<![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <head>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <title>Attention Required! | Cloudflare</title>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta charset="UTF-8" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta name="robots" content="noindex, nofollow" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta name="viewport" content="width=device-width,initial-scale=1" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <link rel="stylesheet" id="cf_styles-css" href="/cdn-cgi/styles/cf.errors.css" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if lt IE 9]><link rel="stylesheet" id='cf_styles-ie-css' href="/cdn-cgi/styles/cf.errors.ie.css" /><![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <style>body{margin:0;padding:0}</style>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if gte IE 10]><!-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   if (!navigator.cookieEnabled) {
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     window.addEventListener('DOMContentLoaded', function () {
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       var cookieEl = document.getElementById('cookie-alert');
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       cookieEl.style.display = 'block';
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     })
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   }
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--<![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </head>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <body>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <div id="cf-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <div class="cf-alert cf-alert-error cf-cookie-error" id="cookie-alert" data-translate="enable_cookies">Please enable cookies.</div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <div id="cf-error-details" class="cf-error-details-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-wrapper cf-header cf-error-overview">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <h1 data-translate="block_headline">Sorry, you have been blocked</h1>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <h2 class="cf-subheadline"><span data-translate="unable_to_access">You are unable to access</span> polymarket.com</h2>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       </div><!-- /.header -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-section cf-highlight">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <div class="cf-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           <div class="cf-screenshot-container cf-screenshot-full">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:               <span class="cf-no-screenshot error"></span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       </div><!-- /.captcha-container -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-section cf-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <div class="cf-columns two">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           <div class="cf-column">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <h2 data-translate="blocked_why_headline">Why have I been blocked?</h2>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <p data-translate="blocked_why_detail">This website is using a security service to protect itself from online attacks. The action you just performed triggered the security solution. There are several actions that could trigger this block including submitting a certain word or phrase, a SQL command or malformed data.</p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           <div class="cf-column">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <h2 data-translate="blocked_resolve_headline">What can I do to resolve this?</h2>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <p data-translate="blocked_resolve_detail">You can email the site owner to let them know you were blocked. Please include what you were doing when this page came up and the Cloudflare Ray ID found at the bottom of this page.</p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       </div><!-- /.section -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <p class="text-13">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-item sm:block sm:mb-1">Cloudflare Ray ID: <strong class="font-semibold">9c39a1ac6ff0f98b</strong></span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-separator sm:hidden">&bull;</span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       Your IP:
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <span class="hidden" id="cf-footer-ip">147.182.206.35</span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <span class="cf-footer-separator sm:hidden">&bull;</span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     </span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-item sm:block sm:mb-1"><span>Performance &amp; security by</span> <a rel="noopener noreferrer" href="https://www.cloudflare.com/5xx-error-landing" id="brand_link" target="_blank">Cloudflare</a></span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   </p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();</script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </div><!-- /.error-footer -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     </div><!-- /#cf-error-details -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   </div><!-- /#cf-wrapper -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   window._cf_translation = {};
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </body>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </html>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: ]
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:    ❌ Buy @ $0.0200 error: PolyApiException[status_code=403, error_message=<!DOCTYPE html>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if gt IE 8]><!--> <html class="no-js" lang="en-US"> <!--<![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <head>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <title>Attention Required! | Cloudflare</title>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta charset="UTF-8" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta name="robots" content="noindex, nofollow" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <meta name="viewport" content="width=device-width,initial-scale=1" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <link rel="stylesheet" id="cf_styles-css" href="/cdn-cgi/styles/cf.errors.css" />
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if lt IE 9]><link rel="stylesheet" id='cf_styles-ie-css' href="/cdn-cgi/styles/cf.errors.ie.css" /><![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <style>body{margin:0;padding:0}</style>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--[if gte IE 10]><!-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   if (!navigator.cookieEnabled) {
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     window.addEventListener('DOMContentLoaded', function () {
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       var cookieEl = document.getElementById('cookie-alert');
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       cookieEl.style.display = 'block';
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     })
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   }
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </script>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <!--<![endif]-->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: </head>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]: <body>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <div id="cf-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <div class="cf-alert cf-alert-error cf-cookie-error" id="cookie-alert" data-translate="enable_cookies">Please enable cookies.</div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <div id="cf-error-details" class="cf-error-details-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-wrapper cf-header cf-error-overview">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <h1 data-translate="block_headline">Sorry, you have been blocked</h1>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <h2 class="cf-subheadline"><span data-translate="unable_to_access">You are unable to access</span> polymarket.com</h2>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       </div><!-- /.header -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-section cf-highlight">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <div class="cf-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           <div class="cf-screenshot-container cf-screenshot-full">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:               <span class="cf-no-screenshot error"></span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       </div><!-- /.captcha-container -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-section cf-wrapper">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         <div class="cf-columns two">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           <div class="cf-column">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <h2 data-translate="blocked_why_headline">Why have I been blocked?</h2>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <p data-translate="blocked_why_detail">This website is using a security service to protect itself from online attacks. The action you just performed triggered the security solution. There are several actions that could trigger this block including submitting a certain word or phrase, a SQL command or malformed data.</p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           <div class="cf-column">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <h2 data-translate="blocked_resolve_headline">What can I do to resolve this?</h2>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:             <p data-translate="blocked_resolve_detail">You can email the site owner to let them know you were blocked. Please include what you were doing when this page came up and the Cloudflare Ray ID found at the bottom of this page.</p>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:           </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:         </div>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       </div><!-- /.section -->
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:   <p class="text-13">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-item sm:block sm:mb-1">Cloudflare Ray ID: <strong class="font-semibold">9c39a1ad0e76dfce</strong></span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span class="cf-footer-separator sm:hidden">&bull;</span>
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:     <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       Your IP:
+Jan 25 17:53:41 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1887926]:       <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>
+Jan 25 17:53:41 ubuntu-s-1vcpu

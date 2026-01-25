@@ -1,0 +1,137 @@
+2:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Bypass method: curl_cffi
+Jan 25 21:22:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    🌐 Using proxy: 92.113.180.106:42563
+Jan 25 21:22:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)
+Jan 25 21:22:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 🔑 Deriving trading credentials from private key...
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: Couldn't parse created CLOB creds
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ⚠️  Credential derivation returned: None
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    💡 Set POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ✅ Trading bot initialized!
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📊 Configuration:
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Poll Interval: 30s
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Batch Size: 5 jobs
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 🔄 Starting worker loop (press Ctrl+C to stop)
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ✅ Found 5 pending job(s)
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ⚡ Processing Job #98097: Valorant: Misa Esports vs S2G Esports - Map 1 Winn...
+Jan 25 21:22:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 🔄 Job #98097 marked as RUNNING (age: 0.3h)
+Jan 25 21:22:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 🎯 Placing orders for: Valorant: Misa Esports vs S2G Esports - Map 1 Winn...
+Jan 25 21:22:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Condition ID: 0xcc69c830751b938346...
+Jan 25 21:22:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📋 Market: Valorant: Misa Esports vs S2G Esports - Map 1 Winner
+Jan 25 21:22:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    YES Token: 5227376745727614...
+Jan 25 21:22:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    NO Token: 1414776737774519...
+Jan 25 21:22:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📊 Placing BUY ladder for YES token...
+Jan 25 21:22:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Token ID: 52273767457276146592276081170582990056882261977390921346969148958518218746829
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0100 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0120 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0140 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0160 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0180 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0200 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0220 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0250 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0280 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0300 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📊 Placing BUY ladder for NO token...
+Jan 25 21:22:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Token ID: 14147767377745198363200871231666040604736672813873780115569997239555559090525
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0100 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0120 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0140 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0160 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0180 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0200 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0220 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0250 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0280 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0300 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ❌ No orders placed (all orders failed)
+Jan 25 21:22:07 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ❌ Job #98097 failed - no orders placed
+Jan 25 21:22:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ⚡ Processing Job #98099: Valorant: Misa Esports vs S2G Esports - Map 2 Winn...
+Jan 25 21:22:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 🔄 Job #98099 marked as RUNNING (age: 0.3h)
+Jan 25 21:22:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 🎯 Placing orders for: Valorant: Misa Esports vs S2G Esports - Map 2 Winn...
+Jan 25 21:22:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Condition ID: 0xfc98826a705db079e6...
+Jan 25 21:22:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📋 Market: Valorant: Misa Esports vs S2G Esports - Map 2 Winner
+Jan 25 21:22:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    YES Token: 2341631017078640...
+Jan 25 21:22:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    NO Token: 1075922736542224...
+Jan 25 21:22:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📊 Placing BUY ladder for YES token...
+Jan 25 21:22:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Token ID: 23416310170786408891997285987201679989147190953712054955304573757533072671217
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0100 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0120 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0140 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0160 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0180 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0200 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0220 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0250 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0280 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0300 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📊 Placing BUY ladder for NO token...
+Jan 25 21:22:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Token ID: 107592273654222449419101078909934528571235428884399775417600144387702842361612
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0100 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0120 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0140 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0160 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0180 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0200 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0220 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0250 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0280 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0300 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ❌ No orders placed (all orders failed)
+Jan 25 21:22:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ❌ Job #98099 failed - no orders placed
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ⚡ Processing Job #98101: Games Total: O/U 2.5...
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 🔄 Job #98101 marked as RUNNING (age: 0.3h)
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 🎯 Placing orders for: Games Total: O/U 2.5...
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Condition ID: 0x60e495a74a31dd6fb3...
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📋 Market: Games Total: O/U 2.5
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    YES Token: 7256185527263000...
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    NO Token: 7346081272195911...
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📊 Placing BUY ladder for YES token...
+Jan 25 21:22:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Token ID: 72561855272630000201834117125597688315737415063398619919145139071295692289489
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0100 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0120 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0140 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0160 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0180 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0200 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0220 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0250 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0280 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0300 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📊 Placing BUY ladder for NO token...
+Jan 25 21:22:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Token ID: 73460812721959118291459119657613342766866056903626049584144657975356626629846
+Jan 25 21:22:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0100 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0120 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0140 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0160 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0180 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0200 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0220 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0250 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0280 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    ❌ Buy @ $0.0300 error: API Credentials are needed to interact with this endpoint!
+Jan 25 21:22:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ❌ No orders placed (all orders failed)
+Jan 25 21:22:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ❌ Job #98101 failed - no orders placed
+Jan 25 21:22:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ⚡ Processing Job #98103: Map Handicap: MISA (-1.5) vs S2G Esports (+1.5)...
+Jan 25 21:22:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 🔄 Job #98103 marked as RUNNING (age: 0.3h)
+Jan 25 21:22:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 🎯 Placing orders for: Map Handicap: MISA (-1.5) vs S2G Esports (+1.5)...
+Jan 25 21:22:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Condition ID: 0x4d413fdc0b0d2f85e9...
+Jan 25 21:22:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: ============================================================
+Jan 25 21:22:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📋 Market: Map Handicap: MISA (-1.5) vs S2G Esports (+1.5)
+Jan 25 21:22:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    YES Token: 8137718596486695...
+Jan 25 21:22:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    NO Token: 2367583098782784...
+Jan 25 21:22:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]: 📊 Placing BUY ladder for YES token...
+Jan 25 21:22:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1896128]:    Token ID: 81377185964866954062087097090352397379993382433241923954515381921116655558582

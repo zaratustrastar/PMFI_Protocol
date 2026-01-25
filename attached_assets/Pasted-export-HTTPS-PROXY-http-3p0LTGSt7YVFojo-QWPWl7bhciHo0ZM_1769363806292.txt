@@ -1,0 +1,50 @@
+export HTTPS_PROXY=http://3p0LTGSt7YVFojo:QWPWl7bhciHo0ZM@92.113.180.106:HTTP_PORT
+
+# Then test
+python3 -c "
+import requests
+r = requests.get('https://ipv4.icanhazip.com')
+print(r.text)
+"
+Traceback (most recent call last):
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/urllib3/util/url.py", line 423, in parse_url
+    host, port = _HOST_PORT_RE.match(host_port).groups()  # type: ignore[union-attr]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'groups'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/requests/adapters.py", line 610, in send
+    conn = self.get_connection_with_tls_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/requests/adapters.py", line 453, in get_connection_with_tls_context
+    proxy = prepend_scheme_if_needed(proxy, "http")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/requests/utils.py", line 985, in prepend_scheme_if_needed
+    parsed = parse_url(url)
+             ^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/urllib3/util/url.py", line 449, in parse_url
+    raise LocationParseError(source_url) from e
+urllib3.exceptions.LocationParseError: Failed to parse: http://3p0LTGSt7YVFojo:QWPWl7bhciHo0ZM@92.113.180.106:HTTP_PORT
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/requests/api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/requests/api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/requests/adapters.py", line 614, in send
+    raise InvalidURL(e, request=request)
+requests.exceptions.InvalidURL: Failed to parse: http://3p0LTGSt7YVFojo:QWPWl7bhciHo0ZM@92.113.180.106:HTTP_PORT
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# 

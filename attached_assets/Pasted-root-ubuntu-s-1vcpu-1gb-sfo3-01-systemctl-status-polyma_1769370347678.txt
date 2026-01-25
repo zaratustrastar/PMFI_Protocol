@@ -1,0 +1,46 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# systemctl status polymarket-worker polymarket-monitor
+● polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue
+     Loaded: loaded (/etc/systemd/system/polymarket-worker.service; enabled; preset: enabled)
+     Active: active (running) since Sun 2026-01-25 18:32:20 UTC; 1h 12min ago
+   Main PID: 1889687 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 37.7M (peak: 38.2M)
+        CPU: 1min 14.556s
+     CGroup: /system.slice/polymarket-worker.service
+             └─1889687 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+
+Jan 25 19:42:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1889687]: ⏸️  No pending jobs (checked at 19:42:22)
+Jan 25 19:42:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1889687]: 💤 Waiting 30s before next poll...
+Jan 25 19:42:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1889687]: ⏸️  No pending jobs (checked at 19:42:53)
+Jan 25 19:42:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1889687]: 💤 Waiting 30s before next poll...
+Jan 25 19:43:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1889687]: ⏸️  No pending jobs (checked at 19:43:23)
+Jan 25 19:43:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1889687]: 💤 Waiting 30s before next poll...
+Jan 25 19:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1889687]: ⏸️  No pending jobs (checked at 19:43:54)
+Jan 25 19:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1889687]: 💤 Waiting 30s before next poll...
+Jan 25 19:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1889687]: ⏸️  No pending jobs (checked at 19:44:24)
+Jan 25 19:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1889687]: 💤 Waiting 30s before next poll...
+
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Sun 2026-01-25 18:32:20 UTC; 1h 12min ago
+   Main PID: 1889690 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 40.8M (peak: 52.8M)
+        CPU: 5min 2.570s
+     CGroup: /system.slice/polymarket-monitor.service
+             └─1889690 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+
+Jan 25 19:43:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1889690]:    ⚠️  Order 0x8d2a63 not found on exchange (cancelled or expired)
+Jan 25 19:43:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1889690]:    ⚠️  Order 0xf26256 not found on exchange (cancelled or expired)
+Jan 25 19:43:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1889690]:    ⚠️  Order 0xfc54e7 not found on exchange (cancelled or expired)
+Jan 25 19:43:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1889690]:    ⚠️  Order 0xda8a69 not found on exchange (cancelled or expired)
+Jan 25 19:43:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1889690]:    ⚠️  Order 0x636e17 not found on exchange (cancelled or expired)
+Jan 25 19:43:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1889690]:    ⚠️  Order 0x8584e5 not found on exchange (cancelled or expired)
+Jan 25 19:43:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1889690]:    ⚠️  Order 0x64b5a5 not found on exchange (cancelled or expired)
+Jan 25 19:43:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1889690]:    ⚠️  Order 0xc8d892 not found on exchange (cancelled or expired)
+Jan 25 19:44:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1889690]: 🔍 Checking 1 open buy orders...
+Jan 25 19:44:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[1889690]:    ⚠️  Order 0xe09056 not found on exchange (cancelled or expired)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# systemctl list-units | grep polymarket
+  polymarket-monitor.service                                                     loaded active     running      Polymarket Order Monitor - Monitors Fills and Places Sells
+  polymarket-worker.service                                                      loaded active     running      Polymarket Trading Worker - Processes Job Queue
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
