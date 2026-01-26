@@ -42,11 +42,11 @@ async function main() {
     }
     
     // Caps
-    const MAX_PER_WALLET = hre.ethers.parseUnits("100", 6);     // 100 USDC per wallet
-    const MAX_TOTAL = hre.ethers.parseUnits("100000", 6);       // 100,000 USDC total
+    const MAX_PER_WALLET = hre.ethers.parseUnits("1000000000", 6);  // No per-wallet limit (1B USDC)
+    const MAX_TOTAL = hre.ethers.parseUnits("100000", 6);           // 100,000 USDC total vault cap
     
-    // Max loss allowed (10% = 1000 bps)
-    const MAX_LOSS_BPS = 1000;
+    // Max loss allowed (30% = 3000 bps)
+    const MAX_LOSS_BPS = 3000;
 
     console.log(`\n📋 Deployment Parameters:`);
     console.log(`   USDC: ${USDC_ADDRESS}`);

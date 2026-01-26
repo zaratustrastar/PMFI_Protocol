@@ -32,8 +32,8 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
  * - Conservation bound: totalAssets >= expectedAssets * (1 - maxLossBps)
  * - 30-second signature validity
  * - Monotonically increasing roundId
- * - 1% withdrawal tax
- * - Deposit caps (per-wallet and total)
+ * - No withdrawal tax (0%)
+ * - Total vault deposit cap (no per-wallet limit)
  * - Pausable on safety valve triggers
  */
 contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
@@ -55,7 +55,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     uint256 public constant MAX_NAV_AGE = 300;  // 5 minutes for MVP (bot takes 30-120s)
     uint256 public constant MIN_NAV_INTERVAL = 60;  // Min 60s between NAV updates
     uint256 public constant STALE_NAV_GRACE = 900;  // 15 min grace for deposits/withdrawRequests
-    uint256 public constant WITHDRAWAL_TAX_BPS = 100;
+    uint256 public constant WITHDRAWAL_TAX_BPS = 0;  // No withdrawal tax
     uint256 public constant USDC_DECIMALS = 6;
     uint256 public constant NAV_PRECISION = 1e18;
     uint256 public constant WITHDRAWAL_EXPIRY = 7 days;
@@ -285,7 +285,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         
         _verifyAndApplyNav(navData, signature);
         
-        require(walletDeposits[msg.sender] + usdcAmount <= maxDepositPerWallet, "Exceeds wallet cap");
+        // Per-wallet cap removed - only total vault cap enforced
         require(expectedAssets + usdcAmount <= maxTotalDeposits, "Exceeds total cap");
         
         // Limbo cap: if pendingCredit > 10% of totalAssets, cap single deposit to $1000
