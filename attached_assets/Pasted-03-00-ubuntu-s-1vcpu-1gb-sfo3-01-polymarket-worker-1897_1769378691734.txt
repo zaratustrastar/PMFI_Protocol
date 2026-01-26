@@ -1,0 +1,188 @@
+03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ✅ Found 5 pending job(s)
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ⚡ Processing Job #98172: SS Juve Stabia vs. Calcio Padova: O/U 1.5...
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 🔄 Job #98172 marked as RUNNING (age: 0.0h)
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 🎯 Placing orders for: SS Juve Stabia vs. Calcio Padova: O/U 1.5...
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Condition ID: 0x537c8a38c6296ecea3...
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📋 Market: SS Juve Stabia vs. Calcio Padova: O/U 1.5
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    YES Token: 6905672060167118...
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    NO Token: 4661658791907079...
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📊 Placing BUY ladder for YES token...
+Jan 25 22:03:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Token ID: 69056720601671183582551654290538373168225024929366808213047890365524101852913
+Jan 25 22:03:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0100 error: Incorrect padding
+Jan 25 22:03:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0120 error: Incorrect padding
+Jan 25 22:03:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0140 error: Incorrect padding
+Jan 25 22:03:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0160 error: Incorrect padding
+Jan 25 22:03:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0180 error: Incorrect padding
+Jan 25 22:03:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0200 error: Incorrect padding
+Jan 25 22:03:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0220 error: Incorrect padding
+Jan 25 22:03:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0250 error: Incorrect padding
+Jan 25 22:03:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0280 error: Incorrect padding
+Jan 25 22:03:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0300 error: Incorrect padding
+Jan 25 22:03:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📊 Placing BUY ladder for NO token...
+Jan 25 22:03:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Token ID: 46616587919070794237206804146736189809461170611890050953577118787005553733765
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0100 error: Incorrect padding
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0120 error: Incorrect padding
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0140 error: Incorrect padding
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0160 error: Incorrect padding
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0180 error: Incorrect padding
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0200 error: Incorrect padding
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0220 error: Incorrect padding
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0250 error: Incorrect padding
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0280 error: Incorrect padding
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0300 error: Incorrect padding
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ❌ No orders placed (all orders failed)
+Jan 25 22:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ❌ Job #98172 failed - no orders placed
+Jan 25 22:03:07 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:07 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ⚡ Processing Job #98173: SS Juve Stabia vs. Calcio Padova: O/U 2.5...
+Jan 25 22:03:07 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 🔄 Job #98173 marked as RUNNING (age: 0.0h)
+Jan 25 22:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 🎯 Placing orders for: SS Juve Stabia vs. Calcio Padova: O/U 2.5...
+Jan 25 22:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Condition ID: 0x79167490d6ffe0d78b...
+Jan 25 22:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📋 Market: SS Juve Stabia vs. Calcio Padova: O/U 2.5
+Jan 25 22:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    YES Token: 2678176847398809...
+Jan 25 22:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    NO Token: 8007517760724366...
+Jan 25 22:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📊 Placing BUY ladder for YES token...
+Jan 25 22:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Token ID: 2678176847398809222872000089025186093545926116144096783206884733084324359788
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0100 error: Incorrect padding
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0120 error: Incorrect padding
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0140 error: Incorrect padding
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0160 error: Incorrect padding
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0180 error: Incorrect padding
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0200 error: Incorrect padding
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0220 error: Incorrect padding
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0250 error: Incorrect padding
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0280 error: Incorrect padding
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0300 error: Incorrect padding
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📊 Placing BUY ladder for NO token...
+Jan 25 22:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Token ID: 80075177607243669046460884851295059885775160231657768597765608167947052491153
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0100 error: Incorrect padding
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0120 error: Incorrect padding
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0140 error: Incorrect padding
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0160 error: Incorrect padding
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0180 error: Incorrect padding
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0200 error: Incorrect padding
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0220 error: Incorrect padding
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0250 error: Incorrect padding
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0280 error: Incorrect padding
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0300 error: Incorrect padding
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ❌ No orders placed (all orders failed)
+Jan 25 22:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ❌ Job #98173 failed - no orders placed
+Jan 25 22:03:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ⚡ Processing Job #98174: SS Juve Stabia vs. Calcio Padova: O/U 3.5...
+Jan 25 22:03:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 🔄 Job #98174 marked as RUNNING (age: 0.0h)
+Jan 25 22:03:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 🎯 Placing orders for: SS Juve Stabia vs. Calcio Padova: O/U 3.5...
+Jan 25 22:03:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Condition ID: 0x2aa652243905bb74d5...
+Jan 25 22:03:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📋 Market: SS Juve Stabia vs. Calcio Padova: O/U 3.5
+Jan 25 22:03:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    YES Token: 2791079955244452...
+Jan 25 22:03:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    NO Token: 6445609092279026...
+Jan 25 22:03:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📊 Placing BUY ladder for YES token...
+Jan 25 22:03:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Token ID: 27910799552444528913549741258662787478122886484902173180830834356863101925660
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0100 error: Incorrect padding
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0120 error: Incorrect padding
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0140 error: Incorrect padding
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0160 error: Incorrect padding
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0180 error: Incorrect padding
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0200 error: Incorrect padding
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0220 error: Incorrect padding
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0250 error: Incorrect padding
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0280 error: Incorrect padding
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0300 error: Incorrect padding
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📊 Placing BUY ladder for NO token...
+Jan 25 22:03:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Token ID: 64456090922790264194910789392133156612795015176846413878725908730448048705488
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0100 error: Incorrect padding
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0120 error: Incorrect padding
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0140 error: Incorrect padding
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0160 error: Incorrect padding
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0180 error: Incorrect padding
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0200 error: Incorrect padding
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0220 error: Incorrect padding
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0250 error: Incorrect padding
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0280 error: Incorrect padding
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0300 error: Incorrect padding
+Jan 25 22:03:20 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ❌ No orders placed (all orders failed)
+Jan 25 22:03:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ❌ Job #98174 failed - no orders placed
+Jan 25 22:03:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ⚡ Processing Job #98175: SS Juve Stabia vs. Calcio Padova: O/U 4.5...
+Jan 25 22:03:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 🔄 Job #98175 marked as RUNNING (age: 0.0h)
+Jan 25 22:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 🎯 Placing orders for: SS Juve Stabia vs. Calcio Padova: O/U 4.5...
+Jan 25 22:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Condition ID: 0xd8001e8d092a183684...
+Jan 25 22:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📋 Market: SS Juve Stabia vs. Calcio Padova: O/U 4.5
+Jan 25 22:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    YES Token: 1583312729227076...
+Jan 25 22:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    NO Token: 9483087000701632...
+Jan 25 22:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📊 Placing BUY ladder for YES token...
+Jan 25 22:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Token ID: 15833127292270769923015235647407214130712327237903419198018061657635685957282
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0100 error: Incorrect padding
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0120 error: Incorrect padding
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0140 error: Incorrect padding
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0160 error: Incorrect padding
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0180 error: Incorrect padding
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0200 error: Incorrect padding
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0220 error: Incorrect padding
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0250 error: Incorrect padding
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0280 error: Incorrect padding
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0300 error: Incorrect padding
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📊 Placing BUY ladder for NO token...
+Jan 25 22:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Token ID: 94830870007016328785376740318635603723032716711883730913461105421708017546142
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0100 error: Incorrect padding
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0120 error: Incorrect padding
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0140 error: Incorrect padding
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0160 error: Incorrect padding
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0180 error: Incorrect padding
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0200 error: Incorrect padding
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0220 error: Incorrect padding
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0250 error: Incorrect padding
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0280 error: Incorrect padding
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0300 error: Incorrect padding
+Jan 25 22:03:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ❌ No orders placed (all orders failed)
+Jan 25 22:03:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ❌ Job #98175 failed - no orders placed
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ⚡ Processing Job #98176: SS Juve Stabia vs. Calcio Padova: Both Teams to Sc...
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 🔄 Job #98176 marked as RUNNING (age: 0.0h)
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 🎯 Placing orders for: SS Juve Stabia vs. Calcio Padova: Both Teams to Sc...
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Condition ID: 0x494cb9b7cbbc80a922...
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ============================================================
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📋 Market: SS Juve Stabia vs. Calcio Padova: Both Teams to Score
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    YES Token: 1667230608214508...
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    NO Token: 7572202690325673...
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📊 Placing BUY ladder for YES token...
+Jan 25 22:03:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Token ID: 1667230608214508545135254832530269611288905143923400169880611381038817218740
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0100 error: Incorrect padding
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0120 error: Incorrect padding
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0140 error: Incorrect padding
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0160 error: Incorrect padding
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0180 error: Incorrect padding
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0200 error: Incorrect padding
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0220 error: Incorrect padding
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0250 error: Incorrect padding
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0280 error: Incorrect padding
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0300 error: Incorrect padding
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 📊 Placing BUY ladder for NO token...
+Jan 25 22:03:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    Token ID: 75722026903256734708568664669991164028090547468958022238736388969505159072386
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0100 error: Incorrect padding
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0120 error: Incorrect padding
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0140 error: Incorrect padding
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0160 error: Incorrect padding
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0180 error: Incorrect padding
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0200 error: Incorrect padding
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0220 error: Incorrect padding
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0250 error: Incorrect padding
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0280 error: Incorrect padding
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]:    ❌ Buy @ $0.0300 error: Incorrect padding
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ❌ No orders placed (all orders failed)
+Jan 25 22:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ❌ Job #98176 failed - no orders placed
+Jan 25 22:03:38 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: 💤 Waiting 30s before next poll...
+Jan 25 22:04:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[1897967]: ✅ Found 5 pending job(s)

@@ -19,35 +19,29 @@ from market_utils import get_market_info, get_market_info_from_job
 from database import save_order, update_order_status, update_market_summary, get_open_sell_orders
 from telegram_notifier import notify_sell_executed
 
-# Cloudflare bypass with curl_cffi
-try:
-    from curl_cffi import requests as curl_requests
-    BYPASS_METHOD = "curl_cffi"
-    print("🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)")
-except ImportError:
-    import requests as curl_requests
-    BYPASS_METHOD = "standard"
-    print("⚠️  curl_cffi not available, using standard requests (may be blocked by Cloudflare)")
 
 
 class PolymarketTrader:
     def __init__(self):
         """Initialize the trading bot with Polymarket CLOB client"""
         print("🤖 Initializing Polymarket Trading Bot...")
-        print(f"   Bypass method: {BYPASS_METHOD}")
+        
+        # Log proxy status
+        http_proxy = os.getenv("HTTP_PROXY") or os.getenv("HTTPS_PROXY")
+        if http_proxy:
+            proxy_display = http_proxy.split('@')[1] if '@' in http_proxy else http_proxy
+            print(f"   🌐 Using proxy: {proxy_display}")
+        else:
+            print("   ⚠️  No HTTP_PROXY/HTTPS_PROXY set - may be blocked by Cloudflare")
         
         # Initialize CLOB client
         self.client = ClobClient(
             config.CLOB_HOST,
             key=config.PRIVATE_KEY,
             chain_id=config.CHAIN_ID,
-            signature_type=1,  # Email/Magic wallet
+            signature_type=2,  # MetaMask proxy wallet
             funder=config.PROXY_ADDRESS
         )
-        
-        # Patch the client's HTTP session to use curl_cffi for Cloudflare bypass
-        if BYPASS_METHOD == "curl_cffi":
-            self._patch_client_session()
         
         # Use explicit API credentials if provided, otherwise try to derive
         pm_api_key = os.getenv("POLYMARKET_API_KEY", "")
@@ -82,130 +76,6 @@ class PolymarketTrader:
         self.active_positions = {}  # {order_id: order_details}
         
         print("✅ Trading bot initialized!")
-    
-    def _patch_client_session(self):
-        """Patch py-clob-client to use curl_cffi for Cloudflare bypass"""
-        import py_clob_client.http_helpers.helpers as http_helpers
-        
-        # Enhanced headers to look like real browser
-        def get_browser_headers(original_headers: dict = None) -> dict:
-            """Merge original headers with browser-like headers"""
-            browser_headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'application/json, text/plain, */*',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Referer': 'https://polymarket.com/',
-                'Origin': 'https://polymarket.com',
-                'Sec-Fetch-Dest': 'empty',
-                'Sec-Fetch-Mode': 'cors',
-                'Sec-Fetch-Site': 'same-site',
-                'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-                'Sec-Ch-Ua-Mobile': '?0',
-                'Sec-Ch-Ua-Platform': '"Windows"',
-            }
-            
-            # Merge with original headers (original takes precedence)
-            if original_headers:
-                browser_headers.update(original_headers)
-            
-            return browser_headers
-        
-        # Proxy configuration (if available)
-        proxy_config = None
-        if config.PROXY_URL:
-            proxy_config = {"http": config.PROXY_URL, "https": config.PROXY_URL}
-            print(f"   🌐 Using proxy: {config.PROXY_URL.split('@')[1] if '@' in config.PROXY_URL else config.PROXY_URL}")
-        
-        # Create wrapper functions using curl_cffi with chrome TLS fingerprint
-        def patched_get(endpoint: str, headers: dict = None, params: dict = None):
-            try:
-                response = curl_requests.get(
-                    endpoint,
-                    headers=get_browser_headers(headers),
-                    params=params,
-                    impersonate="chrome120",  # Latest Chrome fingerprint
-                    proxies=proxy_config,
-                    timeout=30,
-                    allow_redirects=True
-                )
-                
-                # Detect Cloudflare blocking
-                if response.status_code == 403 or "cloudflare" in response.text.lower():
-                    print(f"   🚫 CLOUDFLARE BLOCK: GET {endpoint}")
-                    print(f"   💡 This IP (Replit) is blocked. Run workers from residential IP.")
-                    print(f"   📄 See CLOUDFLARE_ISSUE.md for setup instructions.")
-                    raise Exception(f"Cloudflare blocked (403): {endpoint}")
-                
-                return response.json() if response.text else {}
-            except Exception as e:
-                if "Cloudflare" not in str(e):
-                    print(f"   ❌ GET {endpoint[:40]}... failed: {str(e)[:80]}")
-                raise
-        
-        def patched_post(endpoint: str, headers: dict = None, body: dict = None):
-            try:
-                response = curl_requests.post(
-                    endpoint,
-                    headers=get_browser_headers(headers),
-                    json=body,
-                    impersonate="chrome120",
-                    proxies=proxy_config,
-                    timeout=30,
-                    allow_redirects=True
-                )
-                
-                # Detect Cloudflare blocking
-                if response.status_code == 403 or "cloudflare" in response.text.lower():
-                    print(f"   🚫 CLOUDFLARE BLOCK: POST {endpoint}")
-                    print(f"   💡 This IP (Replit) is blocked. Run workers from residential IP.")
-                    print(f"   📄 See CLOUDFLARE_ISSUE.md for setup instructions.")
-                    raise Exception(f"Cloudflare blocked (403): {endpoint}")
-                
-                return response.json() if response.text else {}
-            except Exception as e:
-                if "Cloudflare" not in str(e):
-                    print(f"   ❌ POST {endpoint[:40]}... failed: {str(e)[:80]}")
-                raise
-        
-        def patched_delete(endpoint: str, headers: dict = None):
-            try:
-                response = curl_requests.delete(
-                    endpoint,
-                    headers=get_browser_headers(headers),
-                    impersonate="chrome120",
-                    proxies=proxy_config,
-                    timeout=30,
-                    allow_redirects=True
-                )
-                
-                # Detect Cloudflare blocking
-                if response.status_code == 403 or "cloudflare" in response.text.lower():
-                    print(f"   🚫 CLOUDFLARE BLOCK: DELETE {endpoint}")
-                    print(f"   💡 This IP (Replit) is blocked. Run workers from residential IP.")
-                    print(f"   📄 See CLOUDFLARE_ISSUE.md for setup instructions.")
-                    raise Exception(f"Cloudflare blocked (403): {endpoint}")
-                
-                return response.json() if response.text else {}
-            except Exception as e:
-                if "Cloudflare" not in str(e):
-                    print(f"   ❌ DELETE {endpoint[:40]}... failed: {str(e)[:80]}")
-                raise
-        
-        # Monkey-patch the http_helpers module
-        http_helpers.get = patched_get
-        http_helpers.post = patched_post
-        http_helpers.delete = patched_delete
-        
-        # CRITICAL: Also patch the direct imports in py_clob_client.client
-        # The client.py imports `from .http_helpers.helpers import post, get, delete`
-        # which creates local bindings that don't update when we patch http_helpers
-        import py_clob_client.client as clob_client_module
-        clob_client_module.get = patched_get
-        clob_client_module.post = patched_post
-        clob_client_module.delete = patched_delete
-        
-        print("   🔧 Patched HTTP client with curl_cffi (Chrome 120 TLS + browser headers)")
     
     def calculate_order_size(self, price: float) -> float:
         """

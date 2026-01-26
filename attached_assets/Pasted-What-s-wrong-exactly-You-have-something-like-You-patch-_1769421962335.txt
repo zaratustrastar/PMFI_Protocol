@@ -1,0 +1,84 @@
+What’s wrong (exactly)
+
+You have something like:
+
+You patch client_session.post with your own patched_post(...)
+
+Your patched_post signature is probably something like:
+
+def patched_post(url, json=None, headers=None, **kwargs): ...
+
+or it only expects (url, payload) etc.
+
+But the code that places orders calls:
+
+session.post(url, data=payload, ...) (or data= for form-encoded body)
+
+Because your patched function doesn’t include data (or **kwargs), Python raises unexpected keyword argument 'data'.
+
+That’s why every ladder level fails identically.
+
+The fix (2 good options)
+Option A (recommended): accept **kwargs and pass through
+
+Make your patched function accept all usual params and forward them:
+
+def patched_post(url, *args, **kwargs):
+    # kwargs may include: data, json, headers, params, timeout, etc.
+    # do your signing / header injection here
+    return original_post(url, *args, **kwargs)
+
+
+If you need to intercept body for signing, handle both cases:
+
+if kwargs.get("json") exists → JSON body
+
+elif kwargs.get("data") exists → raw body / form body
+
+Option B: stop using data= and use json= everywhere
+
+If the Polymarket CLOB endpoint expects JSON (very likely), then in your order placement call change:
+
+post(..., data=payload)
+to
+
+post(..., json=payload)
+
+But this only works if the endpoint + your signing logic are aligned with JSON payloads.
+
+Why this is happening now
+
+Common causes:
+
+You upgraded/downgraded requests, httpx, or whatever client you use, and the library started calling data=...
+
+You switched from one client (requests) to another (httpx/aiohttp) but kept an old patch
+
+Your patch was written for json= only and never handled data=
+
+Quick diagnostic (takes 20 seconds)
+
+Search your codebase for:
+
+_patch_client_session
+
+patched_post
+
+def patched_post(
+
+Then check if it has **kwargs. If not → that’s the bug.
+
+A “safe” patched_post template (won’t break params)
+
+If you want a robust patch that never explodes when the caller changes args:
+
+def patched_post(url, *args, **kwargs):
+    headers = kwargs.get("headers") or {}
+    # headers = add_auth_headers(headers, body_from(kwargs))
+    kwargs["headers"] = headers
+    return original_post(url, *args, **kwargs)
+
+
+This prevents exactly this kind of crash.
+
+If you paste the patched_post function (and what client you’re patching: requests.Session, httpx.Client, aiohttp.ClientSession, etc.), I’ll tell you the exact minimal change to make it work without breaking your signing.
