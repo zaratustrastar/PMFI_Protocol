@@ -105,7 +105,7 @@ POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL") or "https://polygon-rpc.com"  # F
 VAULT_V7_ADDRESS = os.getenv("VAULT_V7_ADDRESS") or os.getenv("VAULT_V6_ADDRESS") or ""
 USDC_ADDRESS = os.getenv("USDC_ADDRESS") or "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 USDC_E_POLYGON = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174"  # USDC.e on Polygon (6 decimals)
-POLYMARKET_BASE_DEPOSIT = "0xa76a91208FC7CB88420070AF978D12F440cab2F0"
+POLYMARKET_BASE_DEPOSIT = "0x2b20920A00D705043260eBFE6561bC96FBd84dBE"
 
 # Normalize private keys at startup (catches bad format immediately)
 _raw_oracle_key = os.getenv("ORACLE_PRIVATE_KEY") or os.getenv("KEEPER_PRIVATE_KEY") or os.getenv("PRIVATE_KEY") or ""
