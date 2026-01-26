@@ -66,8 +66,8 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     uint256 public constant MAX_DEPOSIT_DURING_LIMBO = 1000 * 1e6;  // $1000 max during limbo
     uint256 public constant CLAIM_SLIPPAGE_BPS = 50;  // 0.5% slippage tolerance for bridge fees
     
-    // Polymarket's official Base USDC deposit address
-    address public constant POLYMARKET_BASE_DEPOSIT = 0xa76a91208FC7CB88420070AF978D12F440cab2F0;
+    // Polymarket's official Base USDC deposit address (new wallet)
+    address public constant POLYMARKET_BASE_DEPOSIT = 0x2b20920A00D705043260eBFE6561bC96FBd84dBE;
 
     // ============================================
     // State Variables
