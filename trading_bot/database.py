@@ -231,7 +231,7 @@ def mark_order_accumulated(order_id: str) -> bool:
     
     # Atomic update - only succeeds if accumulated is currently FALSE
     cur.execute("""
-        UPDATE trading_positions 
+        UPDATE polymarket_orders 
         SET accumulated = TRUE, updated_at = CURRENT_TIMESTAMP
         WHERE order_id = %s AND (accumulated = FALSE OR accumulated IS NULL)
         RETURNING order_id
@@ -251,7 +251,7 @@ def is_order_accumulated(order_id: str) -> bool:
     cur = conn.cursor()
     
     cur.execute("""
-        SELECT accumulated FROM trading_positions WHERE order_id = %s
+        SELECT accumulated FROM polymarket_orders WHERE order_id = %s
     """, (order_id,))
     
     result = cur.fetchone()
