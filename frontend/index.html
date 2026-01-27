@@ -20,6 +20,157 @@
             min-height: 100vh;
         }
 
+        /* Invite Code Gate Overlay */
+        .invite-gate {
+            position: fixed;
+            inset: 0;
+            background: #0d1117;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .invite-gate.hidden {
+            display: none;
+        }
+
+        .invite-card {
+            background: linear-gradient(180deg, rgba(30,35,50,1) 0%, rgba(20,25,35,1) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .invite-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 24px;
+            box-shadow: 0 0 30px rgba(240, 246, 252, 0.2);
+        }
+
+        .invite-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .invite-subtitle {
+            color: #8b949e;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .invite-input-group {
+            margin-bottom: 16px;
+        }
+
+        .invite-input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 18px;
+            font-family: monospace;
+            text-align: center;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(0,0,0,0.3);
+            color: #f0f6fc;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .invite-input:focus {
+            border-color: #7ee787;
+        }
+
+        .invite-input::placeholder {
+            letter-spacing: 2px;
+            text-transform: none;
+            color: #484f58;
+        }
+
+        .invite-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 12px;
+        }
+
+        .invite-btn-primary {
+            background: #238636;
+            color: #fff;
+        }
+
+        .invite-btn-primary:hover:not(:disabled) {
+            background: #2ea043;
+        }
+
+        .invite-btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .invite-btn-secondary {
+            background: #21262d;
+            color: #f0f6fc;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .invite-btn-secondary:hover {
+            background: #30363d;
+        }
+
+        .invite-error {
+            color: #f85149;
+            font-size: 14px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .invite-error.show {
+            display: block;
+        }
+
+        .invite-success {
+            color: #7ee787;
+            font-size: 14px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .invite-success.show {
+            display: block;
+        }
+
+        .invite-step {
+            display: none;
+        }
+
+        .invite-step.active {
+            display: block;
+        }
+
+        .invite-wallet-info {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #d2a8ff;
+        }
+
         .header {
             display: flex;
             align-items: center;
@@ -834,6 +985,33 @@
             <button id="withdrawBtn" class="modal-btn">Withdraw</button>
             
             <div id="withdrawTxStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <!-- Invite Code Gate -->
+    <div id="inviteGate" class="invite-gate">
+        <div class="invite-card">
+            <img src="psniper-logo.png" alt="PMFI" class="invite-logo">
+            <h1 class="invite-title">PMFI Beta</h1>
+            <p class="invite-subtitle">Enter your invite code to access the platform</p>
+            
+            <!-- Step 1: Enter Code -->
+            <div id="inviteStep1" class="invite-step active">
+                <div class="invite-input-group">
+                    <input type="text" id="inviteCodeInput" class="invite-input" placeholder="Enter code" maxlength="8" autocomplete="off">
+                </div>
+                <button id="inviteConnectBtn" class="invite-btn invite-btn-primary">Connect Wallet</button>
+                <p class="invite-error" id="inviteError"></p>
+            </div>
+            
+            <!-- Step 2: Confirm Wallet -->
+            <div id="inviteStep2" class="invite-step">
+                <div class="invite-wallet-info" id="inviteWalletDisplay"></div>
+                <button id="inviteRedeemBtn" class="invite-btn invite-btn-primary">Redeem Code</button>
+                <button id="inviteBackBtn" class="invite-btn invite-btn-secondary">Use Different Wallet</button>
+                <p class="invite-error" id="inviteError2"></p>
+                <p class="invite-success" id="inviteSuccess"></p>
+            </div>
         </div>
     </div>
 

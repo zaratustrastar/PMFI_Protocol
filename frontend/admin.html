@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMFI Admin - Invite Codes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0d1117;
+            color: #f0f6fc;
+            min-height: 100vh;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 32px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: rgba(30,35,50,1);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .stat-label {
+            color: #8b949e;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .stat-card.active .stat-value { color: #7ee787; }
+        .stat-card.used .stat-value { color: #58a6ff; }
+        .stat-card.revoked .stat-value { color: #f85149; }
+        .stat-card.wallets .stat-value { color: #d2a8ff; }
+
+        .actions {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+        }
+
+        .btn-primary {
+            background: #238636;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+
+        .btn-secondary {
+            background: #21262d;
+            color: #f0f6fc;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-secondary:hover {
+            background: #30363d;
+        }
+
+        .generate-form {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: rgba(30,35,50,1);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .generate-form label {
+            font-size: 14px;
+            color: #8b949e;
+        }
+
+        .generate-form input {
+            width: 80px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #0d1117;
+            color: #f0f6fc;
+            font-size: 14px;
+        }
+
+        .generated-codes {
+            background: #161b22;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: monospace;
+            font-size: 14px;
+            display: none;
+        }
+
+        .generated-codes.show {
+            display: block;
+        }
+
+        .generated-codes .code {
+            display: inline-block;
+            background: #238636;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(30,35,50,1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        th {
+            background: rgba(0,0,0,0.2);
+            font-weight: 500;
+            color: #8b949e;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status.active {
+            background: rgba(126, 231, 135, 0.15);
+            color: #7ee787;
+        }
+
+        .status.used {
+            background: rgba(88, 166, 255, 0.15);
+            color: #58a6ff;
+        }
+
+        .status.revoked {
+            background: rgba(248, 81, 73, 0.15);
+            color: #f85149;
+        }
+
+        .btn-revoke {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: transparent;
+            color: #f85149;
+            border: 1px solid #f85149;
+        }
+
+        .btn-revoke:hover {
+            background: #f85149;
+            color: #fff;
+        }
+
+        .btn-revoke:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .wallet-address {
+            font-family: monospace;
+            font-size: 12px;
+            color: #d2a8ff;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: #8b949e;
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+        }
+
+        .copy-btn:hover {
+            color: #f0f6fc;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .generate-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PMFI Admin Panel</h1>
+        <p class="subtitle">Manage invite codes for beta access</p>
+
+        <div class="generate-form" id="authSection">
+            <label>Admin Token:</label>
+            <input type="password" id="adminToken" style="width:200px" placeholder="Enter admin token">
+            <button class="btn btn-primary" onclick="authenticate()">Authenticate</button>
+            <span id="authStatus" style="color:#f85149"></span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card active">
+                <div class="stat-value" id="activeCount">-</div>
+                <div class="stat-label">Active Codes</div>
+            </div>
+            <div class="stat-card used">
+                <div class="stat-value" id="usedCount">-</div>
+                <div class="stat-label">Used Codes</div>
+            </div>
+            <div class="stat-card revoked">
+                <div class="stat-value" id="revokedCount">-</div>
+                <div class="stat-label">Revoked</div>
+            </div>
+            <div class="stat-card wallets">
+                <div class="stat-value" id="walletsCount">-</div>
+                <div class="stat-label">Whitelisted Wallets</div>
+            </div>
+        </div>
+
+        <div class="generate-form">
+            <label>Generate new codes:</label>
+            <input type="number" id="codeCount" value="1" min="1" max="100">
+            <button class="btn btn-primary" onclick="generateCodes()">Generate</button>
+            <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+            <button class="btn btn-secondary" onclick="loadCodes()">Refresh</button>
+        </div>
+
+        <div class="generated-codes" id="generatedCodes"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Redeemed By</th>
+                    <th>Redeemed At</th>
+                    <th>Note</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="codesTable">
+                <tr><td colspan="7" style="text-align:center;color:#8b949e">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let adminToken = localStorage.getItem('pmfi_admin_token') || '';
+
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${adminToken}`
+            };
+        }
+
+        async function authenticate() {
+            adminToken = document.getElementById('adminToken').value.trim();
+            if (!adminToken) {
+                document.getElementById('authStatus').textContent = 'Token required';
+                return;
+            }
+            localStorage.setItem('pmfi_admin_token', adminToken);
+            document.getElementById('authStatus').textContent = '';
+            loadStats();
+            loadCodes();
+        }
+
+        // Auto-load if token cached
+        if (adminToken) {
+            document.getElementById('adminToken').value = adminToken;
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/admin/stats', { headers: getAuthHeaders() });
+                if (res.status === 401) {
+                    document.getElementById('authStatus').textContent = 'Invalid token';
+                    return;
+                }
+                const data = await res.json();
+                document.getElementById('activeCount').textContent = data.active_codes || 0;
+                document.getElementById('usedCount').textContent = data.used_codes || 0;
+                document.getElementById('revokedCount').textContent = data.revoked_codes || 0;
+                document.getElementById('walletsCount').textContent = data.whitelisted_wallets || 0;
+            } catch (err) {
+                console.error('Failed to load stats:', err);
+            }
+        }
+
+        async function loadCodes() {
+            try {
+                const res = await fetch('/api/admin/codes', { headers: getAuthHeaders() });
+                const data = await res.json();
+                const tbody = document.getElementById('codesTable');
+                
+                if (!data.codes || data.codes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#8b949e">No codes yet</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.codes.map(code => `
+                    <tr>
+                        <td>#${code.id}</td>
+                        <td><span class="status ${code.status}">${code.status}</span></td>
+                        <td>${new Date(code.created_at).toLocaleDateString()}</td>
+                        <td>${code.redeemed_by ? `<span class="wallet-address">${code.redeemed_by.slice(0,6)}...${code.redeemed_by.slice(-4)}</span>` : '-'}</td>
+                        <td>${code.redeemed_at ? new Date(code.redeemed_at).toLocaleDateString() : '-'}</td>
+                        <td>${code.note || '-'}</td>
+                        <td>
+                            <button class="btn btn-revoke" onclick="revokeCode(${code.id})" ${code.status !== 'active' ? 'disabled' : ''}>
+                                Revoke
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load codes:', err);
+            }
+        }
+
+        async function generateCodes() {
+            const count = parseInt(document.getElementById('codeCount').value) || 1;
+            
+            try {
+                const res = await fetch('/api/admin/codes/generate', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ count })
+                });
+                
+                const data = await res.json();
+                
+                if (data.codes && data.codes.length > 0) {
+                    const container = document.getElementById('generatedCodes');
+                    container.innerHTML = '<strong>Generated codes (copy these now!):</strong><br>' + 
+                        data.codes.map(c => `<span class="code">${c}</span>`).join('');
+                    container.classList.add('show');
+                    
+                    loadStats();
+                    loadCodes();
+                }
+            } catch (err) {
+                console.error('Failed to generate codes:', err);
+                alert('Failed to generate codes');
+            }
+        }
+
+        async function revokeCode(id) {
+            if (!confirm('Are you sure you want to revoke this code?')) return;
+            
+            try {
+                const res = await fetch('/api/admin/codes/revoke', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ id })
+                });
+                
+                if (res.ok) {
+                    loadStats();
+                    loadCodes();
+                } else {
+                    alert('Failed to revoke code');
+                }
+            } catch (err) {
+                console.error('Failed to revoke code:', err);
+            }
+        }
+
+        async function exportCSV() {
+            try {
+                const res = await fetch('/api/admin/codes/export', { headers: getAuthHeaders() });
+                if (res.status === 401) {
+                    alert('Authentication required');
+                    return;
+                }
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'invite_codes.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('Export failed:', err);
+            }
+        }
+
+        // Initial load
+        loadStats();
+        loadCodes();
+    </script>
+</body>
+</html>

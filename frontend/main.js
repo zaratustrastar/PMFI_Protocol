@@ -50,6 +50,183 @@ async function loadABIs() {
 }
 
 // =============================================================================
+// INVITE GATE
+// =============================================================================
+
+const INVITE_STORAGE_KEY = 'pmfi_access';
+
+// Check if wallet has beta access
+async function checkBetaAccess(walletAddress) {
+    try {
+        const res = await fetch(`/api/invite/check/${walletAddress}`);
+        const data = await res.json();
+        return data.hasAccess === true;
+    } catch (err) {
+        console.error('Failed to check beta access:', err);
+        return false;
+    }
+}
+
+// Redeem invite code
+async function redeemInviteCode(code, walletAddress) {
+    try {
+        const res = await fetch('/api/invite/redeem', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, walletAddress })
+        });
+        return await res.json();
+    } catch (err) {
+        console.error('Failed to redeem code:', err);
+        return { error: 'Network error. Please try again.' };
+    }
+}
+
+// Initialize invite gate
+function initInviteGate() {
+    const gate = document.getElementById('inviteGate');
+    const step1 = document.getElementById('inviteStep1');
+    const step2 = document.getElementById('inviteStep2');
+    const codeInput = document.getElementById('inviteCodeInput');
+    const connectBtn = document.getElementById('inviteConnectBtn');
+    const redeemBtn = document.getElementById('inviteRedeemBtn');
+    const backBtn = document.getElementById('inviteBackBtn');
+    const walletDisplay = document.getElementById('inviteWalletDisplay');
+    const error1 = document.getElementById('inviteError');
+    const error2 = document.getElementById('inviteError2');
+    const success = document.getElementById('inviteSuccess');
+
+    let gateWalletAddress = null;
+    let gateCode = null;
+
+    // Check cached access
+    const cachedAccess = localStorage.getItem(INVITE_STORAGE_KEY);
+    if (cachedAccess) {
+        try {
+            const parsed = JSON.parse(cachedAccess);
+            if (parsed.wallet && parsed.expires > Date.now()) {
+                // Cached access valid, hide gate
+                gate.classList.add('hidden');
+                return;
+            }
+        } catch (e) {}
+    }
+
+    // Auto-uppercase code input
+    codeInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase();
+    });
+
+    // Connect wallet button (Step 1)
+    connectBtn.addEventListener('click', async () => {
+        gateCode = codeInput.value.trim();
+        
+        if (!gateCode || gateCode.length < 6) {
+            error1.textContent = 'Please enter a valid invite code';
+            error1.classList.add('show');
+            return;
+        }
+        
+        error1.classList.remove('show');
+        connectBtn.disabled = true;
+        connectBtn.textContent = 'Connecting...';
+
+        try {
+            if (typeof window.ethereum === 'undefined') {
+                error1.textContent = 'Please install MetaMask or another wallet';
+                error1.classList.add('show');
+                return;
+            }
+
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            gateWalletAddress = accounts[0];
+
+            // Check if already has access
+            const hasAccess = await checkBetaAccess(gateWalletAddress);
+            if (hasAccess) {
+                // Grant access immediately
+                localStorage.setItem(INVITE_STORAGE_KEY, JSON.stringify({
+                    wallet: gateWalletAddress,
+                    expires: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+                }));
+                gate.classList.add('hidden');
+                // Trigger main app connection
+                if (typeof connectWallet === 'function') {
+                    connectWallet();
+                }
+                return;
+            }
+
+            // Show step 2
+            walletDisplay.textContent = `${gateWalletAddress.slice(0, 6)}...${gateWalletAddress.slice(-4)}`;
+            step1.classList.remove('active');
+            step2.classList.add('active');
+
+        } catch (err) {
+            console.error('Wallet connection failed:', err);
+            error1.textContent = 'Wallet connection failed. Please try again.';
+            error1.classList.add('show');
+        } finally {
+            connectBtn.disabled = false;
+            connectBtn.textContent = 'Connect Wallet';
+        }
+    });
+
+    // Redeem button (Step 2)
+    redeemBtn.addEventListener('click', async () => {
+        error2.classList.remove('show');
+        success.classList.remove('show');
+        redeemBtn.disabled = true;
+        redeemBtn.textContent = 'Redeeming...';
+
+        try {
+            const result = await redeemInviteCode(gateCode, gateWalletAddress);
+
+            if (result.error) {
+                error2.textContent = result.error;
+                error2.classList.add('show');
+            } else if (result.success) {
+                success.textContent = result.message || 'Access granted!';
+                success.classList.add('show');
+
+                // Cache access
+                localStorage.setItem(INVITE_STORAGE_KEY, JSON.stringify({
+                    wallet: gateWalletAddress,
+                    expires: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+                }));
+
+                // Hide gate after short delay
+                setTimeout(() => {
+                    gate.classList.add('hidden');
+                    // Trigger main app connection
+                    if (typeof connectWallet === 'function') {
+                        connectWallet();
+                    }
+                }, 1500);
+            }
+        } catch (err) {
+            error2.textContent = 'Failed to redeem code. Please try again.';
+            error2.classList.add('show');
+        } finally {
+            redeemBtn.disabled = false;
+            redeemBtn.textContent = 'Redeem Code';
+        }
+    });
+
+    // Back button
+    backBtn.addEventListener('click', () => {
+        step2.classList.remove('active');
+        step1.classList.add('active');
+        error2.classList.remove('show');
+        success.classList.remove('show');
+        gateWalletAddress = null;
+    });
+}
+
+// Initialize gate on load
+document.addEventListener('DOMContentLoaded', initInviteGate);
+
+// =============================================================================
 // STATE
 // =============================================================================
 
