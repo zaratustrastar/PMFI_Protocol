@@ -1,0 +1,187 @@
+[2] 1973155
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# tail -f /tmp/order_monitor.log
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0280
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0xb88205 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+)
+   Order: BUY YES @ $0.0120
+   Market: 0x87b027c1e882c713bfeca9c3cb06d3a2ef75bc2451b1c0f7175d451919a32418
+   ✅ Order 0xb4367b already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0100
+   Market: 0x87b027c1e882c713bfeca9c3cb06d3a2ef75bc2451b1c0f7175d451919a32418
+   ✅ Order 0xaeed79 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0220
+   Market: 0x84db7351687daef75cdefc599285df0c62a4fa29fe9ed55c618241b7acb28cca
+   ✅ Order 0x6ba625 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0200
+   Market: 0x84db7351687daef75cdefc599285df0c62a4fa29fe9ed55c618241b7acb28cca
+   ✅ Order 0x17bab1 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0180
+   Market: 0x84db7351687daef75cdefc599285df0c62a4fa29fe9ed55c618241b7acb28cca
+   ✅ Order 0xbe7cbe already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0160
+   Market: 0x84db7351687daef75cdefc599285df0c62a4fa29fe9ed55c618241b7acb28cca
+   ✅ Order 0x445c80 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0140
+   Market: 0x84db7351687daef75cdefc599285df0c62a4fa29fe9ed55c618241b7acb28cca
+   ✅ Order 0xe7c374 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0120
+   Market: 0x84db7351687daef75cdefc599285df0c62a4fa29fe9ed55c618241b7acb28cca
+   ✅ Order 0x653ff4 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0100
+   Market: 0x84db7351687daef75cdefc599285df0c62a4fa29fe9ed55c618241b7acb28cca
+   ✅ Order 0x9e8a20 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0220
+   Market: 0xa70f2cef4ee2ea911e3b4fd50953f9ec36c9bb7cb01623d42d21ccdf6891438b
+   ✅ Order 0xcceb42 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0200
+   Market: 0xa70f2cef4ee2ea911e3b4fd50953f9ec36c9bb7cb01623d42d21ccdf6891438b
+   ✅ Order 0xd14a39 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0180
+   Market: 0xa70f2cef4ee2ea911e3b4fd50953f9ec36c9bb7cb01623d42d21ccdf6891438b
+   ✅ Order 0xacd476 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0160
+   Market: 0xa70f2cef4ee2ea911e3b4fd50953f9ec36c9bb7cb01623d42d21ccdf6891438b
+   ✅ Order 0xcb08b9 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0140
+   Market: 0xa70f2cef4ee2ea911e3b4fd50953f9ec36c9bb7cb01623d42d21ccdf6891438b
+   ✅ Order 0xe65c79 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0120
+   Market: 0xa70f2cef4ee2ea911e3b4fd50953f9ec36c9bb7cb01623d42d21ccdf6891438b
+   ✅ Order 0x53890d already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0100
+   Market: 0xa70f2cef4ee2ea911e3b4fd50953f9ec36c9bb7cb01623d42d21ccdf6891438b
+   ✅ Order 0xe25438 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY NO @ $0.0120
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0x518294 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY NO @ $0.0100
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0x060639 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0300
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0xbe481c already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0280
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0xb88205 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0250
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0x1e1595 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0220
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0xc03119 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0200
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0xad59fd already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0180
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0xb53f39 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0160
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0xb7d90c already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0140
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0x178505 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0120
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0xea3bb8 already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY YES @ $0.0100
+   Market: 0x518e7b28bf5f6da9cb4a5f2c43f45da81baf9d0b34588d7a723709a1639a4d57
+   ✅ Order 0x8f7f9f already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY NO @ $0.0280
+   Market: 0xf1f4378b902d0863d0df7142b5f326c98dd49f0201d859b607c41fc38653b892
+   ✅ Order 0xefb85f already gone (order can't be found - already canceled or matched)
+   ✅ Order cancelled and marked in database
+
+⏰ Cancelling stale order (age: 23.5h)
+   Order: BUY NO @ $0.0250

@@ -1,0 +1,40 @@
+total 824
+drwxr-xr-x  4 root root   4096 Jan 25 17:49 .
+drwxr-xr-x 14 root root   4096 Jan 25 22:25 ..
+lrwxrwxrwx  1 root root      7 Nov 27 11:31 .env -> ../.env
+-rw-r--r--  1 root root   4928 Nov 20 18:09 CLOUDFLARE_ISSUE.md
+-rw-r--r--  1 root root   4054 Nov 20 18:09 COMPLETE.md
+-rw-r--r--  1 root root   4385 Nov 20 18:09 DEPLOYMENT.md
+-rw-r--r--  1 root root   5309 Nov 20 18:09 EASY_SETUP.md
+-rw-r--r--  1 root root   2358 Nov 20 18:09 QUICK_START.md
+-rw-r--r--  1 root root   4872 Nov 20 18:09 README.md
+drwxr-xr-x  2 root root   4096 Jan 27 11:33 __pycache__
+-rw-r--r--  1 root root   2007 Nov 20 18:09 add_market_dates.py
+-rw-r--r--  1 root root     22 Dec 16 14:27 auto_trader.log
+-rw-r--r--  1 root root   8089 Nov 28 15:16 auto_trader.py
+-rw-r--r--  1 root root   2942 Nov 20 18:09 cleanup_stale_jobs.py
+-rw-r--r--  1 root root   1359 Nov 29 02:42 config.py
+-rw-r--r--  1 root root  13067 Nov 20 23:39 cript
+-rw-r--r--  1 root root  17116 Jan 27 11:33 database.py
+-rw-r--r--  1 root root  12145 Nov 27 14:49 deploy_multi_market.py
+-rwxr-xr-x  1 root root    891 Nov 20 18:09 export_env.sh
+-rw-r--r--  1 root root  17896 Nov 29 13:31 market_monitor.py
+-rw-r--r--  1 root root  15197 Nov 27 15:51 market_monitor.py.backup
+-rw-r--r--  1 root root  15526 Nov 28 00:03 market_monitor.py.backup2
+-rw-r--r--  1 root root   4939 Nov 27 14:49 market_utils.py
+-rw-r--r--  1 root root 480824 Dec 18 11:30 order_monitor.log
+-rw-r--r--  1 root root   8392 Jan  5 11:10 order_monitor.py
+-rw-r--r--  1 root root   6802 Nov 28 00:03 order_monitor.py.backup
+-rw-r--r--  1 root root   6802 Nov 27 11:00 order_monitor.py.bak
+-rw-r--r--  1 root root  33983 Jan 26 10:20 polymarket_trader.py
+-rw-r--r--  1 root root  27761 Nov 27 11:51 polymarket_trader.py.backup
+-rw-r--r--  1 root root  27761 Nov 27 11:00 polymarket_trader.py.bak
+-rw-r--r--  1 root root    315 Nov 20 18:09 requirements.txt
+-rwxr-xr-x  1 root root   1074 Nov 20 18:09 run_trader.py
+-rwxr-xr-x  1 root root    181 Nov 20 18:09 start_monitor.sh
+-rwxr-xr-x  1 root root    197 Nov 20 18:09 start_worker.sh
+-rw-r--r--  1 root root   6518 Nov 28 00:12 telegram_notifier.py
+-rw-r--r--  1 root root   4918 Nov 27 11:00 telegram_notifier.py.bak
+-rwxr-xr-x  1 root root   3459 Nov 20 18:09 test_system.py
+drwxr-xr-x  5 root root   4096 Nov 20 18:12 venv
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# 
