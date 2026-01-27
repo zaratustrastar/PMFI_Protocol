@@ -78,6 +78,12 @@ def init_database():
     except Exception:
         pass
     
+    # Migration: add accumulated_amount column for tracking partial fills
+    try:
+        cur.execute("ALTER TABLE trading_positions ADD COLUMN IF NOT EXISTS accumulated_amount DECIMAL(18, 6) DEFAULT 0")
+    except Exception:
+        pass
+    
     # Trading summary table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS trading_summary (
@@ -261,6 +267,60 @@ def is_order_accumulated(order_id: str) -> bool:
     if result:
         return result[0] == True
     return False
+
+
+def get_order_accumulated_amount(order_id: str) -> float:
+    """Get the amount already accumulated from this order (for partial fills)"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+        SELECT COALESCE(accumulated_amount, 0) FROM trading_positions WHERE order_id = %s
+    """, (order_id,))
+    
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    return float(result[0]) if result else 0.0
+
+
+def update_order_accumulated_amount(order_id: str, new_amount: float, is_fully_filled: bool = False) -> bool:
+    """
+    Update the accumulated amount for an order (for tracking partial fills).
+    
+    Args:
+        order_id: The order ID
+        new_amount: The new total accumulated amount
+        is_fully_filled: If True, also marks the order as fully accumulated
+        
+    Returns:
+        True if update succeeded
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    if is_fully_filled:
+        cur.execute("""
+            UPDATE trading_positions 
+            SET accumulated_amount = %s, accumulated = TRUE, updated_at = CURRENT_TIMESTAMP
+            WHERE order_id = %s
+            RETURNING order_id
+        """, (new_amount, order_id))
+    else:
+        cur.execute("""
+            UPDATE trading_positions 
+            SET accumulated_amount = %s, updated_at = CURRENT_TIMESTAMP
+            WHERE order_id = %s
+            RETURNING order_id
+        """, (new_amount, order_id))
+    
+    result = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return result is not None
 
 
 def update_market_summary(market_slug: str):

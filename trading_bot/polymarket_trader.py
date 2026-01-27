@@ -351,17 +351,21 @@ class PolymarketTrader:
         
         return placed_orders
     
-    def check_order_fills(self, orders: List[Dict]) -> List[Dict]:
+    def check_order_fills(self, orders: List[Dict]) -> tuple[List[Dict], List[Dict]]:
         """
-        Check which orders have been filled
+        Check which orders have been filled (fully or partially)
         
         Args:
             orders: List of order dictionaries (must include token_id from database)
             
         Returns:
-            List of filled orders with actual filled size, price, AND original token_id preserved
+            Tuple of (fully_filled_orders, partial_fill_orders)
+            Each contains actual filled size, price, AND original token_id preserved
         """
+        from database import get_order_accumulated_amount
+        
         filled_orders = []
+        partial_orders = []
         
         for order in orders:
             order_id = order["order_id"]
@@ -383,41 +387,64 @@ class PolymarketTrader:
                 
                 status = order_status.get("status", "").upper()
                 
-                # Handle both full and partial fills
+                # Handle full fills
                 if status in ["FILLED", "MATCHED"]:
-                    # Get actual filled quantity and average price
                     filled_size = float(order_status.get("size_matched", order["size"]))
                     avg_price = float(order_status.get("avg_price", order["price"]))
                     
-                    print(f"   🎯 Order filled: {order['order_type']} {order['side']} @ ${avg_price:.4f} ({filled_size:.2f} tokens)")
-                    print(f"      Token ID: {original_token_id[:16]}...")
+                    # Check how much we've already accumulated from this order
+                    already_accumulated = get_order_accumulated_amount(order_id)
+                    new_fill_amount = filled_size - already_accumulated
                     
-                    # Build filled order with ALL required fields preserved
-                    filled_order = {
-                        **order,  # Keep all original fields including token_id
-                        "status": "FILLED",
-                        "filled_size": filled_size,
-                        "filled_price": avg_price,
-                        "token_id": original_token_id  # Explicitly ensure token_id is present
-                    }
-                    filled_orders.append(filled_order)
+                    if new_fill_amount > 0.01:  # Only if meaningful new fill
+                        print(f"   🎯 Order FULLY filled: {order['order_type']} {order['side']} @ ${avg_price:.4f} ({filled_size:.2f} tokens)")
+                        print(f"      Token ID: {original_token_id[:16]}...")
+                        print(f"      Already accumulated: {already_accumulated:.2f}, New to add: {new_fill_amount:.2f}")
+                        
+                        filled_order = {
+                            **order,
+                            "status": "FILLED",
+                            "filled_size": filled_size,
+                            "new_fill_amount": new_fill_amount,
+                            "filled_price": avg_price,
+                            "token_id": original_token_id,
+                            "is_fully_filled": True
+                        }
+                        filled_orders.append(filled_order)
                     
                 elif status == "PARTIAL":
-                    # Partial fill - track but don't trigger sell yet
                     filled_size = float(order_status.get("size_matched", 0))
-                    print(f"   ⏳ Partial fill: {order['order_type']} {order['side']} ({filled_size:.2f}/{order['size']:.2f})")
+                    avg_price = float(order_status.get("avg_price", order["price"]))
+                    
+                    # Check how much we've already accumulated from this order
+                    already_accumulated = get_order_accumulated_amount(order_id)
+                    new_fill_amount = filled_size - already_accumulated
+                    
+                    if new_fill_amount > 0.01:  # Only if meaningful new fill
+                        print(f"   ⏳ PARTIAL fill detected: {order['order_type']} {order['side']} @ ${avg_price:.4f}")
+                        print(f"      Total filled: {filled_size:.2f}/{order['size']:.2f}")
+                        print(f"      Already accumulated: {already_accumulated:.2f}, New to add: {new_fill_amount:.2f}")
+                        
+                        partial_order = {
+                            **order,
+                            "status": "PARTIAL",
+                            "filled_size": filled_size,
+                            "new_fill_amount": new_fill_amount,
+                            "filled_price": avg_price,
+                            "token_id": original_token_id,
+                            "is_fully_filled": False
+                        }
+                        partial_orders.append(partial_order)
                     
             except Exception as e:
                 error_str = str(e).lower()
-                # Only auto-cancel for explicit "not found" errors, NOT transient network errors
                 if "not found" in error_str or "does not exist" in error_str or "order_not_found" in error_str:
                     print(f"   ⚠️  Order {order_id[:8]} not found on exchange (cancelled or expired)")
                     update_order_status(order_id, "CANCELLED")
                 else:
-                    # Transient errors (network, timeout) - keep order OPEN for retry
                     print(f"   ⚠️  Error checking order {order_id[:8]}: {str(e)}")
         
-        return filled_orders
+        return filled_orders, partial_orders
     
     def check_sell_fills(self, orders: List[Dict]) -> List[Dict]:
         """

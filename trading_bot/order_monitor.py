@@ -19,7 +19,7 @@ from polymarket_trader import PolymarketTrader
 from database import (
     get_open_orders, update_order_status, update_market_summary,
     add_accumulated_fill, check_sell_threshold, mark_sell_placed,
-    mark_order_accumulated
+    mark_order_accumulated, update_order_accumulated_amount
 )
 from telegram_notifier import notify_buy_filled, notify_sell_executed, notify_sell_ladder_result
 
@@ -99,28 +99,37 @@ def monitor_all_orders(trader: PolymarketTrader):
     
     if open_buys:
         print(f"🔍 Checking {len(open_buys)} open buy orders...")
-        filled_buys = trader.check_order_fills(open_buys)
+        filled_buys, partial_buys = trader.check_order_fills(open_buys)
         
-        if filled_buys:
-            print(f"   ✅ {len(filled_buys)} buy order(s) filled!")
+        # Combine both lists for processing
+        all_fills = filled_buys + partial_buys
+        
+        if all_fills:
+            full_count = len(filled_buys)
+            partial_count = len(partial_buys)
+            print(f"   ✅ Found {full_count} fully filled + {partial_count} partial fills!")
             
-            for filled_buy in filled_buys:
-                order_id = filled_buy["order_id"]
-                market_slug = filled_buy["market_slug"]
-                filled_price = filled_buy.get('filled_price', filled_buy['price'])
-                filled_size = filled_buy.get('filled_size', filled_buy['size'])
-                token_id = filled_buy.get("token_id")
-                side = filled_buy["side"]
+            for fill in all_fills:
+                order_id = fill["order_id"]
+                market_slug = fill["market_slug"]
+                filled_price = fill.get('filled_price', fill['price'])
+                filled_size = fill.get('filled_size', fill['size'])
+                new_fill_amount = fill.get('new_fill_amount', filled_size)
+                token_id = fill.get("token_id")
+                side = fill["side"]
+                is_fully_filled = fill.get("is_fully_filled", True)
                 
-                print(f"\n🎉 Buy filled: {side} @ ${filled_price:.4f} ({filled_size:.2f} shares)")
+                fill_type = "FULL" if is_fully_filled else "PARTIAL"
+                print(f"\n🎉 {fill_type} fill: {side} @ ${filled_price:.4f} (new: {new_fill_amount:.2f} shares)")
                 
                 # Update buy order status with actual fill data
-                update_order_status(
-                    order_id,
-                    "FILLED",
-                    filled_size,
-                    filled_price
-                )
+                if is_fully_filled:
+                    update_order_status(
+                        order_id,
+                        "FILLED",
+                        filled_size,
+                        filled_price
+                    )
                 
                 # Validate token_id before accumulating
                 if not token_id:
@@ -128,14 +137,12 @@ def monitor_all_orders(trader: PolymarketTrader):
                     print(f"   ❌ Cannot accumulate fill: {error_msg}")
                     continue
                 
-                # Atomically mark this order as accumulated (prevents double-counting)
-                if not mark_order_accumulated(order_id):
-                    print(f"   ⏭️  Order {order_id[:8]} already accumulated - skipping")
-                    continue
+                # Add the NEW fill amount to accumulated fills (not the total)
+                print(f"   📊 Adding {new_fill_amount:.2f} shares to accumulated fills...")
+                add_accumulated_fill(market_slug, token_id, side, new_fill_amount, filled_price)
                 
-                # Add to accumulated fills for this token (only happens once per order)
-                print(f"   📊 Adding to accumulated fills...")
-                add_accumulated_fill(market_slug, token_id, side, filled_size, filled_price)
+                # Update the order's accumulated_amount to prevent double-counting
+                update_order_accumulated_amount(order_id, filled_size, is_fully_filled)
                 
                 # Check if we've reached the sell threshold
                 threshold_check = check_sell_threshold(market_slug, token_id, side, MIN_SHARES_FOR_SELL)
