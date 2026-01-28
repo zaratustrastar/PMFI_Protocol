@@ -1,0 +1,50 @@
+psql "$DATABASE_URL" -c "SELECT market_slug, side, order_type, status, size, price FROM trading_positions WHERE status='OPEN' ORDER BY created_at DESC LIMIT 20;" 
+
+# Filled orders
+psql "$DATABASE_URL" -c "SELECT market_slug, side, order_type, status, size, price, accumulated, accumulated_amount FROM trading_positions WHERE status='FILLED' ORDER BY created_at DESC LIMIT 10;"
+
+# Check accumulated_fills
+psql "$DATABASE_URL" -c "SELECT * FROM accumulated_fills;"
+                            market_slug                             | side | order_type | status |   size    |  price   
+--------------------------------------------------------------------+------+------------+--------+-----------+----------
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | NO   | BUY        | OPEN   | 10.000000 | 0.025000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | NO   | BUY        | OPEN   | 10.000000 | 0.022000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | NO   | BUY        | OPEN   | 10.000000 | 0.020000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | NO   | BUY        | OPEN   | 10.000000 | 0.018000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | NO   | BUY        | OPEN   | 10.000000 | 0.016000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | NO   | BUY        | OPEN   | 10.000000 | 0.014000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | NO   | BUY        | OPEN   | 10.000000 | 0.012000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | NO   | BUY        | OPEN   | 10.000000 | 0.010000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | YES  | BUY        | OPEN   | 10.000000 | 0.030000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | YES  | BUY        | OPEN   | 10.000000 | 0.028000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | YES  | BUY        | OPEN   | 10.000000 | 0.025000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | YES  | BUY        | OPEN   | 10.000000 | 0.022000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | YES  | BUY        | OPEN   | 10.000000 | 0.020000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | YES  | BUY        | OPEN   | 10.000000 | 0.018000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | YES  | BUY        | OPEN   | 10.000000 | 0.016000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | YES  | BUY        | OPEN   | 10.000000 | 0.014000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | YES  | BUY        | OPEN   | 10.000000 | 0.012000
+ 0x2aa0bc7fc2e6d0f6b1080c08400644b2257ee0add8366ce9a22e473715ae2141 | YES  | BUY        | OPEN   | 10.000000 | 0.010000
+ 0x17404fc8cb62b4ff9612a6fd0a93e5e3183aa732c887072e59698ba7b9b06240 | NO   | BUY        | OPEN   | 10.000000 | 0.030000
+ 0x17404fc8cb62b4ff9612a6fd0a93e5e3183aa732c887072e59698ba7b9b06240 | NO   | BUY        | OPEN   | 10.000000 | 0.028000
+(20 rows)
+
+                            market_slug                             | side | order_type | status |   size    |  price   | accumulated | accumulated_amount 
+--------------------------------------------------------------------+------+------------+--------+-----------+----------+-------------+--------------------
+ 0xd442e736fe8681c60d7b2bd06883b3181218ee9e06012a1344ddacefa4df1c38 | YES  | BUY        | FILLED | 10.000000 | 0.010000 | f           |           0.000000
+ 0x3add52e0887fd50aeaebbff31bec390ed0bda849bb8e2180252b9360f47ad98e | YES  | BUY        | FILLED | 10.000000 | 0.016000 | f           |           0.000000
+ 0x514247f611b7419cd694b4d441b93a64ce5c79d4c147da7188dc637dfafb35b4 | YES  | BUY        | FILLED | 10.000000 | 0.012000 | f           |           0.000000
+ 0x514247f611b7419cd694b4d441b93a64ce5c79d4c147da7188dc637dfafb35b4 | YES  | BUY        | FILLED | 10.000000 | 0.010000 | f           |           0.000000
+ 0xc107c575bd945ba3438a4436265d7d0c30d14315b15c611cc097095b891717bd | YES  | BUY        | FILLED | 10.000000 | 0.022000 | f           |           0.000000
+ 0xc107c575bd945ba3438a4436265d7d0c30d14315b15c611cc097095b891717bd | YES  | BUY        | FILLED | 10.000000 | 0.020000 | f           |           0.000000
+ 0x6510b51462f9f49e87c33fa15ac97c98b7fe379ff68ae40b6d87c12d5ba643f2 | NO   | BUY        | FILLED | 10.000000 | 0.030000 | f           |           0.000000
+ 0x6510b51462f9f49e87c33fa15ac97c98b7fe379ff68ae40b6d87c12d5ba643f2 | NO   | BUY        | FILLED | 10.000000 | 0.022000 | f           |           0.000000
+ 0x6510b51462f9f49e87c33fa15ac97c98b7fe379ff68ae40b6d87c12d5ba643f2 | NO   | BUY        | FILLED | 10.000000 | 0.020000 | f           |           0.000000
+ 0x5d4cad3a9e462b4e781339ae33c51608cbce5f2b832e7ed51a5042f9a444044f | NO   | BUY        | FILLED | 10.000000 | 0.030000 | f           |           0.000000
+(10 rows)
+
+ id | market_slug | token_id | side | total_shares | total_cost | avg_buy_price | sell_placed | created_at | updated_at 
+----+-------------+----------+------+--------------+------------+---------------+-------------+------------+------------
+(0 rows)
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# 

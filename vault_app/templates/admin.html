@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMFI Admin - Invite Codes</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e14;
+            color: #e8edf3;
+            min-height: 100vh;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 32px;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-section {
+            background: linear-gradient(180deg, #141a24 0%, #0d1218 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.4);
+            color: #e8edf3;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .btn {
+            padding: 14px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.06);
+            color: #e8edf3;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .btn-primary {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: rgba(34, 197, 94, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .section {
+            background: linear-gradient(180deg, #141a24 0%, #0d1218 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .codes-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .code-badge {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 16px;
+            padding: 12px 20px;
+            background: rgba(167, 139, 250, 0.15);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 8px;
+            color: #a78bfa;
+            cursor: pointer;
+        }
+
+        .code-badge:hover {
+            background: rgba(167, 139, 250, 0.25);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 13px;
+        }
+
+        th {
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            color: #22c55e;
+        }
+
+        .status-redeemed {
+            color: #6b7280;
+        }
+
+        .status-revoked {
+            color: #ef4444;
+        }
+
+        .wallet-addr {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            color: #a78bfa;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        .inline-form {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .inline-form .form-group {
+            margin-bottom: 0;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PMFI Admin Panel</h1>
+
+        <!-- Auth Section -->
+        <div id="authSection" class="auth-section">
+            <div class="form-group">
+                <label>Admin Token</label>
+                <input type="password" id="adminToken" placeholder="Enter admin token">
+            </div>
+            <button class="btn btn-primary" id="authBtn">Authenticate</button>
+            <p class="error-msg hidden" id="authError"></p>
+        </div>
+
+        <!-- Admin Content (hidden until authenticated) -->
+        <div id="adminContent" class="hidden">
+            <!-- Generate Codes -->
+            <div class="section">
+                <h2>Generate Invite Codes</h2>
+                <div class="inline-form">
+                    <div class="form-group">
+                        <label>Number of Codes</label>
+                        <input type="number" id="codeCount" value="1" min="1" max="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Note (optional)</label>
+                        <input type="text" id="codeNote" placeholder="e.g., Beta testers batch 1">
+                    </div>
+                    <button class="btn btn-primary" id="generateBtn">Generate</button>
+                </div>
+                <div id="generatedCodes" class="codes-list"></div>
+            </div>
+
+            <!-- Existing Codes -->
+            <div class="section">
+                <h2>Invite Codes</h2>
+                <button class="btn" id="refreshCodesBtn">Refresh</button>
+                <table id="codesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Redeemed By</th>
+                            <th>Note</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="codesBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Whitelisted Wallets -->
+            <div class="section">
+                <h2>Whitelisted Wallets</h2>
+                <button class="btn" id="refreshWalletsBtn">Refresh</button>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Wallet Address</th>
+                            <th>Whitelisted At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="walletsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = '';
+
+        const authSection = document.getElementById('authSection');
+        const adminContent = document.getElementById('adminContent');
+        const authBtn = document.getElementById('authBtn');
+        const authError = document.getElementById('authError');
+        const adminTokenInput = document.getElementById('adminToken');
+
+        // Auth
+        authBtn.addEventListener('click', async () => {
+            authToken = adminTokenInput.value.trim();
+            if (!authToken) return;
+
+            try {
+                const response = await fetch('/api/admin/codes', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    authSection.classList.add('hidden');
+                    adminContent.classList.remove('hidden');
+                    loadCodes();
+                    loadWallets();
+                } else {
+                    authError.textContent = 'Invalid token';
+                    authError.classList.remove('hidden');
+                }
+            } catch (e) {
+                authError.textContent = 'Connection error';
+                authError.classList.remove('hidden');
+            }
+        });
+
+        // Generate codes
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const count = parseInt(document.getElementById('codeCount').value) || 1;
+            const note = document.getElementById('codeNote').value.trim();
+
+            try {
+                const response = await fetch('/api/admin/codes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ count, note })
+                });
+
+                const data = await response.json();
+                const container = document.getElementById('generatedCodes');
+                container.innerHTML = '';
+
+                if (data.codes) {
+                    data.codes.forEach(code => {
+                        const badge = document.createElement('div');
+                        badge.className = 'code-badge';
+                        badge.textContent = code;
+                        badge.title = 'Click to copy';
+                        badge.onclick = () => {
+                            navigator.clipboard.writeText(code);
+                            badge.textContent = 'Copied!';
+                            setTimeout(() => badge.textContent = code, 1000);
+                        };
+                        container.appendChild(badge);
+                    });
+                }
+
+                loadCodes();
+            } catch (e) {
+                console.error('Failed to generate codes:', e);
+            }
+        });
+
+        // Load codes
+        async function loadCodes() {
+            try {
+                const response = await fetch('/api/admin/codes', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+                const tbody = document.getElementById('codesBody');
+                tbody.innerHTML = '';
+
+                if (data.codes) {
+                    data.codes.forEach(code => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${code.id}</td>
+                            <td class="status-${code.status}">${code.status}</td>
+                            <td>${code.created_at ? new Date(code.created_at).toLocaleDateString() : '-'}</td>
+                            <td class="wallet-addr">${code.redeemed_by || '-'}</td>
+                            <td>${code.note || '-'}</td>
+                            <td>${code.status === 'active' ? `<button class="btn btn-small" onclick="revokeCode(${code.id})">Revoke</button>` : ''}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load codes:', e);
+            }
+        }
+
+        // Revoke code
+        async function revokeCode(id) {
+            if (!confirm('Revoke this code?')) return;
+            
+            try {
+                await fetch(`/api/admin/codes/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                loadCodes();
+            } catch (e) {
+                console.error('Failed to revoke:', e);
+            }
+        }
+
+        // Load wallets
+        async function loadWallets() {
+            try {
+                const response = await fetch('/api/admin/wallets', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+                const tbody = document.getElementById('walletsBody');
+                tbody.innerHTML = '';
+
+                if (data.wallets) {
+                    data.wallets.forEach(w => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="wallet-addr">${w.wallet_address}</td>
+                            <td>${w.whitelisted_at ? new Date(w.whitelisted_at).toLocaleString() : '-'}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load wallets:', e);
+            }
+        }
+
+        document.getElementById('refreshCodesBtn').addEventListener('click', loadCodes);
+        document.getElementById('refreshWalletsBtn').addEventListener('click', loadWallets);
+
+        // Enter key to authenticate
+        adminTokenInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') authBtn.click();
+        });
+    </script>
+</body>
+</html>

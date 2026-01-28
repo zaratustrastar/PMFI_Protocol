@@ -1,0 +1,37 @@
+rror: Your local changes to the following files would be overwritten by merge:
+        artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.dbg.json
+        artifacts/@openzeppelin/contracts/interfaces/IERC1363.sol/IERC1363.dbg.json
+        artifacts/@openzeppelin/contracts/interfaces/IERC4626.sol/IERC4626.dbg.json
+        artifacts/@openzeppelin/contracts/interfaces/draft-IERC6093.sol/IERC1155Errors.dbg.json
+        artifacts/@openzeppelin/contracts/interfaces/draft-IERC6093.sol/IERC20Errors.dbg.json
+        artifacts/@openzeppelin/contracts/interfaces/draft-IERC6093.sol/IERC721Errors.dbg.json
+        artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.dbg.json
+        artifacts/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.dbg.json
+        artifacts/@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol/ERC4626.dbg.json
+        artifacts/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol/IERC20Metadata.dbg.json
+        artifacts/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol/SafeERC20.dbg.json
+        artifacts/@openzeppelin/contracts/utils/Context.sol/Context.dbg.json
+        artifacts/@openzeppelin/contracts/utils/Panic.sol/Panic.dbg.json
+        artifacts/@openzeppelin/contracts/utils/ReentrancyGuard.sol/ReentrancyGuard.dbg.json
+        artifacts/@openzeppelin/contracts/utils/Strings.sol/Strings.dbg.json
+        artifacts/@openzeppelin/contracts/utils/cryptography/ECDSA.sol/ECDSA.dbg.json
+        artifacts/@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol/MessageHashUtils.dbg.json
+        artifacts/@openzeppelin/contracts/utils/introspection/IERC165.sol/IERC165.dbg.json
+        artifacts/@openzeppelin/contracts/utils/math/Math.sol/Math.dbg.json
+        artifacts/@openzeppelin/contracts/utils/math/SafeCast.sol/SafeCast.dbg.json
+        artifacts/@openzeppelin/contracts/utils/math/SignedMath.sol/SignedMath.dbg.json
+        artifacts/contracts/ISniperStrategy.sol/ISniperStrategy.dbg.json
+        artifacts/contracts/MockSniperStrategy.sol/MockSniperStrategy.dbg.json
+        artifacts/contracts/MockUSDC.sol/MockUSDC.dbg.json
+        artifacts/contracts/PredictFiSniperVault.sol/PredictFiSniperVault.dbg.json
+        artifacts/contracts/PredictFiSniperVaultV2.sol/PredictFiSniperVaultV2.dbg.json
+        artifacts/contracts/PredictFiSniperVaultV3.sol/PredictFiSniperVaultV3.dbg.json
+        artifacts/contracts/PredictFiSniperVaultV4.sol/PredictFiSniperVaultV4.dbg.json
+        artifacts/contracts/PredictFiSniperVaultV5.sol/PredictFiSniperVaultV5.dbg.json
+        artifacts/contracts/PredictFiSniperVaultV6.sol/PredictFiSniperVaultV6.dbg.json
+        artifacts/contracts/PredictFiSniperVaultV7.sol/PredictFiSniperVaultV7.dbg.json
+        artifacts/contracts/TestUSDC.sol/TestUSDC.dbg.json
+        artifacts/contracts/mocks/MockERC20.sol/MockERC20.dbg.json
+        cache/solidity-files-cache.json
+Please commit your changes or stash them before you merge.
+Aborting

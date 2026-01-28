@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMFI - pSNIPER Vault</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e14;
+            color: #e8edf3;
+            min-height: 100vh;
+        }
+
+        /* Invite Gate Overlay */
+        .invite-gate {
+            position: fixed;
+            inset: 0;
+            background: #0a0e14;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .invite-gate.hidden {
+            display: none;
+        }
+
+        .invite-card {
+            background: linear-gradient(180deg, #141a24 0%, #0d1218 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 48px 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .invite-logo {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            margin-bottom: 24px;
+            opacity: 0.9;
+        }
+
+        .invite-title {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .invite-subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .invite-input-group {
+            margin-bottom: 20px;
+        }
+
+        .invite-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-family: 'SF Mono', Monaco, monospace;
+            text-align: center;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.4);
+            color: #e8edf3;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .invite-input:focus {
+            border-color: rgba(255,255,255,0.25);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+        }
+
+        .invite-input::placeholder {
+            letter-spacing: 2px;
+            text-transform: none;
+            color: #3d4654;
+            font-size: 15px;
+        }
+
+        .invite-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            margin-bottom: 12px;
+        }
+
+        .invite-btn-primary {
+            background: rgba(255,255,255,0.08);
+            color: #e8edf3;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .invite-btn-primary:hover:not(:disabled) {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .invite-btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .invite-error {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .invite-error.show {
+            display: block;
+        }
+
+        .invite-success {
+            color: #22c55e;
+            font-size: 13px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .invite-success.show {
+            display: block;
+        }
+
+        .invite-step {
+            display: none;
+        }
+
+        .invite-step.active {
+            display: block;
+        }
+
+        .invite-wallet-info {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 20px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+            color: #a78bfa;
+            word-break: break-all;
+        }
+
+        .invite-request-link {
+            margin-top: 28px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .invite-request-link a {
+            color: #6b7280;
+            text-decoration: underline;
+            transition: color 0.15s;
+        }
+
+        .invite-request-link a:hover {
+            color: #9ca3af;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Main app content (hidden until authenticated) */
+        .app-content {
+            display: none;
+        }
+
+        .app-content.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Invite Gate Overlay -->
+    <div id="inviteGate" class="invite-gate">
+        <div class="invite-card">
+            <img src="/static/logo.png" alt="PMFI" class="invite-logo" onerror="this.style.display='none'">
+            <h1 class="invite-title">PMFI Beta</h1>
+            <p class="invite-subtitle">Enter your invite code to access the vault</p>
+            
+            <!-- Step 1: Enter Code -->
+            <div id="inviteStep1" class="invite-step active">
+                <div class="invite-input-group">
+                    <input type="text" id="inviteCodeInput" class="invite-input" placeholder="Enter code" maxlength="8" autocomplete="off">
+                </div>
+                <button id="inviteConnectBtn" class="invite-btn invite-btn-primary">Connect Wallet</button>
+                <p class="invite-error" id="inviteError"></p>
+                <p class="invite-request-link">
+                    Don't have a code? <a href="https://tally.so/r/5Bb29b" target="_blank">Request access</a>
+                </p>
+            </div>
+            
+            <!-- Step 2: Confirm Wallet -->
+            <div id="inviteStep2" class="invite-step">
+                <div class="invite-wallet-info" id="inviteWalletDisplay"></div>
+                <button id="inviteRedeemBtn" class="invite-btn invite-btn-primary">Redeem Code</button>
+                <button id="inviteBackBtn" class="invite-btn invite-btn-primary" style="background: transparent; border: 1px solid rgba(255,255,255,0.08);">Use Different Wallet</button>
+                <p class="invite-error" id="inviteError2"></p>
+                <p class="invite-success" id="inviteSuccess"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Content (your existing vault dashboard goes here) -->
+    <div id="appContent" class="app-content">
+        <!-- This will be replaced by your existing vault HTML or use an iframe -->
+    </div>
+
+    <script>
+        // Invite Code Gate Logic
+        const inviteGate = document.getElementById('inviteGate');
+        const appContent = document.getElementById('appContent');
+        const inviteCodeInput = document.getElementById('inviteCodeInput');
+        const inviteConnectBtn = document.getElementById('inviteConnectBtn');
+        const inviteRedeemBtn = document.getElementById('inviteRedeemBtn');
+        const inviteBackBtn = document.getElementById('inviteBackBtn');
+        const inviteStep1 = document.getElementById('inviteStep1');
+        const inviteStep2 = document.getElementById('inviteStep2');
+        const inviteError = document.getElementById('inviteError');
+        const inviteError2 = document.getElementById('inviteError2');
+        const inviteSuccess = document.getElementById('inviteSuccess');
+        const inviteWalletDisplay = document.getElementById('inviteWalletDisplay');
+
+        let connectedWallet = null;
+        let enteredCode = '';
+
+        // Check if wallet is already whitelisted
+        async function checkWalletWhitelist(wallet) {
+            try {
+                const response = await fetch('/api/invite/check-wallet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wallet })
+                });
+                const data = await response.json();
+                return data.whitelisted === true;
+            } catch (e) {
+                console.error('Error checking whitelist:', e);
+                return false;
+            }
+        }
+
+        // Validate invite code
+        async function validateCode(code) {
+            try {
+                const response = await fetch('/api/invite/validate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await response.json();
+                return data;
+            } catch (e) {
+                return { valid: false, error: 'Network error' };
+            }
+        }
+
+        // Redeem invite code
+        async function redeemCode(code, wallet) {
+            try {
+                const response = await fetch('/api/invite/redeem', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, wallet })
+                });
+                const data = await response.json();
+                return data;
+            } catch (e) {
+                return { success: false, error: 'Network error' };
+            }
+        }
+
+        // Show error
+        function showError(el, msg) {
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        function hideError(el) {
+            el.classList.remove('show');
+        }
+
+        function showSuccess(msg) {
+            inviteSuccess.textContent = msg;
+            inviteSuccess.classList.add('show');
+        }
+
+        // Grant access - hide gate and show app
+        function grantAccess() {
+            inviteGate.classList.add('hidden');
+            appContent.classList.add('visible');
+            // Redirect to actual vault or reload
+            window.location.href = '/vault';
+        }
+
+        // Connect wallet button
+        inviteConnectBtn.addEventListener('click', async () => {
+            hideError(inviteError);
+            
+            const code = inviteCodeInput.value.trim().toUpperCase();
+            if (code.length !== 8) {
+                showError(inviteError, 'Please enter a valid 8-character code');
+                return;
+            }
+
+            inviteConnectBtn.disabled = true;
+            inviteConnectBtn.innerHTML = '<span class="spinner"></span>Validating...';
+
+            // Validate code first
+            const validation = await validateCode(code);
+            
+            if (!validation.valid) {
+                showError(inviteError, validation.error || 'Invalid code');
+                inviteConnectBtn.disabled = false;
+                inviteConnectBtn.textContent = 'Connect Wallet';
+                return;
+            }
+
+            // Code is valid, connect wallet
+            if (typeof window.ethereum === 'undefined') {
+                showError(inviteError, 'Please install MetaMask or another wallet');
+                inviteConnectBtn.disabled = false;
+                inviteConnectBtn.textContent = 'Connect Wallet';
+                return;
+            }
+
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await provider.send('eth_requestAccounts', []);
+                connectedWallet = accounts[0].toLowerCase();
+                enteredCode = code;
+
+                // Check if already whitelisted
+                const isWhitelisted = await checkWalletWhitelist(connectedWallet);
+                if (isWhitelisted) {
+                    grantAccess();
+                    return;
+                }
+
+                // Show step 2
+                inviteWalletDisplay.textContent = connectedWallet;
+                inviteStep1.classList.remove('active');
+                inviteStep2.classList.add('active');
+                
+            } catch (e) {
+                showError(inviteError, 'Failed to connect wallet');
+            }
+
+            inviteConnectBtn.disabled = false;
+            inviteConnectBtn.textContent = 'Connect Wallet';
+        });
+
+        // Redeem button
+        inviteRedeemBtn.addEventListener('click', async () => {
+            hideError(inviteError2);
+            
+            inviteRedeemBtn.disabled = true;
+            inviteRedeemBtn.innerHTML = '<span class="spinner"></span>Redeeming...';
+
+            const result = await redeemCode(enteredCode, connectedWallet);
+
+            if (result.success) {
+                showSuccess('Access granted!');
+                setTimeout(() => grantAccess(), 1000);
+            } else {
+                showError(inviteError2, result.error || 'Failed to redeem code');
+                inviteRedeemBtn.disabled = false;
+                inviteRedeemBtn.textContent = 'Redeem Code';
+            }
+        });
+
+        // Back button
+        inviteBackBtn.addEventListener('click', () => {
+            connectedWallet = null;
+            inviteStep2.classList.remove('active');
+            inviteStep1.classList.add('active');
+            hideError(inviteError2);
+        });
+
+        // Auto-uppercase input
+        inviteCodeInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Check on load if wallet is connected and whitelisted
+        async function checkExistingAccess() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        const wallet = accounts[0].toLowerCase();
+                        const isWhitelisted = await checkWalletWhitelist(wallet);
+                        if (isWhitelisted) {
+                            grantAccess();
+                        }
+                    }
+                } catch (e) {
+                    console.log('No existing access');
+                }
+            }
+        }
+
+        checkExistingAccess();
+    </script>
+</body>
+</html>

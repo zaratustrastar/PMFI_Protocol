@@ -1,0 +1,801 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# cd /opt/polymarket-bot
+source .env.systemd
+export $(grep -v '^#' .env.systemd | xargs)
+python3 trading_bot/backfill_accumulated_fills.py
+python3: can't open file '/opt/polymarket-bot/trading_bot/backfill_accumulated_fills.py': [Errno 2] No such file or directory
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# cd /opt/polymarket-bot
+git checkout -- artifacts/ cache/
+git pull
+error: pathspec 'artifacts/' did not match any file(s) known to git
+error: pathspec 'cache/' did not match any file(s) known to git
+fatal: unable to access 'https://github.com/zaratustrastar/PolyNotifyBot.git/': Proxy CONNECT aborted
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# cat > /opt/polymarket-bot/trading_bot/backfill_accumulated_fills.py << 'EOF'
+"""
+Backfill accumulated_fills table from existing FILLED orders
+and place sell orders for markets with >= MIN_SHARES_FOR_SELL
+"""
+
+import os
+import sys
+from decimal import Decimal
+
+# Add parent directory to path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from dotenv import load_dotenv
+load_dotenv()
+
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+MIN_SHARES_FOR_SELL = 10
+SELL_SHARES = 5
+
+def backfill():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    # Get all FILLED buy orders grouped by market/token/side
+    cur.execute("""
+        SELECT market_slug, token_id, side, 
+               SUM(size) as total_shares,
+               SUM(size * price) as total_cost,
+               COUNT(*) as order_count
+        FROM trading_positions 
+        WHERE status = 'FILLED' AND order_type = 'BUY'
+        GROUP BY market_slug, token_id, side
+    """)
+    
+    filled_groups = cur.fetchall()
+    print(f"Found {len(filled_groups)} market/token groups with filled buys")
+    
+    for group in filled_groups:
+        market_slug = group['market_slug']
+        token_id = group['token_id']
+        side = group['side']
+        total_shares = Decimal(str(group['total_shares']))
+EOF backfill() "__main__":er monitor to place sell orders automatically.")rders.")} @ ${row['avg_buy_price']:.4f}"), sell_placed)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot# cd /opt/polymarket-bot
+source .env.systemd
+export $(grep -v '^#' .env.systemd | xargs)
+python3 trading_bot/backfill_accumulated_fills.py
+Found 961 market/token groups with filled buys
+
+0xa7fc1bb3ab11950183... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x5a3ccf5d4f0876ee0d... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x3d4832f13c1172dc11... YES: 19.993166 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x57b600dfaef51d6517... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x976b59b1ca2f26dc46... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xb3a452252629d51211... NO: 10.000000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0x769bd2b51fa5150a71... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x3912c130d94acb16fb... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x17f26c0b5dd208bc6d... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xcd029589f39d729a73... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x6433a3729eb3fcebf9... YES: 10.000000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0x7f1f8b2ce1d08ec3ea... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x02aeb08c499809bd50... NO: 10.000000 shares @ avg $0.0100
+  Added to accumulated_fills
+
+0xcefabed101c372b6a5... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xd244149cf0ca43d2e3... YES: 10.000000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0x81f60e0bb4aa3fcadb... YES: 40.000000 shares @ avg $0.0190
+  Added to accumulated_fills
+
+0x31a79558aa68698478... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xff50a6821036a278d2... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xc1edb83dff24509fb2... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x9defe0bc94d3f10395... YES: 10.000000 shares @ avg $0.0160
+  Added to accumulated_fills
+
+0x7e231d43d5555fcacb... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x70c97f68354190d5c2... YES: 90.000000 shares @ avg $0.0183
+  Added to accumulated_fills
+
+0xe38b3e0f1c6a208e59... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x6b33f2cc52bdb8d267... NO: 10.000000 shares @ avg $0.0160
+  Added to accumulated_fills
+
+0x059da3ba4ea3b184e3... YES: 4.940000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0xfdeb8897b60295cd34... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x1773b4bb9794faa005... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x354331a99ff9da0c2d... YES: 10.000000 shares @ avg $0.0120
+  Added to accumulated_fills
+
+0xc566cfe098f0bda30b... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xd6c3e6b886ce988b0f... YES: 29.990200 shares @ avg $0.0247
+  Added to accumulated_fills
+
+0xc72649e38dadb16803... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x06d0d25725d2d240c6... YES: 60.000000 shares @ avg $0.0235
+  Added to accumulated_fills
+
+0x9d7b89af9c4ab20cc0... NO: 80.000000 shares @ avg $0.0171
+  Added to accumulated_fills
+
+0x4b76de960f3b8a83eb... YES: 80.000000 shares @ avg $0.0211
+  Added to accumulated_fills
+
+solana-price-on-dece... YES: 64.500000 shares @ avg $0.0217
+  Added to accumulated_fills
+
+0xc5730b40a636b4fd9e... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x2d2fdab346199e67eb... YES: 49.990200 shares @ avg $0.0224
+  Added to accumulated_fills
+
+0xa1f827dc3b42ea813d... YES: 30.000000 shares @ avg $0.0120
+  Added to accumulated_fills
+
+0x2161cb1478073a49c7... NO: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x825c4c518678cb9f57... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x3a2ce2cfd610a4e695... YES: 80.000000 shares @ avg $0.0171
+  Added to accumulated_fills
+
+0xd536211d588189ec7b... YES: 99.994727 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x9f13b2461ff3122e4f... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x0d0c2655106a10bcbf... NO: 99.999300 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xbf980f893828e93f58... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x9be3e8893fb7a7d250... YES: 10.000000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0x02d3dc258985f60373... NO: 10.000000 shares @ avg $0.0300
+  Added to accumulated_fills
+
+0xb8b9d9f044e5cf1ebe... NO: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x9ee606aefe8f045156... YES: 50.000000 shares @ avg $0.0140
+  Added to accumulated_fills
+
+0x42145db43473956ba2... YES: 60.000000 shares @ avg $0.0228
+  Added to accumulated_fills
+
+0xdb96eb65024f7f785e... NO: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x3d4b08159c12fc65c1... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x97f9755986c28d6169... NO: 60.000000 shares @ avg $0.0232
+  Added to accumulated_fills
+
+0xfabe9213d2cb60417f... YES: 10.000000 shares @ avg $0.0120
+  Added to accumulated_fills
+
+0xcc34d2558652de0f49... YES: 29.995640 shares @ avg $0.0277
+  Added to accumulated_fills
+
+0x87473d835fde77eedd... YES: 20.000000 shares @ avg $0.0170
+  Added to accumulated_fills
+
+0x82f7b559a7c76cd16c... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x0bd8a57fe56926b10c... YES: 99.998500 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x65e2e14e9fe76d5d1d... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xc2d1385802c9fd52a8... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x998d6de566afea4bcf... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x20dad1256f528c1ca8... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xb771535c0581daf80d... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xd6be619d898c2b0b85... YES: 10.000000 shares @ avg $0.0100
+  Added to accumulated_fills
+
+0xf0daca49e8f83c5517... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xefea80a96b633dad64... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x352033c984e12ccde4... YES: 50.000000 shares @ avg $0.0250
+  Added to accumulated_fills
+
+0xffe1bb4cff26ae88cd... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xa42194c1db1d32d6ec... NO: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xc2c079ced20fa0c6a7... NO: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xe8794c6121a6cd2f4b... NO: 90.000000 shares @ avg $0.0201
+  Added to accumulated_fills
+
+0x064ba43003e747f744... YES: 99.990000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xbf9959b3456e7015a5... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x6cfd78feebaab13364... YES: 80.000000 shares @ avg $0.0216
+  Added to accumulated_fills
+
+0xd29294db7dc8bb74f6... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x073af32b8842ca59ef... YES: 9.997500 shares @ avg $0.0140
+  Added to accumulated_fills
+
+0x31cdbe0c785e29028d... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x4d7eeb6b14f64cc6b8... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x66758a17a98bcaf80f... NO: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x7616cd9798e1eaad9c... YES: 30.000000 shares @ avg $0.0247
+  Added to accumulated_fills
+
+0xc403f85ae537551e5c... NO: 10.000000 shares @ avg $0.0100
+  Added to accumulated_fills
+
+0xc24eb4117f0afd9c6f... YES: 99.998633 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x7fa6b4b5d340f613f8... NO: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xe2931cdcfc6e767f77... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xb69ac2787614daa14e... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x923ad3a60a3ca6c81d... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x15759314fb72a13e9e... NO: 99.997500 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x34dda84012c6e533cc... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xd947132664ede54131... YES: 90.000000 shares @ avg $0.0192
+  Added to accumulated_fills
+
+0x827ce17fe8c84748ba... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xa12038bf2111715539... YES: 29.981800 shares @ avg $0.0247
+  Added to accumulated_fills
+
+0xdc0b12f658721ca900... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x4f8df43c247b91c4f2... YES: 99.992766 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x0c87ea5773c64f7cf8... YES: 70.090000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x29e22f55c09b2b3327... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x93555a5f0219b1f6b2... YES: 70.000000 shares @ avg $0.0204
+  Added to accumulated_fills
+
+0x8bc084bb9c12f36f54... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x74aea86a749f4c2717... YES: 50.000000 shares @ avg $0.0152
+  Added to accumulated_fills
+
+0x9ee9de15df6c69a99d... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x8d2cdf4131545941b9... NO: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xdca5553136ded0389d... YES: 99.990000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x1a4ef27b6b1f375c77... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xde6e349b0cb24006a1... NO: 20.000000 shares @ avg $0.0110
+  Added to accumulated_fills
+
+0xcf16bd5fd0be51aa20... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xdfa6fb5f1160a71f76... NO: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x160622fdbdc5d1d25a... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x9126f2b9dba5be7186... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x39ec09101a79a252a0... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xad5eaea649a3944b3e... YES: 30.000000 shares @ avg $0.0120
+  Added to accumulated_fills
+
+0xfbf5676d266d1759b1... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x1cdd9fcdecd989fe9d... YES: 99.982350 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x3ccb0aea2f316170c2... YES: 60.000000 shares @ avg $0.0150
+  Added to accumulated_fills
+
+0xba5f7528bf67d75be4... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x4491043f65e034b82f... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x6572da8bd35c04550c... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x07e5844075a5de7820... NO: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x19e97bba4ee080d95c... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x953eaafb46b7c8ca12... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x9513f3b904d6476222... YES: 90.000000 shares @ avg $0.0201
+  Added to accumulated_fills
+
+0x4edfcf9fd988986429... YES: 40.000000 shares @ avg $0.0230
+  Added to accumulated_fills
+
+0x069888c763da59d8e6... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x596b82d8371efcfcc2... YES: 99.971400 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x966d6c4f453a74f1f8... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x33aab0090d87ca31e9... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xb1a366b3e37a85c2d5... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xc83af9e3ea9b7bb7f3... YES: 80.000000 shares @ avg $0.0211
+  Added to accumulated_fills
+
+0x2cefe6009ea518f77b... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x6559821dc61ea6c359... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x6be9ba6ee36478a499... YES: 99.997700 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x51a816595b6a148caf... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x284fb872d4b476ce66... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xd569aa5a77ea64e5da... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xf829129cd05db88874... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xf92d6661118df556e0... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x874085a677b2158231... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x4d3a3d8429978c6b0b... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x2d7694162cc75eab04... YES: 50.000000 shares @ avg $0.0202
+  Added to accumulated_fills
+
+0xb319a1220404e9c923... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x0f081421ce894e2acc... YES: 40.000000 shares @ avg $0.0140
+  Added to accumulated_fills
+
+0x6959da908837e9d32c... YES: 20.000000 shares @ avg $0.0170
+  Added to accumulated_fills
+
+0xb264f7d633bb206b44... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xdcc387cddd2da1d542... YES: 64.500000 shares @ avg $0.0217
+  Added to accumulated_fills
+
+0x073446e0771d72d391... YES: 10.000000 shares @ avg $0.0120
+  Added to accumulated_fills
+
+0xe88e5b9f0534547b8f... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xae3fbb2e813b7a857e... YES: 99.993400 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x563fdec0315713d4f6... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x463cf61e265ca45ed1... YES: 30.000000 shares @ avg $0.0247
+  Added to accumulated_fills
+
+0x3c6bd654f9cb363e14... YES: 6.660000 shares @ avg $0.0300
+  Added to accumulated_fills
+
+0x6f1db8b181cc8f6cf5... NO: 90.000000 shares @ avg $0.0183
+  Added to accumulated_fills
+
+0x1a2f5e3dbbed59eee2... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x9045ee6d275464c969... YES: 19.980735 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x53267ef4ba058f7e46... NO: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xa2b7d292821eafb970... YES: 99.986500 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x51b28ae91893cbb16f... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x9b6f49056938dcb006... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xb7f6e78caa5703b85a... YES: 99.990000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xf178f1ac33fac905c0... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xd7c30264e0ee6bef93... YES: 69.985083 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x5a20deb170fc76eaf9... YES: 50.000000 shares @ avg $0.0224
+  Added to accumulated_fills
+
+0x6e159695fc33efb8dd... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x4429fa5340f4e8d669... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xf06a08d0ee3ac48c40... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x92eadf652b4b431bed... YES: 10.000000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0x5e70c33774e0b0043c... YES: 99.995700 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x7a6491e3c906af3657... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x638db816b41d2e011c... YES: 50.000000 shares @ avg $0.0140
+  Added to accumulated_fills
+
+cfb-rice-sfl-2025-11... YES: 7.140000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0x043abfc205f0b43f33... YES: 99.991800 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xc927e0ef788dab4820... YES: 50.000000 shares @ avg $0.0156
+  Added to accumulated_fills
+
+0x3d97bd61ee039af674... NO: 10.000000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0xa3caa8972cece9f18f... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x90d00895a75d874df0... YES: 40.000000 shares @ avg $0.0230
+  Added to accumulated_fills
+
+0xf50a79b1c1b883668e... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xabe0e49f0563429040... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xc907fed98bd8fc1d0b... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xff86907a5cad73c519... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xfa56b99d78185d6276... YES: 29.986183 shares @ avg $0.0247
+  Added to accumulated_fills
+
+0xd54105b65f6ec4993b... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x0d2d77c3ae2c5c6582... YES: 10.000000 shares @ avg $0.0180
+  Added to accumulated_fills
+
+0x2a3bc0b83dfefe0029... YES: 79.992200 shares @ avg $0.0171
+  Added to accumulated_fills
+
+0xe2552e20a594fbd2e8... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xcec76f0036e456809c... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x8e82dbab44e08cae51... YES: 60.000000 shares @ avg $0.0150
+  Added to accumulated_fills
+
+0x73b8910aa7d3063e58... YES: 90.000000 shares @ avg $0.0192
+  Added to accumulated_fills
+
+0x2331bd56836b773ea7... YES: 20.000000 shares @ avg $0.0110
+  Added to accumulated_fills
+
+0x610e5b3790f5a69979... NO: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xf9eb51888f6ff2d581... NO: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x8f6f71291a3c32981c... NO: 99.996000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x798e2253f477b36b84... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x774c4fb5073164381b... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x58074761e991e2dadf... YES: 10.000000 shares @ avg $0.0100
+  Added to accumulated_fills
+
+0xeeab045777f18ad71a... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x0e3b5ea17c89d4d644... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xe84738772a41601232... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x63e92097aac929d211... NO: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x2aa4259aba28057ec4... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x1fd96997ceae11744a... YES: 10.000000 shares @ avg $0.0160
+  Added to accumulated_fills
+
+0xae4cd1757a47641269... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x0e9e54e794483a5fbf... YES: 10.000000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0x262962b5d5b1f248aa... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xb0b65208a059319239... YES: 10.000000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0x2a6ed141588a0cbfc6... YES: 69.986816 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xf655204d9fe4e2bb63... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xdcea3946f449d85c80... YES: 30.000000 shares @ avg $0.0120
+  Added to accumulated_fills
+
+0x0881547b72d4e95cd1... YES: 19.999266 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xa00a1333f6836b6b04... YES: 60.000000 shares @ avg $0.0228
+  Added to accumulated_fills
+
+0xb14532a14894b75d15... YES: 69.994116 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xf81b7a409faddbe962... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x54ccb4dc6574077273... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xc9051d6cb7a1da1b77... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xae5f22fd8c4edb3843... YES: 20.000000 shares @ avg $0.0170
+  Added to accumulated_fills
+
+0x35b990242c31673833... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x35b6864f88b9a58d65... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xf189b0608355703c63... NO: 90.000000 shares @ avg $0.0201
+  Added to accumulated_fills
+
+0xb5567520f864461696... YES: 10.000000 shares @ avg $0.0280
+  Added to accumulated_fills
+
+0x4ef786a4f0bdee3e8d... YES: 50.000000 shares @ avg $0.0202
+  Added to accumulated_fills
+
+0x79f248793183427a38... YES: 10.000000 shares @ avg $0.0140
+  Added to accumulated_fills
+
+0xad023f56faa36bcf0c... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xdabfefc3b35a8dcedf... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x588cf945cbb3eab6cb... YES: 99.990800 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xdbd6918e9fc6177ea4... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x871076e9760e9b13c2... YES: 60.000000 shares @ avg $0.0223
+  Added to accumulated_fills
+
+0x48a6afeff867fb36db... YES: 80.000000 shares @ avg $0.0171
+  Added to accumulated_fills
+
+0xea828d65ebe2ff1faa... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x2bb0cd3045d604aa04... YES: 10.000000 shares @ avg $0.0180
+  Added to accumulated_fills
+
+0x87c61f4af5e7757d48... YES: 29.996900 shares @ avg $0.0247
+  Added to accumulated_fills
+
+0x6af737a306bb1c596c... YES: 99.999266 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xec2a48792d0cdad9f5... YES: 40.000000 shares @ avg $0.0230
+  Added to accumulated_fills
+
+0x6e9b6ff1f13fa75253... YES: 40.000000 shares @ avg $0.0130
+  Added to accumulated_fills
+
+0x479845d71b766892b0... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xb02ee7c7850e98a083... YES: 29.991200 shares @ avg $0.0247
+  Added to accumulated_fills
+
+0xee39f89138cf0fdf7d... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0xbf8cd809897c0969ad... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xc1f6203916ad80e3bd... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x3d7f3bc174a8ddbd33... YES: 50.000000 shares @ avg $0.0202
+  Added to accumulated_fills
+
+0x514247f611b7419cd6... YES: 20.000000 shares @ avg $0.0110
+  Added to accumulated_fills
+
+0x2e140da67dd4d1c2d6... YES: 20.000000 shares @ avg $0.0110
+  Added to accumulated_fills
+
+0x74f8c2a8ffd927c476... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0x04706f607f4c313878... YES: 15.000000 shares @ avg $0.0287
+  Added to accumulated_fills
+
+0xaf15f055f10713cbd3... YES: 99.971400 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0x92743e5270a51662a8... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xcdbef0a58b5085fb81... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xda959c3939d1e56c5d... YES: 100.000000 shares @ avg $0.0195
+  Added to accumulated_fills
+
+0xb71cc432a6b5335efd... YES: 20.000000 shares @ avg $0.0290
+  Added to accumulated_fills
+
+0xa0b8cad7f4daa7b84b... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills
+
+0x69c4cb7598eb364618... YES: 70.000000 shares @ avg $0.0227
+  Added to accumulated_fills

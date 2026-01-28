@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pSNIPER - Vault Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e14;
+            color: #e8edf3;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .wallet-display {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+            color: #a78bfa;
+            background: rgba(167, 139, 250, 0.1);
+            padding: 8px 14px;
+            border-radius: 8px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.06);
+            color: #e8edf3;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, #141a24 0%, #0d1218 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+
+        .stat-value.green {
+            color: #22c55e;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.06);
+            color: #e8edf3;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 12px;
+        }
+
+        .action-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .action-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .product-card {
+            background: linear-gradient(180deg, #141a24 0%, #0d1218 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            opacity: 0.5;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .product-status {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 16px;
+            }
+            .main-content {
+                padding: 40px 20px;
+            }
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="/static/logo.png" alt="PMFI" onerror="this.style.display='none'">
+            <span class="logo-text">pSNIPER</span>
+        </div>
+        <div class="header-right">
+            <span class="wallet-display" id="walletDisplay">Not connected</span>
+            <button class="btn" id="disconnectBtn">Disconnect</button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="cards-grid">
+            <div class="card">
+                <h2 class="card-title">pSNIPER</h2>
+                <button class="action-btn" id="depositBtn">Deposit</button>
+                <button class="action-btn" id="withdrawBtn">Withdraw</button>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Stats</h2>
+                <div style="margin-bottom: 24px;">
+                    <p class="stat-label">Total Value Locked</p>
+                    <p class="stat-value" id="tvlValue">$--</p>
+                </div>
+                <div>
+                    <p class="stat-label">pSNIPER Price</p>
+                    <p class="stat-value green" id="priceValue">$--</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="products-grid">
+            <div class="product-card">
+                <p class="product-name">pARBITRAGE</p>
+                <p class="product-status">SOON ...</p>
+            </div>
+            <div class="product-card">
+                <p class="product-name">pVOLATILITY</p>
+                <p class="product-status">SOON ...</p>
+            </div>
+            <div class="product-card">
+                <p class="product-name">pCOPY</p>
+                <p class="product-status">SOON ...</p>
+            </div>
+            <div class="product-card">
+                <p class="product-name">pLP</p>
+                <p class="product-status">SOON ...</p>
+            </div>
+            <div class="product-card">
+                <p class="product-name">pENDSPIEL</p>
+                <p class="product-status">SOON ...</p>
+            </div>
+            <div class="product-card">
+                <p class="product-name">pINSIDER</p>
+                <p class="product-status">SOON ...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Check wallet access on load
+        async function checkAccess() {
+            if (typeof window.ethereum === 'undefined') {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length === 0) {
+                    window.location.href = '/';
+                    return;
+                }
+
+                const wallet = accounts[0].toLowerCase();
+                
+                // Verify wallet is whitelisted
+                const response = await fetch('/api/invite/check-wallet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wallet })
+                });
+                const data = await response.json();
+                
+                if (!data.whitelisted) {
+                    window.location.href = '/';
+                    return;
+                }
+
+                // Show wallet
+                document.getElementById('walletDisplay').textContent = 
+                    wallet.slice(0, 6) + '...' + wallet.slice(-4);
+
+            } catch (e) {
+                console.error('Access check failed:', e);
+                window.location.href = '/';
+            }
+        }
+
+        // Disconnect
+        document.getElementById('disconnectBtn').addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        // TODO: Implement deposit/withdraw - these would call your vault contract
+        document.getElementById('depositBtn').addEventListener('click', () => {
+            alert('Deposit functionality - integrate with your vault contract');
+        });
+
+        document.getElementById('withdrawBtn').addEventListener('click', () => {
+            alert('Withdraw functionality - integrate with your vault contract');
+        });
+
+        // Initialize
+        checkAccess();
+
+        // TODO: Fetch TVL and price from your vault contract
+        // document.getElementById('tvlValue').textContent = '$22.05';
+        // document.getElementById('priceValue').textContent = '$3.39';
+    </script>
+</body>
+</html>
