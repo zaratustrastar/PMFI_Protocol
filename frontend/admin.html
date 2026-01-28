@@ -384,7 +384,7 @@
             const count = parseInt(document.getElementById('codeCount').value) || 1;
             
             try {
-                const res = await fetch('/api/admin/codes/generate', {
+                const res = await fetch('/api/admin/codes', {
                     method: 'POST',
                     headers: getAuthHeaders(),
                     body: JSON.stringify({ count })
@@ -411,10 +411,9 @@
             if (!confirm('Are you sure you want to revoke this code?')) return;
             
             try {
-                const res = await fetch('/api/admin/codes/revoke', {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ id })
+                const res = await fetch(`/api/admin/codes/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
                 });
                 
                 if (res.ok) {

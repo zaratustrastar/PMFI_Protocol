@@ -58,9 +58,13 @@ const INVITE_STORAGE_KEY = 'pmfi_access';
 // Check if wallet has beta access
 async function checkBetaAccess(walletAddress) {
     try {
-        const res = await fetch(`/api/invite/check/${walletAddress}`);
+        const res = await fetch('/api/invite/check-wallet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wallet: walletAddress })
+        });
         const data = await res.json();
-        return data.hasAccess === true;
+        return data.whitelisted === true;
     } catch (err) {
         console.error('Failed to check beta access:', err);
         return false;
@@ -73,7 +77,7 @@ async function redeemInviteCode(code, walletAddress) {
         const res = await fetch('/api/invite/redeem', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, walletAddress })
+            body: JSON.stringify({ code, wallet: walletAddress })
         });
         return await res.json();
     } catch (err) {

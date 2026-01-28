@@ -41,12 +41,17 @@ import sys
 import json
 import time
 import threading
+import hmac
+import hashlib
+import secrets
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
 
 import requests
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from web3 import Web3
 from eth_account import Account
@@ -133,6 +138,113 @@ MAX_PENDING_RATIO = 0.5   # Pause if pendingCredit > 50% of totalAssets
 # Rate limiting
 REFRESH_RATE_LIMIT_SECONDS = 5
 last_refresh_request = {}
+
+# =============================================================================
+# Invite Code System Configuration
+# =============================================================================
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+PMFI_ADMIN_TOKEN = os.getenv("PMFI_ADMIN_TOKEN", secrets.token_hex(16))
+PMFI_HMAC_SECRET = os.getenv("PMFI_HMAC_SECRET", secrets.token_hex(32))
+
+# In-memory rate limiting for invite codes
+invite_rate_limit_store = {}
+INVITE_RATE_LIMIT_WINDOW = 60  # 1 minute
+INVITE_RATE_LIMIT_MAX = 5
+
+def get_invite_db():
+    """Get database connection for invite system"""
+    return psycopg2.connect(DATABASE_URL)
+
+def init_invite_tables():
+    """Initialize invite code database tables"""
+    if not DATABASE_URL:
+        print("⚠️ DATABASE_URL not set - invite system disabled")
+        return False
+    try:
+        conn = get_invite_db()
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS invite_codes (
+                id SERIAL PRIMARY KEY,
+                code_hash VARCHAR(64) NOT NULL UNIQUE,
+                status VARCHAR(20) NOT NULL DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created_by VARCHAR(255),
+                expires_at TIMESTAMP,
+                redeemed_by VARCHAR(42),
+                redeemed_at TIMESTAMP,
+                note TEXT
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS invite_audit_logs (
+                id SERIAL PRIMARY KEY,
+                action VARCHAR(50) NOT NULL,
+                code_hash VARCHAR(64),
+                wallet_address VARCHAR(42),
+                ip_address VARCHAR(45),
+                success BOOLEAN NOT NULL,
+                error_message TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS whitelisted_wallets (
+                wallet_address VARCHAR(42) PRIMARY KEY,
+                code_id INTEGER REFERENCES invite_codes(id),
+                whitelisted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("✅ Invite code tables initialized")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to init invite tables: {e}")
+        return False
+
+def hash_invite_code(code: str) -> str:
+    """Hash an invite code using HMAC-SHA256"""
+    return hmac.new(
+        PMFI_HMAC_SECRET.encode(),
+        code.lower().strip().encode(),
+        hashlib.sha256
+    ).hexdigest()
+
+def generate_invite_code() -> str:
+    """Generate a random 8-character invite code"""
+    return secrets.token_hex(4).upper()
+
+def check_invite_rate_limit(ip: str) -> bool:
+    """Check if IP is rate limited for invite operations"""
+    now = time.time()
+    if ip in invite_rate_limit_store:
+        attempts, window_start = invite_rate_limit_store[ip]
+        if now - window_start > INVITE_RATE_LIMIT_WINDOW:
+            invite_rate_limit_store[ip] = (1, now)
+            return True
+        if attempts >= INVITE_RATE_LIMIT_MAX:
+            return False
+        invite_rate_limit_store[ip] = (attempts + 1, window_start)
+    else:
+        invite_rate_limit_store[ip] = (1, now)
+    return True
+
+def log_invite_action(action: str, code_hash: str = None, wallet: str = None, ip: str = None, success: bool = True, error: str = None):
+    """Log invite code action to audit table"""
+    try:
+        conn = get_invite_db()
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO invite_audit_logs (action, code_hash, wallet_address, ip_address, success, error_message)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (action, code_hash, wallet, ip, success, error))
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"⚠️ Failed to log invite action: {e}")
 
 # =============================================================================
 # Liquidation Reservation System (for withdrawal servicer)
@@ -1845,6 +1957,310 @@ def get_positions_endpoint():
 
 
 # =============================================================================
+# Invite Code API Routes
+# =============================================================================
+
+@flask_app.route('/api/invite/check-wallet', methods=['POST'])
+def api_check_wallet():
+    """Check if a wallet is whitelisted"""
+    try:
+        data = flask_request.get_json() or {}
+        wallet = data.get('wallet', '').lower()
+        
+        if not wallet or len(wallet) != 42:
+            return jsonify({'error': 'Invalid wallet address'}), 400
+        
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT wallet_address FROM whitelisted_wallets WHERE wallet_address = %s", (wallet,))
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        return jsonify({'whitelisted': result is not None})
+    except Exception as e:
+        print(f"❌ check-wallet error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@flask_app.route('/api/invite/validate', methods=['POST'])
+def api_validate_code():
+    """Validate an invite code (without redeeming)"""
+    ip = flask_request.headers.get('X-Forwarded-For', flask_request.remote_addr or 'unknown')
+    
+    if not check_invite_rate_limit(ip):
+        log_invite_action('validate', ip=ip, success=False, error='Rate limited')
+        return jsonify({'error': 'Too many attempts. Please wait.'}), 429
+    
+    try:
+        data = flask_request.get_json() or {}
+        code = data.get('code', '').strip().upper()
+        
+        if not code or len(code) != 8:
+            return jsonify({'valid': False, 'error': 'Invalid code format'}), 400
+        
+        code_hash = hash_invite_code(code)
+        
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT id, status, expires_at, redeemed_by 
+            FROM invite_codes 
+            WHERE code_hash = %s
+        """, (code_hash,))
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if not result:
+            log_invite_action('validate', code_hash=code_hash[:16], ip=ip, success=False, error='Code not found')
+            return jsonify({'valid': False, 'error': 'Invalid code'})
+        
+        if result['status'] != 'active':
+            log_invite_action('validate', code_hash=code_hash[:16], ip=ip, success=False, error='Code already used')
+            return jsonify({'valid': False, 'error': 'Code already used'})
+        
+        if result['expires_at'] and result['expires_at'] < datetime.now():
+            log_invite_action('validate', code_hash=code_hash[:16], ip=ip, success=False, error='Code expired')
+            return jsonify({'valid': False, 'error': 'Code expired'})
+        
+        log_invite_action('validate', code_hash=code_hash[:16], ip=ip, success=True)
+        return jsonify({'valid': True})
+        
+    except Exception as e:
+        print(f"❌ validate error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@flask_app.route('/api/invite/redeem', methods=['POST'])
+def api_redeem_code():
+    """Redeem an invite code and whitelist a wallet"""
+    ip = flask_request.headers.get('X-Forwarded-For', flask_request.remote_addr or 'unknown')
+    
+    if not check_invite_rate_limit(ip):
+        return jsonify({'error': 'Too many attempts. Please wait.'}), 429
+    
+    try:
+        data = flask_request.get_json() or {}
+        code = data.get('code', '').strip().upper()
+        wallet = data.get('wallet', '').lower()
+        
+        if not code or len(code) != 8:
+            return jsonify({'success': False, 'error': 'Invalid code format'}), 400
+        
+        if not wallet or len(wallet) != 42:
+            return jsonify({'success': False, 'error': 'Invalid wallet address'}), 400
+        
+        code_hash = hash_invite_code(code)
+        
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Check if wallet already whitelisted
+        cur.execute("SELECT wallet_address FROM whitelisted_wallets WHERE wallet_address = %s", (wallet,))
+        if cur.fetchone():
+            cur.close()
+            conn.close()
+            return jsonify({'success': True, 'message': 'Wallet already whitelisted'})
+        
+        # Check code validity
+        cur.execute("""
+            SELECT id, status, expires_at 
+            FROM invite_codes 
+            WHERE code_hash = %s
+        """, (code_hash,))
+        result = cur.fetchone()
+        
+        if not result:
+            log_invite_action('redeem', code_hash=code_hash[:16], wallet=wallet, ip=ip, success=False, error='Code not found')
+            cur.close()
+            conn.close()
+            return jsonify({'success': False, 'error': 'Invalid code'})
+        
+        if result['status'] != 'active':
+            log_invite_action('redeem', code_hash=code_hash[:16], wallet=wallet, ip=ip, success=False, error='Code already used')
+            cur.close()
+            conn.close()
+            return jsonify({'success': False, 'error': 'Code already used'})
+        
+        if result['expires_at'] and result['expires_at'] < datetime.now():
+            cur.close()
+            conn.close()
+            return jsonify({'success': False, 'error': 'Code expired'})
+        
+        # Redeem the code
+        cur.execute("""
+            UPDATE invite_codes 
+            SET status = 'redeemed', redeemed_by = %s, redeemed_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (wallet, result['id']))
+        
+        # Whitelist the wallet
+        cur.execute("""
+            INSERT INTO whitelisted_wallets (wallet_address, code_id)
+            VALUES (%s, %s)
+            ON CONFLICT (wallet_address) DO NOTHING
+        """, (wallet, result['id']))
+        
+        conn.commit()
+        log_invite_action('redeem', code_hash=code_hash[:16], wallet=wallet, ip=ip, success=True)
+        
+        cur.close()
+        conn.close()
+        
+        print(f"✅ Wallet {wallet[:10]}... whitelisted with code {code}")
+        return jsonify({'success': True, 'message': 'Access granted!'})
+        
+    except Exception as e:
+        print(f"❌ redeem error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@flask_app.route('/api/admin/codes', methods=['GET', 'POST'])
+def api_admin_codes():
+    """Admin: List or generate invite codes"""
+    # Verify admin token
+    auth = flask_request.headers.get('Authorization', '')
+    if not auth.startswith('Bearer ') or auth[7:] != PMFI_ADMIN_TOKEN:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        if flask_request.method == 'GET':
+            # List codes
+            conn = get_invite_db()
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute("""
+                SELECT id, status, created_at, expires_at, redeemed_by, redeemed_at, note,
+                       SUBSTRING(code_hash, 1, 8) as code_prefix
+                FROM invite_codes 
+                ORDER BY created_at DESC 
+                LIMIT 100
+            """)
+            codes = cur.fetchall()
+            cur.close()
+            conn.close()
+            
+            # Convert datetime objects to strings
+            for code in codes:
+                if code.get('created_at'):
+                    code['created_at'] = code['created_at'].isoformat()
+                if code.get('expires_at'):
+                    code['expires_at'] = code['expires_at'].isoformat()
+                if code.get('redeemed_at'):
+                    code['redeemed_at'] = code['redeemed_at'].isoformat()
+            
+            return jsonify({'codes': codes})
+        
+        else:  # POST - Generate codes
+            data = flask_request.get_json() or {}
+            count = min(int(data.get('count', 1)), 50)
+            note = data.get('note', '')
+            
+            codes = []
+            conn = get_invite_db()
+            cur = conn.cursor()
+            
+            for _ in range(count):
+                code = generate_invite_code()
+                code_hash = hash_invite_code(code)
+                cur.execute("""
+                    INSERT INTO invite_codes (code_hash, note, created_by)
+                    VALUES (%s, %s, 'admin')
+                """, (code_hash, note))
+                codes.append(code)
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            log_invite_action('create_codes', ip=flask_request.remote_addr, success=True)
+            print(f"✅ Generated {len(codes)} invite codes")
+            return jsonify({'codes': codes})
+            
+    except Exception as e:
+        print(f"❌ admin/codes error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@flask_app.route('/api/admin/codes/<int:code_id>', methods=['DELETE'])
+def api_admin_revoke_code(code_id):
+    """Admin: Revoke an invite code"""
+    auth = flask_request.headers.get('Authorization', '')
+    if not auth.startswith('Bearer ') or auth[7:] != PMFI_ADMIN_TOKEN:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        conn = get_invite_db()
+        cur = conn.cursor()
+        cur.execute("UPDATE invite_codes SET status = 'revoked' WHERE id = %s", (code_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@flask_app.route('/api/admin/wallets', methods=['GET'])
+def api_admin_wallets():
+    """Admin: List whitelisted wallets"""
+    auth = flask_request.headers.get('Authorization', '')
+    if not auth.startswith('Bearer ') or auth[7:] != PMFI_ADMIN_TOKEN:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT wallet_address, whitelisted_at 
+            FROM whitelisted_wallets 
+            ORDER BY whitelisted_at DESC
+        """)
+        wallets = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        for w in wallets:
+            if w.get('whitelisted_at'):
+                w['whitelisted_at'] = w['whitelisted_at'].isoformat()
+        
+        return jsonify({'wallets': wallets})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@flask_app.route('/api/admin/stats', methods=['GET'])
+def api_admin_stats():
+    """Admin: Get invite code statistics"""
+    auth = flask_request.headers.get('Authorization', '')
+    if not auth.startswith('Bearer ') or auth[7:] != PMFI_ADMIN_TOKEN:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("SELECT COUNT(*) as total FROM invite_codes")
+        total_codes = cur.fetchone()['total']
+        
+        cur.execute("SELECT COUNT(*) as active FROM invite_codes WHERE status = 'active'")
+        active_codes = cur.fetchone()['active']
+        
+        cur.execute("SELECT COUNT(*) as redeemed FROM invite_codes WHERE status = 'redeemed'")
+        redeemed_codes = cur.fetchone()['redeemed']
+        
+        cur.execute("SELECT COUNT(*) as total FROM whitelisted_wallets")
+        total_wallets = cur.fetchone()['total']
+        
+        cur.close()
+        conn.close()
+        
+        return jsonify({
+            'total_codes': total_codes,
+            'active_codes': active_codes,
+            'redeemed_codes': redeemed_codes,
+            'whitelisted_wallets': total_wallets
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# =============================================================================
 # Background NAV Refresh
 # =============================================================================
 
@@ -1917,6 +2333,9 @@ def main():
     print(f"   USDC: {USDC_ADDRESS}")
     print(f"   PM Wallet: {POLYMARKET_PROXY_ADDRESS}")
     print(f"   PM Deposit: {POLYMARKET_BASE_DEPOSIT}")
+    
+    # Initialize invite code tables
+    init_invite_tables()
     
     # Initialize Web3
     w3 = Web3(Web3.HTTPProvider(RPC_URL))
