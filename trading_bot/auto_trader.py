@@ -52,6 +52,79 @@ def is_updown_market(market_slug: str) -> bool:
     return any(keyword in slug_lower for keyword in UPDOWN_KEYWORDS)
 
 
+# Crypto ticker patterns for defense-in-depth filtering
+CRYPTO_TICKERS = [
+    "btc", "bitcoin", "eth", "ethereum", "sol", "solana", "xrp", "ripple",
+    "ada", "cardano", "doge", "dogecoin", "shib", "bnb", "avax", "dot",
+    "matic", "polygon", "link", "chainlink", "ltc", "litecoin", "atom",
+    "near", "apt", "aptos", "sui", "arb", "arbitrum", "op", "optimism"
+]
+
+# Stock/index patterns
+STOCK_TICKERS = [
+    "nasdaq", "s&p", "sp500", "spx", "dow", "djia", "nyse", "russell",
+    "aapl", "apple", "msft", "microsoft", "googl", "google", "amzn", "amazon",
+    "tsla", "tesla", "nvda", "nvidia", "meta", "nflx", "netflix"
+]
+
+# Financial keywords
+FINANCIAL_KEYWORDS = [
+    "price", "etf", "sec approval", "market cap", "ath", "all-time high",
+    "halving", "spot etf", "futures"
+]
+
+
+def is_crypto_stock_market(text: str, threshold: int = 5) -> tuple:
+    """
+    Defense-in-depth crypto/stock filter for auto_trader.
+    Uses scoring system similar to market_monitor.
+    
+    Args:
+        text: Combined text of question/condition_id to check
+        threshold: Score threshold (default 5)
+        
+    Returns:
+        (is_crypto_stock: bool, score: int, reasons: list)
+    """
+    import re
+    
+    score = 0
+    reasons = []
+    text_lower = text.lower()
+    
+    # Check crypto tickers (+3 each, max +6)
+    crypto_found = []
+    for ticker in CRYPTO_TICKERS:
+        if re.search(rf'\b{re.escape(ticker)}\b', text_lower):
+            crypto_found.append(ticker)
+            if len(crypto_found) <= 2:
+                score += 3
+    if crypto_found:
+        reasons.append(f"crypto:{','.join(crypto_found[:3])}")
+    
+    # Check stock tickers (+3 each, max +6)
+    stock_found = []
+    for ticker in STOCK_TICKERS:
+        if re.search(rf'\b{re.escape(ticker)}\b', text_lower):
+            stock_found.append(ticker)
+            if len(stock_found) <= 2:
+                score += 3
+    if stock_found:
+        reasons.append(f"stock:{','.join(stock_found[:3])}")
+    
+    # Check financial keywords (+2 each, max +4)
+    financial_found = []
+    for keyword in FINANCIAL_KEYWORDS:
+        if keyword in text_lower:
+            financial_found.append(keyword)
+            if len(financial_found) <= 2:
+                score += 2
+    if financial_found:
+        reasons.append(f"financial:{','.join(financial_found[:3])}")
+    
+    return (score >= threshold, score, reasons)
+
+
 def is_short_duration_market(market_created_at, market_closed_time, min_hours=15):
     """
     Check if a market's duration is too short (< 15 hours)
@@ -128,6 +201,15 @@ def process_trading_job(job, trader: PolymarketTrader):
         print(f"   Market: {question[:60]}")
         print(f"   Created: {market_created_at}, Closes: {market_closed_time}")
         complete_trading_job(job_id, f"Skipped: Short duration ({duration_hours}h < 15h)")
+        return False
+    
+    # Check if crypto/stock market (defense in depth - should already be filtered in workflow)
+    is_crypto_stock, cs_score, cs_reasons = is_crypto_stock_market(search_text)
+    if is_crypto_stock:
+        print(f"⏭️  Job #{job_id} is a CRYPTO/STOCK market (score={cs_score})")
+        print(f"   Reasons: {cs_reasons}")
+        print(f"   Market: {question[:60]}")
+        complete_trading_job(job_id, f"Skipped: Crypto/Stock market (score={cs_score})")
         return False
     
     # Check if job is too old (older than 24 hours)

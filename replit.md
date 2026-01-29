@@ -46,11 +46,29 @@ Both NAV calculation and `pendingCredit` now use liquidation value (mark-to-mark
 
 This system automates Polymarket monitoring and trading.
 
-**1. Market Monitoring (Mastra Workflow)**: A cron-triggered workflow (every minute) fetches new Polymarket markets, posts them to Telegram, filters out short-term "up/down" markets, and queues relevant markets for trading in a PostgreSQL database.
+**1. Market Monitoring (Mastra Workflow)**: A cron-triggered workflow (every minute) fetches new Polymarket markets, posts them to Telegram, and queues relevant markets for trading in a PostgreSQL database.
+
+**Market Filtering (Jan 2026 Update)**:
+- **Up/Down Markets**: Filters out short-term markets with keywords like "up or down", "15m", "1h", etc.
+- **Crypto/Stock Markets**: Uses hybrid NLP scoring to filter out crypto and stock markets:
+  - +3 points per crypto ticker (BTC, ETH, SOL, etc.)
+  - +3 points per stock ticker (NASDAQ, AAPL, TSLA, etc.)
+  - +2 points per financial keyword (price, ETF, halving, etc.)
+  - +2 points per crypto/stock tag
+  - Markets with score ≥5 are filtered out
+- **Duration Filter**: Skips markets that close within 15 hours
+- **Defense-in-depth**: Both market_monitor.py and auto_trader.py apply filters
 
 **2. Trading Job Worker (Python)**: A continuous worker polls the `trading_jobs` queue, places laddered buy orders (1¢-3¢ on YES/NO tokens) for new markets, and updates job status. This component requires a residential IP due to Cloudflare blocking datacenter IPs.
 
-**3. Order Monitor (Python)**: Continuously monitors all active orders. It auto-cancels stale orders (>12 hours) to free up capital, places laddered sell orders upon fill (at 3x-10x profit), and sends Telegram notifications when sells execute. This also requires a residential IP.
+**3. Order Monitor (Python)**: Continuously monitors all active orders. It auto-cancels stale orders (>12 hours) to free up capital, places laddered sell orders upon fill, and sends Telegram notifications when sells execute. This also requires a residential IP.
+
+**Sell Ladder Strategy (Jan 2026 Update)**:
+- Reserve 10% of position for resolution (held untouched)
+- Tier 1: 30% of position @ 3x (200% profit)
+- Tier 2: 30% of position @ 4x (300% profit)
+- Tier 3: 30% of position @ 5x (400% profit)
+- Configuration in `trading_bot/config.py` via `SELL_LADDER_CONFIG` and `SELL_RESERVE_RATIO`
 
 ## Core Framework (Mastra)
 

@@ -16,14 +16,27 @@ PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS", "")
 
 # Trading strategy parameters
 ORDER_SIZE_SHARES = 10  # Buy 10 shares per order
-SELL_SHARE_RATIO = 0.5  # Sell half the shares (5), keep half to ride
+SELL_RESERVE_RATIO = 0.10  # Keep 10% of position untouched until resolution
 
 # Buy ladder: 1¢ to 3¢ (0.01 to 0.03) - 10 levels
 # These prices respect Polymarket's minimum price requirements
 BUY_LADDER_PRICES = [0.01, 0.012, 0.014, 0.016, 0.018, 0.020, 0.022, 0.025, 0.028, 0.03]
 
-# Sell target: 3x buy price (200% profit)
+# Sell ladder: Start at 200% profit (3x), increase by 100% for each tier
+# After reserving 10% for resolution, remaining 90% is split across tiers:
+#   Tier 1: 30% of total @ 3x (200% profit)
+#   Tier 2: 30% of total @ 4x (300% profit)
+#   Tier 3: 30% of total @ 5x (400% profit)
+# Remaining 10% held to resolution
+SELL_LADDER_CONFIG = [
+    {"ratio": 0.30, "profit_multiple": 3},  # 200% profit
+    {"ratio": 0.30, "profit_multiple": 4},  # 300% profit  
+    {"ratio": 0.30, "profit_multiple": 5},  # 400% profit
+]
+
+# Legacy single sell target (kept for compatibility with existing code paths)
 SELL_PROFIT_MULTIPLE = 3
+SELL_SHARE_RATIO = 0.5  # Deprecated - use SELL_LADDER_CONFIG instead
 
 # Monitoring settings
 POLL_INTERVAL_SECONDS = 10  # Check for filled orders every 10 seconds

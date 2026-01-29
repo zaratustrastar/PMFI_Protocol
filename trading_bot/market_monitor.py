@@ -17,6 +17,7 @@ Cron setup:
 
 import os
 import sys
+import re
 import requests
 import psycopg2
 from datetime import datetime
@@ -49,6 +50,34 @@ UPDOWN_KEYWORDS = [
     "3pm et",
     "4pm et",
     "5pm et",
+]
+
+# Crypto ticker patterns (high confidence)
+CRYPTO_TICKERS = [
+    "btc", "bitcoin", "eth", "ethereum", "sol", "solana", "xrp", "ripple",
+    "ada", "cardano", "doge", "dogecoin", "shib", "bnb", "avax", "dot",
+    "matic", "polygon", "link", "chainlink", "ltc", "litecoin", "atom",
+    "near", "apt", "aptos", "sui", "arb", "arbitrum", "op", "optimism"
+]
+
+# Stock/index patterns (high confidence)
+STOCK_TICKERS = [
+    "nasdaq", "s&p", "sp500", "spx", "dow", "djia", "nyse", "russell",
+    "aapl", "apple", "msft", "microsoft", "googl", "google", "amzn", "amazon",
+    "tsla", "tesla", "nvda", "nvidia", "meta", "nflx", "netflix"
+]
+
+# Financial/price keywords (medium confidence)
+FINANCIAL_KEYWORDS = [
+    "price", "etf", "sec", "approval", "trading", "market cap", "ath",
+    "all-time high", "breakout", "resistance", "support", "bull", "bear",
+    "halving", "spot etf", "futures"
+]
+
+# Category tags that indicate crypto/stock markets
+CRYPTO_STOCK_TAGS = [
+    "crypto", "cryptocurrency", "bitcoin", "ethereum", "defi",
+    "stocks", "equities", "nasdaq", "finance", "trading"
 ]
 
 
@@ -340,6 +369,93 @@ def is_short_duration(created_at: str, closed_time: str, min_hours: int = 15) ->
         return (False, None)
 
 
+def is_crypto_stock_market(title: str, outcomes: str, tags: List = None, threshold: int = 5) -> tuple:
+    """
+    Hybrid NLP scoring to detect crypto/stock markets.
+    
+    Uses multi-field scoring approach:
+    - +3 points for crypto ticker in title/outcomes
+    - +3 points for stock ticker in title/outcomes  
+    - +2 points for financial keywords in title
+    - +2 points for crypto/stock tags
+    
+    Args:
+        title: Market title/question
+        outcomes: Outcomes string (often contains tickers)
+        tags: Market tags list
+        threshold: Score threshold to classify as crypto/stock (default 5)
+        
+    Returns:
+        (is_crypto_stock: bool, score: int, reasons: list)
+    """
+    score = 0
+    reasons = []
+    
+    # Normalize text for matching
+    title_lower = title.lower()
+    outcomes_lower = str(outcomes).lower() if outcomes else ""
+    combined_text = f"{title_lower} {outcomes_lower}"
+    
+    # Check crypto tickers (+3 each, max +6)
+    crypto_found = []
+    for ticker in CRYPTO_TICKERS:
+        # Use word boundary matching to avoid false positives
+        import re
+        if re.search(rf'\b{re.escape(ticker)}\b', combined_text):
+            crypto_found.append(ticker)
+            if len(crypto_found) <= 2:  # Max +6 points
+                score += 3
+    if crypto_found:
+        reasons.append(f"crypto:{','.join(crypto_found[:3])}")
+    
+    # Check stock tickers (+3 each, max +6)
+    stock_found = []
+    for ticker in STOCK_TICKERS:
+        import re
+        if re.search(rf'\b{re.escape(ticker)}\b', combined_text):
+            stock_found.append(ticker)
+            if len(stock_found) <= 2:  # Max +6 points
+                score += 3
+    if stock_found:
+        reasons.append(f"stock:{','.join(stock_found[:3])}")
+    
+    # Check financial keywords (+2 each, max +4)
+    financial_found = []
+    for keyword in FINANCIAL_KEYWORDS:
+        if keyword in title_lower:
+            financial_found.append(keyword)
+            if len(financial_found) <= 2:  # Max +4 points
+                score += 2
+    if financial_found:
+        reasons.append(f"financial:{','.join(financial_found[:3])}")
+    
+    # Check tags (+2 per matching tag, max +4)
+    if tags:
+        tag_strings = []
+        for tag in tags:
+            if isinstance(tag, dict):
+                tag_strings.append(str(tag.get("label", "")).lower())
+                tag_strings.append(str(tag.get("slug", "")).lower())
+            else:
+                tag_strings.append(str(tag).lower())
+        
+        tag_matches = []
+        for check_tag in CRYPTO_STOCK_TAGS:
+            if any(check_tag in t for t in tag_strings):
+                tag_matches.append(check_tag)
+                if len(tag_matches) <= 2:  # Max +4 points
+                    score += 2
+        if tag_matches:
+            reasons.append(f"tags:{','.join(tag_matches[:3])}")
+    
+    is_match = score >= threshold
+    
+    if is_match:
+        log(f"   🚫 Crypto/Stock market (score={score}): {reasons}")
+    
+    return (is_match, score, reasons)
+
+
 def queue_trading_job(
     condition_id: str, 
     event_slug: str,
@@ -475,6 +591,19 @@ def process_sub_market(market: Dict, event: Dict, seen_conditions: Set[str]) -> 
         mark_condition_as_seen(condition_id, event_slug)
         result["skipped"] = True
         result["reason"] = "updown"
+        return result
+    
+    # Check if crypto/stock market (hybrid scoring filter)
+    is_crypto_stock, cs_score, cs_reasons = is_crypto_stock_market(
+        title=market_question,
+        outcomes=outcomes,
+        tags=tags,
+        threshold=5
+    )
+    if is_crypto_stock:
+        mark_condition_as_seen(condition_id, event_slug)
+        result["skipped"] = True
+        result["reason"] = f"crypto_stock_score_{cs_score}"
         return result
     
     # Check duration
