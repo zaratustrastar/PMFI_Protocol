@@ -48,16 +48,20 @@ This system automates Polymarket monitoring and trading.
 
 **1. Market Monitoring (Mastra Workflow)**: A cron-triggered workflow (every minute) fetches new Polymarket markets, posts them to Telegram, and queues relevant markets for trading in a PostgreSQL database.
 
-**Market Filtering (Jan 2026 Update)**:
+**Market Filtering (Jan 2026 v2 - Reduced False Positives)**:
 - **Up/Down Markets**: Filters out short-term markets with keywords like "up or down", "15m", "1h", etc.
-- **Crypto/Stock Markets**: Uses hybrid NLP scoring to filter out crypto and stock markets:
-  - +3 points per crypto ticker (BTC, ETH, SOL, etc.)
-  - +3 points per stock ticker (NASDAQ, AAPL, TSLA, etc.)
-  - +2 points per financial keyword (price, ETF, halving, etc.)
-  - +2 points per crypto/stock tag
-  - Markets with score ≥5 are filtered out
 - **Duration Filter**: Skips markets that close within 15 hours
-- **Defense-in-depth**: Both market_monitor.py and auto_trader.py apply filters
+- **Crypto/Stock Markets**: Improved hybrid NLP scoring with reduced false positives:
+  - **Safe tickers** (+3 pts): BTC, ETH, AAPL, NASDAQ, TSLA, etc. - match with word boundaries
+  - **Risky tickers** (sol, ada, dot, link, near, atom, uni, meta, apple, amazon, google): Only count if:
+    - $TOKEN format (e.g., $SOL)
+    - Full name present (e.g., "sol" + "solana")
+    - Hard-finance keyword present
+  - **Hard-finance keywords** (+2 pts): etf, sec, futures, halving, approval, market cap, ath
+  - **Soft keywords** (+2 pts, only if ticker hit): price, trading, breakout, resistance, support
+  - **Tags** (+2 pts): crypto, stocks, defi, finance
+  - **Exclusion rule**: Require `ticker_score > 0 AND total_score >= 5`
+- **Defense-in-depth**: Both market_monitor.py and auto_trader.py apply same filter logic
 
 **2. Trading Job Worker (Python)**: A continuous worker polls the `trading_jobs` queue, places laddered buy orders (1¢-3¢ on YES/NO tokens) for new markets, and updates job status. This component requires a residential IP due to Cloudflare blocking datacenter IPs.
 

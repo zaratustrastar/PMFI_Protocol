@@ -52,32 +52,50 @@ UPDOWN_KEYWORDS = [
     "5pm et",
 ]
 
-# Crypto ticker patterns (high confidence)
-CRYPTO_TICKERS = [
-    "btc", "bitcoin", "eth", "ethereum", "sol", "solana", "xrp", "ripple",
-    "ada", "cardano", "doge", "dogecoin", "shib", "bnb", "avax", "dot",
-    "matic", "polygon", "link", "chainlink", "ltc", "litecoin", "atom",
-    "near", "apt", "aptos", "sui", "arb", "arbitrum", "op", "optimism"
+# === CRYPTO TICKERS ===
+# Safe tokens: can match with word boundaries
+CRYPTO_SAFE = [
+    "btc", "bitcoin", "eth", "ethereum", "xrp", "ripple", "bnb", "avax",
+    "ltc", "litecoin", "apt", "aptos", "sui", "arb", "arbitrum", "op", "optimism",
+    "doge", "dogecoin", "shib", "matic", "polygon", "pepe", "wif", "bonk"
 ]
 
-# Stock/index patterns (high confidence)
-STOCK_TICKERS = [
+# Risky tokens: common English words, require stronger evidence
+# Only count if: $TOKEN format, paired with full name, or paired with hard-finance keyword
+CRYPTO_RISKY = ["sol", "ada", "dot", "uni", "near", "link", "atom"]
+
+# Full names for risky tokens (to confirm risky token match)
+CRYPTO_RISKY_FULLNAMES = {
+    "sol": "solana", "ada": "cardano", "dot": "polkadot", 
+    "uni": "uniswap", "near": "near protocol", "link": "chainlink", "atom": "cosmos"
+}
+
+# === STOCK TICKERS ===
+# Safe: indices and unambiguous tickers
+STOCK_SAFE = [
     "nasdaq", "s&p", "sp500", "spx", "dow", "djia", "nyse", "russell",
-    "aapl", "apple", "msft", "microsoft", "googl", "google", "amzn", "amazon",
-    "tsla", "tesla", "nvda", "nvidia", "meta", "nflx", "netflix"
+    "aapl", "msft", "microsoft", "googl", "tsla", "tesla", "nvda", "nvidia", "nflx", "netflix"
 ]
 
-# Financial/price keywords (medium confidence)
-FINANCIAL_KEYWORDS = [
-    "price", "etf", "sec", "approval", "trading", "market cap", "ath",
-    "all-time high", "breakout", "resistance", "support", "bull", "bear",
-    "halving", "spot etf", "futures"
+# Risky: common words that are also company names, require second signal
+STOCK_RISKY = ["meta", "apple", "amazon", "google"]
+
+# === FINANCIAL KEYWORDS ===
+# Hard finance: safe to use, strong signal
+HARD_FINANCE_KEYWORDS = [
+    "etf", "sec", "futures", "spot etf", "approval", "halving", 
+    "market cap", "ath", "all-time high"
+]
+
+# Soft/generic: only count if ticker already hit (boosters, not triggers)
+SOFT_FINANCE_KEYWORDS = [
+    "price", "trading", "breakout", "resistance", "support", "bull", "bear"
 ]
 
 # Category tags that indicate crypto/stock markets
 CRYPTO_STOCK_TAGS = [
     "crypto", "cryptocurrency", "bitcoin", "ethereum", "defi",
-    "stocks", "equities", "nasdaq", "finance", "trading"
+    "stocks", "equities", "nasdaq", "finance"
 ]
 
 
@@ -371,65 +389,120 @@ def is_short_duration(created_at: str, closed_time: str, min_hours: int = 15) ->
 
 def is_crypto_stock_market(title: str, outcomes: str, tags: List = None, threshold: int = 5) -> tuple:
     """
-    Hybrid NLP scoring to detect crypto/stock markets.
+    Improved hybrid NLP scoring to detect crypto/stock markets with reduced false positives.
     
-    Uses multi-field scoring approach:
-    - +3 points for crypto ticker in title/outcomes
-    - +3 points for stock ticker in title/outcomes  
-    - +2 points for financial keywords in title
-    - +2 points for crypto/stock tags
+    Key improvements:
+    1. Risky tokens (sol, ada, dot, etc.) require stronger evidence ($TOKEN, full name, or hard-finance keyword)
+    2. Soft keywords (price, trading) only count if a ticker already hit
+    3. Risky stock names (meta, apple, amazon) require a second signal
+    4. Must have at least one ticker hit to filter (keywords+tags alone won't filter)
     
-    Args:
-        title: Market title/question
-        outcomes: Outcomes string (often contains tickers)
-        tags: Market tags list
-        threshold: Score threshold to classify as crypto/stock (default 5)
-        
-    Returns:
-        (is_crypto_stock: bool, score: int, reasons: list)
+    Returns (is_match, score, reasons) tuple.
     """
+    import re
+    
     score = 0
-    reasons = []
+    ticker_score = 0  # Track ticker hits separately
+    matched_items = {"crypto": [], "stock": [], "hard_finance": [], "soft_finance": [], "tags": []}
     
     # Normalize text for matching
     title_lower = title.lower()
     outcomes_lower = str(outcomes).lower() if outcomes else ""
     combined_text = f"{title_lower} {outcomes_lower}"
     
-    # Check crypto tickers (+3 each, max +6)
-    crypto_found = []
-    for ticker in CRYPTO_TICKERS:
-        # Use word boundary matching to avoid false positives
-        import re
-        if re.search(rf'\b{re.escape(ticker)}\b', combined_text):
-            crypto_found.append(ticker)
-            if len(crypto_found) <= 2:  # Max +6 points
-                score += 3
-    if crypto_found:
-        reasons.append(f"crypto:{','.join(crypto_found[:3])}")
+    # Helper: check for $TOKEN format (e.g., $SOL, $BTC)
+    def has_dollar_format(token):
+        return bool(re.search(rf'\${token}\b', combined_text, re.IGNORECASE))
     
-    # Check stock tickers (+3 each, max +6)
-    stock_found = []
-    for ticker in STOCK_TICKERS:
-        import re
-        if re.search(rf'\b{re.escape(ticker)}\b', combined_text):
-            stock_found.append(ticker)
-            if len(stock_found) <= 2:  # Max +6 points
-                score += 3
-    if stock_found:
-        reasons.append(f"stock:{','.join(stock_found[:3])}")
+    # Helper: check if full name is present alongside short ticker
+    def has_fullname(token, fullname):
+        return bool(re.search(rf'\b{re.escape(fullname)}\b', combined_text))
     
-    # Check financial keywords (+2 each, max +4)
-    financial_found = []
-    for keyword in FINANCIAL_KEYWORDS:
-        if keyword in title_lower:
-            financial_found.append(keyword)
-            if len(financial_found) <= 2:  # Max +4 points
+    # Helper: check if any hard-finance keyword is present
+    def has_hard_finance():
+        for kw in HARD_FINANCE_KEYWORDS:
+            if kw in combined_text:
+                return True
+        return False
+    
+    # === CHECK SAFE CRYPTO TICKERS (+3 each, max 2 = +6) ===
+    crypto_count = 0
+    for ticker in CRYPTO_SAFE:
+        if re.search(rf'\b{re.escape(ticker)}\b', combined_text):
+            matched_items["crypto"].append(ticker)
+            if crypto_count < 2:
+                score += 3
+                ticker_score += 3
+                crypto_count += 1
+    
+    # === CHECK RISKY CRYPTO TICKERS (require confirmation) ===
+    for ticker in CRYPTO_RISKY:
+        if re.search(rf'\b{re.escape(ticker)}\b', combined_text):
+            fullname = CRYPTO_RISKY_FULLNAMES.get(ticker, "")
+            
+            # Only count if: $TOKEN format, fullname present, or hard-finance keyword present
+            confirmed = (
+                has_dollar_format(ticker) or
+                (fullname and has_fullname(ticker, fullname)) or
+                has_hard_finance()
+            )
+            
+            if confirmed:
+                matched_items["crypto"].append(f"{ticker}(confirmed)")
+                if crypto_count < 2:
+                    score += 3
+                    ticker_score += 3
+                    crypto_count += 1
+            else:
+                matched_items["crypto"].append(f"{ticker}(unconfirmed-skipped)")
+    
+    # === CHECK SAFE STOCK TICKERS (+3 each, max 2 = +6) ===
+    stock_count = 0
+    for ticker in STOCK_SAFE:
+        if re.search(rf'\b{re.escape(ticker)}\b', combined_text):
+            matched_items["stock"].append(ticker)
+            if stock_count < 2:
+                score += 3
+                ticker_score += 3
+                stock_count += 1
+    
+    # === CHECK RISKY STOCK NAMES (require second signal) ===
+    for ticker in STOCK_RISKY:
+        if re.search(rf'\b{re.escape(ticker)}\b', combined_text):
+            # Only count if hard-finance keyword present
+            confirmed = has_hard_finance()
+            
+            if confirmed:
+                matched_items["stock"].append(f"{ticker}(confirmed)")
+                if stock_count < 2:
+                    score += 3
+                    ticker_score += 3
+                    stock_count += 1
+            else:
+                matched_items["stock"].append(f"{ticker}(unconfirmed-skipped)")
+    
+    # === CHECK HARD FINANCE KEYWORDS (+2 each, max 2 = +4) ===
+    # Always count - these are strong signals
+    hard_fin_count = 0
+    for keyword in HARD_FINANCE_KEYWORDS:
+        if keyword in combined_text:
+            matched_items["hard_finance"].append(keyword)
+            if hard_fin_count < 2:
                 score += 2
-    if financial_found:
-        reasons.append(f"financial:{','.join(financial_found[:3])}")
+                hard_fin_count += 1
     
-    # Check tags (+2 per matching tag, max +4)
+    # === CHECK SOFT FINANCE KEYWORDS (+2 each, max 2 = +4) ===
+    # ONLY count if we already have a ticker hit (boosters, not triggers)
+    if ticker_score > 0:
+        soft_fin_count = 0
+        for keyword in SOFT_FINANCE_KEYWORDS:
+            if keyword in combined_text:
+                matched_items["soft_finance"].append(keyword)
+                if soft_fin_count < 2:
+                    score += 2
+                    soft_fin_count += 1
+    
+    # === CHECK TAGS (+2 per matching tag, max 2 = +4) ===
     if tags:
         tag_strings = []
         for tag in tags:
@@ -439,19 +512,36 @@ def is_crypto_stock_market(title: str, outcomes: str, tags: List = None, thresho
             else:
                 tag_strings.append(str(tag).lower())
         
-        tag_matches = []
+        tag_count = 0
         for check_tag in CRYPTO_STOCK_TAGS:
             if any(check_tag in t for t in tag_strings):
-                tag_matches.append(check_tag)
-                if len(tag_matches) <= 2:  # Max +4 points
+                matched_items["tags"].append(check_tag)
+                if tag_count < 2:
                     score += 2
-        if tag_matches:
-            reasons.append(f"tags:{','.join(tag_matches[:3])}")
+                    tag_count += 1
     
-    is_match = score >= threshold
+    # === EXCLUSION LOGIC ===
+    # Require at least one CONFIRMED ticker hit before excluding
+    has_ticker_hit = ticker_score > 0
+    is_match = has_ticker_hit and (score >= threshold)
+    
+    # Build reason string for logging
+    reasons = []
+    if matched_items["crypto"]:
+        reasons.append(f"crypto:{','.join(matched_items['crypto'][:4])}")
+    if matched_items["stock"]:
+        reasons.append(f"stock:{','.join(matched_items['stock'][:4])}")
+    if matched_items["hard_finance"]:
+        reasons.append(f"hard_fin:{','.join(matched_items['hard_finance'][:3])}")
+    if matched_items["soft_finance"]:
+        reasons.append(f"soft_fin:{','.join(matched_items['soft_finance'][:3])}")
+    if matched_items["tags"]:
+        reasons.append(f"tags:{','.join(matched_items['tags'][:3])}")
     
     if is_match:
-        log(f"   🚫 Crypto/Stock market (score={score}): {reasons}")
+        log(f"   🚫 FILTERED crypto/stock (score={score}, ticker_score={ticker_score}): {reasons}")
+    elif score > 0:
+        log(f"   ✅ NOT filtered (score={score}, ticker_score={ticker_score}, need ticker+threshold): {reasons}")
     
     return (is_match, score, reasons)
 

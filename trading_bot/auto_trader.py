@@ -52,77 +52,165 @@ def is_updown_market(market_slug: str) -> bool:
     return any(keyword in slug_lower for keyword in UPDOWN_KEYWORDS)
 
 
-# Crypto ticker patterns for defense-in-depth filtering
-CRYPTO_TICKERS = [
-    "btc", "bitcoin", "eth", "ethereum", "sol", "solana", "xrp", "ripple",
-    "ada", "cardano", "doge", "dogecoin", "shib", "bnb", "avax", "dot",
-    "matic", "polygon", "link", "chainlink", "ltc", "litecoin", "atom",
-    "near", "apt", "aptos", "sui", "arb", "arbitrum", "op", "optimism"
+# === CRYPTO TICKERS ===
+# Safe tokens: can match with word boundaries
+CRYPTO_SAFE = [
+    "btc", "bitcoin", "eth", "ethereum", "xrp", "ripple", "bnb", "avax",
+    "ltc", "litecoin", "apt", "aptos", "sui", "arb", "arbitrum", "op", "optimism",
+    "doge", "dogecoin", "shib", "matic", "polygon", "pepe", "wif", "bonk"
 ]
 
-# Stock/index patterns
-STOCK_TICKERS = [
+# Risky tokens: common English words, require stronger evidence
+CRYPTO_RISKY = ["sol", "ada", "dot", "uni", "near", "link", "atom"]
+
+# Full names for risky tokens
+CRYPTO_RISKY_FULLNAMES = {
+    "sol": "solana", "ada": "cardano", "dot": "polkadot", 
+    "uni": "uniswap", "near": "near protocol", "link": "chainlink", "atom": "cosmos"
+}
+
+# === STOCK TICKERS ===
+# Safe: indices and unambiguous tickers
+STOCK_SAFE = [
     "nasdaq", "s&p", "sp500", "spx", "dow", "djia", "nyse", "russell",
-    "aapl", "apple", "msft", "microsoft", "googl", "google", "amzn", "amazon",
-    "tsla", "tesla", "nvda", "nvidia", "meta", "nflx", "netflix"
+    "aapl", "msft", "microsoft", "googl", "tsla", "tesla", "nvda", "nvidia", "nflx", "netflix"
 ]
 
-# Financial keywords
-FINANCIAL_KEYWORDS = [
-    "price", "etf", "sec approval", "market cap", "ath", "all-time high",
-    "halving", "spot etf", "futures"
+# Risky: common words that are also company names
+STOCK_RISKY = ["meta", "apple", "amazon", "google"]
+
+# === FINANCIAL KEYWORDS ===
+# Hard finance: always count
+HARD_FINANCE_KEYWORDS = [
+    "etf", "sec", "futures", "spot etf", "approval", "halving", 
+    "market cap", "ath", "all-time high"
+]
+
+# Soft/generic: only count if ticker already hit
+SOFT_FINANCE_KEYWORDS = [
+    "price", "trading", "breakout", "resistance", "support", "bull", "bear"
 ]
 
 
 def is_crypto_stock_market(text: str, threshold: int = 5) -> tuple:
     """
-    Defense-in-depth crypto/stock filter for auto_trader.
-    Uses scoring system similar to market_monitor.
+    Defense-in-depth crypto/stock filter with reduced false positives.
     
-    Args:
-        text: Combined text of question/condition_id to check
-        threshold: Score threshold (default 5)
-        
-    Returns:
-        (is_crypto_stock: bool, score: int, reasons: list)
+    Key improvements:
+    1. Risky tokens (sol, ada, dot) require confirmation ($TOKEN, full name, or hard-finance keyword)
+    2. Soft keywords only count if ticker already hit
+    3. Risky stock names require second signal
+    4. Must have ticker hit to filter
+    
+    Returns (is_match, score, reasons) tuple.
     """
     import re
     
     score = 0
-    reasons = []
+    ticker_score = 0
+    matched_items = {"crypto": [], "stock": [], "hard_finance": [], "soft_finance": []}
     text_lower = text.lower()
     
-    # Check crypto tickers (+3 each, max +6)
-    crypto_found = []
-    for ticker in CRYPTO_TICKERS:
-        if re.search(rf'\b{re.escape(ticker)}\b', text_lower):
-            crypto_found.append(ticker)
-            if len(crypto_found) <= 2:
-                score += 3
-    if crypto_found:
-        reasons.append(f"crypto:{','.join(crypto_found[:3])}")
+    # Helper: check for $TOKEN format
+    def has_dollar_format(token):
+        return bool(re.search(rf'\${token}\b', text_lower, re.IGNORECASE))
     
-    # Check stock tickers (+3 each, max +6)
-    stock_found = []
-    for ticker in STOCK_TICKERS:
-        if re.search(rf'\b{re.escape(ticker)}\b', text_lower):
-            stock_found.append(ticker)
-            if len(stock_found) <= 2:
-                score += 3
-    if stock_found:
-        reasons.append(f"stock:{','.join(stock_found[:3])}")
+    # Helper: check if full name present
+    def has_fullname(token, fullname):
+        return bool(re.search(rf'\b{re.escape(fullname)}\b', text_lower))
     
-    # Check financial keywords (+2 each, max +4)
-    financial_found = []
-    for keyword in FINANCIAL_KEYWORDS:
+    # Helper: check for hard-finance keyword
+    def has_hard_finance():
+        for kw in HARD_FINANCE_KEYWORDS:
+            if kw in text_lower:
+                return True
+        return False
+    
+    # === SAFE CRYPTO TICKERS (+3 each, max 2) ===
+    crypto_count = 0
+    for ticker in CRYPTO_SAFE:
+        if re.search(rf'\b{re.escape(ticker)}\b', text_lower):
+            matched_items["crypto"].append(ticker)
+            if crypto_count < 2:
+                score += 3
+                ticker_score += 3
+                crypto_count += 1
+    
+    # === RISKY CRYPTO (require confirmation) ===
+    for ticker in CRYPTO_RISKY:
+        if re.search(rf'\b{re.escape(ticker)}\b', text_lower):
+            fullname = CRYPTO_RISKY_FULLNAMES.get(ticker, "")
+            confirmed = (
+                has_dollar_format(ticker) or
+                (fullname and has_fullname(ticker, fullname)) or
+                has_hard_finance()
+            )
+            if confirmed:
+                matched_items["crypto"].append(f"{ticker}(confirmed)")
+                if crypto_count < 2:
+                    score += 3
+                    ticker_score += 3
+                    crypto_count += 1
+            else:
+                matched_items["crypto"].append(f"{ticker}(skipped)")
+    
+    # === SAFE STOCK TICKERS (+3 each, max 2) ===
+    stock_count = 0
+    for ticker in STOCK_SAFE:
+        if re.search(rf'\b{re.escape(ticker)}\b', text_lower):
+            matched_items["stock"].append(ticker)
+            if stock_count < 2:
+                score += 3
+                ticker_score += 3
+                stock_count += 1
+    
+    # === RISKY STOCK (require second signal) ===
+    for ticker in STOCK_RISKY:
+        if re.search(rf'\b{re.escape(ticker)}\b', text_lower):
+            confirmed = has_hard_finance()
+            if confirmed:
+                matched_items["stock"].append(f"{ticker}(confirmed)")
+                if stock_count < 2:
+                    score += 3
+                    ticker_score += 3
+                    stock_count += 1
+            else:
+                matched_items["stock"].append(f"{ticker}(skipped)")
+    
+    # === HARD FINANCE KEYWORDS (+2 each, max 2) ===
+    hard_fin_count = 0
+    for keyword in HARD_FINANCE_KEYWORDS:
         if keyword in text_lower:
-            financial_found.append(keyword)
-            if len(financial_found) <= 2:
+            matched_items["hard_finance"].append(keyword)
+            if hard_fin_count < 2:
                 score += 2
-    if financial_found:
-        reasons.append(f"financial:{','.join(financial_found[:3])}")
+                hard_fin_count += 1
     
-    return (score >= threshold, score, reasons)
+    # === SOFT FINANCE (only if ticker hit) ===
+    if ticker_score > 0:
+        soft_fin_count = 0
+        for keyword in SOFT_FINANCE_KEYWORDS:
+            if keyword in text_lower:
+                matched_items["soft_finance"].append(keyword)
+                if soft_fin_count < 2:
+                    score += 2
+                    soft_fin_count += 1
+    
+    # Must have ticker hit to filter
+    has_ticker_hit = ticker_score > 0
+    is_match = has_ticker_hit and (score >= threshold)
+    
+    reasons = []
+    if matched_items["crypto"]:
+        reasons.append(f"crypto:{','.join(matched_items['crypto'][:4])}")
+    if matched_items["stock"]:
+        reasons.append(f"stock:{','.join(matched_items['stock'][:4])}")
+    if matched_items["hard_finance"]:
+        reasons.append(f"hard_fin:{','.join(matched_items['hard_finance'][:3])}")
+    if matched_items["soft_finance"]:
+        reasons.append(f"soft_fin:{','.join(matched_items['soft_finance'][:3])}")
+    
+    return (is_match, score, reasons)
 
 
 def is_short_duration_market(market_created_at, market_closed_time, min_hours=15):
