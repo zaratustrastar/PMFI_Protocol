@@ -1,0 +1,117 @@
+This list is solid for coverage, but **as-is it will create false positives** (especially with *sol / ada / dot / market*), and your keyword set is **too broad** if it’s allowed to exclude markets without a ticker hit.
+
+Here’s how I’d tighten it without making it complicated.
+
+## 1) make ticker matching “ticker-safe”
+
+Right now if you’re doing naive `in` substring matching, you’ll accidentally match:
+
+* `sol` in “solution / solved / solidarity / sol…” (and Spanish “sol” appears everywhere)
+* `ada` in “Canada”
+* `dot` in “dot com”
+* `uni` in “united / university”
+* `near` in “near” (common English word)
+* `atom` in “atomic”
+* `link` in “link” (super common)
+
+**Fix:** only count tickers when they match as a *token*, not a substring.
+
+Use:
+
+* word boundaries: `\bBTC\b`
+* or `$BTC`
+* or “(BTC)” style
+* and for multiword like “market cap”, match as a phrase.
+
+**Rule:**
+
+* Treat *full names* (bitcoin, ethereum, solana…) as normal words with boundaries too (`\bbitcoin\b`)
+* Treat short tickers (sol, ada, dot, uni, near, link, atom) with **extra strict rules** (next section).
+
+## 2) create a “high-risk short token” group (stricter)
+
+Split your crypto list into:
+
+### safe-ish tokens (can match with word boundaries)
+
+`btc, eth, xrp, bnb, avax, ltc, apt, sui, pepe, wif, bonk, shib, doge, matic` (still boundaries)
+
+### risky tokens (require stronger evidence)
+
+`sol, ada, dot, uni, near, link, atom`
+
+For these, only count them if **any** of these is true:
+
+* appears as `$SOL` / `$ADA` / `$DOT`
+* appears in outcomes list (if you have it)
+* appears alongside a crypto keyword like `etf, halving, futures, spot`
+* appears alongside the full name in same market text (`sol` + `solana`, `link` + `chainlink`)
+
+This one change eliminates most accidental filtering.
+
+## 3) don’t allow keywords-only to exclude markets
+
+Your financial keywords include very generic words:
+
+* `price`, `trading`, `market cap`, `market`, `bull`, `bear`, `support`, `resistance`
+
+Those can show up in random descriptions or commentary and you’ll filter non-financial markets.
+
+**Strong recommendation:**
+
+* Only exclude if **at least one ticker/name hit** is present.
+* Keywords should be “boosters”, not independent triggers.
+
+So exclusion logic becomes:
+
+> Exclude if `(ticker_score >= 3) AND (ticker_score + keyword_score + tag_score >= 5)`
+
+This keeps your threshold concept but prevents keyword-only exclusions.
+
+## 4) tighten the keyword set (or weight it)
+
+I’d split keywords into:
+
+### “hard finance” (safe to use)
+
+`etf, sec, futures, spot etf, approval, halving, market cap, ath, all-time high`
+
+### “soft / too generic” (only count if ticker already hit)
+
+`price, trading, breakout, resistance, support, bull, bear`
+
+And you already cap keywords to max 2 — good. Keep that.
+
+## 5) stock list: mostly fine, but watch “meta”
+
+`meta` is a common word. Same for `apple` (fruit), `amazon` (river), `google` (verb). Use word boundaries, and ideally require at least one hard-finance keyword when the match is a company name.
+
+Example stock exclusion:
+
+* If it hits `nasdaq/spx/sp500/djia/nyse` → immediate strong signal
+* If it hits `apple/meta/amazon` → require a second signal (keyword/tag)
+
+## 6) logging: store the matched items
+
+When a market is excluded, log:
+
+* matched tickers/names
+* matched keywords
+* matched tags
+* final score
+
+You’ll quickly see which token causes damage (usually `sol`, `meta`, `near`, `link`).
+
+---
+
+### If you want a clean rule that will work well:
+
+**Exclude market if:**
+
+1. `has_ticker_hit == True`, and
+2. `(score >= 5)`, and
+3. if the ticker hit is from the **risky list**, require an additional confirmation (`hard_finance_keyword OR full-name match OR $TICKER format`)
+
+That gives you high precision without losing recall.
+
+If you tell me **how you’re matching right now** (substring vs regex boundaries, and whether you parse outcomes/tags), I can translate the above into a concrete implementation pattern for your exact setup.
