@@ -1,0 +1,125 @@
+Replit task: transform PMFI web app into a Farcaster mini app while keeping the full web app
+context
+
+We have a working PMFI beta dapp running locally (desktop-focused UI). We are adding a public domain and want to ship a Farcaster Mini App (Frames → Mini Apps / Frames v2) version while keeping the existing full web app.
+
+We want:
+
+/ = full web app (existing)
+
+/mini = mini-app optimized UI for Farcaster clients + Base App
+
+Same backend + same contracts + same user state (where possible)
+
+Use official specs + builders:
+
+Farcaster Mini Apps: getting started + spec
+
+Frames v2 / Mini Apps hub:
+
+Base Mini Apps builder page (create-onchain mini app starter):
+
+Base MiniKit overview (SDK for Base + Farcaster clients):
+
+Base Quickstart: create mini app + manifest /.well-known/farcaster.json:
+
+Action verification (don’t accept unauthenticated posts):
+
+Optional: Neynar mini app quickstart package:
+
+goal
+
+Implement a Farcaster Mini App entrypoint for PMFI that:
+
+can be embedded and launched inside Farcaster clients and Base App
+
+provides a mobile-first mini UX (not just “responsive desktop”)
+
+keeps the full web app intact
+
+includes proper verification for mini app interactions (security)
+
+scope & deliverables
+1) routing / app structure
+
+Keep existing app at /
+
+Add a new route /mini
+
+/mini must be designed for small screens + Farcaster mini app container (tight vertical layout)
+
+2) mini app embed + metadata
+
+Implement Mini App Embed metadata according to the official mini apps specification (OpenGraph-like tags).
+
+Ensure /mini returns correct metadata so a Farcaster client can render the embed and launch it.
+
+3) manifest + well-known config
+
+Add the mini app manifest at /.well-known/farcaster.json (or the exact path the Base MiniKit quickstart expects).
+
+Ensure the manifest references the correct domain and points to /mini.
+
+Follow Base’s mini app quickstart conventions.
+
+4) Base App optimization (recommended)
+
+Integrate Base MiniKit in /mini so it works smoothly inside Base App and other Farcaster clients (wallet context, app lifecycle ready signal, etc.).
+
+5) interaction handling + verification (security)
+
+Implement server-side endpoint(s) to handle mini app actions/requests.
+
+Validate/verify incoming Farcaster action payloads (don’t trust raw POSTs).
+
+Use Neynar verification flow (or equivalent hub verification) as shown in docs.
+
+6) UX requirements for the mini version
+
+The mini app must focus on 2–4 core actions only (PMFI finance style):
+
+show current vault NAV and user position snapshot
+
+deposit / withdraw (or “connect + deposit” if needed)
+
+“view details” deep link to full app page (optional)
+
+Keep:
+
+no dense tables
+
+no hover-only interactions
+
+no multi-step forms unless absolutely needed
+
+7) environment detection + redirects (optional but helpful)
+
+If the user opens / inside a mini app container, redirect them to /mini (do not rely only on screen width).
+
+Outside of the container, / remains default.
+
+8) testing checklist
+
+Provide a simple testing doc:
+
+How to test embeds + launch behavior
+
+How to test /mini in local dev (including HTTPS / tunneling if needed)
+
+How to verify the manifest is served correctly
+
+How to confirm action verification is working (reject invalid payloads)
+
+acceptance criteria (must pass)
+
+/ behaves exactly as before (no regressions)
+
+/mini loads fast, fits mobile + mini container
+
+Farcaster mini app embed metadata is present and valid on /mini
+
+Manifest exists at the correct well-known path and matches the deployed domain
+
+Actions/requests hitting our server are verified (invalid ones rejected)
+
+Works in Base App context using MiniKit (or at least does not break)
