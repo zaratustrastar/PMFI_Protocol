@@ -1,0 +1,16 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0",
+    "payload": "eyJkb21haW4iOiJwbWZpLmNjIn0",
+    "signature": "REPLACE_WITH_REAL_SIGNATURE_AFTER_FID_REGISTRATION"
+  },
+  "frame": {
+    "version": "1",
+    "name": "pSNIPER Vault",
+    "iconUrl": "https://pmfi.cc/psniper-logo.png",
+    "splashImageUrl": "https://pmfi.cc/psniper-logo.png",
+    "splashBackgroundColor": "#0d1117",
+    "homeUrl": "https://pmfi.cc/mini",
+    "webhookUrl": "https://pmfi.cc/api/farcaster/webhook"
+  }
+}

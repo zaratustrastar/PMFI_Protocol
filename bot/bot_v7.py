@@ -581,10 +581,27 @@ if not FRONTEND_DIR.exists():
 
 @flask_app.route('/')
 def serve_index():
+    user_agent = flask_request.headers.get('User-Agent', '').lower()
+    fc_frame = flask_request.headers.get('Sec-Fetch-Dest', '')
+    
+    if 'farcaster' in user_agent or 'warpcast' in user_agent or fc_frame == 'iframe':
+        return send_from_directory(FRONTEND_DIR, 'mini.html')
     return send_from_directory(FRONTEND_DIR, 'index.html')
+
+@flask_app.route('/mini')
+def serve_mini():
+    """Serve the Farcaster Mini App version"""
+    return send_from_directory(FRONTEND_DIR, 'mini.html')
+
+@flask_app.route('/.well-known/farcaster.json')
+def serve_farcaster_manifest():
+    """Serve the Farcaster Mini App manifest"""
+    return send_from_directory(FRONTEND_DIR / '.well-known', 'farcaster.json', mimetype='application/json')
 
 @flask_app.route('/<path:filename>')
 def serve_static(filename):
+    if filename.startswith('.well-known/'):
+        return send_from_directory(FRONTEND_DIR, filename)
     return send_from_directory(FRONTEND_DIR, filename)
 
 
@@ -1954,6 +1971,128 @@ def get_positions_endpoint():
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+
+# =============================================================================
+# Farcaster Mini App API Routes
+# =============================================================================
+
+NEYNAR_API_KEY = os.getenv("NEYNAR_API_KEY", "")
+FARCASTER_HUB_URL = os.getenv("FARCASTER_HUB_URL", "https://hub.pinata.cloud")
+
+def verify_farcaster_message(message_bytes_hex: str) -> dict:
+    """
+    Verify a Farcaster message using hub validation.
+    Returns dict with 'valid' boolean and 'fid' if valid.
+    """
+    if not message_bytes_hex:
+        return {'valid': False, 'error': 'Missing messageBytes'}
+    
+    if NEYNAR_API_KEY:
+        try:
+            resp = requests.post(
+                "https://api.neynar.com/v2/farcaster/frame/validate",
+                headers={
+                    "accept": "application/json",
+                    "api_key": NEYNAR_API_KEY,
+                    "content-type": "application/json"
+                },
+                json={"message_bytes_in_hex": message_bytes_hex},
+                timeout=10
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                if data.get('valid'):
+                    return {
+                        'valid': True,
+                        'fid': data.get('action', {}).get('interactor', {}).get('fid'),
+                        'button_index': data.get('action', {}).get('tapped_button', {}).get('index')
+                    }
+            return {'valid': False, 'error': 'Neynar validation failed'}
+        except Exception as e:
+            print(f"⚠️ Neynar verification failed: {e}")
+    
+    try:
+        resp = requests.post(
+            f"{FARCASTER_HUB_URL}/v1/validateMessage",
+            headers={"Content-Type": "application/octet-stream"},
+            data=bytes.fromhex(message_bytes_hex.replace('0x', '')),
+            timeout=10
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get('valid'):
+                return {
+                    'valid': True,
+                    'fid': data.get('message', {}).get('data', {}).get('fid')
+                }
+        return {'valid': False, 'error': 'Hub validation failed'}
+    except Exception as e:
+        print(f"⚠️ Hub verification failed: {e}")
+        return {'valid': False, 'error': str(e)}
+
+@flask_app.route('/api/farcaster/webhook', methods=['POST'])
+def farcaster_webhook():
+    """Handle Farcaster Frame/Mini App webhook callbacks with verification"""
+    try:
+        data = flask_request.get_json() or {}
+        
+        untrusted_data = data.get('untrustedData', {})
+        trusted_data = data.get('trustedData', {})
+        message_bytes = trusted_data.get('messageBytes', '')
+        
+        if not message_bytes:
+            print("⚠️ Farcaster webhook: No trustedData.messageBytes - rejecting")
+            return jsonify({'error': 'Missing signature data'}), 401
+        
+        verification = verify_farcaster_message(message_bytes)
+        
+        if not verification.get('valid'):
+            print(f"❌ Farcaster webhook: Verification failed - {verification.get('error')}")
+            return jsonify({'error': 'Invalid message signature', 'details': verification.get('error')}), 401
+        
+        verified_fid = verification.get('fid')
+        untrusted_fid = untrusted_data.get('fid')
+        
+        if verified_fid and untrusted_fid and str(verified_fid) != str(untrusted_fid):
+            print(f"❌ Farcaster webhook: FID mismatch - untrusted={untrusted_fid}, verified={verified_fid}")
+            return jsonify({'error': 'FID mismatch'}), 401
+        
+        fid = verified_fid or untrusted_fid
+        button_index = verification.get('button_index') or untrusted_data.get('buttonIndex')
+        input_text = untrusted_data.get('inputText', '')
+        
+        print(f"✅ Farcaster webhook: VERIFIED fid={fid}, button={button_index}, input={input_text}")
+        
+        return jsonify({
+            'success': True,
+            'fid': fid,
+            'action': 'acknowledged',
+            'verified': True
+        })
+        
+    except Exception as e:
+        print(f"❌ Farcaster webhook error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@flask_app.route('/api/farcaster/verify', methods=['POST'])
+def farcaster_verify():
+    """Verify a Farcaster message signature using Neynar or hub validation"""
+    try:
+        data = flask_request.get_json() or {}
+        message_bytes = data.get('messageBytes', '')
+        
+        if not message_bytes:
+            return jsonify({'valid': False, 'error': 'Missing messageBytes'}), 400
+        
+        print(f"🔐 Farcaster verify request for message: {message_bytes[:50]}...")
+        
+        verification = verify_farcaster_message(message_bytes)
+        return jsonify(verification)
+        
+    except Exception as e:
+        print(f"❌ Farcaster verify error: {e}")
+        return jsonify({'valid': False, 'error': str(e)}), 500
 
 
 # =============================================================================

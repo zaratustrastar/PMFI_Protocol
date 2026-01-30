@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>pSNIPER | Farcaster Mini App</title>
+    
+    <!-- Farcaster Mini App Embed Metadata -->
+    <meta property="fc:frame" content="vNext" />
+    <meta property="fc:frame:image" content="https://pmfi.cc/psniper-logo.png" />
+    <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+    <meta property="fc:frame:button:1" content="Open pSNIPER" />
+    <meta property="fc:frame:button:1:action" content="launch_frame" />
+    <meta property="fc:frame:button:1:target" content="https://pmfi.cc/mini" />
+    
+    <!-- OpenGraph Meta -->
+    <meta property="og:title" content="pSNIPER Vault - Polymarket Alpha" />
+    <meta property="og:description" content="Automated Polymarket sniping vault. Early access beta." />
+    <meta property="og:image" content="https://pmfi.cc/psniper-logo.png" />
+    <meta property="og:url" content="https://pmfi.cc/mini" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="pSNIPER Vault" />
+    <meta name="twitter:description" content="Automated Polymarket sniping vault." />
+    <meta name="twitter:image" content="https://pmfi.cc/psniper-logo.png" />
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    
+    <!-- Farcaster Frame SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@0.0.26/dist/index.umd.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        :root {
+            --bg-primary: #0d1117;
+            --bg-card: linear-gradient(180deg, rgba(30,35,50,1) 0%, rgba(20,25,35,1) 100%);
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent-green: #7ee787;
+            --accent-red: #f85149;
+            --border-subtle: rgba(255,255,255,0.08);
+        }
+        
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .mini-app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 16px;
+            padding-bottom: env(safe-area-inset-bottom, 16px);
+            max-width: 420px;
+            margin: 0 auto;
+        }
+        
+        .mini-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0 16px;
+        }
+        
+        .mini-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .mini-logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(240, 246, 252, 0.2);
+        }
+        
+        .mini-logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .connect-btn {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        
+        .connect-btn:hover {
+            opacity: 0.85;
+        }
+        
+        .connect-btn.connected {
+            background: rgba(126,231,135,0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(126,231,135,0.3);
+        }
+        
+        .vault-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .vault-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .vault-title img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .stat-box {
+            background: rgba(0,0,0,0.25);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .stat-value.green {
+            color: var(--accent-green);
+        }
+        
+        .user-position {
+            background: rgba(126,231,135,0.08);
+            border: 1px solid rgba(126,231,135,0.15);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+        
+        .user-position.hidden {
+            display: none;
+        }
+        
+        .position-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .position-label {
+            font-size: 12px;
+            color: var(--accent-green);
+        }
+        
+        .position-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: auto;
+            padding-top: 16px;
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .action-btn.primary {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+        
+        .action-btn.primary:hover:not(:disabled) {
+            opacity: 0.85;
+        }
+        
+        .action-btn.secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .action-btn.secondary:hover:not(:disabled) {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .action-btn.link {
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 12px;
+        }
+        
+        .action-btn.link:hover {
+            color: var(--text-primary);
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-sheet {
+            background: #161b22;
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            width: 100%;
+            max-width: 420px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+        }
+        
+        .modal-overlay.active .modal-sheet {
+            transform: translateY(0);
+        }
+        
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+        
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            padding-right: 70px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-size: 18px;
+            color: var(--text-primary);
+            font-family: 'SF Mono', 'Monaco', monospace;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.3);
+        }
+        
+        .input-suffix {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .max-btn {
+            position: absolute;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(126,231,135,0.2);
+            color: var(--accent-green);
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .status-msg {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 16px;
+            display: none;
+        }
+        
+        .status-msg.show {
+            display: block;
+        }
+        
+        .status-msg.info {
+            background: rgba(56, 139, 253, 0.1);
+            border: 1px solid rgba(56, 139, 253, 0.2);
+            color: #58a6ff;
+        }
+        
+        .status-msg.success {
+            background: rgba(126, 231, 135, 0.1);
+            border: 1px solid rgba(126, 231, 135, 0.2);
+            color: var(--accent-green);
+        }
+        
+        .status-msg.error {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid rgba(248, 81, 73, 0.2);
+            color: var(--accent-red);
+        }
+        
+        .beta-badge {
+            background: rgba(126,231,135,0.15);
+            color: var(--accent-green);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--text-primary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .network-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,82,255,0.15);
+            color: #5b8def;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        
+        .network-badge .dot {
+            width: 6px;
+            height: 6px;
+            background: #5b8def;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="mini-app" id="miniApp">
+        <!-- Header -->
+        <header class="mini-header">
+            <div class="mini-logo">
+                <img src="/psniper-logo.png" alt="pSNIPER">
+                <span class="mini-logo-text">pSNIPER</span>
+                <span class="beta-badge">Beta</span>
+            </div>
+            <button id="connectBtn" class="connect-btn">Connect</button>
+        </header>
+        
+        <!-- Vault Card -->
+        <div class="vault-card">
+            <div class="vault-title">
+                <img src="/psniper-logo.png" alt="">
+                Sniper Vault
+                <span class="network-badge"><span class="dot"></span>Base</span>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Share Price</div>
+                    <div class="stat-value" id="sharePrice">$1.00</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Value</div>
+                    <div class="stat-value" id="tvl">$0</div>
+                </div>
+            </div>
+            
+            <div class="user-position hidden" id="userPosition">
+                <div class="position-row">
+                    <span class="position-label">Your Shares</span>
+                    <span class="position-value" id="userShares">0</span>
+                </div>
+                <div class="position-row" style="margin-top: 8px;">
+                    <span class="position-label">Your Value</span>
+                    <span class="position-value" id="userValue">$0</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button id="depositBtn" class="action-btn primary" disabled>Deposit USDC</button>
+            <button id="withdrawBtn" class="action-btn secondary" disabled>Withdraw</button>
+            <button id="viewDetailsBtn" class="action-btn link">View Full Details</button>
+        </div>
+    </div>
+    
+    <!-- Deposit Modal -->
+    <div class="modal-overlay" id="depositModal">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <h2 class="modal-title">Deposit USDC</h2>
+            
+            <div class="input-group">
+                <label class="input-label">Amount</label>
+                <div class="input-wrapper">
+                    <input type="number" class="input-field" id="depositAmount" placeholder="0.00" step="0.01" min="1">
+                    <button class="max-btn" id="depositMaxBtn">MAX</button>
+                    <span class="input-suffix">USDC</span>
+                </div>
+            </div>
+            
+            <div class="status-msg" id="depositStatus"></div>
+            
+            <button class="action-btn primary" id="confirmDeposit" disabled>Approve & Deposit</button>
+            <button class="action-btn link" id="cancelDeposit" style="margin-top: 8px;">Cancel</button>
+        </div>
+    </div>
+    
+    <!-- Withdraw Modal -->
+    <div class="modal-overlay" id="withdrawModal">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <h2 class="modal-title">Request Withdrawal</h2>
+            
+            <div class="input-group">
+                <label class="input-label">Shares to Withdraw</label>
+                <div class="input-wrapper">
+                    <input type="number" class="input-field" id="withdrawAmount" placeholder="0" step="1" min="1">
+                    <button class="max-btn" id="withdrawMaxBtn">MAX</button>
+                    <span class="input-suffix">Shares</span>
+                </div>
+            </div>
+            
+            <div class="status-msg" id="withdrawStatus"></div>
+            
+            <button class="action-btn primary" id="confirmWithdraw" disabled>Request Withdrawal</button>
+            <button class="action-btn link" id="cancelWithdraw" style="margin-top: 8px;">Cancel</button>
+        </div>
+    </div>
+    
+    <script>
+        const BASE_CHAIN_ID = 8453;
+        const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+        const VAULT_ADDRESS = '0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D';
+        
+        let provider = null;
+        let signer = null;
+        let userAddress = null;
+        let vaultContract = null;
+        let usdcContract = null;
+        let sharePrice = 1.0;
+        
+        const USDC_ABI = [
+            'function balanceOf(address) view returns (uint256)',
+            'function allowance(address owner, address spender) view returns (uint256)',
+            'function approve(address spender, uint256 amount) returns (bool)',
+            'function decimals() view returns (uint8)'
+        ];
+        
+        const VAULT_ABI = [
+            'function balanceOf(address) view returns (uint256)',
+            'function totalSupply() view returns (uint256)',
+            'function deposit(uint256 assets, address receiver, tuple(uint256 totalAssets, uint256 expectedAssets, uint256 roundId, uint256 timestamp, bytes signature) nav) returns (uint256)',
+            'function requestWithdraw(uint256 shares) returns (uint256)',
+            'function decimals() view returns (uint8)'
+        ];
+        
+        async function init() {
+            await fetchPrice();
+            setInterval(fetchPrice, 30000);
+            
+            if (window.ethereum?.isConnected?.()) {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) {
+                    await connectWallet(true);
+                }
+            }
+            
+            if (typeof window.FarcasterFrame !== 'undefined') {
+                try {
+                    const sdk = new window.FarcasterFrame.FrameSDK();
+                    sdk.actions.ready();
+                    console.log('Farcaster Frame SDK initialized');
+                } catch (e) {
+                    console.log('Not in Farcaster frame context:', e.message);
+                }
+            }
+        }
+        
+        async function fetchPrice() {
+            try {
+                const res = await fetch('/price');
+                const data = await res.json();
+                sharePrice = parseFloat(data.pricePerShare) || 1.0;
+                document.getElementById('sharePrice').textContent = '$' + sharePrice.toFixed(4);
+                
+                const tvl = parseFloat(data.totalAssets) || 0;
+                document.getElementById('tvl').textContent = '$' + formatNumber(tvl);
+            } catch (e) {
+                console.error('Price fetch error:', e);
+            }
+        }
+        
+        function formatNumber(n) {
+            if (n >= 1000000) return (n/1000000).toFixed(2) + 'M';
+            if (n >= 1000) return (n/1000).toFixed(2) + 'K';
+            return n.toFixed(2);
+        }
+        
+        async function connectWallet(silent = false) {
+            try {
+                if (!window.ethereum) {
+                    if (!silent) alert('Please install a wallet like MetaMask or Coinbase Wallet');
+                    return;
+                }
+                
+                provider = new ethers.BrowserProvider(window.ethereum);
+                
+                const network = await provider.getNetwork();
+                if (Number(network.chainId) !== BASE_CHAIN_ID) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x' + BASE_CHAIN_ID.toString(16) }]
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x' + BASE_CHAIN_ID.toString(16),
+                                    chainName: 'Base',
+                                    rpcUrls: ['https://mainnet.base.org'],
+                                    nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                                    blockExplorerUrls: ['https://basescan.org']
+                                }]
+                            });
+                        }
+                    }
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                }
+                
+                signer = await provider.getSigner();
+                userAddress = await signer.getAddress();
+                
+                const connectBtn = document.getElementById('connectBtn');
+                connectBtn.textContent = userAddress.slice(0,6) + '...' + userAddress.slice(-4);
+                connectBtn.classList.add('connected');
+                
+                document.getElementById('depositBtn').disabled = false;
+                document.getElementById('withdrawBtn').disabled = false;
+                
+                vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+                usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
+                
+                await updateUserPosition();
+                
+            } catch (e) {
+                console.error('Connect error:', e);
+                if (!silent) alert('Failed to connect: ' + e.message);
+            }
+        }
+        
+        async function updateUserPosition() {
+            if (!vaultContract || !userAddress) return;
+            
+            try {
+                const shares = await vaultContract.balanceOf(userAddress);
+                const sharesNum = parseFloat(ethers.formatUnits(shares, 18));
+                
+                if (sharesNum > 0) {
+                    document.getElementById('userPosition').classList.remove('hidden');
+                    document.getElementById('userShares').textContent = sharesNum.toFixed(2);
+                    document.getElementById('userValue').textContent = '$' + (sharesNum * sharePrice).toFixed(2);
+                } else {
+                    document.getElementById('userPosition').classList.add('hidden');
+                }
+            } catch (e) {
+                console.error('Position fetch error:', e);
+            }
+        }
+        
+        function showModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        
+        function hideModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+        
+        function showStatus(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = 'status-msg show ' + type;
+        }
+        
+        function hideStatus(elementId) {
+            document.getElementById(elementId).className = 'status-msg';
+        }
+        
+        document.getElementById('connectBtn').addEventListener('click', () => {
+            if (userAddress) {
+                userAddress = null;
+                signer = null;
+                const btn = document.getElementById('connectBtn');
+                btn.textContent = 'Connect';
+                btn.classList.remove('connected');
+                document.getElementById('depositBtn').disabled = true;
+                document.getElementById('withdrawBtn').disabled = true;
+                document.getElementById('userPosition').classList.add('hidden');
+            } else {
+                connectWallet();
+            }
+        });
+        
+        document.getElementById('depositBtn').addEventListener('click', () => showModal('depositModal'));
+        document.getElementById('withdrawBtn').addEventListener('click', () => showModal('withdrawModal'));
+        document.getElementById('cancelDeposit').addEventListener('click', () => hideModal('depositModal'));
+        document.getElementById('cancelWithdraw').addEventListener('click', () => hideModal('withdrawModal'));
+        
+        document.getElementById('viewDetailsBtn').addEventListener('click', () => {
+            window.open('/', '_blank');
+        });
+        
+        document.getElementById('depositAmount').addEventListener('input', (e) => {
+            document.getElementById('confirmDeposit').disabled = !e.target.value || parseFloat(e.target.value) <= 0;
+        });
+        
+        document.getElementById('withdrawAmount').addEventListener('input', (e) => {
+            document.getElementById('confirmWithdraw').disabled = !e.target.value || parseFloat(e.target.value) <= 0;
+        });
+        
+        document.getElementById('depositMaxBtn').addEventListener('click', async () => {
+            if (!usdcContract || !userAddress) return;
+            try {
+                const balance = await usdcContract.balanceOf(userAddress);
+                document.getElementById('depositAmount').value = ethers.formatUnits(balance, 6);
+                document.getElementById('confirmDeposit').disabled = false;
+            } catch (e) {
+                console.error('Max balance error:', e);
+            }
+        });
+        
+        document.getElementById('withdrawMaxBtn').addEventListener('click', async () => {
+            if (!vaultContract || !userAddress) return;
+            try {
+                const shares = await vaultContract.balanceOf(userAddress);
+                document.getElementById('withdrawAmount').value = Math.floor(parseFloat(ethers.formatUnits(shares, 18)));
+                document.getElementById('confirmWithdraw').disabled = false;
+            } catch (e) {
+                console.error('Max shares error:', e);
+            }
+        });
+        
+        document.getElementById('confirmDeposit').addEventListener('click', async () => {
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            if (!amount || amount <= 0) return;
+            
+            const amountWei = ethers.parseUnits(amount.toString(), 6);
+            const btn = document.getElementById('confirmDeposit');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span>';
+            
+            try {
+                showStatus('depositStatus', 'Fetching NAV data...', 'info');
+                const navRes = await fetch('/sign-nav');
+                const navData = await navRes.json();
+                
+                if (navData.paused) {
+                    showStatus('depositStatus', 'Deposits are currently paused', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Approve & Deposit';
+                    return;
+                }
+                
+                const allowance = await usdcContract.allowance(userAddress, VAULT_ADDRESS);
+                if (allowance < amountWei) {
+                    showStatus('depositStatus', 'Approving USDC...', 'info');
+                    const approveTx = await usdcContract.approve(VAULT_ADDRESS, ethers.MaxUint256);
+                    await approveTx.wait();
+                }
+                
+                showStatus('depositStatus', 'Depositing...', 'info');
+                
+                const navTuple = [
+                    ethers.parseUnits(navData.totalAssets.toString(), 6),
+                    ethers.parseUnits(navData.expectedAssets.toString(), 6),
+                    navData.roundId,
+                    navData.timestamp,
+                    navData.signature
+                ];
+                
+                const tx = await vaultContract.deposit(amountWei, userAddress, navTuple);
+                await tx.wait();
+                
+                showStatus('depositStatus', 'Deposit successful!', 'success');
+                await updateUserPosition();
+                await fetchPrice();
+                
+                setTimeout(() => {
+                    hideModal('depositModal');
+                    hideStatus('depositStatus');
+                    document.getElementById('depositAmount').value = '';
+                }, 2000);
+                
+            } catch (e) {
+                console.error('Deposit error:', e);
+                showStatus('depositStatus', 'Error: ' + (e.reason || e.message), 'error');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Approve & Deposit';
+        });
+        
+        document.getElementById('confirmWithdraw').addEventListener('click', async () => {
+            const shares = parseInt(document.getElementById('withdrawAmount').value);
+            if (!shares || shares <= 0) return;
+            
+            const sharesWei = ethers.parseUnits(shares.toString(), 18);
+            const btn = document.getElementById('confirmWithdraw');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span>';
+            
+            try {
+                showStatus('withdrawStatus', 'Requesting withdrawal...', 'info');
+                const tx = await vaultContract.requestWithdraw(sharesWei);
+                await tx.wait();
+                
+                showStatus('withdrawStatus', 'Withdrawal request submitted!', 'success');
+                await updateUserPosition();
+                
+                setTimeout(() => {
+                    hideModal('withdrawModal');
+                    hideStatus('withdrawStatus');
+                    document.getElementById('withdrawAmount').value = '';
+                }, 2000);
+                
+            } catch (e) {
+                console.error('Withdraw error:', e);
+                showStatus('withdrawStatus', 'Error: ' + (e.reason || e.message), 'error');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Request Withdrawal';
+        });
+        
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+        
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', () => location.reload());
+            window.ethereum.on('chainChanged', () => location.reload());
+        }
+        
+        init();
+    </script>
+</body>
+</html>
