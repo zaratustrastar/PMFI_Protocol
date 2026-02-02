@@ -86,7 +86,10 @@ async function redeemInviteCode(code, walletAddress) {
     }
 }
 
-// Initialize invite gate
+// Initialize invite gate - New flow:
+// 1. Connect wallet first (no code input on step 1)
+// 2. Auto-check access - if wallet has access, enter app immediately
+// 3. If no access, show code input + request access link
 function initInviteGate() {
     const gate = document.getElementById('inviteGate');
     const step1 = document.getElementById('inviteStep1');
@@ -101,7 +104,6 @@ function initInviteGate() {
     const success = document.getElementById('inviteSuccess');
 
     let gateWalletAddress = null;
-    let gateCode = null;
 
     // Check cached access
     const cachedAccess = localStorage.getItem(INVITE_STORAGE_KEY);
@@ -116,21 +118,13 @@ function initInviteGate() {
         } catch (e) {}
     }
 
-    // Auto-uppercase code input
+    // Auto-uppercase code input (in step 2)
     codeInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.toUpperCase();
     });
 
-    // Connect wallet button (Step 1)
+    // Connect wallet button (Step 1) - just connects wallet and checks access
     connectBtn.addEventListener('click', async () => {
-        gateCode = codeInput.value.trim();
-        
-        if (!gateCode || gateCode.length < 6) {
-            error1.textContent = 'Please enter a valid invite code';
-            error1.classList.add('show');
-            return;
-        }
-        
         error1.classList.remove('show');
         connectBtn.disabled = true;
         connectBtn.textContent = 'Connecting...';
@@ -145,10 +139,13 @@ function initInviteGate() {
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             gateWalletAddress = accounts[0];
 
+            // Update button to show checking status
+            connectBtn.textContent = 'Checking access...';
+
             // Check if already has access
             const hasAccess = await checkBetaAccess(gateWalletAddress);
             if (hasAccess) {
-                // Grant access immediately
+                // Grant access immediately - no code needed
                 localStorage.setItem(INVITE_STORAGE_KEY, JSON.stringify({
                     wallet: gateWalletAddress,
                     expires: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
@@ -161,7 +158,7 @@ function initInviteGate() {
                 return;
             }
 
-            // Show step 2
+            // No access - show step 2 with code input
             walletDisplay.textContent = `${gateWalletAddress.slice(0, 6)}...${gateWalletAddress.slice(-4)}`;
             step1.classList.remove('active');
             step2.classList.add('active');
@@ -176,15 +173,23 @@ function initInviteGate() {
         }
     });
 
-    // Redeem button (Step 2)
+    // Redeem button (Step 2) - now gets code from step 2 input
     redeemBtn.addEventListener('click', async () => {
+        const code = codeInput.value.trim();
+        
+        if (!code || code.length < 6) {
+            error2.textContent = 'Please enter a valid invite code';
+            error2.classList.add('show');
+            return;
+        }
+
         error2.classList.remove('show');
         success.classList.remove('show');
         redeemBtn.disabled = true;
         redeemBtn.textContent = 'Redeeming...';
 
         try {
-            const result = await redeemInviteCode(gateCode, gateWalletAddress);
+            const result = await redeemInviteCode(code, gateWalletAddress);
 
             if (result.error) {
                 error2.textContent = result.error;
@@ -217,12 +222,13 @@ function initInviteGate() {
         }
     });
 
-    // Back button
+    // Back button - go back to step 1
     backBtn.addEventListener('click', () => {
         step2.classList.remove('active');
         step1.classList.add('active');
         error2.classList.remove('show');
         success.classList.remove('show');
+        codeInput.value = '';
         gateWalletAddress = null;
     });
 }

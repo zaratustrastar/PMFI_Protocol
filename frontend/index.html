@@ -993,27 +993,28 @@
         <div class="invite-card">
             <img src="psniper-logo.png" alt="PMFI" class="invite-logo">
             <h1 class="invite-title">PMFI Beta</h1>
-            <p class="invite-subtitle">Enter your invite code to access the platform</p>
+            <p class="invite-subtitle" id="inviteSubtitle">Connect your wallet to continue</p>
             
-            <!-- Step 1: Enter Code -->
+            <!-- Step 1: Connect Wallet Only -->
             <div id="inviteStep1" class="invite-step active">
-                <div class="invite-input-group">
-                    <input type="text" id="inviteCodeInput" class="invite-input" placeholder="Enter code" maxlength="8" autocomplete="off">
-                </div>
                 <button id="inviteConnectBtn" class="invite-btn invite-btn-primary">Connect Wallet</button>
                 <p class="invite-error" id="inviteError"></p>
-                <p style="margin-top: 24px; font-size: 13px; color: #6e7681;">
-                    Don't have a code? <a href="https://tally.so/r/5Bb29b" target="_blank" style="color: #8b949e; text-decoration: underline;">Request access</a>
-                </p>
             </div>
             
-            <!-- Step 2: Confirm Wallet -->
+            <!-- Step 2: No Access - Enter Code -->
             <div id="inviteStep2" class="invite-step">
                 <div class="invite-wallet-info" id="inviteWalletDisplay"></div>
+                <p style="margin: 16px 0 8px; font-size: 14px; color: #8b949e;">This wallet doesn't have access yet</p>
+                <div class="invite-input-group">
+                    <input type="text" id="inviteCodeInput" class="invite-input" placeholder="Enter invite code" maxlength="8" autocomplete="off">
+                </div>
                 <button id="inviteRedeemBtn" class="invite-btn invite-btn-primary">Redeem Code</button>
                 <button id="inviteBackBtn" class="invite-btn invite-btn-secondary">Use Different Wallet</button>
                 <p class="invite-error" id="inviteError2"></p>
                 <p class="invite-success" id="inviteSuccess"></p>
+                <p style="margin-top: 24px; font-size: 13px; color: #6e7681;">
+                    Don't have a code? <a href="https://tally.so/r/5Bb29b" target="_blank" style="color: #8b949e; text-decoration: underline;">Request access</a>
+                </p>
             </div>
         </div>
     </div>
