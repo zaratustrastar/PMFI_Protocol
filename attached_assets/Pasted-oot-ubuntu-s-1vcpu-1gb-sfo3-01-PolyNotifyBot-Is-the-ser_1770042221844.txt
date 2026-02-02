@@ -1,0 +1,71 @@
+oot@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# # Is the service running?
+sudo systemctl status psniper-bot
+
+# Check recent logs without filtering
+sudo journalctl -u psniper-bot -n 50
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-02-02 13:47:35 UTC; 35min ago
+   Main PID: 2247646 (python3)
+      Tasks: 2 (limit: 4653)
+     Memory: 81.9M (peak: 82.4M)
+        CPU: 16.614s
+     CGroup: /system.slice/psniper-bot.service
+             └─2247646 /usr/bin/python3 bot/bot_v7.py
+
+Feb 02 14:22:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:22:53] "GET /price HTTP/1.1" 200 -
+Feb 02 14:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 127.0.0.1 - - [02/Feb/2026 14:22:57] "GET /sign-nav HTTP/1.1" 200 -
+Feb 02 14:23:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:00] "GET /price HTTP/1.1" 200 -
+Feb 02 14:23:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:03] "GET /price HTTP/1.1" 200 -
+Feb 02 14:23:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:04] "GET /price HTTP/1.1" 200 -
+Feb 02 14:23:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:10] "GET /price HTTP/1.1" 200 -
+Feb 02 14:23:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:13] "GET /price HTTP/1.1" 200 -
+Feb 02 14:23:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:14] "GET /price HTTP/1.1" 200 -
+Feb 02 14:23:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:20] "GET /price HTTP/1.1" 200 -
+Feb 02 14:23:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:23] "GET /price HTTP/1.1" 200 -
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 99205773658616477805...
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📊 Got 0 bids, 25 asks
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Yes: 20.0 - NO BIDS (illiquid, valued at $0)
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 99346466270094362065...
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:       Full token: 99346466270094362065391834965723876444770999076596124705155073912002196148429
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Yes: 20.0 - NO BIDS (illiquid, valued at $0)
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 17773623633241679700...
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:       Full token: 17773623633241679700592552608983014165550136074115438737918149183637953682076
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Yes: 16.2 - NO BIDS (illiquid, valued at $0)
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 10550443665059716121...
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:       Full token: 10550443665059716121605015312036289682410761245178670601732277472408495340666
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Yes: 15.0 - NO BIDS (illiquid, valued at $0)
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 11242599172583678725...
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:       Full token: 112425991725836787250270911178464210955192804211767488695763016723930595239510
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Yes: 15.0 - NO BIDS (illiquid, valued at $0)
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 71973320815196030106...
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:       Full token: 71973320815196030106097348583863922016672759447808434014663991273920337227590
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Yes: 15.0 - NO BIDS (illiquid, valued at $0)
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 46228539183090091364...
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:       Full token: 46228539183090091364246601718778114934923475890375459117678527109857970572773
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ No: 14.9 - NO BIDS (illiquid, valued at $0)
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 10677047032440896473...
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:       Full token: 106770470324408964738038913563257062385236051206489719031693459670226018444719
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Hong Kong Women: 10.0 - NO BIDS (illiquid, valued at $0)
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 30292339982437760610...
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:       Full token: 30292339982437760610444676349144949697647804498282717665925008542691293654341
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ No: 10.0 - NO BIDS (illiquid, valued at $0)
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 43960367977234337884...
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:       Full token: 43960367977234337884522692590772046628603988894828339344266552934142059231489
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    ❌ No: 10.0 - NO BIDS (illiquid, valued at $0)
+Feb 02 14:22:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    📖 Orderbook via CLOB client: 70084825817150171834...
+Feb 02 14:22:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:22:53] "GET /price HTTP/1.1" 200 -
+Feb 02 14:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 127.0.0.1 - - [02/Feb/2026 14:22:57] "GET /sign-nav HTTP/1.1" 200 -
+Feb 02 14:23:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:00] "GET /price HTTP/1.1" 200 -
+Feb 02 14:23:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:03] "GET /price HTTP/1.1" 200 -
+Feb 02 14:23:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]: 139.28.90.101 - - [02/Feb/2026 14:23:04] "GET /price HTTP/1.1" 200 -
+lines 1-45
