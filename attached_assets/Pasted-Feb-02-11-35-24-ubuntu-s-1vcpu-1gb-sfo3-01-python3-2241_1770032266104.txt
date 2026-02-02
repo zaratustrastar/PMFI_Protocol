@@ -1,0 +1,32 @@
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]: 📊 Pending Credit Calculation (V7.3.2 - expectedAssets + liquidation value):
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    expectedAssets:   $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    - pmCash:         $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    - reserved:       $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    - positionsLiq:   $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    - inFlight:       $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    - vaultBuffer:    $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    = pendingCredit:  $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]: 📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • In-flight (deposit addr): $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Pending credit:           $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Credited cash:            $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Reserved (open orders):   $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Vault buffer (on-chain):  $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Expected assets:          $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Positions (liquidation):  $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Positions (cost basis):   $36.07
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    ─────────────────────────────
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • TOTAL ASSETS:             $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]: 📊 Total Assets Breakdown (V7.3):
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • PM Cash:        $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Reserved:       $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Vault Buffer:   $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Credited Cash (signed): $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Positions:      $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • Pending Credit: $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • In-Flight:      $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    ─────────────────────────────
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    • TOTAL ASSETS:   $0.00
+Feb 02 11:35:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    ✅ Breakdown check PASSED
+Feb 02
