@@ -565,6 +565,18 @@
         ];
         
         async function init() {
+            // Call Farcaster SDK ready() IMMEDIATELY to dismiss splash screen
+            if (typeof window.FarcasterFrame !== 'undefined') {
+                try {
+                    const sdk = new window.FarcasterFrame.FrameSDK();
+                    sdk.actions.ready();
+                    console.log('Farcaster Frame SDK ready() called');
+                } catch (e) {
+                    console.log('Not in Farcaster frame context:', e.message);
+                }
+            }
+            
+            // Then do async initialization
             await fetchPrice();
             setInterval(fetchPrice, 30000);
             
@@ -572,16 +584,6 @@
                 const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                 if (accounts.length > 0) {
                     await connectWallet(true);
-                }
-            }
-            
-            if (typeof window.FarcasterFrame !== 'undefined') {
-                try {
-                    const sdk = new window.FarcasterFrame.FrameSDK();
-                    sdk.actions.ready();
-                    console.log('Farcaster Frame SDK initialized');
-                } catch (e) {
-                    console.log('Not in Farcaster frame context:', e.message);
                 }
             }
         }
