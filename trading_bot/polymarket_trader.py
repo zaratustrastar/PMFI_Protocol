@@ -211,9 +211,10 @@ class PolymarketTrader:
             
             print(f"\n   📊 Tier {i+1}: {tier_size:.2f} tokens @ {profit_multiple}x (+{profit_pct:.0f}%)")
             
-            # Skip if tier size too small
-            if tier_size < 5:
-                print(f"      ⚠️  Tier size {tier_size:.2f} < 5 minimum, skipping this tier")
+            # Skip if tier size too small (Polymarket minimum)
+            min_shares = getattr(config, 'MIN_SHARES_PER_ORDER', 5)
+            if tier_size < min_shares:
+                print(f"      ⚠️  Tier size {tier_size:.2f} < {min_shares} minimum, skipping this tier")
                 continue
             
             # Cap sell price at Polymarket max
@@ -351,9 +352,10 @@ class PolymarketTrader:
             
             print(f"\n   📊 Tier {i+1}: {tier_size:.2f} tokens @ {profit_multiple}x (+{profit_pct:.0f}%)")
             
-            # Skip if tier size too small
-            if tier_size < 5:
-                print(f"      ⚠️  Tier size {tier_size:.2f} < 5 minimum, skipping this tier")
+            # Skip if tier size too small (Polymarket minimum)
+            min_shares = getattr(config, 'MIN_SHARES_PER_ORDER', 5)
+            if tier_size < min_shares:
+                print(f"      ⚠️  Tier size {tier_size:.2f} < {min_shares} minimum, skipping this tier")
                 continue
             
             # Cap sell price at Polymarket max/min

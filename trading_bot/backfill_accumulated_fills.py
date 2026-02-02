@@ -5,7 +5,7 @@ Backfill Accumulated Fills Script
 This script:
 1. Creates the accumulated_fills table if it doesn't exist
 2. Backfills from all FILLED buy orders in trading_positions
-3. Identifies markets with ≥10 accumulated shares that need sell orders
+3. Identifies markets with ≥5 accumulated shares that need sell orders
 4. Places sell orders for those markets
 
 Run this once on production to fix missing sell orders.
@@ -30,7 +30,13 @@ if not DATABASE_URL:
     print("❌ DATABASE_URL not set!")
     sys.exit(1)
 
-MIN_SHARES_FOR_SELL = 10
+# Import from centralized config
+try:
+    from config import MIN_SHARES_PER_ORDER
+    MIN_SHARES_FOR_SELL = MIN_SHARES_PER_ORDER
+except ImportError:
+    MIN_SHARES_FOR_SELL = 5  # Fallback to Polymarket minimum
+
 SELL_SHARES = 5
 SELL_PROFIT_MULTIPLE = 3.0
 DRY_RUN = "--dry-run" in sys.argv
@@ -142,7 +148,7 @@ def backfill_from_filled_orders():
 
 
 def find_markets_needing_sells():
-    """Find markets with ≥10 shares that haven't had sells placed"""
+    """Find markets with ≥5 shares that haven't had sells placed"""
     print(f"\n📊 Step 3: Finding markets with ≥{MIN_SHARES_FOR_SELL} shares needing sells...")
     
     conn = get_db_connection()

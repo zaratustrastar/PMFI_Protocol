@@ -17,6 +17,7 @@ PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS", "")
 # Trading strategy parameters
 ORDER_SIZE_SHARES = 10  # Buy 10 shares per order
 SELL_RESERVE_RATIO = 0.10  # Keep 10% of position untouched until resolution
+MIN_SHARES_PER_ORDER = 5  # Polymarket minimum: 5 shares per limit order
 
 # Buy ladder: 1¢ to 3¢ (0.01 to 0.03) - 10 levels
 # These prices respect Polymarket's minimum price requirements

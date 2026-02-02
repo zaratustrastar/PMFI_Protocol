@@ -23,8 +23,11 @@ from database import (
 )
 from telegram_notifier import notify_buy_filled, notify_sell_executed, notify_sell_ladder_result
 
+# Import from centralized config
+from config import MIN_SHARES_PER_ORDER
+
 # Configuration for sell threshold
-MIN_SHARES_FOR_SELL = 10  # Minimum accumulated shares before placing sell
+MIN_SHARES_FOR_SELL = MIN_SHARES_PER_ORDER  # Minimum accumulated shares before placing sell
 SELL_SHARES = 5  # Fixed number of shares to sell (rest kept as moonbag)
 
 

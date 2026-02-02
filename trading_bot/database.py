@@ -551,7 +551,7 @@ def mark_sell_placed(market_slug: str, token_id: str, side: str) -> bool:
     return affected > 0
 
 
-def check_sell_threshold(market_slug: str, token_id: str, side: str, min_shares: float = 6) -> Dict:
+def check_sell_threshold(market_slug: str, token_id: str, side: str, min_shares: float = 5) -> Dict:
     """
     Check if accumulated fills have reached the sell threshold.
     
@@ -559,7 +559,7 @@ def check_sell_threshold(market_slug: str, token_id: str, side: str, min_shares:
         market_slug: Market identifier
         token_id: Token ID
         side: YES or NO
-        min_shares: Minimum shares needed to trigger sell (default 6)
+        min_shares: Minimum shares needed to trigger sell (default 5, Polymarket minimum)
         
     Returns:
         Dict with:
