@@ -1,6 +1,6 @@
 # Overview
 
-This project consists of two primary systems: the pSNIPER Vault (V7.1) for secure, 3-state asset tracking of USDC investments in Polymarket, and an Automated Polymarket Trading Bot. The vault ensures accurate NAV calculation and capital conservation, addressing prior issues with in-flight assets. The trading bot provides fully automated market monitoring, Telegram notifications, and strategic trading, designed for efficient and timely execution on Polymarket. Together, these systems aim to optimize and automate Polymarket participation with robust financial tracking and trading capabilities.
+This project consists of two primary systems: the pSNIPER Vault (V7.4) for secure NAV-based share pricing using actual liquid asset values, and an Automated Polymarket Trading Bot. The vault calculates NAV from real position values (cash + positions liquidation value), ensuring accurate share pricing that reflects trading gains/losses. The trading bot provides fully automated market monitoring, Telegram notifications, and strategic trading, designed for efficient and timely execution on Polymarket. Together, these systems aim to optimize and automate Polymarket participation with accurate financial tracking and trading capabilities.
 
 # User Preferences
 
@@ -8,39 +8,37 @@ Preferred communication style: Simple, everyday language.
 
 # System Architecture
 
-## pSNIPER Vault (V7.3.3)
+## pSNIPER Vault (V7.4)
 
-The vault features a 3-state asset tracking system to accurately manage USDC within Polymarket. Asset states include `inFlightOnChain`, `pendingCredit`, and `creditedAssets`. 
+The vault calculates NAV using **ACTUAL LIQUID VALUE** - the real market value of assets.
 
-**V7.3.3 FIX (Jan 2026)**: Three critical changes:
-1. Uses on-chain `expectedAssets` instead of cumulative `totalForwarded`
-2. Uses position **liquidation value** (mark-to-market) instead of cost basis
-3. **Reserved excluded from NAV math** - Polygon balanceOf is the source of truth for cash
+**V7.4 MAJOR CHANGE (Feb 2026)**: NAV reflects actual position values, not expected deposits.
+- OLD: `totalAssets = cash + positions + pendingCredit` (where pendingCredit filled the gap to expectedAssets)
+- NEW: `totalAssets = cash + positions + inFlight` (pendingCredit = 0 for NAV)
+- **Result**: Trading losses show directly in NAV, no longer hidden in phantom pendingCredit
+
+**Why V7.4?** 
+V7.3.3 had a critical flaw: `pendingCredit = expectedAssets - cash - positions - inFlight` was a plug number that made `totalAssets` always equal `expectedAssets`. This meant NAV stayed at $1/share regardless of position performance. With positions that lost 85% of value, NAV still showed $1 instead of the actual ~$0.15.
+
+**V7.4 Formula**:
+- `totalAssets = pmCash + positionsLiqValue + vaultBuffer + inFlight` (ACTUAL values only)
+- `pendingCredit = 0` for NAV purposes (calculated separately for monitoring bridging delays)
+- NAV = totalAssets / totalShares (reflects real gains/losses)
+
+**Safety Valves (V7.4)**:
+- Only `maxPendingAge` on in-flight funds (actual bridging delays)
+- Removed `maxPendingRatio` since pendingCredit is no longer in NAV
+
+**Previous Fixes (still in effect)**:
+- Uses on-chain `expectedAssets` for reference (not cumulative `totalForwarded`)
+- Uses position **liquidation value** (mark-to-market) instead of cost basis
+- **Reserved excluded from NAV math** - Polygon balanceOf is the source of truth for cash
 
 **Withdrawal Servicer V7.3.3 FIX**: 
 - Now reads actual `usdcLocked` from pending withdrawal requests instead of recalculating with current NAV
 - Prevents wrong bridge amounts when NAV is corrupted (e.g., from multiple bot instances)
 
-BUCKET INVARIANT: Funds live in exactly ONE bucket at any time - no overlap:
-- `inFlight`: USDC at deposit address on Base (not yet swept)
-- `pendingCredit`: Swept/bridging, not visible yet in PM
-- `cash/positionsValue`: Credited inside PM account (reserved excluded)
-- `vaultBuffer`: USDC in vault contract (claimable withdrawals) - **on-chain truth**
-
-Formula: `pendingCredit = max(0, expectedAssets - pmCash - positionsLiqValue - inFlight - vaultBuffer)`
-Note: Reserved is excluded - Polygon balanceOf is the source of truth for cash.
-
-**Why V7.3.3?** 
-1. **totalForwarded bug**: V7.3.1 used `totalForwarded` which is cumulative and never decreases. When users claim funds from vaultBuffer, those funds exit the system but `totalForwarded` stayed high, causing massive pending credit inflation and $6/share NAV after claims. `expectedAssets` correctly decreases when claims happen.
-2. **costBasis bug**: Using cost basis created phantom pending when `recordTradingGain()` was called (expectedAssets increased but costBasis stayed the same). Using liquidation value keeps all buckets on the same mark-to-market basis.
-3. **Reserved double-counting bug**: Adding reserved to cash double-counted funds since Polygon balanceOf already represents total on-chain cash.
-4. **Withdrawal servicer recalculation bug**: Servicer was calculating `pendingShares × currentNAV` instead of reading actual locked amounts, causing wrong bridge amounts.
-
-**Key Invariant**: `expectedAssets ≈ pmCash + positionsValue + vaultBuffer + inFlight + pending`
-
 **Current Contract**: `0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D` (Base Mainnet)
-
-Both NAV calculation and `pendingCredit` now use liquidation value (mark-to-market) for positions. A conservation bound (`totalAssets >= expectedAssets * (1 - maxLossBps)`) replaces a fixed percentage limit, allowing for trading PnL while safeguarding against artificial drops. Safety valves (e.g., `maxPendingAge`, `maxPendingRatio`) pause deposits under adverse conditions. Negative pending is clamped to 0 with a warning log.
 
 ## Polymarket Trading Bot
 

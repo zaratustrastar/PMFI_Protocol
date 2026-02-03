@@ -1,29 +1,42 @@
 #!/usr/bin/env python3
 """
-PredictFi Sniper Vault V7 - NAV Signing Bot with 3-State Asset Tracking
+PredictFi Sniper Vault V7.4 - NAV Signing Bot with ACTUAL LIQUID VALUE
+
+=============================================================================
+V7.4 MAJOR CHANGE:
+=============================================================================
+
+NAV now reflects ACTUAL LIQUID VALUE (cash + positions liquidation value).
+Trading losses are shown directly in NAV, not hidden in pendingCredit.
+
+OLD (V7.3 and earlier):
+    totalAssets = cash + positions + inFlight + pendingCredit
+    pendingCredit = expectedAssets - cash - positions - inFlight
+    Result: NAV always equals expectedAssets/shares = initial deposit price
+
+NEW (V7.4):
+    totalAssets = cash + positions + inFlight
+    pendingCredit = 0 (for NAV purposes, kept for bridging monitoring only)
+    Result: NAV reflects actual market value of positions
 
 =============================================================================
 ARCHITECTURE:
 =============================================================================
 
-V7 tracks THREE asset states for accurate NAV during Polymarket bridging:
+V7.4 tracks asset states for NAV calculation:
 
 1. inFlightOnChain - USDC sitting at Polymarket Base deposit address (usually ~0)
-2. pendingCredit - Forwarded to PM but not yet visible in API (during bridge)
-3. creditedAssets - PM cash + positions visible via API
+2. creditedAssets - PM cash + positions liquidation value via API
+3. vaultBuffer - USDC in vault contract (claimable withdrawals)
 
-pendingCredit reconciliation (cash-only, avoids market fluctuations):
-    pendingCredit = max(0, totalForwarded - polymarketCash - withdrawnBackToVault)
-
-Conservation bound replaces 5% NAV change limit:
-    totalAssets >= expectedAssets * (1 - maxLossBps)
+pendingCredit is calculated but NOT included in NAV - only for monitoring bridging.
 
 =============================================================================
 SAFETY VALVES:
 =============================================================================
 
-1. maxPendingAge - If any deposit pending > X hours, pause deposits
-2. maxPendingRatio - If pendingCredit > 50% of totalAssets, pause deposits
+1. maxPendingAge - If in-flight funds pending > X hours, pause deposits
+   (V7.4: Only checks in-flight, not phantom pendingCredit)
 
 =============================================================================
 ENDPOINTS:
@@ -133,7 +146,11 @@ NAV_PRECISION = 10**18
 
 # Safety valve thresholds
 MAX_PENDING_AGE_HOURS = 2  # Pause if any deposit pending > 2 hours
-MAX_PENDING_RATIO = 0.5   # Pause if pendingCredit > 50% of totalAssets
+
+# Conservation bound - match contract's maxLossBps (4000 = 40%)
+# totalAssets must be >= expectedAssets * (1 - maxLossBps/10000)
+# If totalAssets drops below this, contract will reject the NAV
+MAX_LOSS_BPS = 4000  # 40% max loss allowed
 
 # Rate limiting
 REFRESH_RATE_LIMIT_SECONDS = 5
@@ -1121,24 +1138,31 @@ class NavEngineV7:
             credited_cash, reserved_usdc, credited_positions, in_flight, vault_buffer, expected_assets
         )
         
-        # 7. Total assets for NAV = inFlight + pending + cash + liquidationValue
-        # NOTE: We use liquidation value for NAV (share pricing), NOT cost basis
+        # 7. Total assets for NAV = ACTUAL LIQUID VALUE ONLY
+        # V7.4 FIX: Don't include pendingCredit in NAV - it was masking trading losses
+        # pendingCredit is kept for monitoring bridging delays but NOT included in NAV
+        # This means NAV reflects actual position values, not expected deposits
         # NOTE: vault_buffer is NOT added here - it's already included in creditedCash at signing time
         # NOTE: reserved is EXCLUDED - Polygon balanceOf is the source of truth for cash
-        total_assets = in_flight + pending_credit + credited_cash + credited_positions
+        total_assets = in_flight + credited_cash + credited_positions
         
-        print(f"\n📊 Asset Breakdown (V7.3.2 - expectedAssets from chain):")
+        # Keep pendingCredit for monitoring but don't add to NAV
+        # If pendingCredit is high, it indicates either bridging delay OR trading losses
+        pending_for_monitoring = pending_credit
+        
+        print(f"\n📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):")
         print(f"   • In-flight (deposit addr): ${in_flight/1e6:.2f}")
-        print(f"   • Pending credit:           ${pending_credit/1e6:.2f}")
         print(f"   • Credited cash:            ${credited_cash/1e6:.2f}")
+        print(f"   • Positions (liquidation):  ${credited_positions/1e6:.2f}")
+        print(f"   ─────────────────────────────")
+        print(f"   • TOTAL ASSETS (NAV):       ${total_assets/1e6:.2f}")
+        print(f"   ─────────────────────────────")
         print(f"   • Reserved (open orders):   ${reserved_usdc/1e6:.2f}")
         print(f"   • Vault buffer (on-chain):  ${vault_buffer/1e6:.2f}")
-        print(f"   • Expected assets:          ${expected_assets/1e6:.2f}")
-        print(f"   • Positions (liquidation):  ${credited_positions/1e6:.2f}")
+        print(f"   • Expected assets (chain):  ${expected_assets/1e6:.2f}")
         print(f"   • Positions (cost basis):   ${cost_basis_usdc/1e6:.2f}")
-        print(f"   ─────────────────────────────")
-        print(f"   • TOTAL ASSETS:             ${total_assets/1e6:.2f}")
-        print(f"   (expectedAssets used for pending, vaultBuffer added to creditedCash at signing)")
+        print(f"   • Pending (monitoring):     ${pending_for_monitoring/1e6:.2f}")
+        print(f"   (V7.4: NAV = actual liquid value, pendingCredit excluded)")
         
         return {
             "in_flight": in_flight,
@@ -1214,9 +1238,13 @@ def sign_nav_data_v7(
     return signed.signature.hex(), oracle_account.address
 
 
-def check_safety_valves(breakdown: Dict) -> Tuple[str, str]:
+def check_safety_valves(breakdown: Dict, expected_assets: int = 0) -> Tuple[str, str]:
     """
     Check safety valves and return status.
+    
+    V7.4: Checks for bridging delays AND conservation bound violations.
+    - in_flight age: pauses if deposits stuck in bridging too long
+    - conservation bound: warns if totalAssets < expectedAssets * (1 - maxLossBps)
     
     Returns:
         Tuple of (status, reason)
@@ -1224,21 +1252,24 @@ def check_safety_valves(breakdown: Dict) -> Tuple[str, str]:
     """
     global pending_tracker
     
-    pending_credit = breakdown.get("pending_credit", 0)
+    in_flight = breakdown.get("in_flight", 0)
     total_assets = breakdown.get("total_assets", 0)
     
-    # Check max pending age (now uses pre-calculated pending_credit)
-    oldest_age = pending_tracker.get_oldest_pending_age_hours(pending_credit)
-    if oldest_age > MAX_PENDING_AGE_HOURS:
-        return "pause", f"Oldest deposit pending {oldest_age:.1f} hours (max {MAX_PENDING_AGE_HOURS}h)"
+    # V7.4: Check conservation bound - contract will reject NAV if violated
+    # totalAssets must be >= expectedAssets * (1 - maxLossBps/10000)
+    if expected_assets > 0 and total_assets > 0:
+        min_allowed = expected_assets * (10000 - MAX_LOSS_BPS) // 10000
+        if total_assets < min_allowed:
+            loss_pct = (1 - total_assets / expected_assets) * 100
+            return "warning", f"Conservation bound violated! Loss {loss_pct:.1f}% exceeds {MAX_LOSS_BPS/100:.0f}% limit. Contract may reject NAV."
     
-    # Check max pending ratio
-    if total_assets > 0:
-        pending_ratio = pending_credit / total_assets
-        if pending_ratio > MAX_PENDING_RATIO:
-            return "pause", f"Pending ratio {pending_ratio:.1%} exceeds {MAX_PENDING_RATIO:.0%}"
-        elif pending_ratio > MAX_PENDING_RATIO * 0.8:
-            return "warning", f"Pending ratio {pending_ratio:.1%} approaching limit"
+    # V7.4: Check in-flight age (actual funds waiting to be swept/bridged)
+    if in_flight > 0:
+        oldest_age = pending_tracker.get_oldest_pending_age_hours(in_flight)
+        if oldest_age > MAX_PENDING_AGE_HOURS:
+            return "pause", f"In-flight funds pending {oldest_age:.1f} hours (max {MAX_PENDING_AGE_HOURS}h)"
+        elif oldest_age > MAX_PENDING_AGE_HOURS * 0.8:
+            return "warning", f"In-flight funds pending {oldest_age:.1f} hours"
     
     return "ok", ""
 
@@ -1295,38 +1326,40 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "total_assets": 0,
         }
     
-    # Check safety valves (V7.1: now uses pending_credit from breakdown)
-    safety_status, safety_reason = check_safety_valves(breakdown)
+    # Check safety valves (V7.4: checks in-flight age + conservation bound)
+    safety_status, safety_reason = check_safety_valves(breakdown, expected_assets)
     if safety_status == "pause":
         print(f"🛑 SAFETY VALVE TRIGGERED: {safety_reason}")
     elif safety_status == "warning":
         print(f"⚠️ SAFETY WARNING: {safety_reason}")
     
     # Calculate NAV per share
-    # V7.3.3 FIX: Include vault buffer INSIDE creditedCash for signing
-    # Reserved is EXCLUDED - Polygon balanceOf is the source of truth for cash
-    # This ensures: totalAssets = creditedCash + creditedPositions + pendingCredit + inFlight
-    # The contract's asset breakdown check requires this exact equality (only 4 fields)
+    # V7.4 FIX: NAV uses ACTUAL LIQUID VALUE only (no pendingCredit)
+    # pendingCredit is set to 0 for signing - it was masking trading losses
+    # This ensures NAV correctly reflects position gains/losses
     reserved_usdc = breakdown.get("reserved", 0)  # Keep for logging only
-    credited_cash_signed = breakdown["credited_cash"] + vault_buffer  # No reserved!
-    total_assets = credited_cash_signed + breakdown["credited_positions"] + breakdown["pending_credit"] + breakdown["in_flight"]
+    credited_cash_signed = breakdown["credited_cash"] + vault_buffer  # Include vault buffer in cash
     
-    # V7.3 ASSERTION: Verify totalAssets equals the sum of 4 signed fields
-    expected_sum = credited_cash_signed + breakdown["credited_positions"] + breakdown["pending_credit"] + breakdown["in_flight"]
+    # V7.4: pendingCredit = 0 for NAV (kept for monitoring only)
+    pending_credit_signed = 0
+    total_assets = credited_cash_signed + breakdown["credited_positions"] + pending_credit_signed + breakdown["in_flight"]
+    
+    # V7.4 ASSERTION: Verify totalAssets equals the sum of 4 signed fields
+    expected_sum = credited_cash_signed + breakdown["credited_positions"] + pending_credit_signed + breakdown["in_flight"]
     if total_assets != expected_sum:
         raise ValueError(f"Asset breakdown mismatch! totalAssets={total_assets} != sum={expected_sum}")
     
-    print(f"📊 Total Assets Breakdown (V7.3):")
+    print(f"📊 Total Assets Breakdown (V7.4 - ACTUAL LIQUID VALUE):")
     print(f"   • PM Cash:        ${breakdown['credited_cash']/1e6:.2f}")
     print(f"   • Reserved:       ${reserved_usdc/1e6:.2f}")
     print(f"   • Vault Buffer:   ${vault_buffer/1e6:.2f}")
     print(f"   • Credited Cash (signed): ${credited_cash_signed/1e6:.2f}")
     print(f"   • Positions:      ${breakdown['credited_positions']/1e6:.2f}")
-    print(f"   • Pending Credit: ${breakdown['pending_credit']/1e6:.2f}")
+    print(f"   • Pending Credit (signed): ${pending_credit_signed/1e6:.2f}")
     print(f"   • In-Flight:      ${breakdown['in_flight']/1e6:.2f}")
     print(f"   ─────────────────────────────")
     print(f"   • TOTAL ASSETS:   ${total_assets/1e6:.2f}")
-    print(f"   ✅ Breakdown check PASSED")
+    print(f"   (V7.4: pendingCredit=0, NAV reflects actual liquid value)")
     
     if total_supply > 0:
         nav = (total_assets * NAV_PRECISION) // total_supply
@@ -1337,11 +1370,12 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     deadline = now + NAV_VALIDITY_SECONDS
     
     # Sign the full breakdown (credited_cash includes vault buffer)
+    # V7.4: Use pending_credit_signed (0) instead of calculated pending_credit
     signature, signer = sign_nav_data_v7(
         total_assets,
         credited_cash_signed,
         breakdown["credited_positions"],
-        breakdown["pending_credit"],
+        pending_credit_signed,  # V7.4: Always 0 - NAV reflects actual liquid value
         breakdown["in_flight"],
         timestamp,
         deadline,
@@ -1351,12 +1385,14 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     
     # Update cache - IMPORTANT: Keep raw PM cash for pending credit calculations
     # The signed credited_cash is only used for signing, not for internal accounting
+    # V7.4: Store both the calculated pending_credit (for monitoring) and signed (0 for NAV)
     with nav_lock:
         cached_nav = {
             "total_assets": total_assets,
             "credited_cash": breakdown["credited_cash"],  # Raw PM cash, NOT signed
             "credited_positions": breakdown["credited_positions"],
-            "pending_credit": breakdown["pending_credit"],
+            "pending_credit": pending_credit_signed,      # V7.4: 0 for NAV purposes
+            "pending_credit_monitoring": breakdown["pending_credit"],  # V7.4: Original for monitoring
             "in_flight": breakdown["in_flight"],
             "reserved": reserved_usdc,                    # Separate reserved tracking
             "cost_basis": breakdown.get("cost_basis", 0),
