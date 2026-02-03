@@ -89,14 +89,105 @@ HARD_FINANCE_KEYWORDS = [
 
 # Soft/generic: only count if ticker already hit (boosters, not triggers)
 SOFT_FINANCE_KEYWORDS = [
-    "price", "trading", "breakout", "resistance", "support", "bull", "bear"
+    "price", "trading", "breakout", "resistance", "support", "bull", "bear",
+    "above", "below", "hits", "reaches", "breaks", "crosses", "surpass",
+    "100k", "50k", "200k", "1000", "10000", "all time high", "new high"
 ]
+
+# Maximum outcomes per market - spray 12 bets (4 start, 4 middle, 4 end) for large markets
+MAX_OUTCOMES_PER_MARKET = 12
 
 # Category tags that indicate crypto/stock markets
 CRYPTO_STOCK_TAGS = [
     "crypto", "cryptocurrency", "bitcoin", "ethereum", "defi",
     "stocks", "equities", "nasdaq", "finance"
 ]
+
+
+def apply_outcome_limit(clob_token_ids_json: str, outcomes_json: str) -> tuple:
+    """
+    Apply outcome limit for markets with many outcomes.
+    
+    For markets with > MAX_OUTCOMES_PER_MARKET outcomes, select exactly 12:
+    - 4 from start (likely favorites)
+    - 4 from middle
+    - 4 from end (likely longshots)
+    
+    Uses evenly spaced selection to avoid overlaps and ensure exactly 12 outcomes.
+    
+    Args:
+        clob_token_ids_json: JSON array of token IDs
+        outcomes_json: JSON array of outcome names
+        
+    Returns:
+        Tuple of (limited_token_ids_json, limited_outcomes_json, was_limited)
+    """
+    import json
+    
+    try:
+        token_ids = json.loads(clob_token_ids_json) if clob_token_ids_json else []
+        outcomes = json.loads(outcomes_json) if outcomes_json else []
+    except (json.JSONDecodeError, TypeError) as e:
+        log(f"   ⚠️ JSON parse error in apply_outcome_limit: {e}")
+        return clob_token_ids_json, outcomes_json, False
+    
+    # Use minimum length to ensure alignment
+    total_outcomes = min(len(token_ids), len(outcomes))
+    if len(token_ids) != len(outcomes):
+        log(f"   ⚠️ Mismatched lengths: token_ids={len(token_ids)}, outcomes={len(outcomes)}")
+    
+    # If within limit, return as-is
+    if total_outcomes <= MAX_OUTCOMES_PER_MARKET:
+        return clob_token_ids_json, outcomes_json, False
+    
+    # Use evenly spaced selection to get exactly 12 outcomes
+    # This prevents overlaps that occur with start/middle/end approach
+    selected_indices = []
+    
+    # Calculate spacing to distribute 12 picks across the total range
+    # Pick from 3 zones: start (0-33%), middle (33%-66%), end (66%-100%)
+    zone_size = total_outcomes // 3
+    
+    # Zone 1: Start (indices 0 to zone_size-1), pick 4 evenly spaced
+    for i in range(4):
+        idx = (i * zone_size) // 4
+        selected_indices.append(idx)
+    
+    # Zone 2: Middle (indices zone_size to 2*zone_size-1), pick 4 evenly spaced
+    for i in range(4):
+        idx = zone_size + (i * zone_size) // 4
+        selected_indices.append(idx)
+    
+    # Zone 3: End (indices 2*zone_size to total_outcomes-1), pick 4 evenly spaced
+    end_zone_size = total_outcomes - (2 * zone_size)
+    for i in range(4):
+        idx = (2 * zone_size) + (i * end_zone_size) // 4
+        if idx >= total_outcomes:
+            idx = total_outcomes - 1
+        selected_indices.append(idx)
+    
+    # Deduplicate and sort (should rarely have duplicates with this approach)
+    selected_indices = sorted(set(selected_indices))
+    
+    # If we have fewer than 12 due to small total or dedup, fill in gaps
+    if len(selected_indices) < MAX_OUTCOMES_PER_MARKET:
+        all_indices = set(range(total_outcomes))
+        remaining = sorted(all_indices - set(selected_indices))
+        needed = MAX_OUTCOMES_PER_MARKET - len(selected_indices)
+        # Add evenly spaced from remaining
+        for i in range(min(needed, len(remaining))):
+            idx = remaining[(i * len(remaining)) // needed] if needed > 0 else 0
+            selected_indices.append(idx)
+        selected_indices = sorted(set(selected_indices))
+    
+    # Limit to exactly MAX_OUTCOMES_PER_MARKET
+    selected_indices = selected_indices[:MAX_OUTCOMES_PER_MARKET]
+    
+    # Select the outcomes
+    limited_tokens = [token_ids[i] for i in selected_indices]
+    limited_outcomes = [outcomes[i] for i in selected_indices]
+    
+    return json.dumps(limited_tokens), json.dumps(limited_outcomes), True
 
 
 def log(message: str):
@@ -704,13 +795,21 @@ def process_sub_market(market: Dict, event: Dict, seen_conditions: Set[str]) -> 
         result["reason"] = f"short_{duration}h"
         return result
     
+    # Apply outcome limit for multi-outcome markets (spray distribution)
+    limited_token_ids, limited_outcomes, was_limited = apply_outcome_limit(clob_token_ids, outcomes)
+    if was_limited:
+        import json
+        original_count = len(json.loads(clob_token_ids)) if clob_token_ids else 0
+        limited_count = len(json.loads(limited_token_ids)) if limited_token_ids else 0
+        log(f"   🎯 Outcome limit applied: {original_count} → {limited_count} (spray distribution)")
+    
     # Queue for trading
     if queue_trading_job(
         condition_id=condition_id,
         event_slug=event_slug,
         question=market_question,
-        clob_token_ids=clob_token_ids,
-        outcomes=outcomes,
+        clob_token_ids=limited_token_ids,
+        outcomes=limited_outcomes,
         created_at=created_at,
         closed_time=closed_time
     ):

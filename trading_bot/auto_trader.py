@@ -88,7 +88,9 @@ HARD_FINANCE_KEYWORDS = [
 
 # Soft/generic: only count if ticker already hit
 SOFT_FINANCE_KEYWORDS = [
-    "price", "trading", "breakout", "resistance", "support", "bull", "bear"
+    "price", "trading", "breakout", "resistance", "support", "bull", "bear",
+    "above", "below", "hits", "reaches", "breaks", "crosses", "surpass",
+    "100k", "50k", "200k", "1000", "10000", "all time high", "new high"
 ]
 
 
