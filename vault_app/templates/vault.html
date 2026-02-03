@@ -134,8 +134,13 @@
             margin-bottom: 12px;
         }
 
-        .action-btn:hover {
+        .action-btn:hover:not(:disabled) {
             background: rgba(255,255,255,0.1);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .action-btn:last-child {
@@ -168,6 +173,116 @@
             color: #6b7280;
         }
 
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(180deg, #1a2030 0%, #141a24 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(0,0,0,0.3);
+            color: #e8edf3;
+            margin-bottom: 16px;
+            outline: none;
+        }
+
+        .modal-input:focus {
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .modal-balance {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 12px;
+        }
+
+        .modal-btn-primary {
+            background: #ffffff;
+            color: #0d1117;
+        }
+
+        .modal-btn-primary:hover:not(:disabled) {
+            background: #f0f0f0;
+        }
+
+        .modal-btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal-btn-secondary {
+            background: rgba(255,255,255,0.06);
+            color: #e8edf3;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .modal-status.info {
+            display: block;
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+        }
+
+        .modal-status.success {
+            display: block;
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .modal-status.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 16px 20px;
@@ -186,7 +301,7 @@
 <body>
     <header class="header">
         <div class="logo">
-            <img src="/static/logo.png" alt="PMFI" onerror="this.style.display='none'">
+            <img src="/static/psniper-logo.png" alt="PMFI" onerror="this.style.display='none'">
             <span class="logo-text">pSNIPER</span>
         </div>
         <div class="header-right">
@@ -244,8 +359,68 @@
         </div>
     </main>
 
+    <!-- Deposit Modal -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Deposit USDC</h2>
+            <input type="number" class="modal-input" id="depositAmount" placeholder="0.00" step="0.01" min="0">
+            <p class="modal-balance">Balance: <span id="usdcBalance">--</span> USDC</p>
+            <button class="modal-btn modal-btn-primary" id="confirmDepositBtn">Deposit</button>
+            <button class="modal-btn modal-btn-secondary" id="closeDepositBtn">Cancel</button>
+            <div class="modal-status" id="depositStatus"></div>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Request Withdrawal</h2>
+            <input type="number" class="modal-input" id="withdrawAmount" placeholder="0.00" step="0.01" min="0">
+            <p class="modal-balance">Your shares: <span id="shareBalance">--</span> pSNIPER</p>
+            <button class="modal-btn modal-btn-primary" id="confirmWithdrawBtn">Request Withdraw</button>
+            <button class="modal-btn modal-btn-secondary" id="closeWithdrawBtn">Cancel</button>
+            <div class="modal-status" id="withdrawStatus"></div>
+        </div>
+    </div>
+
     <script>
-        // Check wallet access on load
+        // =============================================================================
+        // CONFIGURATION
+        // =============================================================================
+        const VAULT_ADDRESS = "0x500bd5C79525d429B96056703629e35bF6057282";
+        const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+        const BASE_CHAIN_ID = 8453;
+        const PRICE_API_URL = window.location.origin;
+
+        // Minimal ABIs - NavDataV7 struct: (totalAssets, creditedCash, creditedPositions, pendingCredit, inFlightOnChain, timestamp, deadline, roundId)
+        const VAULT_ABI = [
+            "function deposit(uint256 amount, tuple(uint256 totalAssets, uint256 creditedCash, uint256 creditedPositions, uint256 pendingCredit, uint256 inFlightOnChain, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) external",
+            "function requestWithdraw(uint256 shares, tuple(uint256 totalAssets, uint256 creditedCash, uint256 creditedPositions, uint256 pendingCredit, uint256 inFlightOnChain, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) external returns (uint256)",
+            "function totalAssets() view returns (uint256)",
+            "function totalSupply() view returns (uint256)",
+            "function balanceOf(address account) view returns (uint256)",
+            "function expectedAssets() view returns (uint256)"
+        ];
+
+        const USDC_ABI = [
+            "function approve(address spender, uint256 amount) returns (bool)",
+            "function allowance(address owner, address spender) view returns (uint256)",
+            "function balanceOf(address account) view returns (uint256)",
+            "function decimals() view returns (uint8)"
+        ];
+
+        // =============================================================================
+        // STATE
+        // =============================================================================
+        let provider = null;
+        let signer = null;
+        let userAddress = null;
+        let vaultContract = null;
+        let usdcContract = null;
+
+        // =============================================================================
+        // INITIALIZATION
+        // =============================================================================
         async function checkAccess() {
             if (typeof window.ethereum === 'undefined') {
                 window.location.href = '/';
@@ -259,13 +434,13 @@
                     return;
                 }
 
-                const wallet = accounts[0].toLowerCase();
+                userAddress = accounts[0].toLowerCase();
                 
                 // Verify wallet is whitelisted
                 const response = await fetch('/api/invite/check-wallet', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ wallet })
+                    body: JSON.stringify({ wallet: userAddress })
                 });
                 const data = await response.json();
                 
@@ -276,7 +451,30 @@
 
                 // Show wallet
                 document.getElementById('walletDisplay').textContent = 
-                    wallet.slice(0, 6) + '...' + wallet.slice(-4);
+                    userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+
+                // Initialize ethers
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+                usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
+
+                // Ensure on Base network
+                const network = await provider.getNetwork();
+                if (Number(network.chainId) !== BASE_CHAIN_ID) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x2105' }]
+                        });
+                    } catch (e) {
+                        console.error('Failed to switch to Base:', e);
+                    }
+                }
+
+                // Load stats
+                await loadStats();
+                await loadBalances();
 
             } catch (e) {
                 console.error('Access check failed:', e);
@@ -284,26 +482,255 @@
             }
         }
 
+        // =============================================================================
+        // STATS & BALANCES
+        // =============================================================================
+        async function loadStats() {
+            try {
+                const res = await fetch(`${PRICE_API_URL}/price`);
+                const data = await res.json();
+                
+                if (data.price_per_share) {
+                    document.getElementById('priceValue').textContent = 
+                        '$' + parseFloat(data.price_per_share).toFixed(2);
+                }
+                if (data.total_assets_usdc) {
+                    document.getElementById('tvlValue').textContent = 
+                        '$' + parseFloat(data.total_assets_usdc).toFixed(2);
+                }
+            } catch (e) {
+                console.error('Failed to load stats:', e);
+            }
+        }
+
+        async function loadBalances() {
+            try {
+                const usdcBal = await usdcContract.balanceOf(userAddress);
+                const shareBal = await vaultContract.balanceOf(userAddress);
+                
+                document.getElementById('usdcBalance').textContent = 
+                    (Number(usdcBal) / 1e6).toFixed(2);
+                document.getElementById('shareBalance').textContent = 
+                    (Number(shareBal) / 1e18).toFixed(4);
+            } catch (e) {
+                console.error('Failed to load balances:', e);
+            }
+        }
+
+        // =============================================================================
+        // SIGNED NAV
+        // =============================================================================
+        async function getSignedNav() {
+            const res = await fetch(`${PRICE_API_URL}/sign-nav`);
+            if (!res.ok) throw new Error('Failed to get signed NAV');
+            return await res.json();
+        }
+
+        // =============================================================================
+        // DEPOSIT
+        // =============================================================================
+        async function handleDeposit() {
+            const amountStr = document.getElementById('depositAmount').value;
+            const amount = parseFloat(amountStr);
+            
+            if (!amountStr || amount <= 0) {
+                showStatus('depositStatus', 'Enter a valid amount', 'error');
+                return;
+            }
+
+            const depositBtn = document.getElementById('confirmDepositBtn');
+            depositBtn.disabled = true;
+
+            try {
+                const amountWei = BigInt(Math.floor(amount * 1e6));
+
+                // Check balance
+                const balance = await usdcContract.balanceOf(userAddress);
+                if (balance < amountWei) {
+                    showStatus('depositStatus', 'Insufficient USDC balance', 'error');
+                    return;
+                }
+
+                // Check allowance and approve if needed
+                showStatus('depositStatus', 'Checking allowance...', 'info');
+                const allowance = await usdcContract.allowance(userAddress, VAULT_ADDRESS);
+                if (allowance < amountWei) {
+                    showStatus('depositStatus', 'Approving USDC...', 'info');
+                    const approveTx = await usdcContract.approve(VAULT_ADDRESS, amountWei);
+                    await approveTx.wait();
+                }
+
+                // Get signed NAV
+                showStatus('depositStatus', 'Getting signed price...', 'info');
+                const signedNav = await getSignedNav();
+                
+                const navData = {
+                    totalAssets: BigInt(signedNav.navData.totalAssets),
+                    creditedCash: BigInt(signedNav.navData.creditedCash),
+                    creditedPositions: BigInt(signedNav.navData.creditedPositions),
+                    pendingCredit: BigInt(signedNav.navData.pendingCredit),
+                    inFlightOnChain: BigInt(signedNav.navData.inFlightOnChain),
+                    timestamp: BigInt(signedNav.navData.timestamp),
+                    deadline: BigInt(signedNav.navData.deadline),
+                    roundId: BigInt(signedNav.navData.roundId)
+                };
+
+                // Execute deposit
+                showStatus('depositStatus', 'Depositing...', 'info');
+                const tx = await vaultContract.deposit(amountWei, navData, signedNav.signature);
+                
+                showStatus('depositStatus', 'Confirming...', 'info');
+                await tx.wait();
+
+                showStatus('depositStatus', `Deposited $${amount.toFixed(2)} USDC`, 'success');
+                document.getElementById('depositAmount').value = '';
+                
+                // Refresh balances
+                await loadBalances();
+                await loadStats();
+
+            } catch (e) {
+                console.error('Deposit error:', e);
+                let msg = e.reason || e.message || 'Deposit failed';
+                if (msg.includes('NAV too old')) msg = 'Price expired, please try again';
+                showStatus('depositStatus', msg.slice(0, 100), 'error');
+            } finally {
+                depositBtn.disabled = false;
+            }
+        }
+
+        // =============================================================================
+        // WITHDRAW
+        // =============================================================================
+        async function handleWithdraw() {
+            const amountStr = document.getElementById('withdrawAmount').value;
+            const amount = parseFloat(amountStr);
+            
+            if (!amountStr || amount <= 0) {
+                showStatus('withdrawStatus', 'Enter a valid amount', 'error');
+                return;
+            }
+
+            const withdrawBtn = document.getElementById('confirmWithdrawBtn');
+            withdrawBtn.disabled = true;
+
+            try {
+                const sharesWei = ethers.parseEther(amountStr);
+
+                // Check share balance
+                const balance = await vaultContract.balanceOf(userAddress);
+                if (balance < sharesWei) {
+                    showStatus('withdrawStatus', 'Insufficient share balance', 'error');
+                    return;
+                }
+
+                // Get signed NAV
+                showStatus('withdrawStatus', 'Getting signed price...', 'info');
+                const signedNav = await getSignedNav();
+                
+                const navData = {
+                    totalAssets: BigInt(signedNav.navData.totalAssets),
+                    creditedCash: BigInt(signedNav.navData.creditedCash),
+                    creditedPositions: BigInt(signedNav.navData.creditedPositions),
+                    pendingCredit: BigInt(signedNav.navData.pendingCredit),
+                    inFlightOnChain: BigInt(signedNav.navData.inFlightOnChain),
+                    timestamp: BigInt(signedNav.navData.timestamp),
+                    deadline: BigInt(signedNav.navData.deadline),
+                    roundId: BigInt(signedNav.navData.roundId)
+                };
+
+                // Execute withdrawal request
+                showStatus('withdrawStatus', 'Requesting withdrawal...', 'info');
+                const tx = await vaultContract.requestWithdraw(sharesWei, navData, signedNav.signature);
+                
+                showStatus('withdrawStatus', 'Confirming...', 'info');
+                await tx.wait();
+
+                showStatus('withdrawStatus', `Withdrawal requested for ${amount.toFixed(4)} shares`, 'success');
+                document.getElementById('withdrawAmount').value = '';
+                
+                // Refresh balances
+                await loadBalances();
+                await loadStats();
+
+            } catch (e) {
+                console.error('Withdraw error:', e);
+                let msg = e.reason || e.message || 'Withdrawal failed';
+                if (msg.includes('NAV too old')) msg = 'Price expired, please try again';
+                showStatus('withdrawStatus', msg.slice(0, 100), 'error');
+            } finally {
+                withdrawBtn.disabled = false;
+            }
+        }
+
+        // =============================================================================
+        // UI HELPERS
+        // =============================================================================
+        function showStatus(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = 'modal-status ' + type;
+        }
+
+        function hideStatus(elementId) {
+            const el = document.getElementById(elementId);
+            el.className = 'modal-status';
+            el.textContent = '';
+        }
+
+        // =============================================================================
+        // EVENT LISTENERS
+        // =============================================================================
+        
         // Disconnect
         document.getElementById('disconnectBtn').addEventListener('click', () => {
             window.location.href = '/';
         });
 
-        // TODO: Implement deposit/withdraw - these would call your vault contract
-        document.getElementById('depositBtn').addEventListener('click', () => {
-            alert('Deposit functionality - integrate with your vault contract');
+        // Deposit modal
+        document.getElementById('depositBtn').addEventListener('click', async () => {
+            document.getElementById('depositModal').classList.add('active');
+            hideStatus('depositStatus');
+            await loadBalances();
         });
 
-        document.getElementById('withdrawBtn').addEventListener('click', () => {
-            alert('Withdraw functionality - integrate with your vault contract');
+        document.getElementById('closeDepositBtn').addEventListener('click', () => {
+            document.getElementById('depositModal').classList.remove('active');
         });
+
+        document.getElementById('confirmDepositBtn').addEventListener('click', handleDeposit);
+
+        // Withdraw modal
+        document.getElementById('withdrawBtn').addEventListener('click', async () => {
+            document.getElementById('withdrawModal').classList.add('active');
+            hideStatus('withdrawStatus');
+            await loadBalances();
+        });
+
+        document.getElementById('closeWithdrawBtn').addEventListener('click', () => {
+            document.getElementById('withdrawModal').classList.remove('active');
+        });
+
+        document.getElementById('confirmWithdrawBtn').addEventListener('click', handleWithdraw);
+
+        // Close modals on backdrop click
+        document.getElementById('depositModal').addEventListener('click', (e) => {
+            if (e.target.id === 'depositModal') {
+                document.getElementById('depositModal').classList.remove('active');
+            }
+        });
+
+        document.getElementById('withdrawModal').addEventListener('click', (e) => {
+            if (e.target.id === 'withdrawModal') {
+                document.getElementById('withdrawModal').classList.remove('active');
+            }
+        });
+
+        // Refresh stats every 30 seconds
+        setInterval(loadStats, 30000);
 
         // Initialize
         checkAccess();
-
-        // TODO: Fetch TVL and price from your vault contract
-        // document.getElementById('tvlValue').textContent = '$22.05';
-        // document.getElementById('priceValue').textContent = '$3.39';
     </script>
 </body>
 </html>
