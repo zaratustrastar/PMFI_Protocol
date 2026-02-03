@@ -1,0 +1,105 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl status polymarket-monitor polymarket-worker psniper-bot withdrawal-servicer psniper-admin
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-01-30 10:18:29 UTC; 4 days ago
+   Main PID: 2099396 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 64.6M (peak: 85.5M)
+        CPU: 4h 32min 17.791s
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-01-30 10:18:29 UTC; 4 days ago
+   Main PID: 2099396 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 64.6M (peak: 85.5M)
+        CPU: 4h 32min 17.791s
+     CGroup: /system.slice/polymarket-monitor.service
+             └─2099396 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bo>
+
+Feb 03 15:56:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]: 🔍 Checking 120 open buy order>
+Feb 03 15:58:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]: 🔍 Checking 105 open sell orde>
+Feb 03 15:58:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell orde>
+Feb 03 15:58:58 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell orde>
+Feb 03 15:58:59 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell orde>
+Feb 03 16:00:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]: 🔍 Checking 144 open buy order>
+Feb 03 16:02:43 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]: 🔍 Checking 105 open sell orde>
+Feb 03 16:03:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell orde>
+Feb 03 16:03:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell orde>
+Feb 03 16:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell orde>
+
+● polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue
+     Loaded: loaded (/etc/systemd/system/polymarket-worker.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-01-30 10:18:29 UTC; 4 days ago
+   Main PID: 2099398 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 42.2M (peak: 42.8M)
+        CPU: 2h 46min 7.914s
+     CGroup: /system.slice/polymarket-worker.service
+             └─2099398 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bo>
+
+Feb 03 16:04:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]: 📊 Placing BUY ladder for YES t>
+Feb 03 16:04:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    Token ID: 931148656014469181>
+Feb 03 16:04:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ✅ Buy @ $0.0100 (10.00 toke>
+Feb 03 16:04:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ✅ Buy @ $0.0120 (10.00 toke>
+Feb 03 16:04:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ✅ Buy @ $0.0140 (10.00 toke>
+Feb 03 16:04:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ✅ Buy @ $0.0160 (10.00 toke>
+Feb 03 16:04:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ❌ Buy @ $0.0180 error: Poly>
+Feb 03 16:04:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ❌ Buy @ $0.0200 error: Poly>
+Feb 03 16:04:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ❌ Buy @ $0.0220 error: Poly>
+Feb 03 16:04:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ❌ Buy @ $0.0250 error: Poly>
+
+○ psniper-bot.service - pSNIPER Bot V7
+lines 1-43...skipping...
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-01-30 10:18:29 UTC; 4 days ago
+   Main PID: 2099396 (python3)
+      Tasks: 1 (limit: 4653)
+● polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells
+     Loaded: loaded (/etc/systemd/system/polymarket-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-01-30 10:18:29 UTC; 4 days ago
+   Main PID: 2099396 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 64.6M (peak: 85.5M)
+        CPU: 4h 32min 17.791s
+     CGroup: /system.slice/polymarket-monitor.service
+             └─2099396 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+
+Feb 03 15:56:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]: 🔍 Checking 120 open buy orders...
+Feb 03 15:58:18 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]: 🔍 Checking 105 open sell orders...
+Feb 03 15:58:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell order 0xb74e95: unsupported operand type(s) for -: 'float' and>
+Feb 03 15:58:58 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell order 0x0f91a0: unsupported operand type(s) for -: 'float' and>
+Feb 03 15:58:59 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell order 0xb66975: unsupported operand type(s) for -: 'float' and>
+Feb 03 16:00:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]: 🔍 Checking 144 open buy orders...
+Feb 03 16:02:43 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]: 🔍 Checking 105 open sell orders...
+Feb 03 16:03:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell order 0xb74e95: unsupported operand type(s) for -: 'float' and>
+Feb 03 16:03:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell order 0x0f91a0: unsupported operand type(s) for -: 'float' and>
+Feb 03 16:03:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2099396]:    ⚠️  Error checking sell order 0xb66975: unsupported operand type(s) for -: 'float' and>
+
+● polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue
+     Loaded: loaded (/etc/systemd/system/polymarket-worker.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-01-30 10:18:29 UTC; 4 days ago
+   Main PID: 2099398 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 42.2M (peak: 42.8M)
+        CPU: 2h 46min 7.914s
+     CGroup: /system.slice/polymarket-worker.service
+             └─2099398 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+
+Feb 03 16:04:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]: 📊 Placing BUY ladder for YES token...
+Feb 03 16:04:19 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    Token ID: 93114865601446918135493005512748104564343097039381670930146832315920959816383
+Feb 03 16:04:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ✅ Buy @ $0.0100 (10.00 tokens) - Order ID: 0x603835...
+Feb 03 16:04:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ✅ Buy @ $0.0120 (10.00 tokens) - Order ID: 0xc02508...
+Feb 03 16:04:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ✅ Buy @ $0.0140 (10.00 tokens) - Order ID: 0x254ac0...
+Feb 03 16:04:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ✅ Buy @ $0.0160 (10.00 tokens) - Order ID: 0x21edf0...
+Feb 03 16:04:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ❌ Buy @ $0.0180 error: PolyApiException[status_code=400, error_message={'error': 'not>
+Feb 03 16:04:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ❌ Buy @ $0.0200 error: PolyApiException[status_code=400, error_message={'error': 'not>
+Feb 03 16:04:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ❌ Buy @ $0.0220 error: PolyApiException[status_code=400, error_message={'error': 'not>
+Feb 03 16:04:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[2099398]:    ❌ Buy @ $0.0250 error: PolyApiException[status_code=400, error_message={'error': 'not>
+
+○ psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; disabled; preset: enabled)
+     Active: inactive (dead)
+lines 1-45
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl restart polymarket-monitor polymarket-worker psniper-bot withdrawal-servicer psniper-admin
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
