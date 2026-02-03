@@ -1409,14 +1409,37 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     
     print(f"✅ Signed NAV: ${nav/1e6:.4f}/share (round {new_round_id}) [{safety_status}]")
     
-    # Build response and cache it
+    # V7.4 FIX: API response MUST use the EXACT same values used for signing
+    # The contract verifies: creditedCash + creditedPositions + pendingCredit + inFlight == totalAssets
+    # We signed with pending_credit_signed (0), so we MUST return pending_credit_signed (0)
+    credited_positions_signed = int(breakdown["credited_positions"])
+    in_flight_signed = int(breakdown["in_flight"])
+    
+    # Debug: verify the breakdown adds up correctly
+    signed_sum = credited_cash_signed + credited_positions_signed + pending_credit_signed + in_flight_signed
+    print(f"🔍 V7.4 Signature Verification:")
+    print(f"   creditedCash (signed):     {credited_cash_signed}")
+    print(f"   creditedPositions (signed): {credited_positions_signed}")
+    print(f"   pendingCredit (signed):     {pending_credit_signed}  <- V7.4: MUST be 0")
+    print(f"   inFlight (signed):          {in_flight_signed}")
+    print(f"   ─────────────────────────────")
+    print(f"   SUM of components:          {signed_sum}")
+    print(f"   totalAssets (signed):       {total_assets}")
+    print(f"   MATCH: {signed_sum == total_assets}")
+    
+    if signed_sum != total_assets:
+        print(f"⚠️ CRITICAL: Breakdown mismatch! Contract will reject this NAV.")
+        print(f"   Difference: {total_assets - signed_sum}")
+        raise ValueError(f"V7.4 breakdown mismatch: sum={signed_sum} != totalAssets={total_assets}")
+    
+    # Build response - ALL values must match what was signed
     result = {
         "navData": {
             "totalAssets": str(total_assets),
             "creditedCash": str(credited_cash_signed),
-            "creditedPositions": str(breakdown["credited_positions"]),
-            "pendingCredit": str(breakdown["pending_credit"]),
-            "inFlightOnChain": str(breakdown["in_flight"]),
+            "creditedPositions": str(credited_positions_signed),
+            "pendingCredit": str(pending_credit_signed),  # V7.4 FIX: was breakdown["pending_credit"]
+            "inFlightOnChain": str(in_flight_signed),
             "timestamp": timestamp,
             "deadline": deadline,
             "roundId": new_round_id,
@@ -1430,10 +1453,11 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "total_assets_usdc": total_assets / 1e6,
             "total_supply": total_supply / 1e18,
             "vault_buffer_usdc": vault_buffer / 1e6 if vault_buffer else 0,
-            "credited_cash_usdc": breakdown["credited_cash"] / 1e6,
-            "credited_positions_usdc": breakdown["credited_positions"] / 1e6,
-            "pending_credit_usdc": breakdown["pending_credit"] / 1e6,
-            "in_flight_usdc": breakdown["in_flight"] / 1e6,
+            "credited_cash_usdc": credited_cash_signed / 1e6,  # V7.4: use signed value
+            "credited_positions_usdc": credited_positions_signed / 1e6,
+            "pending_credit_usdc": pending_credit_signed / 1e6,  # V7.4: 0 for NAV
+            "pending_credit_monitoring_usdc": breakdown["pending_credit"] / 1e6,  # V7.4: original for monitoring
+            "in_flight_usdc": in_flight_signed / 1e6,
             "reserved_usdc": breakdown.get("reserved", 0) / 1e6,      # V7.1
             "cost_basis_usdc": breakdown.get("cost_basis", 0) / 1e6,  # V7.1
             "valid_until": deadline,
