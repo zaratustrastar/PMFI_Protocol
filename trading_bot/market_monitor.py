@@ -264,14 +264,25 @@ def init_tables():
 
 
 def fetch_events(limit: int = 20) -> List[Dict]:
-    """Fetch latest EVENTS from Polymarket Gamma API."""
+    """Fetch latest EVENTS from Polymarket Gamma API.
+    
+    Uses exclude_tag_id to filter out crypto (21) and finance (120) markets
+    at the API level, preventing them from ever entering the pipeline.
+    """
     try:
-        url = f"{GAMMA_API_URL}?order=id&ascending=false&closed=false&limit={limit}"
+        # Exclude crypto (tag_id=21) and finance (tag_id=120) markets at API level
+        # This is more reliable than keyword filtering
+        url = (
+            f"{GAMMA_API_URL}"
+            f"?order=id&ascending=false&closed=false&limit={limit}"
+            f"&exclude_tag_id=21"   # Exclude crypto markets
+            f"&exclude_tag_id=120"  # Exclude finance markets
+        )
         response = requests.get(url, timeout=30)
         response.raise_for_status()
         events = response.json()
         
-        log(f"Fetched {len(events)} events from API")
+        log(f"Fetched {len(events)} events from API (excluding crypto/finance tags)")
         return events
         
     except Exception as e:
