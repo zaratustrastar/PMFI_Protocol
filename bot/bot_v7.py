@@ -1333,136 +1333,145 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     elif safety_status == "warning":
         print(f"⚠️ SAFETY WARNING: {safety_reason}")
     
-    # Calculate NAV per share
-    # V7.4 FIX: NAV uses ACTUAL LIQUID VALUE only (no pendingCredit)
-    # pendingCredit is set to 0 for signing - it was masking trading losses
-    # This ensures NAV correctly reflects position gains/losses
-    reserved_usdc = breakdown.get("reserved", 0)  # Keep for logging only
-    credited_cash_signed = breakdown["credited_cash"] + vault_buffer  # Include vault buffer in cash
+    # ==========================================================================
+    # V7.4 SIGNED BREAKDOWN: Single source of truth for all signed values
+    # ==========================================================================
+    # All values MUST be ints in 1e6 units (USDC decimals)
+    # This pattern prevents mismatch bugs by building one dict that's used everywhere
     
-    # V7.4: pendingCredit = 0 for NAV (kept for monitoring only)
-    pending_credit_signed = 0
-    total_assets = credited_cash_signed + breakdown["credited_positions"] + pending_credit_signed + breakdown["in_flight"]
+    # Raw values from breakdown (already in 1e6 from calculate_nav_breakdown)
+    credited_cash_raw = int(breakdown["credited_cash"])
+    credited_positions_1e6 = int(breakdown["credited_positions"])
+    in_flight_1e6 = int(breakdown["in_flight"])
+    vault_buffer_1e6 = int(vault_buffer)  # Raw from ERC20.balanceOf()
+    reserved_usdc = int(breakdown.get("reserved", 0))  # For logging only
     
-    # V7.4 ASSERTION: Verify totalAssets equals the sum of 4 signed fields
-    expected_sum = credited_cash_signed + breakdown["credited_positions"] + pending_credit_signed + breakdown["in_flight"]
-    if total_assets != expected_sum:
-        raise ValueError(f"Asset breakdown mismatch! totalAssets={total_assets} != sum={expected_sum}")
+    # V7.4: Build the signed breakdown (single source of truth)
+    # - credited_cash includes vault_buffer (on Base) + PM cash (on Polygon)
+    # - pending_credit = 0 (V7.4 rule: NAV reflects actual liquid value only)
+    signed_breakdown = {
+        "credited_cash": credited_cash_raw + vault_buffer_1e6,
+        "credited_positions": credited_positions_1e6,
+        "pending_credit": 0,  # V7.4: Always 0 - was masking trading losses
+        "in_flight": in_flight_1e6,
+    }
+    signed_breakdown["total_assets"] = (
+        signed_breakdown["credited_cash"]
+        + signed_breakdown["credited_positions"]
+        + signed_breakdown["pending_credit"]
+        + signed_breakdown["in_flight"]
+    )
     
-    print(f"📊 Total Assets Breakdown (V7.4 - ACTUAL LIQUID VALUE):")
-    print(f"   • PM Cash:        ${breakdown['credited_cash']/1e6:.2f}")
-    print(f"   • Reserved:       ${reserved_usdc/1e6:.2f}")
-    print(f"   • Vault Buffer:   ${vault_buffer/1e6:.2f}")
-    print(f"   • Credited Cash (signed): ${credited_cash_signed/1e6:.2f}")
-    print(f"   • Positions:      ${breakdown['credited_positions']/1e6:.2f}")
-    print(f"   • Pending Credit (signed): ${pending_credit_signed/1e6:.2f}")
-    print(f"   • In-Flight:      ${breakdown['in_flight']/1e6:.2f}")
-    print(f"   ─────────────────────────────")
-    print(f"   • TOTAL ASSETS:   ${total_assets/1e6:.2f}")
-    print(f"   (V7.4: pendingCredit=0, NAV reflects actual liquid value)")
+    # Hard fail BEFORE signing if breakdown doesn't sum correctly
+    # This mirrors the Solidity require() check exactly
+    computed_sum = (
+        signed_breakdown["credited_cash"]
+        + signed_breakdown["credited_positions"]
+        + signed_breakdown["pending_credit"]
+        + signed_breakdown["in_flight"]
+    )
+    if computed_sum != signed_breakdown["total_assets"]:
+        raise ValueError(f"Asset breakdown mismatch: {computed_sum} != {signed_breakdown['total_assets']}")
     
+    # NAV calculation (1e6 precision per share)
     if total_supply > 0:
-        nav = (total_assets * NAV_PRECISION) // total_supply
+        nav = (signed_breakdown["total_assets"] * NAV_PRECISION) // total_supply
     else:
-        nav = 10**6  # $1.00 per share
+        nav = 10**6  # $1.00 per share if no supply
     
     timestamp = now
     deadline = now + NAV_VALIDITY_SECONDS
     
-    # Sign the full breakdown (credited_cash includes vault buffer)
-    # V7.4: Use pending_credit_signed (0) instead of calculated pending_credit
+    # Log the signed breakdown for debugging
+    print(f"📊 V7.4 Signed Breakdown (SINGLE SOURCE OF TRUTH):")
+    print(f"   • PM Cash (raw):            ${credited_cash_raw/1e6:.2f}")
+    print(f"   • Vault Buffer:             ${vault_buffer_1e6/1e6:.2f}")
+    print(f"   • creditedCash (signed):    ${signed_breakdown['credited_cash']/1e6:.2f}")
+    print(f"   • creditedPositions:        ${signed_breakdown['credited_positions']/1e6:.2f}")
+    print(f"   • pendingCredit (V7.4=0):   ${signed_breakdown['pending_credit']/1e6:.2f}")
+    print(f"   • inFlight:                 ${signed_breakdown['in_flight']/1e6:.2f}")
+    print(f"   ─────────────────────────────")
+    print(f"   • TOTAL ASSETS:             ${signed_breakdown['total_assets']/1e6:.2f}")
+    print(f"   • Reserved (not in NAV):    ${reserved_usdc/1e6:.2f}")
+    print(f"   • Pending (monitoring):     ${breakdown['pending_credit']/1e6:.2f}")
+    
+    # Sign using ONLY signed_breakdown values
     signature, signer = sign_nav_data_v7(
-        total_assets,
-        credited_cash_signed,
-        breakdown["credited_positions"],
-        pending_credit_signed,  # V7.4: Always 0 - NAV reflects actual liquid value
-        breakdown["in_flight"],
-        timestamp,
-        deadline,
-        new_round_id,
-        VAULT_V7_ADDRESS
+        total_assets=signed_breakdown["total_assets"],
+        credited_cash=signed_breakdown["credited_cash"],
+        credited_positions=signed_breakdown["credited_positions"],
+        pending_credit=signed_breakdown["pending_credit"],
+        in_flight=signed_breakdown["in_flight"],
+        timestamp=timestamp,
+        deadline=deadline,
+        round_id=new_round_id,
+        vault_address=VAULT_V7_ADDRESS
     )
     
-    # Update cache - IMPORTANT: Keep raw PM cash for pending credit calculations
-    # The signed credited_cash is only used for signing, not for internal accounting
-    # V7.4: Store both the calculated pending_credit (for monitoring) and signed (0 for NAV)
+    # Ensure signature has 0x prefix
+    sig_hex = signature if signature.startswith("0x") else "0x" + signature
+    
+    print(f"✅ Signed NAV: ${nav/1e6:.4f}/share (round {new_round_id}) [{safety_status}]")
+    
+    # Update cache - keep raw PM cash for internal accounting
     with nav_lock:
         cached_nav = {
-            "total_assets": total_assets,
-            "credited_cash": breakdown["credited_cash"],  # Raw PM cash, NOT signed
-            "credited_positions": breakdown["credited_positions"],
-            "pending_credit": pending_credit_signed,      # V7.4: 0 for NAV purposes
-            "pending_credit_monitoring": breakdown["pending_credit"],  # V7.4: Original for monitoring
-            "in_flight": breakdown["in_flight"],
-            "reserved": reserved_usdc,                    # Separate reserved tracking
+            "total_assets": signed_breakdown["total_assets"],
+            "credited_cash": credited_cash_raw,  # Raw PM cash, NOT signed
+            "credited_positions": signed_breakdown["credited_positions"],
+            "pending_credit": signed_breakdown["pending_credit"],  # V7.4: 0
+            "pending_credit_monitoring": breakdown["pending_credit"],  # Original for monitoring
+            "in_flight": signed_breakdown["in_flight"],
+            "reserved": reserved_usdc,
             "cost_basis": breakdown.get("cost_basis", 0),
             "nav": nav,
             "round_id": new_round_id,
             "last_calculated": now,
             "total_supply": total_supply,
-            "vault_buffer": vault_buffer,
-            "credited_cash_signed": credited_cash_signed,  # Store signed version separately
+            "vault_buffer": vault_buffer_1e6,
+            "credited_cash_signed": signed_breakdown["credited_cash"],
             "safety_status": safety_status,
             "safety_reason": safety_reason,
             "expected_assets": expected_assets,
         }
     
-    print(f"✅ Signed NAV: ${nav/1e6:.4f}/share (round {new_round_id}) [{safety_status}]")
-    
-    # V7.4 FIX: API response MUST use the EXACT same values used for signing
-    # The contract verifies: creditedCash + creditedPositions + pendingCredit + inFlight == totalAssets
-    # We signed with pending_credit_signed (0), so we MUST return pending_credit_signed (0)
-    credited_positions_signed = int(breakdown["credited_positions"])
-    in_flight_signed = int(breakdown["in_flight"])
-    
-    # Debug: verify the breakdown adds up correctly
-    signed_sum = credited_cash_signed + credited_positions_signed + pending_credit_signed + in_flight_signed
-    print(f"🔍 V7.4 Signature Verification:")
-    print(f"   creditedCash (signed):     {credited_cash_signed}")
-    print(f"   creditedPositions (signed): {credited_positions_signed}")
-    print(f"   pendingCredit (signed):     {pending_credit_signed}  <- V7.4: MUST be 0")
-    print(f"   inFlight (signed):          {in_flight_signed}")
-    print(f"   ─────────────────────────────")
-    print(f"   SUM of components:          {signed_sum}")
-    print(f"   totalAssets (signed):       {total_assets}")
-    print(f"   MATCH: {signed_sum == total_assets}")
-    
-    if signed_sum != total_assets:
-        print(f"⚠️ CRITICAL: Breakdown mismatch! Contract will reject this NAV.")
-        print(f"   Difference: {total_assets - signed_sum}")
-        raise ValueError(f"V7.4 breakdown mismatch: sum={signed_sum} != totalAssets={total_assets}")
-    
-    # Build response - ALL values must match what was signed
+    # Build response - ALL navData fields come from signed_breakdown
     result = {
         "navData": {
-            "totalAssets": str(total_assets),
-            "creditedCash": str(credited_cash_signed),
-            "creditedPositions": str(credited_positions_signed),
-            "pendingCredit": str(pending_credit_signed),  # V7.4 FIX: was breakdown["pending_credit"]
-            "inFlightOnChain": str(in_flight_signed),
+            "totalAssets": str(signed_breakdown["total_assets"]),
+            "creditedCash": str(signed_breakdown["credited_cash"]),
+            "creditedPositions": str(signed_breakdown["credited_positions"]),
+            "pendingCredit": str(signed_breakdown["pending_credit"]),
+            "inFlightOnChain": str(signed_breakdown["in_flight"]),
             "timestamp": timestamp,
             "deadline": deadline,
             "roundId": new_round_id,
             "nav": str(nav),
         },
-        "signature": "0x" + signature,
+        "signature": sig_hex,
         "signer": signer,
         "metadata": {
             "nav_raw": str(nav),
             "price_per_share": nav / 1e6,
-            "total_assets_usdc": total_assets / 1e6,
+            "total_assets_usdc": signed_breakdown["total_assets"] / 1e6,
             "total_supply": total_supply / 1e18,
-            "vault_buffer_usdc": vault_buffer / 1e6 if vault_buffer else 0,
-            "credited_cash_usdc": credited_cash_signed / 1e6,  # V7.4: use signed value
-            "credited_positions_usdc": credited_positions_signed / 1e6,
-            "pending_credit_usdc": pending_credit_signed / 1e6,  # V7.4: 0 for NAV
-            "pending_credit_monitoring_usdc": breakdown["pending_credit"] / 1e6,  # V7.4: original for monitoring
-            "in_flight_usdc": in_flight_signed / 1e6,
-            "reserved_usdc": breakdown.get("reserved", 0) / 1e6,      # V7.1
-            "cost_basis_usdc": breakdown.get("cost_basis", 0) / 1e6,  # V7.1
+            "vault_buffer_usdc": vault_buffer_1e6 / 1e6,
+            "credited_cash_usdc": signed_breakdown["credited_cash"] / 1e6,
+            "credited_positions_usdc": signed_breakdown["credited_positions"] / 1e6,
+            "pending_credit_usdc": signed_breakdown["pending_credit"] / 1e6,
+            "pending_credit_monitoring_usdc": breakdown["pending_credit"] / 1e6,
+            "in_flight_usdc": signed_breakdown["in_flight"] / 1e6,
+            "reserved_usdc": reserved_usdc / 1e6,
+            "cost_basis_usdc": breakdown.get("cost_basis", 0) / 1e6,
             "valid_until": deadline,
             "safety_status": safety_status,
             "safety_reason": safety_reason,
+        },
+        "debug": {
+            "chain_round_id": chain_round_id,
+            "vault_buffer_raw": vault_buffer_1e6,
+            "credited_cash_raw": credited_cash_raw,
+            "total_supply_raw": str(total_supply),
         }
     }
     

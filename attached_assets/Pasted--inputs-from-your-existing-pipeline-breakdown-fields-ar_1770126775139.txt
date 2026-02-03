@@ -1,0 +1,90 @@
+# --- inputs from your existing pipeline ---
+# breakdown fields are already int(1e6) where relevant
+credited_cash_1e6      = int(breakdown["credited_cash"])
+credited_positions_1e6 = int(breakdown["credited_positions"])
+in_flight_1e6          = int(breakdown["in_flight"])
+
+vault_buffer_1e6       = int(vault_buffer)  # raw from ERC20.balanceOf(vault)
+pending_credit_signed  = 0                  # V7.4 rule
+
+# round id source (your current approach)
+chain_round_id = int(vault_v7.functions.lastRoundId().call())
+new_round_id   = chain_round_id + 1
+
+# --- build signed breakdown (single source of truth) ---
+credited_cash_signed_1e6 = credited_cash_1e6 + vault_buffer_1e6
+
+total_assets_1e6 = (
+    credited_cash_signed_1e6
+    + credited_positions_1e6
+    + pending_credit_signed
+    + in_flight_1e6
+)
+
+signed_breakdown = {
+    "credited_cash": credited_cash_signed_1e6,
+    "credited_positions": credited_positions_1e6,
+    "pending_credit": pending_credit_signed,
+    "in_flight": in_flight_1e6,
+    "total_assets": total_assets_1e6,
+}
+
+# hard fail to prevent bad payloads reaching contract
+computed = (
+    signed_breakdown["credited_cash"]
+    + signed_breakdown["credited_positions"]
+    + signed_breakdown["pending_credit"]
+    + signed_breakdown["in_flight"]
+)
+if computed != signed_breakdown["total_assets"]:
+    raise ValueError(f"Asset breakdown mismatch: {computed} != {signed_breakdown['total_assets']}")
+
+# NAV (1e6 precision per share, derived from signed totals)
+total_supply_1e18 = int(total_supply_1e18)  # however you fetch it
+if total_supply_1e18 <= 0:
+    nav_1e6 = 10**6  # define startup NAV = $1.000000 if supply is 0
+else:
+    nav_1e6 = (total_assets_1e6 * 10**18) // total_supply_1e18  # floor is fine
+
+# sign (note: returns tuple in your codebase)
+sig_hex, signer = sign_nav_data_v7(
+    total_assets=signed_breakdown["total_assets"],
+    credited_cash=signed_breakdown["credited_cash"],
+    credited_positions=signed_breakdown["credited_positions"],
+    pending_credit=signed_breakdown["pending_credit"],
+    in_flight=signed_breakdown["in_flight"],
+    timestamp=timestamp,
+    deadline=deadline,
+    round_id=new_round_id,
+    vault_address=vault_address,
+)
+
+if not sig_hex.startswith("0x"):
+    sig_hex = "0x" + sig_hex
+
+payload = {
+    # contract-facing fields
+    "totalAssets": str(signed_breakdown["total_assets"]),
+    "creditedCash": str(signed_breakdown["credited_cash"]),
+    "creditedPositions": str(signed_breakdown["credited_positions"]),
+    "pendingCredit": str(signed_breakdown["pending_credit"]),
+    "inFlightOnChain": str(signed_breakdown["in_flight"]),
+    "timestamp": str(timestamp),
+    "deadline": str(deadline),
+    "roundId": str(new_round_id),
+    "signature": sig_hex,
+    "signer": signer,
+
+    # frontend convenience
+    "nav": str(nav_1e6),  # raw 1e6 nav
+    # optional: human-friendly
+    # "navFloat": f"{nav_1e6/1e6:.6f}",
+}
+
+# optional debug block
+payload["debug"] = {
+    "chainRoundId": chain_round_id,
+    "vaultBuffer": vault_buffer_1e6,
+    "creditedCashRaw": credited_cash_1e6,
+    "totalSupply": str(total_supply_1e18),
+}
