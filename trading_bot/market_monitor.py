@@ -790,7 +790,7 @@ def process_sub_market(market: Dict, event: Dict, seen_conditions: Set[str]) -> 
         title=market_question,
         outcomes=outcomes,
         tags=tags,
-        threshold=5
+        threshold=3
     )
     if is_crypto_stock:
         mark_condition_as_seen(condition_id, event_slug)

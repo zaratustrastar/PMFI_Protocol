@@ -94,7 +94,7 @@ SOFT_FINANCE_KEYWORDS = [
 ]
 
 
-def is_crypto_stock_market(text: str, threshold: int = 5) -> tuple:
+def is_crypto_stock_market(text: str, threshold: int = 3) -> tuple:
     """
     Defense-in-depth crypto/stock filter with reduced false positives.
     
