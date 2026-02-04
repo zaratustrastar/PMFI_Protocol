@@ -24,11 +24,10 @@ from database import (
 from telegram_notifier import notify_buy_filled, notify_sell_executed, notify_sell_ladder_result
 
 # Import from centralized config
-from config import MIN_SHARES_PER_ORDER
+from config import MIN_SHARES_PER_ORDER, SELL_RESERVE_RATIO
 
 # Configuration for sell threshold
 MIN_SHARES_FOR_SELL = MIN_SHARES_PER_ORDER  # Minimum accumulated shares before placing sell
-SELL_SHARES = 5  # Fixed number of shares to sell (rest kept as moonbag)
 
 
 def cancel_stale_orders(trader: PolymarketTrader, max_age_hours: int = 12):
@@ -158,33 +157,36 @@ def monitor_all_orders(trader: PolymarketTrader):
                 
                 if threshold_check["ready_to_sell"]:
                     # We have enough shares and haven't placed a sell yet!
-                    print(f"\n   📈 Threshold reached! Placing sell for {SELL_SHARES} shares...")
+                    reserve_shares = total_shares * SELL_RESERVE_RATIO
+                    sellable_shares = total_shares - reserve_shares
+                    
+                    print(f"\n   📈 Threshold reached! Placing SELL LADDER for {total_shares:.2f} shares...")
                     print(f"      Token ID: {token_id[:16]}...")
                     print(f"      Avg buy price: ${avg_buy_price:.4f}")
-                    print(f"      Sell shares: {SELL_SHARES}")
-                    print(f"      Moonbag: {total_shares - SELL_SHARES:.2f} shares")
+                    print(f"      Sellable shares: {sellable_shares:.2f} (90% of position)")
+                    print(f"      Reserve (moonbag): {reserve_shares:.2f} shares (10%)")
                     
                     try:
-                        # Place sell for exactly SELL_SHARES at 3x avg price
-                        sell_orders = trader.place_sell_order(
+                        # Place tiered sell ladder using full accumulated position
+                        sell_orders = trader.place_sell_ladder(
                             token_id,
                             avg_buy_price,
-                            SELL_SHARES,  # Fixed 5 shares
+                            total_shares,  # Full position - ladder handles reserve internally
                             side,
                             market_slug
                         )
                         
                         if sell_orders and len(sell_orders) > 0:
-                            print(f"   ✅ Placed sell for {SELL_SHARES} shares")
+                            print(f"   ✅ Placed {len(sell_orders)} sell order(s) in ladder")
                             # Mark sell as placed to prevent duplicates
                             mark_sell_placed(market_slug, token_id, side)
                         else:
-                            error_msg = "Sell order failed"
+                            error_msg = "Sell ladder failed - no orders placed"
                             print(f"   ❌ {error_msg}")
                             
                     except Exception as e:
                         error_msg = str(e)
-                        print(f"   ❌ Sell order error: {error_msg}")
+                        print(f"   ❌ Sell ladder error: {error_msg}")
                 
                 elif threshold_check["sell_already_placed"]:
                     print(f"   ⏭️  Sell already placed for this token - skipping")
