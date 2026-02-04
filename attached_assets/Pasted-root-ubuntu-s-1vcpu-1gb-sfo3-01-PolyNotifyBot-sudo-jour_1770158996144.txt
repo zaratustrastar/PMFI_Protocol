@@ -1,0 +1,817 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --no-pager | grep -i "error\|exception\|traceback" | tail -20
+Feb 03 22:02:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316013]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:05:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316099]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316189]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:10:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316276]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:12:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316374]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:14:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316458]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:17:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316549]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:19:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316646]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:22:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316735]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316874]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:26:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316971]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:29:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317064]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:31:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317144]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:33:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317212]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:36:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317287]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:38:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317367]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:40:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317437]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:43:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317511]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:45:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317589]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 22:48:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317664]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --no-pager | grep -i "running on\|flask\|serving"
+Feb 02 11:12:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2240812]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 02 11:12:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2240812]:  * Serving Flask app 'bot_v7'
+Feb 02 11:12:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2240812]:  * Running on all addresses (0.0.0.0)
+Feb 02 11:12:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2240812]:  * Running on http://127.0.0.1:8080
+Feb 02 11:12:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2240812]:  * Running on http://147.182.206.35:8080
+Feb 02 11:24:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 02 11:24:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:  * Serving Flask app 'bot_v7'
+Feb 02 11:24:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:  * Running on all addresses (0.0.0.0)
+Feb 02 11:24:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:  * Running on http://127.0.0.1:8080
+Feb 02 11:24:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2241664]:  * Running on http://147.182.206.35:8080
+Feb 02 13:47:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 02 13:47:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:  * Serving Flask app 'bot_v7'
+Feb 02 13:47:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:  * Running on all addresses (0.0.0.0)
+Feb 02 13:47:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:  * Running on http://127.0.0.1:8080
+Feb 02 13:47:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2247646]:  * Running on http://147.182.206.35:8080
+Feb 02 14:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2249932]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 02 14:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2249932]:  * Serving Flask app 'bot_v7'
+Feb 02 14:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2249932]:  * Running on all addresses (0.0.0.0)
+Feb 02 14:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2249932]:  * Running on http://127.0.0.1:8080
+Feb 02 14:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2249932]:  * Running on http://147.182.206.35:8080
+Feb 03 16:05:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302462]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:05:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302462]:  * Serving Flask app 'bot_v7'
+Feb 03 16:06:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302484]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:06:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302484]:  * Serving Flask app 'bot_v7'
+Feb 03 16:06:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302503]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:06:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302503]:  * Serving Flask app 'bot_v7'
+Feb 03 16:06:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302513]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:06:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302513]:  * Serving Flask app 'bot_v7'
+Feb 03 16:07:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302525]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:07:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302525]:  * Serving Flask app 'bot_v7'
+Feb 03 16:07:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302543]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:07:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302543]:  * Serving Flask app 'bot_v7'
+Feb 03 16:08:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302556]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:08:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302556]:  * Serving Flask app 'bot_v7'
+Feb 03 16:08:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302576]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:08:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302576]:  * Serving Flask app 'bot_v7'
+Feb 03 16:08:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302586]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:08:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302586]:  * Serving Flask app 'bot_v7'
+Feb 03 16:09:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302599]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:09:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302599]:  * Serving Flask app 'bot_v7'
+Feb 03 16:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302615]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302615]:  * Serving Flask app 'bot_v7'
+Feb 03 16:09:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302683]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:09:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302683]:  * Serving Flask app 'bot_v7'
+Feb 03 16:10:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302695]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:10:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302695]:  * Serving Flask app 'bot_v7'
+Feb 03 16:10:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302718]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:10:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302718]:  * Serving Flask app 'bot_v7'
+Feb 03 16:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302728]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:11:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302728]:  * Serving Flask app 'bot_v7'
+Feb 03 16:11:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302746]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:11:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302746]:  * Serving Flask app 'bot_v7'
+Feb 03 16:11:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302756]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:11:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302756]:  * Serving Flask app 'bot_v7'
+Feb 03 16:12:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302767]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:12:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302767]:  * Serving Flask app 'bot_v7'
+Feb 03 16:12:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302785]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:12:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302785]:  * Serving Flask app 'bot_v7'
+Feb 03 16:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302797]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302797]:  * Serving Flask app 'bot_v7'
+Feb 03 16:13:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302811]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:13:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302811]:  * Serving Flask app 'bot_v7'
+Feb 03 16:13:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302827]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:13:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302827]:  * Serving Flask app 'bot_v7'
+Feb 03 16:14:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302844]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:14:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302844]:  * Serving Flask app 'bot_v7'
+Feb 03 16:14:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302860]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:14:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302860]:  * Serving Flask app 'bot_v7'
+Feb 03 16:15:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302872]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:15:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302872]:  * Serving Flask app 'bot_v7'
+Feb 03 16:15:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302894]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:15:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302894]:  * Serving Flask app 'bot_v7'
+Feb 03 16:15:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302904]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:15:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302904]:  * Serving Flask app 'bot_v7'
+Feb 03 16:16:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302920]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:16:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302920]:  * Serving Flask app 'bot_v7'
+Feb 03 16:16:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302936]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:16:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302936]:  * Serving Flask app 'bot_v7'
+Feb 03 16:16:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302946]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:16:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302946]:  * Serving Flask app 'bot_v7'
+Feb 03 16:17:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302959]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:17:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302959]:  * Serving Flask app 'bot_v7'
+Feb 03 16:17:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302983]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:17:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302983]:  * Serving Flask app 'bot_v7'
+Feb 03 16:18:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302993]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:18:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2302993]:  * Serving Flask app 'bot_v7'
+Feb 03 16:18:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303011]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:18:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303011]:  * Serving Flask app 'bot_v7'
+Feb 03 16:18:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303021]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:18:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303021]:  * Serving Flask app 'bot_v7'
+Feb 03 16:19:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303033]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:19:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303033]:  * Serving Flask app 'bot_v7'
+Feb 03 16:19:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303053]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:19:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303053]:  * Serving Flask app 'bot_v7'
+Feb 03 16:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303066]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303066]:  * Serving Flask app 'bot_v7'
+Feb 03 16:20:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303084]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:20:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303084]:  * Serving Flask app 'bot_v7'
+Feb 03 16:20:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303105]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:20:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303105]:  * Serving Flask app 'bot_v7'
+Feb 03 16:21:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303116]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:21:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303116]:  * Serving Flask app 'bot_v7'
+Feb 03 16:21:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303134]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:21:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303134]:  * Serving Flask app 'bot_v7'
+Feb 03 16:21:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303144]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:21:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303144]:  * Serving Flask app 'bot_v7'
+Feb 03 16:22:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303154]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:22:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303154]:  * Serving Flask app 'bot_v7'
+Feb 03 16:22:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303170]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:22:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303170]:  * Serving Flask app 'bot_v7'
+Feb 03 16:23:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303181]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:23:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303181]:  * Serving Flask app 'bot_v7'
+Feb 03 16:23:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303197]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:23:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303197]:  * Serving Flask app 'bot_v7'
+Feb 03 16:23:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303207]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:23:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303207]:  * Serving Flask app 'bot_v7'
+Feb 03 16:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303221]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:24:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303221]:  * Serving Flask app 'bot_v7'
+Feb 03 16:24:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303237]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:24:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303237]:  * Serving Flask app 'bot_v7'
+Feb 03 16:24:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303251]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:24:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303251]:  * Serving Flask app 'bot_v7'
+Feb 03 16:25:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303267]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:25:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303267]:  * Serving Flask app 'bot_v7'
+Feb 03 16:25:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303289]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:25:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303289]:  * Serving Flask app 'bot_v7'
+Feb 03 16:26:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303300]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:26:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303300]:  * Serving Flask app 'bot_v7'
+Feb 03 16:26:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303316]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:26:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303316]:  * Serving Flask app 'bot_v7'
+Feb 03 16:26:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303329]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:26:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303329]:  * Serving Flask app 'bot_v7'
+Feb 03 16:27:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303341]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:27:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303341]:  * Serving Flask app 'bot_v7'
+Feb 03 16:27:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303359]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:27:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303359]:  * Serving Flask app 'bot_v7'
+Feb 03 16:27:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303369]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:27:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303369]:  * Serving Flask app 'bot_v7'
+Feb 03 16:28:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303378]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:28:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303378]:  * Serving Flask app 'bot_v7'
+Feb 03 16:28:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303442]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:28:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303442]:  * Serving Flask app 'bot_v7'
+Feb 03 16:29:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303455]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:29:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303455]:  * Serving Flask app 'bot_v7'
+Feb 03 16:29:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303471]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:29:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303471]:  * Serving Flask app 'bot_v7'
+Feb 03 16:29:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303481]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:29:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303481]:  * Serving Flask app 'bot_v7'
+Feb 03 16:30:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303490]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:30:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303490]:  * Serving Flask app 'bot_v7'
+Feb 03 16:30:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303510]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:30:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303510]:  * Serving Flask app 'bot_v7'
+Feb 03 16:31:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303522]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:31:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303522]:  * Serving Flask app 'bot_v7'
+Feb 03 16:31:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303538]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:31:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303538]:  * Serving Flask app 'bot_v7'
+Feb 03 16:31:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303547]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:31:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303547]:  * Serving Flask app 'bot_v7'
+Feb 03 16:32:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303562]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:32:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303562]:  * Serving Flask app 'bot_v7'
+Feb 03 16:32:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303578]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:32:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303578]:  * Serving Flask app 'bot_v7'
+Feb 03 16:32:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303588]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:32:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303588]:  * Serving Flask app 'bot_v7'
+Feb 03 16:33:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303597]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:33:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303597]:  * Serving Flask app 'bot_v7'
+Feb 03 16:33:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303615]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:33:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303615]:  * Serving Flask app 'bot_v7'
+Feb 03 16:34:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303625]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:34:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303625]:  * Serving Flask app 'bot_v7'
+Feb 03 16:34:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303642]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:34:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303642]:  * Serving Flask app 'bot_v7'
+Feb 03 16:34:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303650]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:34:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303650]:  * Serving Flask app 'bot_v7'
+Feb 03 16:35:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303663]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:35:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303663]:  * Serving Flask app 'bot_v7'
+Feb 03 16:35:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303683]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:35:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303683]:  * Serving Flask app 'bot_v7'
+Feb 03 16:36:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303694]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:36:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303694]:  * Serving Flask app 'bot_v7'
+Feb 03 16:36:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303712]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:36:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303712]:  * Serving Flask app 'bot_v7'
+Feb 03 16:36:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303724]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:36:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303724]:  * Serving Flask app 'bot_v7'
+Feb 03 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303735]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303735]:  * Serving Flask app 'bot_v7'
+Feb 03 16:37:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303752]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:37:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303752]:  * Serving Flask app 'bot_v7'
+Feb 03 16:38:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303762]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:38:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303762]:  * Serving Flask app 'bot_v7'
+Feb 03 16:38:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303781]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:38:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303781]:  * Serving Flask app 'bot_v7'
+Feb 03 16:38:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303791]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:38:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303791]:  * Serving Flask app 'bot_v7'
+Feb 03 16:39:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303802]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:39:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303802]:  * Serving Flask app 'bot_v7'
+Feb 03 16:39:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303818]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:39:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303818]:  * Serving Flask app 'bot_v7'
+Feb 03 16:40:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303828]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:40:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303828]:  * Serving Flask app 'bot_v7'
+Feb 03 16:42:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303839]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:42:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303839]:  * Serving Flask app 'bot_v7'
+Feb 03 16:44:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303911]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:44:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303911]:  * Serving Flask app 'bot_v7'
+Feb 03 16:47:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303972]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:47:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2303972]:  * Serving Flask app 'bot_v7'
+Feb 03 16:49:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304048]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:49:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304048]:  * Serving Flask app 'bot_v7'
+Feb 03 16:51:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304111]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:51:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304111]:  * Serving Flask app 'bot_v7'
+Feb 03 16:54:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304179]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:54:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304179]:  * Serving Flask app 'bot_v7'
+Feb 03 16:56:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304260]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:56:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304260]:  * Serving Flask app 'bot_v7'
+Feb 03 16:59:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304328]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 16:59:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304328]:  * Serving Flask app 'bot_v7'
+Feb 03 17:01:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304402]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:01:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304402]:  * Serving Flask app 'bot_v7'
+Feb 03 17:03:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304469]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:03:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304469]:  * Serving Flask app 'bot_v7'
+Feb 03 17:06:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304539]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:06:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304539]:  * Serving Flask app 'bot_v7'
+Feb 03 17:08:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304624]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:08:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304624]:  * Serving Flask app 'bot_v7'
+Feb 03 17:10:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304682]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:10:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304682]:  * Serving Flask app 'bot_v7'
+Feb 03 17:13:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304750]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:13:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304750]:  * Serving Flask app 'bot_v7'
+Feb 03 17:15:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304819]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:15:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304819]:  * Serving Flask app 'bot_v7'
+Feb 03 17:18:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304887]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:18:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304887]:  * Serving Flask app 'bot_v7'
+Feb 03 17:20:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304962]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:20:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2304962]:  * Serving Flask app 'bot_v7'
+Feb 03 17:22:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305090]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:22:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305090]:  * Serving Flask app 'bot_v7'
+Feb 03 17:25:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305158]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:25:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305158]:  * Serving Flask app 'bot_v7'
+Feb 03 17:27:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305237]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:27:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305237]:  * Serving Flask app 'bot_v7'
+Feb 03 17:29:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305307]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:29:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305307]:  * Serving Flask app 'bot_v7'
+Feb 03 17:32:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305375]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:32:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305375]:  * Serving Flask app 'bot_v7'
+Feb 03 17:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305450]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305450]:  * Serving Flask app 'bot_v7'
+Feb 03 17:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305515]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305515]:  * Serving Flask app 'bot_v7'
+Feb 03 17:39:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305590]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:39:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305590]:  * Serving Flask app 'bot_v7'
+Feb 03 17:41:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305660]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:41:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305660]:  * Serving Flask app 'bot_v7'
+Feb 03 17:44:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305732]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:44:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305732]:  * Serving Flask app 'bot_v7'
+Feb 03 17:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305809]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305809]:  * Serving Flask app 'bot_v7'
+Feb 03 17:45:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305853]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:45:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305853]:  * Serving Flask app 'bot_v7'
+Feb 03 17:46:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305868]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:46:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305868]:  * Serving Flask app 'bot_v7'
+Feb 03 17:46:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305886]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:46:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305886]:  * Serving Flask app 'bot_v7'
+Feb 03 17:47:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305896]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:47:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305896]:  * Serving Flask app 'bot_v7'
+Feb 03 17:47:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305914]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:47:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305914]:  * Serving Flask app 'bot_v7'
+Feb 03 17:47:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305925]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:47:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305925]:  * Serving Flask app 'bot_v7'
+Feb 03 17:48:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305941]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:48:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305941]:  * Serving Flask app 'bot_v7'
+Feb 03 17:48:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305959]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:48:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305959]:  * Serving Flask app 'bot_v7'
+Feb 03 17:48:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305967]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:48:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305967]:  * Serving Flask app 'bot_v7'
+Feb 03 17:49:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305980]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:49:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305980]:  * Serving Flask app 'bot_v7'
+Feb 03 17:49:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305998]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:49:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2305998]:  * Serving Flask app 'bot_v7'
+Feb 03 17:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306008]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306008]:  * Serving Flask app 'bot_v7'
+Feb 03 17:50:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306031]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:50:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306031]:  * Serving Flask app 'bot_v7'
+Feb 03 17:50:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306042]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:50:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306042]:  * Serving Flask app 'bot_v7'
+Feb 03 17:51:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306057]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:51:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306057]:  * Serving Flask app 'bot_v7'
+Feb 03 17:51:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306075]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:51:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306075]:  * Serving Flask app 'bot_v7'
+Feb 03 17:52:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306083]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:52:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306083]:  * Serving Flask app 'bot_v7'
+Feb 03 17:52:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306103]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:52:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306103]:  * Serving Flask app 'bot_v7'
+Feb 03 17:52:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306113]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:52:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306113]:  * Serving Flask app 'bot_v7'
+Feb 03 17:53:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306126]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:53:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306126]:  * Serving Flask app 'bot_v7'
+Feb 03 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306143]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306143]:  * Serving Flask app 'bot_v7'
+Feb 03 17:53:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306153]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:53:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306153]:  * Serving Flask app 'bot_v7'
+Feb 03 17:54:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306169]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:54:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306169]:  * Serving Flask app 'bot_v7'
+Feb 03 17:54:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306185]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:54:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306185]:  * Serving Flask app 'bot_v7'
+Feb 03 17:55:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306198]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:55:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306198]:  * Serving Flask app 'bot_v7'
+Feb 03 17:55:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306219]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:55:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306219]:  * Serving Flask app 'bot_v7'
+Feb 03 17:55:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306235]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:55:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306235]:  * Serving Flask app 'bot_v7'
+Feb 03 17:56:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306245]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:56:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306245]:  * Serving Flask app 'bot_v7'
+Feb 03 17:56:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306266]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:56:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306266]:  * Serving Flask app 'bot_v7'
+Feb 03 17:57:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306277]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:57:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306277]:  * Serving Flask app 'bot_v7'
+Feb 03 17:57:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306297]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:57:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306297]:  * Serving Flask app 'bot_v7'
+Feb 03 17:57:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306307]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:57:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306307]:  * Serving Flask app 'bot_v7'
+Feb 03 17:58:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306318]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:58:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306318]:  * Serving Flask app 'bot_v7'
+Feb 03 17:58:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306336]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:58:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306336]:  * Serving Flask app 'bot_v7'
+Feb 03 17:58:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306347]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:58:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306347]:  * Serving Flask app 'bot_v7'
+Feb 03 17:59:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306359]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:59:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306359]:  * Serving Flask app 'bot_v7'
+Feb 03 17:59:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306376]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 17:59:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306376]:  * Serving Flask app 'bot_v7'
+Feb 03 18:00:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306404]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:00:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306404]:  * Serving Flask app 'bot_v7'
+Feb 03 18:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306426]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306426]:  * Serving Flask app 'bot_v7'
+Feb 03 18:00:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306437]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:00:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306437]:  * Serving Flask app 'bot_v7'
+Feb 03 18:01:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306449]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:01:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306449]:  * Serving Flask app 'bot_v7'
+Feb 03 18:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306468]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306468]:  * Serving Flask app 'bot_v7'
+Feb 03 18:02:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306479]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:02:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306479]:  * Serving Flask app 'bot_v7'
+Feb 03 18:02:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306497]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:02:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306497]:  * Serving Flask app 'bot_v7'
+Feb 03 18:02:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306507]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:02:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306507]:  * Serving Flask app 'bot_v7'
+Feb 03 18:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306519]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306519]:  * Serving Flask app 'bot_v7'
+Feb 03 18:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306539]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:03:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306539]:  * Serving Flask app 'bot_v7'
+Feb 03 18:03:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306549]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:03:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306549]:  * Serving Flask app 'bot_v7'
+Feb 03 18:04:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306561]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:04:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306561]:  * Serving Flask app 'bot_v7'
+Feb 03 18:04:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306581]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:04:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306581]:  * Serving Flask app 'bot_v7'
+Feb 03 18:05:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306594]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:05:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306594]:  * Serving Flask app 'bot_v7'
+Feb 03 18:05:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306615]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:05:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306615]:  * Serving Flask app 'bot_v7'
+Feb 03 18:05:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306628]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:05:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306628]:  * Serving Flask app 'bot_v7'
+Feb 03 18:06:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306642]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:06:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306642]:  * Serving Flask app 'bot_v7'
+Feb 03 18:06:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306658]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:06:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306658]:  * Serving Flask app 'bot_v7'
+Feb 03 18:07:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306668]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:07:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306668]:  * Serving Flask app 'bot_v7'
+Feb 03 18:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306691]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306691]:  * Serving Flask app 'bot_v7'
+Feb 03 18:07:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306699]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:07:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306699]:  * Serving Flask app 'bot_v7'
+Feb 03 18:08:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306711]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:08:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306711]:  * Serving Flask app 'bot_v7'
+Feb 03 18:08:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306731]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:08:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306731]:  * Serving Flask app 'bot_v7'
+Feb 03 18:09:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306745]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:09:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306745]:  * Serving Flask app 'bot_v7'
+Feb 03 18:09:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306765]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:09:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306765]:  * Serving Flask app 'bot_v7'
+Feb 03 18:09:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306775]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:09:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306775]:  * Serving Flask app 'bot_v7'
+Feb 03 18:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306784]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306784]:  * Serving Flask app 'bot_v7'
+Feb 03 18:10:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306808]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:10:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306808]:  * Serving Flask app 'bot_v7'
+Feb 03 18:10:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306819]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:10:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306819]:  * Serving Flask app 'bot_v7'
+Feb 03 18:11:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306832]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:11:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306832]:  * Serving Flask app 'bot_v7'
+Feb 03 18:11:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306856]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:11:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306856]:  * Serving Flask app 'bot_v7'
+Feb 03 18:12:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306870]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:12:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306870]:  * Serving Flask app 'bot_v7'
+Feb 03 18:12:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306893]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:12:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306893]:  * Serving Flask app 'bot_v7'
+Feb 03 18:12:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306904]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:12:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306904]:  * Serving Flask app 'bot_v7'
+Feb 03 18:13:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306913]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:13:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306913]:  * Serving Flask app 'bot_v7'
+Feb 03 18:13:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306936]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:13:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306936]:  * Serving Flask app 'bot_v7'
+Feb 03 18:14:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306944]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:14:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306944]:  * Serving Flask app 'bot_v7'
+Feb 03 18:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306966]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306966]:  * Serving Flask app 'bot_v7'
+Feb 03 18:14:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306979]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:14:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306979]:  * Serving Flask app 'bot_v7'
+Feb 03 18:15:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306988]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:15:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2306988]:  * Serving Flask app 'bot_v7'
+Feb 03 18:15:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307011]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:15:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307011]:  * Serving Flask app 'bot_v7'
+Feb 03 18:15:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307023]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:15:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307023]:  * Serving Flask app 'bot_v7'
+Feb 03 18:16:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307037]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:16:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307037]:  * Serving Flask app 'bot_v7'
+Feb 03 18:16:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307057]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:16:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307057]:  * Serving Flask app 'bot_v7'
+Feb 03 18:17:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307070]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:17:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307070]:  * Serving Flask app 'bot_v7'
+Feb 03 18:17:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307094]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:17:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307094]:  * Serving Flask app 'bot_v7'
+Feb 03 18:17:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307106]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:17:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307106]:  * Serving Flask app 'bot_v7'
+Feb 03 18:18:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307118]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:18:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307118]:  * Serving Flask app 'bot_v7'
+Feb 03 18:18:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307138]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:18:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307138]:  * Serving Flask app 'bot_v7'
+Feb 03 18:19:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307150]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:19:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307150]:  * Serving Flask app 'bot_v7'
+Feb 03 18:19:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307170]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:19:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307170]:  * Serving Flask app 'bot_v7'
+Feb 03 18:19:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307180]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:19:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307180]:  * Serving Flask app 'bot_v7'
+Feb 03 18:20:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307191]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:20:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307191]:  * Serving Flask app 'bot_v7'
+Feb 03 18:20:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307212]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:20:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307212]:  * Serving Flask app 'bot_v7'
+Feb 03 18:20:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307225]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:20:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307225]:  * Serving Flask app 'bot_v7'
+Feb 03 18:21:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307237]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:21:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307237]:  * Serving Flask app 'bot_v7'
+Feb 03 18:21:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307254]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:21:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307254]:  * Serving Flask app 'bot_v7'
+Feb 03 18:22:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307264]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:22:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307264]:  * Serving Flask app 'bot_v7'
+Feb 03 18:22:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307286]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:22:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307286]:  * Serving Flask app 'bot_v7'
+Feb 03 18:22:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307346]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:22:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307346]:  * Serving Flask app 'bot_v7'
+Feb 03 18:23:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307357]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:23:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307357]:  * Serving Flask app 'bot_v7'
+Feb 03 18:23:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307377]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:23:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307377]:  * Serving Flask app 'bot_v7'
+Feb 03 18:24:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307387]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:24:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307387]:  * Serving Flask app 'bot_v7'
+Feb 03 18:24:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307409]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:24:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307409]:  * Serving Flask app 'bot_v7'
+Feb 03 18:24:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307419]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:24:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307419]:  * Serving Flask app 'bot_v7'
+Feb 03 18:25:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307431]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:25:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307431]:  * Serving Flask app 'bot_v7'
+Feb 03 18:25:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307456]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:25:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307456]:  * Serving Flask app 'bot_v7'
+Feb 03 18:26:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307472]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:26:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307472]:  * Serving Flask app 'bot_v7'
+Feb 03 18:26:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307494]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:26:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307494]:  * Serving Flask app 'bot_v7'
+Feb 03 18:27:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307504]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:27:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307504]:  * Serving Flask app 'bot_v7'
+Feb 03 18:27:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307516]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:27:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307516]:  * Serving Flask app 'bot_v7'
+Feb 03 18:27:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307536]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:27:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307536]:  * Serving Flask app 'bot_v7'
+Feb 03 18:28:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307546]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:28:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307546]:  * Serving Flask app 'bot_v7'
+Feb 03 18:28:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307567]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:28:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307567]:  * Serving Flask app 'bot_v7'
+Feb 03 18:28:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307578]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:28:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307578]:  * Serving Flask app 'bot_v7'
+Feb 03 18:29:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307595]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:29:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307595]:  * Serving Flask app 'bot_v7'
+Feb 03 18:29:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307611]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:29:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307611]:  * Serving Flask app 'bot_v7'
+Feb 03 18:30:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307621]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:30:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307621]:  * Serving Flask app 'bot_v7'
+Feb 03 18:30:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307644]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:30:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307644]:  * Serving Flask app 'bot_v7'
+Feb 03 18:30:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307654]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:30:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307654]:  * Serving Flask app 'bot_v7'
+Feb 03 18:31:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307664]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:31:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307664]:  * Serving Flask app 'bot_v7'
+Feb 03 18:31:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307682]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:31:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307682]:  * Serving Flask app 'bot_v7'
+Feb 03 18:32:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307690]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:32:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307690]:  * Serving Flask app 'bot_v7'
+Feb 03 18:32:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307710]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:32:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307710]:  * Serving Flask app 'bot_v7'
+Feb 03 18:32:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307719]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:32:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307719]:  * Serving Flask app 'bot_v7'
+Feb 03 18:33:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307730]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:33:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307730]:  * Serving Flask app 'bot_v7'
+Feb 03 18:33:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307750]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:33:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307750]:  * Serving Flask app 'bot_v7'
+Feb 03 18:34:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307760]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:34:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307760]:  * Serving Flask app 'bot_v7'
+Feb 03 18:34:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307778]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:34:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307778]:  * Serving Flask app 'bot_v7'
+Feb 03 18:34:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307786]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:34:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307786]:  * Serving Flask app 'bot_v7'
+Feb 03 18:35:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307798]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:35:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307798]:  * Serving Flask app 'bot_v7'
+Feb 03 18:35:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307819]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:35:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307819]:  * Serving Flask app 'bot_v7'
+Feb 03 18:35:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307830]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:35:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307830]:  * Serving Flask app 'bot_v7'
+Feb 03 18:36:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307841]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:36:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307841]:  * Serving Flask app 'bot_v7'
+Feb 03 18:36:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307862]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:36:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307862]:  * Serving Flask app 'bot_v7'
+Feb 03 18:37:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307870]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:37:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307870]:  * Serving Flask app 'bot_v7'
+Feb 03 18:37:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307890]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:37:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307890]:  * Serving Flask app 'bot_v7'
+Feb 03 18:37:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307900]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:37:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307900]:  * Serving Flask app 'bot_v7'
+Feb 03 18:38:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307909]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:38:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307909]:  * Serving Flask app 'bot_v7'
+Feb 03 18:38:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307941]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:38:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307941]:  * Serving Flask app 'bot_v7'
+Feb 03 18:39:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307949]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:39:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307949]:  * Serving Flask app 'bot_v7'
+Feb 03 18:39:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307969]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:39:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307969]:  * Serving Flask app 'bot_v7'
+Feb 03 18:39:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307978]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:39:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307978]:  * Serving Flask app 'bot_v7'
+Feb 03 18:40:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307987]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:40:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2307987]:  * Serving Flask app 'bot_v7'
+Feb 03 18:40:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308008]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:40:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308008]:  * Serving Flask app 'bot_v7'
+Feb 03 18:40:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308021]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:40:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308021]:  * Serving Flask app 'bot_v7'
+Feb 03 18:41:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308030]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:41:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308030]:  * Serving Flask app 'bot_v7'
+Feb 03 18:41:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308050]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:41:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308050]:  * Serving Flask app 'bot_v7'
+Feb 03 18:42:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308058]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:42:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308058]:  * Serving Flask app 'bot_v7'
+Feb 03 18:42:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308081]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:42:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308081]:  * Serving Flask app 'bot_v7'
+Feb 03 18:42:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308089]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:42:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308089]:  * Serving Flask app 'bot_v7'
+Feb 03 18:43:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308101]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:43:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308101]:  * Serving Flask app 'bot_v7'
+Feb 03 18:43:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308124]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:43:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308124]:  * Serving Flask app 'bot_v7'
+Feb 03 18:44:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308136]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:44:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308136]:  * Serving Flask app 'bot_v7'
+Feb 03 18:44:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308154]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:44:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308154]:  * Serving Flask app 'bot_v7'
+Feb 03 18:44:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308164]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:44:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308164]:  * Serving Flask app 'bot_v7'
+Feb 03 18:45:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308173]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:45:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308173]:  * Serving Flask app 'bot_v7'
+Feb 03 18:45:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308200]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:45:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308200]:  * Serving Flask app 'bot_v7'
+Feb 03 18:45:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308211]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:45:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308211]:  * Serving Flask app 'bot_v7'
+Feb 03 18:46:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308220]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:46:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308220]:  * Serving Flask app 'bot_v7'
+Feb 03 18:46:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308240]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:46:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308240]:  * Serving Flask app 'bot_v7'
+Feb 03 18:47:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308254]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:47:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308254]:  * Serving Flask app 'bot_v7'
+Feb 03 18:47:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308274]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:47:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308274]:  * Serving Flask app 'bot_v7'
+Feb 03 18:49:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308284]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:49:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308284]:  * Serving Flask app 'bot_v7'
+Feb 03 18:52:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308354]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:52:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308354]:  * Serving Flask app 'bot_v7'
+Feb 03 18:52:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308437]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:52:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308437]:  * Serving Flask app 'bot_v7'
+Feb 03 18:53:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308449]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:53:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308449]:  * Serving Flask app 'bot_v7'
+Feb 03 18:53:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308469]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:53:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308469]:  * Serving Flask app 'bot_v7'
+Feb 03 18:53:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308482]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:53:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308482]:  * Serving Flask app 'bot_v7'
+Feb 03 18:54:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308492]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:54:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308492]:  * Serving Flask app 'bot_v7'
+Feb 03 18:54:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308512]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:54:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308512]:  * Serving Flask app 'bot_v7'
+Feb 03 18:55:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308520]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:55:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308520]:  * Serving Flask app 'bot_v7'
+Feb 03 18:55:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308546]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:55:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308546]:  * Serving Flask app 'bot_v7'
+Feb 03 18:55:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308559]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:55:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308559]:  * Serving Flask app 'bot_v7'
+Feb 03 18:56:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308569]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:56:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308569]:  * Serving Flask app 'bot_v7'
+Feb 03 18:56:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308591]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:56:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308591]:  * Serving Flask app 'bot_v7'
+Feb 03 18:57:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308601]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:57:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308601]:  * Serving Flask app 'bot_v7'
+Feb 03 18:57:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308617]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:57:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308617]:  * Serving Flask app 'bot_v7'
+Feb 03 18:57:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308631]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:57:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308631]:  * Serving Flask app 'bot_v7'
+Feb 03 18:58:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308644]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:58:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308644]:  * Serving Flask app 'bot_v7'
+Feb 03 18:58:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308676]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:58:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308676]:  * Serving Flask app 'bot_v7'
+Feb 03 18:59:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308684]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:59:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308684]:  * Serving Flask app 'bot_v7'
+Feb 03 18:59:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308705]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:59:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308705]:  * Serving Flask app 'bot_v7'
+Feb 03 18:59:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308717]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 18:59:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308717]:  * Serving Flask app 'bot_v7'
+Feb 03 19:00:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308730]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:00:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308730]:  * Serving Flask app 'bot_v7'
+Feb 03 19:00:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308752]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:00:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308752]:  * Serving Flask app 'bot_v7'
+Feb 03 19:00:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308764]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:00:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308764]:  * Serving Flask app 'bot_v7'
+Feb 03 19:01:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308776]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:01:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308776]:  * Serving Flask app 'bot_v7'
+Feb 03 19:01:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308796]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:01:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308796]:  * Serving Flask app 'bot_v7'
+Feb 03 19:04:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308806]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:04:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308806]:  * Serving Flask app 'bot_v7'
+Feb 03 19:06:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308893]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:06:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308893]:  * Serving Flask app 'bot_v7'
+Feb 03 19:08:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308967]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:08:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2308967]:  * Serving Flask app 'bot_v7'
+Feb 03 19:11:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309036]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:11:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309036]:  * Serving Flask app 'bot_v7'
+Feb 03 19:13:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309123]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:13:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309123]:  * Serving Flask app 'bot_v7'
+Feb 03 19:16:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309200]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:16:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309200]:  * Serving Flask app 'bot_v7'
+Feb 03 19:18:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309294]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:18:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309294]:  * Serving Flask app 'bot_v7'
+Feb 03 19:20:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309383]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:20:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309383]:  * Serving Flask app 'bot_v7'
+Feb 03 19:21:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309464]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:21:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309464]:  * Serving Flask app 'bot_v7'
+Feb 03 19:23:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309490]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:23:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309490]:  * Serving Flask app 'bot_v7'
+Feb 03 19:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309616]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309616]:  * Serving Flask app 'bot_v7'
+Feb 03 19:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309721]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309721]:  * Serving Flask app 'bot_v7'
+Feb 03 19:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309802]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309802]:  * Serving Flask app 'bot_v7'
+Feb 03 19:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309889]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309889]:  * Serving Flask app 'bot_v7'
+Feb 03 19:35:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309974]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:35:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2309974]:  * Serving Flask app 'bot_v7'
+Feb 03 19:38:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310063]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:38:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310063]:  * Serving Flask app 'bot_v7'
+Feb 03 19:40:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310150]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:40:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310150]:  * Serving Flask app 'bot_v7'
+Feb 03 19:42:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310234]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:42:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310234]:  * Serving Flask app 'bot_v7'
+Feb 03 19:45:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310312]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:45:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310312]:  * Serving Flask app 'bot_v7'
+Feb 03 19:47:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310399]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:47:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310399]:  * Serving Flask app 'bot_v7'
+Feb 03 19:49:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310484]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:49:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310484]:  * Serving Flask app 'bot_v7'
+Feb 03 19:52:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310558]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:52:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310558]:  * Serving Flask app 'bot_v7'
+Feb 03 19:54:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310646]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:54:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310646]:  * Serving Flask app 'bot_v7'
+Feb 03 19:57:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310720]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:57:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310720]:  * Serving Flask app 'bot_v7'
+Feb 03 19:59:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310806]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 19:59:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310806]:  * Serving Flask app 'bot_v7'
+Feb 03 20:01:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310882]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:01:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310882]:  * Serving Flask app 'bot_v7'
+Feb 03 20:04:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310958]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:04:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310958]:  * Serving Flask app 'bot_v7'
+Feb 03 20:06:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311044]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:06:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311044]:  * Serving Flask app 'bot_v7'
+Feb 03 20:09:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311127]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:09:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311127]:  * Serving Flask app 'bot_v7'
+Feb 03 20:11:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311208]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:11:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311208]:  * Serving Flask app 'bot_v7'
+Feb 03 20:13:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311293]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:13:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311293]:  * Serving Flask app 'bot_v7'
+Feb 03 20:16:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311365]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:16:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311365]:  * Serving Flask app 'bot_v7'
+Feb 03 20:18:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311454]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:18:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311454]:  * Serving Flask app 'bot_v7'
+Feb 03 20:20:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311542]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:20:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311542]:  * Serving Flask app 'bot_v7'
+Feb 03 20:25:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311894]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:25:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311894]:  * Serving Flask app 'bot_v7'
+Feb 03 20:26:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312003]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:26:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312003]:  * Serving Flask app 'bot_v7'
+Feb 03 20:29:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312059]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:29:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312059]:  * Serving Flask app 'bot_v7'
+Feb 03 20:31:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312164]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:31:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312164]:  * Serving Flask app 'bot_v7'
+Feb 03 20:34:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312262]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:34:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312262]:  * Serving Flask app 'bot_v7'
+Feb 03 20:36:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312361]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:36:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312361]:  * Serving Flask app 'bot_v7'
+Feb 03 20:38:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312461]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:38:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312461]:  * Serving Flask app 'bot_v7'
+Feb 03 20:40:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312547]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:40:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312547]:  * Serving Flask app 'bot_v7'
+Feb 03 20:43:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312639]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:43:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312639]:  * Serving Flask app 'bot_v7'
+Feb 03 20:47:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312837]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:47:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312837]:  * Serving Flask app 'bot_v7'
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:  * Serving Flask app 'bot_v7'
+Feb 03 20:52:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2313114]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 20:52:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2313114]:  * Serving Flask app 'bot_v7'
+Feb 03 21:23:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314456]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:23:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314456]:  * Serving Flask app 'bot_v7'
+Feb 03 21:25:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314568]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:25:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314568]:  * Serving Flask app 'bot_v7'
+Feb 03 21:27:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314672]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:27:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314672]:  * Serving Flask app 'bot_v7'
+Feb 03 21:30:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314811]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:30:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314811]:  * Serving Flask app 'bot_v7'
+Feb 03 21:32:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314907]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:32:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314907]:  * Serving Flask app 'bot_v7'
+Feb 03 21:34:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314981]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:34:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2314981]:  * Serving Flask app 'bot_v7'
+Feb 03 21:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315062]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315062]:  * Serving Flask app 'bot_v7'
+Feb 03 21:39:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315151]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:39:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315151]:  * Serving Flask app 'bot_v7'
+Feb 03 21:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315232]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315232]:  * Serving Flask app 'bot_v7'
+Feb 03 21:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315320]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315320]:  * Serving Flask app 'bot_v7'
+Feb 03 21:46:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315372]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:46:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315372]:  * Serving Flask app 'bot_v7'
+Feb 03 21:48:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315460]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:48:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315460]:  * Serving Flask app 'bot_v7'
+Feb 03 21:50:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315546]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:50:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315546]:  * Serving Flask app 'bot_v7'
+Feb 03 21:53:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315663]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:53:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315663]:  * Serving Flask app 'bot_v7'
+Feb 03 21:55:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315762]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:55:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315762]:  * Serving Flask app 'bot_v7'
+Feb 03 21:58:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315847]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 21:58:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315847]:  * Serving Flask app 'bot_v7'
+Feb 03 22:00:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315935]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:00:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2315935]:  * Serving Flask app 'bot_v7'
+Feb 03 22:02:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316013]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:02:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316013]:  * Serving Flask app 'bot_v7'
+Feb 03 22:05:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316099]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:05:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316099]:  * Serving Flask app 'bot_v7'
+Feb 03 22:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316189]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:07:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316189]:  * Serving Flask app 'bot_v7'
+Feb 03 22:10:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316276]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:10:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316276]:  * Serving Flask app 'bot_v7'
+Feb 03 22:12:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316374]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:12:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316374]:  * Serving Flask app 'bot_v7'
+Feb 03 22:14:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316458]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:14:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316458]:  * Serving Flask app 'bot_v7'
+Feb 03 22:17:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316549]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:17:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316549]:  * Serving Flask app 'bot_v7'
+Feb 03 22:19:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316646]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:19:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316646]:  * Serving Flask app 'bot_v7'
+Feb 03 22:22:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316735]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:22:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316735]:  * Serving Flask app 'bot_v7'
+Feb 03 22:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316874]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:24:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316874]:  * Serving Flask app 'bot_v7'
+Feb 03 22:26:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316971]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:26:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2316971]:  * Serving Flask app 'bot_v7'
+Feb 03 22:29:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317064]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:29:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317064]:  * Serving Flask app 'bot_v7'
+Feb 03 22:31:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317144]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:31:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317144]:  * Serving Flask app 'bot_v7'
+Feb 03 22:33:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317212]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:33:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317212]:  * Serving Flask app 'bot_v7'
+Feb 03 22:36:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317287]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:36:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317287]:  * Serving Flask app 'bot_v7'
+Feb 03 22:38:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317367]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:38:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317367]:  * Serving Flask app 'bot_v7'
+Feb 03 22:40:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317437]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:40:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317437]:  * Serving Flask app 'bot_v7'
+Feb 03 22:43:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317511]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:43:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317511]:  * Serving Flask app 'bot_v7'
+Feb 03 22:45:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317589]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:45:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317589]:  * Serving Flask app 'bot_v7'
+Feb 03 22:48:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317664]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Feb 03 22:48:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317664]:  * Serving Flask app 'bot_v7'
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

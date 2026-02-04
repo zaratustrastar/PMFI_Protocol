@@ -1,0 +1,26 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot | grep -i "killed\|exit\|failed\|restart" | tail -20
+Feb 03 20:34:01 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 03 20:34:02 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 5.
+Feb 03 20:36:24 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 03 20:36:24 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 03 20:36:24 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 6.
+Feb 03 20:38:24 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 03 20:38:24 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 03 20:38:25 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 7.
+Feb 03 20:40:47 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 03 20:40:47 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 03 20:40:48 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 8.
+Feb 03 20:43:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 03 20:43:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 03 20:43:11 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 9.
+Feb 03 20:47:40 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 03 20:47:40 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 03 20:47:40 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 1.
+Feb 03 20:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 03 20:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 03 20:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 2.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# free -h
+               total        used        free      shared  buff/cache   available
+Mem:           3.8Gi       889Mi       378Mi        17Mi       2.9Gi       3.0Gi
+Swap:          2.0Gi       439Mi       1.6Gi
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

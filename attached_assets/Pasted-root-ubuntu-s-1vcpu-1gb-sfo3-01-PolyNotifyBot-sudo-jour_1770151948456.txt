@@ -1,0 +1,68 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot | grep -i "error\|exception\|traceback" | tail -20
+Feb 03 20:01:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310882]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:04:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2310958]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:06:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311044]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:09:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311127]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:11:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311208]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:13:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311293]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:16:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311365]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:18:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311454]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:20:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311542]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:25:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2311894]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:26:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312003]: ❌ Error fetching open orders: PolyApiException[status_code=None, error_message=Request exception!]
+Feb 03 20:29:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312059]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:31:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312164]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:34:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312262]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:36:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312361]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:38:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312461]: ❌ Error fetching open orders: PolyApiException[status_code=None, error_message=Request exception!]
+Feb 03 20:40:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312547]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:43:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312639]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:47:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312837]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]: ❌ Error fetching open orders: PolyApiException[status_code=401, error_message={'error': 'Unauthorized/Invalid api key'}]
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "20:49:00" --until "20:50:10"
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ✅ Yes: 15.0 → liq value $0.06
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 53165770035958585984...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📊 Got 3 bids, 19 asks
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ✅ Yes: 15.0 → liq value $0.04
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 53415831992643982643...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📊 Got 1 bids, 24 asks
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ✅ Yes: 15.0 → liq value $0.01
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 68583724199998419186...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📊 Got 1 bids, 26 asks
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ✅ Yes: 15.0 → liq value $0.01
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 95845139235967493761...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📊 Got 5 bids, 27 asks
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ✅ Yes: 15.0 → liq value $0.34
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 46228539183090091364...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:       Full token: 46228539183090091364246601718778114934923475890375459117678527109857970572773
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ No: 14.9 - NO BIDS (illiquid, valued at $0)
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 51950637708452692768...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📊 Got 2 bids, 14 asks
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ✅ Yes: 11.0 → liq value $0.22
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 10677047032440896473...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:       Full token: 106770470324408964738038913563257062385236051206489719031693459670226018444719
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ Hong Kong Women: 10.0 - NO BIDS (illiquid, valued at $0)
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 30292339982437760610...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:       Full token: 30292339982437760610444676349144949697647804498282717665925008542691293654341
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ No: 10.0 - NO BIDS (illiquid, valued at $0)
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 43960367977234337884...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:       Full token: 43960367977234337884522692590772046628603988894828339344266552934142059231489
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ No: 10.0 - NO BIDS (illiquid, valued at $0)
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 56106216503356457769...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📊 Got 12 bids, 22 asks
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ✅ Yes: 10.0 → liq value $0.18
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 70084825817150171834...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:       Full token: 70084825817150171834364956588445711749005847036650864341676191291729072650704
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 78492415536100253175...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:       Full token: 78492415536100253175731984134228618590557944278672650001187613186988665084338
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    📖 Orderbook via CLOB client: 82278661474605214449...
+Feb 03 20:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2312967]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+lines 1-45

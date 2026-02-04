@@ -1,0 +1,48 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl http://localhost:8080/sign-nav/debug | python3 -m json.tool
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  1251  100  1251    0     0     56      0  0:00:22  0:00:21  0:00:01   333
+{
+    "debug": {
+        "oracle_address": "0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0",
+        "pending_tracker": {
+            "deposit_count": 0,
+            "total_forwarded": 68.5,
+            "withdrawn_back": 0.0
+        },
+        "polymarket_deposit_address": "0x2b20920A00D705043260eBFE6561bC96FBd84dBE",
+        "polymarket_wallet": "0xd1EdE018CF5724268C8881888A2D0822E8e765aF",
+        "vault_address": "0x500bd5C79525d429B96056703629e35bF6057282"
+    },
+    "metadata": {
+        "cost_basis_usdc": 70.2288,
+        "credited_cash_usdc": 0.073568,
+        "credited_positions_usdc": 5.323939,
+        "in_flight_usdc": 0.0,
+        "nav_raw": "154214",
+        "pending_credit_monitoring_usdc": 29.602493,
+        "pending_credit_usdc": 0.0,
+        "price_per_share": 0.154214,
+        "reserved_usdc": 0.046243,
+        "safety_reason": "Conservation bound violated! Loss 84.6% exceeds 40% limit. Contract may reject NAV.",
+        "safety_status": "warning",
+        "total_assets_usdc": 5.397507,
+        "total_supply": 35.0,
+        "valid_until": 1770164422,
+        "vault_buffer_usdc": 0.0
+    },
+    "navData": {
+        "creditedCash": "73568",
+        "creditedPositions": "5323939",
+        "deadline": 1770164422,
+        "inFlightOnChain": "0",
+        "nav": "154214",
+        "pendingCredit": "0",
+        "roundId": 3,
+        "timestamp": 1770164122,
+        "totalAssets": "5397507"
+    },
+    "signature": "0xa7da641c74939c7de6a18850b1bd9bb2976aeb66b2a9bd4bcf4f90e6915950690c67b67b201ac08d5238e4c2ee0523a43e9ba0c97c8c2687d8a812f557efdfc91b",
+    "signer": "0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0"
+}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

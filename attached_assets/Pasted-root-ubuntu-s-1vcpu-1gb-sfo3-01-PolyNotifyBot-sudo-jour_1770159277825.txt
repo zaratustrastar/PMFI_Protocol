@@ -1,0 +1,59 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --no-pager | grep "2317829" | head -50
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 🔓 Using curl_cffi for Cloudflare bypass (TLS fingerprint spoofing)
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ============================================================
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 🚀 PredictFi Sniper Vault V7 - NAV Signing Bot
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    3-State Asset Tracking + Conservation Bounds
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ============================================================
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 📋 Configuration:
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    RPC: https://base-mainnet.g.alchemy...
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    Vault V7: 0x500bd5C79525d429B96056703629e35bF6057282
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    PM Wallet: 0xd1EdE018CF5724268C8881888A2D0822E8e765aF
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    PM Deposit: 0x2b20920A00D705043260eBFE6561bC96FBd84dBE
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ✅ Invite code tables initialized
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ✅ Connected to Base (block 41684841)
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 🔑 Oracle signer: 0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ✅ USDC contract loaded
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ✅ Vault V7 contract loaded
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 📂 Loaded pending credit state: forwarded=68.50, withdrawn=0.00
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 📂 Loaded roundId cache from disk: lastRoundId=2
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 📝 RoundId cache synced from chain: 2
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ✅ Initial roundId from chain: 2
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 🌐 PolymarketClient using residential proxy: 92.113.180.106:42563
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ✅ CLOB client initialized with L2 auth (can fetch open orders and balance)
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 📊 On-chain: supply=35.0000, buffer=0.00, forwarded=35.00, expected=35.00, lastRoundId=2
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 📝 RoundId cache synced from chain: 2
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ============================================================
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ============================================================
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ✈️ In-flight (at deposit addr): $0.00
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: 📡 Fetching positions with cost basis for 0xd1EdE018...
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]: ✅ Found 101 active positions, total cost basis: $69.68
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    📖 Orderbook via CLOB client: 48575864165088925782...
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:       Full token: 48575864165088925782429118424440249995758784437284163672534918059882124518773
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    ❌ Yes: 95.0 - NO BIDS (illiquid, valued at $0)
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    📖 Orderbook via CLOB client: 64408718633454557040...
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:       Full token: 64408718633454557040040172898611199685986895707765528935304144408408099577364
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    📖 Orderbook via CLOB client: 69603777429249662639...
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:       Full token: 69603777429249662639502073904479960935803336599337682063699776071367096728336
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    📖 Orderbook via CLOB client: 45823313489869605821...
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    📊 Got 8 bids, 43 asks
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    ✅ Yes: 85.0 → liq value $0.68
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    📖 Orderbook via CLOB client: 90354124380250051301...
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:       Full token: 9035412438025005130144082882417385782442501425691954313876839284968600616680
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+Feb 03 22:50:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2317829]:    📖 Orderbook via CLOB client: 88729810697571683268...
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# ps aux | grep python | grep -v grep
+root         857  0.0  0.1 110000  5888 ?        Ssl   2025   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+root     2311887  5.2  1.6  97500 66652 ?        Ss   20:23   7:59 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+root     2311891  0.7  1.5  93268 61244 ?        Ss   20:23   1:11 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+root     2311892  0.0  2.1  99604 84628 ?        Ss   20:23   0:06 /usr/bin/python3 trading_bot/withdrawal_servicer.py
+root     2315665  0.0  1.0 219188 43488 ?        Ssl  21:51   0:01 /usr/bin/python3 app.py
+root     2317904  3.5  6.3 289948 256036 ?       Ss   22:52   0:03 /usr/bin/python3 bot/bot_v7.py
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
