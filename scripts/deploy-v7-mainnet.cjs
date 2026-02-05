@@ -136,7 +136,7 @@ async function main() {
                     POLYMARKET_WALLET,
                     MAX_PER_WALLET,
                     MAX_TOTAL,
-                    MAX_LOSS_BPS,
+                    // V7.5: MAX_LOSS_BPS removed
                 ],
             });
             console.log(`✅ Contract verified!`);
