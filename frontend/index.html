@@ -45,14 +45,22 @@
             text-align: center;
         }
 
-        .invite-logo {
+        .invite-logo-wrapper {
             width: 80px;
             height: 80px;
             border-radius: 50%;
             margin-bottom: 24px;
             box-shadow: 0 0 30px rgba(240, 246, 252, 0.2);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .invite-logo {
+            width: 110%;
+            height: 110%;
             object-fit: cover;
-            transform: scale(1.05);
         }
 
         .invite-title {
@@ -993,7 +1001,9 @@
     <!-- Invite Code Gate -->
     <div id="inviteGate" class="invite-gate">
         <div class="invite-card">
-            <img src="logo.png" alt="PMFI" class="invite-logo">
+            <div class="invite-logo-wrapper">
+                <img src="logo.png" alt="PMFI" class="invite-logo">
+            </div>
             <h1 class="invite-title">PMFI Beta</h1>
             
             <!-- Step 1: Connect Wallet Only -->
