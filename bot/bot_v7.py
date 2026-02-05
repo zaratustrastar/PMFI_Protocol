@@ -212,10 +212,17 @@ def init_invite_tables():
                 whitelisted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS whitelisted_fids (
+                fid INTEGER PRIMARY KEY,
+                code_id INTEGER REFERENCES invite_codes(id),
+                whitelisted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
         conn.commit()
         cur.close()
         conn.close()
-        print("✅ Invite code tables initialized")
+        print("✅ Invite code tables initialized (including whitelisted_fids)")
         return True
     except Exception as e:
         print(f"❌ Failed to init invite tables: {e}")
@@ -2194,6 +2201,142 @@ elif ALLOWED_FIDS_ENV.strip():
 else:
     print("🚫 Farcaster Mini App: No ALLOWED_FIDS set - deny-all mode")
 
+def is_fid_whitelisted(fid: int) -> bool:
+    """Check if FID has access via env allowlist OR database whitelist"""
+    if ALLOW_ALL_FIDS:
+        return True
+    if fid in ALLOWED_FIDS:
+        return True
+    if DATABASE_URL:
+        try:
+            conn = get_invite_db()
+            cur = conn.cursor()
+            cur.execute('SELECT fid FROM whitelisted_fids WHERE fid = %s', (fid,))
+            result = cur.fetchone()
+            cur.close()
+            conn.close()
+            return result is not None
+        except Exception as e:
+            print(f"⚠️ DB whitelist check error: {e}")
+    return False
+
+@flask_app.route('/api/mini/redeem', methods=['POST'])
+def api_mini_redeem():
+    """Redeem an invite code for a Farcaster FID (Mini App).
+    
+    Requires a verified Quick Auth JWT token in Authorization header.
+    The FID is extracted from the verified token, not from request body.
+    """
+    try:
+        import jwt as pyjwt
+        from jwt import PyJWKClient
+        
+        if not DATABASE_URL:
+            return jsonify({'error': 'Invite system not available'}), 503
+        
+        auth_header = flask_request.headers.get('Authorization', '')
+        if not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        token = auth_header.split(' ')[1]
+        
+        try:
+            FARCASTER_JWKS_URL = "https://auth.farcaster.xyz/.well-known/jwks.json"
+            jwks_client = PyJWKClient(FARCASTER_JWKS_URL, cache_keys=True, lifespan=3600)
+            signing_key = jwks_client.get_signing_key_from_jwt(token)
+            
+            payload = pyjwt.decode(
+                token,
+                signing_key.key,
+                algorithms=["RS256", "ES256"],
+                issuer="https://auth.farcaster.xyz",
+                audience=FC_APP_DOMAIN,
+                options={
+                    "verify_aud": True,
+                    "verify_exp": True,
+                    "verify_iss": True,
+                    "require": ["sub", "iss", "exp", "aud"]
+                }
+            )
+            
+            fid = int(payload.get('sub', 0))
+            if not fid:
+                return jsonify({'error': 'Invalid token'}), 401
+                
+        except Exception as jwt_err:
+            print(f"❌ Mini redeem JWT error: {jwt_err}")
+            return jsonify({'error': 'Authentication failed'}), 401
+        
+        if is_fid_whitelisted(fid):
+            print(f"✅ FID {fid} already whitelisted, skipping code redeem")
+            return jsonify({'success': True, 'message': 'Already have access!', 'alreadyWhitelisted': True, 'fid': fid})
+        
+        data = flask_request.get_json() or {}
+        code = data.get('code', '').strip()
+        
+        if not code or len(code) < 6:
+            return jsonify({'error': 'Please enter a valid invite code'}), 400
+        
+        ip = flask_request.remote_addr or '0.0.0.0'
+        if not check_invite_rate_limit(ip):
+            return jsonify({'error': 'Too many attempts. Please wait 1 minute.'}), 429
+        
+        code_hash = hash_invite_code(code)
+        
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        try:
+            cur.execute('BEGIN')
+            
+            cur.execute('SELECT * FROM invite_codes WHERE code_hash = %s FOR UPDATE', (code_hash,))
+            invite_code = cur.fetchone()
+            
+            if not invite_code:
+                cur.execute('ROLLBACK')
+                print(f"❌ FID {fid} tried invalid code")
+                return jsonify({'error': 'Invalid invite code'}), 400
+            
+            if invite_code['status'] == 'used' or invite_code['redeemed_by']:
+                cur.execute('ROLLBACK')
+                return jsonify({'error': 'This code has already been used'}), 400
+            
+            if invite_code['status'] == 'revoked':
+                cur.execute('ROLLBACK')
+                return jsonify({'error': 'This code has been revoked'}), 400
+            
+            if invite_code.get('expires_at') and invite_code['expires_at'] < datetime.now():
+                cur.execute('ROLLBACK')
+                return jsonify({'error': 'This code has expired'}), 400
+            
+            cur.execute(
+                "UPDATE invite_codes SET status = 'used', redeemed_by = %s, redeemed_at = CURRENT_TIMESTAMP WHERE id = %s",
+                (f'fid:{fid}', invite_code['id'])
+            )
+            
+            cur.execute(
+                'INSERT INTO whitelisted_fids (fid, code_id) VALUES (%s, %s) ON CONFLICT (fid) DO NOTHING',
+                (fid, invite_code['id'])
+            )
+            
+            cur.execute('COMMIT')
+            print(f"✅ FID {fid} redeemed invite code and whitelisted")
+            return jsonify({'success': True, 'message': 'Access granted! Welcome to pSNIPER Beta.', 'fid': fid})
+            
+        except Exception as db_err:
+            cur.execute('ROLLBACK')
+            print(f"❌ Mini redeem DB error: {db_err}")
+            return jsonify({'error': 'Server error. Please try again.'}), 500
+        finally:
+            cur.close()
+            conn.close()
+    
+    except ImportError:
+        return jsonify({'error': 'JWT verification not available'}), 500
+    except Exception as e:
+        print(f"❌ mini/redeem error: {e}")
+        return jsonify({'error': 'Server error'}), 500
+
 @flask_app.route('/api/check-fid', methods=['POST'])
 def api_check_fid():
     """Check if a FID is on the allowlist for Mini App access
@@ -2279,8 +2422,8 @@ def api_verify_fc_token():
             
             fid = int(fid)
             
-            # Check allowlist
-            if ALLOW_ALL_FIDS or fid in ALLOWED_FIDS:
+            # Check allowlist (env var + database whitelist)
+            if is_fid_whitelisted(fid):
                 print(f"✅ FID {fid} verified via Quick Auth (JWKS, aud={FC_APP_DOMAIN}) and granted access")
                 return jsonify({'allowed': True, 'fid': fid, 'verified': True})
             else:

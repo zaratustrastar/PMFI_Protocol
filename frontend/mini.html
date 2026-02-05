@@ -46,6 +46,7 @@
             --text-secondary: #8b949e;
             --accent-green: #7ee787;
             --accent-red: #f85149;
+            --accent-blue: #58a6ff;
             --border-subtle: rgba(255,255,255,0.08);
         }
         
@@ -504,6 +505,75 @@
         .gate-error {
             color: var(--accent-red);
         }
+        
+        .gate-code-section {
+            display: none;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 16px;
+        }
+        .gate-code-section.visible {
+            display: block;
+        }
+        .gate-code-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-family: 'SF Mono', monospace;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .gate-code-input:focus {
+            border-color: var(--accent-blue);
+        }
+        .gate-code-input::placeholder {
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 1px;
+            text-transform: none;
+        }
+        .gate-code-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: var(--accent-blue);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .gate-code-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .gate-code-error {
+            color: var(--accent-red);
+            font-size: 13px;
+            margin-top: 8px;
+            text-align: center;
+            display: none;
+        }
+        .gate-code-error.show {
+            display: block;
+        }
+        .gate-code-success {
+            color: var(--accent-green);
+            font-size: 13px;
+            margin-top: 8px;
+            text-align: center;
+            display: none;
+        }
+        .gate-code-success.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -517,6 +587,13 @@
             <span>Authenticating...</span>
         </div>
         <p class="gate-fid" id="gateFid"></p>
+        
+        <div class="gate-code-section" id="gateCodeSection">
+            <input type="text" id="gateCodeInput" class="gate-code-input" placeholder="Enter invite code" maxlength="8" autocomplete="off">
+            <button id="gateCodeBtn" class="gate-code-btn">Redeem Code</button>
+            <p class="gate-code-error" id="gateCodeError"></p>
+            <p class="gate-code-success" id="gateCodeSuccess"></p>
+        </div>
     </div>
     
     <div class="mini-app hidden" id="miniApp">
@@ -671,6 +748,13 @@
         const miniApp = document.getElementById('miniApp');
         const gateStatus = document.getElementById('gateStatus');
         const gateFid = document.getElementById('gateFid');
+        const gateCodeSection = document.getElementById('gateCodeSection');
+        const gateCodeInput = document.getElementById('gateCodeInput');
+        const gateCodeBtn = document.getElementById('gateCodeBtn');
+        const gateCodeError = document.getElementById('gateCodeError');
+        const gateCodeSuccess = document.getElementById('gateCodeSuccess');
+        
+        let quickAuthToken = null;
         
         function showGateError(message) {
             gateStatus.innerHTML = `<span class="gate-error">${message}</span>`;
@@ -721,28 +805,38 @@
                 // Context alone is not cryptographically verified
                 showGateSuccess('Verifying access...');
                 
-                let authSucceeded = false;
+                let token = null;
                 
                 // Try Quick Auth (required for secure access)
                 if (fcSdk.experimental && fcSdk.experimental.quickAuth) {
                     try {
-                        const { token } = await fcSdk.experimental.quickAuth.getToken();
-                        authSucceeded = await verifyQuickAuthToken(token);
+                        const result = await fcSdk.experimental.quickAuth.getToken();
+                        token = result.token;
                     } catch (qe) {
                         console.error('[FC] experimental.quickAuth failed:', qe);
                     }
                 }
                 
-                if (!authSucceeded && fcSdk.quickAuth && fcSdk.quickAuth.getToken) {
+                if (!token && fcSdk.quickAuth && fcSdk.quickAuth.getToken) {
                     try {
-                        const { token } = await fcSdk.quickAuth.getToken();
-                        authSucceeded = await verifyQuickAuthToken(token);
+                        const result = await fcSdk.quickAuth.getToken();
+                        token = result.token;
                     } catch (qe) {
                         console.error('[FC] quickAuth failed:', qe);
                     }
                 }
                 
-                if (!authSucceeded) {
+                if (token) {
+                    quickAuthToken = token;
+                    const result = await verifyQuickAuthToken(token);
+                    // result: 'granted', 'denied', or false (error)
+                    if (result === 'denied') {
+                        // Verified identity but not on allowlist - show invite code input
+                        showCodeSection();
+                    }
+                    // 'granted' is handled in verifyQuickAuthToken (calls grantAccess)
+                    // false means auth error, error message already shown
+                } else {
                     // Quick Auth not available or failed - cannot verify securely
                     console.log('[FC] No verified auth - denying access');
                     showGateError('Could not verify identity. Update Warpcast and try again.');
@@ -773,10 +867,10 @@
                 if (data.allowed && data.verified) {
                     showGateSuccess('Access granted!');
                     setTimeout(grantAccess, 500);
-                    return true;
-                } else if (data.fid) {
-                    showGateError('Not on allowlist. Request access from @pmfi');
-                    return true; // Auth succeeded but not allowed
+                    return 'granted';
+                } else if (data.fid && data.verified) {
+                    showGateError('Not on allowlist. Enter an invite code below or request access from @pmfi');
+                    return 'denied';
                 } else {
                     showGateError(data.error || 'Authentication failed');
                     return false;
@@ -784,6 +878,66 @@
             } catch (e) {
                 console.error('[FC] Token verification error:', e);
                 return false;
+            }
+        }
+        
+        let codeHandlersBound = false;
+        function showCodeSection() {
+            gateCodeSection.classList.add('visible');
+            
+            if (!codeHandlersBound) {
+                codeHandlersBound = true;
+                gateCodeInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                });
+                gateCodeBtn.addEventListener('click', redeemCode);
+                gateCodeInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') redeemCode();
+                });
+            }
+        }
+        
+        async function redeemCode() {
+            const code = gateCodeInput.value.trim();
+            if (!code || code.length < 6) {
+                gateCodeError.textContent = 'Please enter a valid invite code';
+                gateCodeError.classList.add('show');
+                return;
+            }
+            
+            gateCodeError.classList.remove('show');
+            gateCodeSuccess.classList.remove('show');
+            gateCodeBtn.disabled = true;
+            gateCodeBtn.textContent = 'Redeeming...';
+            
+            try {
+                const res = await fetch('/api/mini/redeem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${quickAuthToken}`
+                    },
+                    body: JSON.stringify({ code })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    gateCodeSuccess.textContent = data.message || 'Access granted!';
+                    gateCodeSuccess.classList.add('show');
+                    gateCodeSection.classList.remove('visible');
+                    showGateSuccess('Access granted!');
+                    setTimeout(grantAccess, 800);
+                } else {
+                    gateCodeError.textContent = data.error || 'Failed to redeem code';
+                    gateCodeError.classList.add('show');
+                }
+            } catch (e) {
+                gateCodeError.textContent = 'Network error. Please try again.';
+                gateCodeError.classList.add('show');
+            } finally {
+                gateCodeBtn.disabled = false;
+                gateCodeBtn.textContent = 'Redeem Code';
             }
         }
         
