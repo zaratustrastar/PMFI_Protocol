@@ -1,0 +1,30 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# ps aux | grep python
+# or
+systemctl status psniper-bot
+root         857  0.0  0.1 110000  5376 ?        Ssl   2025   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+root     2338009  0.0  3.7 473184 151048 ?       S    Feb04   0:00 /usr/bin/python3 /usr/bin/unattended-upgrade
+root     2338891  0.0  2.2 473184 91484 ?        S    Feb04   0:00 /usr/bin/python3 /usr/bin/unattended-upgrade
+root     2394967  0.2  1.0 219180 43648 ?        Ss   14:45   0:00 /usr/bin/python3 app.py
+root     2394969  1.0  1.5  91992 60880 ?        Ss   14:45   0:02 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/auto_trader.py
+root     2394973  4.6  2.1 117200 85344 ?        Ss   14:45   0:11 /opt/polymarket-bot/trading_bot/venv/bin/python3 /opt/polymarket-bot/trading_bot/order_monitor.py
+root     2394976  0.7  2.1  99776 84440 ?        Ss   14:45   0:01 /usr/bin/python3 trading_bot/withdrawal_servicer.py
+root     2395161 47.3  2.5 135184 101552 ?       Ss   14:49   0:01 /usr/bin/python3 bot/bot_v7.py
+root     2395165  0.0  0.0   2800  1792 ?        Ss   14:50   0:00 /bin/sh -c cd /opt/polymarket-bot && export $(cat .env | grep -v '^#' | xargs) && python3 trading_bot/market_monitor.py >> /var/log/market_monitor.log 2>&1
+root     2395171 22.9  1.0  69372 40320 ?        S    14:50   0:00 python3 trading_bot/market_monitor.py
+root     2395176  0.0  0.0   7076  2048 pts/1    S+   14:50   0:00 grep --color=auto python
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2026-02-05 14:49:59 UTC; 3s ago
+   Main PID: 2395161 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 70.9M (peak: 71.1M)
+        CPU: 1.832s
+     CGroup: /system.slice/psniper-bot.service
+             └─2395161 /usr/bin/python3 bot/bot_v7.py
+
+Feb 05 14:49:58 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 05 14:49:58 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 05 14:49:58 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Consumed 2.232s CPU time.
+Feb 05 14:49:59 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 11.
+Feb 05 14:49:59 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
