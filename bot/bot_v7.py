@@ -596,7 +596,7 @@ if not FRONTEND_DIR.exists():
 flask_app = Flask(__name__, template_folder=str(FRONTEND_DIR))
 CORS(flask_app)
 
-VAULT_ADDRESS_CONFIG = os.getenv('VAULT_V7_ADDRESS', '0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D')
+VAULT_ADDRESS_CONFIG = os.getenv('VAULT_V7_ADDRESS', '0xbF0944893e6bd445F715dE76CD6343B1d551D41B')
 
 @flask_app.route('/')
 def serve_index():
@@ -2164,6 +2164,157 @@ def farcaster_verify():
     except Exception as e:
         print(f"❌ Farcaster verify error: {e}")
         return jsonify({'valid': False, 'error': str(e)}), 500
+
+
+# =============================================================================
+# Farcaster FID Allowlist for Mini App
+# =============================================================================
+
+# Allowlist of FIDs that can access the mini app
+# Format: comma-separated list of FIDs in env var
+# SECURITY: Defaults to deny-all unless ALLOWED_FIDS is explicitly set
+# Use ALLOWED_FIDS=* to allow all (for development only)
+ALLOWED_FIDS_ENV = os.getenv('ALLOWED_FIDS', '')
+ALLOWED_FIDS = set()
+ALLOW_ALL_FIDS = False
+
+# App domain for JWT audience verification
+FC_APP_DOMAIN = os.getenv('FC_APP_DOMAIN', 'app.pmfi.cc')
+
+if ALLOWED_FIDS_ENV.strip() == '*':
+    ALLOW_ALL_FIDS = True
+    print("🔓 Farcaster Mini App: All FIDs allowed (ALLOWED_FIDS=*)")
+elif ALLOWED_FIDS_ENV.strip():
+    try:
+        ALLOWED_FIDS = set(int(fid.strip()) for fid in ALLOWED_FIDS_ENV.split(',') if fid.strip().isdigit())
+        print(f"🔐 Farcaster Mini App: {len(ALLOWED_FIDS)} FIDs on allowlist")
+    except Exception as e:
+        print(f"⚠️ Error parsing ALLOWED_FIDS: {e}, defaulting to deny-all")
+        ALLOWED_FIDS = set()
+else:
+    print("🚫 Farcaster Mini App: No ALLOWED_FIDS set - deny-all mode")
+
+@flask_app.route('/api/check-fid', methods=['POST'])
+def api_check_fid():
+    """Check if a FID is on the allowlist for Mini App access
+    
+    SECURITY NOTE: This endpoint should only be used for UX hints.
+    For actual access control, use /api/verify-fc-token with a Quick Auth JWT.
+    Client-provided FIDs are NOT trusted for access decisions.
+    """
+    try:
+        data = flask_request.get_json() or {}
+        fid = data.get('fid')
+        
+        if not fid:
+            return jsonify({'allowed': False, 'error': 'Missing FID'}), 400
+        
+        try:
+            fid = int(fid)
+        except (ValueError, TypeError):
+            return jsonify({'allowed': False, 'error': 'Invalid FID format'}), 400
+        
+        # Check allowlist (used as UX hint - frontend should verify with Quick Auth for security)
+        if ALLOW_ALL_FIDS or fid in ALLOWED_FIDS:
+            print(f"✅ FID {fid} granted access to Mini App (context-based, verify with token for security)")
+            return jsonify({'allowed': True, 'fid': fid, 'verified': False})
+        else:
+            print(f"❌ FID {fid} not on allowlist")
+            return jsonify({'allowed': False, 'fid': fid, 'verified': False})
+            
+    except Exception as e:
+        print(f"❌ check-fid error: {e}")
+        return jsonify({'allowed': False, 'error': str(e)}), 500
+
+@flask_app.route('/api/verify-fc-token', methods=['POST'])
+def api_verify_fc_token():
+    """Verify a Farcaster Quick Auth JWT token and check FID allowlist
+    
+    Uses proper JWKS-based JWT verification with:
+    - Signature verification against Farcaster's JWKS
+    - Issuer validation (must be auth.farcaster.xyz)
+    - Audience/domain validation (must match our app domain)
+    - Expiration check
+    """
+    try:
+        import jwt
+        from jwt import PyJWKClient
+        
+        auth_header = flask_request.headers.get('Authorization', '')
+        
+        if not auth_header.startswith('Bearer '):
+            return jsonify({'allowed': False, 'error': 'Missing or invalid Authorization header'}), 401
+        
+        token = auth_header.split(' ')[1]
+        
+        try:
+            # Farcaster Quick Auth JWKS endpoint
+            FARCASTER_JWKS_URL = "https://auth.farcaster.xyz/.well-known/jwks.json"
+            
+            # Create JWKS client to fetch and cache public keys
+            jwks_client = PyJWKClient(FARCASTER_JWKS_URL, cache_keys=True, lifespan=3600)
+            
+            # Get the signing key from the JWT header
+            signing_key = jwks_client.get_signing_key_from_jwt(token)
+            
+            # Verify and decode the JWT with full validation
+            payload = jwt.decode(
+                token,
+                signing_key.key,
+                algorithms=["RS256", "ES256"],
+                issuer="https://auth.farcaster.xyz",
+                audience=FC_APP_DOMAIN,
+                options={
+                    "verify_aud": True,
+                    "verify_exp": True,
+                    "verify_iss": True,
+                    "require": ["sub", "iss", "exp", "aud"]
+                }
+            )
+            
+            # Extract FID from 'sub' claim
+            fid = payload.get('sub')
+            if not fid:
+                return jsonify({'allowed': False, 'error': 'No FID in token'}), 401
+            
+            fid = int(fid)
+            
+            # Check allowlist
+            if ALLOW_ALL_FIDS or fid in ALLOWED_FIDS:
+                print(f"✅ FID {fid} verified via Quick Auth (JWKS, aud={FC_APP_DOMAIN}) and granted access")
+                return jsonify({'allowed': True, 'fid': fid, 'verified': True})
+            else:
+                print(f"❌ FID {fid} verified (JWKS) but not on allowlist")
+                return jsonify({'allowed': False, 'fid': fid, 'verified': True})
+                
+        except jwt.ExpiredSignatureError:
+            print("❌ JWT expired")
+            return jsonify({'allowed': False, 'error': 'Token expired'}), 401
+        except jwt.InvalidIssuerError:
+            print("❌ JWT invalid issuer")
+            return jsonify({'allowed': False, 'error': 'Invalid token issuer'}), 401
+        except jwt.InvalidAudienceError:
+            print(f"❌ JWT audience mismatch (expected {FC_APP_DOMAIN})")
+            return jsonify({'allowed': False, 'error': 'Token not issued for this app'}), 401
+        except jwt.MissingRequiredClaimError as e:
+            print(f"❌ JWT missing required claim: {e}")
+            return jsonify({'allowed': False, 'error': 'Invalid token format'}), 401
+        except jwt.PyJWKClientError as e:
+            print(f"❌ JWKS fetch error: {e}")
+            return jsonify({'allowed': False, 'error': 'Could not verify token'}), 401
+        except jwt.InvalidTokenError as e:
+            print(f"❌ JWT validation error: {e}")
+            return jsonify({'allowed': False, 'error': 'Invalid token'}), 401
+        except Exception as jwt_err:
+            print(f"❌ JWT verification error: {jwt_err}")
+            return jsonify({'allowed': False, 'error': 'Token verification failed'}), 401
+            
+    except ImportError:
+        print("⚠️ PyJWT not installed - cannot verify Farcaster tokens")
+        return jsonify({'allowed': False, 'error': 'JWT verification not available'}), 500
+    except Exception as e:
+        print(f"❌ verify-fc-token error: {e}")
+        return jsonify({'allowed': False, 'error': str(e)}), 500
 
 
 # =============================================================================

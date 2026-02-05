@@ -29,8 +29,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
     
-    <!-- Farcaster Frame SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@0.0.26/dist/index.umd.js"></script>
+    <!-- Farcaster Mini App SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@0.1.5/dist/index.umd.js"></script>
     
     <style>
         * {
@@ -440,15 +440,90 @@
             background: #5b8def;
             border-radius: 50%;
         }
+        
+        /* Gate Screen Styles */
+        .gate-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 24px;
+            text-align: center;
+        }
+        
+        .gate-screen.hidden {
+            display: none;
+        }
+        
+        .gate-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 24px;
+            box-shadow: 0 0 30px rgba(240, 246, 252, 0.3);
+        }
+        
+        .gate-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        
+        .gate-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            max-width: 280px;
+            line-height: 1.5;
+        }
+        
+        .gate-fid {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 16px;
+        }
+        
+        .gate-fid strong {
+            color: var(--text-primary);
+        }
+        
+        .gate-status {
+            font-size: 14px;
+            color: var(--accent-green);
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .gate-error {
+            color: var(--accent-red);
+        }
     </style>
 </head>
 <body>
-    <div class="mini-app" id="miniApp">
+    <!-- Gate Screen for Unauthorized Users -->
+    <div class="gate-screen" id="gateScreen">
+        <img src="/psniper-logo.png" alt="pSNIPER" class="gate-logo">
+        <h1 class="gate-title">pSNIPER Vault</h1>
+        <p class="gate-subtitle">Early access beta. This vault is currently invite-only for whitelisted users.</p>
+        <div class="gate-status" id="gateStatus">
+            <span class="loading-spinner"></span>
+            <span>Authenticating...</span>
+        </div>
+        <p class="gate-fid" id="gateFid"></p>
+    </div>
+    
+    <div class="mini-app hidden" id="miniApp">
         <!-- Header -->
         <header class="mini-header">
             <div class="mini-logo">
                 <img src="/psniper-logo.png" alt="pSNIPER">
-                <span class="mini-logo-text">pSNIPER</span>
                 <span class="beta-badge">Beta</span>
             </div>
             <button id="connectBtn" class="connect-btn">Connect</button>
@@ -458,7 +533,7 @@
         <div class="vault-card">
             <div class="vault-title">
                 <img src="/psniper-logo.png" alt="">
-                Sniper Vault
+                pSNIPER Vault
                 <span class="network-badge"><span class="dot"></span>Base</span>
             </div>
             
@@ -538,10 +613,36 @@
     </div>
     
     <script>
+        // ============================================
+        // CRITICAL: Call sdk.actions.ready() IMMEDIATELY
+        // This must be synchronous and unconditional to dismiss the splash screen
+        // ============================================
+        let fcSdk = null;
+        let userFid = null;
+        let isInFarcaster = false;
+        
+        (function callReadyImmediately() {
+            try {
+                if (typeof window.FarcasterFrame !== 'undefined' && window.FarcasterFrame.sdk) {
+                    fcSdk = window.FarcasterFrame.sdk;
+                    fcSdk.actions.ready();
+                    isInFarcaster = true;
+                    console.log('[FC] sdk.actions.ready() called immediately');
+                } else if (typeof window.sdk !== 'undefined') {
+                    fcSdk = window.sdk;
+                    fcSdk.actions.ready();
+                    isInFarcaster = true;
+                    console.log('[FC] sdk.actions.ready() called via window.sdk');
+                }
+            } catch (e) {
+                console.log('[FC] Not in Farcaster frame context:', e.message);
+            }
+        })();
+        
         const BASE_CHAIN_ID = 8453;
         const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-        // Injected from server .env via Jinja, fallback to current V7.4 contract
-        const VAULT_ADDRESS = '{{ vault_address | default("0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D") }}';
+        // Injected from server .env via Jinja, fallback to current V7.5 contract
+        const VAULT_ADDRESS = '{{ vault_address | default("0xbF0944893e6bd445F715dE76CD6343B1d551D41B") }}';
         
         let provider = null;
         let signer = null;
@@ -565,17 +666,130 @@
             'function decimals() view returns (uint8)'
         ];
         
-        async function init() {
-            // Call Farcaster SDK ready() IMMEDIATELY to dismiss splash screen
-            if (typeof window.FarcasterFrame !== 'undefined') {
-                try {
-                    const sdk = new window.FarcasterFrame.FrameSDK();
-                    sdk.actions.ready();
-                    console.log('Farcaster Frame SDK ready() called');
-                } catch (e) {
-                    console.log('Not in Farcaster frame context:', e.message);
-                }
+        // Gate screen elements
+        const gateScreen = document.getElementById('gateScreen');
+        const miniApp = document.getElementById('miniApp');
+        const gateStatus = document.getElementById('gateStatus');
+        const gateFid = document.getElementById('gateFid');
+        
+        function showGateError(message) {
+            gateStatus.innerHTML = `<span class="gate-error">${message}</span>`;
+        }
+        
+        function showGateSuccess(message) {
+            gateStatus.innerHTML = `<span>${message}</span>`;
+        }
+        
+        function grantAccess() {
+            gateScreen.classList.add('hidden');
+            miniApp.classList.remove('hidden');
+        }
+        
+        async function authenticateWithFarcaster() {
+            // If not in Farcaster frame, show gate with message to open in Warpcast
+            if (!fcSdk || !isInFarcaster) {
+                console.log('[FC] Not in Farcaster frame');
+                showGateError('Please open in Warpcast to access');
+                gateFid.innerHTML = 'This app requires Farcaster authentication';
+                return;
             }
+            
+            try {
+                showGateSuccess('Authenticating...');
+                
+                // Get context for UX (to display FID while authenticating)
+                let context = null;
+                try {
+                    if (typeof fcSdk.context === 'function') {
+                        context = await fcSdk.context();
+                    } else if (fcSdk.context && fcSdk.context.then) {
+                        context = await fcSdk.context;
+                    } else if (fcSdk.context) {
+                        context = fcSdk.context;
+                    }
+                    
+                    if (context && context.user && context.user.fid) {
+                        userFid = context.user.fid;
+                        gateFid.innerHTML = `Your FID: <strong>${userFid}</strong>`;
+                        console.log('[FC] Got FID from context:', userFid);
+                    }
+                } catch (ctxErr) {
+                    console.log('[FC] Context fetch error (non-critical):', ctxErr);
+                }
+                
+                // SECURITY: Always verify with Quick Auth token for actual access control
+                // Context alone is not cryptographically verified
+                showGateSuccess('Verifying access...');
+                
+                let authSucceeded = false;
+                
+                // Try Quick Auth (required for secure access)
+                if (fcSdk.experimental && fcSdk.experimental.quickAuth) {
+                    try {
+                        const { token } = await fcSdk.experimental.quickAuth.getToken();
+                        authSucceeded = await verifyQuickAuthToken(token);
+                    } catch (qe) {
+                        console.error('[FC] experimental.quickAuth failed:', qe);
+                    }
+                }
+                
+                if (!authSucceeded && fcSdk.quickAuth && fcSdk.quickAuth.getToken) {
+                    try {
+                        const { token } = await fcSdk.quickAuth.getToken();
+                        authSucceeded = await verifyQuickAuthToken(token);
+                    } catch (qe) {
+                        console.error('[FC] quickAuth failed:', qe);
+                    }
+                }
+                
+                if (!authSucceeded) {
+                    // Quick Auth not available or failed - cannot verify securely
+                    console.log('[FC] No verified auth - denying access');
+                    showGateError('Could not verify identity. Update Warpcast and try again.');
+                }
+            } catch (e) {
+                console.error('[FC] Auth error:', e);
+                showGateError('Authentication error. Try refreshing.');
+            }
+        }
+        
+        async function verifyQuickAuthToken(token) {
+            try {
+                const res = await fetch('/api/verify-fc-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await res.json();
+                
+                if (data.fid) {
+                    userFid = data.fid;
+                    gateFid.innerHTML = `Your FID: <strong>${userFid}</strong>`;
+                }
+                
+                if (data.allowed && data.verified) {
+                    showGateSuccess('Access granted!');
+                    setTimeout(grantAccess, 500);
+                    return true;
+                } else if (data.fid) {
+                    showGateError('Not on allowlist. Request access from @pmfi');
+                    return true; // Auth succeeded but not allowed
+                } else {
+                    showGateError(data.error || 'Authentication failed');
+                    return false;
+                }
+            } catch (e) {
+                console.error('[FC] Token verification error:', e);
+                return false;
+            }
+        }
+        
+        async function init() {
+            // Authenticate via Farcaster (gate check happens here)
+            await authenticateWithFarcaster();
             
             // Then do async initialization
             await fetchPrice();
