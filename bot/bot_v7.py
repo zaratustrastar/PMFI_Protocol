@@ -2625,7 +2625,7 @@ def main():
     print(f"   - GET  /sign-nav/debug - Debug NAV calculation")
     print(f"\n   Press Ctrl+C to stop\n")
     
-    flask_app.run(host='0.0.0.0', port=HTTP_PORT, debug=False, threaded=True)
+    flask_app.run(host='127.0.0.1', port=HTTP_PORT, debug=False, threaded=True)
 
 
 if __name__ == "__main__":
