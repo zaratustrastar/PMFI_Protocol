@@ -1,0 +1,22 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u withdrawal-servicer -n 10 --no-pager
+Feb 05 19:35:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2401175]: 💤 Sleeping 60s...
+Feb 05 19:35:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2401175]: ============================================================
+Feb 05 19:35:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2401175]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-05 19:35:45
+Feb 05 19:35:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2401175]: ============================================================
+Feb 05 19:35:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2401175]:    NAV from bot (cached): $1.000000
+Feb 05 19:36:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping withdrawal-servicer.service - pSNIPER Withdrawal Servicer...
+Feb 05 19:36:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Deactivated successfully.
+Feb 05 19:36:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
+Feb 05 19:36:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Consumed 7.083s CPU time.
+Feb 05 19:36:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u withdrawal-servicer -f
+Feb 05 19:35:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2401175]: 💤 Sleeping 60s...
+Feb 05 19:35:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2401175]: ============================================================
+Feb 05 19:35:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2401175]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-05 19:35:45
+Feb 05 19:35:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2401175]: ============================================================
+Feb 05 19:35:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2401175]:    NAV from bot (cached): $1.000000
+Feb 05 19:36:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping withdrawal-servicer.service - pSNIPER Withdrawal Servicer...
+Feb 05 19:36:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Deactivated successfully.
+Feb 05 19:36:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
+Feb 05 19:36:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Consumed 7.083s CPU time.
+Feb 05 19:36:53 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
