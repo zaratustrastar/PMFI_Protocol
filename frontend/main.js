@@ -15,9 +15,8 @@ const BASE_MAINNET_RPC = "https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh
 const BASE_MAINNET_CHAIN_ID = 8453;
 
 // VPS Price API Configuration
-// Set this to your VPS URL where bot.py is running (e.g., "http://your-vps-ip:8080")
-// Leave empty to use on-chain data directly
-const PRICE_API_URL = localStorage.getItem("predictfi_price_api_url") || "";
+// Auto-detect from current domain - frontend and API are served from same origin
+const PRICE_API_URL = localStorage.getItem("predictfi_price_api_url") || window.location.origin;
 const PRICE_REFRESH_INTERVAL = 10000; // 10 seconds for live price updates
 
 // =============================================================================
