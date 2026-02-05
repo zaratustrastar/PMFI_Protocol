@@ -1,0 +1,43 @@
+oot@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u withdrawal-servicer -n 50
+Feb 04 23:15:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:            ^^^^^^^^^^^^
+Feb 04 23:15:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/usr/lib/python3.12/base64.py", line 88, i>
+Feb 04 23:15:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     return binascii.a2b_base64(s, strict_mode=vali>
+Feb 04 23:15:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^>
+Feb 04 23:15:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]: binascii.Error: Incorrect padding
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]: Traceback (most recent call last):
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/root/PolyNotifyBot/trading_bot/withdrawal>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     resp = client.post_order(signed_order, OrderTy>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/usr/local/lib/python3.12/dist-packages/py>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     headers = create_level_2_headers(self.signer, >
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/usr/local/lib/python3.12/dist-packages/py>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     hmac_sig = build_hmac_signature(
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:                ^^^^^^^^^^^^^^^^^^^^^
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/usr/local/lib/python3.12/dist-packages/py>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     base64_secret = base64.urlsafe_b64decode(secre>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/usr/lib/python3.12/base64.py", line 134, >
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     return b64decode(s)
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:            ^^^^^^^^^^^^
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/usr/lib/python3.12/base64.py", line 88, i>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     return binascii.a2b_base64(s, strict_mode=vali>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^>
+Feb 04 23:15:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]: binascii.Error: Incorrect padding
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]: Traceback (most recent call last):
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/root/PolyNotifyBot/trading_bot/withdrawal>
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     resp = client.post_order(signed_order, OrderTy>
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^>
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/usr/local/lib/python3.12/dist-packages/py>
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     headers = create_level_2_headers(self.signer, >
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^>
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/usr/local/lib/python3.12/dist-packages/py>
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     hmac_sig = build_hmac_signature(
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:                ^^^^^^^^^^^^^^^^^^^^^
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/usr/local/lib/python3.12/dist-packages/py>
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     base64_secret = base64.urlsafe_b64decode(secre>
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^>
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:   File "/usr/lib/python3.12/base64.py", line 134, >
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:     return b64decode(s)
+Feb 04 23:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2338984]:            ^^^^^^^^^^^^
+lines 1-41

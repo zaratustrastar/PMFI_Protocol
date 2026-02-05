@@ -1445,7 +1445,7 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
             cmd_args,
             capture_output=True,
             text=True,
-            timeout=300,
+            timeout=600,  # 10 minutes to handle approval + bridge
             env={
                 **os.environ,
                 "TREASURY_ADDRESS": VAULT_ADDRESS,
@@ -1488,7 +1488,7 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
             return False, "", 0.0
             
     except subprocess.TimeoutExpired:
-        print("❌ Withdraw script timed out (5 min)")
+        print("❌ Withdraw script timed out (10 min)")
         send_telegram_alert(
             f"❌ Withdraw script timeout\n"
             f"Amount: ${amount_usdc:.2f}\n"
@@ -1499,6 +1499,115 @@ def withdraw_pm_cash_to_bridge(amount_usdc: float, dry_run: bool = False) -> Tup
     except Exception as e:
         print(f"❌ Withdraw error: {e}")
         send_telegram_alert(f"❌ Withdraw error: {e}", is_error=True)
+        return False, "", 0.0
+
+
+def get_eoa_usdc_balance() -> float:
+    """
+    Get the EOA wallet's USDC balance on Polygon.
+    
+    This checks if there's USDC stuck in the EOA from a previous failed bridge.
+    If found, we should bridge it first before liquidating more positions.
+    
+    Returns: USDC balance in dollars (float)
+    """
+    try:
+        # Derive EOA address from private key
+        raw_key = os.getenv("POLYMARKET_PRIVATE_KEY", "")
+        if not raw_key:
+            return 0.0
+        
+        normalized_key = normalize_privkey(raw_key, "POLYMARKET_PRIVATE_KEY")
+        eoa_address = Account.from_key(normalized_key).address
+        
+        # USDC.e on Polygon (Bridged USDC that Polymarket uses)
+        USDC_E_POLYGON = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+        
+        # Use Polygon RPC to check balance
+        polygon_rpc = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
+        w3 = Web3(Web3.HTTPProvider(polygon_rpc))
+        
+        # balanceOf(address) selector
+        data = f"0x70a08231000000000000000000000000{eoa_address[2:].lower()}"
+        
+        result = w3.eth.call({
+            "to": Web3.to_checksum_address(USDC_E_POLYGON),
+            "data": data
+        })
+        
+        balance_raw = int(result.hex(), 16)
+        balance_usdc = balance_raw / 1e6
+        
+        return balance_usdc
+    except Exception as e:
+        print(f"⚠️  Failed to get EOA USDC balance: {e}")
+        return 0.0
+
+
+def bridge_eoa_to_vault(dry_run: bool = False) -> Tuple[bool, str, float]:
+    """
+    Bridge USDC from EOA directly to vault (skip PM withdrawal step).
+    
+    Used when previous bridge timed out but USDC is already in EOA.
+    Calls safe_proxy_withdraw.ts with 'bridge' command.
+    
+    Returns: (success, request_id, amount_bridged)
+    """
+    import re
+    
+    eoa_balance = get_eoa_usdc_balance()
+    if eoa_balance < MIN_WITHDRAWAL_USDC:
+        print(f"⚠️  EOA balance ${eoa_balance:.2f} below minimum ${MIN_WITHDRAWAL_USDC}")
+        return False, "", 0.0
+    
+    print(f"\n🔄 RESUME BRIDGE: ${eoa_balance:.2f} from EOA → Vault")
+    
+    cmd_args = [
+        "npx", "tsx",
+        os.path.join(os.path.dirname(__file__), "safe_proxy_withdraw.ts"),
+        "bridge"
+    ]
+    if dry_run:
+        cmd_args.append("--dry-run")
+    
+    try:
+        result = subprocess.run(
+            cmd_args,
+            capture_output=True,
+            text=True,
+            timeout=600,  # 10 minutes for bridge
+            env={
+                **os.environ,
+                "TREASURY_ADDRESS": VAULT_ADDRESS,
+            }
+        )
+        
+        output = result.stdout + result.stderr
+        print(f"   Output (first 2000 chars): {output[:2000]}")
+        
+        request_id = ""
+        request_id_match = re.search(r'requestId["\s:]+([a-f0-9-]+)', output, re.IGNORECASE)
+        if request_id_match:
+            request_id = request_id_match.group(1)
+            print(f"   Extracted requestId: {request_id}")
+        
+        if "success" in output.lower() or "complete" in output.lower() or result.returncode == 0:
+            return True, request_id, eoa_balance
+        else:
+            print(f"❌ Bridge script failed (exit {result.returncode})")
+            return False, "", 0.0
+            
+    except subprocess.TimeoutExpired:
+        print("❌ Bridge script timed out (10 min)")
+        send_telegram_alert(
+            f"❌ Bridge-only script timeout\n"
+            f"EOA balance: ${eoa_balance:.2f}\n"
+            f"Manual bridge required",
+            is_error=True
+        )
+        return False, "", 0.0
+    except Exception as e:
+        print(f"❌ Bridge error: {e}")
         return False, "", 0.0
 
 
@@ -2460,6 +2569,40 @@ def servicer_iteration(
     
     needed = min(needed, max_allowed)
     print(f"\n⚠️  WITHDRAWAL NEEDED: ${needed:.2f} (includes slippage buffer)")
+    
+    # V7.3.5: Check if EOA has USDC from a previous failed bridge
+    # If so, bridge it first before liquidating more positions
+    eoa_balance = get_eoa_usdc_balance()
+    if eoa_balance >= MIN_WITHDRAWAL_USDC:
+        print(f"\n🔄 Found ${eoa_balance:.2f} USDC in EOA from previous attempt - bridging first")
+        send_telegram_alert(
+            f"🔄 Resuming bridge: ${eoa_balance:.2f} USDC found in EOA\n"
+            f"Bridging to vault before any new liquidation"
+        )
+        
+        success, request_id, amount_bridged = bridge_eoa_to_vault(dry_run=dry_run)
+        
+        if success:
+            state.in_transit.append({
+                "request_id": request_id,
+                "amount_usdc": amount_bridged,
+                "initiated_at": time.time(),
+                "status": "pending",
+            })
+            state.daily_withdrawn_usdc += amount_bridged
+            needed -= amount_bridged
+            
+            send_telegram_alert(
+                f"✅ EOA bridge initiated: ${amount_bridged:.2f} USDC\n"
+                f"Remaining needed: ${needed:.2f}"
+            )
+            
+            # If EOA bridge covered the need, we're done for this cycle
+            if needed < MIN_WITHDRAWAL_USDC:
+                print(f"\n✅ EOA bridge covered withdrawal need")
+                return state
+        else:
+            print(f"⚠️  EOA bridge failed, will try full withdrawal flow")
     
     pm_cash, pm_positions = get_pm_balance()
     liquidatable_positions = get_liquidatable_cash()

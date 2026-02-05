@@ -1,0 +1,29 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u withdrawal-servicer --since "23:22:00" | grep -i "bridge\|transfer\|withdraw"
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Min withdrawal: $5.0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Daily withdrawn so far: $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-04 23:16:21
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals count: 1
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Next withdrawal index: 0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals: $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Daily withdrawn: $0.00 / $50000.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ⚠️  WITHDRAWAL NEEDED: $5.42 (includes slippage buffer)
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-04 23:21:02
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals count: 1
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Next withdrawal index: 0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals: $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Daily withdrawn: $0.00 / $50000.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ⚠️  WITHDRAWAL NEEDED: $5.42 (includes slippage buffer)
+Feb 04 23:38:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 💸 WITHDRAW: $5.42 from PM → Vault
+Feb 04 23:38:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ❌ Withdraw script timed out (5 min)
+Feb 04 23:38:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-04 23:35:13
+Feb 04 23:38:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals count: 1
+Feb 04 23:38:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Next withdrawal index: 0
+Feb 04 23:38:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals: $5.39
+Feb 04 23:38:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Daily withdrawn: $0.00 / $50000.00
+Feb 04 23:38:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ⚠️  WITHDRAWAL NEEDED: $5.42 (includes slippage buffer)
+Feb 04 23:40:39 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping withdrawal-servicer.service - pSNIPER Withdrawal Servicer...
+Feb 04 23:40:39 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Deactivated successfully.
+Feb 04 23:40:39 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
+Feb 04 23:40:39 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Consumed 16.460s CPU time.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

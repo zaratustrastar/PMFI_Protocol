@@ -1,0 +1,141 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u withdrawal-servicer --since "23:16:20"
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping withdrawal-servicer.service - pSNIPER Withdrawa>
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Deactivated successfully.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped withdrawal-servicer.service - pSNIPER Withdrawal>
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Consumed 35.342s CPU time.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started withdrawal-servicer.service - pSNIPER Withdrawal>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ==================================================>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ==================================================>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: Configuration:
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Vault: 0x500bd5C79525d429B96056703629e35bF60572>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    PM Proxy: 0xd1EdE018CF5724268C...
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Bot URL: http://localhost:8080
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Dry run: False
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Min withdrawal: $5.0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Max daily: $50000.0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Bypass method: curl_cffi
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ✅ Servicer initialized
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Daily withdrawn so far: $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    In-transit items: 0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Tracked vault balance: $1.04
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Unclaimed delta pool: $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ==================================================>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-04 23:16:21
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ==================================================>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    NAV from bot (cached): $1.000000
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending shares: 50.000000
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals count: 1
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Next withdrawal index: 0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Iterating 1 pending requests...
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:       Request #0: 50.0000 shares, $5.39 locked
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Checked 1 requests, found 1 pending, total lock>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Actual usdcLocked from queue: $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 📊 STATUS:
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals: $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Vault USDC (Base): $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    In-transit USDC: $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    NAV: $1.000000/share
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Daily withdrawn: $0.00 / $50000.00
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping withdrawal-servicer.service - pSNIPER Withdrawa>
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Deactivated successfully.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped withdrawal-servicer.service - pSNIPER Withdrawal>
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Consumed 35.342s CPU time.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started withdrawal-servicer.service - pSNIPER Withdrawal>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ==================================================>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ==================================================>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: Configuration:
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Vault: 0x500bd5C79525d429B96056703629e35bF60572>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    PM Proxy: 0xd1EdE018CF5724268C...
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Bot URL: http://localhost:8080
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Dry run: False
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Min withdrawal: $5.0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Max daily: $50000.0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Bypass method: curl_cffi
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ✅ Servicer initialized
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Daily withdrawn so far: $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    In-transit items: 0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Tracked vault balance: $1.04
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Unclaimed delta pool: $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ==================================================>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-04 23:16:21
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ==================================================>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    NAV from bot (cached): $1.000000
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending shares: 50.000000
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals count: 1
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Next withdrawal index: 0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Iterating 1 pending requests...
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:       Request #0: 50.0000 shares, $5.39 locked
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Checked 1 requests, found 1 pending, total lock>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Actual usdcLocked from queue: $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 📊 STATUS:
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals: $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Vault USDC (Base): $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    In-transit USDC: $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    NAV: $1.000000/share
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Daily withdrawn: $0.00 / $50000.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Needed (base): $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Needed (with 0.5% slippage): $5.42
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ⚠️  WITHDRAWAL NEEDED: $5.42 (includes slippage buf>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    📊 On-chain USDC (Polygon RPC): $0.05
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 🔧 Initializing patched CLOB client for liquidatio>
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    📋 EOA (signer): 0x59D0461e...
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    📋 Proxy wallet (funder): 0xd1EdE018...
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    📋 Signature type: 2 (Browser proxy)
+lines 1-46...skipping...
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping withdrawal-servicer.service - pSNIPER Withdrawal Servicer...
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Deactivated successfully.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Consumed 35.342s CPU time.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping withdrawal-servicer.service - pSNIPER Withdrawal Servicer...
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Deactivated successfully.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping withdrawal-servicer.service - pSNIPER Withdrawal Servicer...
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Deactivated successfully.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping withdrawal-servicer.service - pSNIPER Withdrawal Servicer...
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Deactivated successfully.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Consumed 35.342s CPU time.
+Feb 04 23:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ============================================================
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 🚀 WITHDRAWAL SERVICER V7.3 (Event-Driven)
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ============================================================
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: Configuration:
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Vault: 0x500bd5C79525d429B96056703629e35bF6057282
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    PM Proxy: 0xd1EdE018CF5724268C...
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Bot URL: http://localhost:8080
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Dry run: False
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Min withdrawal: $5.0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Max daily: $50000.0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Bypass method: curl_cffi
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ✅ Servicer initialized
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Daily withdrawn so far: $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    In-transit items: 0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Tracked vault balance: $1.04
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Unclaimed delta pool: $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ============================================================
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-04 23:16:21
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ============================================================
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    NAV from bot (cached): $1.000000
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending shares: 50.000000
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals count: 1
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Next withdrawal index: 0
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Iterating 1 pending requests...
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:       Request #0: 50.0000 shares, $5.39 locked
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Checked 1 requests, found 1 pending, total locked: $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Actual usdcLocked from queue: $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 📊 STATUS:
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Pending withdrawals: $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Vault USDC (Base): $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    In-transit USDC: $0.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    NAV: $1.000000/share
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Daily withdrawn: $0.00 / $50000.00
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Needed (base): $5.39
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    Needed (with 0.5% slippage): $5.42
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: ⚠️  WITHDRAWAL NEEDED: $5.42 (includes slippage buffer)
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    📊 On-chain USDC (Polygon RPC): $0.05
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]: 🔧 Initializing patched CLOB client for liquidation...
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    📋 EOA (signer): 0x59D0461e...
+Feb 04 23:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2364768]:    📋 Proxy wallet (funder): 0xd1EdE018...
+lines 1-45
