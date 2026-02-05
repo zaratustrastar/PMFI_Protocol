@@ -1,0 +1,27 @@
+sudo rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock
+sudo dpkg --configure -a
+sudo apt update && sudo apt install nginx certbot python3-certbot-nginx -y
+Hit:1 http://mirrors.digitalocean.com/ubuntu noble InRelease
+Hit:2 http://mirrors.digitalocean.com/ubuntu noble-updates InRelease                                                                                            
+Hit:3 http://mirrors.digitalocean.com/ubuntu noble-backports InRelease                                                                                          
+Hit:4 https://deb.nodesource.com/node_20.x nodistro InRelease                                                                                            
+Hit:5 https://repos-droplet.digitalocean.com/apt/droplet-agent main InRelease                    
+Hit:6 http://security.ubuntu.com/ubuntu noble-security InRelease           
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+56 packages can be upgraded. Run 'apt list --upgradable' to see them.
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)      
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)      
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)      
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)      
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)      
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)      
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)      
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)      
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)      
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)      
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)       
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)       
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)       
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 2385970 (unattended-upgr)       

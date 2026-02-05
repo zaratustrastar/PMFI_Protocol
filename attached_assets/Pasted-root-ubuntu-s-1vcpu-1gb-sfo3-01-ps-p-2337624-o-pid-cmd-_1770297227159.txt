@@ -1,0 +1,93 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# ps -p 2337624 -o pid,cmd,etime
+    PID CMD                             ELAPSED
+2337624 /usr/bin/python3 /usr/bin/u  1-06:31:03
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo tail -n 50 /var/log/unattended-upgrades/unattended-upgrades.log
+sudo tail -n 50 /var/log/dpkg.log
+2026-02-01 03:02:07,386 INFO Starting unattended upgrades script
+2026-02-01 03:02:07,387 INFO Allowed origins are: o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security
+2026-02-01 03:02:07,387 INFO Initial blacklist: 
+2026-02-01 03:02:07,387 INFO Initial whitelist (not strict): 
+2026-02-01 06:13:23,505 INFO Starting unattended upgrades script
+2026-02-01 06:13:23,506 INFO Allowed origins are: o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security
+2026-02-01 06:13:23,506 INFO Initial blacklist: 
+2026-02-01 06:13:23,506 INFO Initial whitelist (not strict): 
+2026-02-01 06:13:26,867 INFO No packages found that can be upgraded unattended and no pending auto-removals
+2026-02-02 00:07:08,677 INFO Starting unattended upgrades script
+2026-02-02 00:07:08,678 INFO Allowed origins are: o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security
+2026-02-02 00:07:08,678 INFO Initial blacklist: 
+2026-02-02 00:07:08,678 INFO Initial whitelist (not strict): 
+2026-02-02 06:40:39,340 INFO Starting unattended upgrades script
+2026-02-02 06:40:39,341 INFO Allowed origins are: o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security
+2026-02-02 06:40:39,341 INFO Initial blacklist: 
+2026-02-02 06:40:39,341 INFO Initial whitelist (not strict): 
+2026-02-02 06:40:42,773 INFO No packages found that can be upgraded unattended and no pending auto-removals
+2026-02-03 06:14:20,598 INFO Starting unattended upgrades script
+2026-02-03 06:14:20,600 INFO Allowed origins are: o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security
+2026-02-03 06:14:20,600 INFO Initial blacklist: 
+2026-02-03 06:14:20,600 INFO Initial whitelist (not strict): 
+2026-02-03 06:14:24,006 INFO No packages found that can be upgraded unattended and no pending auto-removals
+2026-02-03 11:38:47,229 INFO Starting unattended upgrades script
+2026-02-03 11:38:47,231 INFO Allowed origins are: o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security
+2026-02-03 11:38:47,231 INFO Initial blacklist: 
+2026-02-03 11:38:47,231 INFO Initial whitelist (not strict): 
+2026-02-04 03:27:16,123 INFO Starting unattended upgrades script
+2026-02-04 03:27:16,124 INFO Allowed origins are: o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security
+2026-02-04 03:27:16,124 INFO Initial blacklist: 
+2026-02-04 03:27:16,124 INFO Initial whitelist (not strict): 
+2026-02-04 06:42:01,284 INFO Starting unattended upgrades script
+2026-02-04 06:42:01,285 INFO Allowed origins are: o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security
+2026-02-04 06:42:01,285 INFO Initial blacklist: 
+2026-02-04 06:42:01,285 INFO Initial whitelist (not strict): 
+2026-02-04 06:42:10,043 INFO Packages that will be upgraded: inetutils-telnet libc-bin libc-dev-bin libc-devtools libc6 libc6-dev libpng16-16t64 locales telnet
+2026-02-04 06:42:10,043 INFO Writing dpkg log to /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
+2026-02-04 06:42:23 status half-installed libc-dev-bin:amd64 2.39-0ubuntu8.6
+2026-02-04 06:42:23 status unpacked libc-dev-bin:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:23 upgrade libc6:amd64 2.39-0ubuntu8.6 2.39-0ubuntu8.7
+2026-02-04 06:42:23 status triggers-pending libc-bin:amd64 2.39-0ubuntu8.6
+2026-02-04 06:42:23 status half-configured libc6:amd64 2.39-0ubuntu8.6
+2026-02-04 06:42:23 status unpacked libc6:amd64 2.39-0ubuntu8.6
+2026-02-04 06:42:23 status half-installed libc6:amd64 2.39-0ubuntu8.6
+2026-02-04 06:42:23 status unpacked libc6:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:23 startup packages configure
+2026-02-04 06:42:23 configure libc6:amd64 2.39-0ubuntu8.7 <none>
+2026-02-04 06:42:23 status unpacked libc6:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:23 status half-configured libc6:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:24 status installed libc6:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:24 startup archives unpack
+2026-02-04 06:42:24 upgrade libc-bin:amd64 2.39-0ubuntu8.6 2.39-0ubuntu8.7
+2026-02-04 06:42:24 status half-configured libc-bin:amd64 2.39-0ubuntu8.6
+2026-02-04 06:42:24 status unpacked libc-bin:amd64 2.39-0ubuntu8.6
+2026-02-04 06:42:24 status half-installed libc-bin:amd64 2.39-0ubuntu8.6
+2026-02-04 06:42:24 status unpacked libc-bin:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:24 startup packages configure
+2026-02-04 06:42:24 configure libc-bin:amd64 2.39-0ubuntu8.7 <none>
+2026-02-04 06:42:24 status unpacked libc-bin:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:24 status half-configured libc-bin:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:24 status installed libc-bin:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:25 startup archives unpack
+2026-02-04 06:42:25 upgrade locales:all 2.39-0ubuntu8.6 2.39-0ubuntu8.7
+2026-02-04 06:42:25 status half-configured locales:all 2.39-0ubuntu8.6
+2026-02-04 06:42:25 status unpacked locales:all 2.39-0ubuntu8.6
+2026-02-04 06:42:25 status half-installed locales:all 2.39-0ubuntu8.6
+2026-02-04 06:42:25 status unpacked locales:all 2.39-0ubuntu8.7
+2026-02-04 06:42:25 startup packages configure
+2026-02-04 06:42:25 configure locales:all 2.39-0ubuntu8.7 <none>
+2026-02-04 06:42:25 status unpacked locales:all 2.39-0ubuntu8.7
+2026-02-04 06:42:25 status half-configured locales:all 2.39-0ubuntu8.7
+2026-02-04 06:42:29 status installed locales:all 2.39-0ubuntu8.7
+2026-02-04 06:42:29 configure libc-dev-bin:amd64 2.39-0ubuntu8.7 <none>
+2026-02-04 06:42:29 status unpacked libc-dev-bin:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:29 status half-configured libc-dev-bin:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:29 status installed libc-dev-bin:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:29 configure libc-devtools:amd64 2.39-0ubuntu8.7 <none>
+2026-02-04 06:42:29 status unpacked libc-devtools:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:29 status half-configured libc-devtools:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:29 status installed libc-devtools:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:29 configure libc6-dev:amd64 2.39-0ubuntu8.7 <none>
+2026-02-04 06:42:29 status unpacked libc6-dev:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:29 status half-configured libc6-dev:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:29 status installed libc6-dev:amd64 2.39-0ubuntu8.7
+2026-02-04 06:42:29 trigproc man-db:amd64 2.12.0-4build2 <none>
+2026-02-04 06:42:29 status half-configured man-db:amd64 2.12.0-4build2
+2026-02-04 06:42:30 status installed man-db:amd64 2.12.0-4build2
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
