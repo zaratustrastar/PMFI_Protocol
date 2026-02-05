@@ -64,7 +64,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     uint256 public constant PENDING_RATIO_PAUSE = 3000;   // 30% - pause deposits
     uint256 public constant PENDING_RATIO_CAP = 1000;     // 10% - cap single deposit
     uint256 public constant MAX_DEPOSIT_DURING_LIMBO = 1000 * 1e6;  // $1000 max during limbo
-    uint256 public constant CLAIM_SLIPPAGE_BPS = 50;  // 0.5% slippage tolerance for bridge fees
+    uint256 public constant CLAIM_SLIPPAGE_BPS = 100;  // 1% slippage tolerance for bridge fees
     
     // Polymarket's official Base USDC deposit address (new wallet)
     address public constant POLYMARKET_BASE_DEPOSIT = 0x2b20920A00D705043260eBFE6561bC96FBd84dBE;
@@ -489,11 +489,8 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         
         require(signer == navSigner, "Invalid NAV signer");
         
-        // Conservation bound check (only if we have deposits)
-        if (expectedAssets > 0 && totalSupply() > 0) {
-            uint256 minAllowedAssets = (expectedAssets * (10000 - maxLossBps)) / 10000;
-            require(navData.totalAssets >= minAllowedAssets, "Conservation bound violated");
-        }
+        // V7.5: Conservation bound removed - NAV now reflects real position values
+        // Old check blocked withdrawals when positions lost value, which is expected behavior
         
         lastRoundId = navData.roundId;
         lastNavTimestamp = navData.timestamp;
