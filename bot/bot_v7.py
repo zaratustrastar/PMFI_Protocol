@@ -605,7 +605,7 @@ def serve_index():
     
     if 'farcaster' in user_agent or 'warpcast' in user_agent or fc_frame == 'iframe':
         return render_template('mini.html', vault_address=VAULT_ADDRESS_CONFIG)
-    return send_from_directory(FRONTEND_DIR, 'index.html')
+    return render_template('index.html', vault_address=VAULT_ADDRESS_CONFIG)
 
 @flask_app.route('/mini')
 def serve_mini():

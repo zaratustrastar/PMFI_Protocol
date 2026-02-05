@@ -1018,6 +1018,12 @@
         </div>
     </div>
 
+    <script>
+        // Config injected from server .env via Jinja
+        window.PSNIPER_CONFIG = {
+            VAULT_ADDRESS: '{{ vault_address | default("0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D") }}'
+        };
+    </script>
     <script src="main.js"></script>
 </body>
 </html>
