@@ -4,7 +4,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { Pool } = require('pg');
 
-const PORT = 3001;
+const PORT = parseInt(process.env.ADMIN_PORT || '8081', 10);
 
 // Admin authentication token (set via environment variable)
 const ADMIN_TOKEN = process.env.PMFI_ADMIN_TOKEN || crypto.randomBytes(16).toString('hex');
