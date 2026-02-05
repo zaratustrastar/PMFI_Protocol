@@ -170,7 +170,6 @@ VAULT_V7_ABI = [
             {"name": "_pendingWithdrawalsCount", "type": "uint256"},
             {"name": "_paused", "type": "bool"},
             {"name": "_depositsThrottled", "type": "bool"},
-            {"name": "_maxLossBps", "type": "uint256"},
         ],
         "stateMutability": "view",
         "type": "function"
