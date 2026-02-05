@@ -6,7 +6,8 @@
 // CONFIGURATION
 // =============================================================================
 
-const VAULT_ADDRESS = "0x500bd5C79525d429B96056703629e35bF6057282"; // V7.3.3 - claim invalidates roundId
+// Read from global config (set by HTML template) or use default
+const VAULT_ADDRESS = window.PSNIPER_CONFIG?.VAULT_ADDRESS || "0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D"; // V7.5
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;

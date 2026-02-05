@@ -69,7 +69,7 @@ from dotenv import load_dotenv
 from web3 import Web3
 from eth_account import Account
 from eth_account.messages import encode_defunct
-from flask import Flask, jsonify, request as flask_request, send_from_directory
+from flask import Flask, jsonify, request as flask_request, send_from_directory, render_template
 from flask_cors import CORS
 
 # Cloudflare bypass with curl_cffi (residential proxy support)
@@ -588,13 +588,15 @@ cached_nav = {
 cached_signed_nav = None  # Cached signed NAV response for instant returns
 nav_lock = threading.Lock()
 
-flask_app = Flask(__name__)
-CORS(flask_app)
-
 _script_dir = Path(__file__).resolve().parent
 FRONTEND_DIR = _script_dir / "frontend"
 if not FRONTEND_DIR.exists():
     FRONTEND_DIR = _script_dir.parent / "frontend"
+
+flask_app = Flask(__name__, template_folder=str(FRONTEND_DIR))
+CORS(flask_app)
+
+VAULT_ADDRESS_CONFIG = os.getenv('VAULT_V7_ADDRESS', '0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D')
 
 @flask_app.route('/')
 def serve_index():
@@ -602,13 +604,13 @@ def serve_index():
     fc_frame = flask_request.headers.get('Sec-Fetch-Dest', '')
     
     if 'farcaster' in user_agent or 'warpcast' in user_agent or fc_frame == 'iframe':
-        return send_from_directory(FRONTEND_DIR, 'mini.html')
+        return render_template('mini.html', vault_address=VAULT_ADDRESS_CONFIG)
     return send_from_directory(FRONTEND_DIR, 'index.html')
 
 @flask_app.route('/mini')
 def serve_mini():
-    """Serve the Farcaster Mini App version"""
-    return send_from_directory(FRONTEND_DIR, 'mini.html')
+    """Serve the Farcaster Mini App version with config from env"""
+    return render_template('mini.html', vault_address=VAULT_ADDRESS_CONFIG)
 
 @flask_app.route('/.well-known/farcaster.json')
 def serve_farcaster_manifest():

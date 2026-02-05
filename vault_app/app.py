@@ -98,8 +98,10 @@ def vault():
     # Option 1: Redirect to existing vault app
     # return redirect('http://localhost:8081/')
     
-    # Option 2: Render vault template
-    return render_template('vault.html')
+    # Option 2: Render vault template with config from env
+    return render_template('vault.html', 
+        vault_address=os.getenv('VAULT_V7_ADDRESS', '0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D')
+    )
 
 @app.route('/admin')
 def admin():
