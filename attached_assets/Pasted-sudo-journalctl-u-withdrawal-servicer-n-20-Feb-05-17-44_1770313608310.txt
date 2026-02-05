@@ -1,0 +1,22 @@
+sudo journalctl -u withdrawal-servicer -n 20
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]: ❌ Error iterating withdrawal queue: Could not decode contract function call to getVaultState() wit>
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]: 📊 STATUS:
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]:    Pending withdrawals: $0.00
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]:    Vault USDC (Base): $0.00
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]:    In-transit USDC: $0.00
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]:    NAV: $1.000000/share
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]:    Daily withdrawn: $0.00 / $50000.00
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]:    Needed (base): $0.00
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]:    Needed (with 0.5% slippage): $0.00
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]: ✅ No action needed (no shortfall)
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]: 💤 Sleeping 60s...
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]: ============================================================
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-05 17:44:24
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]: ============================================================
+Feb 05 17:44:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2394976]:    NAV from bot (cached): $1.000000
+Feb 05 17:46:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping withdrawal-servicer.service - pSNIPER Withdrawal Servicer...
+Feb 05 17:46:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Deactivated successfully.
+Feb 05 17:46:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
+Feb 05 17:46:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: withdrawal-servicer.service: Consumed 10.743s CPU time, 75.5M memory peak, 0B memory swap peak.
+Feb 05 17:46:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started withdrawal-servicer.service - pSNIPER Withdrawal Servicer.
+lines 1-20/20 (END)
