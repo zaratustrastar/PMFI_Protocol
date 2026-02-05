@@ -1,11 +1,12 @@
 /**
  * Deploy PredictFiSniperVaultV7 to Base Mainnet
  * 
- * V7 Features:
+ * V7.5 Features:
  * - 100% forwarding to Polymarket (no buffer split)
  * - 3-state asset tracking (in-flight, pending, credited)
- * - Conservation bounds (replace 5% NAV change limit)
+ * - Conservation bound REMOVED (was blocking withdrawals on position losses)
  * - Extended NavData with full asset breakdown
+ * - 1% claim slippage tolerance (up from 0.5%)
  * 
  * Usage:
  *   npx hardhat run scripts/deploy-v7-mainnet.cjs --network base
@@ -44,9 +45,7 @@ async function main() {
     // Caps
     const MAX_PER_WALLET = hre.ethers.parseUnits("1000000000", 6);  // No per-wallet limit (1B USDC)
     const MAX_TOTAL = hre.ethers.parseUnits("100000", 6);           // 100,000 USDC total vault cap
-    
-    // Max loss allowed (30% = 3000 bps)
-    const MAX_LOSS_BPS = 3000;
+    // V7.5: MAX_LOSS_BPS removed - conservation bound no longer used
 
     console.log(`\n📋 Deployment Parameters:`);
     console.log(`   USDC: ${USDC_ADDRESS}`);
@@ -55,10 +54,10 @@ async function main() {
     console.log(`   Polymarket Wallet: ${POLYMARKET_WALLET}`);
     console.log(`   Max Per Wallet: $${hre.ethers.formatUnits(MAX_PER_WALLET, 6)}`);
     console.log(`   Max Total: $${hre.ethers.formatUnits(MAX_TOTAL, 6)}`);
-    console.log(`   Max Loss: ${MAX_LOSS_BPS / 100}%`);
+    // V7.5: Max Loss removed
 
-    // Deploy
-    console.log(`\n⏳ Deploying contract...`);
+    // Deploy (V7.5)
+    console.log(`\n⏳ Deploying contract (V7.5)...`);
     
     const VaultFactory = await hre.ethers.getContractFactory("PredictFiSniperVaultV7");
     const vault = await VaultFactory.deploy(
@@ -67,8 +66,8 @@ async function main() {
         TAX_COLLECTOR,
         POLYMARKET_WALLET,
         MAX_PER_WALLET,
-        MAX_TOTAL,
-        MAX_LOSS_BPS
+        MAX_TOTAL
+        // V7.5: MAX_LOSS_BPS removed
     );
 
     await vault.waitForDeployment();
@@ -91,7 +90,7 @@ async function main() {
         usdcAddress: USDC_ADDRESS,
         maxPerWallet: MAX_PER_WALLET.toString(),
         maxTotal: MAX_TOTAL.toString(),
-        maxLossBps: MAX_LOSS_BPS,
+        // V7.5: maxLossBps removed
         timestamp: new Date().toISOString(),
         polymarketBaseDeposit: "0xa76a91208FC7CB88420070AF978D12F440cab2F0",
     };

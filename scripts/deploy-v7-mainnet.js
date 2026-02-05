@@ -21,7 +21,7 @@ async function main() {
   // Deposit caps (in USDC with 6 decimals)
   const MAX_PER_WALLET = 100_000n * 1_000_000n;   // $100,000 per wallet
   const MAX_TOTAL = 100_000_000n * 1_000_000n;    // $100M total
-  const MAX_LOSS_BPS = 1000;                       // 10% max loss allowed
+  // V7.5: MAX_LOSS_BPS removed - conservation bound no longer used
 
   console.log("Configuration:");
   console.log("  USDC:", USDC_ADDRESS);
@@ -30,10 +30,10 @@ async function main() {
   console.log("  Polymarket Wallet:", POLYMARKET_WALLET);
   console.log("  Max per wallet:", MAX_PER_WALLET.toString());
   console.log("  Max total:", MAX_TOTAL.toString());
-  console.log("  Max loss BPS:", MAX_LOSS_BPS);
+  // V7.5: Max loss BPS removed
 
-  // Deploy PredictFiSniperVaultV7
-  console.log("\nDeploying PredictFiSniperVaultV7...");
+  // Deploy PredictFiSniperVaultV7 (V7.5)
+  console.log("\nDeploying PredictFiSniperVaultV7 (V7.5)...");
   const PredictFiSniperVaultV7 = await hre.ethers.getContractFactory("PredictFiSniperVaultV7");
   
   const vault = await PredictFiSniperVaultV7.deploy(
@@ -42,8 +42,8 @@ async function main() {
     TAX_COLLECTOR,
     POLYMARKET_WALLET,
     MAX_PER_WALLET,
-    MAX_TOTAL,
-    MAX_LOSS_BPS
+    MAX_TOTAL
+    // V7.5: MAX_LOSS_BPS parameter removed
   );
   await vault.waitForDeployment();
   const vaultAddress = await vault.getAddress();
@@ -62,7 +62,7 @@ async function main() {
     usdcAddress: USDC_ADDRESS,
     maxPerWallet: MAX_PER_WALLET.toString(),
     maxTotal: MAX_TOTAL.toString(),
-    maxLossBps: MAX_LOSS_BPS,
+    // V7.5: maxLossBps removed
     timestamp: new Date().toISOString(),
     polymarketBaseDeposit: "0xa76a91208FC7CB88420070AF978D12F440cab2F0"
   };

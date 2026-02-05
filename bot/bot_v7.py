@@ -147,10 +147,10 @@ NAV_PRECISION = 10**18
 # Safety valve thresholds
 MAX_PENDING_AGE_HOURS = 2  # Pause if any deposit pending > 2 hours
 
-# Conservation bound - match contract's maxLossBps (4000 = 40%)
-# totalAssets must be >= expectedAssets * (1 - maxLossBps/10000)
-# If totalAssets drops below this, contract will reject the NAV
-MAX_LOSS_BPS = 4000  # 40% max loss allowed
+# V7.5: Conservation bound REMOVED from contract
+# NAV now reflects actual position values without artificial floors
+# Keeping MAX_LOSS_BPS for display/warning purposes only
+MAX_LOSS_BPS = 4000  # 40% threshold for warnings (not enforced)
 
 # Rate limiting
 REFRESH_RATE_LIMIT_SECONDS = 5
@@ -1242,9 +1242,9 @@ def check_safety_valves(breakdown: Dict, expected_assets: int = 0) -> Tuple[str,
     """
     Check safety valves and return status.
     
-    V7.4: Checks for bridging delays AND conservation bound violations.
+    V7.5: Conservation bound REMOVED - contract no longer rejects NAV on losses.
     - in_flight age: pauses if deposits stuck in bridging too long
-    - conservation bound: warns if totalAssets < expectedAssets * (1 - maxLossBps)
+    - loss threshold: warns (informational only) if losses exceed MAX_LOSS_BPS
     
     Returns:
         Tuple of (status, reason)
@@ -1255,13 +1255,13 @@ def check_safety_valves(breakdown: Dict, expected_assets: int = 0) -> Tuple[str,
     in_flight = breakdown.get("in_flight", 0)
     total_assets = breakdown.get("total_assets", 0)
     
-    # V7.4: Check conservation bound - contract will reject NAV if violated
-    # totalAssets must be >= expectedAssets * (1 - maxLossBps/10000)
+    # V7.5: Conservation bound REMOVED - just informational warning now
+    # Contract no longer rejects NAV based on loss threshold
     if expected_assets > 0 and total_assets > 0:
         min_allowed = expected_assets * (10000 - MAX_LOSS_BPS) // 10000
         if total_assets < min_allowed:
             loss_pct = (1 - total_assets / expected_assets) * 100
-            return "warning", f"Conservation bound violated! Loss {loss_pct:.1f}% exceeds {MAX_LOSS_BPS/100:.0f}% limit. Contract may reject NAV."
+            return "warning", f"Significant loss detected: {loss_pct:.1f}% (threshold: {MAX_LOSS_BPS/100:.0f}%). NAV reflects actual values."
     
     # V7.4: Check in-flight age (actual funds waiting to be swept/bridged)
     if in_flight > 0:

@@ -14,27 +14,31 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
  * @notice pSNIPER vault with 100% Polymarket forwarding and 3-state asset tracking
  * @dev 
  * 
- * V7 Architecture: 3-State Asset Tracking with Conservation Bounds
+ * V7.5 Architecture: 3-State Asset Tracking (Conservation Bound Removed)
  * 
  * Asset States:
  * 1. inFlightOnChain - USDC at Polymarket deposit address (usually ~0 after sweep)
  * 2. pendingCredit - Forwarded but not yet visible in PM API (during bridge)
  * 3. creditedAssets - PM cash + positions visible via API
  * 
- * Key Changes from V6:
+ * Key Changes from V7.4:
+ * - REMOVED conservation bound check (was blocking withdrawals on position losses)
+ * - Increased claim slippage tolerance from 0.5% to 1%
+ * - NAV now reflects actual position values without artificial floors
+ * 
+ * Key Features:
  * - 100% forwarding to Polymarket (no buffer split)
- * - Conservation-style bounds replace 5% NAV change limit
  * - Extended NavData with full asset breakdown
  * - Pausable deposits with safety valves
  * - All withdrawals are queued (no buffer)
  * 
  * Safety Features:
- * - Conservation bound: totalAssets >= expectedAssets * (1 - maxLossBps)
  * - 30-second signature validity
  * - Monotonically increasing roundId
- * - No withdrawal tax (0%)
- * - Total vault deposit cap (no per-wallet limit)
+ * - 0.5% withdrawal tax
+ * - Total vault deposit cap
  * - Pausable on safety valve triggers
+ * - 1% slippage tolerance on claims
  */
 contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -86,7 +90,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     
     // Conservation tracking
     uint256 public expectedAssets;      // Sum of all deposits minus withdrawals paid
-    uint256 public maxLossBps;          // Max allowed loss from expected (e.g., 1000 = 10%)
+    // V7.5: maxLossBps removed - conservation bound no longer used
     
     // Deposit tracking for pendingCredit reconciliation
     uint256 public totalForwardedToPolymarket;  // Total USDC sent to PM deposit address
@@ -182,7 +186,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     event TaxCollectorUpdated(address indexed oldCollector, address indexed newCollector);
     event PolymarketWalletUpdated(address indexed oldWallet, address indexed newWallet);
     event CapsUpdated(uint256 perWallet, uint256 total);
-    event MaxLossUpdated(uint256 oldMaxLoss, uint256 newMaxLoss);
+    // V7.5: MaxLossUpdated event removed - conservation bound no longer used
     event Paused(bool isPaused);
     event DepositsThrottled(bool isThrottled);
     event EmergencyWithdraw(address indexed to, uint256 amount);
@@ -223,14 +227,13 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         address _taxCollector,
         address _polymarketWallet,
         uint256 _maxPerWallet,
-        uint256 _maxTotal,
-        uint256 _maxLossBps  // e.g., 1000 = 10% max loss allowed
+        uint256 _maxTotal
+        // V7.5: _maxLossBps parameter removed - conservation bound no longer used
     ) ERC20("PredictFi Sniper", "pSNIPER") Ownable(msg.sender) {
         require(_usdc != address(0), "Invalid USDC");
         require(_navSigner != address(0), "Invalid signer");
         require(_taxCollector != address(0), "Invalid tax collector");
         require(_polymarketWallet != address(0), "Invalid PM wallet");
-        require(_maxLossBps <= 5000, "Max loss cannot exceed 50%");
         
         usdc = IERC20(_usdc);
         navSigner = _navSigner;
@@ -238,7 +241,6 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         polymarketWallet = _polymarketWallet;
         maxDepositPerWallet = _maxPerWallet;
         maxTotalDeposits = _maxTotal;
-        maxLossBps = _maxLossBps;
         
         lastRoundId = 0;
         lastNavTimestamp = 0;  // Initialize to 0 to allow first NAV update
@@ -545,8 +547,8 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         uint256 _totalPendingShares,
         uint256 _pendingWithdrawalsCount,
         bool _paused,
-        bool _depositsThrottled,
-        uint256 _maxLossBps
+        bool _depositsThrottled
+        // V7.5: _maxLossBps removed - conservation bound no longer used
     ) {
         uint256 pendingCount = 0;
         for (uint256 i = nextWithdrawalIndex; i < withdrawalQueue.length; i++) {
@@ -563,8 +565,8 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
             totalPendingShares,
             pendingCount,
             paused,
-            depositsThrottled,
-            maxLossBps
+            depositsThrottled
+            // V7.5: maxLossBps removed
         );
     }
     
@@ -621,11 +623,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         emit BufferRefilled(amount, isReconciliation ? "reconciliation" : "owner");
     }
     
-    function setMaxLoss(uint256 _maxLossBps) external onlyOwner {
-        require(_maxLossBps <= 5000, "Max loss cannot exceed 50%");
-        emit MaxLossUpdated(maxLossBps, _maxLossBps);
-        maxLossBps = _maxLossBps;
-    }
+    // V7.5: setMaxLoss function removed - conservation bound no longer used
     
     function setTaxCollector(address _taxCollector) external onlyOwner {
         require(_taxCollector != address(0), "Invalid address");
