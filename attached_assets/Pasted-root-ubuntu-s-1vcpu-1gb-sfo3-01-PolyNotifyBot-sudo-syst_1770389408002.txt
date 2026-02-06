@@ -1,0 +1,62 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl daemon-reload
+sudo systemctl restart psniper-bot
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -v https://auth.farcaster.xyz/.well-known/jwks.json
+* Host auth.farcaster.xyz:443 was resolved.
+* IPv6: 2606:4700:4401::6812:2a87, 2606:4700:4407::ac40:9179
+* IPv4: 104.18.42.135, 172.64.145.121
+*   Trying 104.18.42.135:443...
+* Connected to auth.farcaster.xyz (104.18.42.135) port 443
+* ALPN: curl offers h2,http/1.1
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / id-ecPublicKey
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=farcaster.xyz
+*  start date: Jan 29 18:22:27 2026 GMT
+*  expire date: Feb 12 19:22:24 2026 GMT
+*  subjectAltName: host "auth.farcaster.xyz" matched cert's "*.farcaster.xyz"
+*  issuer: C=US; O=Google Trust Services; CN=WE1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA256
+*   Certificate level 1: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA384
+*   Certificate level 2: Public key type EC/secp384r1 (384/192 Bits/secBits), signed using ecdsa-with-SHA384
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://auth.farcaster.xyz/.well-known/jwks.json
+* [HTTP/2] [1] [:method: GET]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: auth.farcaster.xyz]
+* [HTTP/2] [1] [:path: /.well-known/jwks.json]
+* [HTTP/2] [1] [user-agent: curl/8.5.0]
+* [HTTP/2] [1] [accept: */*]
+> GET /.well-known/jwks.json HTTP/2
+> Host: auth.farcaster.xyz
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* old SSL session ID is stale, removing
+< HTTP/2 200 
+< date: Fri, 06 Feb 2026 14:49:45 GMT
+< content-type: application/json
+< content-length: 429
+< cf-ray: 9c9b74bd1b65b8b6-SJC
+< access-control-allow-origin: *
+< cf-placement: local-
+< strict-transport-security: max-age=15552000; includeSubDomains; preload
+< x-content-type-options: nosniff
+< set-cookie: _cfuvid=esRI2lfYnsKTsilGPhcpkfbHZ6EQu_Tyl.8z9ODnRc4-1770389385793-0.0.1.1-604800000; path=/; domain=.farcaster.xyz; HttpOnly; Secure; SameSite=None
+< server: cloudflare
+< alt-svc: h3=":443"; ma=86400
+< 
+* Connection #0 to host auth.farcaster.xyz left intact
+{"keys":[{"kty":"RSA","n":"wJB94rZ73yA3z8e95APlFjfQeDHL7WOKENVLKEpsb8of0f1S_soQPCjb7rdE80FDkxnRYCYDy5z2IEpRSm0jSCKxbQdUEbpevPemo_7-tyPa5F9Pg8tLcoNPUDC76B0vzmYLlglaRMDNaiFJ3wOYze9PgtLFMXqoV0Yt6JM49i2sBWuOm7_x9DgPlzsNYCY16yRMbLcgxVOjieo1SDsESvxS-PepXQu1AquhvFAdhTkKomjhqUEQeSC0J1rpuB1imKXHsegLdDm8I-GuENz5ErSRP_2z499Qj1Ehf5Pue2a8pZ0dYSQ0VzeZF1H1sfb3FjUY4gls3UyZdzE-SHoXKw","e":"AQAB","kid":"355d43bf-c4b4-45e3-82ca-8eb28c6709e5"}]}root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
