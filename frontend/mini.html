@@ -877,11 +877,11 @@
                     gateFid.innerHTML = `Your FID: <strong>${userFid}</strong>`;
                 }
                 
-                if (data.allowed && data.verified) {
+                if (data.allowed) {
                     showGateSuccess('Access granted!');
                     setTimeout(grantAccess, 500);
                     return 'granted';
-                } else if (data.fid && data.verified) {
+                } else if (data.fid) {
                     showGateError('Not on allowlist. Enter an invite code below or request access from @pmfi');
                     return 'denied';
                 } else {

@@ -2402,62 +2402,58 @@ def api_verify_fc_token():
         
         token = auth_header.split(' ')[1]
         
-        try:
-            FARCASTER_JWKS_URL = "https://auth.farcaster.xyz/.well-known/jwks.json"
-            VALID_AUDIENCES = [FC_APP_DOMAIN, "miniapps.farcaster.xyz"]
-            
-            jwks_client = PyJWKClient(FARCASTER_JWKS_URL, cache_keys=True, lifespan=3600)
-            signing_key = jwks_client.get_signing_key_from_jwt(token)
-            
-            payload = None
-            last_err = None
+        import base64, json as json_mod, ssl, urllib.request
+        
+        FARCASTER_JWKS_URL = "https://auth.farcaster.xyz/.well-known/jwks.json"
+        VALID_AUDIENCES = [FC_APP_DOMAIN, "miniapps.farcaster.xyz"]
+        
+        def decode_jwt_unsafe(t):
+            try:
+                parts = t.split('.')
+                def pad_b64(s):
+                    missing = len(s) % 4
+                    return s + '=' * (4 - missing) if missing else s
+                header = json_mod.loads(base64.urlsafe_b64decode(pad_b64(parts[0])))
+                payload = json_mod.loads(base64.urlsafe_b64decode(pad_b64(parts[1])))
+                return header, payload
+            except Exception as dec_err:
+                print(f"❌ Could not decode JWT: {dec_err}")
+                return None, None
+        
+        def fetch_jwks_manual():
+            try:
+                ctx = ssl.create_default_context()
+                req = urllib.request.Request(FARCASTER_JWKS_URL, headers={'User-Agent': 'pSNIPER/1.0'})
+                resp = urllib.request.urlopen(req, timeout=10, context=ctx)
+                jwks_data = json_mod.loads(resp.read().decode())
+                print(f"🔑 Manual JWKS fetch succeeded, got {len(jwks_data.get('keys', []))} keys")
+                return jwks_data
+            except Exception as e:
+                print(f"❌ Manual JWKS fetch failed: {e}")
+                return None
+        
+        def verify_with_key(signing_key, algorithms=["RS256", "ES256"]):
             for aud in VALID_AUDIENCES:
                 try:
-                    payload = jwt.decode(
-                        token,
-                        signing_key.key,
-                        algorithms=["RS256", "ES256"],
-                        issuer="https://auth.farcaster.xyz",
-                        audience=aud,
-                        options={
-                            "verify_aud": True,
-                            "verify_exp": True,
-                            "verify_iss": True,
-                            "require": ["sub", "iss", "exp", "aud"]
-                        }
+                    p = jwt.decode(
+                        token, signing_key, algorithms=algorithms,
+                        issuer="https://auth.farcaster.xyz", audience=aud,
+                        options={"verify_aud": True, "verify_exp": True, "verify_iss": True, "require": ["sub", "iss", "exp", "aud"]}
                     )
-                    print(f"🔑 JWT verified with audience: {aud}")
-                    break
+                    return p, aud
                 except jwt.InvalidAudienceError:
-                    last_err = f"aud mismatch for {aud}"
                     continue
-            
-            if payload is None:
-                import base64, json as json_mod
-                try:
-                    parts = token.split('.')
-                    missing = len(parts[1]) % 4
-                    pad = parts[1] + '=' * (4 - missing) if missing else parts[1]
-                    raw = json_mod.loads(base64.urlsafe_b64decode(pad))
-                    actual_aud = raw.get('aud', 'unknown')
-                except Exception:
-                    actual_aud = 'could not decode'
-                print(f"❌ JWT audience mismatch - token aud={actual_aud}, accepted={VALID_AUDIENCES}")
-                return jsonify({'allowed': False, 'error': f'Token audience mismatch (got {actual_aud})'}), 401
-            
-            fid = payload.get('sub')
-            if not fid:
-                return jsonify({'allowed': False, 'error': 'No FID in token'}), 401
-            
-            fid = int(fid)
-            
-            if is_fid_whitelisted(fid):
-                print(f"✅ FID {fid} verified via Quick Auth (JWKS) and granted access")
-                return jsonify({'allowed': True, 'fid': fid, 'verified': True})
-            else:
-                print(f"❌ FID {fid} verified (JWKS) but not on allowlist")
-                return jsonify({'allowed': False, 'fid': fid, 'verified': True})
-                
+            return None, None
+        
+        payload = None
+        verified_aud = None
+        
+        try:
+            jwks_client = PyJWKClient(FARCASTER_JWKS_URL, cache_keys=True, lifespan=3600)
+            signing_key = jwks_client.get_signing_key_from_jwt(token)
+            payload, verified_aud = verify_with_key(signing_key.key)
+            if payload:
+                print(f"🔑 JWT verified with PyJWKClient, audience: {verified_aud}")
         except jwt.ExpiredSignatureError:
             print("❌ JWT expired")
             return jsonify({'allowed': False, 'error': 'Token expired'}), 401
@@ -2467,21 +2463,65 @@ def api_verify_fc_token():
         except jwt.MissingRequiredClaimError as e:
             print(f"❌ JWT missing required claim: {e}")
             return jsonify({'allowed': False, 'error': 'Invalid token format'}), 401
-        except jwt.PyJWKClientError as e:
-            print(f"❌ JWKS fetch error: {e}")
-            import urllib.request
-            try:
-                urllib.request.urlopen("https://auth.farcaster.xyz/.well-known/jwks.json", timeout=5)
-                print("🔍 JWKS endpoint is reachable - issue may be with token format")
-            except Exception as net_err:
-                print(f"🔍 JWKS endpoint NOT reachable: {net_err}")
-            return jsonify({'allowed': False, 'error': 'Could not verify token (key fetch failed)'}), 401
         except jwt.InvalidTokenError as e:
-            print(f"❌ JWT validation error: {e}")
+            print(f"❌ JWT invalid token: {e}")
             return jsonify({'allowed': False, 'error': 'Invalid token'}), 401
-        except Exception as jwt_err:
-            print(f"❌ JWT verification error: {jwt_err}")
-            return jsonify({'allowed': False, 'error': 'Token verification failed'}), 401
+        except Exception as pyjwk_err:
+            print(f"⚠️ PyJWKClient failed: {pyjwk_err}, trying manual JWKS fetch...")
+        
+        if payload is None:
+            jwks_data = fetch_jwks_manual()
+            if jwks_data and jwks_data.get('keys'):
+                try:
+                    from jwt.algorithms import RSAAlgorithm
+                    jwt_header, _ = decode_jwt_unsafe(token)
+                    token_kid = jwt_header.get('kid') if jwt_header else None
+                    
+                    key_data = None
+                    if token_kid:
+                        for k in jwks_data['keys']:
+                            if k.get('kid') == token_kid:
+                                key_data = k
+                                break
+                    if not key_data:
+                        key_data = jwks_data['keys'][0]
+                        print(f"⚠️ No kid match, using first key")
+                    
+                    public_key = RSAAlgorithm.from_jwk(json_mod.dumps(key_data))
+                    payload, verified_aud = verify_with_key(public_key, algorithms=["RS256"])
+                    if payload:
+                        print(f"🔑 JWT verified with manual JWKS (kid={key_data.get('kid')}), audience: {verified_aud}")
+                except jwt.ExpiredSignatureError:
+                    print("❌ JWT expired")
+                    return jsonify({'allowed': False, 'error': 'Token expired'}), 401
+                except jwt.InvalidIssuerError:
+                    print("❌ JWT invalid issuer")
+                    return jsonify({'allowed': False, 'error': 'Invalid token issuer'}), 401
+                except Exception as manual_err:
+                    print(f"❌ Manual JWT verification failed: {manual_err}")
+        
+        if payload is None:
+            _, raw_payload = decode_jwt_unsafe(token)
+            if raw_payload and raw_payload.get('sub'):
+                fid = int(raw_payload['sub'])
+                actual_aud = raw_payload.get('aud', 'unknown')
+                print(f"⚠️ JWKS verification failed - unverified FID {fid} (aud={actual_aud}), showing invite code only")
+                return jsonify({'allowed': False, 'fid': fid, 'verified': False})
+            else:
+                return jsonify({'allowed': False, 'error': 'Could not verify or decode token'}), 401
+        
+        fid = payload.get('sub')
+        if not fid:
+            return jsonify({'allowed': False, 'error': 'No FID in token'}), 401
+        
+        fid = int(fid)
+        
+        if is_fid_whitelisted(fid):
+            print(f"✅ FID {fid} verified via Quick Auth and granted access")
+            return jsonify({'allowed': True, 'fid': fid, 'verified': True})
+        else:
+            print(f"❌ FID {fid} verified but not on allowlist")
+            return jsonify({'allowed': False, 'fid': fid, 'verified': True})
             
     except ImportError:
         print("⚠️ PyJWT not installed - cannot verify Farcaster tokens")
