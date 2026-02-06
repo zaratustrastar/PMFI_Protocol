@@ -543,10 +543,10 @@
             width: 100%;
             padding: 12px;
             margin-top: 10px;
-            background: var(--accent-blue);
+            background: #ffffff;
             border: none;
             border-radius: 10px;
-            color: #fff;
+            color: #000000;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -612,8 +612,7 @@
         <!-- Vault Card -->
         <div class="vault-card">
             <div class="vault-title">
-                <img src="/psniper-logo.png" alt="">
-                PMFI Beta
+                pSniper
                 <span class="network-badge"><span class="dot"></span>Base</span>
             </div>
             
@@ -767,8 +766,8 @@
         const VAULT_ABI = [
             'function balanceOf(address) view returns (uint256)',
             'function totalSupply() view returns (uint256)',
-            'function deposit(uint256 assets, address receiver, tuple(uint256 totalAssets, uint256 expectedAssets, uint256 roundId, uint256 timestamp, bytes signature) nav) returns (uint256)',
-            'function requestWithdraw(uint256 shares) returns (uint256)',
+            'function deposit(uint256 usdcAmount, tuple(uint256 totalAssets, uint256 creditedCash, uint256 creditedPositions, uint256 pendingCredit, uint256 inFlightOnChain, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) returns (uint256)',
+            'function requestWithdraw(uint256 shareAmount, tuple(uint256 totalAssets, uint256 creditedCash, uint256 creditedPositions, uint256 pendingCredit, uint256 inFlightOnChain, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) returns (uint256)',
             'function decimals() view returns (uint8)'
         ];
         
@@ -976,10 +975,10 @@
             try {
                 const res = await fetch('/price');
                 const data = await res.json();
-                sharePrice = parseFloat(data.pricePerShare) || 1.0;
+                sharePrice = parseFloat(data.price_per_share) || 1.0;
                 document.getElementById('sharePrice').textContent = '$' + sharePrice.toFixed(4);
                 
-                const tvl = parseFloat(data.totalAssets) || 0;
+                const tvl = parseFloat(data.total_assets) || 0;
                 document.getElementById('tvl').textContent = '$' + formatNumber(tvl);
             } catch (e) {
                 console.error('Price fetch error:', e);
@@ -1149,14 +1148,16 @@
             try {
                 showStatus('depositStatus', 'Fetching NAV data...', 'info');
                 const navRes = await fetch('/sign-nav');
-                const navData = await navRes.json();
+                const signedNav = await navRes.json();
                 
-                if (navData.paused) {
-                    showStatus('depositStatus', 'Deposits are currently paused', 'error');
+                if (signedNav.error || !signedNav.navData) {
+                    showStatus('depositStatus', signedNav.error || 'NAV data unavailable', 'error');
                     btn.disabled = false;
                     btn.textContent = 'Approve & Deposit';
                     return;
                 }
+                
+                const nd = signedNav.navData;
                 
                 const allowance = await usdcContract.allowance(userAddress, VAULT_ADDRESS);
                 if (allowance < amountWei) {
@@ -1167,15 +1168,18 @@
                 
                 showStatus('depositStatus', 'Depositing...', 'info');
                 
-                const navTuple = [
-                    ethers.parseUnits(navData.totalAssets.toString(), 6),
-                    ethers.parseUnits(navData.expectedAssets.toString(), 6),
-                    navData.roundId,
-                    navData.timestamp,
-                    navData.signature
-                ];
+                const navTuple = {
+                    totalAssets: BigInt(nd.totalAssets),
+                    creditedCash: BigInt(nd.creditedCash),
+                    creditedPositions: BigInt(nd.creditedPositions),
+                    pendingCredit: BigInt(nd.pendingCredit),
+                    inFlightOnChain: BigInt(nd.inFlightOnChain),
+                    timestamp: nd.timestamp,
+                    deadline: nd.deadline,
+                    roundId: nd.roundId
+                };
                 
-                const tx = await vaultContract.deposit(amountWei, userAddress, navTuple);
+                const tx = await vaultContract.deposit(amountWei, navTuple, signedNav.signature);
                 await tx.wait();
                 
                 showStatus('depositStatus', 'Deposit successful!', 'success');
@@ -1207,8 +1211,31 @@
             btn.innerHTML = '<span class="loading-spinner"></span>';
             
             try {
+                showStatus('withdrawStatus', 'Fetching NAV data...', 'info');
+                const navRes = await fetch('/sign-nav');
+                const signedNav = await navRes.json();
+                
+                if (signedNav.error || !signedNav.navData) {
+                    showStatus('withdrawStatus', signedNav.error || 'NAV data unavailable', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Request Withdrawal';
+                    return;
+                }
+                
+                const nd = signedNav.navData;
+                const navTuple = {
+                    totalAssets: BigInt(nd.totalAssets),
+                    creditedCash: BigInt(nd.creditedCash),
+                    creditedPositions: BigInt(nd.creditedPositions),
+                    pendingCredit: BigInt(nd.pendingCredit),
+                    inFlightOnChain: BigInt(nd.inFlightOnChain),
+                    timestamp: nd.timestamp,
+                    deadline: nd.deadline,
+                    roundId: nd.roundId
+                };
+                
                 showStatus('withdrawStatus', 'Requesting withdrawal...', 'info');
-                const tx = await vaultContract.requestWithdraw(sharesWei);
+                const tx = await vaultContract.requestWithdraw(sharesWei, navTuple, signedNav.signature);
                 await tx.wait();
                 
                 showStatus('withdrawStatus', 'Withdrawal request submitted!', 'success');
