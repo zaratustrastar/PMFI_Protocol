@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>pSNIPER | Farcaster Mini App</title>
+    <title>PMFI Beta</title>
     
     <!-- Farcaster Mini App Embed Metadata -->
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="https://pmfi.cc/psniper-logo.png" />
     <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-    <meta property="fc:frame:button:1" content="Open pSNIPER" />
+    <meta property="fc:frame:button:1" content="Open PMFI" />
     <meta property="fc:frame:button:1:action" content="launch_frame" />
     <meta property="fc:frame:button:1:target" content="https://pmfi.cc/mini" />
     
     <!-- OpenGraph Meta -->
-    <meta property="og:title" content="pSNIPER Vault - Polymarket Alpha" />
-    <meta property="og:description" content="Automated Polymarket sniping vault. Early access beta." />
+    <meta property="og:title" content="PMFI Beta" />
+    <meta property="og:description" content="PMFI Beta - Polymarket Trading Vault" />
     <meta property="og:image" content="https://pmfi.cc/psniper-logo.png" />
     <meta property="og:url" content="https://pmfi.cc/mini" />
     <meta property="og:type" content="website" />
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="pSNIPER Vault" />
+    <meta name="twitter:title" content="PMFI Beta" />
     <meta name="twitter:description" content="Automated Polymarket sniping vault." />
     <meta name="twitter:image" content="https://pmfi.cc/psniper-logo.png" />
     
@@ -30,7 +30,8 @@
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
     
     <!-- Farcaster Mini App SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@0.1.5/dist/index.umd.js"></script>
+    <link rel="preconnect" href="https://auth.farcaster.xyz" />
+    <script src="https://cdn.jsdelivr.net/npm/@farcaster/miniapp-sdk/dist/index.min.js"></script>
     
     <style>
         * {
@@ -580,8 +581,7 @@
     <!-- Gate Screen for Unauthorized Users -->
     <div class="gate-screen" id="gateScreen">
         <img src="/psniper-logo.png" alt="pSNIPER" class="gate-logo">
-        <h1 class="gate-title">pSNIPER Vault</h1>
-        <p class="gate-subtitle">Early access beta. This vault is currently invite-only for whitelisted users.</p>
+        <h1 class="gate-title">PMFI Beta</h1>
         <div class="gate-status" id="gateStatus">
             <span class="loading-spinner"></span>
             <span>Authenticating...</span>
@@ -613,7 +613,7 @@
         <div class="vault-card">
             <div class="vault-title">
                 <img src="/psniper-logo.png" alt="">
-                pSNIPER Vault
+                PMFI Beta
                 <span class="network-badge"><span class="dot"></span>Base</span>
             </div>
             
@@ -703,16 +703,42 @@
         
         (function callReadyImmediately() {
             try {
-                if (typeof window.FarcasterFrame !== 'undefined' && window.FarcasterFrame.sdk) {
+                if (typeof window.miniapp !== 'undefined' && window.miniapp.sdk) {
+                    fcSdk = window.miniapp.sdk;
+                    fcSdk.actions.ready();
+                    isInFarcaster = true;
+                    console.log('[FC] sdk.actions.ready() called via miniapp.sdk');
+                } else if (typeof window.FarcasterFrame !== 'undefined' && window.FarcasterFrame.sdk) {
                     fcSdk = window.FarcasterFrame.sdk;
                     fcSdk.actions.ready();
                     isInFarcaster = true;
-                    console.log('[FC] sdk.actions.ready() called immediately');
+                    console.log('[FC] sdk.actions.ready() called via FarcasterFrame.sdk');
                 } else if (typeof window.sdk !== 'undefined') {
                     fcSdk = window.sdk;
                     fcSdk.actions.ready();
                     isInFarcaster = true;
                     console.log('[FC] sdk.actions.ready() called via window.sdk');
+                } else {
+                    console.log('[FC] No Farcaster SDK found at load time, will retry...');
+                    var retryCount = 0;
+                    var retryInterval = setInterval(function() {
+                        retryCount++;
+                        try {
+                            if (typeof window.miniapp !== 'undefined' && window.miniapp.sdk) {
+                                fcSdk = window.miniapp.sdk;
+                                fcSdk.actions.ready();
+                                isInFarcaster = true;
+                                console.log('[FC] sdk.actions.ready() called on retry #' + retryCount);
+                                clearInterval(retryInterval);
+                            } else if (retryCount >= 20) {
+                                console.log('[FC] Gave up waiting for SDK after 20 retries');
+                                clearInterval(retryInterval);
+                            }
+                        } catch (retryErr) {
+                            console.log('[FC] Retry #' + retryCount + ' failed:', retryErr.message);
+                            clearInterval(retryInterval);
+                        }
+                    }, 100);
                 }
             } catch (e) {
                 console.log('[FC] Not in Farcaster frame context:', e.message);
@@ -787,13 +813,7 @@
                 // Get context for UX (to display FID while authenticating)
                 let context = null;
                 try {
-                    if (typeof fcSdk.context === 'function') {
-                        context = await fcSdk.context();
-                    } else if (fcSdk.context && fcSdk.context.then) {
-                        context = await fcSdk.context;
-                    } else if (fcSdk.context) {
-                        context = fcSdk.context;
-                    }
+                    context = await fcSdk.context;
                     
                     if (context && context.user && context.user.fid) {
                         userFid = context.user.fid;
@@ -811,21 +831,13 @@
                 let token = null;
                 
                 // Try Quick Auth (required for secure access)
-                if (fcSdk.experimental && fcSdk.experimental.quickAuth) {
-                    try {
-                        const result = await fcSdk.experimental.quickAuth.getToken();
-                        token = result.token;
-                    } catch (qe) {
-                        console.error('[FC] experimental.quickAuth failed:', qe);
-                    }
-                }
-                
-                if (!token && fcSdk.quickAuth && fcSdk.quickAuth.getToken) {
+                if (fcSdk.quickAuth && fcSdk.quickAuth.getToken) {
                     try {
                         const result = await fcSdk.quickAuth.getToken();
                         token = result.token;
+                        console.log('[FC] quickAuth.getToken() succeeded');
                     } catch (qe) {
-                        console.error('[FC] quickAuth failed:', qe);
+                        console.error('[FC] quickAuth.getToken failed:', qe);
                     }
                 }
                 
