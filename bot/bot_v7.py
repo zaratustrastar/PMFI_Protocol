@@ -2242,22 +2242,34 @@ def api_mini_redeem():
         
         try:
             FARCASTER_JWKS_URL = "https://auth.farcaster.xyz/.well-known/jwks.json"
+            VALID_AUDIENCES = [FC_APP_DOMAIN, "miniapps.farcaster.xyz"]
             jwks_client = PyJWKClient(FARCASTER_JWKS_URL, cache_keys=True, lifespan=3600)
             signing_key = jwks_client.get_signing_key_from_jwt(token)
             
-            payload = pyjwt.decode(
-                token,
-                signing_key.key,
-                algorithms=["RS256", "ES256"],
-                issuer="https://auth.farcaster.xyz",
-                audience=FC_APP_DOMAIN,
-                options={
-                    "verify_aud": True,
-                    "verify_exp": True,
-                    "verify_iss": True,
-                    "require": ["sub", "iss", "exp", "aud"]
-                }
-            )
+            payload = None
+            for aud in VALID_AUDIENCES:
+                try:
+                    payload = pyjwt.decode(
+                        token,
+                        signing_key.key,
+                        algorithms=["RS256", "ES256"],
+                        issuer="https://auth.farcaster.xyz",
+                        audience=aud,
+                        options={
+                            "verify_aud": True,
+                            "verify_exp": True,
+                            "verify_iss": True,
+                            "require": ["sub", "iss", "exp", "aud"]
+                        }
+                    )
+                    print(f"🔑 Redeem JWT verified with audience: {aud}")
+                    break
+                except pyjwt.InvalidAudienceError:
+                    continue
+            
+            if payload is None:
+                print(f"❌ Redeem JWT audience mismatch, accepted={VALID_AUDIENCES}")
+                return jsonify({'error': 'Token audience mismatch'}), 401
             
             fid = int(payload.get('sub', 0))
             if not fid:
@@ -2391,40 +2403,56 @@ def api_verify_fc_token():
         token = auth_header.split(' ')[1]
         
         try:
-            # Farcaster Quick Auth JWKS endpoint
             FARCASTER_JWKS_URL = "https://auth.farcaster.xyz/.well-known/jwks.json"
+            VALID_AUDIENCES = [FC_APP_DOMAIN, "miniapps.farcaster.xyz"]
             
-            # Create JWKS client to fetch and cache public keys
             jwks_client = PyJWKClient(FARCASTER_JWKS_URL, cache_keys=True, lifespan=3600)
-            
-            # Get the signing key from the JWT header
             signing_key = jwks_client.get_signing_key_from_jwt(token)
             
-            # Verify and decode the JWT with full validation
-            payload = jwt.decode(
-                token,
-                signing_key.key,
-                algorithms=["RS256", "ES256"],
-                issuer="https://auth.farcaster.xyz",
-                audience=FC_APP_DOMAIN,
-                options={
-                    "verify_aud": True,
-                    "verify_exp": True,
-                    "verify_iss": True,
-                    "require": ["sub", "iss", "exp", "aud"]
-                }
-            )
+            payload = None
+            last_err = None
+            for aud in VALID_AUDIENCES:
+                try:
+                    payload = jwt.decode(
+                        token,
+                        signing_key.key,
+                        algorithms=["RS256", "ES256"],
+                        issuer="https://auth.farcaster.xyz",
+                        audience=aud,
+                        options={
+                            "verify_aud": True,
+                            "verify_exp": True,
+                            "verify_iss": True,
+                            "require": ["sub", "iss", "exp", "aud"]
+                        }
+                    )
+                    print(f"🔑 JWT verified with audience: {aud}")
+                    break
+                except jwt.InvalidAudienceError:
+                    last_err = f"aud mismatch for {aud}"
+                    continue
             
-            # Extract FID from 'sub' claim
+            if payload is None:
+                import base64, json as json_mod
+                try:
+                    parts = token.split('.')
+                    missing = len(parts[1]) % 4
+                    pad = parts[1] + '=' * (4 - missing) if missing else parts[1]
+                    raw = json_mod.loads(base64.urlsafe_b64decode(pad))
+                    actual_aud = raw.get('aud', 'unknown')
+                except Exception:
+                    actual_aud = 'could not decode'
+                print(f"❌ JWT audience mismatch - token aud={actual_aud}, accepted={VALID_AUDIENCES}")
+                return jsonify({'allowed': False, 'error': f'Token audience mismatch (got {actual_aud})'}), 401
+            
             fid = payload.get('sub')
             if not fid:
                 return jsonify({'allowed': False, 'error': 'No FID in token'}), 401
             
             fid = int(fid)
             
-            # Check allowlist (env var + database whitelist)
             if is_fid_whitelisted(fid):
-                print(f"✅ FID {fid} verified via Quick Auth (JWKS, aud={FC_APP_DOMAIN}) and granted access")
+                print(f"✅ FID {fid} verified via Quick Auth (JWKS) and granted access")
                 return jsonify({'allowed': True, 'fid': fid, 'verified': True})
             else:
                 print(f"❌ FID {fid} verified (JWKS) but not on allowlist")
@@ -2436,15 +2464,18 @@ def api_verify_fc_token():
         except jwt.InvalidIssuerError:
             print("❌ JWT invalid issuer")
             return jsonify({'allowed': False, 'error': 'Invalid token issuer'}), 401
-        except jwt.InvalidAudienceError:
-            print(f"❌ JWT audience mismatch (expected {FC_APP_DOMAIN})")
-            return jsonify({'allowed': False, 'error': 'Token not issued for this app'}), 401
         except jwt.MissingRequiredClaimError as e:
             print(f"❌ JWT missing required claim: {e}")
             return jsonify({'allowed': False, 'error': 'Invalid token format'}), 401
         except jwt.PyJWKClientError as e:
             print(f"❌ JWKS fetch error: {e}")
-            return jsonify({'allowed': False, 'error': 'Could not verify token'}), 401
+            import urllib.request
+            try:
+                urllib.request.urlopen("https://auth.farcaster.xyz/.well-known/jwks.json", timeout=5)
+                print("🔍 JWKS endpoint is reachable - issue may be with token format")
+            except Exception as net_err:
+                print(f"🔍 JWKS endpoint NOT reachable: {net_err}")
+            return jsonify({'allowed': False, 'error': 'Could not verify token (key fetch failed)'}), 401
         except jwt.InvalidTokenError as e:
             print(f"❌ JWT validation error: {e}")
             return jsonify({'allowed': False, 'error': 'Invalid token'}), 401

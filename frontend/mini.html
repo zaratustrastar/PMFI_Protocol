@@ -844,17 +844,15 @@
                 if (token) {
                     quickAuthToken = token;
                     const result = await verifyQuickAuthToken(token);
-                    // result: 'granted', 'denied', or false (error)
                     if (result === 'denied') {
-                        // Verified identity but not on allowlist - show invite code input
                         showCodeSection();
                     }
-                    // 'granted' is handled in verifyQuickAuthToken (calls grantAccess)
-                    // false means auth error, error message already shown
                 } else {
-                    // Quick Auth not available or failed - cannot verify securely
-                    console.log('[FC] No verified auth - denying access');
-                    showGateError('Could not verify identity. Update Warpcast and try again.');
+                    console.log('[FC] No verified auth token available');
+                    console.log('[FC] SDK type:', typeof fcSdk);
+                    console.log('[FC] quickAuth exists:', !!(fcSdk && fcSdk.quickAuth));
+                    console.log('[FC] quickAuth.getToken exists:', !!(fcSdk && fcSdk.quickAuth && fcSdk.quickAuth.getToken));
+                    showGateError('Could not get auth token. Make sure you are using the latest Warpcast.');
                 }
             } catch (e) {
                 console.error('[FC] Auth error:', e);
@@ -887,11 +885,13 @@
                     showGateError('Not on allowlist. Enter an invite code below or request access from @pmfi');
                     return 'denied';
                 } else {
-                    showGateError(data.error || 'Authentication failed');
+                    console.error('[FC] Server verify response:', JSON.stringify(data));
+                    showGateError(data.error || 'Could not verify token');
                     return false;
                 }
             } catch (e) {
-                console.error('[FC] Token verification error:', e);
+                console.error('[FC] Token verification fetch error:', e);
+                showGateError('Could not reach server. Try again.');
                 return false;
             }
         }
