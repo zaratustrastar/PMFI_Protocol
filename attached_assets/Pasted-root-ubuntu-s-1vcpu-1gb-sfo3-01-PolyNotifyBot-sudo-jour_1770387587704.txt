@@ -1,0 +1,52 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u polymarket-monitor -n 50 --no-pager
+Feb 06 14:18:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452895]:     from database import (
+Feb 06 14:18:33 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452895]: ImportError: cannot import name 'update_order_accumulated_amount' from 'database' (/opt/polymarket-bot/trading_bot/database.py)
+Feb 06 14:18:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Feb 06 14:18:33 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Feb 06 14:18:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 6251.
+Feb 06 14:18:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Feb 06 14:18:43 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452903]: ✅ Loaded environment variables from .env file
+Feb 06 14:18:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452903]: Traceback (most recent call last):
+Feb 06 14:18:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452903]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 19, in <module>
+Feb 06 14:18:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452903]:     from database import (
+Feb 06 14:18:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452903]: ImportError: cannot import name 'update_order_accumulated_amount' from 'database' (/opt/polymarket-bot/trading_bot/database.py)
+Feb 06 14:18:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Feb 06 14:18:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Feb 06 14:18:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 6252.
+Feb 06 14:18:54 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Feb 06 14:18:54 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452914]: ✅ Loaded environment variables from .env file
+Feb 06 14:18:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452914]: Traceback (most recent call last):
+Feb 06 14:18:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452914]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 19, in <module>
+Feb 06 14:18:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452914]:     from database import (
+Feb 06 14:18:55 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452914]: ImportError: cannot import name 'update_order_accumulated_amount' from 'database' (/opt/polymarket-bot/trading_bot/database.py)
+Feb 06 14:18:55 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Feb 06 14:18:55 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Feb 06 14:18:55 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Consumed 1.018s CPU time, 4.9M memory peak, 0B memory swap peak.
+Feb 06 14:19:05 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 6253.
+Feb 06 14:19:05 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Feb 06 14:19:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452985]: ✅ Loaded environment variables from .env file
+Feb 06 14:19:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452985]: Traceback (most recent call last):
+Feb 06 14:19:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452985]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 19, in <module>
+Feb 06 14:19:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452985]:     from database import (
+Feb 06 14:19:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452985]: ImportError: cannot import name 'update_order_accumulated_amount' from 'database' (/opt/polymarket-bot/trading_bot/database.py)
+Feb 06 14:19:06 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Feb 06 14:19:06 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Feb 06 14:19:16 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 6254.
+Feb 06 14:19:16 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Feb 06 14:19:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452989]: ✅ Loaded environment variables from .env file
+Feb 06 14:19:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452989]: Traceback (most recent call last):
+Feb 06 14:19:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452989]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 19, in <module>
+Feb 06 14:19:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452989]:     from database import (
+Feb 06 14:19:17 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452989]: ImportError: cannot import name 'update_order_accumulated_amount' from 'database' (/opt/polymarket-bot/trading_bot/database.py)
+Feb 06 14:19:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Feb 06 14:19:17 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+Feb 06 14:19:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Scheduled restart job, restart counter is at 6255.
+Feb 06 14:19:27 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Feb 06 14:19:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452993]: ✅ Loaded environment variables from .env file
+Feb 06 14:19:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452993]: Traceback (most recent call last):
+Feb 06 14:19:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452993]:   File "/opt/polymarket-bot/trading_bot/order_monitor.py", line 19, in <module>
+Feb 06 14:19:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452993]:     from database import (
+Feb 06 14:19:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2452993]: ImportError: cannot import name 'update_order_accumulated_amount' from 'database' (/opt/polymarket-bot/trading_bot/database.py)
+Feb 06 14:19:28 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Main process exited, code=exited, status=1/FAILURE
+Feb 06 14:19:28 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Failed with result 'exit-code'.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
