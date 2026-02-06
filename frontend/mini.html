@@ -882,7 +882,6 @@
                     setTimeout(grantAccess, 500);
                     return 'granted';
                 } else if (data.fid) {
-                    showGateError('Not on allowlist. Enter an invite code below or request access from @pmfi');
                     return 'denied';
                 } else {
                     console.error('[FC] Server verify response:', JSON.stringify(data));
@@ -898,6 +897,7 @@
         
         let codeHandlersBound = false;
         function showCodeSection() {
+            gateStatus.style.display = 'none';
             gateCodeSection.classList.add('visible');
             
             if (!codeHandlersBound) {
