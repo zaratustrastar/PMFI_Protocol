@@ -955,18 +955,67 @@
             }
         }
         
+        let ethProvider = null;
+        
+        async function getFarcasterProvider() {
+            for (let i = 0; i < 10; i++) {
+                const sdk = fcSdk || window.miniapp?.sdk || window.FarcasterFrame?.sdk;
+                if (sdk && sdk.wallet) {
+                    try {
+                        if (typeof sdk.wallet.getEthereumProvider === 'function') {
+                            const p = await sdk.wallet.getEthereumProvider();
+                            console.log('[FC] Got Farcaster wallet provider');
+                            return p;
+                        } else if (sdk.wallet.ethProvider) {
+                            console.log('[FC] Got Farcaster wallet ethProvider (legacy)');
+                            return sdk.wallet.ethProvider;
+                        }
+                    } catch (e) {
+                        console.warn('[FC] Provider attempt ' + i + ' failed:', e.message);
+                    }
+                }
+                await new Promise(r => setTimeout(r, 300));
+            }
+            return null;
+        }
+        
+        async function getEthProvider() {
+            if (ethProvider) return ethProvider;
+            
+            if (isInFarcaster) {
+                const fcProvider = await getFarcasterProvider();
+                if (fcProvider) {
+                    ethProvider = fcProvider;
+                    return ethProvider;
+                }
+            }
+            
+            if (window.ethereum) {
+                ethProvider = window.ethereum;
+                console.log('[FC] Using window.ethereum (external wallet)');
+            }
+            return ethProvider;
+        }
+        
         async function init() {
-            // Authenticate via Farcaster (gate check happens here)
             await authenticateWithFarcaster();
             
-            // Then do async initialization
             await fetchPrice();
             setInterval(fetchPrice, 30000);
             
-            if (window.ethereum?.isConnected?.()) {
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                if (accounts.length > 0) {
+            const ep = await getEthProvider();
+            if (ep) {
+                if (isInFarcaster) {
                     await connectWallet(true);
+                } else {
+                    try {
+                        const accounts = await ep.request({ method: 'eth_accounts' });
+                        if (accounts && accounts.length > 0) {
+                            await connectWallet(true);
+                        }
+                    } catch (e) {
+                        console.log('[FC] Auto-connect check failed:', e);
+                    }
                 }
             }
         }
@@ -993,23 +1042,30 @@
         
         async function connectWallet(silent = false) {
             try {
-                if (!window.ethereum) {
-                    if (!silent) alert('Please install a wallet like MetaMask or Coinbase Wallet');
+                const ep = await getEthProvider();
+                if (!ep) {
+                    if (!silent) alert('No wallet available. Open in Warpcast or install MetaMask.');
                     return;
                 }
                 
-                provider = new ethers.BrowserProvider(window.ethereum);
+                try {
+                    await ep.request({ method: 'eth_requestAccounts' });
+                } catch (reqErr) {
+                    console.log('[FC] eth_requestAccounts failed (may be normal for FC wallet):', reqErr.message);
+                }
+                
+                provider = new ethers.BrowserProvider(ep);
                 
                 const network = await provider.getNetwork();
                 if (Number(network.chainId) !== BASE_CHAIN_ID) {
                     try {
-                        await window.ethereum.request({
+                        await ep.request({
                             method: 'wallet_switchEthereumChain',
                             params: [{ chainId: '0x' + BASE_CHAIN_ID.toString(16) }]
                         });
                     } catch (switchError) {
                         if (switchError.code === 4902) {
-                            await window.ethereum.request({
+                            await ep.request({
                                 method: 'wallet_addEthereumChain',
                                 params: [{
                                     chainId: '0x' + BASE_CHAIN_ID.toString(16),
@@ -1021,7 +1077,7 @@
                             });
                         }
                     }
-                    provider = new ethers.BrowserProvider(window.ethereum);
+                    provider = new ethers.BrowserProvider(ep);
                 }
                 
                 signer = await provider.getSigner();
@@ -1261,10 +1317,12 @@
             });
         });
         
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', () => location.reload());
-            window.ethereum.on('chainChanged', () => location.reload());
-        }
+        getEthProvider().then(ep => {
+            if (ep && ep.on) {
+                ep.on('accountsChanged', () => location.reload());
+                ep.on('chainChanged', () => location.reload());
+            }
+        });
         
         init();
     </script>
