@@ -1,0 +1,138 @@
+For a **native Farcaster wallet connect** in a Farcaster Mini App (Warpcast / Base app / other Farcaster clients), the “correct” pattern is:
+
+1. **Initialize Mini App SDK**
+
+* Detect Mini App context with `await sdk.isInMiniApp()`. ([docs.base.org][1])
+* Load context (`await sdk.context`) if you need fid/user/client info. ([docs.base.org][1])
+* Call `await sdk.actions.ready()` exactly once when your UI is ready to show (otherwise you can get a “stuck loading” / loop feeling). ([docs.celo.org][2])
+
+2. **Use the Farcaster-native EIP-1193 provider**
+
+* In Mini Apps, the SDK exposes the provider at **`sdk.wallet.getEthereumProvider()`**. ([docs.celo.org][2])
+* Best practice is to wire that into Wagmi via **`@farcaster/miniapp-wagmi-connector`** so you don’t fight wallet-detection logic. ([docs.celo.org][2])
+
+3. **Avoid “auto connect” loops**
+   The loop you described usually happens when you:
+
+* auto-run `eth_requestAccounts` on load (or on every render),
+* auto-run chain switching on load,
+* and any error causes the in-app webview to reload → your code runs again → repeat.
+
+Instead:
+
+* **Show the app first** (`actions.ready()`), do auth/access checks, render UI.
+* **Only request wallet actions when needed** (user taps “Connect” or when they press a CTA that requires a signature/tx).
+* Keep a **single-attempt guard** (in memory + `sessionStorage`) so a failure doesn’t retry on the next reload.
+
+---
+
+## A solid “native wallet” implementation (minimal + loop-proof)
+
+### A) Detect mini app + call ready once
+
+```ts
+import { sdk } from "@farcaster/miniapp-sdk";
+
+let readyCalled = false;
+
+export async function initMiniApp() {
+  const inMiniApp = await sdk.isInMiniApp(); // detect Farcaster client
+  if (inMiniApp) {
+    // optional: const ctx = await sdk.context;
+  }
+
+  if (!readyCalled) {
+    readyCalled = true;
+    await sdk.actions.ready(); // IMPORTANT: prevents infinite loading screen
+  }
+
+  return inMiniApp;
+}
+```
+
+(That `ready()` requirement is explicitly called out in Mini App docs.) ([docs.celo.org][2])
+
+### B) Use the Farcaster Mini App Wagmi connector (recommended)
+
+```ts
+import { createConfig, http } from "wagmi";
+import { base, baseSepolia } from "wagmi/chains";
+import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
+
+export const wagmiConfig = createConfig({
+  chains: [base, baseSepolia],
+  transports: {
+    [base.id]: http(),
+    [baseSepolia.id]: http(),
+  },
+  connectors: [farcasterMiniApp()],
+});
+```
+
+This is the officially recommended direction: Mini App SDK provides an EIP-1193 provider at `sdk.wallet.getEthereumProvider()` and Wagmi is the suggested integration path. ([docs.celo.org][2])
+
+### C) Connect only on user action (and don’t retry forever)
+
+```ts
+import { useConnect, useAccount } from "wagmi";
+
+export function ConnectButton() {
+  const { isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
+
+  const onConnect = () => {
+    // one-click: no wallet picker UX needed in Farcaster clients
+    connect({ connector: connectors[0] });
+  };
+
+  return (
+    <button disabled={isConnected} onClick={onConnect}>
+      {isConnected ? "Connected" : "Connect wallet"}
+    </button>
+  );
+}
+```
+
+Docs note you shouldn’t need a typical “wallet selection” flow inside a Mini App. ([docs.celo.org][2])
+
+---
+
+## Fixing your specific “infinite loop” symptoms
+
+Your instincts are right. Here’s the *clean* set of rules that usually eliminates the loop:
+
+* **Never call `connectWallet()` automatically on load** inside Warpcast/Base app. Make it user-triggered, or only triggered by a specific action that truly needs a signature/tx.
+* **Call `sdk.actions.ready()` early** (once). If you delay it until *after* wallet connection, failures can look like “infinite loading / reload”. ([docs.celo.org][2])
+* **Wrap all provider calls** (`eth_requestAccounts`, `wallet_switchEthereumChain`, `eth_sendTransaction`) in `try/catch` and show a friendly in-app error state instead of throwing.
+* **Add a “attempted” guard**:
+
+  * `sessionStorage.setItem("wallet_attempted","1")` before trying,
+  * if it fails, don’t auto-try again on reload; show a “Try again” button.
+* **Don’t mix providers**:
+
+  * In Mini App context: use `sdk.wallet.getEthereumProvider()` (or Wagmi connector that uses it).
+  * Outside Mini App context: use `window.ethereum` / normal injected wallets.
+    Mixing both in the same render path often triggers race conditions and “wallet detected → switch → detected again” loops.
+
+---
+
+## One more gotcha that causes loops
+
+Some Farcaster clients are strict about “startup behavior”. If you try to do **chain switching on load**, and the client rejects it, your app can end up in a repeated failure path. Prefer:
+
+* connect → (optionally) check current chain → if wrong, prompt user with a button “Switch to Base” → then call `switchChain`.
+
+There’s active discussion in the Farcaster mini apps repo about client capabilities and chain support evolving, so treating chain switch as a user-confirmed action is the safest default. ([GitHub][3])
+
+---
+
+If you want, paste your current `connectWallet()` + `getFarcasterProvider()` code (just those two functions + where they’re called). I’ll rewrite them into a **single-attempt, miniapp-aware** version that:
+
+* uses Farcaster provider in-app,
+* falls back to `window.ethereum` outside,
+* never loops on reload,
+* and won’t block `sdk.actions.ready()`.
+
+[1]: https://docs.base.org/mini-apps/core-concepts/context?utm_source=chatgpt.com "Mini App Context"
+[2]: https://docs.celo.org/build-on-celo/build-with-farcaster?utm_source=chatgpt.com "Build with Farcaster"
+[3]: https://github.com/farcasterxyz/miniapps/discussions/240?utm_source=chatgpt.com "Making Miniapps aware of a Farcaster client's supported ..."
