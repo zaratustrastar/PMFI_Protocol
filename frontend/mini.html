@@ -329,7 +329,7 @@
         .input-field {
             width: 100%;
             padding: 16px;
-            padding-right: 70px;
+            padding-right: 130px;
             background: rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
@@ -355,7 +355,7 @@
         
         .max-btn {
             position: absolute;
-            right: 55px;
+            right: 70px;
             top: 50%;
             transform: translateY(-50%);
             background: rgba(255,255,255,0.08);
@@ -587,6 +587,86 @@
         .gate-code-success.show {
             display: block;
         }
+
+        .pending-withdrawals {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .pending-withdrawals.hidden {
+            display: none;
+        }
+
+        .pending-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .pending-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(0,0,0,0.25);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .pending-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .pending-info {
+            flex: 1;
+        }
+
+        .pending-shares {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .pending-value {
+            font-size: 12px;
+            color: var(--accent-green);
+            margin-top: 2px;
+        }
+
+        .pending-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .claim-btn {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 12px;
+            white-space: nowrap;
+        }
+
+        .claim-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .claim-btn.expired {
+            background: rgba(248,81,73,0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(248,81,73,0.3);
+        }
     </style>
 </head>
 <body>
@@ -651,6 +731,11 @@
             </div>
         </div>
         
+        <div class="pending-withdrawals hidden" id="pendingWithdrawalsSection">
+            <div class="pending-title">Pending Withdrawals</div>
+            <div id="pendingWithdrawalsList"></div>
+        </div>
+        
         <!-- Action Buttons -->
         <div class="action-buttons">
             <button id="depositBtn" class="action-btn primary" disabled>Deposit USDC</button>
@@ -690,7 +775,7 @@
             <div class="input-group">
                 <label class="input-label">Shares to Withdraw</label>
                 <div class="input-wrapper">
-                    <input type="number" class="input-field" id="withdrawAmount" placeholder="0" step="1" min="1">
+                    <input type="number" class="input-field" id="withdrawAmount" placeholder="0.00" step="0.01" min="0.01">
                     <button class="max-btn" id="withdrawMaxBtn">MAX</button>
                     <span class="input-suffix">Shares</span>
                 </div>
@@ -784,7 +869,11 @@
             'function totalSupply() view returns (uint256)',
             'function deposit(uint256 usdcAmount, tuple(uint256 totalAssets, uint256 creditedCash, uint256 creditedPositions, uint256 pendingCredit, uint256 inFlightOnChain, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) returns (uint256)',
             'function requestWithdraw(uint256 shareAmount, tuple(uint256 totalAssets, uint256 creditedCash, uint256 creditedPositions, uint256 pendingCredit, uint256 inFlightOnChain, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) returns (uint256)',
-            'function decimals() view returns (uint8)'
+            'function decimals() view returns (uint8)',
+            'function getUserWithdrawals(address) view returns (uint256[])',
+            'function getWithdrawalRequest(uint256) view returns (address, uint256, uint256, uint256, bool, bool)',
+            'function claim(uint256 requestId)',
+            'function cancelExpiredWithdrawal(uint256 requestId)'
         ];
         
         readUsdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, readProvider);
@@ -1019,6 +1108,119 @@
             return ethProvider;
         }
         
+        async function loadPendingWithdrawals() {
+            if (!userAddress) return;
+            
+            const section = document.getElementById('pendingWithdrawalsSection');
+            const list = document.getElementById('pendingWithdrawalsList');
+            
+            try {
+                const contract = readVaultContract || vaultContract;
+                if (!contract) return;
+                
+                const requestIds = await contract.getUserWithdrawals(userAddress);
+                
+                if (!requestIds || requestIds.length === 0) {
+                    section.classList.add('hidden');
+                    return;
+                }
+                
+                const pendingRequests = [];
+                for (const requestId of requestIds) {
+                    const req = await contract.getWithdrawalRequest(requestId);
+                    if (!req[4]) {
+                        pendingRequests.push({
+                            id: requestId,
+                            shares: req[1],
+                            usdcLocked: req[2],
+                            requestTime: req[3],
+                            expired: req[5]
+                        });
+                    }
+                }
+                
+                if (pendingRequests.length === 0) {
+                    section.classList.add('hidden');
+                    return;
+                }
+                
+                list.innerHTML = pendingRequests.map(req => {
+                    const sharesFormatted = Number(ethers.formatUnits(req.shares, 18)).toFixed(2);
+                    const lockedUsdc = Number(ethers.formatUnits(req.usdcLocked, 6)).toFixed(2);
+                    const requestDate = new Date(Number(req.requestTime) * 1000).toLocaleDateString();
+                    
+                    return `
+                        <div class="pending-item">
+                            <div class="pending-info">
+                                <div class="pending-shares">${sharesFormatted} pSNIPER</div>
+                                <div class="pending-value">$${lockedUsdc} USDC (locked)</div>
+                                <div class="pending-time">${requestDate}</div>
+                            </div>
+                            <button class="claim-btn ${req.expired ? 'expired' : ''}" 
+                                    onclick="handleMiniClaim('${req.id}', this)"
+                                    ${req.expired ? 'title="Expired - reclaim shares"' : ''}>
+                                ${req.expired ? 'Reclaim' : 'Claim'}
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+                
+                section.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error loading pending withdrawals:', error);
+                section.classList.add('hidden');
+            }
+        }
+
+        async function handleMiniClaim(requestId, claimBtn) {
+            if (!signer || !userAddress) {
+                showStatus('withdrawStatus', 'Please connect your wallet first', 'error');
+                return;
+            }
+            
+            const isExpired = claimBtn.classList.contains('expired');
+            const originalText = claimBtn.textContent;
+            
+            try {
+                claimBtn.disabled = true;
+                claimBtn.textContent = 'Processing...';
+                
+                const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+                
+                let tx;
+                if (isExpired) {
+                    tx = await signerVaultContract.cancelExpiredWithdrawal(requestId);
+                } else {
+                    tx = await signerVaultContract.claim(requestId);
+                }
+                
+                try {
+                    await readProvider.waitForTransaction(tx.hash, 1, 120000);
+                } catch (receiptErr) {
+                    console.warn('Receipt polling failed (tx likely succeeded):', receiptErr.message);
+                    await new Promise(r => setTimeout(r, 5000));
+                }
+                
+                showStatus('withdrawStatus', isExpired ? 'Shares reclaimed!' : 'Withdrawal claimed!', 'success');
+                await updateUserPosition();
+                await loadPendingWithdrawals();
+                
+                setTimeout(() => hideStatus('withdrawStatus'), 3000);
+                
+            } catch (error) {
+                console.error('Claim error:', error);
+                let errorMsg = error.reason || error.message || 'Unknown error';
+                if (errorMsg.includes('Insufficient buffer') || errorMsg.includes('Not enough USDC')) {
+                    errorMsg = 'Not enough USDC in vault buffer. Try again later.';
+                }
+                showStatus('withdrawStatus', 'Claim failed: ' + errorMsg, 'error');
+            } finally {
+                claimBtn.disabled = false;
+                claimBtn.textContent = originalText;
+            }
+        }
+
         async function init() {
             await authenticateWithFarcaster();
             
@@ -1162,6 +1364,7 @@
                 } else {
                     document.getElementById('userPosition').classList.add('hidden');
                 }
+                await loadPendingWithdrawals();
             } catch (e) {
                 console.error('Position fetch error:', e);
             }
@@ -1234,7 +1437,7 @@
             if (!userAddress) return;
             try {
                 const shares = await readVaultContract.balanceOf(userAddress);
-                document.getElementById('withdrawAmount').value = Math.floor(parseFloat(ethers.formatUnits(shares, 18)));
+                document.getElementById('withdrawAmount').value = parseFloat(ethers.formatUnits(shares, 18)).toFixed(2);
                 document.getElementById('confirmWithdraw').disabled = false;
             } catch (e) {
                 console.error('Max shares error:', e);
@@ -1249,6 +1452,7 @@
             const btn = document.getElementById('confirmDeposit');
             btn.disabled = true;
             btn.innerHTML = '<span class="loading-spinner"></span>';
+            let txSent = false;
             
             try {
                 showStatus('depositStatus', 'Fetching NAV data...', 'info');
@@ -1281,7 +1485,12 @@
                         approveGas = approveGas * 150n / 100n;
                     } catch (e) { console.warn('Approve gas estimate failed, using fallback:', e.message); }
                     const approveTx = await usdcContract.approve(VAULT_ADDRESS, ethers.MaxUint256, { gasLimit: approveGas });
-                    await readProvider.waitForTransaction(approveTx.hash, 1, 60000);
+                    try {
+                        await readProvider.waitForTransaction(approveTx.hash, 1, 60000);
+                    } catch (e) {
+                        console.warn('Approval receipt polling failed, waiting...', e.message);
+                        await new Promise(r => setTimeout(r, 5000));
+                    }
                 }
                 
                 showStatus('depositStatus', 'Depositing...', 'info');
@@ -1303,7 +1512,13 @@
                     depositGas = depositGas * 150n / 100n;
                 } catch (e) { console.warn('Deposit gas estimate failed, using fallback:', e.message); }
                 const tx = await vaultContract.deposit(amountWei, navTuple, signedNav.signature, { gasLimit: depositGas });
-                await readProvider.waitForTransaction(tx.hash, 1, 120000);
+                txSent = true;
+                try {
+                    await readProvider.waitForTransaction(tx.hash, 1, 120000);
+                } catch (e) {
+                    console.warn('Deposit receipt polling failed, waiting...', e.message);
+                    await new Promise(r => setTimeout(r, 5000));
+                }
                 
                 showStatus('depositStatus', 'Deposit successful!', 'success');
                 await updateUserPosition();
@@ -1317,7 +1532,17 @@
                 
             } catch (e) {
                 console.error('Deposit error:', e);
-                showStatus('depositStatus', 'Error: ' + (e.reason || e.message), 'error');
+                if (txSent) {
+                    showStatus('depositStatus', 'Transaction sent! It may take a moment to confirm.', 'success');
+                    setTimeout(async () => {
+                        await updateUserPosition();
+                        await fetchPrice();
+                        hideModal('depositModal');
+                        hideStatus('depositStatus');
+                    }, 5000);
+                } else {
+                    showStatus('depositStatus', 'Error: ' + (e.reason || e.message), 'error');
+                }
             }
             
             btn.disabled = false;
@@ -1325,20 +1550,21 @@
         });
         
         document.getElementById('confirmWithdraw').addEventListener('click', async () => {
-            const shares = parseInt(document.getElementById('withdrawAmount').value);
+            const shares = parseFloat(document.getElementById('withdrawAmount').value);
             if (!shares || shares <= 0) return;
             
             const MIN_WITHDRAWAL_USDC = 5.0;
             const estimatedUsdc = shares * sharePrice;
             if (estimatedUsdc < MIN_WITHDRAWAL_USDC) {
-                showStatus('withdrawStatus', `Minimum withdrawal is $${MIN_WITHDRAWAL_USDC} (≈${Math.ceil(MIN_WITHDRAWAL_USDC / sharePrice)} shares)`, 'error');
+                showStatus('withdrawStatus', `Minimum withdrawal is $${MIN_WITHDRAWAL_USDC} (≈${(MIN_WITHDRAWAL_USDC / sharePrice).toFixed(2)} shares)`, 'error');
                 return;
             }
             
-            const sharesWei = ethers.parseUnits(shares.toString(), 18);
+            const sharesWei = ethers.parseUnits(document.getElementById('withdrawAmount').value, 18);
             const btn = document.getElementById('confirmWithdraw');
             btn.disabled = true;
             btn.innerHTML = '<span class="loading-spinner"></span>';
+            let txSent = false;
             
             try {
                 showStatus('withdrawStatus', 'Fetching NAV data...', 'info');
@@ -1379,7 +1605,13 @@
                     withdrawGas = withdrawGas * 150n / 100n;
                 } catch (e) { console.warn('Withdraw gas estimate failed, using fallback:', e.message); }
                 const tx = await vaultContract.requestWithdraw(sharesWei, navTuple, signedNav.signature, { gasLimit: withdrawGas });
-                await readProvider.waitForTransaction(tx.hash, 1, 120000);
+                txSent = true;
+                try {
+                    await readProvider.waitForTransaction(tx.hash, 1, 120000);
+                } catch (e) {
+                    console.warn('Withdraw receipt polling failed, waiting...', e.message);
+                    await new Promise(r => setTimeout(r, 5000));
+                }
                 
                 showStatus('withdrawStatus', 'Withdrawal request submitted!', 'success');
                 await updateUserPosition();
@@ -1392,7 +1624,16 @@
                 
             } catch (e) {
                 console.error('Withdraw error:', e);
-                showStatus('withdrawStatus', 'Error: ' + (e.reason || e.message), 'error');
+                if (txSent) {
+                    showStatus('withdrawStatus', 'Transaction sent! It may take a moment to confirm.', 'success');
+                    setTimeout(async () => {
+                        await updateUserPosition();
+                        hideModal('withdrawModal');
+                        hideStatus('withdrawStatus');
+                    }, 5000);
+                } else {
+                    showStatus('withdrawStatus', 'Error: ' + (e.reason || e.message), 'error');
+                }
             }
             
             btn.disabled = false;
