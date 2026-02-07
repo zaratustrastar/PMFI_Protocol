@@ -1,0 +1,105 @@
+Yes — that approach makes sense if (and only if) your NAV formula currently subtracts usdcLocked as an exclusion, and bridging already causes a real balance drop on the source side. In that case, you are double-subtracting during transit:
+
+once because the cash actually left Polygon/Polymarket custody (assets drop)
+
+again because usdcLocked still excludes it
+
+So the clean correction is exactly what you said:
+
+Split usdcLocked into two states
+
+usdcLocked_on_PM (still sitting in Polymarket / source custody, should be excluded)
+
+usdcLocked_in_transit (already left custody, must not be excluded again)
+
+Then:
+
+effective_usdcLocked_to_exclude = usdcLocked_total − bridged_for_withdrawal_in_transit
+
+…and that is what you subtract (exclude) in NAV.
+
+Why this is better than adding a new “in-flight asset” bucket (in your specific setup)
+
+You can fix the accounting without inventing a new asset bucket if your only bug is double exclusion.
+
+Because the “missing asset” during bridge is already explained by:
+
+custody balance dropped (correct)
+
+exclusion didn’t drop (bug)
+
+So adjusting the exclusion is the most minimal, least invasive fix.
+
+The one thing you must be careful about
+
+You need a clear state transition so you don’t under-exclude.
+
+Define exactly when “in transit” starts
+
+Use “source debit is final” (tx confirmed and irreversible enough for your risk model).
+Not “servicer clicked bridge”.
+
+Define exactly when it ends
+
+When destination credit is final or when you can prove it’s returned/refunded.
+
+If it gets stuck for hours, your NAV should still be correct and conservative.
+
+Implementation spec (tight and safe)
+Add a value you already have: withdrawal_bridge_in_transit_amount
+
+This should be the sum of withdrawal amounts that:
+
+were removed from Polymarket custody / Polygon wallet
+
+not yet arrived to Base vault (or credited bucket)
+
+NAV calculation change
+
+Where you currently do something like:
+
+assets = polygon_cash + polygon_positions + base_cash + ... − usdcLocked
+
+Change to:
+
+assets = ... − max(0, usdcLocked − withdrawal_bridge_in_transit_amount)
+
+(Clamp to 0 to avoid negative exclusion if the numbers temporarily mismatch.)
+
+Reporting / observability
+
+Include in signed breakdown:
+
+usdcLocked_total
+
+withdrawal_bridge_in_transit_amount
+
+usdcLocked_excluded_effective
+
+So auditors/users can see exactly what happened.
+
+Sanity check with your example
+
+Before: usdcLocked=200, cash still on PM → exclude 200 ✅
+
+Bridge 80:
+
+cash on PM drops by 80 ✅
+
+set in_transit=80
+
+effective exclusion = 200 − 80 = 120 ✅ (no double subtraction)
+
+After arrival:
+
+Base cash increases by 80 ✅
+
+in_transit=0
+
+exclusion back to 200 (until claim resolves / locked decreases) ✅
+
+This matches your intention.
+
+When this would not be enough
+
+If bridging happens via an escrow address you still control and your NAV “custody cash” doesn’t drop until later (or you’re valuing “PM cash” differently), then you would need an explicit in-flight asset bucket. But given your description (“cash has left Polymarket, totalAssets naturally lower”), your exclusion-adjustment fix is the right minimal move.
