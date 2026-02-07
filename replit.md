@@ -12,10 +12,19 @@ Preferred communication style: Simple, everyday language.
 
 The vault calculates NAV using **ACTUAL LIQUID VALUE** with **withdrawal exclusion**.
 
-**V7.5 CHANGE (Feb 2026)**: Pending withdrawals excluded from NAV calculation.
+**V7.5.1 CHANGE (Feb 2026)**: Fixed double-subtraction during withdrawal bridge transit.
+- Problem: When servicer bridges USDC from Polygon to Base, funds disappear from totalAssets
+  (cash left PM) while usdcLocked exclusion also subtracts them → double-count → temporary depeg
+- Fix: `effective_exclusion = max(0, usdcLocked - withdrawal_bridge_in_transit)`
+  where `withdrawal_bridge_in_transit` = funds already debited from Polygon, not yet on Base
+- Reads servicer's `withdrawal_state.json` for pending bridge amounts
+- Observability: NAV breakdown now shows `usdc_locked_total`, `bridge_in_transit`, `effective_exclusion`
+- **$5 minimum withdrawal** enforced on both web app and mini app frontends
+
+**V7.5 (still in effect)**: Pending withdrawals excluded from NAV calculation.
 - When `requestWithdraw()` is confirmed, shares transfer to vault and `usdcLocked` is recorded
 - These are "spoken for" - excluded from both asset and supply sides of NAV
-- `effective_assets = totalAssets - total_usdcLocked`
+- `effective_assets = totalAssets - effective_exclusion` (adjusted for in-transit bridges)
 - `effective_supply = totalSupply - totalPendingShares`
 - `NAV = effective_assets / effective_supply`
 - **Result**: Remaining LPs see accurate pricing regardless of withdrawal pipeline stage

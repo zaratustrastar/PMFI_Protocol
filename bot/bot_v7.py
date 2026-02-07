@@ -11,9 +11,14 @@ usdcLocked is recorded. These shares and USDC are "spoken for" and must be
 excluded from NAV calculation to prevent distortion for remaining LPs.
 
 V7.5 NAV FORMULA:
-    effective_assets = totalAssets - total_usdcLocked
+    effective_exclusion = max(0, total_usdcLocked - withdrawal_bridge_in_transit)
+    effective_assets = totalAssets - effective_exclusion
     effective_supply = totalSupply - totalPendingShares
     NAV = effective_assets / effective_supply
+
+withdrawal_bridge_in_transit = USDC already debited from Polygon cash but
+not yet credited on Base vault. This prevents double-subtraction during
+bridge transit: once from totalAssets (cash left PM) and once from usdcLocked.
 
 This ensures remaining LP shares are priced correctly regardless of
 where the withdrawal funds are in the pipeline (PM cash, positions,
@@ -1335,6 +1340,9 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     # V7.5: Read pending withdrawal exclusions from on-chain queue
     pending_shares_excluded, total_usdc_locked = get_pending_withdrawal_exclusions(vault_v7)
     
+    # V7.5.1: Read withdrawal bridge in-transit to prevent double-subtraction
+    withdrawal_bridge_in_transit = get_withdrawal_bridge_in_transit()
+    
     # Get next roundId using cache (handles RPC failures safely)
     new_round_id = round_id_cache.get_next_round_id(chain_round_id)
     if new_round_id is None:
@@ -1407,11 +1415,17 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     # totalAssets on-chain stays the same (contract doesn't know about exclusion)
     # But the NAV (price per share) must reflect only economically active shares/assets
     #
-    # effective_assets = totalAssets - total_usdcLocked (remove liability owed to withdrawers)
+    # effective_exclusion = max(0, usdcLocked - withdrawal_bridge_in_transit)
+    # effective_assets = totalAssets - effective_exclusion
     # effective_supply = totalSupply - totalPendingShares (remove shares no longer active)
     # NAV = effective_assets / effective_supply
+    #
+    # V7.5.1: Reduce exclusion by amount already debited from Polygon cash (in-transit bridge).
+    # Without this, funds are double-subtracted during bridge transit: once because cash left
+    # Polymarket (totalAssets drops) and once via usdcLocked exclusion.
     
-    effective_assets = signed_breakdown["total_assets"] - total_usdc_locked
+    effective_exclusion = max(0, total_usdc_locked - withdrawal_bridge_in_transit)
+    effective_assets = signed_breakdown["total_assets"] - effective_exclusion
     effective_supply = total_supply - pending_shares_excluded
     
     if effective_assets < 0:
@@ -1442,9 +1456,11 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     print(f"   • Reserved (not in NAV):    ${reserved_usdc/1e6:.2f}")
     print(f"   • Pending (monitoring):     ${breakdown['pending_credit']/1e6:.2f}")
     print(f"   ─────────────────────────────")
-    print(f"   • 🔒 Withdrawal Exclusion (V7.5):")
+    print(f"   • 🔒 Withdrawal Exclusion (V7.5.1):")
     print(f"   •   Pending shares:         {pending_shares_excluded/1e18:.6f}")
-    print(f"   •   USDC locked:            ${total_usdc_locked/1e6:.2f}")
+    print(f"   •   USDC locked (total):    ${total_usdc_locked/1e6:.2f}")
+    print(f"   •   Bridge in-transit:      ${withdrawal_bridge_in_transit/1e6:.2f}")
+    print(f"   •   Effective exclusion:    ${effective_exclusion/1e6:.2f}")
     print(f"   •   Effective assets:       ${effective_assets/1e6:.2f}")
     print(f"   •   Effective supply:       {effective_supply/1e18:.6f}")
     print(f"   •   Total supply (raw):     {total_supply/1e18:.6f}")
@@ -1489,6 +1505,8 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "expected_assets": expected_assets,
             "pending_shares_excluded": pending_shares_excluded,
             "total_usdc_locked": total_usdc_locked,
+            "withdrawal_bridge_in_transit": withdrawal_bridge_in_transit,
+            "effective_exclusion": effective_exclusion,
             "effective_assets": effective_assets,
             "effective_supply": effective_supply,
         }
@@ -1526,7 +1544,9 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "safety_reason": safety_reason,
             "v75_withdrawal_exclusion": {
                 "pending_shares": pending_shares_excluded / 1e18,
-                "usdc_locked": total_usdc_locked / 1e6,
+                "usdc_locked_total": total_usdc_locked / 1e6,
+                "withdrawal_bridge_in_transit": withdrawal_bridge_in_transit / 1e6,
+                "effective_exclusion": effective_exclusion / 1e6,
                 "effective_assets": effective_assets / 1e6,
                 "effective_supply": effective_supply / 1e18,
             },
@@ -1538,6 +1558,8 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "total_supply_raw": str(total_supply),
             "pending_shares_excluded_raw": str(pending_shares_excluded),
             "total_usdc_locked_raw": str(total_usdc_locked),
+            "withdrawal_bridge_in_transit_raw": str(withdrawal_bridge_in_transit),
+            "effective_exclusion_raw": str(effective_exclusion),
         }
     }
     
@@ -1584,7 +1606,9 @@ def get_price():
             "safety_status": cached_nav.get("safety_status", "ok"),
             "v75_withdrawal_exclusion": {
                 "pending_shares": cached_nav.get("pending_shares_excluded", 0) / 1e18 if cached_nav.get("pending_shares_excluded") else 0,
-                "usdc_locked": cached_nav.get("total_usdc_locked", 0) / 1e6 if cached_nav.get("total_usdc_locked") else 0,
+                "usdc_locked_total": cached_nav.get("total_usdc_locked", 0) / 1e6 if cached_nav.get("total_usdc_locked") else 0,
+                "withdrawal_bridge_in_transit": cached_nav.get("withdrawal_bridge_in_transit", 0) / 1e6 if cached_nav.get("withdrawal_bridge_in_transit") else 0,
+                "effective_exclusion": cached_nav.get("effective_exclusion", 0) / 1e6 if cached_nav.get("effective_exclusion") else 0,
                 "effective_assets": cached_nav.get("effective_assets", 0) / 1e6 if cached_nav.get("effective_assets") else 0,
                 "effective_supply": cached_nav.get("effective_supply", 0) / 1e18 if cached_nav.get("effective_supply") else 0,
             },
@@ -2958,6 +2982,50 @@ def nav_refresh_loop():
 # =============================================================================
 # V7.5 Withdrawal Exclusion: Read pending usdcLocked from on-chain queue
 # =============================================================================
+
+def get_withdrawal_bridge_in_transit() -> int:
+    """
+    Read total USDC currently being bridged for withdrawals (Polygon → Base).
+
+    These funds have already been debited from Polymarket/Polygon cash (so
+    totalAssets already dropped) but haven't arrived on Base yet.  If we also
+    subtract them via the usdcLocked exclusion we double-count.
+
+    Reads the servicer's withdrawal_state.json and sums pending in-transit
+    bridge amounts.
+
+    Returns:
+        Total withdrawal bridge in-transit amount in raw 1e6 (USDC decimals).
+        Returns 0 on any error (safe default = full exclusion applied).
+    """
+    state_paths = [
+        os.path.join(os.path.dirname(__file__), "..", "trading_bot", "withdrawal_state.json"),
+        os.path.join(os.path.dirname(__file__), "withdrawal_state.json"),
+        "/opt/polymarket-bot/trading_bot/withdrawal_state.json",
+    ]
+
+    for path in state_paths:
+        try:
+            if os.path.exists(path):
+                with open(path, 'r') as f:
+                    data = json.load(f)
+
+                in_transit = data.get("in_transit", [])
+                total = 0.0
+                for item in in_transit:
+                    if item.get("status") == "pending":
+                        total += item.get("amount_usdc", 0.0)
+
+                total_raw = int(total * 1e6)
+                if total_raw > 0:
+                    print(f"   🔄 Withdrawal bridge in-transit: ${total:.2f} (from {os.path.basename(path)})")
+                return total_raw
+        except Exception as e:
+            print(f"   ⚠️ Error reading servicer state from {path}: {e}")
+            continue
+
+    return 0
+
 
 WITHDRAWAL_QUEUE_ABI = [
     {"inputs": [], "name": "nextWithdrawalIndex", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},

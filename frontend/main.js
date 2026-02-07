@@ -915,6 +915,15 @@ async function handleWithdraw() {
         return;
     }
 
+    const MIN_WITHDRAWAL_USDC = 5.0;
+    const shareCount = Number(amountStr);
+    const currentPrice = parseFloat(document.getElementById("sharePrice")?.textContent?.replace("$", "") || "1");
+    const estimatedUsdc = shareCount * currentPrice;
+    if (estimatedUsdc < MIN_WITHDRAWAL_USDC) {
+        showStatus(withdrawTxStatus, `Minimum withdrawal is $${MIN_WITHDRAWAL_USDC} (≈${(MIN_WITHDRAWAL_USDC / currentPrice).toFixed(2)} shares at current price)`, "error");
+        return;
+    }
+
     if (!signer || !userAddress) {
         showStatus(withdrawTxStatus, "Please connect your wallet first", "error");
         return;

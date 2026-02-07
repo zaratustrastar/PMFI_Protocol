@@ -1328,6 +1328,13 @@
             const shares = parseInt(document.getElementById('withdrawAmount').value);
             if (!shares || shares <= 0) return;
             
+            const MIN_WITHDRAWAL_USDC = 5.0;
+            const estimatedUsdc = shares * sharePrice;
+            if (estimatedUsdc < MIN_WITHDRAWAL_USDC) {
+                showStatus('withdrawStatus', `Minimum withdrawal is $${MIN_WITHDRAWAL_USDC} (≈${Math.ceil(MIN_WITHDRAWAL_USDC / sharePrice)} shares)`, 'error');
+                return;
+            }
+            
             const sharesWei = ethers.parseUnits(shares.toString(), 18);
             const btn = document.getElementById('confirmWithdraw');
             btn.disabled = true;
