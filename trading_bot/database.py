@@ -596,5 +596,37 @@ def check_sell_threshold(market_slug: str, token_id: str, side: str, min_shares:
     }
 
 
+def get_all_sells_placed() -> Dict[str, bool]:
+    """
+    Get a lookup dict of all token_ids that already have sell orders placed.
+    Key is token_id, value is True if sell_placed.
+    Used by order_monitor_v2 for quick comparison against portfolio positions.
+    """
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT token_id, side, sell_placed, total_shares, avg_buy_price, market_slug
+        FROM accumulated_fills
+    """)
+    
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    result = {}
+    for row in rows:
+        token_id = row["token_id"]
+        result[token_id] = {
+            "sell_placed": row.get("sell_placed", False),
+            "total_shares": float(row.get("total_shares", 0)),
+            "avg_buy_price": float(row.get("avg_buy_price", 0)),
+            "side": row["side"],
+            "market_slug": row["market_slug"],
+        }
+    
+    return result
+
+
 if __name__ == "__main__":
     init_database()

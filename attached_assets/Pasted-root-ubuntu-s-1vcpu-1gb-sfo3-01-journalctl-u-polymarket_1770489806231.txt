@@ -1,0 +1,85 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u polymarket-monitor --since "1 hour ago" --no-pager | tail -100
+Feb 07 17:56:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]: 🔍 Checking 14 open sell orders...
+Feb 07 17:56:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]: 🔍 Checking 3599 open buy orders...
+Feb 07 18:00:59 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0300 (10.00 tokens)
+Feb 07 18:00:59 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 1127483859794807...
+Feb 07 18:00:59 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:01:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0280 (10.00 tokens)
+Feb 07 18:01:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 1127483859794807...
+Feb 07 18:01:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:01:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0250 (9.99 tokens)
+Feb 07 18:01:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 1127483859794807...
+Feb 07 18:01:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 9.99
+Feb 07 18:01:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0220 (10.00 tokens)
+Feb 07 18:01:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 1127483859794807...
+Feb 07 18:01:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:01:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0200 (10.00 tokens)
+Feb 07 18:01:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 1127483859794807...
+Feb 07 18:01:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:01:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0300 (10.00 tokens)
+Feb 07 18:01:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 4616872821405716...
+Feb 07 18:01:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:01:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0280 (10.00 tokens)
+Feb 07 18:01:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 4616872821405716...
+Feb 07 18:01:22 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:01:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0250 (10.00 tokens)
+Feb 07 18:01:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 4616872821405716...
+Feb 07 18:01:24 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:01:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0220 (10.00 tokens)
+Feb 07 18:01:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 4616872821405716...
+Feb 07 18:01:25 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:01:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0200 (10.00 tokens)
+Feb 07 18:01:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 4616872821405716...
+Feb 07 18:01:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:02:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0300 (10.00 tokens)
+Feb 07 18:02:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 5521167664167652...
+Feb 07 18:02:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0280 (10.00 tokens)
+Feb 07 18:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 5521167664167652...
+Feb 07 18:02:30 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:02:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0160 (10.00 tokens)
+Feb 07 18:02:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 5521167664167652...
+Feb 07 18:02:35 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+Feb 07 18:02:49 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:    🎯 Order FULLY filled: BUY YES @ $0.0300 (10.00 tokens)
+Feb 07 18:02:49 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Token ID: 1004093115414078...
+Feb 07 18:02:49 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[2453312]:       Already accumulated: 0.00, New to add: 10.00
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd /opt/polymarket-bot/trading_bot
+python3 -c "from database import get_open_orders; orders = get_open_orders(); print(f'Open orders: {len(orders)}'); [print(f'  {o[\"order_type\"]} {o[\"side\"]} @ {o[\"price\"]} - {o[\"market_slug\"]}') for o in orders[:20]]"
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/polymarket-bot/trading_bot/database.py", line 166, in get_open_orders
+    conn = get_db_connection()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/database.py", line 13, in get_db_connection
+    return psycopg2.connect(config.DATABASE_URL)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "root" does not exist
+
+Error in sys.excepthook:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 228, in partial_apport_excepthook
+    return apport_excepthook(binary, exc_type, exc_obj, exc_tb)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 114, in apport_excepthook
+    report["ExecutableTimestamp"] = str(int(os.stat(binary).st_mtime))
+                                            ^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/opt/polymarket-bot/trading_bot/-c'
+
+Original exception was:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/polymarket-bot/trading_bot/database.py", line 166, in get_open_orders
+    conn = get_db_connection()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/polymarket-bot/trading_bot/database.py", line 13, in get_db_connection
+    return psycopg2.connect(config.DATABASE_URL)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "root" does not exist
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:/opt/polymarket-bot/trading_bot# 
