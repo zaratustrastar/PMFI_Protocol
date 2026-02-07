@@ -1281,7 +1281,7 @@
                         approveGas = approveGas * 150n / 100n;
                     } catch (e) { console.warn('Approve gas estimate failed, using fallback:', e.message); }
                     const approveTx = await usdcContract.approve(VAULT_ADDRESS, ethers.MaxUint256, { gasLimit: approveGas });
-                    await approveTx.wait();
+                    await readProvider.waitForTransaction(approveTx.hash, 1, 60000);
                 }
                 
                 showStatus('depositStatus', 'Depositing...', 'info');
@@ -1303,7 +1303,7 @@
                     depositGas = depositGas * 150n / 100n;
                 } catch (e) { console.warn('Deposit gas estimate failed, using fallback:', e.message); }
                 const tx = await vaultContract.deposit(amountWei, navTuple, signedNav.signature, { gasLimit: depositGas });
-                await tx.wait();
+                await readProvider.waitForTransaction(tx.hash, 1, 120000);
                 
                 showStatus('depositStatus', 'Deposit successful!', 'success');
                 await updateUserPosition();
@@ -1372,7 +1372,7 @@
                     withdrawGas = withdrawGas * 150n / 100n;
                 } catch (e) { console.warn('Withdraw gas estimate failed, using fallback:', e.message); }
                 const tx = await vaultContract.requestWithdraw(sharesWei, navTuple, signedNav.signature, { gasLimit: withdrawGas });
-                await tx.wait();
+                await readProvider.waitForTransaction(tx.hash, 1, 120000);
                 
                 showStatus('withdrawStatus', 'Withdrawal request submitted!', 'success');
                 await updateUserPosition();
