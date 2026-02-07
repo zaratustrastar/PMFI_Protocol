@@ -1,6 +1,6 @@
 # Overview
 
-This project consists of two primary systems: the pSNIPER Vault (V7.4) for secure NAV-based share pricing using actual liquid asset values, and an Automated Polymarket Trading Bot. The vault calculates NAV from real position values (cash + positions liquidation value), ensuring accurate share pricing that reflects trading gains/losses. The trading bot provides fully automated market monitoring, Telegram notifications, and strategic trading, designed for efficient and timely execution on Polymarket. Together, these systems aim to optimize and automate Polymarket participation with accurate financial tracking and trading capabilities.
+This project consists of two primary systems: the pSNIPER Vault (V7.5) for secure NAV-based share pricing using actual liquid asset values with withdrawal exclusion, and an Automated Polymarket Trading Bot. The vault calculates NAV from real position values (cash + positions liquidation value), excluding pending withdrawal liabilities from both assets and share supply to prevent NAV distortion. The trading bot provides fully automated market monitoring, Telegram notifications, and strategic trading, designed for efficient and timely execution on Polymarket. Together, these systems aim to optimize and automate Polymarket participation with accurate financial tracking and trading capabilities.
 
 # User Preferences
 
@@ -8,24 +8,23 @@ Preferred communication style: Simple, everyday language.
 
 # System Architecture
 
-## pSNIPER Vault (V7.4)
+## pSNIPER Vault (V7.5)
 
-The vault calculates NAV using **ACTUAL LIQUID VALUE** - the real market value of assets.
+The vault calculates NAV using **ACTUAL LIQUID VALUE** with **withdrawal exclusion**.
 
-**V7.4 MAJOR CHANGE (Feb 2026)**: NAV reflects actual position values, not expected deposits.
-- OLD: `totalAssets = cash + positions + pendingCredit` (where pendingCredit filled the gap to expectedAssets)
-- NEW: `totalAssets = cash + positions + inFlight` (pendingCredit = 0 for NAV)
-- **Result**: Trading losses show directly in NAV, no longer hidden in phantom pendingCredit
+**V7.5 CHANGE (Feb 2026)**: Pending withdrawals excluded from NAV calculation.
+- When `requestWithdraw()` is confirmed, shares transfer to vault and `usdcLocked` is recorded
+- These are "spoken for" - excluded from both asset and supply sides of NAV
+- `effective_assets = totalAssets - total_usdcLocked`
+- `effective_supply = totalSupply - totalPendingShares`
+- `NAV = effective_assets / effective_supply`
+- **Result**: Remaining LPs see accurate pricing regardless of withdrawal pipeline stage
 
-**Why V7.4?** 
-V7.3.3 had a critical flaw: `pendingCredit = expectedAssets - cash - positions - inFlight` was a plug number that made `totalAssets` always equal `expectedAssets`. This meant NAV stayed at $1/share regardless of position performance. With positions that lost 85% of value, NAV still showed $1 instead of the actual ~$0.15.
-
-**V7.4 Formula**:
+**V7.4 (still in effect)**: NAV reflects actual position values, not expected deposits.
 - `totalAssets = pmCash + positionsLiqValue + vaultBuffer + inFlight` (ACTUAL values only)
 - `pendingCredit = 0` for NAV purposes (calculated separately for monitoring bridging delays)
-- NAV = totalAssets / totalShares (reflects real gains/losses)
 
-**Safety Valves (V7.4)**:
+**Safety Valves**:
 - Only `maxPendingAge` on in-flight funds (actual bridging delays)
 - Removed `maxPendingRatio` since pendingCredit is no longer in NAV
 
@@ -33,12 +32,9 @@ V7.3.3 had a critical flaw: `pendingCredit = expectedAssets - cash - positions -
 - Uses on-chain `expectedAssets` for reference (not cumulative `totalForwarded`)
 - Uses position **liquidation value** (mark-to-market) instead of cost basis
 - **Reserved excluded from NAV math** - Polygon balanceOf is the source of truth for cash
+- Withdrawal servicer reads actual `usdcLocked` from pending requests (V7.3.3 fix)
 
-**Withdrawal Servicer V7.3.3 FIX**: 
-- Now reads actual `usdcLocked` from pending withdrawal requests instead of recalculating with current NAV
-- Prevents wrong bridge amounts when NAV is corrupted (e.g., from multiple bot instances)
-
-**Current Contract**: `0x960eC492C1c9245dAe05bA4027d6e15ce0AD9d3D` (Base Mainnet)
+**Current Contract**: `0xbF0944893e6bd445F715dE76CD6343B1d551D41B` (Base Mainnet, V7.5)
 
 ## Polymarket Trading Bot
 

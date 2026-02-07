@@ -1,12 +1,29 @@
 #!/usr/bin/env python3
 """
-PredictFi Sniper Vault V7.4 - NAV Signing Bot with ACTUAL LIQUID VALUE
+PredictFi Sniper Vault V7.5 - NAV Signing Bot with Withdrawal Exclusion
 
 =============================================================================
-V7.4 MAJOR CHANGE:
+V7.5 CHANGE: Withdrawal Exclusion from NAV
 =============================================================================
 
-NAV now reflects ACTUAL LIQUID VALUE (cash + positions liquidation value).
+When a user calls requestWithdraw(), shares are transferred to the vault and
+usdcLocked is recorded. These shares and USDC are "spoken for" and must be
+excluded from NAV calculation to prevent distortion for remaining LPs.
+
+V7.5 NAV FORMULA:
+    effective_assets = totalAssets - total_usdcLocked
+    effective_supply = totalSupply - totalPendingShares
+    NAV = effective_assets / effective_supply
+
+This ensures remaining LP shares are priced correctly regardless of
+where the withdrawal funds are in the pipeline (PM cash, positions,
+in-flight bridge, vault buffer).
+
+=============================================================================
+V7.4 CHANGE (still in effect):
+=============================================================================
+
+NAV reflects ACTUAL LIQUID VALUE (cash + positions liquidation value).
 Trading losses are shown directly in NAV, not hidden in pendingCredit.
 
 OLD (V7.3 and earlier):
@@ -14,7 +31,7 @@ OLD (V7.3 and earlier):
     pendingCredit = expectedAssets - cash - positions - inFlight
     Result: NAV always equals expectedAssets/shares = initial deposit price
 
-NEW (V7.4):
+NEW (V7.4+):
     totalAssets = cash + positions + inFlight
     pendingCredit = 0 (for NAV purposes, kept for bridging monitoring only)
     Result: NAV reflects actual market value of positions
@@ -1315,10 +1332,12 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
         vault_buffer = cached_nav.get("vault_buffer", 0)
         expected_assets = cached_nav.get("expected_assets", 0)
     
+    # V7.5: Read pending withdrawal exclusions from on-chain queue
+    pending_shares_excluded, total_usdc_locked = get_pending_withdrawal_exclusions(vault_v7)
+    
     # Get next roundId using cache (handles RPC failures safely)
     new_round_id = round_id_cache.get_next_round_id(chain_round_id)
     if new_round_id is None:
-        # Cannot determine safe roundId - refuse to sign
         raise ValueError("Cannot sign NAV: RPC failed and no cached roundId available. Please restart bot with working RPC.")
     
     # Calculate NAV breakdown (V7.3.2: pass vault_buffer AND expected_assets)
@@ -1382,8 +1401,27 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     if computed_sum != signed_breakdown["total_assets"]:
         raise ValueError(f"Asset breakdown mismatch: {computed_sum} != {signed_breakdown['total_assets']}")
     
-    # NAV calculation (1e6 precision per share)
-    if total_supply > 0:
+    # ==========================================================================
+    # V7.5 NAV: Exclude pending withdrawals from price calculation
+    # ==========================================================================
+    # totalAssets on-chain stays the same (contract doesn't know about exclusion)
+    # But the NAV (price per share) must reflect only economically active shares/assets
+    #
+    # effective_assets = totalAssets - total_usdcLocked (remove liability owed to withdrawers)
+    # effective_supply = totalSupply - totalPendingShares (remove shares no longer active)
+    # NAV = effective_assets / effective_supply
+    
+    effective_assets = signed_breakdown["total_assets"] - total_usdc_locked
+    effective_supply = total_supply - pending_shares_excluded
+    
+    if effective_assets < 0:
+        print(f"⚠️ V7.5: effective_assets went negative ({effective_assets/1e6:.2f}), clamping to 0")
+        effective_assets = 0
+    
+    if effective_supply > 0:
+        nav = (effective_assets * NAV_PRECISION) // effective_supply
+    elif total_supply > 0 and effective_supply <= 0:
+        print(f"⚠️ V7.5: All shares are pending withdrawal, using raw totalAssets/totalSupply")
         nav = (signed_breakdown["total_assets"] * NAV_PRECISION) // total_supply
     else:
         nav = 10**6  # $1.00 per share if no supply
@@ -1392,7 +1430,7 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     deadline = now + NAV_VALIDITY_SECONDS
     
     # Log the signed breakdown for debugging
-    print(f"📊 V7.4 Signed Breakdown (SINGLE SOURCE OF TRUTH):")
+    print(f"📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):")
     print(f"   • PM Cash (raw):            ${credited_cash_raw/1e6:.2f}")
     print(f"   • Vault Buffer:             ${vault_buffer_1e6/1e6:.2f}")
     print(f"   • creditedCash (signed):    ${signed_breakdown['credited_cash']/1e6:.2f}")
@@ -1400,9 +1438,16 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
     print(f"   • pendingCredit (V7.4=0):   ${signed_breakdown['pending_credit']/1e6:.2f}")
     print(f"   • inFlight:                 ${signed_breakdown['in_flight']/1e6:.2f}")
     print(f"   ─────────────────────────────")
-    print(f"   • TOTAL ASSETS:             ${signed_breakdown['total_assets']/1e6:.2f}")
+    print(f"   • TOTAL ASSETS (gross):     ${signed_breakdown['total_assets']/1e6:.2f}")
     print(f"   • Reserved (not in NAV):    ${reserved_usdc/1e6:.2f}")
     print(f"   • Pending (monitoring):     ${breakdown['pending_credit']/1e6:.2f}")
+    print(f"   ─────────────────────────────")
+    print(f"   • 🔒 Withdrawal Exclusion (V7.5):")
+    print(f"   •   Pending shares:         {pending_shares_excluded/1e18:.6f}")
+    print(f"   •   USDC locked:            ${total_usdc_locked/1e6:.2f}")
+    print(f"   •   Effective assets:       ${effective_assets/1e6:.2f}")
+    print(f"   •   Effective supply:       {effective_supply/1e18:.6f}")
+    print(f"   •   Total supply (raw):     {total_supply/1e18:.6f}")
     
     # Sign using ONLY signed_breakdown values
     signature, signer = sign_nav_data_v7(
@@ -1442,6 +1487,10 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "safety_status": safety_status,
             "safety_reason": safety_reason,
             "expected_assets": expected_assets,
+            "pending_shares_excluded": pending_shares_excluded,
+            "total_usdc_locked": total_usdc_locked,
+            "effective_assets": effective_assets,
+            "effective_supply": effective_supply,
         }
     
     # Build response - ALL navData fields come from signed_breakdown
@@ -1475,12 +1524,20 @@ def get_signed_nav_data_v7(force_refresh: bool = False) -> Dict:
             "valid_until": deadline,
             "safety_status": safety_status,
             "safety_reason": safety_reason,
+            "v75_withdrawal_exclusion": {
+                "pending_shares": pending_shares_excluded / 1e18,
+                "usdc_locked": total_usdc_locked / 1e6,
+                "effective_assets": effective_assets / 1e6,
+                "effective_supply": effective_supply / 1e18,
+            },
         },
         "debug": {
             "chain_round_id": chain_round_id,
             "vault_buffer_raw": vault_buffer_1e6,
             "credited_cash_raw": credited_cash_raw,
             "total_supply_raw": str(total_supply),
+            "pending_shares_excluded_raw": str(pending_shares_excluded),
+            "total_usdc_locked_raw": str(total_usdc_locked),
         }
     }
     
@@ -1525,6 +1582,12 @@ def get_price():
             "in_flight_usdc": cached_nav["in_flight"] / 1e6,
             "last_updated": cached_nav["last_calculated"],
             "safety_status": cached_nav.get("safety_status", "ok"),
+            "v75_withdrawal_exclusion": {
+                "pending_shares": cached_nav.get("pending_shares_excluded", 0) / 1e18 if cached_nav.get("pending_shares_excluded") else 0,
+                "usdc_locked": cached_nav.get("total_usdc_locked", 0) / 1e6 if cached_nav.get("total_usdc_locked") else 0,
+                "effective_assets": cached_nav.get("effective_assets", 0) / 1e6 if cached_nav.get("effective_assets") else 0,
+                "effective_supply": cached_nav.get("effective_supply", 0) / 1e18 if cached_nav.get("effective_supply") else 0,
+            },
         })
 
 
@@ -2893,6 +2956,101 @@ def nav_refresh_loop():
 
 
 # =============================================================================
+# V7.5 Withdrawal Exclusion: Read pending usdcLocked from on-chain queue
+# =============================================================================
+
+WITHDRAWAL_QUEUE_ABI = [
+    {"inputs": [], "name": "nextWithdrawalIndex", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "totalPendingShares", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {
+        "inputs": [{"name": "requestId", "type": "uint256"}],
+        "name": "getWithdrawalRequest",
+        "outputs": [
+            {"name": "user", "type": "address"},
+            {"name": "shares", "type": "uint256"},
+            {"name": "usdcLocked", "type": "uint256"},
+            {"name": "requestTime", "type": "uint256"},
+            {"name": "claimed", "type": "bool"},
+            {"name": "expired", "type": "bool"},
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+]
+
+def get_pending_withdrawal_exclusions(vault_contract) -> Tuple[int, int]:
+    """
+    Read totalPendingShares and total usdcLocked from the on-chain withdrawal queue.
+    
+    V7.5 FIX: These values must be excluded from NAV calculation so that
+    remaining LPs aren't priced against assets/shares that are spoken for.
+    
+    Uses getVaultState() to get pendingWithdrawalsCount for bounded iteration,
+    then iterates from nextWithdrawalIndex to find exactly that many unclaimed requests.
+    
+    Returns:
+        (total_pending_shares, total_usdc_locked) - both in raw units (18 dec / 6 dec)
+    """
+    if not vault_contract:
+        return 0, 0
+    
+    try:
+        state = vault_contract.functions.getVaultState().call()
+        pending_shares = state[6]   # _totalPendingShares
+        pending_count = state[7]    # _pendingWithdrawalsCount
+        
+        print(f"\n🔒 V7.5 Withdrawal Exclusion:")
+        print(f"   totalPendingShares: {pending_shares/1e18:.6f}")
+        print(f"   pendingWithdrawalsCount: {pending_count}")
+        
+        if pending_shares == 0 or pending_count == 0:
+            print(f"   No pending withdrawals - no exclusion needed")
+            return 0, 0
+        
+        next_idx = vault_contract.functions.nextWithdrawalIndex().call()
+        print(f"   nextWithdrawalIndex: {next_idx}")
+        
+        total_usdc_locked = 0
+        found = 0
+        request_id = next_idx
+        max_checks = pending_count + 50
+        checked = 0
+        
+        while found < pending_count and checked < max_checks:
+            try:
+                user, shares, usdc_locked, request_time, claimed, expired = \
+                    vault_contract.functions.getWithdrawalRequest(request_id).call()
+                
+                checked += 1
+                
+                if not claimed and not expired:
+                    total_usdc_locked += usdc_locked
+                    found += 1
+                    print(f"      Request #{request_id}: {shares/1e18:.4f} shares, ${usdc_locked/1e6:.2f} locked")
+                
+                request_id += 1
+                
+            except Exception as e:
+                if "Invalid request" in str(e) or "revert" in str(e).lower():
+                    print(f"   Reached end of queue at request {request_id}")
+                    break
+                print(f"      ⚠️ Error reading request {request_id}: {e}")
+                request_id += 1
+                checked += 1
+        
+        print(f"   Checked {checked} requests, found {found}/{pending_count} pending, total locked: ${total_usdc_locked/1e6:.2f}")
+        
+        if found != pending_count:
+            print(f"   ⚠️ Found {found} but expected {pending_count} pending requests - possible gap in queue")
+        
+        return pending_shares, total_usdc_locked
+        
+    except Exception as e:
+        print(f"❌ Error reading withdrawal exclusions: {e}")
+        return 0, 0
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -2972,8 +3130,13 @@ def main():
     
     try:
         vault_abi = load_abi("vault")
+        existing_names = {entry.get("name") for entry in vault_abi if isinstance(entry, dict)}
+        for entry in WITHDRAWAL_QUEUE_ABI:
+            if entry.get("name") not in existing_names:
+                vault_abi.append(entry)
+                print(f"   + Added ABI entry: {entry['name']}")
         vault_v7 = w3.eth.contract(address=Web3.to_checksum_address(VAULT_V7_ADDRESS), abi=vault_abi)
-        print(f"✅ Vault V7 contract loaded")
+        print(f"✅ Vault V7 contract loaded (with withdrawal queue ABI)")
     except Exception as e:
         print(f"⚠️ Could not load Vault contract: {e}")
         vault_v7 = None
