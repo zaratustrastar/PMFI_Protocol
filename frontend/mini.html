@@ -757,8 +757,8 @@
         })();
         
         const BASE_CHAIN_ID = 8453;
+        const BASE_RPC = 'https://mainnet.base.org';
         const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-        // Injected from server .env via Jinja, fallback to current V7.5 contract
         const VAULT_ADDRESS = '{{ vault_address | default("0xbF0944893e6bd445F715dE76CD6343B1d551D41B") }}';
         
         let provider = null;
@@ -767,6 +767,10 @@
         let vaultContract = null;
         let usdcContract = null;
         let sharePrice = 1.0;
+        
+        const readProvider = new ethers.JsonRpcProvider(BASE_RPC);
+        let readUsdcContract = null;
+        let readVaultContract = null;
         
         const USDC_ABI = [
             'function balanceOf(address) view returns (uint256)',
@@ -782,6 +786,9 @@
             'function requestWithdraw(uint256 shareAmount, tuple(uint256 totalAssets, uint256 creditedCash, uint256 creditedPositions, uint256 pendingCredit, uint256 inFlightOnChain, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) returns (uint256)',
             'function decimals() view returns (uint8)'
         ];
+        
+        readUsdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, readProvider);
+        readVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, readProvider);
         
         // Gate screen elements
         const gateScreen = document.getElementById('gateScreen');
@@ -1142,10 +1149,10 @@
         }
         
         async function updateUserPosition() {
-            if (!vaultContract || !userAddress) return;
+            if (!userAddress) return;
             
             try {
-                const shares = await vaultContract.balanceOf(userAddress);
+                const shares = await readVaultContract.balanceOf(userAddress);
                 const sharesNum = parseFloat(ethers.formatUnits(shares, 18));
                 
                 if (sharesNum > 0) {
@@ -1213,9 +1220,9 @@
         });
         
         document.getElementById('depositMaxBtn').addEventListener('click', async () => {
-            if (!usdcContract || !userAddress) return;
+            if (!userAddress) return;
             try {
-                const balance = await usdcContract.balanceOf(userAddress);
+                const balance = await readUsdcContract.balanceOf(userAddress);
                 document.getElementById('depositAmount').value = ethers.formatUnits(balance, 6);
                 document.getElementById('confirmDeposit').disabled = false;
             } catch (e) {
@@ -1224,9 +1231,9 @@
         });
         
         document.getElementById('withdrawMaxBtn').addEventListener('click', async () => {
-            if (!vaultContract || !userAddress) return;
+            if (!userAddress) return;
             try {
-                const shares = await vaultContract.balanceOf(userAddress);
+                const shares = await readVaultContract.balanceOf(userAddress);
                 document.getElementById('withdrawAmount').value = Math.floor(parseFloat(ethers.formatUnits(shares, 18)));
                 document.getElementById('confirmWithdraw').disabled = false;
             } catch (e) {
@@ -1257,7 +1264,7 @@
                 
                 const nd = signedNav.navData;
                 
-                const allowance = await usdcContract.allowance(userAddress, VAULT_ADDRESS);
+                const allowance = await readUsdcContract.allowance(userAddress, VAULT_ADDRESS);
                 if (allowance < amountWei) {
                     showStatus('depositStatus', 'Approving USDC...', 'info');
                     const approveTx = await usdcContract.approve(VAULT_ADDRESS, ethers.MaxUint256);
