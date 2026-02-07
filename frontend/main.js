@@ -1092,6 +1092,33 @@ connectBtn.addEventListener("click", connectWallet);
 depositBtn.addEventListener("click", handleDeposit);
 withdrawBtn.addEventListener("click", handleWithdraw);
 
+const depositMaxBtn = document.getElementById("depositMaxBtn");
+const withdrawMaxBtn = document.getElementById("withdrawMaxBtn");
+
+if (depositMaxBtn) {
+    depositMaxBtn.addEventListener("click", async () => {
+        if (!usdcContract || !userAddress) return;
+        try {
+            const balance = await usdcContract.balanceOf(userAddress);
+            depositAmountEl.value = ethers.formatUnits(balance, 6);
+        } catch (e) {
+            console.error("Max USDC balance error:", e);
+        }
+    });
+}
+
+if (withdrawMaxBtn) {
+    withdrawMaxBtn.addEventListener("click", async () => {
+        if (!vaultContract || !userAddress) return;
+        try {
+            const shares = await vaultContract.balanceOf(userAddress);
+            withdrawAmountEl.value = parseFloat(ethers.formatUnits(shares, 18)).toFixed(2);
+        } catch (e) {
+            console.error("Max pSNIPER balance error:", e);
+        }
+    });
+}
+
 // =============================================================================
 // INITIALIZATION
 // =============================================================================

@@ -956,25 +956,24 @@
         }
         
         let ethProvider = null;
+        let walletConnectAttempted = false;
+        try { walletConnectAttempted = sessionStorage.getItem('fc_wallet_attempted') === '1'; } catch(e) {}
         
         async function getFarcasterProvider() {
-            for (let i = 0; i < 10; i++) {
-                const sdk = fcSdk || window.miniapp?.sdk || window.FarcasterFrame?.sdk;
-                if (sdk && sdk.wallet) {
-                    try {
-                        if (typeof sdk.wallet.getEthereumProvider === 'function') {
-                            const p = await sdk.wallet.getEthereumProvider();
-                            console.log('[FC] Got Farcaster wallet provider');
-                            return p;
-                        } else if (sdk.wallet.ethProvider) {
-                            console.log('[FC] Got Farcaster wallet ethProvider (legacy)');
-                            return sdk.wallet.ethProvider;
-                        }
-                    } catch (e) {
-                        console.warn('[FC] Provider attempt ' + i + ' failed:', e.message);
+            const sdk = fcSdk || window.miniapp?.sdk || window.FarcasterFrame?.sdk;
+            if (sdk && sdk.wallet) {
+                try {
+                    if (typeof sdk.wallet.getEthereumProvider === 'function') {
+                        const p = await sdk.wallet.getEthereumProvider();
+                        console.log('[FC] Got Farcaster wallet provider');
+                        return p;
+                    } else if (sdk.wallet.ethProvider) {
+                        console.log('[FC] Got Farcaster wallet ethProvider (legacy)');
+                        return sdk.wallet.ethProvider;
                     }
+                } catch (e) {
+                    console.warn('[FC] Provider fetch failed:', e.message);
                 }
-                await new Promise(r => setTimeout(r, 300));
             }
             return null;
         }
@@ -983,14 +982,18 @@
             if (ethProvider) return ethProvider;
             
             if (isInFarcaster) {
-                const fcProvider = await getFarcasterProvider();
-                if (fcProvider) {
-                    ethProvider = fcProvider;
-                    return ethProvider;
+                try {
+                    const fcProvider = await getFarcasterProvider();
+                    if (fcProvider) {
+                        ethProvider = fcProvider;
+                        return ethProvider;
+                    }
+                } catch (e) {
+                    console.warn('[FC] Farcaster provider error:', e.message);
                 }
             }
             
-            if (window.ethereum) {
+            if (!isInFarcaster && window.ethereum) {
                 ethProvider = window.ethereum;
                 console.log('[FC] Using window.ethereum (external wallet)');
             }
@@ -1002,22 +1005,6 @@
             
             await fetchPrice();
             setInterval(fetchPrice, 30000);
-            
-            const ep = await getEthProvider();
-            if (ep) {
-                if (isInFarcaster) {
-                    await connectWallet(true);
-                } else {
-                    try {
-                        const accounts = await ep.request({ method: 'eth_accounts' });
-                        if (accounts && accounts.length > 0) {
-                            await connectWallet(true);
-                        }
-                    } catch (e) {
-                        console.log('[FC] Auto-connect check failed:', e);
-                    }
-                }
-            }
         }
         
         async function fetchPrice() {
@@ -1041,6 +1028,13 @@
         }
         
         async function connectWallet(silent = false) {
+            if (walletConnectAttempted && silent) {
+                console.log('[FC] Wallet connect already attempted this session, skipping silent retry');
+                return;
+            }
+            walletConnectAttempted = true;
+            try { sessionStorage.setItem('fc_wallet_attempted', '1'); } catch(e) {}
+            
             try {
                 const ep = await getEthProvider();
                 if (!ep) {
@@ -1048,16 +1042,32 @@
                     return;
                 }
                 
-                try {
-                    await ep.request({ method: 'eth_requestAccounts' });
-                } catch (reqErr) {
-                    console.log('[FC] eth_requestAccounts failed (may be normal for FC wallet):', reqErr.message);
+                if (!isInFarcaster) {
+                    try {
+                        await ep.request({ method: 'eth_requestAccounts' });
+                    } catch (reqErr) {
+                        console.log('[FC] eth_requestAccounts failed:', reqErr.message);
+                        if (!silent) alert('Wallet connection was rejected.');
+                        return;
+                    }
                 }
                 
                 provider = new ethers.BrowserProvider(ep);
                 
-                const network = await provider.getNetwork();
+                let network;
+                try {
+                    network = await provider.getNetwork();
+                } catch (netErr) {
+                    console.warn('[FC] Could not get network:', netErr.message);
+                    if (!silent) alert('Could not connect to network. Please try again.');
+                    return;
+                }
+                
                 if (Number(network.chainId) !== BASE_CHAIN_ID) {
+                    if (silent) {
+                        console.log('[FC] Wrong chain (' + network.chainId + '), not auto-switching');
+                        return;
+                    }
                     try {
                         await ep.request({
                             method: 'wallet_switchEthereumChain',
@@ -1065,16 +1075,26 @@
                         });
                     } catch (switchError) {
                         if (switchError.code === 4902) {
-                            await ep.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: '0x' + BASE_CHAIN_ID.toString(16),
-                                    chainName: 'Base',
-                                    rpcUrls: ['https://mainnet.base.org'],
-                                    nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                                    blockExplorerUrls: ['https://basescan.org']
-                                }]
-                            });
+                            try {
+                                await ep.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: '0x' + BASE_CHAIN_ID.toString(16),
+                                        chainName: 'Base',
+                                        rpcUrls: ['https://mainnet.base.org'],
+                                        nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                                        blockExplorerUrls: ['https://basescan.org']
+                                    }]
+                                });
+                            } catch (addErr) {
+                                console.warn('[FC] Failed to add Base chain:', addErr.message);
+                                alert('Please switch to Base network manually.');
+                                return;
+                            }
+                        } else {
+                            console.warn('[FC] Chain switch rejected:', switchError.message);
+                            alert('Please switch to Base network to use this app.');
+                            return;
                         }
                     }
                     provider = new ethers.BrowserProvider(ep);
@@ -1142,6 +1162,9 @@
             if (userAddress) {
                 userAddress = null;
                 signer = null;
+                ethProvider = null;
+                walletConnectAttempted = false;
+                try { sessionStorage.removeItem('fc_wallet_attempted'); } catch(e) {}
                 const btn = document.getElementById('connectBtn');
                 btn.textContent = 'Connect';
                 btn.classList.remove('connected');
@@ -1149,6 +1172,8 @@
                 document.getElementById('withdrawBtn').disabled = true;
                 document.getElementById('userPosition').classList.add('hidden');
             } else {
+                walletConnectAttempted = false;
+                try { sessionStorage.removeItem('fc_wallet_attempted'); } catch(e) {}
                 connectWallet();
             }
         });
