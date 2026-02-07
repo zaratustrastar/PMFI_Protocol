@@ -596,11 +596,13 @@ def check_sell_threshold(market_slug: str, token_id: str, side: str, min_shares:
     }
 
 
-def get_all_sells_placed() -> Dict[str, bool]:
+def get_all_sells_placed() -> Dict[str, Dict]:
     """
-    Get a lookup dict of all token_ids that already have sell orders placed.
-    Key is token_id, value is True if sell_placed.
+    Get a lookup dict of all accumulated fills keyed by (token_id, side).
     Used by order_monitor_v2 for quick comparison against portfolio positions.
+    
+    Returns:
+        Dict keyed by "token_id|side" with fill data including sell_placed status.
     """
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -616,16 +618,47 @@ def get_all_sells_placed() -> Dict[str, bool]:
     
     result = {}
     for row in rows:
-        token_id = row["token_id"]
-        result[token_id] = {
+        key = f"{row['token_id']}|{row['side']}"
+        result[key] = {
             "sell_placed": row.get("sell_placed", False),
             "total_shares": float(row.get("total_shares", 0)),
             "avg_buy_price": float(row.get("avg_buy_price", 0)),
             "side": row["side"],
             "market_slug": row["market_slug"],
+            "token_id": row["token_id"],
         }
     
     return result
+
+
+def upsert_accumulated_fill(market_slug: str, token_id: str, side: str, total_shares: float, avg_buy_price: float) -> Dict:
+    """
+    Insert or update accumulated fill with absolute values (not incremental).
+    Used by order_monitor_v2 to sync DB with Data API position data.
+    """
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    total_cost = total_shares * avg_buy_price
+    
+    cur.execute("""
+        INSERT INTO accumulated_fills (market_slug, token_id, side, total_shares, total_cost, avg_buy_price)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON CONFLICT (market_slug, token_id, side) 
+        DO UPDATE SET
+            total_shares = EXCLUDED.total_shares,
+            total_cost = EXCLUDED.total_cost,
+            avg_buy_price = EXCLUDED.avg_buy_price,
+            updated_at = CURRENT_TIMESTAMP
+        RETURNING *
+    """, (market_slug, token_id, side, total_shares, total_cost, avg_buy_price))
+    
+    result = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return dict(result) if result else {}
 
 
 if __name__ == "__main__":
