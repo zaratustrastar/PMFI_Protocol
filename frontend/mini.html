@@ -1264,10 +1264,23 @@
                 
                 const nd = signedNav.navData;
                 
+                const network = await provider.getNetwork();
+                if (Number(network.chainId) !== BASE_CHAIN_ID) {
+                    showStatus('depositStatus', 'Please switch to Base network first', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Approve & Deposit';
+                    return;
+                }
+                
                 const allowance = await readUsdcContract.allowance(userAddress, VAULT_ADDRESS);
                 if (allowance < amountWei) {
                     showStatus('depositStatus', 'Approving USDC...', 'info');
-                    const approveTx = await usdcContract.approve(VAULT_ADDRESS, ethers.MaxUint256);
+                    let approveGas = 100000n;
+                    try {
+                        approveGas = await readUsdcContract.approve.estimateGas(VAULT_ADDRESS, ethers.MaxUint256, { from: userAddress });
+                        approveGas = approveGas * 150n / 100n;
+                    } catch (e) { console.warn('Approve gas estimate failed, using fallback:', e.message); }
+                    const approveTx = await usdcContract.approve(VAULT_ADDRESS, ethers.MaxUint256, { gasLimit: approveGas });
                     await approveTx.wait();
                 }
                 
@@ -1284,7 +1297,12 @@
                     roundId: nd.roundId
                 };
                 
-                const tx = await vaultContract.deposit(amountWei, navTuple, signedNav.signature);
+                let depositGas = 300000n;
+                try {
+                    depositGas = await readVaultContract.deposit.estimateGas(amountWei, navTuple, signedNav.signature, { from: userAddress });
+                    depositGas = depositGas * 150n / 100n;
+                } catch (e) { console.warn('Deposit gas estimate failed, using fallback:', e.message); }
+                const tx = await vaultContract.deposit(amountWei, navTuple, signedNav.signature, { gasLimit: depositGas });
                 await tx.wait();
                 
                 showStatus('depositStatus', 'Deposit successful!', 'success');
@@ -1339,8 +1357,21 @@
                     roundId: nd.roundId
                 };
                 
+                const network = await provider.getNetwork();
+                if (Number(network.chainId) !== BASE_CHAIN_ID) {
+                    showStatus('withdrawStatus', 'Please switch to Base network first', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Request Withdrawal';
+                    return;
+                }
+                
                 showStatus('withdrawStatus', 'Requesting withdrawal...', 'info');
-                const tx = await vaultContract.requestWithdraw(sharesWei, navTuple, signedNav.signature);
+                let withdrawGas = 400000n;
+                try {
+                    withdrawGas = await readVaultContract.requestWithdraw.estimateGas(sharesWei, navTuple, signedNav.signature, { from: userAddress });
+                    withdrawGas = withdrawGas * 150n / 100n;
+                } catch (e) { console.warn('Withdraw gas estimate failed, using fallback:', e.message); }
+                const tx = await vaultContract.requestWithdraw(sharesWei, navTuple, signedNav.signature, { gasLimit: withdrawGas });
                 await tx.wait();
                 
                 showStatus('withdrawStatus', 'Withdrawal request submitted!', 'success');
