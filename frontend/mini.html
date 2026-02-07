@@ -1113,6 +1113,14 @@
                 vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
                 usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
                 
+                if (ep && ep.on && !window._walletListenersRegistered) {
+                    window._walletListenersRegistered = true;
+                    let ignoreFirstEvent = true;
+                    setTimeout(() => { ignoreFirstEvent = false; }, 2000);
+                    ep.on('accountsChanged', () => { if (!ignoreFirstEvent) location.reload(); });
+                    ep.on('chainChanged', () => { if (!ignoreFirstEvent) location.reload(); });
+                }
+                
                 await updateUserPosition();
                 
             } catch (e) {
@@ -1340,13 +1348,6 @@
                     modal.classList.remove('active');
                 }
             });
-        });
-        
-        getEthProvider().then(ep => {
-            if (ep && ep.on) {
-                ep.on('accountsChanged', () => location.reload());
-                ep.on('chainChanged', () => location.reload());
-            }
         });
         
         init();
