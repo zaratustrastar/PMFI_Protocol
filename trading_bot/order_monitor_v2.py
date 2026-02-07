@@ -37,6 +37,15 @@ POSITION_CHECK_INTERVAL = 60
 STALE_ORDER_INTERVAL = 1800
 STALE_ORDER_MAX_AGE_HOURS = 12
 
+PROXY_URL = os.getenv("PROXY_URL", "")
+
+
+def get_proxy_config():
+    """Build requests proxies dict from PROXY_URL env var."""
+    if PROXY_URL:
+        return {"http": PROXY_URL, "https": PROXY_URL}
+    return None
+
 
 def fetch_portfolio_positions(proxy_address: str) -> list:
     """
@@ -48,7 +57,8 @@ def fetch_portfolio_positions(proxy_address: str) -> list:
             "user": proxy_address,
             "sizeThreshold": MIN_SHARES_FOR_SELL,
         }
-        resp = requests.get(DATA_API_URL, params=params, timeout=30)
+        proxies = get_proxy_config()
+        resp = requests.get(DATA_API_URL, params=params, proxies=proxies, timeout=30)
         resp.raise_for_status()
         positions = resp.json()
         print(f"📊 Fetched {len(positions)} positions from Data API")
@@ -168,7 +178,13 @@ def main():
     print(f"   Mode: Fetch positions from Data API every {POSITION_CHECK_INTERVAL}s")
     print(f"   Sell threshold: {MIN_SHARES_FOR_SELL} shares minimum")
     print(f"   Stale order cleanup: every {STALE_ORDER_INTERVAL}s (>{STALE_ORDER_MAX_AGE_HOURS}h old)")
-    print(f"   Proxy address: {config.PROXY_ADDRESS[:10]}...\n")
+    print(f"   Proxy address: {config.PROXY_ADDRESS[:10]}...")
+    if PROXY_URL:
+        proxy_display = PROXY_URL.split('@')[1] if '@' in PROXY_URL else PROXY_URL
+        print(f"   Proxy URL: {proxy_display}")
+    else:
+        print(f"   Proxy URL: None (direct connection)")
+    print()
 
     trader = PolymarketTrader()
 
