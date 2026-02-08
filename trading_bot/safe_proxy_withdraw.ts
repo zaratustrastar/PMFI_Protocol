@@ -256,12 +256,19 @@ async function getEOABalance(eoaAddress: string): Promise<number> {
 // RELAY BRIDGE
 // =============================================================================
 
+interface StepTxData {
+  to: string;
+  data: string;
+  value: string;
+}
+
 interface BridgeQuote {
   requestId: string;
   amountIn: bigint;
   amountOut: bigint;
   feeUsd: number;
-  txData: { to: string; data: string; value: string };
+  approveTx: StepTxData | null;
+  depositTx: StepTxData;
   timeEstimateSeconds: number;
 }
 
@@ -298,18 +305,71 @@ async function getRelayQuote(
     
     const data = await response.json();
     const steps = data.steps || [];
-    if (!steps.length || !steps[0].items?.length) {
-      log('ERROR', 'Invalid quote response structure');
+    if (!steps.length) {
+      log('ERROR', 'Invalid quote response: no steps');
       return null;
     }
-    
-    const txData = steps[0].items[0].data || {};
+
+    log('INFO', `Relay quote returned ${steps.length} step(s): ${steps.map((s: { id?: string }) => s.id || 'unknown').join(', ')}`);
+
+    let approveTx: StepTxData | null = null;
+    let depositTx: StepTxData | null = null;
+    let requestId = '';
+
+    const APPROVE_STEP_IDS = ['approve', 'signature', 'permit'];
+    const DEPOSIT_STEP_IDS = ['deposit', 'bridge', 'swap', 'transaction'];
+
+    for (const step of steps) {
+      const items = step.items || [];
+      if (!items.length) continue;
+      const txData = items[0].data || {};
+      const stepTx: StepTxData = {
+        to: txData.to || '',
+        data: txData.data || '0x',
+        value: txData.value || '0',
+      };
+      const stepId = (step.id || '').toLowerCase();
+
+      if (APPROVE_STEP_IDS.includes(stepId) || step.kind === 'signature') {
+        approveTx = stepTx;
+        log('INFO', `  Step "${step.id}" (kind: ${step.kind || 'n/a'}): classified as APPROVE → ${stepTx.to.slice(0, 10)}...`);
+      } else if (DEPOSIT_STEP_IDS.includes(stepId)) {
+        depositTx = stepTx;
+        requestId = step.requestId || requestId;
+        log('INFO', `  Step "${step.id}" (kind: ${step.kind || 'n/a'}): classified as DEPOSIT → ${stepTx.to.slice(0, 10)}...`);
+      } else {
+        log('WARN', `  Step "${step.id}" (kind: ${step.kind || 'n/a'}): UNKNOWN step type, treating as deposit candidate → ${stepTx.to.slice(0, 10)}...`);
+        depositTx = stepTx;
+        requestId = step.requestId || requestId;
+      }
+    }
+
+    if (!depositTx) {
+      if (steps.length === 1 && steps[0].items?.length) {
+        const txData = steps[0].items[0].data || {};
+        depositTx = {
+          to: txData.to || '',
+          data: txData.data || '0x',
+          value: txData.value || '0',
+        };
+        requestId = steps[0].requestId || '';
+        log('INFO', `  Single-step quote: treating as deposit to ${depositTx.to.slice(0, 10)}...`);
+      } else {
+        log('ERROR', 'Could not find deposit step in Relay quote. Raw steps:');
+        for (const step of steps) {
+          log('ERROR', `  id=${step.id}, kind=${step.kind}, requestId=${step.requestId}, items=${(step.items || []).length}`);
+        }
+        return null;
+      }
+    }
+
     return {
-      requestId: steps[0].requestId || '',
+      requestId,
       amountIn: amount6dec,
       amountOut: BigInt(data.details?.currencyOut?.amount || '0'),
       feeUsd: parseFloat(data.fees?.gas?.amountUsd || '0'),
-      txData: { to: txData.to || '', data: txData.data || '0x', value: txData.value || '0' },
+      approveTx,
+      depositTx,
       timeEstimateSeconds: data.details?.timeEstimate || 120,
     };
   } catch (error) {
@@ -410,6 +470,83 @@ async function withdrawFromProxyToEOA(
 }
 
 // =============================================================================
+// APPROVE HELPER: Use Relay-provided approve tx or build manual one
+// =============================================================================
+
+async function executeApproveTx(
+  wallet: any,
+  publicClient: ReturnType<typeof createPublicClient>,
+  quote: BridgeQuote
+): Promise<{ success: boolean; error?: string }> {
+  if (quote.approveTx) {
+    log('INFO', 'Using Relay-provided approve transaction...');
+    try {
+      const approveHash = await wallet.sendTransaction({
+        to: quote.approveTx.to as Hex,
+        data: quote.approveTx.data as Hex,
+        value: BigInt(quote.approveTx.value || '0'),
+        gas: BigInt(100_000),
+      });
+      log('INFO', `Approval tx sent: ${approveHash}`);
+
+      log('INFO', 'Waiting for approval to be mined...');
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: approveHash,
+        timeout: 120_000,
+        pollingInterval: 3_000,
+      });
+
+      if (receipt.status === 'reverted') {
+        log('ERROR', 'Approval transaction reverted on-chain');
+        return { success: false, error: 'Approval transaction reverted' };
+      }
+
+      log('INFO', `✅ Approval confirmed in block ${receipt.blockNumber} (gas used: ${receipt.gasUsed})`);
+      return { success: true };
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      log('ERROR', 'Approval failed', errMsg);
+      return { success: false, error: `Approval failed: ${errMsg}` };
+    }
+  } else {
+    log('INFO', 'No Relay approve step — building manual approve for deposit contract...');
+    const approveData = encodeFunctionData({
+      abi: ERC20_ABI,
+      functionName: 'approve',
+      args: [quote.depositTx.to as Hex, quote.amountIn],
+    });
+
+    try {
+      const approveHash = await wallet.sendTransaction({
+        to: USDC_E_POLYGON as Hex,
+        data: approveData as Hex,
+        gas: BigInt(100_000),
+      });
+      log('INFO', `Manual approval tx sent: ${approveHash}`);
+
+      log('INFO', 'Waiting for approval to be mined...');
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: approveHash,
+        timeout: 120_000,
+        pollingInterval: 3_000,
+      });
+
+      if (receipt.status === 'reverted') {
+        log('ERROR', 'Manual approval transaction reverted on-chain');
+        return { success: false, error: 'Manual approval transaction reverted' };
+      }
+
+      log('INFO', `✅ Manual approval confirmed in block ${receipt.blockNumber} (gas used: ${receipt.gasUsed})`);
+      return { success: true };
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      log('ERROR', 'Manual approval failed', errMsg);
+      return { success: false, error: `Manual approval failed: ${errMsg}` };
+    }
+  }
+}
+
+// =============================================================================
 // MAIN FLOW: Safe → EOA → Bridge to Base
 // =============================================================================
 
@@ -506,7 +643,7 @@ async function withdrawAndBridge(
     return { success: false, error: 'Failed to get Relay bridge quote' };
   }
   
-  log('INFO', `Bridge quote: in=$${Number(quote.amountIn) / 1e6}, out=$${Number(quote.amountOut) / 1e6}, fee=$${quote.feeUsd.toFixed(4)}`);
+  log('INFO', `Bridge quote: in=$${formatUnits(quote.amountIn, 6)}, out=$${formatUnits(quote.amountOut, 6)}, fee=$${quote.feeUsd.toFixed(4)}`);
   
   const wallet = createWalletClient({
     account,
@@ -519,39 +656,10 @@ async function withdrawAndBridge(
     transport: http(POLYGON_RPC_URL),
   });
 
-  // Step 2a: Approve USDC.e for bridge contract
-  log('INFO', 'Approving USDC.e for Relay bridge...');
-  const approveData = encodeFunctionData({
-    abi: ERC20_ABI,
-    functionName: 'approve',
-    args: [quote.txData.to as Hex, quote.amountIn],
-  });
-  
-  try {
-    const approveHash = await wallet.sendTransaction({
-      to: USDC_E_POLYGON as Hex,
-      data: approveData as Hex,
-      gas: BigInt(100_000),
-    });
-    log('INFO', `Approval tx sent: ${approveHash}`);
-    
-    log('INFO', 'Waiting for approval to be mined...');
-    const approveReceipt = await publicClient.waitForTransactionReceipt({
-      hash: approveHash,
-      timeout: 120_000,
-      pollingInterval: 3_000,
-    });
-    
-    if (approveReceipt.status === 'reverted') {
-      log('ERROR', 'Approval transaction reverted on-chain');
-      return { success: false, error: 'Approval transaction reverted' };
-    }
-    
-    log('INFO', `✅ Approval confirmed in block ${approveReceipt.blockNumber} (gas used: ${approveReceipt.gasUsed})`);
-  } catch (error: unknown) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    log('ERROR', 'Approval failed', errMsg);
-    return { success: false, error: `Approval failed: ${errMsg}` };
+  // Step 2a: Execute approve (use Relay-provided approve tx if available, else manual)
+  const approveResult = await executeApproveTx(wallet, publicClient, quote);
+  if (!approveResult.success) {
+    return { success: false, error: approveResult.error };
   }
   
   // Step 2b: Execute bridge deposit (with retry)
@@ -572,12 +680,21 @@ async function withdrawAndBridge(
         }
         currentQuote = freshQuote;
         log('INFO', `Fresh quote: in=$${formatUnits(currentQuote.amountIn, 6)}, out=$${formatUnits(currentQuote.amountOut, 6)}`);
+        
+        if (currentQuote.approveTx) {
+          log('INFO', 'Fresh quote includes new approve step, executing...');
+          const retryApprove = await executeApproveTx(wallet, publicClient, currentQuote);
+          if (!retryApprove.success) {
+            log('ERROR', `Retry approve failed: ${retryApprove.error}`);
+            continue;
+          }
+        }
       }
       
       const bridgeTxHash = await wallet.sendTransaction({
-        to: currentQuote.txData.to as Hex,
-        data: currentQuote.txData.data as Hex,
-        value: BigInt(currentQuote.txData.value || '0'),
+        to: currentQuote.depositTx.to as Hex,
+        data: currentQuote.depositTx.data as Hex,
+        value: BigInt(currentQuote.depositTx.value || '0'),
         gas: BigInt(300_000),
       });
       log('INFO', `Bridge tx sent: ${bridgeTxHash}`);
@@ -763,7 +880,7 @@ async function main(): Promise<void> {
         process.exit(1);
       }
       
-      log('INFO', `Bridge quote: in=$${Number(quote.amountIn) / 1e6}, out=$${Number(quote.amountOut) / 1e6}, fee=$${quote.feeUsd.toFixed(4)}`);
+      log('INFO', `Bridge quote: in=$${formatUnits(quote.amountIn, 6)}, out=$${formatUnits(quote.amountOut, 6)}, fee=$${quote.feeUsd.toFixed(4)}`);
       
       const wallet = createWalletClient({
         account,
@@ -776,38 +893,10 @@ async function main(): Promise<void> {
         transport: http(POLYGON_RPC_URL),
       });
 
-      // Approve USDC.e for bridge
-      log('INFO', 'Approving USDC.e for Relay bridge...');
-      const approveData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: 'approve',
-        args: [quote.txData.to as Hex, quote.amountIn],
-      });
-      
-      try {
-        const approveHash = await wallet.sendTransaction({
-          to: USDC_E_POLYGON as Hex,
-          data: approveData as Hex,
-          gas: BigInt(100_000),
-        });
-        log('INFO', `Approval tx sent: ${approveHash}`);
-        
-        log('INFO', 'Waiting for approval to be mined...');
-        const approveReceipt = await publicClient.waitForTransactionReceipt({
-          hash: approveHash,
-          timeout: 120_000,
-          pollingInterval: 3_000,
-        });
-        
-        if (approveReceipt.status === 'reverted') {
-          log('ERROR', 'Approval transaction reverted on-chain');
-          process.exit(1);
-        }
-        
-        log('INFO', `✅ Approval confirmed in block ${approveReceipt.blockNumber} (gas used: ${approveReceipt.gasUsed})`);
-      } catch (error: unknown) {
-        const errMsg = error instanceof Error ? error.message : String(error);
-        log('ERROR', 'Approval failed', errMsg);
+      // Execute approve (Relay-provided or manual)
+      const approveResult = await executeApproveTx(wallet, publicClient, quote);
+      if (!approveResult.success) {
+        log('ERROR', `Approval failed: ${approveResult.error}`);
         process.exit(1);
       }
       
@@ -829,12 +918,21 @@ async function main(): Promise<void> {
               continue;
             }
             currentQuote = freshQuote;
+            
+            if (currentQuote.approveTx) {
+              log('INFO', 'Fresh quote includes new approve step, executing...');
+              const retryApprove = await executeApproveTx(wallet, publicClient, currentQuote);
+              if (!retryApprove.success) {
+                log('ERROR', `Retry approve failed: ${retryApprove.error}`);
+                continue;
+              }
+            }
           }
           
           const bridgeTxHash = await wallet.sendTransaction({
-            to: currentQuote.txData.to as Hex,
-            data: currentQuote.txData.data as Hex,
-            value: BigInt(currentQuote.txData.value || '0'),
+            to: currentQuote.depositTx.to as Hex,
+            data: currentQuote.depositTx.data as Hex,
+            value: BigInt(currentQuote.depositTx.value || '0'),
             gas: BigInt(300_000),
           });
           log('INFO', `Bridge tx sent: ${bridgeTxHash}`);
