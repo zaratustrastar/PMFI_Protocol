@@ -734,6 +734,7 @@
         <div class="pending-withdrawals hidden" id="pendingWithdrawalsSection">
             <div class="pending-title">Pending Withdrawals</div>
             <div id="pendingWithdrawalsList"></div>
+            <div class="status-msg" id="claimStatus"></div>
         </div>
         
         <!-- Action Buttons -->
@@ -1174,8 +1175,11 @@
         }
 
         async function handleMiniClaim(requestId, claimBtn) {
+            console.log('[Claim] Starting claim for requestId:', requestId, 'type:', typeof requestId);
+            
             if (!signer || !userAddress) {
-                showStatus('withdrawStatus', 'Please connect your wallet first', 'error');
+                console.log('[Claim] No signer or userAddress');
+                showStatus('claimStatus', 'Please connect your wallet first', 'error');
                 return;
             }
             
@@ -1185,36 +1189,56 @@
             try {
                 claimBtn.disabled = true;
                 claimBtn.textContent = 'Processing...';
+                showStatus('claimStatus', isExpired ? 'Reclaiming shares...' : 'Claiming withdrawal...', 'info');
                 
                 const signerVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+                console.log('[Claim] Contract created, estimating gas...');
+                
+                let gasLimit = 300000n;
+                try {
+                    if (isExpired) {
+                        gasLimit = await signerVaultContract.cancelExpiredWithdrawal.estimateGas(requestId);
+                    } else {
+                        gasLimit = await signerVaultContract.claim.estimateGas(requestId);
+                    }
+                    gasLimit = gasLimit * 150n / 100n;
+                    console.log('[Claim] Gas estimated:', gasLimit.toString());
+                } catch (gasErr) {
+                    console.warn('[Claim] Gas estimation failed, using fallback 300k:', gasErr.message);
+                }
                 
                 let tx;
                 if (isExpired) {
-                    tx = await signerVaultContract.cancelExpiredWithdrawal(requestId);
+                    tx = await signerVaultContract.cancelExpiredWithdrawal(requestId, { gasLimit });
                 } else {
-                    tx = await signerVaultContract.claim(requestId);
+                    tx = await signerVaultContract.claim(requestId, { gasLimit });
                 }
+                console.log('[Claim] Transaction sent:', tx.hash);
                 
+                showStatus('claimStatus', 'Transaction sent, waiting for confirmation...', 'info');
                 try {
                     await readProvider.waitForTransaction(tx.hash, 1, 120000);
                 } catch (receiptErr) {
-                    console.warn('Receipt polling failed (tx likely succeeded):', receiptErr.message);
+                    console.warn('[Claim] Receipt polling failed (tx likely succeeded):', receiptErr.message);
                     await new Promise(r => setTimeout(r, 5000));
                 }
                 
-                showStatus('withdrawStatus', isExpired ? 'Shares reclaimed!' : 'Withdrawal claimed!', 'success');
+                showStatus('claimStatus', isExpired ? 'Shares reclaimed!' : 'Withdrawal claimed!', 'success');
+                console.log('[Claim] Success!');
                 await updateUserPosition();
                 await loadPendingWithdrawals();
                 
-                setTimeout(() => hideStatus('withdrawStatus'), 3000);
+                setTimeout(() => hideStatus('claimStatus'), 5000);
                 
             } catch (error) {
-                console.error('Claim error:', error);
+                console.error('[Claim] Error:', error);
                 let errorMsg = error.reason || error.message || 'Unknown error';
                 if (errorMsg.includes('Insufficient buffer') || errorMsg.includes('Not enough USDC')) {
                     errorMsg = 'Not enough USDC in vault buffer. Try again later.';
+                } else if (errorMsg.includes('user rejected') || errorMsg.includes('denied')) {
+                    errorMsg = 'Transaction was cancelled.';
                 }
-                showStatus('withdrawStatus', 'Claim failed: ' + errorMsg, 'error');
+                showStatus('claimStatus', 'Claim failed: ' + errorMsg, 'error');
             } finally {
                 claimBtn.disabled = false;
                 claimBtn.textContent = originalText;
