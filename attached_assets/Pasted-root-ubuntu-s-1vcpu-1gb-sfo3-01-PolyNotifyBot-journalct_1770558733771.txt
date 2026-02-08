@@ -1,0 +1,604 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# journalctl -u withdrawal-servicer --since "30 minutes ago" --no-pager
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:12:14
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:13:14
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:14:14
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:15:15
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:16:15
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:17:15
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:18:15
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:19:16
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:20:16
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:21:16
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:22:16
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:23:16
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:24:17
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:25:17
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:26:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:26:17
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:27:17
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:28:18
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:29:18
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:30:18
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 0.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 0
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:31:18
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 10.000000
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 1
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Next withdrawal index: 2
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Iterating 1 pending requests...
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Request #2: 10.0000 shares, $5.94 locked
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Checked 1 requests, found 1 pending, total locked: $5.94
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Actual usdcLocked from queue: $5.94
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $5.94
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $0.93
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.93
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ⚠️ Shortfall $0.93 < $5.0 minimum, bumping to $5.0
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ⚠️  WITHDRAWAL NEEDED: $5.00 (includes slippage buffer)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 On-chain USDC (Polygon RPC): $0.06
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ CLOB confirms: $0.06
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Top positions (from bot_v7):
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       1. Yes: 14.99 tokens, $1.50
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       2. Yes: 69.17 tokens, $0.69
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       3. Yes: 80.00 tokens, $0.59
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       4. No: 85.00 tokens, $0.42
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       5. Yes: 55.62 tokens, $0.40
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 PM balances: cash=$0.06, positions=$7.89
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 Polymarket:
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Cash: $0.06
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Positions (NAV): $7.89
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Liquidatable: $7.89 (VWAP)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 On-chain USDC (Polygon RPC): $0.06
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ CLOB confirms: $0.06
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Top positions (from bot_v7):
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       1. Yes: 14.99 tokens, $1.50
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       2. Yes: 69.17 tokens, $0.69
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       3. Yes: 80.00 tokens, $0.59
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       4. No: 85.00 tokens, $0.42
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       5. Yes: 55.62 tokens, $0.40
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 PM balances: cash=$0.06, positions=$7.89
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ⚠️  Cash insufficient, need to liquidate $5.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Liquidatable: $7.89
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Targeting: $5.00 (min $5.0)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 On-chain USDC (Polygon RPC): $0.06
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ CLOB confirms: $0.06
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Top positions (from bot_v7):
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       1. Yes: 14.99 tokens, $1.50
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       2. Yes: 69.17 tokens, $0.69
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       3. Yes: 80.00 tokens, $0.59
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       4. No: 85.00 tokens, $0.42
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       5. Yes: 55.62 tokens, $0.40
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 PM balances: cash=$0.06, positions=$7.89
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 🔥 LIQUIDATE V7.3.4: Need $5.00 USDC (capped from $5.00)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Initial PM cash: $0.06
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    usdcLocked cap: $5.00 (will not exceed)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    💵 Partial cash $0.06, reducing target from $5.00
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📉 New liquidation target: $4.94
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 ROUND 1: Still need $4.94
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📡 Requesting liquidation plan from bot_v7...
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Got plan: 5 legs, expected $3.41
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Plan 82f5fc8c: 5 legs, expected $3.41, shortfall $1.54
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 14.99 tokens @ limit $0.0990
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.1000 (limit: $0.0990)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 14.99 tokens (~$1.50) [limit: $0.0990]
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Response: status=matched, takingAmount=1.499, makingAmount=14.99
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ MARKET SELL filled: $1.50 USDC (~14.99 tokens, -1.0% slip)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Filled: $1.50 USDC (14.99 tokens)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Total: $1.50, still need: $3.50
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 69.17 tokens @ limit $0.0099
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0100 (limit: $0.0099)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 69.17 tokens (~$0.69) [limit: $0.0099]
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Response: status=matched, takingAmount=0.6917, makingAmount=69.17
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ MARKET SELL filled: $0.69 USDC (~69.17 tokens, -1.0% slip)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Filled: $0.69 USDC (69.17 tokens)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Total: $2.19, still need: $2.81
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: No | 85.00 tokens @ limit $0.0050
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0050 (limit: $0.0050)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 85.00 tokens (~$0.42) [limit: $0.0050]
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Response: status=matched, takingAmount=0.425, makingAmount=85
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ MARKET SELL filled: $0.42 USDC (~85.00 tokens, 0.0% slip)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Filled: $0.42 USDC (85.00 tokens)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Total: $2.62, still need: $2.38
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 40.00 tokens @ limit $0.0099
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0100 (limit: $0.0099)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 40.00 tokens (~$0.40) [limit: $0.0099]
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Response: status=matched, takingAmount=0.4, makingAmount=40
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ MARKET SELL filled: $0.40 USDC (~40.00 tokens, -1.0% slip)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Filled: $0.40 USDC (40.00 tokens)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Total: $3.02, still need: $1.98
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 25.99 tokens @ limit $0.0148
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0150 (limit: $0.0148)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 25.99 tokens (~$0.39) [limit: $0.0148]
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Response: status=matched, takingAmount=0.38985, makingAmount=25.99
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ MARKET SELL filled: $0.39 USDC (~25.99 tokens, -1.4% slip)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Filled: $0.39 USDC (25.99 tokens)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Total: $3.41, still need: $1.59
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 ROUND 2: Still need $1.59
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📡 Requesting liquidation plan from bot_v7...
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Got plan: 5 legs, expected $1.58
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Plan b373b151: 5 legs, expected $1.58, shortfall $0.01
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 25.99 tokens @ limit $0.0148
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0150 (limit: $0.0148)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 25.99 tokens (~$0.39) [limit: $0.0148]
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ❌ Market sell failed: Unknown error
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Full response: {'error': 'not enough balance / allowance'}
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ❌ Order failed
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 35.00 tokens @ limit $0.0099
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0100 (limit: $0.0099)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 35.00 tokens (~$0.35) [limit: $0.0099]
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Response: status=matched, takingAmount=0.35, makingAmount=35
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ MARKET SELL filled: $0.35 USDC (~35.00 tokens, -1.0% slip)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Filled: $0.35 USDC (35.00 tokens)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Total: $3.76, still need: $1.24
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 50.00 tokens @ limit $0.0059
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0060 (limit: $0.0059)
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 50.00 tokens (~$0.30) [limit: $0.0059]
+Feb 08 13:34:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Response: status=matched, takingAmount=0.3, makingAmount=50
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ MARKET SELL filled: $0.30 USDC (~50.00 tokens, -1.7% slip)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Filled: $0.30 USDC (50.00 tokens)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Total: $4.06, still need: $0.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 40.00 tokens @ limit $0.0069
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0070 (limit: $0.0069)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 40.00 tokens (~$0.28) [limit: $0.0069]
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Response: status=matched, takingAmount=0.28, makingAmount=40
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ MARKET SELL filled: $0.28 USDC (~40.00 tokens, -1.4% slip)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Filled: $0.28 USDC (40.00 tokens)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Total: $4.34, still need: $0.66
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 20.00 tokens @ limit $0.0129
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0130 (limit: $0.0129)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 20.00 tokens (~$0.26) [limit: $0.0129]
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Response: status=matched, takingAmount=0.26, makingAmount=20
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ MARKET SELL filled: $0.26 USDC (~20.00 tokens, -0.8% slip)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Filled: $0.26 USDC (20.00 tokens)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Total: $4.60, still need: $0.40
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 ROUND 3: Still need $0.40
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📡 Requesting liquidation plan from bot_v7...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Got plan: 2 legs, expected $0.40
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Plan 76632ba7: 2 legs, expected $0.40, shortfall $0.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 20.00 tokens @ limit $0.0129
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0130 (limit: $0.0129)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 20.00 tokens (~$0.26) [limit: $0.0129]
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ❌ Market sell failed: Unknown error
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Full response: {'error': 'not enough balance / allowance'}
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ❌ Order failed
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 28.89 tokens @ limit $0.0050
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0050 (limit: $0.0050)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 28.89 tokens (~$0.14) [limit: $0.0050]
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Response: status=matched, takingAmount=0.14445, makingAmount=28.89
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ MARKET SELL filled: $0.14 USDC (~28.89 tokens, 0.0% slip)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Filled: $0.14 USDC (28.89 tokens)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Total: $4.74, still need: $0.26
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 ROUND 4: Still need $0.26
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📡 Requesting liquidation plan from bot_v7...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Got plan: 2 legs, expected $0.26
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Plan fd9e2d71: 2 legs, expected $0.26, shortfall $0.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 49.99 tokens @ limit $0.0050
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Fresh best_bid: $0.0050 (limit: $0.0050)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📤 Creating market sell: 49.99 tokens (~$0.25) [limit: $0.0050]
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ❌ Market sell failed: Unknown error
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📋 Full response: {'error': 'not enough balance / allowance'}
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ❌ Order failed
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    🎯 Leg: Yes | 0.91 tokens @ limit $0.0109
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    💵 New cash $5.57 detected, reducing target
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Cash covers need, stopping!
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 On-chain USDC (Polygon RPC): $10.37
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ CLOB confirms: $10.37
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 Top positions (from bot_v7):
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       1. Yes: 80.00 tokens, $0.59
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       2. Yes: 55.62 tokens, $0.40
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       3. Yes: 30.56 tokens, $0.26
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       4. Yes: 24.38 tokens, $0.26
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       5. Yes: 21.69 tokens, $0.24
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📊 PM balances: cash=$10.37, positions=$3.12
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💸 WITHDRAW: $5.00 from PM → Vault
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ❌ Withdraw script timed out (10 min)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:47:11
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 10.000000
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 1
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Next withdrawal index: 2
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Iterating 1 pending requests...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Request #2: 10.0000 shares, $5.94 locked
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Checked 1 requests, found 1 pending, total locked: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Actual usdcLocked from queue: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $5.02
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $15.91 / $50000.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $0.93
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.93
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ⚠️ Shortfall $0.93 < $5.0 minimum, bumping to $5.0
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ⚠️  WITHDRAWAL NEEDED: $5.00 (includes slippage buffer)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 🔄 Found $5.00 USDC in EOA from previous attempt - bridging first
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 🔄 RESUME BRIDGE: $5.00 from EOA → Vault
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Output (first 2000 chars): [dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:20.286Z 📝 [SafeProxyWithdraw] === Bridge EOA → Base Vault ===
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:20.366Z 📝 [SafeProxyWithdraw] EOA: 0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:20.366Z 📝 [SafeProxyWithdraw] Destination: 0xbF0944893e6bd445F715dE76CD6343B1d551D41B
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:20.542Z 📝 [SafeProxyWithdraw] EOA USDC.e balance: $5.000000
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:20.543Z 📝 [SafeProxyWithdraw] Will bridge: $5.000000
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:20.543Z 📝 [SafeProxyWithdraw] Getting Relay quote: $5 from 0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0 to 0xbF0944893e6bd445F715dE76CD6343B1d551D41B
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:21.145Z 📝 [SafeProxyWithdraw] Bridge quote: in=$5, out=$4.944319, fee=$0.0057
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:21.145Z 📝 [SafeProxyWithdraw] Approving USDC.e for Relay bridge...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:21.328Z 📝 [SafeProxyWithdraw] Approval tx: 0xb7621c1fd51ea6b10b18b02a290a0184d7512a65b3b282debb0b6b5be487a8c8
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:21.328Z 📝 [SafeProxyWithdraw] Waiting for approval confirmation...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:26.330Z 📝 [SafeProxyWithdraw] Executing Relay bridge deposit...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:26.533Z 📝 [SafeProxyWithdraw] Bridge tx submitted: 0xd8e893e4b2bba075d57cb78f1350bed65fd73caf0014140a1be3f90ec3f800b9
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:26.533Z 📝 [SafeProxyWithdraw] Waiting for bridge tx confirmation...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:36.539Z 📝 [SafeProxyWithdraw] Polling for bridge completion...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:36.540Z 📝 [SafeProxyWithdraw] Polling bridge status for 0xfa956c32642391af9f...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:36.652Z 📝 [SafeProxyWithdraw] ✅ Bridge complete!
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ BRIDGE COMPLETE
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    TX: 0xd8e893e4b2bba075d57cb78f1350bed65fd73caf0014140a1be3f90ec3f800b9
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Bridged: $5.00 USDC
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Destination: 0xbF0944893e6bd445F715dE76CD6343B1d551D41B
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:36.652Z 📝 [SafeProxyWithdraw] Notifying bot of withdrawal: $5.00 (5000000 raw)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 2026-02-08T13:47:36.663Z 📝 [SafeProxyWithdraw] ✅ Bot notified - withdrawn_back now: $25.91
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ EOA bridge covered withdrawal need
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:48:36
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    📡 Found 1 USDC transfers to vault since block 41884524
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    ✅ Bridge CONFIRMED via event: $5.00 (tx: a0c68d0a4f8db8e9...)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 10.000000
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 1
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Next withdrawal index: 2
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Iterating 1 pending requests...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Request #2: 10.0000 shares, $5.94 locked
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Checked 1 requests, found 1 pending, total locked: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Actual usdcLocked from queue: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $9.96
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $20.91 / $50000.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-4.02
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:49:37
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 10.000000
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 1
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Next withdrawal index: 2
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Iterating 1 pending requests...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Request #2: 10.0000 shares, $5.94 locked
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Checked 1 requests, found 1 pending, total locked: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Actual usdcLocked from queue: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $9.96
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Daily withdrawn: $20.91 / $50000.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (base): $-4.02
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Needed (with 0.5% slippage): $0.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ✅ No action needed (no shortfall)
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💤 Sleeping 60s...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 💰 WITHDRAWAL SERVICER V7.3 - 2026-02-08 13:50:37
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: ============================================================
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV from bot (cached): $1.000000
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending shares: 10.000000
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals count: 1
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Next withdrawal index: 2
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Iterating 1 pending requests...
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:       Request #2: 10.0000 shares, $5.94 locked
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Checked 1 requests, found 1 pending, total locked: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Actual usdcLocked from queue: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]: 📊 STATUS:
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Pending withdrawals: $5.94
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    Vault USDC (Base): $9.96
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    In-transit USDC: $0.00
+Feb 08 13:50:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2417391]:    NAV: $1.000000/share
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

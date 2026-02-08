@@ -1,0 +1,918 @@
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.75
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.11
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.6% (threshold: 40%). NAV reflects actual values.
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.69
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 12:59:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.71
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.77
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.09
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.5% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.71
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.73
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.79
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.07
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.4% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.73
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:01:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.73
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.79
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.07
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.4% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.73
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:02:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.71
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.77
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.09
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.5% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.71
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:03:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.71
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.77
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.09
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.5% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.71
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:04:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.71
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.77
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.09
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.5% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.71
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:05:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.71
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.77
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.09
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.5% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.71
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:06:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.71
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.77
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.09
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.5% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.71
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:08:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.71
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.77
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.09
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.5% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.71
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:09:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.71
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.77
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.09
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.5% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.71
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:10:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.71
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.77
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.09
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.5% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.71
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.71
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.77
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.09
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.5% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.71
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:12:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.59
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.64
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.21
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 65.1% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.59
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:13:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.38
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.44
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.42
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 66.0% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.38
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.38
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.44
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.42
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 66.0% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.38
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:15:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.41
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.47
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.39
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 65.9% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.41
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.43
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.49
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.37
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 65.8% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.43
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.43
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.49
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.37
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 65.8% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.43
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:18:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.43
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.49
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.37
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 65.8% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.43
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:19:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.39
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.45
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.41
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 66.0% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.39
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:20:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.39
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.45
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.41
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 66.0% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.39
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:21:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.39
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.44
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $9.41
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 66.0% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.39
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:22:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.82
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.88
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.98
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 64.0% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.82
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:24:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.89
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.95
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.91
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 63.7% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.89
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:25:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.84
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.90
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.96
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 63.9% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.84
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:26:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.89
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.95
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.91
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 63.7% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.89
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.85
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.91
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.95
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 63.8% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.85
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:28:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.89
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.94
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.91
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 63.7% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.89
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:29:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.89
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.94
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.91
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 63.7% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.89
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:30:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.89
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.94
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.91
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 63.7% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.89
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:31:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.89
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.94
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.91
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 63.7% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.89
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:31:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $0.06
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $7.89
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $7.94
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $55.55
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.91
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 63.7% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $0.06
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $5.07
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $7.89
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:32:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $3.07
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $5.65
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $8.72
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $53.52
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.14
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 60.1% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $3.07
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $8.09
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $5.65
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:33:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $4.39
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $4.10
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $8.49
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $21.87
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $49.46
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $8.36
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 61.2% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $4.39
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $9.41
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $4.10
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:35:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $5.58
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $10.37
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $3.12
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $19.07
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $0.00
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $27.45
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $45.98
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $3.37
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $10.37
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $15.39
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $3.12
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $5.58
+Feb 08 13:36:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+--
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $5.37
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $3.12
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $8.49
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $4.00
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $27.45
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $45.98
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $13.95
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 69.1% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $5.37
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $10.39
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $3.12
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $5.37
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $3.12
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $8.49
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $10.00
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $27.45
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $45.98
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $13.95
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 69.1% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $5.37
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $10.39
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $3.12
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $5.37
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $3.16
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $8.53
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $15.90
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $27.45
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $45.98
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $13.91
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 68.9% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $5.37
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $10.39
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $3.16
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:39:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $5.37
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $3.16
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $8.53
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $19.00
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $27.45
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $45.98
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $13.91
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 68.9% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $5.37
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $10.39
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $3.16
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:40:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $5.37
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $3.14
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $8.51
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $24.90
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $27.45
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $45.98
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $13.93
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 69.0% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $5.37
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $10.39
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $3.14
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
+--
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 Asset Breakdown (V7.4 - ACTUAL LIQUID VALUE for NAV):
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • In-flight (deposit addr): $0.00
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Credited cash:            $5.37
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (liquidation):  $3.14
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • TOTAL ASSETS (NAV):       $8.51
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    ─────────────────────────────
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Reserved (open orders):   $30.60
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault buffer (on-chain):  $5.02
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Expected assets (chain):  $27.45
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Positions (cost basis):   $45.98
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Pending (monitoring):     $13.93
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    (V7.4: NAV = actual liquid value, pendingCredit excluded)
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: ⚠️ SAFETY WARNING: Significant loss detected: 69.0% (threshold: 40%). NAV reflects actual values.
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]: 📊 V7.5 Signed Breakdown (SINGLE SOURCE OF TRUTH):
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • PM Cash (raw):            $5.37
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • Vault Buffer:             $5.02
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedCash (signed):    $10.39
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • creditedPositions:        $3.14
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • pendingCredit (V7.4=0):   $0.00
+Feb 08 13:43:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2525935]:    • inFlight:                 $0.00
