@@ -9,7 +9,7 @@
  * Flow: PM Safe (Polygon) → EOA (Polygon) → Relay Bridge → Vault (Base)
  */
 
-import { createWalletClient, http, encodeFunctionData, parseUnits, formatUnits, type Hex } from 'viem';
+import { createWalletClient, createPublicClient, http, encodeFunctionData, parseUnits, formatUnits, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { polygon } from 'viem/chains';
 import { RelayClient } from '@polymarket/builder-relayer-client';
@@ -508,6 +508,17 @@ async function withdrawAndBridge(
   
   log('INFO', `Bridge quote: in=$${Number(quote.amountIn) / 1e6}, out=$${Number(quote.amountOut) / 1e6}, fee=$${quote.feeUsd.toFixed(4)}`);
   
+  const wallet = createWalletClient({
+    account,
+    chain: polygon,
+    transport: http(POLYGON_RPC_URL),
+  });
+
+  const publicClient = createPublicClient({
+    chain: polygon,
+    transport: http(POLYGON_RPC_URL),
+  });
+
   // Step 2a: Approve USDC.e for bridge contract
   log('INFO', 'Approving USDC.e for Relay bridge...');
   const approveData = encodeFunctionData({
@@ -516,80 +527,119 @@ async function withdrawAndBridge(
     args: [quote.txData.to as Hex, quote.amountIn],
   });
   
-  const wallet = createWalletClient({
-    account,
-    chain: polygon,
-    transport: http(POLYGON_RPC_URL),
-  });
-  
   try {
-    // Use explicit gas limit to avoid bad RPC gas estimates
     const approveHash = await wallet.sendTransaction({
       to: USDC_E_POLYGON as Hex,
       data: approveData as Hex,
-      gas: BigInt(100_000), // 100k gas is plenty for ERC20 approve
+      gas: BigInt(100_000),
     });
-    log('INFO', `Approval tx: ${approveHash}`);
+    log('INFO', `Approval tx sent: ${approveHash}`);
     
-    // Wait for approval to confirm
-    log('INFO', 'Waiting for approval confirmation...');
-    await new Promise(r => setTimeout(r, 5000));
+    log('INFO', 'Waiting for approval to be mined...');
+    const approveReceipt = await publicClient.waitForTransactionReceipt({
+      hash: approveHash,
+      timeout: 120_000,
+      pollingInterval: 3_000,
+    });
+    
+    if (approveReceipt.status === 'reverted') {
+      log('ERROR', 'Approval transaction reverted on-chain');
+      return { success: false, error: 'Approval transaction reverted' };
+    }
+    
+    log('INFO', `✅ Approval confirmed in block ${approveReceipt.blockNumber} (gas used: ${approveReceipt.gasUsed})`);
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : String(error);
     log('ERROR', 'Approval failed', errMsg);
     return { success: false, error: `Approval failed: ${errMsg}` };
   }
   
-  // Step 2b: Execute bridge deposit
-  log('INFO', 'Executing Relay bridge deposit...');
+  // Step 2b: Execute bridge deposit (with retry)
+  const MAX_BRIDGE_ATTEMPTS = 2;
   
-  try {
-    // Use explicit gas limit to avoid bad RPC gas estimates
-    const bridgeTxHash = await wallet.sendTransaction({
-      to: quote.txData.to as Hex,
-      data: quote.txData.data as Hex,
-      value: BigInt(quote.txData.value || '0'),
-      gas: BigInt(300_000), // 300k gas for bridge contract interaction
-    });
-    log('INFO', `Bridge tx submitted: ${bridgeTxHash}`);
+  for (let attempt = 1; attempt <= MAX_BRIDGE_ATTEMPTS; attempt++) {
+    log('INFO', `Executing Relay bridge deposit (attempt ${attempt}/${MAX_BRIDGE_ATTEMPTS})...`);
     
-    // Wait for bridge tx to confirm
-    log('INFO', 'Waiting for bridge tx confirmation...');
-    await new Promise(r => setTimeout(r, 10000));
-    
-    // Poll for bridge completion
-    log('INFO', 'Polling for bridge completion...');
-    const bridgeResult = await pollBridgeStatus(quote.requestId);
-    
-    if (bridgeResult.success) {
-      log('INFO', '\n✅ FULL WITHDRAWAL COMPLETE');
-      log('INFO', `   Step 1 (Safe → EOA): ${withdrawResult.txHash}`);
-      log('INFO', `   Step 2 (EOA → Base): ${bridgeTxHash}`);
-      log('INFO', `   Bridged: $${bridgeAmount.toFixed(2)} USDC`);
-      log('INFO', `   Destination: ${TREASURY_ADDRESS}`);
+    try {
+      let currentQuote = quote;
       
-      // Notify bot to update withdrawn_back tracker
-      await notifyBotWithdrawalBack(bridgeAmount);
+      if (attempt > 1) {
+        log('INFO', 'Getting fresh bridge quote for retry...');
+        const freshQuote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeAmount);
+        if (!freshQuote) {
+          log('ERROR', 'Failed to get fresh quote for retry');
+          continue;
+        }
+        currentQuote = freshQuote;
+        log('INFO', `Fresh quote: in=$${formatUnits(currentQuote.amountIn, 6)}, out=$${formatUnits(currentQuote.amountOut, 6)}`);
+      }
       
-      return {
-        success: true,
-        txHash: bridgeTxHash,
-        bridgeRequestId: quote.requestId,
-      };
-    } else {
-      log('WARN', `Bridge status: ${bridgeResult.message}`);
-      log('INFO', 'Bridge may still be in progress - check Relay dashboard');
-      return {
-        success: true, // Tx submitted, may still complete
-        txHash: bridgeTxHash,
-        bridgeRequestId: quote.requestId,
-      };
+      const bridgeTxHash = await wallet.sendTransaction({
+        to: currentQuote.txData.to as Hex,
+        data: currentQuote.txData.data as Hex,
+        value: BigInt(currentQuote.txData.value || '0'),
+        gas: BigInt(300_000),
+      });
+      log('INFO', `Bridge tx sent: ${bridgeTxHash}`);
+      
+      log('INFO', 'Waiting for bridge tx to be mined...');
+      const bridgeReceipt = await publicClient.waitForTransactionReceipt({
+        hash: bridgeTxHash,
+        timeout: 120_000,
+        pollingInterval: 3_000,
+      });
+      
+      if (bridgeReceipt.status === 'reverted') {
+        log('ERROR', `Bridge tx reverted on-chain (attempt ${attempt})`);
+        if (attempt < MAX_BRIDGE_ATTEMPTS) {
+          log('INFO', 'Will retry with fresh quote in 5s...');
+          await new Promise(r => setTimeout(r, 5000));
+          continue;
+        }
+        return { success: false, error: 'Bridge transaction reverted after all retries' };
+      }
+      
+      log('INFO', `✅ Bridge tx confirmed in block ${bridgeReceipt.blockNumber} (gas used: ${bridgeReceipt.gasUsed})`);
+      
+      log('INFO', 'Polling for cross-chain bridge completion...');
+      const bridgeResult = await pollBridgeStatus(currentQuote.requestId);
+      
+      if (bridgeResult.success) {
+        log('INFO', '\n✅ FULL WITHDRAWAL COMPLETE');
+        log('INFO', `   Step 1 (Safe → EOA): ${withdrawResult.txHash}`);
+        log('INFO', `   Step 2 (EOA → Base): ${bridgeTxHash}`);
+        log('INFO', `   Bridged: $${bridgeAmount.toFixed(2)} USDC`);
+        log('INFO', `   Destination: ${TREASURY_ADDRESS}`);
+        
+        await notifyBotWithdrawalBack(bridgeAmount);
+        
+        return {
+          success: true,
+          txHash: bridgeTxHash,
+          bridgeRequestId: currentQuote.requestId,
+        };
+      } else {
+        log('WARN', `Bridge status: ${bridgeResult.message}`);
+        log('INFO', 'Bridge may still be in progress - check Relay dashboard');
+        return {
+          success: true,
+          txHash: bridgeTxHash,
+          bridgeRequestId: currentQuote.requestId,
+        };
+      }
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      log('ERROR', `Bridge deposit failed (attempt ${attempt}): ${errMsg}`);
+      if (attempt < MAX_BRIDGE_ATTEMPTS) {
+        log('INFO', 'Will retry with fresh quote in 5s...');
+        await new Promise(r => setTimeout(r, 5000));
+        continue;
+      }
+      return { success: false, error: `Bridge deposit failed after ${MAX_BRIDGE_ATTEMPTS} attempts: ${errMsg}` };
     }
-  } catch (error: unknown) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    log('ERROR', 'Bridge deposit failed', errMsg);
-    return { success: false, error: `Bridge deposit failed: ${errMsg}` };
   }
+  
+  return { success: false, error: 'Bridge failed after all attempts' };
 }
 
 // =============================================================================
@@ -715,6 +765,17 @@ async function main(): Promise<void> {
       
       log('INFO', `Bridge quote: in=$${Number(quote.amountIn) / 1e6}, out=$${Number(quote.amountOut) / 1e6}, fee=$${quote.feeUsd.toFixed(4)}`);
       
+      const wallet = createWalletClient({
+        account,
+        chain: polygon,
+        transport: http(POLYGON_RPC_URL),
+      });
+
+      const publicClient = createPublicClient({
+        chain: polygon,
+        transport: http(POLYGON_RPC_URL),
+      });
+
       // Approve USDC.e for bridge
       log('INFO', 'Approving USDC.e for Relay bridge...');
       const approveData = encodeFunctionData({
@@ -723,59 +784,110 @@ async function main(): Promise<void> {
         args: [quote.txData.to as Hex, quote.amountIn],
       });
       
-      const wallet = createWalletClient({
-        account,
-        chain: polygon,
-        transport: http(POLYGON_RPC_URL),
-      });
-      
       try {
         const approveHash = await wallet.sendTransaction({
           to: USDC_E_POLYGON as Hex,
           data: approveData as Hex,
           gas: BigInt(100_000),
         });
-        log('INFO', `Approval tx: ${approveHash}`);
-        log('INFO', 'Waiting for approval confirmation...');
-        await new Promise(r => setTimeout(r, 5000));
+        log('INFO', `Approval tx sent: ${approveHash}`);
+        
+        log('INFO', 'Waiting for approval to be mined...');
+        const approveReceipt = await publicClient.waitForTransactionReceipt({
+          hash: approveHash,
+          timeout: 120_000,
+          pollingInterval: 3_000,
+        });
+        
+        if (approveReceipt.status === 'reverted') {
+          log('ERROR', 'Approval transaction reverted on-chain');
+          process.exit(1);
+        }
+        
+        log('INFO', `✅ Approval confirmed in block ${approveReceipt.blockNumber} (gas used: ${approveReceipt.gasUsed})`);
       } catch (error: unknown) {
         const errMsg = error instanceof Error ? error.message : String(error);
         log('ERROR', 'Approval failed', errMsg);
         process.exit(1);
       }
       
-      // Execute bridge
-      log('INFO', 'Executing Relay bridge deposit...');
-      try {
-        const bridgeTxHash = await wallet.sendTransaction({
-          to: quote.txData.to as Hex,
-          data: quote.txData.data as Hex,
-          value: BigInt(quote.txData.value || '0'),
-          gas: BigInt(300_000),
-        });
-        log('INFO', `Bridge tx submitted: ${bridgeTxHash}`);
-        log('INFO', 'Waiting for bridge tx confirmation...');
-        await new Promise(r => setTimeout(r, 10000));
+      // Execute bridge with retry
+      const BRIDGE_MAX_ATTEMPTS = 2;
+      let bridgeSuccess = false;
+      
+      for (let attempt = 1; attempt <= BRIDGE_MAX_ATTEMPTS; attempt++) {
+        log('INFO', `Executing Relay bridge deposit (attempt ${attempt}/${BRIDGE_MAX_ATTEMPTS})...`);
         
-        // Poll for completion
-        log('INFO', 'Polling for bridge completion...');
-        const bridgeResult = await pollBridgeStatus(quote.requestId);
-        
-        if (bridgeResult.success) {
-          console.log('\n✅ BRIDGE COMPLETE');
-          console.log(`   TX: ${bridgeTxHash}`);
-          console.log(`   Bridged: $${bridgeAmount.toFixed(2)} USDC`);
-          console.log(`   Destination: ${TREASURY_ADDRESS}`);
+        try {
+          let currentQuote = quote;
           
-          // Notify bot to update withdrawn_back tracker
-          await notifyBotWithdrawalBack(bridgeAmount);
-        } else {
-          log('WARN', `Bridge status: ${bridgeResult.message}`);
-          console.log('Bridge may still be in progress - check Relay dashboard');
+          if (attempt > 1) {
+            log('INFO', 'Getting fresh bridge quote for retry...');
+            const freshQuote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeAmount);
+            if (!freshQuote) {
+              log('ERROR', 'Failed to get fresh quote for retry');
+              continue;
+            }
+            currentQuote = freshQuote;
+          }
+          
+          const bridgeTxHash = await wallet.sendTransaction({
+            to: currentQuote.txData.to as Hex,
+            data: currentQuote.txData.data as Hex,
+            value: BigInt(currentQuote.txData.value || '0'),
+            gas: BigInt(300_000),
+          });
+          log('INFO', `Bridge tx sent: ${bridgeTxHash}`);
+          
+          log('INFO', 'Waiting for bridge tx to be mined...');
+          const bridgeReceipt = await publicClient.waitForTransactionReceipt({
+            hash: bridgeTxHash,
+            timeout: 120_000,
+            pollingInterval: 3_000,
+          });
+          
+          if (bridgeReceipt.status === 'reverted') {
+            log('ERROR', `Bridge tx reverted on-chain (attempt ${attempt})`);
+            if (attempt < BRIDGE_MAX_ATTEMPTS) {
+              log('INFO', 'Will retry with fresh quote in 5s...');
+              await new Promise(r => setTimeout(r, 5000));
+              continue;
+            }
+            process.exit(1);
+          }
+          
+          log('INFO', `✅ Bridge tx confirmed in block ${bridgeReceipt.blockNumber} (gas used: ${bridgeReceipt.gasUsed})`);
+          
+          log('INFO', 'Polling for cross-chain bridge completion...');
+          const bridgeResult = await pollBridgeStatus(currentQuote.requestId);
+          
+          if (bridgeResult.success) {
+            console.log('\n✅ BRIDGE COMPLETE');
+            console.log(`   TX: ${bridgeTxHash}`);
+            console.log(`   Bridged: $${bridgeAmount.toFixed(2)} USDC`);
+            console.log(`   Destination: ${TREASURY_ADDRESS}`);
+            
+            await notifyBotWithdrawalBack(bridgeAmount);
+          } else {
+            log('WARN', `Bridge status: ${bridgeResult.message}`);
+            console.log('Bridge may still be in progress - check Relay dashboard');
+          }
+          bridgeSuccess = true;
+          break;
+        } catch (error: unknown) {
+          const errMsg = error instanceof Error ? error.message : String(error);
+          log('ERROR', `Bridge deposit failed (attempt ${attempt}): ${errMsg}`);
+          if (attempt < BRIDGE_MAX_ATTEMPTS) {
+            log('INFO', 'Will retry with fresh quote in 5s...');
+            await new Promise(r => setTimeout(r, 5000));
+            continue;
+          }
+          process.exit(1);
         }
-      } catch (error: unknown) {
-        const errMsg = error instanceof Error ? error.message : String(error);
-        log('ERROR', 'Bridge deposit failed', errMsg);
+      }
+      
+      if (!bridgeSuccess) {
+        log('ERROR', 'Bridge failed after all attempts');
         process.exit(1);
       }
       break;
