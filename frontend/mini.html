@@ -1216,15 +1216,29 @@
                 console.log('[Claim] Transaction sent:', tx.hash);
                 
                 showStatus('claimStatus', 'Transaction sent, waiting for confirmation...', 'info');
+                let claimReceipt = null;
                 try {
-                    await readProvider.waitForTransaction(tx.hash, 1, 120000);
+                    claimReceipt = await readProvider.waitForTransaction(tx.hash, 1, 120000);
                 } catch (receiptErr) {
-                    console.warn('[Claim] Receipt polling failed (tx likely succeeded):', receiptErr.message);
-                    await new Promise(r => setTimeout(r, 5000));
+                    console.warn('[Claim] Receipt polling failed, checking manually...', receiptErr.message);
+                    await new Promise(r => setTimeout(r, 8000));
+                    try {
+                        claimReceipt = await readProvider.getTransactionReceipt(tx.hash);
+                    } catch (e2) { console.warn('[Claim] Manual receipt fetch also failed:', e2.message); }
                 }
                 
-                showStatus('claimStatus', isExpired ? 'Shares reclaimed!' : 'Withdrawal claimed!', 'success');
-                console.log('[Claim] Success!');
+                if (claimReceipt && claimReceipt.status === 0) {
+                    console.error('[Claim] Transaction reverted on-chain:', tx.hash);
+                    showStatus('claimStatus', 'Transaction failed on-chain. The claim was reverted.', 'error');
+                    return;
+                }
+                
+                if (!claimReceipt) {
+                    showStatus('claimStatus', 'Transaction sent but status unknown. Check your wallet.', 'info');
+                } else {
+                    showStatus('claimStatus', isExpired ? 'Shares reclaimed!' : 'Withdrawal claimed!', 'success');
+                }
+                console.log('[Claim] Done, receipt status:', claimReceipt?.status);
                 await updateUserPosition();
                 await loadPendingWithdrawals();
                 
@@ -1537,14 +1551,32 @@
                 } catch (e) { console.warn('Deposit gas estimate failed, using fallback:', e.message); }
                 const tx = await vaultContract.deposit(amountWei, navTuple, signedNav.signature, { gasLimit: depositGas });
                 txSent = true;
+                console.log('[Deposit] Transaction sent:', tx.hash);
+                showStatus('depositStatus', 'Transaction sent, waiting for confirmation...', 'info');
+                let depositReceipt = null;
                 try {
-                    await readProvider.waitForTransaction(tx.hash, 1, 120000);
+                    depositReceipt = await readProvider.waitForTransaction(tx.hash, 1, 120000);
                 } catch (e) {
-                    console.warn('Deposit receipt polling failed, waiting...', e.message);
-                    await new Promise(r => setTimeout(r, 5000));
+                    console.warn('Deposit receipt polling failed, checking manually...', e.message);
+                    await new Promise(r => setTimeout(r, 8000));
+                    try {
+                        depositReceipt = await readProvider.getTransactionReceipt(tx.hash);
+                    } catch (e2) { console.warn('Manual receipt fetch also failed:', e2.message); }
                 }
                 
-                showStatus('depositStatus', 'Deposit successful!', 'success');
+                if (depositReceipt && depositReceipt.status === 0) {
+                    console.error('[Deposit] Transaction reverted on-chain:', tx.hash);
+                    showStatus('depositStatus', 'Transaction failed on-chain. The deposit was reverted — no funds were taken.', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Approve & Deposit';
+                    return;
+                }
+                
+                if (!depositReceipt) {
+                    showStatus('depositStatus', 'Transaction sent but status unknown. Check your wallet for confirmation.', 'info');
+                } else {
+                    showStatus('depositStatus', 'Deposit successful!', 'success');
+                }
                 await updateUserPosition();
                 await fetchPrice();
                 
@@ -1552,17 +1584,15 @@
                     hideModal('depositModal');
                     hideStatus('depositStatus');
                     document.getElementById('depositAmount').value = '';
-                }, 2000);
+                }, 3000);
                 
             } catch (e) {
                 console.error('Deposit error:', e);
                 if (txSent) {
-                    showStatus('depositStatus', 'Transaction sent! It may take a moment to confirm.', 'success');
+                    showStatus('depositStatus', 'Transaction sent but could not confirm. Check basescan.org for tx status.', 'info');
                     setTimeout(async () => {
                         await updateUserPosition();
                         await fetchPrice();
-                        hideModal('depositModal');
-                        hideStatus('depositStatus');
                     }, 5000);
                 } else {
                     showStatus('depositStatus', 'Error: ' + (e.reason || e.message), 'error');
@@ -1630,30 +1660,46 @@
                 } catch (e) { console.warn('Withdraw gas estimate failed, using fallback:', e.message); }
                 const tx = await vaultContract.requestWithdraw(sharesWei, navTuple, signedNav.signature, { gasLimit: withdrawGas });
                 txSent = true;
+                console.log('[Withdraw] Transaction sent:', tx.hash);
+                showStatus('withdrawStatus', 'Transaction sent, waiting for confirmation...', 'info');
+                let withdrawReceipt = null;
                 try {
-                    await readProvider.waitForTransaction(tx.hash, 1, 120000);
+                    withdrawReceipt = await readProvider.waitForTransaction(tx.hash, 1, 120000);
                 } catch (e) {
-                    console.warn('Withdraw receipt polling failed, waiting...', e.message);
-                    await new Promise(r => setTimeout(r, 5000));
+                    console.warn('Withdraw receipt polling failed, checking manually...', e.message);
+                    await new Promise(r => setTimeout(r, 8000));
+                    try {
+                        withdrawReceipt = await readProvider.getTransactionReceipt(tx.hash);
+                    } catch (e2) { console.warn('Manual receipt fetch also failed:', e2.message); }
                 }
                 
-                showStatus('withdrawStatus', 'Withdrawal request submitted!', 'success');
+                if (withdrawReceipt && withdrawReceipt.status === 0) {
+                    console.error('[Withdraw] Transaction reverted on-chain:', tx.hash);
+                    showStatus('withdrawStatus', 'Transaction failed on-chain. The withdrawal was reverted.', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Request Withdrawal';
+                    return;
+                }
+                
+                if (!withdrawReceipt) {
+                    showStatus('withdrawStatus', 'Transaction sent but status unknown. Check your wallet for confirmation.', 'info');
+                } else {
+                    showStatus('withdrawStatus', 'Withdrawal request submitted!', 'success');
+                }
                 await updateUserPosition();
                 
                 setTimeout(() => {
                     hideModal('withdrawModal');
                     hideStatus('withdrawStatus');
                     document.getElementById('withdrawAmount').value = '';
-                }, 2000);
+                }, 3000);
                 
             } catch (e) {
                 console.error('Withdraw error:', e);
                 if (txSent) {
-                    showStatus('withdrawStatus', 'Transaction sent! It may take a moment to confirm.', 'success');
+                    showStatus('withdrawStatus', 'Transaction sent but could not confirm. Check basescan.org for tx status.', 'info');
                     setTimeout(async () => {
                         await updateUserPosition();
-                        hideModal('withdrawModal');
-                        hideStatus('withdrawStatus');
                     }, 5000);
                 } else {
                     showStatus('withdrawStatus', 'Error: ' + (e.reason || e.message), 'error');
