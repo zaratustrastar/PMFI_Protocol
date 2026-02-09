@@ -3996,34 +3996,7 @@ pragma solidity ^0.8.20;
 
 /**
  * @title PredictFiSniperVaultV7
- * @notice pSNIPER vault with 100% Polymarket forwarding and 3-state asset tracking
- * @dev 
- * 
- * V7.5 Architecture: 3-State Asset Tracking (Conservation Bound Removed)
- * 
- * Asset States:
- * 1. inFlightOnChain - USDC at Polymarket deposit address (usually ~0 after sweep)
- * 2. pendingCredit - Forwarded but not yet visible in PM API (during bridge)
- * 3. creditedAssets - PM cash + positions visible via API
- * 
- * Key Changes from V7.4:
- * - REMOVED conservation bound check (was blocking withdrawals on position losses)
- * - Increased claim slippage tolerance from 0.5% to 1%
- * - NAV now reflects actual position values without artificial floors
- * 
- * Key Features:
- * - 100% forwarding to Polymarket (no buffer split)
- * - Extended NavData with full asset breakdown
- * - Pausable deposits with safety valves
- * - All withdrawals are queued (no buffer)
- * 
- * Safety Features:
- * - 30-second signature validity
- * - Monotonically increasing roundId
- * - 0.5% withdrawal tax
- * - Total vault deposit cap
- * - Pausable on safety valve triggers
- * - 1% slippage tolerance on claims
+ * @notice pSNIPER vault with 100% Polymarket forwarding and NAV-based share pricing
  */
 contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -4044,7 +4017,6 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     uint256 public constant MAX_NAV_AGE = 300;  // 5 minutes for MVP (bot takes 30-120s)
     uint256 public constant MIN_NAV_INTERVAL = 60;  // Min 60s between NAV updates
     uint256 public constant STALE_NAV_GRACE = 900;  // 15 min grace for deposits/withdrawRequests
-    uint256 public constant WITHDRAWAL_TAX_BPS = 0;  // No withdrawal tax
     uint256 public constant USDC_DECIMALS = 6;
     uint256 public constant NAV_PRECISION = 1e18;
     uint256 public constant WITHDRAWAL_EXPIRY = 7 days;
@@ -4064,7 +4036,6 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     
     IERC20 public immutable usdc;
     address public immutable navSigner;
-    address public taxCollector;
     address public polymarketWallet;
     
     uint256 public lastRoundId;
@@ -4075,8 +4046,6 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     
     // Conservation tracking
     uint256 public expectedAssets;      // Sum of all deposits minus withdrawals paid
-    // V7.5: maxLossBps removed - conservation bound no longer used
-    
     // Deposit tracking for pendingCredit reconciliation
     uint256 public totalForwardedToPolymarket;  // Total USDC sent to PM deposit address
     
@@ -4099,7 +4068,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     struct WithdrawalRequest {
         address user;
         uint256 shares;
-        uint256 usdcLocked;     // V7.3: USDC amount locked at request time (price fixed)
+        uint256 usdcLocked;
         uint256 requestTime;
         bool claimed;
     }
@@ -4148,7 +4117,6 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         address indexed user,
         uint256 shares,
         uint256 usdcReceived,
-        uint256 taxPaid,
         uint256 navUsed
     );
     
@@ -4168,10 +4136,10 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     );
     
     event BufferRefilled(uint256 amount, string source);
-    event TaxCollectorUpdated(address indexed oldCollector, address indexed newCollector);
+
     event PolymarketWalletUpdated(address indexed oldWallet, address indexed newWallet);
     event CapsUpdated(uint256 perWallet, uint256 total);
-    // V7.5: MaxLossUpdated event removed - conservation bound no longer used
+
     event Paused(bool isPaused);
     event DepositsThrottled(bool isThrottled);
     event EmergencyWithdraw(address indexed to, uint256 amount);
@@ -4209,20 +4177,16 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
     constructor(
         address _usdc,
         address _navSigner,
-        address _taxCollector,
         address _polymarketWallet,
         uint256 _maxPerWallet,
         uint256 _maxTotal
-        // V7.5: _maxLossBps parameter removed - conservation bound no longer used
     ) ERC20("PredictFi Sniper", "pSNIPER") Ownable(msg.sender) {
         require(_usdc != address(0), "Invalid USDC");
         require(_navSigner != address(0), "Invalid signer");
-        require(_taxCollector != address(0), "Invalid tax collector");
         require(_polymarketWallet != address(0), "Invalid PM wallet");
         
         usdc = IERC20(_usdc);
         navSigner = _navSigner;
-        taxCollector = _taxCollector;
         polymarketWallet = _polymarketWallet;
         maxDepositPerWallet = _maxPerWallet;
         maxTotalDeposits = _maxTotal;
@@ -4323,7 +4287,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         
         _verifyAndApplyNav(navData, signature);
         
-        // V7.3: Calculate and LOCK the USDC amount at current NAV
+        // Calculate and LOCK the USDC amount at current NAV
         // This price is fixed - user will receive exactly this amount at claim
         uint256 nav = _calculateNav(navData.totalAssets);
         uint256 usdcLocked = (shareAmount * nav) / NAV_PRECISION;
@@ -4335,7 +4299,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         withdrawalQueue.push(WithdrawalRequest({
             user: msg.sender,
             shares: shareAmount,
-            usdcLocked: usdcLocked,    // V7.3: Store locked amount
+            usdcLocked: usdcLocked,
             requestTime: block.timestamp,
             claimed: false
         }));
@@ -4362,22 +4326,20 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         require(!request.claimed, "Already claimed");
         require(block.timestamp <= request.requestTime + WITHDRAWAL_EXPIRY, "Request expired");
         
-        // V7.3.3: Invalidate any cached NAV signatures to prevent stale pricing
+        // Invalidate any cached NAV signatures to prevent stale pricing
         // This fixes the race condition where deposit+claim can use same roundId
         lastRoundId += 1;
         
-        // V7.3: Use locked USDC amount from request time - no NAV recalculation
+        // Use locked USDC amount from request time - no NAV recalculation
         uint256 grossUsdc = request.usdcLocked;
         uint256 vaultBalance = usdc.balanceOf(address(this));
         
-        // V7.3.1: Allow 0.5% slippage for bridge/relay fees
+        // Allow slippage for bridge/relay fees
         uint256 minRequired = grossUsdc - (grossUsdc * CLAIM_SLIPPAGE_BPS) / 10000;
         require(vaultBalance >= minRequired, "Not enough USDC in buffer. Try again later when positions are liquidated.");
         
         // Pay out actual available (capped at locked amount)
         uint256 actualGross = vaultBalance >= grossUsdc ? grossUsdc : vaultBalance;
-        uint256 tax = (actualGross * WITHDRAWAL_TAX_BPS) / 10000;
-        uint256 netUsdc = actualGross - tax;
         
         request.claimed = true;
         totalPendingShares -= request.shares;
@@ -4409,12 +4371,10 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         walletDeposits[msg.sender] -= depositReduction;
         
         // Transfer USDC
-        usdc.safeTransfer(taxCollector, tax);
-        usdc.safeTransfer(msg.sender, netUsdc);
+        usdc.safeTransfer(msg.sender, actualGross);
         
-        // V7.3: Calculate effective NAV from locked values for backward-compatible event
         uint256 effectiveNav = (grossUsdc * NAV_PRECISION) / request.shares;
-        emit WithdrawalClaimed(requestId, msg.sender, request.shares, netUsdc, tax, effectiveNav);
+        emit WithdrawalClaimed(requestId, msg.sender, request.shares, actualGross, effectiveNav);
     }
     
     /**
@@ -4476,7 +4436,7 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         
         require(signer == navSigner, "Invalid NAV signer");
         
-        // V7.5: Conservation bound removed - NAV now reflects real position values
+        // NAV reflects real position values
         // Old check blocked withdrawals when positions lost value, which is expected behavior
         
         lastRoundId = navData.roundId;
@@ -4515,11 +4475,9 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         shares = (usdcAmount * NAV_PRECISION) / nav;
     }
     
-    function previewRedeem(uint256 shareAmount, uint256 totalAssets) external view returns (uint256 netUsdc, uint256 tax) {
+    function previewRedeem(uint256 shareAmount, uint256 totalAssets) external view returns (uint256 usdcOut) {
         uint256 nav = _calculateNav(totalAssets);
-        uint256 grossUsdc = (shareAmount * nav) / NAV_PRECISION;
-        tax = (grossUsdc * WITHDRAWAL_TAX_BPS) / 10000;
-        netUsdc = grossUsdc - tax;
+        usdcOut = (shareAmount * nav) / NAV_PRECISION;
     }
     
     function getVaultState() external view returns (
@@ -4533,7 +4491,6 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         uint256 _pendingWithdrawalsCount,
         bool _paused,
         bool _depositsThrottled
-        // V7.5: _maxLossBps removed - conservation bound no longer used
     ) {
         uint256 pendingCount = 0;
         for (uint256 i = nextWithdrawalIndex; i < withdrawalQueue.length; i++) {
@@ -4551,7 +4508,6 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
             pendingCount,
             paused,
             depositsThrottled
-            // V7.5: maxLossBps removed
         );
     }
     
@@ -4606,14 +4562,6 @@ contract PredictFiSniperVaultV7 is ERC20, Ownable, ReentrancyGuard {
         }
         
         emit BufferRefilled(amount, isReconciliation ? "reconciliation" : "owner");
-    }
-    
-    // V7.5: setMaxLoss function removed - conservation bound no longer used
-    
-    function setTaxCollector(address _taxCollector) external onlyOwner {
-        require(_taxCollector != address(0), "Invalid address");
-        emit TaxCollectorUpdated(taxCollector, _taxCollector);
-        taxCollector = _taxCollector;
     }
     
     function setPolymarketWallet(address _polymarketWallet) external onlyOwner {
