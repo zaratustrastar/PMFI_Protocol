@@ -1,4 +1,3 @@
-[dotenv@17.2.1] injecting env (0) from .env -- tip: 📡 auto-backup env with Radar: https://dotenvx.com/radar
 // Sources flattened with hardhat v2.26.0 https://hardhat.org
 
 // SPDX-License-Identifier: MIT
