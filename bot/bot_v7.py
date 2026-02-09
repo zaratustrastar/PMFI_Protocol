@@ -91,7 +91,7 @@ from dotenv import load_dotenv
 from web3 import Web3
 from eth_account import Account
 from eth_account.messages import encode_defunct
-from flask import Flask, jsonify, request as flask_request, send_from_directory, render_template
+from flask import Flask, jsonify, request as flask_request, send_from_directory, render_template, redirect
 from flask_cors import CORS
 
 # Cloudflare bypass with curl_cffi (residential proxy support)
@@ -643,8 +643,8 @@ def serve_mini():
 
 @flask_app.route('/.well-known/farcaster.json')
 def serve_farcaster_manifest():
-    """Serve the Farcaster Mini App manifest"""
-    return send_from_directory(FRONTEND_DIR / '.well-known', 'farcaster.json', mimetype='application/json')
+    """Redirect to Farcaster hosted manifest (307 temporary redirect)"""
+    return redirect('https://api.farcaster.xyz/miniapps/hosted-manifest/019c43b9-e950-d301-9909-9c3124fb01e8', code=307)
 
 @flask_app.route('/icon.png')
 def serve_icon():
