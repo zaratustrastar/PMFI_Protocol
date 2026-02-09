@@ -1,0 +1,104 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo lsof -i :8080
+COMMAND     PID USER   FD   TYPE   DEVICE SIZE/OFF NODE NAME
+python3 2589138 root    6u  IPv4 48016608      0t0  TCP localhost:http-alt (LISTEN)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo cat /etc/nginx/sites-enabled/*pmfi* 2>/dev/null || sudo grep -r "pmfi" /etc/nginx/
+server {
+    server_name app.pmfi.cc;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/app.pmfi.cc/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/app.pmfi.cc/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = app.pmfi.cc) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name app.pmfi.cc;
+    return 404; # managed by Certbot
+
+
+}server {
+    server_name docs.pmfi.cc;
+
+    root /var/www/pmfi;
+    index index.html;
+
+    location = / {
+        return 301 /docs;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/docs.pmfi.cc/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/docs.pmfi.cc/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    if ($host = docs.pmfi.cc) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name docs.pmfi.cc;
+    return 404; # managed by Certbot
+
+
+}server {
+    server_name pmfi.cc www.pmfi.cc;
+
+    root /var/www/pmfi;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/pmfi.cc/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/pmfi.cc/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = www.pmfi.cc) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = pmfi.cc) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name pmfi.cc www.pmfi.cc;
+    return 404; # managed by Certbot
+
+
+
+
+}root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

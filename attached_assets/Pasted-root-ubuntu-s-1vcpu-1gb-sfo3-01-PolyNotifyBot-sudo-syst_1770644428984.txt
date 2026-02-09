@@ -1,0 +1,41 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl status psniper-bot
+sudo cat /etc/systemd/system/psniper-bot.service
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-02-09 13:38:56 UTC; 1min 7s ago
+   Main PID: 2590332 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 260.5M (peak: 260.6M)
+        CPU: 3.919s
+     CGroup: /system.slice/psniper-bot.service
+             └─2590332 /usr/bin/python3 bot/bot_v7.py
+
+Feb 09 13:39:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590332]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:39:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590332]:       Full token: 46228539183090091364246601718778114934923475890375459117678527109857970572773
+Feb 09 13:39:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590332]:    ❌ No: 14.9 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:39:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590332]:    📖 Orderbook via CLOB client: 82285143662366161002...
+Feb 09 13:39:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590332]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:39:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590332]:       Full token: 82285143662366161002890748370837184095194558713456474627759860928394057092409
+Feb 09 13:39:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590332]:    ❌ Yes: 12.2 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:39:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590332]:    📖 Orderbook via CLOB client: 48180422131430038157...
+Feb 09 13:39:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590332]:    📊 Got 3 bids, 35 asks
+Feb 09 13:39:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590332]:    ✅ Yes: 10.9 → liq value $0.11
+[Unit]
+Description=pSNIPER Bot V7
+After=network.target
+
+[Service]
+WorkingDirectory=/root/PolyNotifyBot
+ExecStart=/usr/bin/python3 bot/bot_v7.py
+Restart=always
+User=root
+EnvironmentFile=/root/PolyNotifyBot/.env
+Environment="VAULT_V7_ADDRESS=0xbF0944893e6bd445F715dE76CD6343B1d551D41B"
+Environment="BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5"
+Environment="POLYGON_RPC_URL=https://polygon-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5"
+[Install]
+WantedBy=multi-user.target
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo lsof -i :8080
+COMMAND     PID USER   FD   TYPE   DEVICE SIZE/OFF NODE NAME
+python3 2589560 root    3u  IPv4 48023889      0t0  TCP *:http-alt (LISTEN)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
