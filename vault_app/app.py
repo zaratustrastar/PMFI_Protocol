@@ -108,6 +108,10 @@ def admin():
     """Admin panel for managing invite codes"""
     return render_template('admin.html')
 
+@app.route('/icon.png')
+def serve_icon():
+    return send_from_directory('static', 'icon.png')
+
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     return send_from_directory('static', filename)
