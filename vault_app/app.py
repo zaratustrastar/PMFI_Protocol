@@ -100,7 +100,7 @@ def vault():
     
     # Option 2: Render vault template with config from env
     return render_template('vault.html', 
-        vault_address=os.getenv('VAULT_V7_ADDRESS', '0xbF0944893e6bd445F715dE76CD6343B1d551D41B')
+        vault_address=os.getenv('VAULT_V7_ADDRESS', '0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1')
     )
 
 @app.route('/admin')

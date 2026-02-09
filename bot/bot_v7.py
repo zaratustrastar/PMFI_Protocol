@@ -625,7 +625,7 @@ if not FRONTEND_DIR.exists():
 flask_app = Flask(__name__, template_folder=str(FRONTEND_DIR))
 CORS(flask_app)
 
-VAULT_ADDRESS_CONFIG = os.getenv('VAULT_V7_ADDRESS', '0xbF0944893e6bd445F715dE76CD6343B1d551D41B')
+VAULT_ADDRESS_CONFIG = os.getenv('VAULT_V7_ADDRESS', '0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1')
 
 @flask_app.route('/')
 def serve_index():

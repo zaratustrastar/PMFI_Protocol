@@ -97,7 +97,7 @@ def normalize_privkey(raw: str, name: str = "key") -> str:
 # CONFIGURATION
 # =============================================================================
 
-VAULT_ADDRESS = os.getenv("VAULT_V7_ADDRESS", "0xbF0944893e6bd445F715dE76CD6343B1d551D41B")
+VAULT_ADDRESS = os.getenv("VAULT_V7_ADDRESS", "0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1")
 PM_PROXY_ADDRESS = os.getenv("POLYMARKET_PROXY_ADDRESS", "")
 
 # Normalize private key at startup

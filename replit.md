@@ -43,7 +43,7 @@ The vault calculates NAV using **ACTUAL LIQUID VALUE** with **withdrawal exclusi
 - **Reserved excluded from NAV math** - Polygon balanceOf is the source of truth for cash
 - Withdrawal servicer reads actual `usdcLocked` from pending requests (V7.3.3 fix)
 
-**Current Contract**: `0xbF0944893e6bd445F715dE76CD6343B1d551D41B` (Base Mainnet, V7.5)
+**Current Contract**: `0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1` (Base Mainnet, V7.5)
 
 ## Polymarket Trading Bot
 

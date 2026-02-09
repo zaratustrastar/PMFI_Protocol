@@ -7,7 +7,7 @@
 // =============================================================================
 
 // Read from global config (set by HTML template) or use default
-const VAULT_ADDRESS = window.PSNIPER_CONFIG?.VAULT_ADDRESS || "0xbF0944893e6bd445F715dE76CD6343B1d551D41B"; // V7.5
+const VAULT_ADDRESS = window.PSNIPER_CONFIG?.VAULT_ADDRESS || "0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1";
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
