@@ -1,0 +1,53 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl status psniper-bot
+sudo journalctl -u psniper-bot --no-pager -n 30
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-02-09 13:43:19 UTC; 2min 10s ago
+   Main PID: 2590537 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 488.6M (peak: 488.7M)
+        CPU: 7.204s
+     CGroup: /system.slice/psniper-bot.service
+             └─2590537 /usr/bin/python3 bot/bot_v7.py
+
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:       Full token: 46228539183090091364246601718778114934923475890375459117678527109857970572773
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ No: 14.9 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📖 Orderbook via CLOB client: 82285143662366161002...
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:       Full token: 82285143662366161002890748370837184095194558713456474627759860928394057092409
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Yes: 12.2 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📖 Orderbook via CLOB client: 48180422131430038157...
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📊 Got 3 bids, 35 asks
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ✅ Yes: 10.9 → liq value $0.11
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:       Full token: 71973320815196030106097348583863922016672759447808434014663991273920337227590
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Yes: 15.0 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📖 Orderbook via CLOB client: 39761312724625624636...
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:       Full token: 39761312724625624636182046594521437287298257329499280765364661110096319287225
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Yes: 15.0 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📖 Orderbook via CLOB client: 53165770035958585984...
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:       Full token: 53165770035958585984718391985229896657606263670063083197049782254173743724481
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Yes: 15.0 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📖 Orderbook via CLOB client: 53415831992643982643...
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:       Full token: 53415831992643982643780511861987309202771127218661307923743779913639400035483
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Yes: 15.0 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📖 Orderbook via CLOB client: 68583724199998419186...
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:       Full token: 68583724199998419186329921297081993006140526085982648998963237526357841684813
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Yes: 15.0 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📖 Orderbook via CLOB client: 46228539183090091364...
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:       Full token: 46228539183090091364246601718778114934923475890375459117678527109857970572773
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ No: 14.9 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📖 Orderbook via CLOB client: 82285143662366161002...
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:       Full token: 82285143662366161002890748370837184095194558713456474627759860928394057092409
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ❌ Yes: 12.2 - NO BIDS (illiquid, valued at $0)
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📖 Orderbook via CLOB client: 48180422131430038157...
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    📊 Got 3 bids, 35 asks
+Feb 09 13:43:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2590537]:    ✅ Yes: 10.9 → liq value $0.11
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
