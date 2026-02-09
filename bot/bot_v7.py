@@ -646,6 +646,10 @@ def serve_farcaster_manifest():
     """Serve the Farcaster Mini App manifest"""
     return send_from_directory(FRONTEND_DIR / '.well-known', 'farcaster.json', mimetype='application/json')
 
+@flask_app.route('/icon.png')
+def serve_icon():
+    return send_from_directory(FRONTEND_DIR, 'icon.png')
+
 @flask_app.route('/<path:filename>')
 def serve_static(filename):
     if filename.startswith('.well-known/'):
