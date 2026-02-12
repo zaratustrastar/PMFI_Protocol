@@ -70,12 +70,15 @@ This system automates Polymarket monitoring and trading.
 
 **3. Order Monitor (Python)**: Continuously monitors all active orders. It auto-cancels stale orders (>12 hours) to free up capital, places laddered sell orders upon fill, and sends Telegram notifications when sells execute. This also requires a residential IP.
 
-**Sell Ladder Strategy (Jan 2026 Update)**:
-- Reserve 10% of position for resolution (held untouched)
-- Tier 1: 30% of position @ 3x (200% profit)
-- Tier 2: 30% of position @ 4x (300% profit)
-- Tier 3: 30% of position @ 5x (400% profit)
-- Configuration in `trading_bot/config.py` via `SELL_LADDER_CONFIG` and `SELL_RESERVE_RATIO`
+**Sell Ladder Strategy (Feb 2026 Update)**:
+- Minimum 25 shares accumulated before any sell orders are placed (`MIN_SHARES_FOR_SELL_LADDER`)
+- Reserve 10% of position for resolution (no orders placed, wait for market to resolve)
+- Tier 1: 33% of position @ 3x (200% profit)
+- Tier 2: 27% of position @ 4x (300% profit)
+- Tier 3: 30% of position @ 8x (700% profit)
+- **Incremental fills**: If new shares are bought after sells are placed, additional sell orders are placed for the delta (must also meet 25-share threshold)
+- Tracks `shares_with_sells` in `accumulated_fills` DB table to detect new fills
+- Configuration in `trading_bot/config.py` via `SELL_LADDER_CONFIG`, `SELL_RESERVE_RATIO`, and `MIN_SHARES_FOR_SELL_LADDER`
 
 ## Core Framework (Mastra)
 

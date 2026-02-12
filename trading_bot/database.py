@@ -112,10 +112,25 @@ def init_database():
             total_cost DECIMAL(18, 6) DEFAULT 0,
             avg_buy_price DECIMAL(10, 6) DEFAULT 0,
             sell_placed BOOLEAN DEFAULT FALSE,
+            shares_with_sells DECIMAL(18, 6) DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(market_slug, token_id, side)
         )
+    """)
+    
+    # Migration: add shares_with_sells column if missing (existing installs)
+    cur.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'accumulated_fills' AND column_name = 'shares_with_sells'
+            ) THEN
+                ALTER TABLE accumulated_fills ADD COLUMN shares_with_sells DECIMAL(18, 6) DEFAULT 0;
+                UPDATE accumulated_fills SET shares_with_sells = total_shares WHERE sell_placed = TRUE;
+            END IF;
+        END $$;
     """)
     
     conn.commit()
@@ -526,10 +541,17 @@ def get_accumulated_fill(market_slug: str, token_id: str, side: str) -> Optional
     return dict(result) if result else None
 
 
-def mark_sell_placed(market_slug: str, token_id: str, side: str) -> bool:
+def mark_sell_placed(market_slug: str, token_id: str, side: str, shares_covered: float = None) -> bool:
     """
-    Mark that a sell order has been placed for this accumulated fill.
-    This prevents duplicate sell orders.
+    Mark that sell orders have been placed for this accumulated fill.
+    Records how many shares have sell orders so incremental fills can be detected.
+    
+    Args:
+        market_slug: Market identifier
+        token_id: Token ID
+        side: YES or NO
+        shares_covered: Number of shares that now have sell orders placed.
+                       If None, uses current total_shares.
     
     Returns:
         True if successfully marked, False otherwise
@@ -537,11 +559,18 @@ def mark_sell_placed(market_slug: str, token_id: str, side: str) -> bool:
     conn = get_db_connection()
     cur = conn.cursor()
     
-    cur.execute("""
-        UPDATE accumulated_fills
-        SET sell_placed = TRUE, updated_at = CURRENT_TIMESTAMP
-        WHERE market_slug = %s AND token_id = %s AND side = %s
-    """, (market_slug, token_id, side))
+    if shares_covered is not None:
+        cur.execute("""
+            UPDATE accumulated_fills
+            SET sell_placed = TRUE, shares_with_sells = %s, updated_at = CURRENT_TIMESTAMP
+            WHERE market_slug = %s AND token_id = %s AND side = %s
+        """, (shares_covered, market_slug, token_id, side))
+    else:
+        cur.execute("""
+            UPDATE accumulated_fills
+            SET sell_placed = TRUE, shares_with_sells = total_shares, updated_at = CURRENT_TIMESTAMP
+            WHERE market_slug = %s AND token_id = %s AND side = %s
+        """, (market_slug, token_id, side))
     
     affected = cur.rowcount
     conn.commit()
@@ -608,7 +637,8 @@ def get_all_sells_placed() -> Dict[str, Dict]:
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
     cur.execute("""
-        SELECT token_id, side, sell_placed, total_shares, avg_buy_price, market_slug
+        SELECT token_id, side, sell_placed, total_shares, avg_buy_price, market_slug,
+               COALESCE(shares_with_sells, 0) as shares_with_sells
         FROM accumulated_fills
     """)
     
@@ -623,6 +653,7 @@ def get_all_sells_placed() -> Dict[str, Dict]:
             "sell_placed": row.get("sell_placed", False),
             "total_shares": float(row.get("total_shares", 0)),
             "avg_buy_price": float(row.get("avg_buy_price", 0)),
+            "shares_with_sells": float(row.get("shares_with_sells", 0)),
             "side": row["side"],
             "market_slug": row["market_slug"],
             "token_id": row["token_id"],

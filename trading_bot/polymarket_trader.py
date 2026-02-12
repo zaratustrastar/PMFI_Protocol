@@ -150,42 +150,45 @@ class PolymarketTrader:
     
     def place_sell_ladder(self, token_id: str, buy_price: float, buy_size: float, side_name: str, market_slug: str) -> List[Dict]:
         """
-        Place MULTIPLE sell orders in a ladder pattern with increasing profit targets.
+        Place sell orders in a ladder pattern with increasing profit targets.
         
-        Strategy:
-        - Reserve 10% of position for resolution (untouched)
-        - Tier 1: 30% @ 3x (200% profit)
-        - Tier 2: 30% @ 4x (300% profit)
-        - Tier 3: 30% @ 5x (400% profit)
+        Strategy (from config.py):
+        - Reserve 10% of position for resolution (no orders placed)
+        - Tier 1: 33% @ 3x (200% profit)
+        - Tier 2: 27% @ 4x (300% profit)
+        - Tier 3: 30% @ 8x (700% profit)
+        
+        Caller guarantees buy_size >= MIN_SHARES_FOR_SELL_LADDER (25 shares),
+        so each tier should meet the 5-share minimum. If any tier falls short
+        due to rounding, its shares are redistributed to valid tiers.
         
         Args:
             token_id: Token ID to sell
-            buy_price: Original buy price (actual filled price)
-            buy_size: Number of tokens bought (actual filled quantity)
+            buy_price: Original buy price (actual filled price or avg price)
+            buy_size: Number of tokens to place sells for
             side_name: "YES" or "NO" for logging
             market_slug: Market identifier for database
             
         Returns:
             List of placed sell order responses
         """
-        # Get ladder config from config.py
         reserve_ratio = getattr(config, 'SELL_RESERVE_RATIO', 0.10)
         ladder_config = getattr(config, 'SELL_LADDER_CONFIG', [
-            {"ratio": 0.30, "profit_multiple": 3},
-            {"ratio": 0.30, "profit_multiple": 4},
-            {"ratio": 0.30, "profit_multiple": 5},
+            {"ratio": 0.33, "profit_multiple": 3},
+            {"ratio": 0.27, "profit_multiple": 4},
+            {"ratio": 0.30, "profit_multiple": 8},
         ])
+        min_shares = getattr(config, 'MIN_SHARES_PER_ORDER', 5)
         
         reserved_size = buy_size * reserve_ratio
         sellable_size = buy_size - reserved_size
         
         print(f"\n💰 Placing SELL LADDER for {side_name} token (bought @ ${buy_price:.4f})...")
         print(f"   Token ID: {token_id}")
-        print(f"   Buy size: {buy_size:.2f} tokens")
+        print(f"   Total size: {buy_size:.2f} tokens")
         print(f"   Reserved for resolution: {reserved_size:.2f} tokens ({reserve_ratio*100:.0f}%)")
         print(f"   Available for ladder: {sellable_size:.2f} tokens")
         
-        # Validate inputs
         if not token_id:
             print(f"   ❌ CRITICAL: token_id is None or empty!")
             return []
@@ -194,71 +197,58 @@ class PolymarketTrader:
             print(f"   ❌ CRITICAL: buy_size is {buy_size} (must be > 0)")
             return []
         
-        placed_orders = []
-        min_shares = getattr(config, 'MIN_SHARES_PER_ORDER', 5)
+        if sellable_size < min_shares:
+            print(f"   ❌ Sellable size {sellable_size:.2f} < {min_shares} minimum. No sells placed.")
+            return []
         
-        # Calculate total ratio from ladder config to normalize
         total_ratio = sum(tier["ratio"] for tier in ladder_config)
         
-        # Pre-calculate all tier sizes to determine consolidation strategy
-        tier_sizes = []
+        tier_plan = []
         for tier in ladder_config:
             tier_size = sellable_size * (tier["ratio"] / total_ratio)
-            tier_sizes.append({
+            tier_plan.append({
                 "size": tier_size,
                 "profit_multiple": tier["profit_multiple"],
-                "meets_minimum": tier_size >= min_shares
             })
         
-        # Count how many tiers meet the minimum
-        valid_tiers = sum(1 for t in tier_sizes if t["meets_minimum"])
+        final_tiers = []
+        leftover = 0.0
         
-        print(f"   📊 Tier analysis: {valid_tiers}/{len(ladder_config)} tiers meet {min_shares} share minimum")
-        
-        # CONSOLIDATION STRATEGY
-        if valid_tiers == 0:
-            # All tiers too small - consolidate into single sell at best price (3x)
-            if sellable_size >= min_shares:
-                print(f"   🔄 Consolidating: All tiers too small. Placing single sell @ 3x for {sellable_size:.2f} shares")
-                consolidated_config = [{"size": sellable_size, "profit_multiple": 3}]
+        for t in tier_plan:
+            if t["size"] >= min_shares:
+                final_tiers.append(t)
             else:
-                print(f"   ❌ Position too small: {sellable_size:.2f} < {min_shares} minimum. No sells placed.")
-                return []
-        elif valid_tiers < len(ladder_config):
-            # Some tiers too small - redistribute to valid tiers
-            small_tier_total = sum(t["size"] for t in tier_sizes if not t["meets_minimum"])
-            valid_tier_list = [t for t in tier_sizes if t["meets_minimum"]]
-            
-            # Distribute small tier shares equally to valid tiers
-            redistribution_per_tier = small_tier_total / len(valid_tier_list) if valid_tier_list else 0
-            
-            consolidated_config = []
-            for t in valid_tier_list:
-                consolidated_config.append({
-                    "size": t["size"] + redistribution_per_tier,
-                    "profit_multiple": t["profit_multiple"]
-                })
-            
-            print(f"   🔄 Redistributed {small_tier_total:.2f} shares from {len(ladder_config) - valid_tiers} small tier(s)")
-        else:
-            # All tiers valid - use standard config
-            consolidated_config = tier_sizes
+                leftover += t["size"]
+                print(f"   🔄 Tier @ {t['profit_multiple']}x too small ({t['size']:.2f} < {min_shares}), redistributing")
         
-        # Place orders using the (potentially consolidated) config
-        for i, tier in enumerate(consolidated_config):
+        if leftover > 0 and final_tiers:
+            per_tier = leftover / len(final_tiers)
+            for t in final_tiers:
+                t["size"] += per_tier
+            print(f"   🔄 Redistributed {leftover:.2f} shares across {len(final_tiers)} valid tier(s)")
+        
+        if not final_tiers:
+            if sellable_size >= min_shares:
+                print(f"   🔄 All tiers too small, consolidating into single sell @ {ladder_config[0]['profit_multiple']}x")
+                final_tiers = [{"size": sellable_size, "profit_multiple": ladder_config[0]["profit_multiple"]}]
+            else:
+                print(f"   ❌ Position too small for any sell order.")
+                return []
+        
+        placed_orders = []
+        
+        for i, tier in enumerate(final_tiers):
             tier_size = tier["size"]
             profit_multiple = tier["profit_multiple"]
-            sell_price = buy_price * profit_multiple
+            sell_price = round(buy_price * profit_multiple, 2)
             profit_pct = (profit_multiple - 1) * 100
             
-            print(f"\n   📊 Tier {i+1}: {tier_size:.2f} tokens @ {profit_multiple}x (+{profit_pct:.0f}%)")
+            print(f"\n   📊 Tier {i+1}: {tier_size:.2f} tokens @ {profit_multiple}x (+{profit_pct:.0f}%) = ${sell_price:.2f}")
             
-            # Final safety check
             if tier_size < min_shares:
                 print(f"      ⚠️  Tier size {tier_size:.2f} < {min_shares} minimum, skipping")
                 continue
             
-            # Cap sell price at Polymarket max
             if sell_price > 0.99:
                 sell_price = 0.99
                 print(f"      ⚠️  Capped sell price at $0.99 (max allowed)")
@@ -304,7 +294,6 @@ class PolymarketTrader:
                     }
                     placed_orders.append(order_data)
                     
-                    # Save to database
                     save_order(order_data)
                 else:
                     error = response.get("error", response.get("errorMsg", "Unknown error"))
@@ -318,12 +307,11 @@ class PolymarketTrader:
                 print(f"      ❌ Tier {i+1}: Exception: {str(e)}")
                 print(f"         Traceback: {traceback.format_exc()}")
         
-        # Summary
         if placed_orders:
-            print(f"\n   📊 Sell ladder: {len(placed_orders)}/{len(consolidated_config)} orders placed!")
+            print(f"\n   📊 Sell ladder: {len(placed_orders)}/{len(final_tiers)} orders placed!")
             print(f"   📊 Reserved for resolution: {reserved_size:.2f} tokens ({reserve_ratio*100:.0f}%)")
         else:
-            print(f"\n   ⚠️ Sell ladder: No orders placed (position may be too small)")
+            print(f"\n   ⚠️ Sell ladder: No orders placed")
         
         return placed_orders
     

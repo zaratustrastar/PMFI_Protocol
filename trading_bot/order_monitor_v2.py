@@ -32,7 +32,8 @@ from database import (
 )
 
 DATA_API_URL = "https://data-api.polymarket.com/positions"
-MIN_SHARES_FOR_SELL = config.MIN_SHARES_PER_ORDER
+MIN_SHARES_FOR_SELL = getattr(config, 'MIN_SHARES_FOR_SELL_LADDER', 25)
+MIN_INCREMENTAL_SHARES = getattr(config, 'MIN_SHARES_FOR_SELL_LADDER', 25)
 POSITION_CHECK_INTERVAL = 60
 STALE_ORDER_INTERVAL = 1800
 STALE_ORDER_MAX_AGE_HOURS = 12
@@ -55,7 +56,7 @@ def fetch_portfolio_positions(proxy_address: str) -> list:
     try:
         params = {
             "user": proxy_address,
-            "sizeThreshold": MIN_SHARES_FOR_SELL,
+            "sizeThreshold": config.MIN_SHARES_PER_ORDER,
         }
         proxies = get_proxy_config()
         resp = requests.get(DATA_API_URL, params=params, proxies=proxies, timeout=30)
@@ -71,13 +72,16 @@ def fetch_portfolio_positions(proxy_address: str) -> list:
 def process_positions(trader: PolymarketTrader, positions: list):
     """
     Compare portfolio positions against accumulated_fills DB.
-    Place sell ladders for positions that don't have sells yet.
-    Uses composite key (token_id|side) for unambiguous lookup.
+    Place sell ladders for positions that meet the 25-share threshold.
+    Detects incremental fills (new shares added after sells were already placed)
+    and places additional sell orders for the delta.
     """
     sells_lookup = get_all_sells_placed()
 
     new_sells = 0
+    incremental_sells = 0
     skipped = 0
+    waiting = 0
 
     for pos in positions:
         token_id = pos.get("asset", "")
@@ -87,14 +91,52 @@ def process_positions(trader: PolymarketTrader, positions: list):
         outcome = pos.get("outcome", "YES")
         side = outcome.upper()
 
-        if size < MIN_SHARES_FOR_SELL:
+        if size < config.MIN_SHARES_PER_ORDER:
             continue
 
         lookup_key = f"{token_id}|{side}"
         db_entry = sells_lookup.get(lookup_key)
 
+        upsert_accumulated_fill(slug, token_id, side, size, avg_price)
+
         if db_entry and db_entry.get("sell_placed"):
-            skipped += 1
+            shares_with_sells = db_entry.get("shares_with_sells", 0)
+            new_shares = size - shares_with_sells
+
+            if new_shares >= MIN_INCREMENTAL_SHARES:
+                print(f"\n📈 Incremental fill detected:")
+                print(f"   Market: {slug}")
+                print(f"   Side: {side}")
+                print(f"   Previous sells covered: {shares_with_sells:.2f} shares")
+                print(f"   Current position: {size:.2f} shares")
+                print(f"   New shares to sell: {new_shares:.2f} shares @ avg ${avg_price:.4f}")
+                print(f"   Token: {token_id[:20]}...")
+
+                try:
+                    sell_orders = trader.place_sell_ladder(
+                        token_id=token_id,
+                        buy_price=avg_price,
+                        buy_size=new_shares,
+                        side_name=side,
+                        market_slug=slug,
+                    )
+
+                    if sell_orders and len(sell_orders) > 0:
+                        print(f"   ✅ Placed {len(sell_orders)} incremental sell order(s)")
+                        mark_sell_placed(slug, token_id, side, shares_covered=size)
+                        incremental_sells += 1
+                    else:
+                        print(f"   ⚠️  No incremental sell orders placed")
+
+                except Exception as e:
+                    print(f"   ❌ Incremental sell ladder error: {e}")
+            else:
+                skipped += 1
+            continue
+
+        if size < MIN_SHARES_FOR_SELL:
+            print(f"   ⏳ {slug} {side}: {size:.2f} shares (waiting for {MIN_SHARES_FOR_SELL}+)")
+            waiting += 1
             continue
 
         print(f"\n🆕 Position needs sell ladder:")
@@ -102,9 +144,6 @@ def process_positions(trader: PolymarketTrader, positions: list):
         print(f"   Side: {side}")
         print(f"   Size: {size:.2f} shares @ avg ${avg_price:.4f}")
         print(f"   Token: {token_id[:20]}...")
-
-        print(f"   📝 Syncing position to accumulated_fills DB...")
-        upsert_accumulated_fill(slug, token_id, side, size, avg_price)
 
         try:
             sell_orders = trader.place_sell_ladder(
@@ -117,7 +156,7 @@ def process_positions(trader: PolymarketTrader, positions: list):
 
             if sell_orders and len(sell_orders) > 0:
                 print(f"   ✅ Placed {len(sell_orders)} sell order(s)")
-                mark_sell_placed(slug, token_id, side)
+                mark_sell_placed(slug, token_id, side, shares_covered=size)
                 new_sells += 1
             else:
                 print(f"   ⚠️  No sell orders placed (position may be too small for ladder)")
@@ -125,7 +164,7 @@ def process_positions(trader: PolymarketTrader, positions: list):
         except Exception as e:
             print(f"   ❌ Sell ladder error: {e}")
 
-    print(f"\n📈 Summary: {new_sells} new sell ladder(s) placed, {skipped} already have sells")
+    print(f"\n📈 Summary: {new_sells} new ladder(s), {incremental_sells} incremental, {skipped} fully covered, {waiting} waiting for {MIN_SHARES_FOR_SELL}+ shares")
 
 
 def cancel_stale_orders(trader: PolymarketTrader):
