@@ -641,6 +641,37 @@ def serve_mini():
     """Serve the Farcaster Mini App version with config from env"""
     return render_template('mini.html', vault_address=VAULT_ADDRESS_CONFIG)
 
+@flask_app.route('/share')
+def serve_share():
+    """Serve share page with Farcaster Mini App meta tags for cast embeds"""
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMFI - DeFi Layer for Prediction Markets</title>
+    <meta property="fc:miniapp" content='{"version":"1","name":"PMFI","imageUrl":"https://app.pmfi.cc/hero.png","button":{"title":"Launch pSNIPER","action":{"type":"launch_miniapp","url":"https://app.pmfi.cc/mini"}}}' />
+    <meta property="fc:frame" content='{"version":"1","imageUrl":"https://app.pmfi.cc/hero.png","button":{"title":"Launch pSNIPER","action":{"type":"launch_miniapp","url":"https://app.pmfi.cc/mini"}}}' />
+    <meta property="og:title" content="PMFI - DeFi Layer for Prediction Markets" />
+    <meta property="og:description" content="Automated Polymarket sniping vault on Base. Turn uncertainty into returns." />
+    <meta property="og:image" content="https://app.pmfi.cc/hero.png" />
+    <meta property="og:url" content="https://app.pmfi.cc/share" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PMFI - DeFi Layer for Prediction Markets" />
+    <meta name="twitter:description" content="Automated Polymarket sniping vault on Base. Turn uncertainty into returns." />
+    <meta name="twitter:image" content="https://app.pmfi.cc/hero.png" />
+</head>
+<body style="background:#0d1117;color:#f0f6fc;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;">
+    <div style="text-align:center;max-width:400px;padding:40px;">
+        <img src="/icon.png" alt="PMFI" style="width:80px;height:80px;border-radius:50%;margin-bottom:24px;">
+        <h1 style="font-size:28px;margin-bottom:12px;">PMFI</h1>
+        <p style="color:#8b949e;margin-bottom:24px;">DeFi Layer for Prediction Markets</p>
+        <a href="/mini" style="display:inline-block;padding:12px 32px;background:#f0f6fc;color:#0d1117;border-radius:10px;text-decoration:none;font-weight:600;">Launch App</a>
+    </div>
+</body>
+</html>"""
+
 @flask_app.route('/.well-known/farcaster.json')
 def serve_farcaster_manifest():
     """Redirect to Farcaster hosted manifest (307 temporary redirect)"""
