@@ -650,8 +650,8 @@ def serve_share():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PMFI - DeFi Layer for Prediction Markets</title>
-    <meta property="fc:miniapp" content='{"version":"1","imageUrl":"https://app.pmfi.cc/hero.png","button":{"title":"Launch App","action":{"type":"launch_miniapp","name":"PMFI","url":"https://app.pmfi.cc/mini"}}}' />
-    <meta property="fc:frame" content='{"version":"1","imageUrl":"https://app.pmfi.cc/hero.png","button":{"title":"Launch App","action":{"type":"launch_miniapp","name":"PMFI","url":"https://app.pmfi.cc/mini"}}}' />
+    <meta property="fc:miniapp" content='{"version":"1","imageUrl":"https://app.pmfi.cc/hero.png","button":{"title":"🏦 Start PMFI","action":{"type":"launch_miniapp","name":"PMFI","url":"https://app.pmfi.cc/mini"}}}' />
+    <meta property="fc:frame" content='{"version":"1","imageUrl":"https://app.pmfi.cc/hero.png","button":{"title":"🏦 Start PMFI","action":{"type":"launch_miniapp","name":"PMFI","url":"https://app.pmfi.cc/mini"}}}' />
     <meta property="og:title" content="PMFI - DeFi Layer for Prediction Markets" />
     <meta property="og:description" content="Automated Polymarket sniping vault on Base. Turn uncertainty into returns." />
     <meta property="og:image" content="https://app.pmfi.cc/hero.png" />
