@@ -1,0 +1,59 @@
+Goal: Improve PMFI mini app loading UX in Farcaster/Warpcast.
+Right now users see the static manifest splash too long. We want the “Protardio feel”:
+1) Render an in-app animated loading screen immediately
+2) Call fcSdk.actions.ready() right after first paint (NOT after auth/fetches)
+3) Continue heavy init (auth, API calls, ethers/provider/contract setup) while loader animates
+4) Swap loader → actual UI when ready, or show invite gate if denied
+
+Context:
+- Mini app entry page: /mini (mini.html)
+- There is existing flow:
+  - SDK init loop tries window.miniapp.sdk / FarcasterFrame.sdk / window.sdk then calls actions.ready()
+  - ethers/provider/contract setup currently happens early
+  - authenticateWithFarcaster() handles context FID, quickAuth token, POST /api/verify-fc-token, then grantAccess() or show invite gate
+  - currently there is a 500ms delay before grantAccess() (remove it)
+- We already have valid meta tags for mini app embeds.
+- We want to add a GIF loader but also keep a CSS spinner fallback if the GIF fails.
+
+Tasks:
+A) Add an always-visible "boot loader" overlay to mini.html that shows immediately on first paint:
+   - Fullscreen overlay with background #0d1117
+   - Centered animated GIF (use /loader.gif)
+   - Small text “opening pmfi…”
+   - Provide fallback: if GIF fails to load, show a CSS spinner instead.
+   - The overlay must have z-index above gate screen.
+
+B) Move/adjust sdk.actions.ready() timing:
+   - Ensure boot loader is visible first.
+   - Wait one requestAnimationFrame so the loader paints.
+   - Then detect SDK (existing detection loop is fine) and call fcSdk.actions.ready() ASAP.
+   - Do NOT await auth, fetches, ethers, contracts before calling ready().
+
+C) Move heavy initialization to AFTER ready:
+   - Delay ethers JsonRpcProvider creation and contract instantiation until after ready() is called.
+   - Keep ABI constants where they are, but don’t create provider/contract objects before ready.
+
+D) Auth + gate integration:
+   - Start authenticateWithFarcaster() after ready() is called.
+   - Remove the artificial 500ms delay before grantAccess().
+   - If allowed: call grantAccess() and then hide the boot loader.
+   - If denied: show invite code UI and hide the boot loader (don’t keep user stuck behind loader).
+   - If not in Farcaster environment or SDK never appears: hide boot loader and show a clear fallback UI (e.g., “Open this inside Warpcast” + regular web access).
+
+E) Provide final output:
+   - Modify mini.html with the boot loader HTML + CSS + JS boot sequence.
+   - Add /loader.gif asset placeholder (if not present, create a small sample GIF or instruct where to upload).
+   - Ensure everything works without breaking the existing gate screen.
+
+Implementation details:
+- Add functions:
+  - showBootLoader(), hideBootLoader()
+  - waitForSdk(maxMs=2500)
+  - initContractsLazy() called only after ready
+- Add cache-safe: nothing special needed.
+
+Please implement the changes directly, and then summarize:
+- What files changed
+- Where ready() is called now
+- Where auth starts now
+- How the loader is hidden for allowed/denied/fallback cases
