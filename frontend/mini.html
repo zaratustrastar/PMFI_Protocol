@@ -586,6 +586,24 @@
             color: var(--text-primary);
         }
         
+        .neynar-gate {
+            margin-top: 16px;
+            text-align: center;
+        }
+        
+        .neynar-score {
+            color: #fff;
+            font-size: 15px;
+            opacity: 0.95;
+        }
+        
+        .neynar-requirement {
+            color: #fff;
+            font-size: 13px;
+            opacity: 0.6;
+            margin-top: 8px;
+        }
+        
         .gate-status {
             font-size: 14px;
             color: var(--accent-green);
@@ -772,6 +790,11 @@
             <span>Authenticating...</span>
         </div>
         <p class="gate-fid" id="gateFid"></p>
+        
+        <div id="neynarGateText" class="neynar-gate" style="display:none;">
+            <div class="neynar-score">Neynar score: <span id="neynarScoreValue">—</span></div>
+            <div class="neynar-requirement">Access requires Neynar score ≥ <b>0.7</b></div>
+        </div>
         
         <div class="gate-code-section" id="gateCodeSection">
             <input type="text" id="gateCodeInput" class="gate-code-input" placeholder="Enter invite code" maxlength="8" autocomplete="off">
@@ -1156,28 +1179,12 @@
             gateStatus.style.display = 'none';
             gateCodeSection.classList.remove('visible');
             
-            const scoreDisplay = score !== undefined ? score.toFixed(2) : '?';
-            const minDisplay = minScore !== undefined ? minScore : 0.7;
-            
-            let scoreGate = document.getElementById('scoreGateSection');
-            if (!scoreGate) {
-                scoreGate = document.createElement('div');
-                scoreGate.id = 'scoreGateSection';
-                scoreGate.style.cssText = 'text-align:center; padding:20px 0;';
-                scoreGate.innerHTML = `
-                    <div style="font-size:40px; margin-bottom:16px;">🔒</div>
-                    <div style="font-size:16px; font-weight:600; color:#fff; margin-bottom:12px;">Access Restricted</div>
-                    <div style="font-size:14px; color:rgba(255,255,255,0.7); line-height:1.5; margin-bottom:20px;">
-                        Your Farcaster account doesn't meet the<br>access threshold yet (min ${minDisplay}).
-                    </div>
-                    <div style="background:rgba(255,255,255,0.06); border-radius:12px; padding:16px; display:inline-block; margin-bottom:16px;">
-                        <div style="font-size:12px; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.5); margin-bottom:6px;">Your Score</div>
-                        <div style="font-size:28px; font-weight:700; color:#ff6b6b;">${scoreDisplay}</div>
-                    </div>
-                    <div style="font-size:12px; color:rgba(255,255,255,0.4);">Scores update weekly on Neynar.</div>
-                `;
-                const gateContent = document.querySelector('.gate-content');
-                if (gateContent) gateContent.appendChild(scoreGate);
+            const scoreDisplay = score !== undefined ? score.toFixed(2) : '—';
+            const neynarGate = document.getElementById('neynarGateText');
+            const neynarScoreVal = document.getElementById('neynarScoreValue');
+            if (neynarGate && neynarScoreVal) {
+                neynarScoreVal.textContent = scoreDisplay;
+                neynarGate.style.display = 'block';
             }
         }
         
