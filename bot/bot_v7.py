@@ -2676,12 +2676,69 @@ def api_verify_fc_token():
         
         fid = int(fid)
         
-        if is_fid_whitelisted(fid):
-            print(f"✅ FID {fid} verified via Quick Auth and granted access")
-            return jsonify({'allowed': True, 'fid': fid, 'verified': True})
-        else:
-            print(f"❌ FID {fid} verified but not on allowlist")
-            return jsonify({'allowed': False, 'fid': fid, 'verified': True})
+        NEYNAR_MIN_SCORE = 0.7
+        neynar_api_key = os.environ.get('NEYNAR_API_KEY', '')
+        
+        if not neynar_api_key:
+            print(f"❌ NEYNAR_API_KEY not set, cannot check score for FID {fid}")
+            return jsonify({'allowed': False, 'error': 'score_unavailable', 'fid': fid}), 403
+        
+        try:
+            import urllib.request as urllib_req
+            import urllib.error
+            neynar_url = f"https://api.neynar.com/v2/farcaster/user/bulk?fids={fid}&viewer_fid={fid}"
+            neynar_request = urllib_req.Request(neynar_url, headers={
+                'accept': 'application/json',
+                'x-api-key': neynar_api_key
+            })
+            neynar_ctx = ssl.create_default_context()
+            neynar_resp = urllib_req.urlopen(neynar_request, timeout=10, context=neynar_ctx)
+            neynar_data = json_mod.loads(neynar_resp.read().decode())
+            
+            users = neynar_data.get('users', [])
+            if not users:
+                print(f"❌ Neynar returned no users for FID {fid}")
+                return jsonify({'allowed': False, 'error': 'score_unavailable', 'fid': fid}), 403
+            
+            user_data = users[0]
+            experimental = user_data.get('experimental', {})
+            neynar_score = experimental.get('neynar_user_score')
+            
+            if neynar_score is None or not isinstance(neynar_score, (int, float)):
+                print(f"❌ Neynar score missing or invalid for FID {fid}: {neynar_score}")
+                return jsonify({'allowed': False, 'error': 'score_unavailable', 'fid': fid}), 403
+            
+            neynar_score = float(neynar_score)
+            
+            if neynar_score < NEYNAR_MIN_SCORE:
+                print(f"❌ FID {fid} score {neynar_score} below threshold {NEYNAR_MIN_SCORE}")
+                return jsonify({
+                    'allowed': False,
+                    'error': 'score_too_low',
+                    'fid': fid,
+                    'score': round(neynar_score, 4),
+                    'min': NEYNAR_MIN_SCORE,
+                    'verified': True
+                }), 403
+            
+            print(f"✅ FID {fid} verified, Neynar score {neynar_score} >= {NEYNAR_MIN_SCORE}, access granted")
+            return jsonify({
+                'allowed': True,
+                'fid': fid,
+                'verified': True,
+                'score': round(neynar_score, 4),
+                'source': 'farcaster'
+            })
+            
+        except urllib.error.HTTPError as http_err:
+            print(f"❌ Neynar API HTTP error for FID {fid}: {http_err.code} {http_err.reason}")
+            return jsonify({'allowed': False, 'error': 'neynar_error', 'fid': fid, 'details': f'HTTP {http_err.code}'}), 502
+        except urllib.error.URLError as url_err:
+            print(f"❌ Neynar API connection error for FID {fid}: {url_err.reason}")
+            return jsonify({'allowed': False, 'error': 'neynar_error', 'fid': fid, 'details': str(url_err.reason)}), 502
+        except Exception as neynar_err:
+            print(f"❌ Neynar score check failed for FID {fid}: {neynar_err}")
+            return jsonify({'allowed': False, 'error': 'neynar_error', 'fid': fid, 'details': str(neynar_err)}), 502
             
     except ImportError:
         print("⚠️ PyJWT not installed - cannot verify Farcaster tokens")
