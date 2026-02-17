@@ -1,0 +1,71 @@
+You are working on my PMFI app. I already have an invite-code gate for the WEB app. I want to change gating so it depends on environment:
+
+GOAL
+- Web (normal browser): keep the existing invite code requirement exactly as it is today.
+- Farcaster mini app: REMOVE invite-code gating. Instead require Neynar user score >= 0.7 to log in.
+- The Neynar score check must be enforced on the BACKEND (server), not only frontend, to prevent spoofing.
+
+HIGH LEVEL FLOW
+1) Detect Farcaster vs Web in the frontend boot sequence
+   - If Farcaster SDK is present / running inside Farcaster: call POST /api/auth/farcaster
+   - Else (normal web): keep the existing invite flow (POST /api/auth/invite) and show invite UI as today
+   - Do not show invite code UI inside Farcaster at all
+
+2) Farcaster auth endpoint (backend)
+   - Implement POST /api/auth/farcaster
+   - This endpoint must:
+     a) verify Farcaster mini app auth and extract a trusted fid
+        - IMPORTANT: do NOT trust a raw fid sent from client unless verified
+        - Use our existing Farcaster auth logic / token verification used elsewhere in the app
+        - If we don’t have it yet, create a minimal verification wrapper function: verifyFarcasterAuth(req) -> { fid }
+     b) call Neynar API bulk user endpoint to fetch user info for that fid
+        - GET https://api.neynar.com/v2/farcaster/user/bulk/?fids=<fid>&viewer_fid=<fid>
+        - Use header: "x-api-key": process.env.NEYNAR_API_KEY
+     c) read score from: data.users[0].experimental.neynar_user_score
+     d) enforce threshold MIN_SCORE = 0.7
+        - if score is missing/non-number => 403 { ok:false, error:"score_unavailable" }
+        - if score < 0.7 => 403 { ok:false, error:"score_too_low", score, min:0.7 }
+     e) if score >= 0.7, issue the same session/cookie/jwt we already issue for successful auth today
+        - store fid + score + source:"farcaster" in session payload if possible
+
+3) Web invite endpoint (backend)
+   - Keep the existing POST /api/auth/invite behavior unchanged.
+   - It should still gate web users by invite code like today.
+
+4) Frontend UX
+   - If Farcaster auth returns 200: continue loading app as logged in.
+   - If Farcaster auth returns 403 score_too_low:
+       show a clean gate screen (no invite input) with message:
+       "Your Farcaster account doesn’t meet the access threshold yet (min 0.7)."
+       Optionally show their score and short note "Scores update weekly."
+   - If normal web and not authenticated: show existing invite code UI as today.
+
+FILES / CHANGES
+- Identify where auth routes live (Express routes, Next API routes, serverless functions, etc.) and implement /api/auth/farcaster accordingly.
+- Add env var support for NEYNAR_API_KEY (update .env example / Replit secrets).
+- Update frontend boot/auth logic to branch:
+    if isFarcasterEnvironment() -> POST /api/auth/farcaster
+    else -> existing invite flow
+
+ERROR HANDLING
+- If Neynar API is down or returns non-200:
+    return 502 { ok:false, error:"neynar_error", details:<response text> }
+- Ensure no sensitive tokens are returned to client.
+
+ACCEPTANCE CRITERIA (HOW I WILL TEST)
+1) Open app in normal browser:
+   - I still see invite gate if not logged in
+   - Entering correct invite code lets me in
+2) Open app inside Farcaster mini app:
+   - I do NOT see invite UI
+   - If my Neynar score >= 0.7, I get logged in
+   - If my score < 0.7, I see the “threshold” gate screen and cannot proceed
+3) The backend blocks low-score users even if they try to bypass frontend.
+
+IMPLEMENTATION NOTE
+- If you need a stub for verifyFarcasterAuth(req), ask me where our Farcaster auth token/signature is currently handled, but try first to locate existing verification logic in the repo.
+
+Now implement this with minimal diffs and tell me:
+- which files you changed
+- what env vars I need to set
+- what endpoints exist after the change
