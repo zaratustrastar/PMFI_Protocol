@@ -452,6 +452,55 @@
         }
         
         /* Gate Screen Styles */
+        #bootLoader {
+            position: fixed;
+            inset: 0;
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        #bootLoader.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #bootLoader.hidden {
+            display: none;
+        }
+
+        .boot-gif {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .boot-text {
+            margin-top: 18px;
+            font-size: 14px;
+            color: #8b949e;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes boot-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .boot-css-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #f0f6fc;
+            border-radius: 50%;
+            animation: boot-spin 0.8s linear infinite;
+            display: none;
+        }
+
         .gate-screen {
             position: fixed;
             inset: 0;
@@ -666,6 +715,19 @@
     </style>
 </head>
 <body>
+    <!-- Boot Loader - visible immediately on first paint -->
+    <div id="bootLoader">
+        <img src="/loader.gif" alt="" class="boot-gif" id="bootGif">
+        <div class="boot-css-spinner" id="bootSpinner"></div>
+        <p class="boot-text">opening pmfi...</p>
+    </div>
+    <script>
+        document.getElementById('bootGif').addEventListener('error', function() {
+            this.style.display = 'none';
+            document.getElementById('bootSpinner').style.display = 'block';
+        });
+    </script>
+
     <!-- Gate Screen for Unauthorized Users -->
     <div class="gate-screen" id="gateScreen">
         <img src="/psniper-logo.png" alt="pSNIPER" class="gate-logo">
@@ -787,80 +849,35 @@
     
     <script>
         // ============================================
-        // CRITICAL: Call sdk.actions.ready() IMMEDIATELY
-        // This must be synchronous and unconditional to dismiss the splash screen
+        // BOOT SEQUENCE: loader paint → rAF → SDK detect → ready() → lazy init
         // ============================================
         let fcSdk = null;
         let userFid = null;
         let isInFarcaster = false;
-        
-        (function callReadyImmediately() {
-            try {
-                if (typeof window.miniapp !== 'undefined' && window.miniapp.sdk) {
-                    fcSdk = window.miniapp.sdk;
-                    fcSdk.actions.ready();
-                    isInFarcaster = true;
-                    console.log('[FC] sdk.actions.ready() called via miniapp.sdk');
-                } else if (typeof window.FarcasterFrame !== 'undefined' && window.FarcasterFrame.sdk) {
-                    fcSdk = window.FarcasterFrame.sdk;
-                    fcSdk.actions.ready();
-                    isInFarcaster = true;
-                    console.log('[FC] sdk.actions.ready() called via FarcasterFrame.sdk');
-                } else if (typeof window.sdk !== 'undefined') {
-                    fcSdk = window.sdk;
-                    fcSdk.actions.ready();
-                    isInFarcaster = true;
-                    console.log('[FC] sdk.actions.ready() called via window.sdk');
-                } else {
-                    console.log('[FC] No Farcaster SDK found at load time, will retry...');
-                    var retryCount = 0;
-                    var retryInterval = setInterval(function() {
-                        retryCount++;
-                        try {
-                            if (typeof window.miniapp !== 'undefined' && window.miniapp.sdk) {
-                                fcSdk = window.miniapp.sdk;
-                                fcSdk.actions.ready();
-                                isInFarcaster = true;
-                                console.log('[FC] sdk.actions.ready() called on retry #' + retryCount);
-                                clearInterval(retryInterval);
-                            } else if (retryCount >= 20) {
-                                console.log('[FC] Gave up waiting for SDK after 20 retries');
-                                clearInterval(retryInterval);
-                            }
-                        } catch (retryErr) {
-                            console.log('[FC] Retry #' + retryCount + ' failed:', retryErr.message);
-                            clearInterval(retryInterval);
-                        }
-                    }, 100);
-                }
-            } catch (e) {
-                console.log('[FC] Not in Farcaster frame context:', e.message);
-            }
-        })();
-        
+
         const BASE_CHAIN_ID = 8453;
         const BASE_RPC = 'https://mainnet.base.org';
         const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
         const VAULT_ADDRESS = '{{ vault_address | default("0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1") }}';
-        
+
         let provider = null;
         let signer = null;
         let userAddress = null;
         let vaultContract = null;
         let usdcContract = null;
         let sharePrice = 1.0;
-        
-        const readProvider = new ethers.JsonRpcProvider(BASE_RPC);
+
+        let readProvider = null;
         let readUsdcContract = null;
         let readVaultContract = null;
-        
+
         const USDC_ABI = [
             'function balanceOf(address) view returns (uint256)',
             'function allowance(address owner, address spender) view returns (uint256)',
             'function approve(address spender, uint256 amount) returns (bool)',
             'function decimals() view returns (uint8)'
         ];
-        
+
         const VAULT_ABI = [
             'function balanceOf(address) view returns (uint256)',
             'function totalSupply() view returns (uint256)',
@@ -872,9 +889,70 @@
             'function claim(uint256 requestId)',
             'function cancelExpiredWithdrawal(uint256 requestId)'
         ];
-        
-        readUsdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, readProvider);
-        readVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, readProvider);
+
+        function initContractsLazy() {
+            if (readProvider) return;
+            console.log('[BOOT] Initializing contracts lazily');
+            readProvider = new ethers.JsonRpcProvider(BASE_RPC);
+            readUsdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, readProvider);
+            readVaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, readProvider);
+        }
+
+        function showBootLoader() {
+            const el = document.getElementById('bootLoader');
+            if (el) { el.classList.remove('hidden', 'fade-out'); }
+        }
+
+        function hideBootLoader() {
+            const el = document.getElementById('bootLoader');
+            if (!el || el.classList.contains('hidden')) return;
+            el.classList.add('fade-out');
+            setTimeout(function() { el.classList.add('hidden'); }, 350);
+        }
+
+        function detectSdk() {
+            if (typeof window.miniapp !== 'undefined' && window.miniapp.sdk) return window.miniapp.sdk;
+            if (typeof window.FarcasterFrame !== 'undefined' && window.FarcasterFrame.sdk) return window.FarcasterFrame.sdk;
+            if (typeof window.sdk !== 'undefined') return window.sdk;
+            return null;
+        }
+
+        function waitForSdk(maxMs) {
+            maxMs = maxMs || 2500;
+            return new Promise(function(resolve) {
+                var found = detectSdk();
+                if (found) return resolve(found);
+                var elapsed = 0;
+                var interval = setInterval(function() {
+                    elapsed += 80;
+                    var s = detectSdk();
+                    if (s) { clearInterval(interval); resolve(s); }
+                    else if (elapsed >= maxMs) { clearInterval(interval); resolve(null); }
+                }, 80);
+            });
+        }
+
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                console.log('[BOOT] Loader painted, starting SDK detection');
+                waitForSdk(2500).then(function(sdk) {
+                    if (sdk) {
+                        fcSdk = sdk;
+                        isInFarcaster = true;
+                        try {
+                            fcSdk.actions.ready();
+                            console.log('[BOOT] sdk.actions.ready() called');
+                        } catch (e) {
+                            console.warn('[BOOT] ready() error:', e.message);
+                        }
+                    } else {
+                        console.log('[BOOT] No SDK found — not in Farcaster');
+                    }
+                    initContractsLazy();
+                    authenticateWithFarcaster();
+                });
+            });
+        });
         
         // Gate screen elements
         const gateScreen = document.getElementById('gateScreen');
@@ -898,14 +976,15 @@
         }
         
         function grantAccess() {
+            initContractsLazy();
             gateScreen.classList.add('hidden');
             miniApp.classList.remove('hidden');
         }
         
         async function authenticateWithFarcaster() {
-            // If not in Farcaster frame, show gate with message to open in Warpcast
             if (!fcSdk || !isInFarcaster) {
                 console.log('[FC] Not in Farcaster frame');
+                hideBootLoader();
                 showGateError('Please open in Warpcast to access');
                 gateFid.innerHTML = 'This app requires Farcaster authentication';
                 return;
@@ -949,17 +1028,17 @@
                     quickAuthToken = token;
                     const result = await verifyQuickAuthToken(token);
                     if (result === 'denied') {
+                        hideBootLoader();
                         showCodeSection();
                     }
                 } else {
                     console.log('[FC] No verified auth token available');
-                    console.log('[FC] SDK type:', typeof fcSdk);
-                    console.log('[FC] quickAuth exists:', !!(fcSdk && fcSdk.quickAuth));
-                    console.log('[FC] quickAuth.getToken exists:', !!(fcSdk && fcSdk.quickAuth && fcSdk.quickAuth.getToken));
+                    hideBootLoader();
                     showGateError('Could not get auth token. Make sure you are using the latest Warpcast.');
                 }
             } catch (e) {
                 console.error('[FC] Auth error:', e);
+                hideBootLoader();
                 showGateError('Authentication error. Try refreshing.');
             }
         }
@@ -982,18 +1061,20 @@
                 }
                 
                 if (data.allowed) {
-                    showGateSuccess('Access granted!');
-                    setTimeout(grantAccess, 500);
+                    hideBootLoader();
+                    grantAccess();
                     return 'granted';
                 } else if (data.fid) {
                     return 'denied';
                 } else {
                     console.error('[FC] Server verify response:', JSON.stringify(data));
+                    hideBootLoader();
                     showGateError(data.error || 'Could not verify token');
                     return false;
                 }
             } catch (e) {
                 console.error('[FC] Token verification fetch error:', e);
+                hideBootLoader();
                 showGateError('Could not reach server. Try again.');
                 return false;
             }
@@ -1045,8 +1126,8 @@
                     gateCodeSuccess.textContent = data.message || 'Access granted!';
                     gateCodeSuccess.classList.add('show');
                     gateCodeSection.classList.remove('visible');
-                    showGateSuccess('Access granted!');
-                    setTimeout(grantAccess, 800);
+                    hideBootLoader();
+                    grantAccess();
                 } else {
                     gateCodeError.textContent = data.error || 'Failed to redeem code';
                     gateCodeError.classList.add('show');
