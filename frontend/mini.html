@@ -240,15 +240,16 @@
         .action-buttons {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding: 12px 0 8px;
+            gap: 6px;
+            padding: 10px 0;
+            padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
             flex-shrink: 0;
         }
         
         .action-btn {
             width: 100%;
-            padding: 12px;
-            font-size: 15px;
+            padding: 11px;
+            font-size: 14px;
             font-weight: 600;
             border-radius: 12px;
             border: none;
