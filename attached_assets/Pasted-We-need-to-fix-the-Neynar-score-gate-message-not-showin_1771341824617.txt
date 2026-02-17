@@ -1,0 +1,50 @@
+We need to fix the Neynar score gate message not showing on the Farcaster gate screen.
+
+CURRENT ISSUE
+In frontend/mini.html we previously added showScoreGate() that dynamically creates a DOM element and appends it to .gate-content. In practice, on mobile the element doesn’t appear (likely because .gate-content layout/DOM timing/overwrite). The gate screen stays on “PMFI Beta” + “Your FID: …” with no explanation.
+
+GOAL
+Render the Neynar score message reliably under the FID line on the existing gate screen:
+- White text
+- Center aligned
+- Shows:
+  “Neynar score: 0.xx”
+  “Access requires Neynar score ≥ 0.7”
+- Only visible when backend returns error === "score_too_low"
+- Do NOT dynamically append new elements anymore. Use a static placeholder in HTML and update it.
+
+IMPLEMENTATION (MINIMAL DIFF)
+1) In the existing gate HTML (the screen that shows PMFI Beta and the FID), add a static container directly under the FID line:
+
+<div id="neynarGateText" class="neynar-gate" style="display:none;">
+  <div class="neynar-score">Neynar score: <span id="neynarScoreValue">—</span></div>
+  <div class="neynar-requirement">Access requires Neynar score ≥ <b>0.7</b></div>
+</div>
+
+Place it immediately after the element that renders “Your FID: …”.
+
+2) Add CSS in mini.html to make it visible on the dark background:
+.neynar-gate { margin-top: 12px; text-align:center; }
+.neynar-score { color:#fff; font-size:14px; opacity:0.95; }
+.neynar-requirement { color:#fff; font-size:13px; opacity:0.75; margin-top:6px; }
+
+3) Update the Farcaster auth response handler:
+- When /api/verify-fc-token responds with:
+  { allowed:false, error:"score_too_low", score:<number>, min:0.7 }
+  then:
+    - set #neynarScoreValue to score formatted to 2 decimals
+    - show #neynarGateText (display:block)
+    - keep the gate screen visible
+- For allowed:true:
+    - ensure #neynarGateText is hidden (display:none) and proceed normally
+- For other errors (score_unavailable / neynar_error / unauthorized):
+    - keep existing behavior, but do not show invite code UI inside Farcaster
+
+4) Remove or stop using the old showScoreGate() that dynamically appends elements (or refactor it to just update the static placeholder).
+
+ACCEPTANCE TEST
+- In Farcaster mini app with Neynar score < 0.7: the gate screen shows the score message under the FID line.
+- In Farcaster mini app with score ≥ 0.7: user gets access and no gate message is shown.
+- In normal web: invite flow remains unchanged.
+
+Please implement this in frontend/mini.html with minimal diffs and tell me exactly what you changed.

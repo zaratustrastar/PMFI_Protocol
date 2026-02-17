@@ -1,0 +1,61 @@
+We have an issue in the Farcaster mini app UI:
+
+PROBLEM
+When a user’s Neynar score is < 0.7, the app gets “stuck” on the current splash/gate screen (PMFI Beta + “Your FID: …”) without clearly explaining why access is blocked. We already return a backend error like score_too_low with the user score + min threshold, but the UI doesn’t show it.
+
+GOAL
+On the same gate screen (the one shown in the screenshot: PMFI Beta + Your FID), add a clear white text block that:
+1) displays the user’s current Neynar score (e.g. “Neynar score: 0.63”)
+2) displays the requirement: “Access requires Neynar score ≥ 0.7”
+3) only appears when the backend response indicates the score is too low
+
+DESIRED UI
+- Text color: white (with slightly lower opacity for the requirement line is fine)
+- Center aligned, placed under “Your FID: …”
+- Should not show invite code input for Farcaster users
+- The gate should remain visible, but now it must clearly tell the user what to do
+
+WHERE TO CHANGE
+Frontend: frontend/mini.html
+Backend is already done (bot/bot_v7.py). Do NOT change backend logic unless the response fields are missing.
+
+DATA CONTRACT (what frontend should read)
+When calling POST /api/verify-fc-token, backend returns one of:
+- Allowed:
+  { allowed: true, score: 0.78, fid: ... }
+- Too low:
+  { allowed: false, error: "score_too_low", score: 0.xx, min: 0.7 }
+- Unavailable:
+  { allowed: false, error: "score_unavailable" }
+- Neynar error:
+  { allowed: false, error: "neynar_error" }
+- Unauthorized:
+  { allowed: false, error: "unauthorized" }
+
+IMPLEMENTATION STEPS
+1) Add HTML elements to the gate section:
+   - a container (hidden by default) for the Neynar messages
+   - a span to inject the score value
+2) Add CSS in mini.html:
+   - white text
+   - centered
+   - readable on dark background
+3) Update the Farcaster auth flow JS:
+   - after /api/verify-fc-token returns
+   - if error === "score_too_low":
+       show the container
+       set score text from response score (format to 2 decimals)
+       render requirement line “Access requires Neynar score ≥ 0.7”
+   - for other errors, keep existing messages (but do not show invite code)
+
+ACCEPTANCE CRITERIA
+- In Farcaster mini app with score < 0.7:
+  I see “Neynar score: X.XX” and “Access requires Neynar score ≥ 0.7” in white under the FID line.
+- In Farcaster mini app with score ≥ 0.7:
+  gate does not show; app proceeds normally.
+- In web browser (non-Farcaster):
+  invite code flow remains unchanged.
+
+Please implement with minimal diffs and tell me:
+- which lines/files changed
+- what element IDs/classes you added
