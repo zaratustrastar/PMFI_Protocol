@@ -60,12 +60,20 @@
         .mini-app {
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
-            min-height: 100dvh;
-            padding: 16px;
-            padding-bottom: env(safe-area-inset-bottom, 16px);
+            height: 100vh;
+            height: 100dvh;
+            padding: 0 16px;
             max-width: 420px;
             margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .mini-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-top: 16px;
+            padding-bottom: 8px;
         }
         
         .mini-header {
@@ -203,13 +211,38 @@
             color: var(--accent-green);
         }
         
+        .vault-card-soon {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 24px 20px;
+            margin-bottom: 12px;
+            text-align: center;
+            opacity: 0.45;
+        }
+        
+        .vault-card-soon .vault-soon-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .vault-card-soon .vault-soon-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+        
         .action-buttons {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-top: auto;
-            padding-top: 12px;
-            padding-bottom: 8px;
+            padding: 12px 0 8px;
+            flex-shrink: 0;
         }
         
         .action-btn {
@@ -760,47 +793,74 @@
             <button id="connectBtn" class="connect-btn">Connect</button>
         </header>
         
-        <!-- Vault Card -->
-        <div class="vault-card">
-            <div class="vault-title">
-                pSniper
-                <span class="network-badge"><span class="dot"></span>Base</span>
+        <div class="mini-scroll-area">
+            <!-- Vault Card -->
+            <div class="vault-card">
+                <div class="vault-title">
+                    pSniper
+                    <span class="network-badge"><span class="dot"></span>Base</span>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Share Price</div>
+                        <div class="stat-value" id="sharePrice">$1.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Value</div>
+                        <div class="stat-value" id="tvl">$0</div>
+                    </div>
+                </div>
+                
+                <div class="user-position hidden" id="userPosition">
+                    <div class="position-row">
+                        <span class="position-label">Your Shares</span>
+                        <span class="position-value" id="userShares">0</span>
+                    </div>
+                    <div class="position-row" style="margin-top: 8px;">
+                        <span class="position-label">Your Value</span>
+                        <span class="position-value" id="userValue">$0</span>
+                    </div>
+                </div>
             </div>
             
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-label">Share Price</div>
-                    <div class="stat-value" id="sharePrice">$1.00</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Total Value</div>
-                    <div class="stat-value" id="tvl">$0</div>
-                </div>
+            <div class="pending-withdrawals hidden" id="pendingWithdrawalsSection">
+                <div class="pending-title">Pending Withdrawals</div>
+                <div id="pendingWithdrawalsList"></div>
+                <div class="status-msg" id="claimStatus"></div>
             </div>
             
-            <div class="user-position hidden" id="userPosition">
-                <div class="position-row">
-                    <span class="position-label">Your Shares</span>
-                    <span class="position-value" id="userShares">0</span>
-                </div>
-                <div class="position-row" style="margin-top: 8px;">
-                    <span class="position-label">Your Value</span>
-                    <span class="position-value" id="userValue">$0</span>
-                </div>
+            <!-- Coming Soon Vaults -->
+            <div class="vault-card-soon">
+                <div class="vault-soon-name">pArbitrage</div>
+                <div class="vault-soon-label">Soon ...</div>
+            </div>
+            <div class="vault-card-soon">
+                <div class="vault-soon-name">pVolatility</div>
+                <div class="vault-soon-label">Soon ...</div>
+            </div>
+            <div class="vault-card-soon">
+                <div class="vault-soon-name">pCopy</div>
+                <div class="vault-soon-label">Soon ...</div>
+            </div>
+            <div class="vault-card-soon">
+                <div class="vault-soon-name">pLP</div>
+                <div class="vault-soon-label">Soon ...</div>
+            </div>
+            <div class="vault-card-soon">
+                <div class="vault-soon-name">pEndspiel</div>
+                <div class="vault-soon-label">Soon ...</div>
+            </div>
+            <div class="vault-card-soon">
+                <div class="vault-soon-name">pInsider</div>
+                <div class="vault-soon-label">Soon ...</div>
             </div>
         </div>
         
-        <div class="pending-withdrawals hidden" id="pendingWithdrawalsSection">
-            <div class="pending-title">Pending Withdrawals</div>
-            <div id="pendingWithdrawalsList"></div>
-            <div class="status-msg" id="claimStatus"></div>
-        </div>
-        
-        <!-- Action Buttons -->
+        <!-- Action Buttons (fixed at bottom) -->
         <div class="action-buttons">
             <button id="depositBtn" class="action-btn primary" disabled>Deposit</button>
             <button id="withdrawBtn" class="action-btn secondary" disabled>Withdraw</button>
-
         </div>
     </div>
     
