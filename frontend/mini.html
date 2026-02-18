@@ -854,6 +854,12 @@
                 <div class="status-msg" id="claimStatus"></div>
             </div>
             
+            <!-- XP Tasks Section -->
+            <div id="xpTasksSection" class="vault-card" style="display:none; padding:16px;">
+                <div style="font-size:14px; font-weight:600; color:#fff; margin-bottom:12px; letter-spacing:0.5px;">Tasks</div>
+                <div id="xpTasksList"></div>
+            </div>
+            
             <!-- Coming Soon Vaults -->
             <div class="vault-card-soon">
                 <div class="vault-soon-name">pArbitrage</div>
@@ -1259,6 +1265,95 @@
             const completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
             el.textContent = total + ' XP \u00B7 ' + completedTasks + '/' + tasks.length + ' tasks';
             el.style.display = 'block';
+            renderXpTasks(tasks);
+        }
+
+        const TASK_LABELS = {
+            follow_fc: 'Follow on Farcaster',
+            deposit_10: 'Deposit $10+ USDC',
+            invite: 'Invite a friend',
+            follow_x: 'Follow on X'
+        };
+        const VERIFIABLE_TASKS = ['follow_fc', 'deposit_10', 'invite'];
+
+        function renderXpTasks(tasks) {
+            const section = document.getElementById('xpTasksSection');
+            const list = document.getElementById('xpTasksList');
+            if (!section || !list) return;
+            if (!tasks || tasks.length === 0) return;
+            section.style.display = 'block';
+            list.innerHTML = '';
+            tasks.forEach(t => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.06);';
+                const left = document.createElement('div');
+                left.style.cssText = 'flex:1;';
+                const label = document.createElement('div');
+                label.style.cssText = 'font-size:13px; color:#fff; font-weight:500;';
+                label.textContent = TASK_LABELS[t.id] || t.id;
+                const xpLabel = document.createElement('div');
+                xpLabel.style.cssText = 'font-size:11px; color:rgba(255,255,255,0.4); margin-top:2px;';
+                xpLabel.textContent = '+' + t.xp + ' XP';
+                left.appendChild(label);
+                left.appendChild(xpLabel);
+
+                const right = document.createElement('div');
+                if (t.status === 'COMPLETED') {
+                    right.innerHTML = '<span style="color:#4ade80; font-size:12px; font-weight:600;">Done</span>';
+                } else if (t.status === 'PENDING_REVIEW') {
+                    right.innerHTML = '<span style="color:#facc15; font-size:12px;">Pending</span>';
+                } else if (t.status === 'LOCKED') {
+                    right.innerHTML = '<span style="color:rgba(255,255,255,0.25); font-size:12px;">Locked</span>';
+                } else if (VERIFIABLE_TASKS.includes(t.id)) {
+                    const btn = document.createElement('button');
+                    btn.textContent = 'Verify';
+                    btn.style.cssText = 'background:#6366f1; color:#fff; border:none; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer;';
+                    btn.dataset.taskId = t.id;
+                    btn.addEventListener('click', () => verifyTask(t.id, btn));
+                    right.appendChild(btn);
+                } else {
+                    right.innerHTML = '<span style="color:rgba(255,255,255,0.35); font-size:12px;">Manual</span>';
+                }
+                row.appendChild(left);
+                row.appendChild(right);
+                list.appendChild(row);
+            });
+        }
+
+        async function verifyTask(taskId, btn) {
+            if (!userFid) return;
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+            btn.style.opacity = '0.6';
+            try {
+                const res = await fetch('/api/tasks/verify/' + taskId, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fid: userFid })
+                });
+                const data = await res.json();
+                console.log('[XP] verify ' + taskId + ':', data);
+                if (data.error) {
+                    btn.textContent = 'Error';
+                    btn.style.background = '#ef4444';
+                    setTimeout(() => { btn.textContent = 'Verify'; btn.style.background = '#6366f1'; btn.style.opacity = '1'; btn.disabled = false; }, 2500);
+                    return;
+                }
+                if (data.verified) {
+                    btn.textContent = 'Done!';
+                    btn.style.background = '#22c55e';
+                    await xpFetchState();
+                } else {
+                    btn.textContent = data.reason ? data.reason.substring(0, 20) : 'Not yet';
+                    btn.style.background = '#f59e0b';
+                    setTimeout(() => { btn.textContent = 'Verify'; btn.style.background = '#6366f1'; btn.style.opacity = '1'; btn.disabled = false; }, 3000);
+                }
+            } catch (e) {
+                console.error('[XP] verify error:', e);
+                btn.textContent = 'Error';
+                btn.style.background = '#ef4444';
+                setTimeout(() => { btn.textContent = 'Verify'; btn.style.background = '#6366f1'; btn.style.opacity = '1'; btn.disabled = false; }, 2500);
+            }
         }
 
         async function xpBootstrap() {

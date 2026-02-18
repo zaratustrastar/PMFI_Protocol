@@ -311,6 +311,8 @@ TASK_DEFINITIONS = [
 ]
 
 REFERRAL_BONUS_RATIO = 0.10
+XP_FOLLOW_FC_TARGET_FID = 0  # TODO: Set to the target Farcaster FID users must follow
+XP_DEPOSIT_MIN_USDC = 10  # Minimum USDC deposit to qualify (in whole units)
 
 
 def award_xp(fid, xp_type, xp, meta=None, unique_key=None):
@@ -3356,6 +3358,205 @@ def api_xp_state():
         })
     except Exception as e:
         print(f"❌ [XP] /api/state error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# =============================================================================
+# XP Task Verification Endpoints
+# =============================================================================
+
+@flask_app.route('/api/tasks/verify/follow_fc', methods=['POST'])
+def api_verify_follow_fc():
+    """Verify that user follows the target Farcaster account. Awards 100 XP."""
+    try:
+        if not DATABASE_URL:
+            return jsonify({'error': 'XP system not available'}), 503
+        data = flask_request.get_json(force=True)
+        fid = data.get('fid')
+        if not fid:
+            return jsonify({'error': 'fid required'}), 400
+        fid = int(fid)
+        print(f"📝 [XP] /api/tasks/verify/follow_fc fid={fid}")
+
+        if not XP_FOLLOW_FC_TARGET_FID:
+            print("❌ [XP] XP_FOLLOW_FC_TARGET_FID not configured")
+            return jsonify({'error': 'Follow target not configured'}), 500
+
+        neynar_api_key = os.environ.get('NEYNAR_API_KEY', '')
+        if not neynar_api_key:
+            print("❌ [XP] NEYNAR_API_KEY not set for follow verification")
+            return jsonify({'error': 'Neynar API not configured'}), 500
+
+        verified = False
+        cursor = None
+        while True:
+            url = f"https://api.neynar.com/v2/farcaster/following?fid={fid}&limit=100"
+            if cursor:
+                url += f"&cursor={cursor}"
+            print(f"🔍 [XP] Checking following list: {url}")
+            ctx = ssl.create_default_context()
+            req = urllib_req.Request(url, headers={
+                'accept': 'application/json',
+                'x-api-key': neynar_api_key
+            })
+            resp = urllib_req.urlopen(req, timeout=15, context=ctx)
+            resp_data = json_mod.loads(resp.read().decode())
+            users = resp_data.get('users', [])
+            for u in users:
+                if u.get('fid') == XP_FOLLOW_FC_TARGET_FID:
+                    verified = True
+                    break
+            if verified:
+                break
+            next_cursor = resp_data.get('next', {}).get('cursor')
+            if not next_cursor:
+                break
+            cursor = next_cursor
+
+        if not verified:
+            print(f"❌ [XP] FID {fid} does not follow target FID {XP_FOLLOW_FC_TARGET_FID}")
+            return jsonify({'verified': False, 'reason': 'You are not following the required account'}), 200
+
+        event_id, awarded = award_xp(fid, 'follow_fc', 100, {'target_fid': XP_FOLLOW_FC_TARGET_FID}, f"follow_fc:{fid}")
+        print(f"✅ [XP] follow_fc verified for fid={fid}, awarded={awarded}")
+        return jsonify({'verified': True, 'awarded': awarded, 'xp': 100})
+    except Exception as e:
+        print(f"❌ [XP] /api/tasks/verify/follow_fc error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/tasks/verify/deposit_10', methods=['POST'])
+def api_verify_deposit_10():
+    """Verify that user deposited >= 10 USDC into the vault. Awards 500 XP."""
+    try:
+        if not DATABASE_URL:
+            return jsonify({'error': 'XP system not available'}), 503
+        data = flask_request.get_json(force=True)
+        fid = data.get('fid')
+        if not fid:
+            return jsonify({'error': 'fid required'}), 400
+        fid = int(fid)
+        print(f"📝 [XP] /api/tasks/verify/deposit_10 fid={fid}")
+
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT wallet FROM xp_users WHERE fid = %s", (fid,))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if not user or not user.get('wallet'):
+            print(f"❌ [XP] FID {fid} has no wallet linked")
+            return jsonify({'verified': False, 'reason': 'No wallet connected. Please connect your wallet first.'}), 200
+
+        wallet = user['wallet']
+        print(f"🔍 [XP] Checking deposits for wallet {wallet} on vault {VAULT_ADDRESS_CONFIG}")
+
+        w3_check = Web3(Web3.HTTPProvider(RPC_URL))
+        if not w3_check.is_connected():
+            print("❌ [XP] Cannot connect to Base RPC")
+            return jsonify({'error': 'RPC connection failed'}), 500
+
+        deposit_event_sig = Web3.keccak(text="Deposit(address,address,uint256,uint256)")
+        wallet_checksum = Web3.to_checksum_address(wallet)
+        vault_checksum = Web3.to_checksum_address(VAULT_ADDRESS_CONFIG)
+
+        sender_topic = '0x' + wallet_checksum[2:].lower().zfill(64)
+
+        latest_block = w3_check.eth.block_number
+        from_block = max(0, latest_block - 2_000_000)
+
+        total_deposited = 0
+        chunk_size = 50_000
+        current_block = from_block
+
+        while current_block <= latest_block:
+            to_block = min(current_block + chunk_size - 1, latest_block)
+            try:
+                logs = w3_check.eth.get_logs({
+                    'address': vault_checksum,
+                    'topics': [deposit_event_sig.hex() if isinstance(deposit_event_sig, bytes) else deposit_event_sig, sender_topic],
+                    'fromBlock': current_block,
+                    'toBlock': to_block,
+                })
+                for log in logs:
+                    if len(log['data']) >= 64:
+                        raw = log['data']
+                        if isinstance(raw, str):
+                            raw = bytes.fromhex(raw[2:] if raw.startswith('0x') else raw)
+                        assets_raw = int.from_bytes(raw[:32], 'big')
+                        total_deposited += assets_raw
+                        print(f"   Found deposit: {assets_raw / 1e6:.2f} USDC in tx {log['transactionHash'].hex()}")
+            except Exception as log_err:
+                print(f"⚠️ [XP] Log query error block {current_block}-{to_block}: {log_err}")
+            current_block = to_block + 1
+
+        total_usdc = total_deposited / 1e6
+        print(f"🔍 [XP] Total deposited by {wallet}: {total_usdc:.2f} USDC (min: {XP_DEPOSIT_MIN_USDC})")
+
+        if total_usdc < XP_DEPOSIT_MIN_USDC:
+            return jsonify({
+                'verified': False,
+                'reason': f'Total deposits: ${total_usdc:.2f}. Need at least ${XP_DEPOSIT_MIN_USDC}.',
+                'deposited': round(total_usdc, 2)
+            }), 200
+
+        event_id, awarded = award_xp(fid, 'deposit_10', 500, {'wallet': wallet, 'deposited_usdc': round(total_usdc, 2)}, f"deposit_10:{fid}")
+        print(f"✅ [XP] deposit_10 verified for fid={fid}, awarded={awarded}, total=${total_usdc:.2f}")
+        return jsonify({'verified': True, 'awarded': awarded, 'xp': 500, 'deposited': round(total_usdc, 2)})
+    except Exception as e:
+        print(f"❌ [XP] /api/tasks/verify/deposit_10 error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/tasks/verify/invite', methods=['POST'])
+def api_verify_invite():
+    """Verify that user has referred at least 1 user who completed at least 1 task. Awards 250 XP."""
+    try:
+        if not DATABASE_URL:
+            return jsonify({'error': 'XP system not available'}), 503
+        data = flask_request.get_json(force=True)
+        fid = data.get('fid')
+        if not fid:
+            return jsonify({'error': 'fid required'}), 400
+        fid = int(fid)
+        print(f"📝 [XP] /api/tasks/verify/invite fid={fid}")
+
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT DISTINCT xu.fid, xu.username
+            FROM xp_users xu
+            JOIN xp_events xe ON xe.fid = xu.fid
+            WHERE xu.referrer_fid = %s
+              AND xe.status = 'COMPLETED'
+              AND xe.type != 'referral_bonus'
+        """, (fid,))
+        qualified_referees = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        referred_count = len(qualified_referees)
+        print(f"🔍 [XP] FID {fid} has {referred_count} qualified referee(s)")
+
+        if referred_count < 1:
+            return jsonify({
+                'verified': False,
+                'reason': 'You need at least 1 referred user who has completed a task.',
+                'referredCount': referred_count
+            }), 200
+
+        event_id, awarded = award_xp(fid, 'invite', 250, {'referredCount': referred_count}, f"invite:{fid}")
+        print(f"✅ [XP] invite verified for fid={fid}, awarded={awarded}, referredCount={referred_count}")
+        return jsonify({'verified': True, 'awarded': awarded, 'xp': 250, 'referredCount': referred_count})
+    except Exception as e:
+        print(f"❌ [XP] /api/tasks/verify/invite error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
