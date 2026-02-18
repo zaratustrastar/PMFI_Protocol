@@ -66,6 +66,13 @@ This system automates Polymarket monitoring and trading.
   - **Exclusion rule**: Require `ticker_score > 0 AND total_score >= 5`
 - **Defense-in-depth**: Both market_monitor.py and auto_trader.py apply same filter logic
 
+**4. XP / Tasks / Referral System (Feb 2026)**:
+- Database tables: `xp_users` (fid PK, username, wallet, referrer_fid), `xp_events` (idempotent via unique_key), `referral_earnings` (unique per referrer+referee+source)
+- Tasks: follow_fc (100 XP, verified), deposit_10 (500 XP, verified), invite (250 XP, verified), follow_x (100 XP, manual/PENDING_REVIEW, locked until first 3 completed)
+- Referral: 10% of all referee XP awarded to referrer automatically; link format `?ref=<fid>`
+- Endpoints: POST /api/me, POST /api/referral/attach, GET /api/state?fid=, GET /api/leaderboard?scope=all|weekly
+- Helper: `award_xp(fid, type, xp, meta, unique_key)` — idempotent, auto-generates unique_key if missing, auto-awards referral bonus in same transaction
+
 **2. Trading Job Worker (Python)**: A continuous worker polls the `trading_jobs` queue, places laddered buy orders (1¢-3¢ on YES/NO tokens) for new markets, and updates job status. This component requires a residential IP due to Cloudflare blocking datacenter IPs.
 
 **3. Order Monitor (Python)**: Continuously monitors all active orders. It auto-cancels stale orders (>12 hours) to free up capital, places laddered sell orders upon fill, and sends Telegram notifications when sells execute. This also requires a residential IP.
