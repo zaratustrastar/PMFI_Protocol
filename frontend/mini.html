@@ -823,6 +823,8 @@
                     pSniper
                 </div>
                 
+                <div id="xpStatusBar" style="display:none; text-align:center; font-size:12px; color:rgba(255,255,255,0.55); letter-spacing:0.5px; margin-bottom:8px;"></div>
+                
                 <div class="stats-grid">
                     <div class="stat-box">
                         <div class="stat-label">Share Price</div>
@@ -936,7 +938,10 @@
         // ============================================
         let fcSdk = null;
         let userFid = null;
+        let fcUsername = null;
         let isInFarcaster = false;
+        let xpState = null;
+        let referralAttached = false;
 
         const BASE_CHAIN_ID = 8453;
         const BASE_RPC = 'https://mainnet.base.org';
@@ -1083,8 +1088,9 @@
                     
                     if (context && context.user && context.user.fid) {
                         userFid = context.user.fid;
+                        fcUsername = context.user.username || '';
                         gateFid.innerHTML = `Your FID: <strong>${userFid}</strong>`;
-                        console.log('[FC] Got FID from context:', userFid);
+                        console.log('[FC] Got FID from context:', userFid, 'username:', fcUsername);
                     }
                 } catch (ctxErr) {
                     console.log('[FC] Context fetch error (non-critical):', ctxErr);
@@ -1142,6 +1148,7 @@
                 if (data.allowed) {
                     hideBootLoader();
                     grantAccess();
+                    xpBootstrap();
                     return 'granted';
                 } else if (data.error === 'score_too_low') {
                     hideBootLoader();
@@ -1186,6 +1193,83 @@
             }
         }
         
+        // ============================================
+        // XP SYSTEM BOOTSTRAP
+        // ============================================
+        async function xpApiMe(wallet) {
+            if (!userFid) return;
+            try {
+                const body = { fid: userFid, username: fcUsername || '' };
+                if (wallet) body.wallet = wallet;
+                console.log('[XP] POST /api/me', body);
+                const res = await fetch('/api/me', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                console.log('[XP] /api/me response:', data);
+                return data;
+            } catch (e) {
+                console.error('[XP] /api/me error:', e);
+            }
+        }
+
+        async function xpReferralAttach() {
+            if (!userFid || referralAttached) return;
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const ref = params.get('ref');
+                const refFid = parseInt(ref);
+                if (!ref || isNaN(refFid) || refFid === userFid) return;
+                referralAttached = true;
+                console.log('[XP] POST /api/referral/attach fid=' + userFid + ' ref=' + ref);
+                const res = await fetch('/api/referral/attach', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fid: userFid, ref: refFid })
+                });
+                const data = await res.json();
+                console.log('[XP] /api/referral/attach response:', data);
+            } catch (e) {
+                console.error('[XP] /api/referral/attach error:', e);
+            }
+        }
+
+        async function xpFetchState() {
+            if (!userFid) return;
+            try {
+                console.log('[XP] GET /api/state?fid=' + userFid);
+                const res = await fetch('/api/state?fid=' + userFid);
+                const data = await res.json();
+                xpState = data;
+                console.log('[XP] State:', JSON.stringify(data, null, 2));
+                renderXpStatus();
+                return data;
+            } catch (e) {
+                console.error('[XP] /api/state error:', e);
+            }
+        }
+
+        function renderXpStatus() {
+            const el = document.getElementById('xpStatusBar');
+            if (!el || !xpState || xpState.error) return;
+            const total = xpState.xpTotal || 0;
+            const tasks = xpState.tasks || [];
+            const completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
+            el.textContent = total + ' XP \u00B7 ' + completedTasks + '/' + tasks.length + ' tasks';
+            el.style.display = 'block';
+        }
+
+        async function xpBootstrap() {
+            if (!userFid) return;
+            console.log('[XP] Bootstrap starting for fid=' + userFid);
+            await xpApiMe();
+            await xpReferralAttach();
+            await xpFetchState();
+            console.log('[XP] Bootstrap complete');
+        }
+
         let codeHandlersBound = false;
         function showCodeSection() {
             gateStatus.style.display = 'none';
@@ -1564,6 +1648,10 @@
                 }
                 
                 await updateUserPosition();
+                
+                if (userFid && userAddress) {
+                    xpApiMe(userAddress).then(() => xpFetchState());
+                }
                 
             } catch (e) {
                 console.error('Connect error:', e);
