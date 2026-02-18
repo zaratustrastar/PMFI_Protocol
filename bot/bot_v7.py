@@ -3365,6 +3365,17 @@ def api_xp_state():
 # XP Task Verification Endpoints
 # =============================================================================
 
+def _verify_fid_exists(fid):
+    """Check that the FID exists in xp_users (i.e. has passed auth gate). Returns user row or None."""
+    conn = get_invite_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("SELECT * FROM xp_users WHERE fid = %s", (fid,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+    return user
+
+
 @flask_app.route('/api/tasks/verify/follow_fc', methods=['POST'])
 def api_verify_follow_fc():
     """Verify that user follows the target Farcaster account. Awards 100 XP."""
@@ -3377,6 +3388,9 @@ def api_verify_follow_fc():
             return jsonify({'error': 'fid required'}), 400
         fid = int(fid)
         print(f"📝 [XP] /api/tasks/verify/follow_fc fid={fid}")
+
+        if not _verify_fid_exists(fid):
+            return jsonify({'error': 'User not registered'}), 403
 
         if not XP_FOLLOW_FC_TARGET_FID:
             print("❌ [XP] XP_FOLLOW_FC_TARGET_FID not configured")
@@ -3440,14 +3454,11 @@ def api_verify_deposit_10():
         fid = int(fid)
         print(f"📝 [XP] /api/tasks/verify/deposit_10 fid={fid}")
 
-        conn = get_invite_db()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT wallet FROM xp_users WHERE fid = %s", (fid,))
-        user = cur.fetchone()
-        cur.close()
-        conn.close()
+        user = _verify_fid_exists(fid)
+        if not user:
+            return jsonify({'error': 'User not registered'}), 403
 
-        if not user or not user.get('wallet'):
+        if not user.get('wallet'):
             print(f"❌ [XP] FID {fid} has no wallet linked")
             return jsonify({'verified': False, 'reason': 'No wallet connected. Please connect your wallet first.'}), 200
 
@@ -3463,7 +3474,7 @@ def api_verify_deposit_10():
         wallet_checksum = Web3.to_checksum_address(wallet)
         vault_checksum = Web3.to_checksum_address(VAULT_ADDRESS_CONFIG)
 
-        sender_topic = '0x' + wallet_checksum[2:].lower().zfill(64)
+        owner_topic = '0x' + wallet_checksum[2:].lower().zfill(64)
 
         latest_block = w3_check.eth.block_number
         from_block = max(0, latest_block - 2_000_000)
@@ -3475,20 +3486,39 @@ def api_verify_deposit_10():
         while current_block <= latest_block:
             to_block = min(current_block + chunk_size - 1, latest_block)
             try:
-                logs = w3_check.eth.get_logs({
+                sig_hex = deposit_event_sig.hex() if isinstance(deposit_event_sig, bytes) else deposit_event_sig
+                logs_as_caller = w3_check.eth.get_logs({
                     'address': vault_checksum,
-                    'topics': [deposit_event_sig.hex() if isinstance(deposit_event_sig, bytes) else deposit_event_sig, sender_topic],
+                    'topics': [sig_hex, owner_topic],
                     'fromBlock': current_block,
                     'toBlock': to_block,
                 })
-                for log in logs:
-                    if len(log['data']) >= 64:
-                        raw = log['data']
-                        if isinstance(raw, str):
-                            raw = bytes.fromhex(raw[2:] if raw.startswith('0x') else raw)
+                logs_as_owner = w3_check.eth.get_logs({
+                    'address': vault_checksum,
+                    'topics': [sig_hex, None, owner_topic],
+                    'fromBlock': current_block,
+                    'toBlock': to_block,
+                })
+                seen_txs = set()
+                all_logs = list(logs_as_caller) + list(logs_as_owner)
+                for log in all_logs:
+                    tx_hash = log['transactionHash'].hex() if hasattr(log['transactionHash'], 'hex') else str(log['transactionHash'])
+                    log_idx = log.get('logIndex', 0)
+                    dedup_key = f"{tx_hash}:{log_idx}"
+                    if dedup_key in seen_txs:
+                        continue
+                    seen_txs.add(dedup_key)
+                    raw = log['data']
+                    if isinstance(raw, str):
+                        raw = bytes.fromhex(raw[2:] if raw.startswith('0x') else raw)
+                    elif isinstance(raw, bytes):
+                        pass
+                    else:
+                        raw = bytes(raw)
+                    if len(raw) >= 64:
                         assets_raw = int.from_bytes(raw[:32], 'big')
                         total_deposited += assets_raw
-                        print(f"   Found deposit: {assets_raw / 1e6:.2f} USDC in tx {log['transactionHash'].hex()}")
+                        print(f"   Found deposit: {assets_raw / 1e6:.2f} USDC in tx {tx_hash}")
             except Exception as log_err:
                 print(f"⚠️ [XP] Log query error block {current_block}-{to_block}: {log_err}")
             current_block = to_block + 1
@@ -3525,6 +3555,9 @@ def api_verify_invite():
             return jsonify({'error': 'fid required'}), 400
         fid = int(fid)
         print(f"📝 [XP] /api/tasks/verify/invite fid={fid}")
+
+        if not _verify_fid_exists(fid):
+            return jsonify({'error': 'User not registered'}), 403
 
         conn = get_invite_db()
         cur = conn.cursor(cursor_factory=RealDictCursor)

@@ -1344,9 +1344,11 @@
                     btn.style.background = '#22c55e';
                     await xpFetchState();
                 } else {
-                    btn.textContent = data.reason ? data.reason.substring(0, 20) : 'Not yet';
+                    const msg = data.reason || 'Not yet';
+                    btn.textContent = msg.length > 25 ? msg.substring(0, 22) + '...' : msg;
                     btn.style.background = '#f59e0b';
-                    setTimeout(() => { btn.textContent = 'Verify'; btn.style.background = '#6366f1'; btn.style.opacity = '1'; btn.disabled = false; }, 3000);
+                    btn.style.opacity = '1';
+                    setTimeout(() => { btn.textContent = 'Verify'; btn.style.background = '#6366f1'; btn.style.opacity = '1'; btn.disabled = false; }, 3500);
                 }
             } catch (e) {
                 console.error('[XP] verify error:', e);
