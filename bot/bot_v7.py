@@ -250,6 +250,138 @@ def init_invite_tables():
         print(f"❌ Failed to init invite tables: {e}")
         return False
 
+def init_xp_tables():
+    """Initialize XP system database tables"""
+    if not DATABASE_URL:
+        print("⚠️ DATABASE_URL not set - XP system disabled")
+        return False
+    try:
+        conn = get_invite_db()
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS xp_users (
+                fid INTEGER PRIMARY KEY,
+                username VARCHAR(255),
+                wallet VARCHAR(42),
+                referrer_fid INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS xp_events (
+                id SERIAL PRIMARY KEY,
+                fid INTEGER NOT NULL,
+                type VARCHAR(50) NOT NULL,
+                xp INTEGER NOT NULL,
+                status VARCHAR(30) NOT NULL DEFAULT 'COMPLETED',
+                meta JSONB,
+                unique_key VARCHAR(255) UNIQUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS referral_earnings (
+                id SERIAL PRIMARY KEY,
+                referrer_fid INTEGER NOT NULL,
+                referee_fid INTEGER NOT NULL,
+                source_event_id INTEGER NOT NULL,
+                xp_share INTEGER NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(referrer_fid, referee_fid, source_event_id)
+            )
+        """)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_xp_events_fid ON xp_events(fid)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_xp_events_unique_key ON xp_events(unique_key)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_referral_earnings_referrer ON referral_earnings(referrer_fid)")
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("✅ XP system tables initialized")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to init XP tables: {e}")
+        return False
+
+
+TASK_DEFINITIONS = [
+    {"id": "follow_fc", "xp": 100, "verified": True},
+    {"id": "deposit_10", "xp": 500, "verified": True},
+    {"id": "invite", "xp": 250, "verified": True},
+    {"id": "follow_x", "xp": 100, "verified": False},
+]
+
+REFERRAL_BONUS_RATIO = 0.10
+
+
+def award_xp(fid, xp_type, xp, meta=None, unique_key=None):
+    """Award XP to a user idempotently. Returns (event_id, awarded_now).
+    unique_key is required for idempotency - will be auto-generated if not provided."""
+    if not DATABASE_URL:
+        return None, False
+    if not unique_key:
+        unique_key = f"{xp_type}:{fid}"
+    conn = get_invite_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        status = 'PENDING_REVIEW' if xp_type == 'follow_x' else 'COMPLETED'
+        cur.execute("""
+            INSERT INTO xp_events (fid, type, xp, status, meta, unique_key)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (unique_key) DO NOTHING
+            RETURNING id
+        """, (fid, xp_type, xp, status, json.dumps(meta or {}), unique_key))
+        row = cur.fetchone()
+        if row is None:
+            conn.commit()
+            print(f"ℹ️ [XP] Duplicate unique_key={unique_key}, skipping")
+            cur.close()
+            conn.close()
+            return None, False
+        event_id = row['id']
+        if status == 'COMPLETED':
+            _award_referral_bonus(cur, fid, event_id, xp)
+        conn.commit()
+        print(f"✅ [XP] Awarded {xp} XP to fid={fid} type={xp_type} event_id={event_id}")
+        cur.close()
+        conn.close()
+        return event_id, True
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ [XP] award_xp error: {e}")
+        cur.close()
+        conn.close()
+        return None, False
+
+
+def _award_referral_bonus(cur, referee_fid, source_event_id, base_xp):
+    """Award 10% referral bonus to the referrer if one exists.
+    Called within award_xp's transaction - does NOT commit or rollback."""
+    try:
+        cur.execute("SELECT referrer_fid FROM xp_users WHERE fid = %s", (referee_fid,))
+        user = cur.fetchone()
+        if not user or not user['referrer_fid']:
+            return
+        referrer_fid = user['referrer_fid']
+        bonus_xp = max(1, int(base_xp * REFERRAL_BONUS_RATIO))
+        ref_unique = f"ref_bonus:{source_event_id}"
+        cur.execute("""
+            INSERT INTO xp_events (fid, type, xp, status, meta, unique_key)
+            VALUES (%s, 'referral_bonus', %s, 'COMPLETED', %s, %s)
+            ON CONFLICT (unique_key) DO NOTHING
+            RETURNING id
+        """, (referrer_fid, bonus_xp, json.dumps({"from_fid": referee_fid, "source_event_id": source_event_id}), ref_unique))
+        bonus_row = cur.fetchone()
+        if bonus_row:
+            cur.execute("""
+                INSERT INTO referral_earnings (referrer_fid, referee_fid, source_event_id, xp_share)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT DO NOTHING
+            """, (referrer_fid, referee_fid, source_event_id, bonus_xp))
+            print(f"✅ [XP] Referral bonus {bonus_xp} XP to referrer fid={referrer_fid} from fid={referee_fid}")
+    except Exception as e:
+        print(f"⚠️ [XP] Referral bonus error: {e}")
+
+
 def hash_invite_code(code: str) -> str:
     """Hash an invite code using HMAC-SHA256"""
     return hmac.new(
@@ -3053,6 +3185,220 @@ def api_admin_stats():
 
 
 # =============================================================================
+# XP System API Endpoints
+# =============================================================================
+
+@flask_app.route('/api/me', methods=['POST'])
+def api_xp_me():
+    """Upsert user for XP system. Input: { fid, username, wallet? }"""
+    try:
+        if not DATABASE_URL:
+            return jsonify({'error': 'XP system not available'}), 503
+        data = flask_request.get_json(force=True)
+        fid = data.get('fid')
+        username = data.get('username', '')
+        wallet = data.get('wallet')
+        if not fid:
+            return jsonify({'error': 'fid required'}), 400
+        fid = int(fid)
+        print(f"📝 [XP] /api/me fid={fid} username={username} wallet={wallet}")
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        if wallet:
+            cur.execute("""
+                INSERT INTO xp_users (fid, username, wallet)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (fid) DO UPDATE SET username = EXCLUDED.username, wallet = EXCLUDED.wallet
+                RETURNING *
+            """, (fid, username, wallet.lower() if wallet else None))
+        else:
+            cur.execute("""
+                INSERT INTO xp_users (fid, username)
+                VALUES (%s, %s)
+                ON CONFLICT (fid) DO UPDATE SET username = EXCLUDED.username
+                RETURNING *
+            """, (fid, username))
+        user = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+        if user and user.get('created_at'):
+            user['created_at'] = user['created_at'].isoformat()
+        print(f"✅ [XP] Upserted user fid={fid}")
+        return jsonify({'ok': True, 'user': user})
+    except Exception as e:
+        print(f"❌ [XP] /api/me error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/referral/attach', methods=['POST'])
+def api_referral_attach():
+    """Attach referrer to user. Input: { fid, ref } where ref is referrer_fid."""
+    try:
+        if not DATABASE_URL:
+            return jsonify({'error': 'XP system not available'}), 503
+        data = flask_request.get_json(force=True)
+        fid = data.get('fid')
+        ref = data.get('ref')
+        if not fid or not ref:
+            return jsonify({'error': 'fid and ref required'}), 400
+        fid = int(fid)
+        ref = int(ref)
+        if fid == ref:
+            return jsonify({'error': 'Cannot refer yourself'}), 400
+        print(f"📝 [XP] /api/referral/attach fid={fid} ref={ref}")
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT fid, referrer_fid FROM xp_users WHERE fid = %s", (fid,))
+        user = cur.fetchone()
+        if not user:
+            cur.execute("INSERT INTO xp_users (fid, referrer_fid) VALUES (%s, %s)", (fid, ref))
+            conn.commit()
+            cur.close()
+            conn.close()
+            print(f"✅ [XP] Created user fid={fid} with referrer={ref}")
+            return jsonify({'ok': True, 'attached': True})
+        if user['referrer_fid']:
+            cur.close()
+            conn.close()
+            print(f"ℹ️ [XP] fid={fid} already has referrer={user['referrer_fid']}")
+            return jsonify({'ok': True, 'attached': False, 'reason': 'already_has_referrer'})
+        cur.execute("UPDATE xp_users SET referrer_fid = %s WHERE fid = %s", (ref, fid))
+        conn.commit()
+        cur.close()
+        conn.close()
+        print(f"✅ [XP] Attached referrer={ref} to fid={fid}")
+        return jsonify({'ok': True, 'attached': True})
+    except Exception as e:
+        print(f"❌ [XP] /api/referral/attach error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/state', methods=['GET'])
+def api_xp_state():
+    """Get full XP state for a user. Query: ?fid=..."""
+    try:
+        if not DATABASE_URL:
+            return jsonify({'error': 'XP system not available'}), 503
+        fid = flask_request.args.get('fid')
+        if not fid:
+            return jsonify({'error': 'fid required'}), 400
+        fid = int(fid)
+        print(f"📝 [XP] /api/state fid={fid}")
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT * FROM xp_users WHERE fid = %s", (fid,))
+        user = cur.fetchone()
+        if not user:
+            cur.close()
+            conn.close()
+            return jsonify({
+                'user': None,
+                'xpTotal': 0,
+                'tasks': [
+                    {"id": t["id"], "xp": t["xp"], "status": "AVAILABLE" if t["id"] != "follow_x" else "LOCKED", "locked": t["id"] == "follow_x", "reason": None}
+                    for t in TASK_DEFINITIONS
+                ],
+                'referralLink': f"?ref={fid}",
+                'referralStats': {'invitedCount': 0, 'referralXpEarned': 0}
+            })
+        if user.get('created_at'):
+            user['created_at'] = user['created_at'].isoformat()
+        cur.execute("""
+            SELECT type, status, xp FROM xp_events
+            WHERE fid = %s AND type IN ('follow_fc', 'deposit_10', 'invite', 'follow_x')
+        """, (fid,))
+        events = cur.fetchall()
+        event_map = {}
+        for ev in events:
+            event_map[ev['type']] = ev['status']
+        cur.execute("""
+            SELECT COALESCE(SUM(xp), 0) as total FROM xp_events
+            WHERE fid = %s AND status = 'COMPLETED'
+        """, (fid,))
+        xp_total = cur.fetchone()['total']
+        prereqs_done = all(
+            event_map.get(t) == 'COMPLETED'
+            for t in ['follow_fc', 'deposit_10', 'invite']
+        )
+        tasks = []
+        for td in TASK_DEFINITIONS:
+            tid = td['id']
+            existing_status = event_map.get(tid)
+            if existing_status:
+                tasks.append({"id": tid, "xp": td["xp"], "status": existing_status, "locked": False, "reason": None})
+            elif tid == 'follow_x':
+                locked = not prereqs_done
+                tasks.append({
+                    "id": tid, "xp": td["xp"],
+                    "status": "LOCKED" if locked else "AVAILABLE",
+                    "locked": locked,
+                    "reason": "Complete follow_fc, deposit_10, and invite first" if locked else None
+                })
+            else:
+                tasks.append({"id": tid, "xp": td["xp"], "status": "AVAILABLE", "locked": False, "reason": None})
+        cur.execute("""
+            SELECT COUNT(DISTINCT fid) as cnt FROM xp_users WHERE referrer_fid = %s
+        """, (fid,))
+        invited_count = cur.fetchone()['cnt']
+        cur.execute("""
+            SELECT COALESCE(SUM(xp_share), 0) as total FROM referral_earnings WHERE referrer_fid = %s
+        """, (fid,))
+        referral_xp = cur.fetchone()['total']
+        cur.close()
+        conn.close()
+        return jsonify({
+            'user': user,
+            'xpTotal': xp_total,
+            'tasks': tasks,
+            'referralLink': f"?ref={fid}",
+            'referralStats': {'invitedCount': invited_count, 'referralXpEarned': referral_xp}
+        })
+    except Exception as e:
+        print(f"❌ [XP] /api/state error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/leaderboard', methods=['GET'])
+def api_xp_leaderboard():
+    """Get XP leaderboard. Query: ?scope=all|weekly"""
+    try:
+        if not DATABASE_URL:
+            return jsonify({'error': 'XP system not available'}), 503
+        scope = flask_request.args.get('scope', 'all')
+        print(f"📝 [XP] /api/leaderboard scope={scope}")
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        if scope == 'weekly':
+            cur.execute("""
+                SELECT e.fid, COALESCE(u.username, '') as username, SUM(e.xp) as xp_total
+                FROM xp_events e
+                LEFT JOIN xp_users u ON e.fid = u.fid
+                WHERE e.status = 'COMPLETED' AND e.created_at >= NOW() - INTERVAL '7 days'
+                GROUP BY e.fid, u.username
+                ORDER BY xp_total DESC
+                LIMIT 50
+            """)
+        else:
+            cur.execute("""
+                SELECT e.fid, COALESCE(u.username, '') as username, SUM(e.xp) as xp_total
+                FROM xp_events e
+                LEFT JOIN xp_users u ON e.fid = u.fid
+                WHERE e.status = 'COMPLETED'
+                GROUP BY e.fid, u.username
+                ORDER BY xp_total DESC
+                LIMIT 50
+            """)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return jsonify({'scope': scope, 'leaderboard': rows})
+    except Exception as e:
+        print(f"❌ [XP] /api/leaderboard error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# =============================================================================
 # Background NAV Refresh
 # =============================================================================
 
@@ -3267,6 +3613,9 @@ def main():
     
     # Initialize invite code tables
     init_invite_tables()
+    
+    # Initialize XP system tables
+    init_xp_tables()
     
     # Initialize Web3
     w3 = Web3(Web3.HTTPProvider(RPC_URL))
