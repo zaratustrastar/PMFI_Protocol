@@ -62,44 +62,50 @@
             flex-direction: column;
             height: 100vh;
             height: 100dvh;
-            padding: 0 16px;
             max-width: 420px;
             margin: 0 auto;
             overflow: hidden;
-        }
-        
-        .mini-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-top: 16px;
-            padding-bottom: 8px;
         }
         
         .mini-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 0 16px;
+            padding: 8px 16px 12px;
+            flex-shrink: 0;
         }
         
         .mini-logo {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0;
         }
         
         .mini-logo img {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             box-shadow: 0 0 15px rgba(240, 246, 252, 0.2);
         }
         
-        .mini-logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 20px;
+        .header-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-nav-link {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 13px;
             font-weight: 500;
+            cursor: pointer;
+            padding: 4px 0;
+            transition: color 0.15s;
+        }
+
+        .header-nav-link:hover {
             color: var(--text-primary);
         }
         
@@ -124,29 +130,100 @@
             color: var(--accent-green);
             border: 1px solid rgba(126,231,135,0.3);
         }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 16px 8px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .bottom-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            height: 56px;
+            background: #161b22;
+            border-top: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 6px 12px;
+            transition: color 0.15s;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--accent-blue);
+        }
+
+        .bottom-nav-item svg {
+            width: 22px;
+            height: 22px;
+        }
         
         .vault-card {
             background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
+            border: 1px solid rgba(59,130,246,0.2);
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 16px;
+            margin-top: 12px;
+            box-shadow: 0 0 15px rgba(59,130,246,0.15), inset 0 0 15px rgba(59,130,246,0.05);
+            position: relative;
         }
         
         .vault-title {
             font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 16px;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .vault-subtitle {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+
+        .xp-eligible-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 4px;
+            border: 1px solid rgba(245,158,11,0.5);
+            background: rgba(245,158,11,0.08);
+            color: #f59e0b;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 8px;
+            border-radius: 6px;
         }
-        
-        .vault-title img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+
+        .xp-eligible-badge .diamond {
+            font-size: 8px;
         }
         
         .stats-grid {
@@ -157,7 +234,7 @@
         }
         
         .stat-box {
-            background: rgba(0,0,0,0.25);
+            background: rgba(0,0,0,0.3);
             border-radius: 12px;
             padding: 14px;
             text-align: center;
@@ -210,6 +287,16 @@
             font-weight: 600;
             color: var(--accent-green);
         }
+
+        .vault-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .vault-actions .action-btn {
+            flex: 1;
+        }
         
         .vault-card-soon {
             background: var(--bg-card);
@@ -237,17 +324,7 @@
             color: var(--text-secondary);
         }
         
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding: 10px 0;
-            padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
-            flex-shrink: 0;
-        }
-        
         .action-btn {
-            width: 100%;
             padding: 11px;
             font-size: 14px;
             font-weight: 600;
@@ -292,7 +369,6 @@
             color: var(--text-primary);
         }
         
-        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -486,7 +562,6 @@
             border-radius: 50%;
         }
         
-        /* Gate Screen Styles */
         #bootLoader {
             position: fixed;
             inset: 0;
@@ -765,6 +840,235 @@
             color: var(--accent-red);
             border: 1px solid rgba(248,81,73,0.3);
         }
+
+        .tab-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 600;
+            padding: 16px 0 12px;
+        }
+
+        .xp-summary {
+            background: rgba(0,0,0,0.25);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .xp-summary-item .xp-summary-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        .xp-summary-item .xp-summary-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        .task-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .task-row:last-child {
+            border-bottom: none;
+        }
+
+        .task-info {
+            flex: 1;
+        }
+
+        .task-name {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .task-xp {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 2px;
+        }
+
+        .task-badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 8px;
+        }
+
+        .task-badge.done {
+            color: #4ade80;
+            background: rgba(74,222,128,0.1);
+        }
+
+        .task-badge.pending {
+            color: #facc15;
+            background: rgba(250,204,21,0.1);
+        }
+
+        .task-badge.locked {
+            color: rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .task-verify-btn {
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .task-claim-btn {
+            background: #f59e0b;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .referral-section {
+            margin-top: 24px;
+            background: rgba(0,0,0,0.25);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .referral-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .referral-link-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .referral-link-input {
+            flex: 1;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-family: 'SF Mono', monospace;
+        }
+
+        .referral-copy-btn {
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .scope-toggle {
+            display: flex;
+            gap: 0;
+            margin-bottom: 16px;
+            background: rgba(0,0,0,0.25);
+            border-radius: 10px;
+            padding: 3px;
+        }
+
+        .scope-btn {
+            flex: 1;
+            padding: 8px 0;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .scope-btn.active {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+        }
+
+        .leaderboard-table {
+            width: 100%;
+        }
+
+        .leaderboard-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+        }
+
+        .leaderboard-row.header {
+            color: var(--text-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .leaderboard-row.current-user {
+            background: rgba(88,166,255,0.1);
+            border: 1px solid rgba(88,166,255,0.2);
+        }
+
+        .lb-rank {
+            width: 40px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .lb-user {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .lb-xp {
+            width: 70px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--accent-blue);
+        }
+
+        .leaderboard-row.header .lb-xp {
+            color: var(--text-secondary);
+        }
+
+        .leaderboard-empty {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+            padding: 32px 0;
+        }
     </style>
 </head>
 <body>
@@ -813,15 +1117,19 @@
             <div class="mini-logo">
                 <img src="/psniper-logo.png" alt="pSNIPER">
             </div>
+            <div class="header-nav-links">
+                <button class="header-nav-link" onclick="switchTab('tasks')">Tasks</button>
+                <button class="header-nav-link" onclick="switchTab('rankings')">Rankings</button>
+            </div>
             <button id="connectBtn" class="connect-btn">Connect</button>
         </header>
         
-        <div class="mini-scroll-area">
-            <!-- Vault Card -->
+        <!-- Home Tab -->
+        <div class="tab-content active" id="tabHome">
             <div class="vault-card">
-                <div class="vault-title">
-                    pSniper
-                </div>
+                <div class="xp-eligible-badge"><span class="diamond">◆</span> XP ELIGIBLE</div>
+                <div class="vault-title">pSniper</div>
+                <div class="vault-subtitle">*Highly Volatile Vault</div>
                 
                 <div id="xpStatusBar" style="display:none; text-align:center; font-size:12px; color:rgba(255,255,255,0.55); letter-spacing:0.5px; margin-bottom:8px;"></div>
                 
@@ -846,6 +1154,11 @@
                         <span class="position-value" id="userValue">$0</span>
                     </div>
                 </div>
+
+                <div class="vault-actions">
+                    <button id="depositBtn" class="action-btn primary" disabled>Deposit</button>
+                    <button id="withdrawBtn" class="action-btn secondary" disabled>Withdraw</button>
+                </div>
             </div>
             
             <div class="pending-withdrawals hidden" id="pendingWithdrawalsSection">
@@ -854,13 +1167,6 @@
                 <div class="status-msg" id="claimStatus"></div>
             </div>
             
-            <!-- XP Tasks Section -->
-            <div id="xpTasksSection" class="vault-card" style="display:none; padding:16px;">
-                <div style="font-size:14px; font-weight:600; color:#fff; margin-bottom:12px; letter-spacing:0.5px;">Tasks</div>
-                <div id="xpTasksList"></div>
-            </div>
-            
-            <!-- Coming Soon Vaults -->
             <div class="vault-card-soon">
                 <div class="vault-soon-name">pArbitrage</div>
                 <div class="vault-soon-label">Soon ...</div>
@@ -886,12 +1192,63 @@
                 <div class="vault-soon-label">Soon ...</div>
             </div>
         </div>
-        
-        <!-- Action Buttons (fixed at bottom) -->
-        <div class="action-buttons">
-            <button id="depositBtn" class="action-btn primary" disabled>Deposit</button>
-            <button id="withdrawBtn" class="action-btn secondary" disabled>Withdraw</button>
+
+        <!-- Tasks Tab -->
+        <div class="tab-content" id="tabTasks">
+            <div class="tab-title">Tasks</div>
+            <div class="xp-summary" id="xpSummary">
+                <div class="xp-summary-item">
+                    <div class="xp-summary-value" id="xpTotalDisplay">0</div>
+                    <div class="xp-summary-label">Total XP</div>
+                </div>
+                <div class="xp-summary-item">
+                    <div class="xp-summary-value" id="xpCompletedDisplay">0/0</div>
+                    <div class="xp-summary-label">Completed</div>
+                </div>
+            </div>
+            <div id="xpTasksSection" style="padding:0;">
+                <div id="xpTasksList"></div>
+            </div>
+            <div class="referral-section" id="referralSection">
+                <div class="referral-title">Your Referral Link</div>
+                <div class="referral-link-box">
+                    <input type="text" class="referral-link-input" id="referralLinkInput" readonly>
+                    <button class="referral-copy-btn" id="referralCopyBtn" onclick="copyReferralLink()">Copy</button>
+                </div>
+            </div>
         </div>
+
+        <!-- Rankings Tab -->
+        <div class="tab-content" id="tabRankings">
+            <div class="tab-title">Rankings</div>
+            <div class="scope-toggle">
+                <button class="scope-btn active" id="scopeAll" onclick="loadLeaderboard('all')">All Time</button>
+                <button class="scope-btn" id="scopeWeekly" onclick="loadLeaderboard('weekly')">Weekly</button>
+            </div>
+            <div id="leaderboardContent">
+                <div class="leaderboard-empty">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="bottom-nav-item active" id="navHome" onclick="switchTab('home')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Home</span>
+            </button>
+            <button class="bottom-nav-item" id="navTasks" onclick="switchTab('tasks')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span>Tasks</span>
+            </button>
+            <button class="bottom-nav-item" id="navRankings" onclick="switchTab('rankings')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+                <span>Rankings</span>
+            </button>
+            <button class="bottom-nav-item" disabled style="opacity:0.3;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Settings</span>
+            </button>
+        </nav>
     </div>
     
     <!-- Deposit Modal -->
@@ -911,8 +1268,8 @@
             
             <div class="status-msg" id="depositStatus"></div>
             
-            <button class="action-btn primary" id="confirmDeposit" disabled>Approve & Deposit</button>
-            <button class="action-btn link" id="cancelDeposit" style="margin-top: 8px;">Cancel</button>
+            <button class="action-btn primary" id="confirmDeposit" disabled style="width:100%;">Approve & Deposit</button>
+            <button class="action-btn link" id="cancelDeposit" style="margin-top: 8px; width:100%;">Cancel</button>
         </div>
     </div>
     
@@ -933,8 +1290,8 @@
             
             <div class="status-msg" id="withdrawStatus"></div>
             
-            <button class="action-btn primary" id="confirmWithdraw" disabled>Request Withdrawal</button>
-            <button class="action-btn link" id="cancelWithdraw" style="margin-top: 8px;">Cancel</button>
+            <button class="action-btn primary" id="confirmWithdraw" disabled style="width:100%;">Request Withdrawal</button>
+            <button class="action-btn link" id="cancelWithdraw" style="margin-top: 8px; width:100%;">Cancel</button>
         </div>
     </div>
     
@@ -1200,6 +1557,84 @@
         }
         
         // ============================================
+        // TAB SWITCHING
+        // ============================================
+        function switchTab(tabName) {
+            const tabs = ['home', 'tasks', 'rankings'];
+            tabs.forEach(t => {
+                const content = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+                const nav = document.getElementById('nav' + t.charAt(0).toUpperCase() + t.slice(1));
+                if (content) content.classList.remove('active');
+                if (nav) nav.classList.remove('active');
+            });
+            const activeContent = document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+            const activeNav = document.getElementById('nav' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+            if (activeContent) activeContent.classList.add('active');
+            if (activeNav) activeNav.classList.add('active');
+
+            if (tabName === 'tasks' && xpState) {
+                renderXpTasks(xpState.tasks || []);
+                updateReferralLink();
+            }
+            if (tabName === 'rankings') {
+                loadLeaderboard('all');
+            }
+        }
+
+        function updateReferralLink() {
+            const input = document.getElementById('referralLinkInput');
+            if (input && userFid) {
+                input.value = 'https://app.pmfi.cc/mini?ref=' + userFid;
+            }
+        }
+
+        function copyReferralLink() {
+            const input = document.getElementById('referralLinkInput');
+            if (!input || !input.value) return;
+            navigator.clipboard.writeText(input.value).then(() => {
+                const btn = document.getElementById('referralCopyBtn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+            }).catch(() => {
+                input.select();
+                document.execCommand('copy');
+            });
+        }
+
+        // ============================================
+        // LEADERBOARD
+        // ============================================
+        async function loadLeaderboard(scope) {
+            scope = scope || 'all';
+            document.getElementById('scopeAll').classList.toggle('active', scope === 'all');
+            document.getElementById('scopeWeekly').classList.toggle('active', scope === 'weekly');
+            const container = document.getElementById('leaderboardContent');
+            container.innerHTML = '<div class="leaderboard-empty">Loading...</div>';
+            try {
+                const res = await fetch('/api/leaderboard?scope=' + scope);
+                const data = await res.json();
+                const entries = data.leaderboard || data.entries || data || [];
+                if (!Array.isArray(entries) || entries.length === 0) {
+                    container.innerHTML = '<div class="leaderboard-empty">No rankings yet</div>';
+                    return;
+                }
+                let html = '<div class="leaderboard-row header"><div class="lb-rank">#</div><div class="lb-user">User</div><div class="lb-xp">XP</div></div>';
+                entries.forEach((entry, i) => {
+                    const isMe = userFid && (entry.fid == userFid);
+                    html += '<div class="leaderboard-row' + (isMe ? ' current-user' : '') + '">';
+                    html += '<div class="lb-rank">' + (entry.rank || (i + 1)) + '</div>';
+                    html += '<div class="lb-user">' + (entry.username || 'fid:' + entry.fid) + '</div>';
+                    html += '<div class="lb-xp">' + (entry.xp || entry.xpTotal || 0) + '</div>';
+                    html += '</div>';
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                console.error('[Rankings] leaderboard error:', e);
+                container.innerHTML = '<div class="leaderboard-empty">Could not load rankings</div>';
+            }
+        }
+
+        // ============================================
         // XP SYSTEM BOOTSTRAP
         // ============================================
         async function xpApiMe(wallet) {
@@ -1265,7 +1700,14 @@
             const completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
             el.textContent = total + ' XP \u00B7 ' + completedTasks + '/' + tasks.length + ' tasks';
             el.style.display = 'block';
+
+            const xpTotalEl = document.getElementById('xpTotalDisplay');
+            const xpCompletedEl = document.getElementById('xpCompletedDisplay');
+            if (xpTotalEl) xpTotalEl.textContent = total;
+            if (xpCompletedEl) xpCompletedEl.textContent = completedTasks + '/' + tasks.length;
+
             renderXpTasks(tasks);
+            updateReferralLink();
         }
 
         const TASK_LABELS = {
@@ -1285,39 +1727,82 @@
             list.innerHTML = '';
             tasks.forEach(t => {
                 const row = document.createElement('div');
-                row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.06);';
+                row.className = 'task-row';
                 const left = document.createElement('div');
-                left.style.cssText = 'flex:1;';
+                left.className = 'task-info';
                 const label = document.createElement('div');
-                label.style.cssText = 'font-size:13px; color:#fff; font-weight:500;';
+                label.className = 'task-name';
                 label.textContent = TASK_LABELS[t.id] || t.id;
                 const xpLabel = document.createElement('div');
-                xpLabel.style.cssText = 'font-size:11px; color:rgba(255,255,255,0.4); margin-top:2px;';
+                xpLabel.className = 'task-xp';
                 xpLabel.textContent = '+' + t.xp + ' XP';
                 left.appendChild(label);
                 left.appendChild(xpLabel);
 
                 const right = document.createElement('div');
                 if (t.status === 'COMPLETED') {
-                    right.innerHTML = '<span style="color:#4ade80; font-size:12px; font-weight:600;">Done</span>';
+                    right.innerHTML = '<span class="task-badge done">Done</span>';
                 } else if (t.status === 'PENDING_REVIEW') {
-                    right.innerHTML = '<span style="color:#facc15; font-size:12px;">Pending</span>';
+                    right.innerHTML = '<span class="task-badge pending">Pending</span>';
                 } else if (t.status === 'LOCKED') {
-                    right.innerHTML = '<span style="color:rgba(255,255,255,0.25); font-size:12px;">Locked</span>';
+                    right.innerHTML = '<span class="task-badge locked">Locked</span>';
+                } else if (t.id === 'follow_x') {
+                    const btn = document.createElement('button');
+                    btn.textContent = 'Claim';
+                    btn.className = 'task-claim-btn';
+                    btn.addEventListener('click', () => claimFollowX(btn));
+                    right.appendChild(btn);
                 } else if (VERIFIABLE_TASKS.includes(t.id)) {
                     const btn = document.createElement('button');
                     btn.textContent = 'Verify';
-                    btn.style.cssText = 'background:#6366f1; color:#fff; border:none; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer;';
+                    btn.className = 'task-verify-btn';
                     btn.dataset.taskId = t.id;
                     btn.addEventListener('click', () => verifyTask(t.id, btn));
                     right.appendChild(btn);
                 } else {
-                    right.innerHTML = '<span style="color:rgba(255,255,255,0.35); font-size:12px;">Manual</span>';
+                    right.innerHTML = '<span class="task-badge locked">Manual</span>';
                 }
                 row.appendChild(left);
                 row.appendChild(right);
                 list.appendChild(row);
             });
+        }
+
+        async function claimFollowX(btn) {
+            if (!userFid) return;
+            btn.disabled = true;
+            btn.textContent = 'Claiming...';
+            btn.style.opacity = '0.6';
+            try {
+                const res = await fetch('/api/tasks/claim/follow_x', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fid: userFid })
+                });
+                const data = await res.json();
+                console.log('[XP] claim follow_x:', data);
+                if (data.error) {
+                    btn.textContent = 'Error';
+                    btn.style.background = '#ef4444';
+                    setTimeout(() => { btn.textContent = 'Claim'; btn.style.background = '#f59e0b'; btn.style.opacity = '1'; btn.disabled = false; }, 2500);
+                    return;
+                }
+                if (data.verified || data.claimed || data.success) {
+                    btn.textContent = 'Done!';
+                    btn.style.background = '#22c55e';
+                    await xpFetchState();
+                } else {
+                    const msg = data.reason || data.message || 'Try again';
+                    btn.textContent = msg.length > 25 ? msg.substring(0, 22) + '...' : msg;
+                    btn.style.background = '#ef4444';
+                    setTimeout(() => { btn.textContent = 'Claim'; btn.style.background = '#f59e0b'; btn.style.opacity = '1'; btn.disabled = false; }, 3500);
+                }
+            } catch (e) {
+                console.error('[XP] claim follow_x error:', e);
+                btn.textContent = 'Error';
+                btn.style.background = '#ef4444';
+                setTimeout(() => { btn.textContent = 'Claim'; btn.style.background = '#f59e0b'; btn.style.opacity = '1'; btn.disabled = false; }, 2500);
+            }
         }
 
         async function verifyTask(taskId, btn) {

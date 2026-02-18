@@ -3593,6 +3593,144 @@ def api_verify_invite():
         return jsonify({'error': str(e)}), 500
 
 
+@flask_app.route('/api/tasks/claim/follow_x', methods=['POST'])
+def api_claim_follow_x():
+    """Claim follow_x task (manual review). Only available after follow_fc + deposit_10 + invite are COMPLETED."""
+    try:
+        if not DATABASE_URL:
+            return jsonify({'error': 'XP system not available'}), 503
+        data = flask_request.get_json(force=True)
+        fid = data.get('fid')
+        if not fid:
+            return jsonify({'error': 'fid required'}), 400
+        fid = int(fid)
+        print(f"📝 [XP] /api/tasks/claim/follow_x fid={fid}")
+
+        if not _verify_fid_exists(fid):
+            return jsonify({'error': 'User not registered'}), 403
+
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT type, status FROM xp_events
+            WHERE fid = %s AND type IN ('follow_fc', 'deposit_10', 'invite', 'follow_x')
+        """, (fid,))
+        events = cur.fetchall()
+        event_map = {e['type']: e['status'] for e in events}
+
+        existing = event_map.get('follow_x')
+        if existing == 'COMPLETED':
+            cur.close()
+            conn.close()
+            return jsonify({'claimed': False, 'reason': 'Task already completed'}), 200
+        if existing == 'PENDING_REVIEW':
+            cur.close()
+            conn.close()
+            return jsonify({'claimed': False, 'reason': 'Task already submitted, awaiting review'}), 200
+
+        prereqs = ['follow_fc', 'deposit_10', 'invite']
+        missing = [p for p in prereqs if event_map.get(p) != 'COMPLETED']
+        if missing:
+            cur.close()
+            conn.close()
+            return jsonify({
+                'claimed': False,
+                'locked': True,
+                'reason': f"Complete these tasks first: {', '.join(missing)}"
+            }), 200
+
+        unique_key = f"follow_x:{fid}"
+        cur.execute("""
+            INSERT INTO xp_events (fid, type, xp, status, meta, unique_key)
+            VALUES (%s, 'follow_x', 0, 'PENDING_REVIEW', %s, %s)
+            ON CONFLICT (unique_key) DO NOTHING
+            RETURNING id
+        """, (fid, json.dumps({'claimed_at': datetime.utcnow().isoformat()}), unique_key))
+        row = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        if row:
+            print(f"✅ [XP] follow_x claimed by fid={fid}, event_id={row['id']}, awaiting review")
+            return jsonify({'claimed': True, 'status': 'PENDING_REVIEW'})
+        else:
+            print(f"ℹ️ [XP] follow_x already claimed by fid={fid}")
+            return jsonify({'claimed': False, 'reason': 'Task already submitted'})
+    except Exception as e:
+        print(f"❌ [XP] /api/tasks/claim/follow_x error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/admin/tasks/approve_follow_x', methods=['POST'])
+def api_admin_approve_follow_x():
+    """Admin endpoint to approve or reject follow_x task. Requires Bearer PMFI_ADMIN_TOKEN."""
+    try:
+        auth = flask_request.headers.get('Authorization', '')
+        if not auth.startswith('Bearer ') or auth[7:] != PMFI_ADMIN_TOKEN:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        if not DATABASE_URL:
+            return jsonify({'error': 'XP system not available'}), 503
+
+        data = flask_request.get_json(force=True)
+        fid = data.get('fid')
+        approve = data.get('approve', True)
+        if not fid:
+            return jsonify({'error': 'fid required'}), 400
+        fid = int(fid)
+        print(f"📝 [XP] /api/admin/tasks/approve_follow_x fid={fid} approve={approve}")
+
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        cur.execute("""
+            SELECT id, status FROM xp_events
+            WHERE fid = %s AND type = 'follow_x'
+            ORDER BY id DESC LIMIT 1
+        """, (fid,))
+        event = cur.fetchone()
+
+        if not event:
+            cur.close()
+            conn.close()
+            return jsonify({'error': 'No follow_x claim found for this user'}), 404
+
+        if event['status'] == 'COMPLETED':
+            cur.close()
+            conn.close()
+            return jsonify({'error': 'Task already approved'}), 400
+
+        if approve:
+            cur.execute("""
+                UPDATE xp_events SET status = 'COMPLETED', xp = 100
+                WHERE id = %s AND status = 'PENDING_REVIEW'
+            """, (event['id'],))
+            if cur.rowcount > 0:
+                _award_referral_bonus(cur, fid, event['id'], 100)
+            conn.commit()
+            print(f"✅ [XP] follow_x APPROVED for fid={fid}, event_id={event['id']}")
+            cur.close()
+            conn.close()
+            return jsonify({'approved': True, 'fid': fid, 'xp': 100})
+        else:
+            cur.execute("""
+                DELETE FROM xp_events WHERE id = %s AND status = 'PENDING_REVIEW'
+            """, (event['id'],))
+            conn.commit()
+            print(f"❌ [XP] follow_x REJECTED for fid={fid}, event_id={event['id']}")
+            cur.close()
+            conn.close()
+            return jsonify({'approved': False, 'fid': fid, 'rejected': True})
+    except Exception as e:
+        print(f"❌ [XP] /api/admin/tasks/approve_follow_x error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 @flask_app.route('/api/leaderboard', methods=['GET'])
 def api_xp_leaderboard():
     """Get XP leaderboard. Query: ?scope=all|weekly"""
