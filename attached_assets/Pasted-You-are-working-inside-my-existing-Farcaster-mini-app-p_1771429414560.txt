@@ -1,0 +1,55 @@
+You are working inside my existing Farcaster mini app project (built on Replit). Do NOT redesign the UI yet. First implement the backend foundation for XP/tasks/referrals/leaderboard.
+
+Goal:
+- Create a tasks + XP system with these tasks and rewards:
+  1) follow_fc (VERIFIED) = 100 XP (one-time)
+  2) deposit_10 (VERIFIED) = 500 XP (one-time, requires linked wallet, deposit >= 10 USDC into vault)
+  3) invite (VERIFIED) = 250 XP (one-time, counts only if at least 1 referred user completes at least 1 task)
+  4) follow_x (MANUAL) = 100 XP (LOCKED until the first 3 tasks are completed; claim sets PENDING_REVIEW)
+
+Referral logic:
+- Users can have a referrer.
+- Referrer earns 10% of ALL XP the referee earns (including follow_fc, deposit_10, invite, follow_x once approved).
+- Referrer must be attached only once and never self-referral.
+- Referral link format: ?ref=<referrer_fid>
+
+Implement database tables (Postgres preferred; if already present, adapt):
+- users(fid PRIMARY KEY, username, wallet, referrer_fid nullable, created_at)
+- xp_events(id, fid, type, xp, status, meta JSON, created_at, unique_key UNIQUE)
+- referral_earnings(id, referrer_fid, referee_fid, source_event_id, xp_share, created_at)
+
+Implement these endpoints:
+1) POST /api/me
+   - input: { fid, username, wallet? }
+   - upsert user, update wallet if provided
+2) POST /api/referral/attach
+   - input: { fid, ref } where ref is referrer_fid from query param
+   - sets users.referrer_fid once if eligible
+3) GET /api/state?fid=...
+   - returns one object for frontend rendering:
+     {
+       user,
+       xpTotal,
+       tasks: [{ id, xp, status, locked, reason }],
+       referralLink,
+       referralStats: { invitedCount, referralXpEarned }
+     }
+   - task statuses must reflect LOCKED/AVAILABLE/PENDING_REVIEW/COMPLETED
+   - follow_x locked until follow_fc + deposit_10 + invite are COMPLETED
+4) GET /api/leaderboard?scope=all|weekly
+   - return top 50 users with total XP (weekly = last 7 days)
+
+Important logic:
+- Create helper awardXp(fid, type, xp, meta, uniqueKey) that is idempotent.
+- After awarding XP to a user, if they have referrer_fid, automatically award referrer 10% as a separate xp event and store referral_earnings.
+- Use unique_key rules:
+  - follow_fc unique_key: "follow_fc:<fid>"
+  - deposit_10 unique_key: "deposit_10:<fid>"
+  - invite unique_key: "invite:<fid>"
+  - follow_x unique_key: "follow_x:<fid>"
+  - referral bonus unique_key should be based on source_event_id
+
+Output:
+- Implement code + migrations and explain how to run locally in Replit.
+- Do not change UI yet.
+- Add minimal logging for debugging.
