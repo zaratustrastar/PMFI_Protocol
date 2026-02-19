@@ -3762,6 +3762,41 @@ def api_xp_leaderboard():
                 LIMIT 50
             """)
         rows = cur.fetchall()
+
+        missing_fids = [r['fid'] for r in rows if not r.get('username')]
+        if missing_fids and NEYNAR_API_KEY:
+            try:
+                fids_str = ','.join(str(f) for f in missing_fids[:100])
+                neynar_url = f"https://api.neynar.com/v2/farcaster/user/bulk?fids={fids_str}"
+                headers = {"accept": "application/json", "x-api-key": NEYNAR_API_KEY}
+                resp = requests.get(neynar_url, headers=headers, timeout=5)
+                if resp.status_code != 200:
+                    print(f"⚠️ [XP] Neynar bulk lookup returned {resp.status_code}")
+                else:
+                    users_data = resp.json().get('users', [])
+                    fid_to_name = {u['fid']: u.get('username', '') for u in users_data}
+                    for row in rows:
+                        if not row.get('username') and row['fid'] in fid_to_name and fid_to_name[row['fid']]:
+                            row['username'] = fid_to_name[row['fid']]
+                    update_conn = None
+                    try:
+                        update_conn = get_invite_db()
+                        update_cur = update_conn.cursor()
+                        for fid_val, uname in fid_to_name.items():
+                            if uname:
+                                update_cur.execute(
+                                    "UPDATE xp_users SET username = %s WHERE fid = %s AND (username IS NULL OR username = '')",
+                                    (uname, fid_val)
+                                )
+                        update_conn.commit()
+                        update_cur.close()
+                        print(f"✅ [XP] Backfilled {len(fid_to_name)} usernames from Neynar")
+                    finally:
+                        if update_conn:
+                            update_conn.close()
+            except Exception as neynar_err:
+                print(f"⚠️ [XP] Neynar username backfill failed: {neynar_err}")
+
         cur.close()
         conn.close()
         return jsonify({'scope': scope, 'leaderboard': rows})

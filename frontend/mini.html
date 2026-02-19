@@ -1568,7 +1568,7 @@
                 filtered.forEach((entry, i) => {
                     const isMe = userFid && (entry.fid == userFid);
                     const xp = entry.xp || entry.xp_total || entry.xpTotal || 0;
-                    const name = entry.username || ('fid:' + entry.fid);
+                    const name = entry.username ? ('@' + entry.username) : ('fid:' + entry.fid);
                     html += '<div class="leaderboard-row' + (isMe ? ' current-user' : '') + '">';
                     html += '<div class="lb-user">' + name + '</div>';
                     html += '<div class="lb-xp">' + xp + ' XP</div>';
