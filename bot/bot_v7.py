@@ -94,6 +94,14 @@ from eth_account.messages import encode_defunct
 from flask import Flask, jsonify, request as flask_request, send_from_directory, render_template, redirect
 from flask_cors import CORS
 
+try:
+    from arb_monitor.scanner import start_scanner
+    from arb_monitor.storage import arb_store
+    ARB_MONITOR_AVAILABLE = True
+except ImportError:
+    ARB_MONITOR_AVAILABLE = False
+    print("⚠️ arb_monitor package not found, /api/arbs endpoints disabled")
+
 # Cloudflare bypass with curl_cffi (residential proxy support)
 try:
     from curl_cffi import requests as curl_requests
@@ -3801,6 +3809,68 @@ def api_xp_leaderboard():
 
 
 # =============================================================================
+# Arbitrage Monitor API
+# =============================================================================
+
+@flask_app.route('/api/arbs', methods=['GET'])
+def api_arb_opportunities():
+    """Return latest arb scan results. Query: ?sports=nba,esports&minEdge=0.01&sort=expiry&limit=50"""
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({'error': 'Arb monitor not available'}), 503
+    try:
+        results = arb_store.get_results()
+
+        sports_param = flask_request.args.get('sports', '')
+        min_edge = float(flask_request.args.get('minEdge', '0'))
+        sort_by = flask_request.args.get('sort', 'expiry')
+        limit = int(flask_request.args.get('limit', '50'))
+
+        sport_filters = [s.strip().lower() for s in sports_param.split(',') if s.strip()] if sports_param else []
+
+        opportunities = results.get('opportunities', [])
+        watchlist = results.get('watchlist', [])
+
+        if sport_filters:
+            opportunities = [o for o in opportunities if o.get('sport') in sport_filters]
+            watchlist = [w for w in watchlist if w.get('sport') in sport_filters]
+
+        if min_edge > 0:
+            opportunities = [o for o in opportunities if o.get('edge', 0) >= min_edge]
+
+        if sort_by == 'edge':
+            opportunities.sort(key=lambda x: x.get('edge', 0), reverse=True)
+            watchlist.sort(key=lambda x: x.get('edge', 0), reverse=True)
+        elif sort_by == 'roi':
+            opportunities.sort(key=lambda x: x.get('roi', 0), reverse=True)
+            watchlist.sort(key=lambda x: x.get('roi', 0), reverse=True)
+        else:
+            opportunities.sort(key=lambda x: x.get('expiryTs', 0))
+            watchlist.sort(key=lambda x: x.get('expiryTs', 0))
+
+        opportunities = opportunities[:limit]
+        watchlist = watchlist[:limit]
+
+        return jsonify({
+            'asOf': results.get('asOf', 0),
+            'opportunities': opportunities,
+            'watchlist': watchlist,
+            'pairsTracked': results.get('pairsTracked', 0),
+            'lastScanMs': results.get('lastScanMs', 0),
+        })
+    except Exception as e:
+        print(f"❌ [Arb] /api/arbs error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/arbs/health', methods=['GET'])
+def api_arb_health():
+    """Health check for arb scanner."""
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({'status': 'unavailable', 'reason': 'arb_monitor not installed'}), 503
+    return jsonify(arb_store.get_health())
+
+
+# =============================================================================
 # Background NAV Refresh
 # =============================================================================
 
@@ -4091,6 +4161,14 @@ def main():
     refresh_thread = threading.Thread(target=nav_refresh_loop, daemon=True)
     refresh_thread.start()
     
+    # Start arb monitor scanner
+    if ARB_MONITOR_AVAILABLE:
+        try:
+            start_scanner()
+            print("🔎 Arb monitor scanner started")
+        except Exception as e:
+            print(f"⚠️ Arb monitor failed to start: {e}")
+    
     # Start HTTP server
     print(f"\n🚀 Starting HTTP API on port {HTTP_PORT}")
     print(f"   Serving frontend from: {FRONTEND_DIR}")
@@ -4100,6 +4178,8 @@ def main():
     print(f"   - GET  /price        - Cached price (for UI)")
     print(f"   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)")
     print(f"   - GET  /sign-nav/debug - Debug NAV calculation")
+    print(f"   - GET  /api/arbs      - Arbitrage opportunities")
+    print(f"   - GET  /api/arbs/health - Arb scanner health")
     print(f"\n   Press Ctrl+C to stop\n")
     
     flask_app.run(host='127.0.0.1', port=HTTP_PORT, debug=False, threaded=True)

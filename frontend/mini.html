@@ -1054,6 +1054,27 @@
             font-size: 13px;
             padding: 32px 0;
         }
+
+        .arb-header { padding: 8px 0 4px; }
+        .arb-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+        .arb-dot { width: 7px; height: 7px; border-radius: 50%; background: #555; flex-shrink: 0; }
+        .arb-dot.live { background: #00c853; }
+        .arb-dot.error { background: #ff4444; }
+        .arb-filter-row { display: flex; gap: 8px; }
+        .arb-filter-select { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border-subtle); color: var(--text-primary); border-radius: 8px; padding: 6px 10px; font-size: 12px; appearance: none; -webkit-appearance: none; }
+        .arb-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); margin: 16px 0 6px; }
+        .arb-card { background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
+        .arb-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .arb-card-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3; flex: 1; margin-right: 8px; }
+        .arb-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+        .arb-badge.opportunity { background: rgba(0,200,83,0.15); color: #00c853; }
+        .arb-badge.watchlist { background: rgba(255,193,7,0.15); color: #ffc107; }
+        .arb-card-prices { display: flex; gap: 6px; margin-bottom: 6px; }
+        .arb-venue { flex: 1; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 6px 8px; }
+        .arb-venue-name { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .arb-venue-price { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+        .arb-card-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); }
+        .arb-empty { text-align: center; color: var(--text-secondary); font-size: 13px; padding: 40px 0; }
     </style>
 </head>
 <body>
@@ -1194,6 +1215,33 @@
             </div>
         </div>
 
+        <div class="tab-content" id="tabArbitrage">
+            <div class="arb-header">
+                <div class="arb-status" id="arbStatus">
+                    <span class="arb-dot"></span>
+                    <span id="arbStatusText">Loading...</span>
+                </div>
+                <div class="arb-filter-row">
+                    <select class="arb-filter-select" id="arbSportFilter">
+                        <option value="">All Sports</option>
+                        <option value="nba">NBA</option>
+                        <option value="nfl">NFL</option>
+                        <option value="soccer">Soccer</option>
+                        <option value="esports">Esports</option>
+                        <option value="mma">MMA</option>
+                    </select>
+                    <select class="arb-filter-select" id="arbSortFilter">
+                        <option value="edge">Edge %</option>
+                        <option value="roi">ROI</option>
+                        <option value="expiry">Expiry</option>
+                    </select>
+                </div>
+            </div>
+            <div id="arbOpportunities"></div>
+            <div class="arb-section-label" id="arbWatchlistLabel" style="display:none;">Watchlist</div>
+            <div id="arbWatchlist"></div>
+        </div>
+
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
             <button class="bottom-nav-item active" id="navHome" onclick="switchTab('home')">
@@ -1205,7 +1253,7 @@
             <button class="bottom-nav-item" id="navRankings" onclick="switchTab('rankings')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="14" width="4" height="7" rx="0.5"/><rect x="10" y="6" width="4" height="15" rx="0.5"/><rect x="17" y="10" width="4" height="11" rx="0.5"/></svg>
             </button>
-            <button class="bottom-nav-item" disabled style="opacity:0.3;">
+            <button class="bottom-nav-item" id="navArbitrage" onclick="switchTab('arbitrage')">
                 <img src="/icon-arbitrage.png" alt="Arbitrage" class="nav-icon">
             </button>
         </nav>
@@ -1519,7 +1567,7 @@
         // TAB SWITCHING
         // ============================================
         function switchTab(tabName) {
-            const tabs = ['home', 'tasks', 'rankings'];
+            const tabs = ['home', 'tasks', 'rankings', 'arbitrage'];
             tabs.forEach(t => {
                 const content = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
                 const nav = document.getElementById('nav' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -1537,6 +1585,9 @@
             }
             if (tabName === 'rankings') {
                 loadLeaderboard('all');
+            }
+            if (tabName === 'arbitrage') {
+                loadArbData();
             }
         }
 
@@ -1591,6 +1642,111 @@
                 container.innerHTML = '<div class="leaderboard-empty">Could not load rankings</div>';
             }
         }
+
+        // ============================================
+        // ARBITRAGE TAB
+        // ============================================
+        let arbRefreshTimer = null;
+        
+        async function loadArbData() {
+            const sport = document.getElementById('arbSportFilter')?.value || '';
+            const sort = document.getElementById('arbSortFilter')?.value || 'edge';
+            const url = '/api/arbs?sort=' + sort + (sport ? '&sports=' + sport : '') + '&limit=50';
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Status ' + res.status);
+                const data = await res.json();
+                renderArbData(data);
+            } catch (e) {
+                console.error('[Arb] fetch error:', e);
+                document.getElementById('arbStatusText').textContent = 'Scanner unavailable';
+                document.getElementById('arbOpportunities').innerHTML = '<div class="arb-empty">Could not reach arb scanner</div>';
+                document.getElementById('arbWatchlist').innerHTML = '';
+                const dot = document.querySelector('.arb-dot');
+                if (dot) { dot.className = 'arb-dot error'; }
+            }
+        }
+
+        function renderArbData(data) {
+            const dot = document.querySelector('.arb-dot');
+            const statusText = document.getElementById('arbStatusText');
+            if (data.asOf > 0) {
+                const ago = Math.round((Date.now()/1000 - data.asOf));
+                statusText.textContent = 'Live \u00b7 ' + data.pairsTracked + ' pairs \u00b7 ' + ago + 's ago';
+                if (dot) dot.className = 'arb-dot live';
+            } else {
+                statusText.textContent = 'Initializing scanner...';
+                if (dot) dot.className = 'arb-dot';
+            }
+
+            const opps = data.opportunities || [];
+            const watch = data.watchlist || [];
+
+            const opContainer = document.getElementById('arbOpportunities');
+            if (opps.length === 0 && watch.length === 0) {
+                opContainer.innerHTML = '<div class="arb-empty">No arbitrage opportunities found yet.<br>Scanner checks every 60s.</div>';
+                document.getElementById('arbWatchlist').innerHTML = '';
+                document.getElementById('arbWatchlistLabel').style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            if (opps.length > 0) {
+                html += '<div class="arb-section-label">Opportunities</div>';
+                opps.forEach(o => { html += renderArbCard(o, 'opportunity'); });
+            } else {
+                html += '<div class="arb-section-label">No live arbs right now</div>';
+            }
+            opContainer.innerHTML = html;
+
+            const wContainer = document.getElementById('arbWatchlist');
+            const wLabel = document.getElementById('arbWatchlistLabel');
+            if (watch.length > 0) {
+                wLabel.style.display = 'block';
+                let wHtml = '';
+                watch.forEach(w => { wHtml += renderArbCard(w, 'watchlist'); });
+                wContainer.innerHTML = wHtml;
+            } else {
+                wLabel.style.display = 'none';
+                wContainer.innerHTML = '';
+            }
+        }
+
+        function renderArbCard(item, type) {
+            const edgePct = ((item.edge || 0) * 100).toFixed(1);
+            const roiPct = (item.roi || 0).toFixed(1);
+            const legs = item.legs || [];
+            let polyLeg = legs.find(l => l.venue === 'polymarket');
+            let opinLeg = legs.find(l => l.venue === 'opinion');
+            const polyPrice = polyLeg ? (polyLeg.price * 100).toFixed(0) : '?';
+            const opinPrice = opinLeg ? (opinLeg.price * 100).toFixed(0) : '?';
+            const polySide = polyLeg ? polyLeg.side : '';
+            const opinSide = opinLeg ? opinLeg.side : '';
+            const sport = item.sport || '';
+            const expiry = item.expiryTs ? new Date(item.expiryTs * 1000).toLocaleDateString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
+            
+            return '<div class="arb-card">' +
+                '<div class="arb-card-header">' +
+                    '<div class="arb-card-title">' + (item.title || 'Unknown') + '</div>' +
+                    '<span class="arb-badge ' + type + '">' + edgePct + '%</span>' +
+                '</div>' +
+                '<div class="arb-card-prices">' +
+                    '<div class="arb-venue"><div class="arb-venue-name">Poly ' + polySide + '</div><div class="arb-venue-price">' + polyPrice + '\u00a2</div></div>' +
+                    '<div class="arb-venue"><div class="arb-venue-name">Opinion ' + opinSide + '</div><div class="arb-venue-price">' + opinPrice + '\u00a2</div></div>' +
+                '</div>' +
+                '<div class="arb-card-meta">' +
+                    '<span>' + sport.toUpperCase() + (expiry ? ' \u00b7 ' + expiry : '') + '</span>' +
+                    '<span>ROI ' + roiPct + '%</span>' +
+                '</div>' +
+            '</div>';
+        }
+
+        (function() {
+            const sf = document.getElementById('arbSportFilter');
+            const so = document.getElementById('arbSortFilter');
+            if (sf) sf.addEventListener('change', loadArbData);
+            if (so) so.addEventListener('change', loadArbData);
+        })();
 
         // ============================================
         // XP SYSTEM BOOTSTRAP
