@@ -3402,30 +3402,25 @@ def api_verify_follow_fc():
             return jsonify({'error': 'Neynar API not configured'}), 500
 
         verified = False
-        cursor = None
-        while True:
-            url = f"https://api.neynar.com/v2/farcaster/following?fid={fid}&limit=100"
-            if cursor:
-                url += f"&cursor={cursor}"
-            print(f"🔍 [XP] Checking following list: {url}")
-            ctx = ssl.create_default_context()
-            req = urllib_req.Request(url, headers={
+        url = f"https://api.neynar.com/v2/farcaster/user/bulk?fids={XP_FOLLOW_FC_TARGET_FID}&viewer_fid={fid}"
+        print(f"🔍 [XP] Checking follow via bulk user API: {url}")
+        try:
+            resp = requests.get(url, headers={
                 'accept': 'application/json',
                 'x-api-key': neynar_api_key
-            })
-            resp = urllib_req.urlopen(req, timeout=15, context=ctx)
-            resp_data = json_mod.loads(resp.read().decode())
-            users = resp_data.get('users', [])
-            for u in users:
-                if u.get('fid') == XP_FOLLOW_FC_TARGET_FID:
-                    verified = True
-                    break
-            if verified:
-                break
-            next_cursor = resp_data.get('next', {}).get('cursor')
-            if not next_cursor:
-                break
-            cursor = next_cursor
+            }, timeout=15)
+            if resp.status_code == 200:
+                resp_data = resp.json()
+                users = resp_data.get('users', [])
+                if users:
+                    viewer_ctx = users[0].get('viewer_context', {})
+                    verified = viewer_ctx.get('following', False)
+                    print(f"🔍 [XP] viewer_context for fid={fid} -> target={XP_FOLLOW_FC_TARGET_FID}: following={verified}")
+            else:
+                print(f"❌ [XP] Neynar bulk API returned status {resp.status_code}: {resp.text[:200]}")
+        except Exception as api_err:
+            print(f"❌ [XP] Neynar API call failed: {api_err}")
+            return jsonify({'error': 'Could not verify follow status'}), 500
 
         if not verified:
             print(f"❌ [XP] FID {fid} does not follow target FID {XP_FOLLOW_FC_TARGET_FID}")
