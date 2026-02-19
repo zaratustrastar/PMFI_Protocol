@@ -934,6 +934,56 @@ def nav_update_loop():
 # Provides live price data to the frontend
 # =============================================================================
 
+@flask_app.route('/api/arbs/overlap_debug', methods=['GET'])
+def arbs_overlap_debug():
+    """Debug endpoint: returns market samples + sport counts from both venues."""
+    try:
+        from arb_monitor.adapters.polymarket import get_polymarket_markets
+        from arb_monitor.adapters.kalshi import get_kalshi_markets
+
+        poly = get_polymarket_markets()
+        kalshi = get_kalshi_markets()
+
+        poly_by_sport: Dict[str, int] = {}
+        for m in poly:
+            s = m.sport or "uncategorized"
+            poly_by_sport[s] = poly_by_sport.get(s, 0) + 1
+
+        kalshi_by_sport: Dict[str, int] = {}
+        for m in kalshi:
+            s = m.sport or "uncategorized"
+            kalshi_by_sport[s] = kalshi_by_sport.get(s, 0) + 1
+
+        poly_samples = [
+            {
+                "marketId": m.marketId,
+                "title": m.title,
+                "teamKey": m.team_key,
+                "expiryTs": m.expiryTs,
+            }
+            for m in poly[:50]
+        ]
+
+        kalshi_samples = [
+            {
+                "ticker": m.marketId,
+                "title": m.title,
+                "teamKey": m.team_key,
+                "expiryTs": m.expiryTs,
+            }
+            for m in kalshi[:50]
+        ]
+
+        return jsonify({
+            "kalshiSamples": kalshi_samples,
+            "polymarketSamples": poly_samples,
+            "kalshiCountBySport": kalshi_by_sport,
+            "polyCountBySport": poly_by_sport,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @flask_app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint."""
