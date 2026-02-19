@@ -2,108 +2,201 @@
 
 import json
 import time
+from datetime import datetime, timezone
 from typing import Optional
-from ..config import POLY_GAMMA_URL, POLY_CLOB_URL, ARB_MAX_PAGES_POLY
+from ..config import (
+    POLY_GAMMA_URL, POLY_CLOB_URL,
+    ARB_MAX_PAGES_POLY, ARB_PAGE_SIZE_POLY, ARB_EXPIRY_WINDOW_DAYS,
+)
 from .. import http_client
 from ..models import NormalizedMarket, extract_team_key
+
+
+_last_poly_stats: dict = {}
 
 
 def log(msg: str):
     print(f"📊 [Arb/Polymarket] {msg}")
 
 
-def fetch_active_markets(limit: int = 100, offset: int = 0) -> list[dict]:
-    url = f"{POLY_GAMMA_URL}/markets"
-    params = {
-        "limit": limit,
-        "offset": offset,
-        "active": "true",
-        "closed": "false",
-    }
-    log(f"Fetching markets: limit={limit} offset={offset}")
-    resp = http_client.get(url, venue="polymarket", params=params)
-    if resp is None or resp.status_code != 200:
-        log(f"Markets API returned {resp.status_code if resp is not None else 'None'}")
-        return []
+def get_discovery_stats() -> dict:
+    return dict(_last_poly_stats)
+
+
+def _parse_clob_token_ids(raw) -> list[str]:
+    if isinstance(raw, list):
+        return [str(t) for t in raw if t]
+    if isinstance(raw, str) and raw.strip():
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return [str(t) for t in parsed if t]
+        except (json.JSONDecodeError, TypeError):
+            parts = [p.strip().strip('"').strip("'") for p in raw.split(",") if p.strip()]
+            return parts
+    return []
+
+
+def _parse_expiry(market: dict) -> int:
+    end_date = market.get("endDate", market.get("end_date_iso", ""))
+    if not end_date:
+        return 0
     try:
-        markets = resp.json()
-        if not isinstance(markets, list):
-            markets = markets.get("data", markets.get("markets", []))
-        binary = [m for m in markets if _is_binary(m)]
-        log(f"Fetched {len(markets)} markets, {len(binary)} binary")
-        return binary
-    except Exception as e:
-        log(f"Parse error: {e}")
-        return []
+        if isinstance(end_date, (int, float)):
+            return int(end_date)
+        if "T" in str(end_date):
+            dt = datetime.fromisoformat(str(end_date).replace("Z", "+00:00"))
+            return int(dt.timestamp())
+        return int(float(end_date))
+    except Exception:
+        return 0
 
 
-def fetch_events_ending_soon(limit: int = 50) -> list[dict]:
-    url = f"{POLY_GAMMA_URL}/events"
-    params = {
-        "limit": limit,
-        "active": "true",
-        "closed": "false",
-        "order": "end_date_min",
-        "ascending": "true",
+def fetch_all_active_markets() -> tuple[list[dict], dict]:
+    global _last_poly_stats
+    stats = {
+        "fetchedTotal": 0,
+        "excludedClosed": 0,
+        "excludedArchived": 0,
+        "excludedMissingTokens": 0,
+        "excludedExpiry": 0,
+        "includedFinal": 0,
     }
-    log(f"Fetching events ending soon: limit={limit}")
-    resp = http_client.get(url, venue="polymarket", params=params)
-    if resp is None or resp.status_code != 200:
-        log(f"Events API returned {resp.status_code if resp is not None else 'None'}")
-        return []
-    try:
-        events = resp.json()
-        if not isinstance(events, list):
-            events = events.get("data", events.get("events", []))
-        markets = []
-        for event in events:
-            event_markets = event.get("markets", [])
-            for m in event_markets:
-                if _is_binary(m):
-                    if event.get("tags"):
-                        m["_event_tags"] = event.get("tags")
-                    markets.append(m)
-        log(f"Events: {len(events)} events → {len(markets)} binary markets")
-        return markets
-    except Exception as e:
-        log(f"Events parse error: {e}")
-        return []
 
+    now = int(time.time())
+    max_expiry = now + ARB_EXPIRY_WINDOW_DAYS * 86400
 
-def fetch_all_active_markets(max_pages: Optional[int] = None) -> list[dict]:
-    if max_pages is None:
-        max_pages = ARB_MAX_PAGES_POLY
     seen_ids: set[str] = set()
-    all_markets: list[dict] = []
+    accepted: list[dict] = []
 
-    event_markets = fetch_events_ending_soon(limit=50)
-    for m in event_markets:
-        mid = _market_id(m)
-        if mid and mid not in seen_ids:
-            seen_ids.add(mid)
-            all_markets.append(m)
-
-    log(f"After events pass: {len(all_markets)} unique markets")
-
-    for page in range(max_pages):
-        batch = fetch_active_markets(limit=100, offset=page * 100)
-        new_count = 0
-        for m in batch:
-            mid = _market_id(m)
-            if mid and mid not in seen_ids:
-                seen_ids.add(mid)
-                all_markets.append(m)
-                new_count += 1
-        log(f"Markets page {page}: {len(batch)} fetched, {new_count} new")
-        if len(batch) < 100:
+    for page in range(ARB_MAX_PAGES_POLY):
+        offset = page * ARB_PAGE_SIZE_POLY
+        url = f"{POLY_GAMMA_URL}/markets"
+        params = {
+            "closed": "false",
+            "limit": ARB_PAGE_SIZE_POLY,
+            "offset": offset,
+        }
+        log(f"Fetching page {page + 1}: offset={offset} limit={ARB_PAGE_SIZE_POLY}")
+        resp = http_client.get(url, venue="polymarket", params=params)
+        if resp is None or resp.status_code != 200:
+            log(f"Markets API returned {resp.status_code if resp else 'None'}, stopping pagination")
             break
 
-    log(f"Total Polymarket markets discovered: {len(all_markets)}")
-    return all_markets
+        try:
+            markets = resp.json()
+            if not isinstance(markets, list):
+                markets = markets.get("data", markets.get("markets", []))
+        except Exception as e:
+            log(f"Parse error on page {page + 1}: {e}")
+            break
+
+        if not markets:
+            log(f"Page {page + 1}: empty response, stopping")
+            break
+
+        page_new = 0
+        for m in markets:
+            stats["fetchedTotal"] += 1
+
+            mid = m.get("id", m.get("condition_id", m.get("conditionId", "")))
+            if not mid or mid in seen_ids:
+                continue
+            seen_ids.add(mid)
+
+            if m.get("closed") is True or str(m.get("closed", "")).lower() == "true":
+                stats["excludedClosed"] += 1
+                continue
+
+            if m.get("archived") is True:
+                stats["excludedArchived"] += 1
+                continue
+
+            clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
+            if len(clob_ids) < 2:
+                stats["excludedMissingTokens"] += 1
+                continue
+
+            expiry_ts = _parse_expiry(m)
+            if expiry_ts <= now or expiry_ts > max_expiry:
+                stats["excludedExpiry"] += 1
+                continue
+
+            m["_parsed_clob_ids"] = clob_ids
+            m["_parsed_expiry"] = expiry_ts
+            accepted.append(m)
+            page_new += 1
+
+        log(f"Page {page + 1}: {len(markets)} fetched, {page_new} new accepted")
+
+        if len(markets) < ARB_PAGE_SIZE_POLY:
+            break
+
+    stats["includedFinal"] = len(accepted)
+    _last_poly_stats = stats
+    log(f"Total: {stats['fetchedTotal']} fetched → {stats['includedFinal']} included "
+        f"(closed={stats['excludedClosed']}, archived={stats['excludedArchived']}, "
+        f"missingTokens={stats['excludedMissingTokens']}, expiry={stats['excludedExpiry']})")
+    return accepted, stats
 
 
-def _market_id(m: dict) -> str:
-    return m.get("condition_id", m.get("id", m.get("conditionId", "")))
+def normalize_market(market: dict) -> NormalizedMarket:
+    clob_ids = market.get("_parsed_clob_ids", [])
+    if not clob_ids:
+        clob_ids = _parse_clob_token_ids(market.get("clobTokenIds"))
+
+    yes_token = ""
+    no_token = ""
+
+    outcomes = market.get("outcomes")
+    if isinstance(outcomes, str):
+        try:
+            outcomes = json.loads(outcomes)
+        except Exception:
+            outcomes = None
+
+    if isinstance(outcomes, list) and len(clob_ids) >= 2:
+        outcome_labels = [str(o).upper() for o in outcomes]
+        if len(outcome_labels) >= 2:
+            for i, label in enumerate(outcome_labels):
+                if label == "YES" and i < len(clob_ids):
+                    yes_token = clob_ids[i]
+                elif label == "NO" and i < len(clob_ids):
+                    no_token = clob_ids[i]
+    if not yes_token and len(clob_ids) >= 2:
+        yes_token = clob_ids[0]
+        no_token = clob_ids[1]
+
+    expiry_ts = market.get("_parsed_expiry") or _parse_expiry(market)
+
+    question = market.get("question", market.get("title", ""))
+    mid = market.get("id", market.get("condition_id", market.get("conditionId", "")))
+
+    team_key = extract_team_key(question)
+
+    return NormalizedMarket(
+        venue="polymarket",
+        marketId=mid,
+        title=question,
+        expiryTs=expiry_ts,
+        yesTokenId=yes_token,
+        noTokenId=no_token,
+        team_key=team_key,
+        meta={
+            "slug": market.get("slug", ""),
+            "volume": float(market.get("volume", 0) or 0),
+        },
+    )
+
+
+def get_polymarket_markets() -> list[NormalizedMarket]:
+    from ..core.filters import classify_sport
+    raw, _stats = fetch_all_active_markets()
+    normalized = [normalize_market(m) for m in raw]
+    for nm in normalized:
+        sport = classify_sport(nm.title)
+        nm.sport = sport
+    return normalized
 
 
 def fetch_orderbook(token_id: str) -> Optional[dict]:
@@ -137,122 +230,3 @@ def get_best_prices(token_id: str) -> dict:
         "bid_size": bid_size,
         "ask_size": ask_size,
     }
-
-
-def normalize_market(market: dict) -> NormalizedMarket:
-    tokens = market.get("tokens", [])
-    yes_token = ""
-    no_token = ""
-
-    if isinstance(tokens, list) and len(tokens) >= 2:
-        if isinstance(tokens[0], dict):
-            for t in tokens:
-                outcome = t.get("outcome", "").upper()
-                if outcome == "YES":
-                    yes_token = t.get("token_id", "")
-                elif outcome == "NO":
-                    no_token = t.get("token_id", "")
-        else:
-            yes_token = str(tokens[0]) if tokens else ""
-            no_token = str(tokens[1]) if len(tokens) > 1 else ""
-
-    clob_ids = market.get("clobTokenIds", "")
-    if not yes_token and isinstance(clob_ids, str) and clob_ids:
-        parts = [p.strip() for p in clob_ids.split(",") if p.strip()]
-        yes_token = parts[0] if len(parts) > 0 else ""
-        no_token = parts[1] if len(parts) > 1 else ""
-
-    end_date = market.get("endDate", market.get("end_date_iso", ""))
-    expiry_ts = 0
-    if end_date:
-        try:
-            if isinstance(end_date, (int, float)):
-                expiry_ts = int(end_date)
-            elif "T" in str(end_date):
-                from datetime import datetime
-                dt = datetime.fromisoformat(str(end_date).replace("Z", "+00:00"))
-                expiry_ts = int(dt.timestamp())
-            else:
-                expiry_ts = int(float(end_date))
-        except Exception:
-            pass
-
-    question = market.get("question", market.get("title", ""))
-
-    event_tags = market.get("_event_tags")
-    tags = []
-    if event_tags:
-        if isinstance(event_tags, list):
-            tags = event_tags
-        elif isinstance(event_tags, str):
-            tags = [t.strip() for t in event_tags.split(",")]
-
-    team_key = extract_team_key(question)
-
-    return NormalizedMarket(
-        venue="polymarket",
-        marketId=_market_id(market),
-        title=question,
-        expiryTs=expiry_ts,
-        yesTokenId=yes_token,
-        noTokenId=no_token,
-        team_key=team_key,
-        meta={
-            "slug": market.get("slug", ""),
-            "volume": float(market.get("volume", 0) or 0),
-            "tags": tags,
-        },
-    )
-
-
-def get_polymarket_markets() -> list[NormalizedMarket]:
-    from ..core.filters import filter_by_expiry, classify_sport
-    raw = fetch_all_active_markets()
-    normalized = [normalize_market(m) for m in raw]
-    filtered = filter_by_expiry(normalized)
-    for nm in filtered:
-        sport = classify_sport(nm.title)
-        if not sport and nm.meta.get("tags"):
-            for tag in nm.meta["tags"]:
-                tl = tag.lower()
-                if any(kw in tl for kw in ("sports", "basketball", "football", "soccer", "esports")):
-                    sport = _tag_to_sport(tl)
-                    break
-        nm.sport = sport
-    return filtered
-
-
-def _tag_to_sport(tag: str) -> Optional[str]:
-    if any(k in tag for k in ("basketball", "nba")):
-        return "nba"
-    if any(k in tag for k in ("esport",)):
-        return "esports"
-    if any(k in tag for k in ("football", "nfl")):
-        return "nfl"
-    if "soccer" in tag:
-        return "soccer"
-    if any(k in tag for k in ("mma", "ufc", "boxing")):
-        return "mma"
-    if "sport" in tag:
-        return "sports"
-    return None
-
-
-def _is_binary(market: dict) -> bool:
-    outcomes = market.get("outcomes")
-    if isinstance(outcomes, str):
-        try:
-            outcomes = json.loads(outcomes)
-        except Exception:
-            pass
-    if isinstance(outcomes, list):
-        labels = [str(o).upper() for o in outcomes]
-        if labels == ["YES", "NO"] or labels == ["NO", "YES"]:
-            return True
-    tokens = market.get("tokens", [])
-    if isinstance(tokens, list) and len(tokens) == 2:
-        return True
-    clob = market.get("clobTokenIds", "")
-    if isinstance(clob, str) and clob:
-        return len(clob.split(",")) == 2
-    return False

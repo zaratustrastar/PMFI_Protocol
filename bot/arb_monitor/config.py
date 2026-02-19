@@ -10,7 +10,8 @@ SCAN_INTERVAL_SECONDS = int(os.environ.get("ARB_SCAN_INTERVAL", "60"))
 CACHE_TTL_SECONDS = int(os.environ.get("ARB_CACHE_TTL", "45"))
 
 ARB_MAX_PAGES_KALSHI = int(os.environ.get("ARB_MAX_PAGES_KALSHI", "10"))
-ARB_MAX_PAGES_POLY = int(os.environ.get("ARB_MAX_PAGES_POLY", "5"))
+ARB_MAX_PAGES_POLY = int(os.environ.get("ARB_MAX_PAGES_POLY", "10"))
+ARB_PAGE_SIZE_POLY = int(os.environ.get("ARB_PAGE_SIZE_POLY", "100"))
 ARB_EXPIRY_WINDOW_DAYS = int(os.environ.get("ARB_EXPIRY_WINDOW_DAYS", "30"))
 
 MIN_EDGE_DEFAULT = 0.01

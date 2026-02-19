@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dotenv import load_dotenv
 load_dotenv()
 
-from arb_monitor.adapters.polymarket import get_polymarket_markets
+from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats
 from arb_monitor.adapters.kalshi import get_kalshi_markets, get_exclusion_stats
 from arb_monitor.core.filters import classify_sport
 from arb_monitor.core.matcher import find_pairs
@@ -36,7 +36,15 @@ def main():
 
     print("\n📊 Fetching Polymarket markets...")
     poly = get_polymarket_markets()
-    print(f"   Total after expiry filter: {len(poly)}")
+    poly_stats = get_discovery_stats()
+    print(f"\n   Discovery breakdown:")
+    print(f"     Total fetched:          {poly_stats.get('fetchedTotal', '?')}")
+    print(f"     Excluded closed:        {poly_stats.get('excludedClosed', '?')}")
+    print(f"     Excluded archived:      {poly_stats.get('excludedArchived', '?')}")
+    print(f"     Excluded missing tokens: {poly_stats.get('excludedMissingTokens', '?')}")
+    print(f"     Excluded expiry:        {poly_stats.get('excludedExpiry', '?')}")
+    print(f"     Included final:         {poly_stats.get('includedFinal', '?')}")
+    print(f"   Total normalized: {len(poly)}")
 
     sport_counts: dict[str, int] = {}
     team_key_count = 0

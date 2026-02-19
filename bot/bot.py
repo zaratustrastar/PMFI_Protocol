@@ -938,8 +938,8 @@ def nav_update_loop():
 def arbs_overlap_debug():
     """Debug endpoint: returns market samples + sport counts from both venues."""
     try:
-        from arb_monitor.adapters.polymarket import get_polymarket_markets
-        from arb_monitor.adapters.kalshi import get_kalshi_markets
+        from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats
+        from arb_monitor.adapters.kalshi import get_kalshi_markets, get_exclusion_stats
 
         poly = get_polymarket_markets()
         kalshi = get_kalshi_markets()
@@ -955,22 +955,12 @@ def arbs_overlap_debug():
             kalshi_by_sport[s] = kalshi_by_sport.get(s, 0) + 1
 
         poly_samples = [
-            {
-                "marketId": m.marketId,
-                "title": m.title,
-                "teamKey": m.team_key,
-                "expiryTs": m.expiryTs,
-            }
+            {"marketId": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs}
             for m in poly[:50]
         ]
 
         kalshi_samples = [
-            {
-                "ticker": m.marketId,
-                "title": m.title,
-                "teamKey": m.team_key,
-                "expiryTs": m.expiryTs,
-            }
+            {"ticker": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs}
             for m in kalshi[:50]
         ]
 
@@ -979,6 +969,8 @@ def arbs_overlap_debug():
             "polymarketSamples": poly_samples,
             "kalshiCountBySport": kalshi_by_sport,
             "polyCountBySport": poly_by_sport,
+            "rawPolyCounts": get_discovery_stats(),
+            "rawKalshiCounts": get_exclusion_stats(),
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500

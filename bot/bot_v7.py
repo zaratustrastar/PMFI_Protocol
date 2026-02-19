@@ -3868,8 +3868,8 @@ def api_arb_overlap_debug():
     if not ARB_MONITOR_AVAILABLE:
         return jsonify({'error': 'Arb monitor not available'}), 503
     try:
-        from arb_monitor.adapters.polymarket import get_polymarket_markets
-        from arb_monitor.adapters.kalshi import get_kalshi_markets
+        from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats
+        from arb_monitor.adapters.kalshi import get_kalshi_markets, get_exclusion_stats
 
         poly = get_polymarket_markets()
         kalshi = get_kalshi_markets()
@@ -3898,6 +3898,8 @@ def api_arb_overlap_debug():
             "polymarketSamples": poly_samples,
             "kalshiCountBySport": kalshi_by_sport,
             "polyCountBySport": poly_by_sport,
+            "rawPolyCounts": get_discovery_stats(),
+            "rawKalshiCounts": get_exclusion_stats(),
         })
     except Exception as e:
         print(f"❌ [Arb] /api/arbs/overlap_debug error: {e}")
