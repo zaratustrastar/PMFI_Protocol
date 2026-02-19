@@ -5,7 +5,7 @@ import time
 from typing import Optional
 from ..config import POLY_GAMMA_URL, POLY_CLOB_URL, ARB_MAX_PAGES_POLY
 from .. import http_client
-from ..models import NormalizedMarket
+from ..models import NormalizedMarket, extract_team_key
 
 
 def log(msg: str):
@@ -70,7 +70,7 @@ def fetch_events_ending_soon(limit: int = 50) -> list[dict]:
         return []
 
 
-def fetch_all_active_markets(max_pages: int = None) -> list[dict]:
+def fetch_all_active_markets(max_pages: Optional[int] = None) -> list[dict]:
     if max_pages is None:
         max_pages = ARB_MAX_PAGES_POLY
     seen_ids: set[str] = set()
@@ -187,6 +187,8 @@ def normalize_market(market: dict) -> NormalizedMarket:
         elif isinstance(event_tags, str):
             tags = [t.strip() for t in event_tags.split(",")]
 
+    team_key = extract_team_key(question)
+
     return NormalizedMarket(
         venue="polymarket",
         marketId=_market_id(market),
@@ -194,6 +196,7 @@ def normalize_market(market: dict) -> NormalizedMarket:
         expiryTs=expiry_ts,
         yesTokenId=yes_token,
         noTokenId=no_token,
+        team_key=team_key,
         meta={
             "slug": market.get("slug", ""),
             "volume": float(market.get("volume", 0) or 0),

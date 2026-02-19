@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Optional
 from ..config import KALSHI_BASE_URL, ARB_MAX_PAGES_KALSHI
 from .. import http_client
-from ..models import NormalizedMarket
+from ..models import NormalizedMarket, extract_team_key
 
 
 def log(msg: str):
@@ -207,6 +207,8 @@ def normalize_market(market: dict) -> NormalizedMarket:
     event_category = market.get("_event_category", "")
     sport = _classify_kalshi_category(event_category, title)
 
+    team_key = extract_team_key(title)
+
     return NormalizedMarket(
         venue="kalshi",
         marketId=ticker,
@@ -215,6 +217,7 @@ def normalize_market(market: dict) -> NormalizedMarket:
         yesTokenId=ticker,
         noTokenId=ticker,
         sport=sport,
+        team_key=team_key,
         meta={
             "event_ticker": market.get("event_ticker", market.get("_event_ticker_parent", "")),
             "event_category": event_category,
