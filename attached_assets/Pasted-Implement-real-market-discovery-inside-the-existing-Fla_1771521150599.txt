@@ -1,0 +1,55 @@
+Implement real market discovery inside the existing Flask repo (Python). Do NOT create a new Node service.
+
+We already created bot/arb_monitor/ from Prompt 1. Now implement:
+
+A) Shared HTTP client usage
+- Reuse the same proxy + request wrapper used by our existing polymarket monitoring/trading code.
+- If we already have a helper (e.g. trading_bot/http_client.py or bot/http.py), import and reuse it.
+- If none exists, create bot/arb_monitor/http_client.py that supports:
+  - requests.get with timeout, retries, and optional proxies
+  - reads env: HTTP_PROXY, HTTPS_PROXY (optional)
+  - reads env: PROXY_ENABLED_POLY=1/0 and PROXY_ENABLED_OPINION=1/0
+  - sets User-Agent and basic backoff on 429/5xx
+
+B) Opinion adapter (bot/arb_monitor/adapters/opinion.py)
+- Base URL: OPINION_BASE_URL default https://openapi.opinion.trade/openapi
+- Header: apikey: OPINION_API_KEY
+- Fetch binary active markets only:
+  GET {OPINION_BASE_URL}/market?status=activated&marketType=0&limit=20&page=...&sortBy=...
+- Do 2 passes and merge/dedupe:
+  1) sortBy=ending soon
+  2) sortBy=volume7d desc (or the closest supported)
+- Pagination budget: ARB_MAX_PAGES_OPINION (default 10)
+- For each market list item, extract:
+  marketId, marketTitle, createdAt, cutoffAt (expiryTs), and token ids (yesTokenId, noTokenId).
+  If token ids are missing in list response, implement a minimal per-market detail fetch:
+    GET {OPINION_BASE_URL}/market/{marketId}
+  Cache market details for 30 minutes to keep requests minimal.
+
+C) Polymarket adapter (bot/arb_monitor/adapters/polymarket.py)
+- Use Gamma API base: POLY_GAMMA_URL default https://gamma-api.polymarket.com
+- Fetch active markets/events with a scan budget (do NOT attempt to fetch everything):
+  Prefer endpoints that can filter to active/open markets and/or “ending soon”.
+- Extract normalized fields:
+  marketId/eventId, title/question, expiryTs/endDate, yesTokenId, noTokenId.
+- If “tags/sports category” is easy with Gamma, use it; if not, use keyword filtering like Opinion.
+
+D) Filters (bot/arb_monitor/core/filters.py)
+- Only include markets with: now < expiryTs < now + ARB_EXPIRY_WINDOW_DAYS (default 30)
+- Sports scope keywords (case-insensitive):
+  esports: cs2, counter-strike, dota, lol, league of legends, valorant, vct, iem, blast, major
+  nba: nba, lakers, celtics, warriors, knicks, nuggets, heat, playoffs, finals, mvp
+  sports generic (minimal): vs, match, game, series
+- Classify sport label per market: "esports" | "nba" | "sports" | "other"
+
+E) Normalized model
+Create NormalizedMarket dataclass:
+{ venue, marketId, title, expiryTs, yesTokenId, noTokenId, sport, meta }
+Expose functions:
+- get_opinion_markets() -> List[NormalizedMarket]
+- get_polymarket_markets() -> List[NormalizedMarket]
+
+F) Debug support
+If /api/arbs is called with debug=1 later, we should be able to return counts of discovered markets per venue and sample titles.
+
+Do not change bot_v7.py yet; just implement modules and unit-ish tests or a small script under bot/arb_monitor/_debug_discovery.py to print counts.
