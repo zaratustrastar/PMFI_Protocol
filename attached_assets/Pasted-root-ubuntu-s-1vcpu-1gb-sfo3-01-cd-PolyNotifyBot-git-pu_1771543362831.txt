@@ -1,0 +1,78 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot
+git pull
+remote: Enumerating objects: 120, done.
+remote: Counting objects: 100% (120/120), done.
+remote: Compressing objects: 100% (44/44), done.
+remote: Total 111 (delta 70), reused 106 (delta 65), pack-reused 0 (from 0)
+Receiving objects: 100% (111/111), 228.48 KiB | 3.46 MiB/s, done.
+Resolving deltas: 100% (70/70), completed with 8 local objects.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   6d5d5ea..57e7411  main       -> origin/main
+Updating 6d5d5ea..57e7411
+Fast-forward
+ ...malist_icons_on_white_background_(1)_copy_1771518733398.png | Bin 0 -> 47049 bytes
+ ...-market-discovery-inside-the-existing-Fla_1771521150599.txt |  55 ++++++
+ ...g-the-arbitrage-monitor-inside-the-existi_1771535948907.txt |  55 ++++++
+ .../Screenshot_2026-02-19_at_17.29.44_1771518594577.png        | Bin 0 -> 9403 bytes
+ attached_assets/arbitragetab_1771518734909.png                 | Bin 0 -> 37850 bytes
+ attached_assets/homeicon_1771518731813.png                     | Bin 0 -> 26431 bytes
+ attached_assets/invertedlogo_1771540142681.png                 | Bin 0 -> 75540 bytes
+ bot/arb_monitor/__init__.py                                    |   1 +
+ bot/arb_monitor/_debug_discovery.py                            | 126 +++++++++++++
+ bot/arb_monitor/adapters/__init__.py                           |   1 +
+ bot/arb_monitor/adapters/kalshi.py                             | 268 ++++++++++++++++++++++++++++
+ bot/arb_monitor/adapters/polymarket.py                         | 258 ++++++++++++++++++++++++++
+ bot/arb_monitor/config.py                                      |  57 ++++++
+ bot/arb_monitor/core/__init__.py                               |   1 +
+ bot/arb_monitor/core/arb_engine.py                             | 191 ++++++++++++++++++++
+ bot/arb_monitor/core/filters.py                                |  72 ++++++++
+ bot/arb_monitor/core/matcher.py                                | 137 ++++++++++++++
+ bot/arb_monitor/http_client.py                                 |  77 ++++++++
+ bot/arb_monitor/models.py                                      |  54 ++++++
+ bot/arb_monitor/scanner.py                                     | 131 ++++++++++++++
+ bot/arb_monitor/storage.py                                     |  93 ++++++++++
+ bot/bot.py                                                     |  50 ++++++
+ bot/bot_v7.py                                                  |  80 +++++++++
+ frontend/icon-arbitrage.png                                    | Bin 0 -> 37850 bytes
+ frontend/icon-home.png                                         | Bin 0 -> 26431 bytes
+ frontend/icon-rewards.png                                      | Bin 0 -> 47049 bytes
+ frontend/icon.png                                              | Bin 690004 -> 75540 bytes
+ frontend/mini.html                                             | 179 ++++++++++++++++++-
+ vault_app/static/icon.png                                      | Bin 78770 -> 75540 bytes
+ 29 files changed, 1881 insertions(+), 5 deletions(-)
+ create mode 100644 attached_assets/Minimalist_icons_on_white_background_(1)_copy_1771518733398.png
+ create mode 100644 attached_assets/Pasted-Implement-real-market-discovery-inside-the-existing-Fla_1771521150599.txt
+ create mode 100644 attached_assets/Pasted-We-are-building-the-arbitrage-monitor-inside-the-existi_1771535948907.txt
+ create mode 100644 attached_assets/Screenshot_2026-02-19_at_17.29.44_1771518594577.png
+ create mode 100644 attached_assets/arbitragetab_1771518734909.png
+ create mode 100644 attached_assets/homeicon_1771518731813.png
+ create mode 100644 attached_assets/invertedlogo_1771540142681.png
+ create mode 100644 bot/arb_monitor/__init__.py
+ create mode 100644 bot/arb_monitor/_debug_discovery.py
+ create mode 100644 bot/arb_monitor/adapters/__init__.py
+ create mode 100644 bot/arb_monitor/adapters/kalshi.py
+ create mode 100644 bot/arb_monitor/adapters/polymarket.py
+ create mode 100644 bot/arb_monitor/config.py
+ create mode 100644 bot/arb_monitor/core/__init__.py
+ create mode 100644 bot/arb_monitor/core/arb_engine.py
+ create mode 100644 bot/arb_monitor/core/filters.py
+ create mode 100644 bot/arb_monitor/core/matcher.py
+ create mode 100644 bot/arb_monitor/http_client.py
+ create mode 100644 bot/arb_monitor/models.py
+ create mode 100644 bot/arb_monitor/scanner.py
+ create mode 100644 bot/arb_monitor/storage.py
+ create mode 100644 frontend/icon-arbitrage.png
+ create mode 100644 frontend/icon-home.png
+ create mode 100644 frontend/icon-rewards.png
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl restart psniper-bot
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -s "http://127.0.0.1:<PORT>/api/arbs/overlap_debug" | head -c 2000
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -s "http://127.0.0.1:<PORT>/api/arbs?minEdge=0&limit=50&debug=1" | head -c 4000
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -s "http://127.0.0.1:8080/api/arbs/overlap_debug" | head -c 2000
+<!doctype html>
+<html lang=en>
+<title>404 Not Found</title>
+<h1>Not Found</h1>
+<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -s "http://127.0.0.1:8080/api/arbs?minEdge=0&limit=50&debug=1" | head -c 4000
+{"asOf":1771543289,"lastScanMs":6480,"opportunities":[],"pairsTracked":0,"watchlist":[]}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
