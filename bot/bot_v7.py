@@ -3862,6 +3862,48 @@ def api_arb_opportunities():
         return jsonify({'error': str(e)}), 500
 
 
+@flask_app.route('/api/arbs/overlap_debug', methods=['GET'])
+def api_arb_overlap_debug():
+    """Debug endpoint: returns market samples + sport counts from both venues."""
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({'error': 'Arb monitor not available'}), 503
+    try:
+        from arb_monitor.adapters.polymarket import get_polymarket_markets
+        from arb_monitor.adapters.kalshi import get_kalshi_markets
+
+        poly = get_polymarket_markets()
+        kalshi = get_kalshi_markets()
+
+        poly_by_sport = {}
+        for m in poly:
+            s = m.sport or "uncategorized"
+            poly_by_sport[s] = poly_by_sport.get(s, 0) + 1
+
+        kalshi_by_sport = {}
+        for m in kalshi:
+            s = m.sport or "uncategorized"
+            kalshi_by_sport[s] = kalshi_by_sport.get(s, 0) + 1
+
+        poly_samples = [
+            {"marketId": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs}
+            for m in poly[:50]
+        ]
+        kalshi_samples = [
+            {"ticker": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs}
+            for m in kalshi[:50]
+        ]
+
+        return jsonify({
+            "kalshiSamples": kalshi_samples,
+            "polymarketSamples": poly_samples,
+            "kalshiCountBySport": kalshi_by_sport,
+            "polyCountBySport": poly_by_sport,
+        })
+    except Exception as e:
+        print(f"❌ [Arb] /api/arbs/overlap_debug error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @flask_app.route('/api/arbs/health', methods=['GET'])
 def api_arb_health():
     """Health check for arb scanner."""
