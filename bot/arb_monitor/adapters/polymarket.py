@@ -22,8 +22,8 @@ def fetch_active_markets(limit: int = 100, offset: int = 0) -> list[dict]:
     }
     log(f"Fetching markets: limit={limit} offset={offset}")
     resp = http_client.get(url, venue="polymarket", params=params)
-    if not resp or resp.status_code != 200:
-        log(f"Markets API returned {resp.status_code if resp else 'None'}")
+    if resp is None or resp.status_code != 200:
+        log(f"Markets API returned {resp.status_code if resp is not None else 'None'}")
         return []
     try:
         markets = resp.json()
@@ -48,8 +48,8 @@ def fetch_events_ending_soon(limit: int = 50) -> list[dict]:
     }
     log(f"Fetching events ending soon: limit={limit}")
     resp = http_client.get(url, venue="polymarket", params=params)
-    if not resp or resp.status_code != 200:
-        log(f"Events API returned {resp.status_code if resp else 'None'}")
+    if resp is None or resp.status_code != 200:
+        log(f"Events API returned {resp.status_code if resp is not None else 'None'}")
         return []
     try:
         events = resp.json()
@@ -109,7 +109,7 @@ def _market_id(m: dict) -> str:
 def fetch_orderbook(token_id: str) -> Optional[dict]:
     url = f"{POLY_CLOB_URL}/book"
     resp = http_client.get(url, venue="polymarket", params={"token_id": token_id}, timeout=10)
-    if not resp or resp.status_code != 200:
+    if resp is None or resp.status_code != 200:
         return None
     try:
         return resp.json()

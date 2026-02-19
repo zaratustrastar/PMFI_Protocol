@@ -8,6 +8,10 @@ from .. import http_client
 from ..models import NormalizedMarket
 
 
+if not OPINION_API_KEY:
+    print("⚠️ [Arb/Opinion] OPINION_API_KEY not set — Opinion.trade API calls will fail with 401")
+
+
 def log(msg: str):
     print(f"💭 [Arb/Opinion] {msg}")
 
@@ -42,7 +46,7 @@ def fetch_market_detail(market_id: str) -> Optional[dict]:
         return cached
     url = f"{OPINION_BASE_URL}/market/{market_id}"
     resp = http_client.get(url, venue="opinion", headers=_headers(), timeout=10, max_retries=2)
-    if not resp or resp.status_code != 200:
+    if resp is None or resp.status_code != 200:
         log(f"Detail fetch failed for market {market_id}")
         return None
     try:
@@ -65,8 +69,8 @@ def _fetch_page(page: int, limit: int, sort_by: str) -> list[dict]:
         "sortBy": sort_by,
     }
     resp = http_client.get(url, venue="opinion", params=params, headers=_headers())
-    if not resp or resp.status_code != 200:
-        log(f"Page fetch failed: page={page} sort={sort_by} status={resp.status_code if resp else 'None'}")
+    if resp is None or resp.status_code != 200:
+        log(f"Page fetch failed: page={page} sort={sort_by} status={resp.status_code if resp is not None else 'None'}")
         return []
     try:
         data = resp.json()
@@ -201,7 +205,7 @@ def normalize_market(market: dict) -> NormalizedMarket:
 def fetch_orderbook(token_id: str) -> Optional[dict]:
     url = f"{OPINION_BASE_URL}/token/orderbook"
     resp = http_client.get(url, venue="opinion", params={"token_id": token_id}, headers=_headers(), timeout=10)
-    if not resp or resp.status_code != 200:
+    if resp is None or resp.status_code != 200:
         return None
     try:
         return resp.json()
