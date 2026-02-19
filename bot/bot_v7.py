@@ -311,7 +311,7 @@ TASK_DEFINITIONS = [
 ]
 
 REFERRAL_BONUS_RATIO = 0.10
-XP_FOLLOW_FC_TARGET_FID = 0  # TODO: Set to the target Farcaster FID users must follow
+XP_FOLLOW_FC_TARGET_FID = 1550088  # pmfi Farcaster FID
 XP_DEPOSIT_MIN_USDC = 10  # Minimum USDC deposit to qualify (in whole units)
 
 

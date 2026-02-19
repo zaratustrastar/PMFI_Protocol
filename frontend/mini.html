@@ -1018,23 +1018,9 @@
             margin-bottom: 4px;
         }
 
-        .leaderboard-row.header {
-            color: var(--text-secondary);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-
         .leaderboard-row.current-user {
             background: rgba(88,166,255,0.1);
             border: 1px solid rgba(88,166,255,0.2);
-        }
-
-        .lb-rank {
-            width: 40px;
-            font-weight: 600;
-            font-size: 14px;
         }
 
         .lb-user {
@@ -1043,15 +1029,10 @@
         }
 
         .lb-xp {
-            width: 70px;
             text-align: right;
             font-weight: 600;
             font-size: 13px;
             color: var(--accent-blue);
-        }
-
-        .leaderboard-row.header .lb-xp {
-            color: var(--text-secondary);
         }
 
         .leaderboard-empty {
@@ -1181,17 +1162,6 @@
 
         <!-- Tasks Tab -->
         <div class="tab-content" id="tabTasks">
-            <div class="tab-title">Tasks</div>
-            <div class="xp-summary" id="xpSummary">
-                <div class="xp-summary-item">
-                    <div class="xp-summary-value" id="xpTotalDisplay">0</div>
-                    <div class="xp-summary-label">Total XP</div>
-                </div>
-                <div class="xp-summary-item">
-                    <div class="xp-summary-value" id="xpCompletedDisplay">0/0</div>
-                    <div class="xp-summary-label">Completed</div>
-                </div>
-            </div>
             <div id="xpTasksSection" style="padding:0;">
                 <div id="xpTasksList"></div>
             </div>
@@ -1206,11 +1176,6 @@
 
         <!-- Rankings Tab -->
         <div class="tab-content" id="tabRankings">
-            <div class="tab-title">Rankings</div>
-            <div class="scope-toggle">
-                <button class="scope-btn active" id="scopeAll" onclick="loadLeaderboard('all')">All Time</button>
-                <button class="scope-btn" id="scopeWeekly" onclick="loadLeaderboard('weekly')">Weekly</button>
-            </div>
             <div id="leaderboardContent">
                 <div class="leaderboard-empty">Loading...</div>
             </div>
@@ -1588,26 +1553,25 @@
         // LEADERBOARD
         // ============================================
         async function loadLeaderboard(scope) {
-            scope = scope || 'all';
-            document.getElementById('scopeAll').classList.toggle('active', scope === 'all');
-            document.getElementById('scopeWeekly').classList.toggle('active', scope === 'weekly');
             const container = document.getElementById('leaderboardContent');
             container.innerHTML = '<div class="leaderboard-empty">Loading...</div>';
             try {
-                const res = await fetch('/api/leaderboard?scope=' + scope);
+                const res = await fetch('/api/leaderboard?scope=all');
                 const data = await res.json();
                 const entries = data.leaderboard || data.entries || data || [];
-                if (!Array.isArray(entries) || entries.length === 0) {
+                const filtered = Array.isArray(entries) ? entries.filter(e => (e.xp || e.xp_total || e.xpTotal || 0) > 0) : [];
+                if (filtered.length === 0) {
                     container.innerHTML = '<div class="leaderboard-empty">No rankings yet</div>';
                     return;
                 }
-                let html = '<div class="leaderboard-row header"><div class="lb-rank">#</div><div class="lb-user">User</div><div class="lb-xp">XP</div></div>';
-                entries.forEach((entry, i) => {
+                let html = '';
+                filtered.forEach((entry, i) => {
                     const isMe = userFid && (entry.fid == userFid);
+                    const xp = entry.xp || entry.xp_total || entry.xpTotal || 0;
+                    const name = entry.username || ('fid:' + entry.fid);
                     html += '<div class="leaderboard-row' + (isMe ? ' current-user' : '') + '">';
-                    html += '<div class="lb-rank">' + (entry.rank || (i + 1)) + '</div>';
-                    html += '<div class="lb-user">' + (entry.username || 'fid:' + entry.fid) + '</div>';
-                    html += '<div class="lb-xp">' + (entry.xp || entry.xpTotal || 0) + '</div>';
+                    html += '<div class="lb-user">' + name + '</div>';
+                    html += '<div class="lb-xp">' + xp + ' XP</div>';
                     html += '</div>';
                 });
                 container.innerHTML = html;
@@ -1677,15 +1641,7 @@
 
         function renderXpStatus() {
             if (!xpState || xpState.error) return;
-            const total = xpState.xpTotal || 0;
             const tasks = xpState.tasks || [];
-            const completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
-
-            const xpTotalEl = document.getElementById('xpTotalDisplay');
-            const xpCompletedEl = document.getElementById('xpCompletedDisplay');
-            if (xpTotalEl) xpTotalEl.textContent = total;
-            if (xpCompletedEl) xpCompletedEl.textContent = completedTasks + '/' + tasks.length;
-
             renderXpTasks(tasks);
             updateReferralLink();
         }
@@ -1732,6 +1688,31 @@
                     btn.className = 'task-claim-btn';
                     btn.addEventListener('click', () => claimFollowX(btn));
                     right.appendChild(btn);
+                } else if (t.id === 'follow_fc') {
+                    const followed = localStorage.getItem('pmfi_followed_fc') === '1';
+                    if (followed) {
+                        const verifyBtn = document.createElement('button');
+                        verifyBtn.textContent = 'Verify';
+                        verifyBtn.className = 'task-verify-btn';
+                        verifyBtn.addEventListener('click', () => verifyTask('follow_fc', verifyBtn));
+                        right.appendChild(verifyBtn);
+                    } else {
+                        const followBtn = document.createElement('button');
+                        followBtn.textContent = 'Follow';
+                        followBtn.className = 'task-verify-btn';
+                        followBtn.style.background = '#6366f1';
+                        followBtn.addEventListener('click', () => {
+                            window.open('https://farcaster.xyz/pmfi', '_blank');
+                            localStorage.setItem('pmfi_followed_fc', '1');
+                            followBtn.style.display = 'none';
+                            const verifyBtn = document.createElement('button');
+                            verifyBtn.textContent = 'Verify';
+                            verifyBtn.className = 'task-verify-btn';
+                            verifyBtn.addEventListener('click', () => verifyTask('follow_fc', verifyBtn));
+                            right.appendChild(verifyBtn);
+                        });
+                        right.appendChild(followBtn);
+                    }
                 } else if (VERIFIABLE_TASKS.includes(t.id)) {
                     const btn = document.createElement('button');
                     btn.textContent = 'Verify';
