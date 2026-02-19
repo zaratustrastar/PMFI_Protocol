@@ -4,7 +4,7 @@ import time
 import threading
 from .config import SCAN_INTERVAL_SECONDS
 from .adapters.polymarket import get_polymarket_markets
-from .adapters.opinion import get_opinion_markets
+from .adapters.kalshi import get_kalshi_markets
 from .core.filters import classify_sport
 from .core.matcher import find_pairs
 from .core.arb_engine import analyze_pair
@@ -36,31 +36,31 @@ def run_scan():
             poly_markets = get_polymarket_markets()
             arb_cache.set("poly_normalized", poly_markets)
 
-        cached_opinion = arb_cache.get("opinion_normalized")
-        if cached_opinion is not None:
-            opinion_markets = cached_opinion
-            log(f"Using cached Opinion data ({len(opinion_markets)} markets)")
+        cached_kalshi = arb_cache.get("kalshi_normalized")
+        if cached_kalshi is not None:
+            kalshi_markets = cached_kalshi
+            log(f"Using cached Kalshi data ({len(kalshi_markets)} markets)")
         else:
-            opinion_markets = get_opinion_markets()
-            arb_cache.set("opinion_normalized", opinion_markets)
+            kalshi_markets = get_kalshi_markets()
+            arb_cache.set("kalshi_normalized", kalshi_markets)
 
         poly_sports = [m for m in poly_markets if m.sport]
-        opinion_sports = [m for m in opinion_markets if m.sport]
+        kalshi_sports = [m for m in kalshi_markets if m.sport]
 
-        log(f"Sports markets: {len(poly_sports)} Poly, {len(opinion_sports)} Opinion (total: {len(poly_markets)} Poly, {len(opinion_markets)} Opinion)")
+        log(f"Sports markets: {len(poly_sports)} Poly, {len(kalshi_sports)} Kalshi (total: {len(poly_markets)} Poly, {len(kalshi_markets)} Kalshi)")
 
         _last_discovery_stats = {
             "polymarket_total": len(poly_markets),
             "polymarket_sports": len(poly_sports),
-            "opinion_total": len(opinion_markets),
-            "opinion_sports": len(opinion_sports),
+            "kalshi_total": len(kalshi_markets),
+            "kalshi_sports": len(kalshi_sports),
             "poly_sample_titles": [m.title for m in poly_markets[:5]],
-            "opinion_sample_titles": [m.title for m in opinion_markets[:5]],
+            "kalshi_sample_titles": [m.title for m in kalshi_markets[:5]],
             "poly_sport_breakdown": _sport_breakdown(poly_markets),
-            "opinion_sport_breakdown": _sport_breakdown(opinion_markets),
+            "kalshi_sport_breakdown": _sport_breakdown(kalshi_markets),
         }
 
-        pairs = find_pairs(poly_sports, opinion_sports)
+        pairs = find_pairs(poly_sports, kalshi_sports)
         log(f"Matched {len(pairs)} pairs, analyzing orderbooks...")
 
         opportunities = []

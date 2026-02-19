@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from arb_monitor.adapters.polymarket import get_polymarket_markets
-from arb_monitor.adapters.opinion import get_opinion_markets
+from arb_monitor.adapters.kalshi import get_kalshi_markets
 from arb_monitor.core.filters import classify_sport
 from arb_monitor.core.matcher import find_pairs
 
@@ -41,30 +41,30 @@ def main():
 
     print("\n" + "-" * 70)
 
-    print("\n💭 Fetching Opinion markets...")
-    opinion = get_opinion_markets()
-    print(f"   Total after expiry filter: {len(opinion)}")
+    print("\n🎯 Fetching Kalshi markets...")
+    kalshi = get_kalshi_markets()
+    print(f"   Total after expiry filter: {len(kalshi)}")
 
     sport_counts = {}
-    for m in opinion:
+    for m in kalshi:
         s = m.sport or "uncategorized"
         sport_counts[s] = sport_counts.get(s, 0) + 1
     print(f"   Sport breakdown: {sport_counts}")
 
     print(f"\n   Sample titles (first 10):")
-    for m in opinion[:10]:
+    for m in kalshi[:10]:
         tag = f"[{m.sport or '?'}]" if m.sport else "[—]"
         exp = f"exp={m.expiryTs}" if m.expiryTs else "no-exp"
-        tok = "✓tokens" if m.yesTokenId and m.noTokenId else "✗tokens"
-        print(f"     {tag:12s} {tok}  {exp}  {m.title[:80]}")
+        tok = f"ticker={m.marketId}"
+        print(f"     {tag:12s} {tok}  exp={m.expiryTs}  {m.title[:80]}")
 
     print("\n" + "-" * 70)
 
     poly_sports = [m for m in poly if m.sport]
-    opinion_sports = [m for m in opinion if m.sport]
-    print(f"\n🔗 Matching pairs: {len(poly_sports)} Poly sports x {len(opinion_sports)} Opinion sports")
+    kalshi_sports = [m for m in kalshi if m.sport]
+    print(f"\n🔗 Matching pairs: {len(poly_sports)} Poly sports x {len(kalshi_sports)} Kalshi sports")
 
-    pairs = find_pairs(poly_sports, opinion_sports)
+    pairs = find_pairs(poly_sports, kalshi_sports)
     print(f"   Matched: {len(pairs)} pairs")
 
     if pairs:
@@ -73,12 +73,12 @@ def main():
             sim = p.get("similarity", 0)
             sport = p.get("sport", "?")
             print(f"     [{sport}] sim={sim:.2f}  {p['title'][:70]}")
-            oq = p["opinion"]["question"]
-            if oq != p["title"]:
-                print(f"       ↔ {oq[:70]}")
+            kq = p["kalshi"]["question"]
+            if kq != p["title"]:
+                print(f"       ↔ {kq[:70]}")
 
     print("\n" + "=" * 70)
-    print(f"SUMMARY: {len(poly)} Poly markets, {len(opinion)} Opinion markets, {len(pairs)} matched pairs")
+    print(f"SUMMARY: {len(poly)} Poly markets, {len(kalshi)} Kalshi markets, {len(pairs)} matched pairs")
     print("=" * 70)
 
 

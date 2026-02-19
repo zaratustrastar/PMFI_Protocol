@@ -2,7 +2,7 @@
 
 import time
 from ..adapters import polymarket as poly_adapter
-from ..adapters import opinion as opinion_adapter
+from ..adapters import kalshi as kalshi_adapter
 
 
 def log(msg: str):
@@ -16,33 +16,32 @@ def analyze_pair(pair: dict) -> dict | None:
     If total cost < 1.0, there's an arb (guaranteed $1 payout minus cost).
     """
     pm = pair["polymarket"]
-    om = pair["opinion"]
+    km = pair["kalshi"]
 
     pm_yes_token = pm.get("yes_token")
     pm_no_token = pm.get("no_token")
-    om_yes_token = om.get("yes_token")
-    om_no_token = om.get("no_token")
+    km_ticker = km.get("yes_token")
 
-    if not pm_yes_token or not om_yes_token:
+    if not pm_yes_token or not km_ticker:
         return None
 
     pm_yes_prices = poly_adapter.get_best_prices(pm_yes_token)
     pm_no_prices = poly_adapter.get_best_prices(pm_no_token) if pm_no_token else {"best_ask": None}
 
-    om_yes_prices = opinion_adapter.get_best_prices(om_yes_token)
-    om_no_prices = opinion_adapter.get_best_prices(om_no_token) if om_no_token else {"best_ask": None}
+    km_prices = kalshi_adapter.get_best_prices(km_ticker)
+    km_yes_ask = km_prices.get("best_ask")
+    km_no_ask = km_prices.get("no_best_ask")
 
     routes = []
 
     pm_yes_ask = pm_yes_prices.get("best_ask")
-    om_no_ask = om_no_prices.get("best_ask")
-    if pm_yes_ask and om_no_ask:
-        cost = pm_yes_ask + om_no_ask
+    if pm_yes_ask and km_no_ask:
+        cost = pm_yes_ask + km_no_ask
         if cost < 1.0:
             edge = round(1.0 - cost, 4)
             roi = round(edge / cost * 100, 2) if cost > 0 else 0
             routes.append({
-                "route": "poly_YES + opinion_NO",
+                "route": "poly_YES + kalshi_NO",
                 "min_cost": round(cost, 4),
                 "edge": edge,
                 "roi": roi,
@@ -55,34 +54,33 @@ def analyze_pair(pair: dict) -> dict | None:
                         "size": pm_yes_prices.get("ask_size", 0),
                     },
                     {
-                        "venue": "opinion",
+                        "venue": "kalshi",
                         "side": "NO",
-                        "tokenId": om_no_token,
-                        "price": om_no_ask,
-                        "size": om_no_prices.get("ask_size", 0),
+                        "tokenId": km_ticker,
+                        "price": km_no_ask,
+                        "size": km_prices.get("ask_size", 0),
                     },
                 ],
             })
 
-    om_yes_ask = om_yes_prices.get("best_ask")
     pm_no_ask = pm_no_prices.get("best_ask")
-    if om_yes_ask and pm_no_ask:
-        cost = om_yes_ask + pm_no_ask
+    if km_yes_ask and pm_no_ask:
+        cost = km_yes_ask + pm_no_ask
         if cost < 1.0:
             edge = round(1.0 - cost, 4)
             roi = round(edge / cost * 100, 2) if cost > 0 else 0
             routes.append({
-                "route": "opinion_YES + poly_NO",
+                "route": "kalshi_YES + poly_NO",
                 "min_cost": round(cost, 4),
                 "edge": edge,
                 "roi": roi,
                 "legs": [
                     {
-                        "venue": "opinion",
+                        "venue": "kalshi",
                         "side": "YES",
-                        "tokenId": om_yes_token,
-                        "price": om_yes_ask,
-                        "size": om_yes_prices.get("ask_size", 0),
+                        "tokenId": km_ticker,
+                        "price": km_yes_ask,
+                        "size": km_prices.get("ask_size", 0),
                     },
                     {
                         "venue": "polymarket",
@@ -95,7 +93,7 @@ def analyze_pair(pair: dict) -> dict | None:
             })
 
     if not routes:
-        watchlist_item = _build_watchlist_item(pair, pm_yes_prices, pm_no_prices, om_yes_prices, om_no_prices)
+        watchlist_item = _build_watchlist_item(pair, pm_yes_prices, pm_no_prices, km_prices)
         return watchlist_item
 
     best = max(routes, key=lambda r: r["edge"])
@@ -134,19 +132,19 @@ def analyze_pair(pair: dict) -> dict | None:
     }
 
 
-def _build_watchlist_item(pair, pm_yes, pm_no, om_yes, om_no) -> dict:
+def _build_watchlist_item(pair, pm_yes, pm_no, km_prices) -> dict:
     """Build a watchlist item for pairs without a live arb but close enough to track."""
     costs = []
 
     pm_y_ask = pm_yes.get("best_ask")
-    om_n_ask = om_no.get("best_ask")
-    if pm_y_ask and om_n_ask:
-        costs.append(("poly_YES + opinion_NO", pm_y_ask + om_n_ask))
+    km_n_ask = km_prices.get("no_best_ask")
+    if pm_y_ask and km_n_ask:
+        costs.append(("poly_YES + kalshi_NO", pm_y_ask + km_n_ask))
 
-    om_y_ask = om_yes.get("best_ask")
+    km_y_ask = km_prices.get("best_ask")
     pm_n_ask = pm_no.get("best_ask")
-    if om_y_ask and pm_n_ask:
-        costs.append(("opinion_YES + poly_NO", om_y_ask + pm_n_ask))
+    if km_y_ask and pm_n_ask:
+        costs.append(("kalshi_YES + poly_NO", km_y_ask + pm_n_ask))
 
     if not costs:
         return {

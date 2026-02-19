@@ -7,7 +7,7 @@ from typing import Optional
 
 
 PROXY_ENABLED_POLY = os.environ.get("PROXY_ENABLED_POLY", "0") == "1"
-PROXY_ENABLED_OPINION = os.environ.get("PROXY_ENABLED_OPINION", "0") == "1"
+PROXY_ENABLED_KALSHI = os.environ.get("PROXY_ENABLED_KALSHI", "0") == "1"
 
 HTTP_PROXY = os.environ.get("HTTP_PROXY", "")
 HTTPS_PROXY = os.environ.get("HTTPS_PROXY", "")
@@ -19,7 +19,7 @@ BACKOFF_BASE = 1.5
 
 
 def _build_proxies(venue: str) -> Optional[dict]:
-    enabled = PROXY_ENABLED_POLY if venue == "polymarket" else PROXY_ENABLED_OPINION
+    enabled = PROXY_ENABLED_POLY if venue == "polymarket" else PROXY_ENABLED_KALSHI
     if not enabled:
         return None
     proxies = {}

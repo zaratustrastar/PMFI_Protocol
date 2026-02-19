@@ -1,0 +1,55 @@
+We are building the arbitrage monitor inside the existing Python Flask repo (bot/bot_v7.py). Do NOT create a separate Node service.
+
+Replace “Opinion” integration with “Kalshi” for now.
+
+Implement adapters and discovery inside bot/arb_monitor/:
+
+A) Shared HTTP client + proxies
+- Reuse the same proxy/request wrapper already used by our Polymarket trading/monitor workers.
+- If there is an existing helper in trading_bot/ or bot/, import and use it.
+- Otherwise create bot/arb_monitor/http_client.py that supports:
+  - requests.get with timeout + retries + optional proxies
+  - env: HTTP_PROXY, HTTPS_PROXY (optional)
+  - env toggles: PROXY_ENABLED_POLY=1/0 and PROXY_ENABLED_KALSHI=1/0
+  - consistent User-Agent
+
+B) Kalshi adapter (bot/arb_monitor/adapters/kalshi.py)
+- Use Kalshi market-data base URL default:
+  KALSHI_BASE_URL=https://api.elections.kalshi.com/trade-api/v2
+  (Note: despite elections subdomain, it provides access to all Kalshi markets.)
+- Implement market discovery with a scan budget:
+  - GET /markets with pagination/cursor if available in docs
+  - Keep only ACTIVE/OPEN markets (not settled/closed)
+  - Keep only binary YES/NO markets (Kalshi markets are binary)
+- Extract normalized fields:
+  ticker (market identifier), title, close_time/end_time (expiryTs), and any event/category fields available
+- Apply keyword-based sports filtering (since category filters may be imperfect):
+  esports keywords: cs2, counter-strike, dota, lol, league of legends, valorant, vct, iem, blast, major
+  nba keywords: nba, lakers, celtics, warriors, knicks, nuggets, heat, playoffs, finals, mvp
+  sports keywords: vs, match, game, series
+- expiry filter: now < expiryTs < now + ARB_EXPIRY_WINDOW_DAYS (default 30)
+
+C) Polymarket adapter (bot/arb_monitor/adapters/polymarket.py)
+- Use Gamma API (POLY_GAMMA_URL) for market discovery, active/open only, scan budget.
+- Extract: marketId/eventId, title/question, expiryTs/endDate, YES token_id, NO token_id
+- Apply same keyword sports filtering as Kalshi if tag-based sports filtering is not implemented.
+
+D) Normalized model
+Create NormalizedMarket dataclass:
+{
+  venue: "kalshi"|"polymarket",
+  marketId: str,        # kalshi ticker OR polymarket marketId
+  title: str,
+  expiryTs: int,
+  yesTokenId: str,      # for kalshi: "YES" (placeholder) or just store ticker; for polymarket: token_id
+  noTokenId: str,       # for kalshi: "NO" (placeholder) or just store ticker; for polymarket: token_id
+  sport: "nba"|"esports"|"sports"|"other",
+  meta: dict
+}
+
+Expose:
+- get_kalshi_markets() -> List[NormalizedMarket]
+- get_polymarket_markets() -> List[NormalizedMarket]
+
+Add a debug script bot/arb_monitor/_debug_discovery.py that prints counts and sample titles for both venues after filtering.
+Do NOT modify bot_v7.py yet.

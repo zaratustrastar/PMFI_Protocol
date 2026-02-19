@@ -2,18 +2,16 @@
 
 import os
 
-OPINION_API_KEY = os.environ.get("OPINION_API_KEY", "")
-OPINION_BASE_URL = os.environ.get("OPINION_BASE_URL", "https://openapi.opinion.trade/openapi")
+KALSHI_BASE_URL = os.environ.get("KALSHI_BASE_URL", "https://api.elections.kalshi.com/trade-api/v2")
 POLY_GAMMA_URL = os.environ.get("POLY_GAMMA_URL", "https://gamma-api.polymarket.com")
 POLY_CLOB_URL = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
 
 SCAN_INTERVAL_SECONDS = int(os.environ.get("ARB_SCAN_INTERVAL", "60"))
 CACHE_TTL_SECONDS = int(os.environ.get("ARB_CACHE_TTL", "45"))
 
-ARB_MAX_PAGES_OPINION = int(os.environ.get("ARB_MAX_PAGES_OPINION", "10"))
+ARB_MAX_PAGES_KALSHI = int(os.environ.get("ARB_MAX_PAGES_KALSHI", "10"))
 ARB_MAX_PAGES_POLY = int(os.environ.get("ARB_MAX_PAGES_POLY", "5"))
 ARB_EXPIRY_WINDOW_DAYS = int(os.environ.get("ARB_EXPIRY_WINDOW_DAYS", "30"))
-ARB_DETAIL_CACHE_TTL = int(os.environ.get("ARB_DETAIL_CACHE_TTL", "1800"))
 
 MIN_EDGE_DEFAULT = 0.01
 MAX_RESULTS_DEFAULT = 50

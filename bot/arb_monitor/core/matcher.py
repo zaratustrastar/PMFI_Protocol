@@ -1,4 +1,4 @@
-"""Matcher - finds matching markets across Opinion and Polymarket using fuzzy text matching."""
+"""Matcher - finds matching markets across Kalshi and Polymarket using fuzzy text matching."""
 
 import re
 from difflib import SequenceMatcher
@@ -24,10 +24,10 @@ def similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, na, nb).ratio()
 
 
-def find_pairs(poly_markets: list[NormalizedMarket], opinion_markets: list[NormalizedMarket],
+def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[NormalizedMarket],
                min_similarity: float = 0.65) -> list[dict]:
     pairs = []
-    used_opinion: set[int] = set()
+    used_kalshi: set[int] = set()
 
     for pm in poly_markets:
         if not pm.title:
@@ -36,23 +36,23 @@ def find_pairs(poly_markets: list[NormalizedMarket], opinion_markets: list[Norma
         best_match = None
         best_score = 0.0
 
-        for i, om in enumerate(opinion_markets):
-            if i in used_opinion:
+        for i, km in enumerate(kalshi_markets):
+            if i in used_kalshi:
                 continue
-            if not om.title:
+            if not km.title:
                 continue
 
-            score = similarity(pm.title, om.title)
+            score = similarity(pm.title, km.title)
             if score > best_score and score >= min_similarity:
                 best_score = score
-                best_match = (i, om)
+                best_match = (i, km)
 
         if best_match:
-            idx, om = best_match
-            used_opinion.add(idx)
-            pair_id = f"polymarket:{pm.marketId}___opinion:{om.marketId}"
-            sport = pm.sport or om.sport
-            expiry = pm.expiryTs or om.expiryTs
+            idx, km = best_match
+            used_kalshi.add(idx)
+            pair_id = f"polymarket:{pm.marketId}___kalshi:{km.marketId}"
+            sport = pm.sport or km.sport
+            expiry = pm.expiryTs or km.expiryTs
 
             pairs.append({
                 "pair_id": pair_id,
@@ -69,16 +69,16 @@ def find_pairs(poly_markets: list[NormalizedMarket], opinion_markets: list[Norma
                     "expiry_ts": pm.expiryTs,
                     "sport": pm.sport,
                 },
-                "opinion": {
-                    "venue": "opinion",
-                    "id": om.marketId,
-                    "question": om.title,
-                    "yes_token": om.yesTokenId,
-                    "no_token": om.noTokenId,
-                    "expiry_ts": om.expiryTs,
-                    "sport": om.sport,
+                "kalshi": {
+                    "venue": "kalshi",
+                    "id": km.marketId,
+                    "question": km.title,
+                    "yes_token": km.yesTokenId,
+                    "no_token": km.noTokenId,
+                    "expiry_ts": km.expiryTs,
+                    "sport": km.sport,
                 },
             })
 
-    log(f"Found {len(pairs)} matched pairs from {len(poly_markets)} Poly x {len(opinion_markets)} Opinion markets")
+    log(f"Found {len(pairs)} matched pairs from {len(poly_markets)} Poly x {len(kalshi_markets)} Kalshi markets")
     return pairs

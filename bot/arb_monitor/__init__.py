@@ -1,1 +1,1 @@
-"""Arb Monitor - Arbitrage opportunity scanner between Opinion and Polymarket."""
+"""Arb Monitor - Arbitrage opportunity scanner between Kalshi and Polymarket."""
