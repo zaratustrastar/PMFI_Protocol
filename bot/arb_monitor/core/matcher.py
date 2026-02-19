@@ -2,6 +2,7 @@
 
 import re
 from difflib import SequenceMatcher
+from ..models import NormalizedMarket
 
 
 def log(msg: str):
@@ -9,7 +10,6 @@ def log(msg: str):
 
 
 def normalize_text(text: str) -> str:
-    """Normalize question text for comparison."""
     t = text.lower().strip()
     t = re.sub(r'[^\w\s]', ' ', t)
     t = re.sub(r'\s+', ' ', t)
@@ -19,21 +19,18 @@ def normalize_text(text: str) -> str:
 
 
 def similarity(a: str, b: str) -> float:
-    """Calculate similarity between two question strings."""
     na = normalize_text(a)
     nb = normalize_text(b)
     return SequenceMatcher(None, na, nb).ratio()
 
 
-def find_pairs(poly_markets: list[dict], opinion_markets: list[dict],
+def find_pairs(poly_markets: list[NormalizedMarket], opinion_markets: list[NormalizedMarket],
                min_similarity: float = 0.65) -> list[dict]:
-    """Find matching market pairs between Polymarket and Opinion."""
     pairs = []
-    used_opinion = set()
+    used_opinion: set[int] = set()
 
     for pm in poly_markets:
-        pq = pm.get("question", "")
-        if not pq:
+        if not pm.title:
             continue
 
         best_match = None
@@ -42,11 +39,10 @@ def find_pairs(poly_markets: list[dict], opinion_markets: list[dict],
         for i, om in enumerate(opinion_markets):
             if i in used_opinion:
                 continue
-            oq = om.get("question", "")
-            if not oq:
+            if not om.title:
                 continue
 
-            score = similarity(pq, oq)
+            score = similarity(pm.title, om.title)
             if score > best_score and score >= min_similarity:
                 best_score = score
                 best_match = (i, om)
@@ -54,18 +50,34 @@ def find_pairs(poly_markets: list[dict], opinion_markets: list[dict],
         if best_match:
             idx, om = best_match
             used_opinion.add(idx)
-            pair_id = f"{pm['venue']}:{pm['id']}___{om['venue']}:{om['id']}"
-            sport = pm.get("sport") or om.get("sport")
-            expiry = pm.get("expiry_ts") or om.get("expiry_ts")
+            pair_id = f"polymarket:{pm.marketId}___opinion:{om.marketId}"
+            sport = pm.sport or om.sport
+            expiry = pm.expiryTs or om.expiryTs
 
             pairs.append({
                 "pair_id": pair_id,
-                "title": pm.get("question", ""),
+                "title": pm.title,
                 "sport": sport,
                 "expiry_ts": expiry or 0,
                 "similarity": round(best_score, 3),
-                "polymarket": pm,
-                "opinion": om,
+                "polymarket": {
+                    "venue": "polymarket",
+                    "id": pm.marketId,
+                    "question": pm.title,
+                    "yes_token": pm.yesTokenId,
+                    "no_token": pm.noTokenId,
+                    "expiry_ts": pm.expiryTs,
+                    "sport": pm.sport,
+                },
+                "opinion": {
+                    "venue": "opinion",
+                    "id": om.marketId,
+                    "question": om.title,
+                    "yes_token": om.yesTokenId,
+                    "no_token": om.noTokenId,
+                    "expiry_ts": om.expiryTs,
+                    "sport": om.sport,
+                },
             })
 
     log(f"Found {len(pairs)} matched pairs from {len(poly_markets)} Poly x {len(opinion_markets)} Opinion markets")
