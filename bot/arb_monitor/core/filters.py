@@ -1,16 +1,28 @@
 """Filters for categorizing and filtering markets by sport/category and expiry window."""
 
+import re
 import time
 from typing import Optional
 from ..config import SPORTS_KEYWORDS, ALL_SPORT_KEYWORDS, ARB_EXPIRY_WINDOW_DAYS
 from ..models import NormalizedMarket
 
+_KEYWORD_PATTERNS: dict[str, list[re.Pattern]] = {}
+
+def _get_patterns() -> dict[str, list[re.Pattern]]:
+    if not _KEYWORD_PATTERNS:
+        for category, keywords in SPORTS_KEYWORDS.items():
+            _KEYWORD_PATTERNS[category] = [
+                re.compile(r'\b' + re.escape(kw) + r'\b', re.IGNORECASE)
+                for kw in keywords
+            ]
+    return _KEYWORD_PATTERNS
+
 
 def classify_sport(title: str) -> Optional[str]:
-    q = title.lower()
-    for category, keywords in SPORTS_KEYWORDS.items():
-        for kw in keywords:
-            if kw in q:
+    patterns = _get_patterns()
+    for category, pats in patterns.items():
+        for pat in pats:
+            if pat.search(title):
                 return category
     return None
 
@@ -28,7 +40,7 @@ def matches_sport_filter(title: str, sport_filters: list[str]) -> bool:
     return sport in sport_filters
 
 
-def filter_by_expiry(markets: list[NormalizedMarket], window_days: int = None) -> list[NormalizedMarket]:
+def filter_by_expiry(markets: list[NormalizedMarket], window_days: Optional[int] = None) -> list[NormalizedMarket]:
     if window_days is None:
         window_days = ARB_EXPIRY_WINDOW_DAYS
     now = int(time.time())

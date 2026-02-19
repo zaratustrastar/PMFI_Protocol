@@ -48,7 +48,7 @@ SPORTS_KEYWORDS = {
     "sports": [
         "mlb", "baseball", "nhl", "hockey", "tennis", "f1", "formula",
         "golf", "pga", "cricket", "rugby", "olympics", "atp", "wta",
-        "vs", "match", "game", "series",
+        "ncaa", "college basketball", "college football",
     ],
 }
 

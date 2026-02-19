@@ -1,4 +1,11 @@
-"""Kalshi adapter - fetches markets and orderbook data via Kalshi Trade API v2."""
+"""Kalshi adapter - fetches markets and orderbook data via Kalshi Trade API v2.
+
+Discovery strategy:
+  1. Fetch events from /events endpoint (gives us category metadata)
+  2. For each event, fetch nested markets
+  3. Filter out parlays using definitive metadata: mve_collection_ticker / mve_selected_legs
+  4. NO fallback — prefer fewer clean markets over polluted parlay data
+"""
 
 import time
 from datetime import datetime
@@ -14,6 +21,48 @@ def log(msg: str):
 
 def _headers() -> dict:
     return {"accept": "application/json"}
+
+
+EXCLUSION_STATS = {
+    "mve_parlay": 0,
+    "title_parlay_keyword": 0,
+    "cap_floor_range": 0,
+    "total_fetched": 0,
+    "passed": 0,
+}
+
+
+def reset_exclusion_stats():
+    for k in EXCLUSION_STATS:
+        EXCLUSION_STATS[k] = 0
+
+
+def get_exclusion_stats() -> dict:
+    return dict(EXCLUSION_STATS)
+
+
+def fetch_events_page(limit: int = 200, cursor: str = "", status: str = "open") -> tuple[list[dict], str]:
+    url = f"{KALSHI_BASE_URL}/events"
+    params = {
+        "limit": limit,
+        "status": status,
+        "with_nested_markets": "true",
+    }
+    if cursor:
+        params["cursor"] = cursor
+
+    resp = http_client.get(url, venue="kalshi", params=params, headers=_headers())
+    if resp is None or resp.status_code != 200:
+        log(f"Events API returned {resp.status_code if resp is not None else 'None'}")
+        return [], ""
+    try:
+        data = resp.json()
+        events = data.get("events", [])
+        next_cursor = data.get("cursor", "")
+        return events, next_cursor
+    except Exception as e:
+        log(f"Events parse error: {e}")
+        return [], ""
 
 
 def fetch_markets_page(limit: int = 200, cursor: str = "", status: str = "open") -> tuple[list[dict], str]:
@@ -39,56 +88,78 @@ def fetch_markets_page(limit: int = 200, cursor: str = "", status: str = "open")
         return [], ""
 
 
-def fetch_all_active_markets(max_pages: int = None) -> list[dict]:
-    if max_pages is None:
-        max_pages = ARB_MAX_PAGES_KALSHI
-    simple_markets: list[dict] = []
-    all_binary: list[dict] = []
-    skipped_multi = 0
-    cursor = ""
+def _is_parlay(market: dict) -> str | None:
+    """Returns exclusion reason string if market is a parlay/multi-leg, else None."""
+    if market.get("mve_collection_ticker"):
+        return "mve_parlay"
+    legs = market.get("mve_selected_legs")
+    if legs and isinstance(legs, list) and len(legs) > 0:
+        return "mve_parlay"
 
-    for page in range(max_pages):
-        batch, next_cursor = fetch_markets_page(limit=200, cursor=cursor, status="open")
-        log(f"Page {page + 1}: fetched {len(batch)} markets")
+    title = (market.get("title") or "").lower()
+    if "parlay" in title:
+        return "title_parlay_keyword"
 
-        for m in batch:
-            all_binary.append(m)
-            if _is_simple_binary(m):
-                simple_markets.append(m)
-            else:
-                skipped_multi += 1
-
-        if not next_cursor or len(batch) == 0:
-            break
-        cursor = next_cursor
-
-    if simple_markets:
-        log(f"Total Kalshi markets discovered: {len(simple_markets)} simple binary (skipped {skipped_multi} parlays)")
-        return simple_markets
-
-    if all_binary:
-        log(f"⚠️ No simple binary markets found, falling back to all {len(all_binary)} markets (including parlays)")
-        return all_binary
-
-    log("Total Kalshi markets discovered: 0")
-    return []
-
-
-def _is_simple_binary(market: dict) -> bool:
     cap_strike = market.get("cap_strike")
     floor_strike = market.get("floor_strike")
     if cap_strike is not None and floor_strike is not None:
-        return False
+        return "cap_floor_range"
 
-    title = market.get("title", "")
-    if ",yes " in title or ",no " in title:
-        return False
+    return None
 
-    event_ticker = market.get("event_ticker", "")
-    if "MULTIGAME" in event_ticker.upper():
-        return False
 
-    return True
+def fetch_all_active_markets(max_pages: Optional[int] = None) -> list[dict]:
+    """Fetch markets via events endpoint to get category metadata, then filter parlays.
+
+    Returns list of raw market dicts, each enriched with '_event_category' and '_event_title'.
+    """
+    if max_pages is None:
+        max_pages = ARB_MAX_PAGES_KALSHI
+
+    reset_exclusion_stats()
+    accepted: list[dict] = []
+    seen_tickers: set[str] = set()
+    cursor = ""
+
+    for page in range(max_pages):
+        events, next_cursor = fetch_events_page(limit=200, cursor=cursor, status="open")
+        log(f"Events page {page + 1}: {len(events)} events")
+
+        for event in events:
+            event_category = event.get("category", "")
+            event_title = event.get("title", "")
+            event_ticker = event.get("event_ticker", "")
+            markets = event.get("markets") or []
+
+            for m in markets:
+                ticker = m.get("ticker", "")
+                if ticker in seen_tickers:
+                    continue
+                seen_tickers.add(ticker)
+                EXCLUSION_STATS["total_fetched"] += 1
+
+                reason = _is_parlay(m)
+                if reason:
+                    EXCLUSION_STATS[reason] = EXCLUSION_STATS.get(reason, 0) + 1
+                    continue
+
+                m["_event_category"] = event_category
+                m["_event_title"] = event_title
+                m["_event_ticker_parent"] = event_ticker
+                EXCLUSION_STATS["passed"] += 1
+                accepted.append(m)
+
+        if not next_cursor or len(events) == 0:
+            break
+        cursor = next_cursor
+
+    log(f"Total Kalshi markets discovered: {EXCLUSION_STATS['passed']} accepted, "
+        f"{EXCLUSION_STATS['total_fetched'] - EXCLUSION_STATS['passed']} excluded "
+        f"(mve_parlay={EXCLUSION_STATS['mve_parlay']}, "
+        f"title_parlay={EXCLUSION_STATS['title_parlay_keyword']}, "
+        f"cap_floor={EXCLUSION_STATS['cap_floor_range']})")
+
+    return accepted
 
 
 def _parse_timestamp(ts_str: str) -> int:
@@ -99,6 +170,23 @@ def _parse_timestamp(ts_str: str) -> int:
         return int(dt.timestamp())
     except Exception:
         return 0
+
+
+KALSHI_CATEGORY_TO_SPORT = {
+    "Sports": "sports",
+    "Esports": "esports",
+}
+
+
+def _classify_kalshi_category(event_category: str, title: str) -> Optional[str]:
+    """Use Kalshi's event category if available, fallback to keyword classification."""
+    if event_category:
+        mapped = KALSHI_CATEGORY_TO_SPORT.get(event_category)
+        if mapped:
+            return mapped
+
+    from ..core.filters import classify_sport
+    return classify_sport(title)
 
 
 def normalize_market(market: dict) -> NormalizedMarket:
@@ -116,6 +204,9 @@ def normalize_market(market: dict) -> NormalizedMarket:
     no_bid = market.get("no_bid")
     no_ask = market.get("no_ask")
 
+    event_category = market.get("_event_category", "")
+    sport = _classify_kalshi_category(event_category, title)
+
     return NormalizedMarket(
         venue="kalshi",
         marketId=ticker,
@@ -123,8 +214,10 @@ def normalize_market(market: dict) -> NormalizedMarket:
         expiryTs=expiry_ts,
         yesTokenId=ticker,
         noTokenId=ticker,
+        sport=sport,
         meta={
-            "event_ticker": market.get("event_ticker", ""),
+            "event_ticker": market.get("event_ticker", market.get("_event_ticker_parent", "")),
+            "event_category": event_category,
             "volume": market.get("volume", 0),
             "volume_24h": market.get("volume_24h", 0),
             "open_interest": market.get("open_interest", 0),
@@ -165,10 +258,8 @@ def get_best_prices(ticker: str) -> dict:
 
 
 def get_kalshi_markets() -> list[NormalizedMarket]:
-    from ..core.filters import filter_by_expiry, classify_sport
+    from ..core.filters import filter_by_expiry
     raw = fetch_all_active_markets()
     normalized = [normalize_market(m) for m in raw]
     filtered = filter_by_expiry(normalized)
-    for nm in filtered:
-        nm.sport = classify_sport(nm.title)
     return filtered
