@@ -212,9 +212,14 @@ def fetch_orderbook(token_id: str) -> Optional[dict]:
 
 
 def get_best_prices(token_id: str) -> dict:
+    if not token_id:
+        log("⚠️ poly_orderbook_missing: no token_id provided")
+        return {"best_bid": None, "best_ask": None, "bid_size": 0, "ask_size": 0, "warning": "poly_orderbook_missing"}
+
     book = fetch_orderbook(token_id)
     if not book:
-        return {"best_bid": None, "best_ask": None, "bid_size": 0, "ask_size": 0}
+        log(f"⚠️ poly_orderbook_missing: fetch returned None for token {token_id[:16]}...")
+        return {"best_bid": None, "best_ask": None, "bid_size": 0, "ask_size": 0, "warning": "poly_orderbook_missing"}
 
     bids = book.get("bids", [])
     asks = book.get("asks", [])
