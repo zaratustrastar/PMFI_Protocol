@@ -7,7 +7,8 @@ Proxy configuration (checked in order of priority):
 Example (nano.env):
   PROXY_URL=socks5://user:pass@host:port
 
-Non-JSON responses (e.g. Cloudflare HTML challenge pages) are detected and logged.
+Cloudflare detection: Only blocks responses that are clearly HTML challenge pages.
+Valid JSON is accepted regardless of Content-Type header.
 """
 
 import os
@@ -52,22 +53,27 @@ def _get_session() -> requests.Session:
     return _session
 
 
-def _is_json_response(resp: requests.Response) -> bool:
+def _looks_like_json(resp: requests.Response) -> bool:
+    """Check if the response is likely JSON — by Content-Type or body shape."""
     ct = resp.headers.get("Content-Type", "")
-    return "application/json" in ct
+    if "json" in ct.lower():
+        return True
+    body = resp.text.strip()[:2] if resp.text else ""
+    return body in ("{", "[", '{"', '[{')
 
 
-def _detect_cloudflare_block(resp: requests.Response, venue: str, url: str) -> bool:
-    """Check if response is a Cloudflare HTML challenge instead of JSON.
+def _is_html_block(resp: requests.Response) -> bool:
+    """Detect Cloudflare / WAF HTML challenge pages.
 
-    Returns True if blocked (caller should treat as failure).
+    Only returns True when the body is clearly HTML, not just missing Content-Type.
     """
-    if _is_json_response(resp):
-        return False
-    ct = resp.headers.get("Content-Type", "")
-    body_preview = resp.text[:200] if resp.text else "(empty)"
-    print(f"⚠️ [HTTP] {venue} non-JSON response from {url} (Content-Type: {ct}): {body_preview}")
-    return True
+    ct = resp.headers.get("Content-Type", "").lower()
+    body_start = resp.text.strip()[:200].lower() if resp.text else ""
+    if "text/html" in ct and ("<html" in body_start or "<!doctype" in body_start):
+        return True
+    if not ct and ("<html" in body_start or "<!doctype" in body_start):
+        return True
+    return False
 
 
 def get(url: str, *,
@@ -100,16 +106,20 @@ def get(url: str, *,
                 continue
 
             if resp.status_code == 403:
-                if _detect_cloudflare_block(resp, venue, url):
-                    print(f"🛡️ [HTTP] {venue} Cloudflare block on {url} (403). Proxy may be required.")
-                    return None
+                if _is_html_block(resp):
+                    body_preview = resp.text[:200] if resp.text else "(empty)"
+                    print(f"🛡️ [HTTP] {venue} Cloudflare block on {url} (403): {body_preview}")
+                else:
+                    print(f"⚠️ [HTTP] {venue} 403 Forbidden on {url}")
                 return None
 
             if resp.status_code != 200:
                 print(f"⚠️ [HTTP] {venue} {resp.status_code} on {url}")
                 return None
 
-            if _detect_cloudflare_block(resp, venue, url):
+            if _is_html_block(resp):
+                body_preview = resp.text[:200] if resp.text else "(empty)"
+                print(f"🛡️ [HTTP] {venue} HTML block on 200 from {url}: {body_preview}")
                 return None
 
             return resp

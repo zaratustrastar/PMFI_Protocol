@@ -3964,10 +3964,14 @@ def api_arb_overlap_debug():
 
 @flask_app.route('/api/arbs/health', methods=['GET'])
 def api_arb_health():
-    """Health check for arb scanner."""
+    """Health check for arb scanner with runtime state."""
     if not ARB_MONITOR_AVAILABLE:
         return jsonify({'status': 'unavailable', 'reason': 'arb_monitor not installed'}), 503
-    return jsonify(arb_store.get_health())
+    from arb_monitor.scanner import get_scanner_health
+    store_health = arb_store.get_health()
+    scanner_health = get_scanner_health()
+    merged = {**store_health, **scanner_health, "ok": store_health.get("status") == "ok" and scanner_health.get("scannerRunning", False)}
+    return jsonify(merged)
 
 
 # =============================================================================

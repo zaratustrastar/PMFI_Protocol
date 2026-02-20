@@ -18,10 +18,26 @@ def log(msg: str):
 _last_discovery_stats: dict = {}
 _tracked_pairs: list[dict] = []
 _tracked_pairs_lock = threading.Lock()
+_scanner_health: dict = {
+    "polyMarketsFetched": 0,
+    "kalshiMarketsFetched": 0,
+    "lastError": None,
+    "lastScanTimestamp": 0,
+}
 
 
 def get_discovery_stats() -> dict:
     return dict(_last_discovery_stats)
+
+
+def get_scanner_health() -> dict:
+    return {
+        "scannerRunning": _scanner_thread is not None and _scanner_thread.is_alive(),
+        "polyMarketsFetched": _scanner_health.get("polyMarketsFetched", 0),
+        "kalshiMarketsFetched": _scanner_health.get("kalshiMarketsFetched", 0),
+        "lastError": _scanner_health.get("lastError"),
+        "lastScanTimestamp": _scanner_health.get("lastScanTimestamp", 0),
+    }
 
 
 def get_tracked_pairs() -> list[dict]:
@@ -63,7 +79,7 @@ def run_debug_analysis(max_pairs: int = 25) -> dict:
 
 
 def run_scan():
-    global _last_discovery_stats, _tracked_pairs
+    global _last_discovery_stats, _tracked_pairs, _scanner_health
     start = time.time()
     log("Starting scan cycle...")
 
@@ -83,6 +99,11 @@ def run_scan():
         else:
             kalshi_markets = get_kalshi_markets()
             arb_cache.set("kalshi_normalized", kalshi_markets)
+
+        _scanner_health["polyMarketsFetched"] = len(poly_markets)
+        _scanner_health["kalshiMarketsFetched"] = len(kalshi_markets)
+        _scanner_health["lastScanTimestamp"] = int(time.time())
+        _scanner_health["lastError"] = None
 
         log(f"Discovered: {len(poly_markets)} Poly, {len(kalshi_markets)} Kalshi")
 
@@ -139,6 +160,8 @@ def run_scan():
         log(f"Scan error: {e}")
         import traceback
         traceback.print_exc()
+        _scanner_health["lastError"] = str(e)
+        _scanner_health["lastScanTimestamp"] = int(time.time())
         arb_store.set_error(str(e))
 
 
