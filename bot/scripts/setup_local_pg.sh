@@ -23,10 +23,21 @@ else
     echo "✅ PostgreSQL already installed"
 fi
 
-# 2. Ensure PostgreSQL is running
-sudo systemctl enable postgresql
-sudo systemctl start postgresql
-echo "✅ PostgreSQL service running"
+# 2. Ensure PostgreSQL is running (try systemctl first, fall back to pg_ctlcluster)
+if sudo systemctl start postgresql 2>/dev/null; then
+    sudo systemctl enable postgresql 2>/dev/null
+    echo "✅ PostgreSQL service running (systemctl)"
+else
+    echo "⚠️  systemctl failed, trying pg_ctlcluster..."
+    PG_VER=$(ls /etc/postgresql/ 2>/dev/null | sort -n | tail -1)
+    if [ -n "$PG_VER" ]; then
+        sudo pg_ctlcluster "$PG_VER" main start 2>/dev/null || true
+        echo "✅ PostgreSQL $PG_VER running (pg_ctlcluster)"
+    else
+        echo "❌ Cannot find PostgreSQL cluster. Is it installed?"
+        exit 1
+    fi
+fi
 
 # 3. Create user and database
 echo "🔧 Creating database and user..."
