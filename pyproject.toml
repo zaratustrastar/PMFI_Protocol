@@ -8,6 +8,7 @@ dependencies = [
     "flask-cors>=6.0.2",
     "psycopg2-binary>=2.9.11",
     "py-clob-client>=0.28.0",
-    "requests>=2.32.5",
+    "pysocks>=1.7.1",
+    "requests[socks]>=2.32.5",
     "web3>=7.14.0",
 ]

@@ -1,12 +1,11 @@
 """Shared HTTP client with session pooling, proxy support, retry/backoff, and Cloudflare detection.
 
-Proxy configuration via environment variables:
-  export HTTP_PROXY=http://user:pass@proxy-host:port
-  export HTTPS_PROXY=http://user:pass@proxy-host:port
-  export NO_PROXY=localhost,127.0.0.1
+Proxy configuration (checked in order of priority):
+  1. HTTP_PROXY / HTTPS_PROXY  — standard env vars
+  2. PROXY_URL                 — single URL used for both http and https (supports socks5://)
 
-If HTTP_PROXY or HTTPS_PROXY is set, ALL arb monitor requests route through the proxy.
-requests library honors NO_PROXY automatically when set in os.environ.
+Example (nano.env):
+  PROXY_URL=socks5://user:pass@host:port
 
 Non-JSON responses (e.g. Cloudflare HTML challenge pages) are detected and logged.
 """
@@ -19,6 +18,7 @@ from typing import Optional
 
 HTTP_PROXY = os.environ.get("HTTP_PROXY", "")
 HTTPS_PROXY = os.environ.get("HTTPS_PROXY", "")
+PROXY_URL = os.environ.get("PROXY_URL", "")
 
 DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 DEFAULT_TIMEOUT = 10
@@ -38,9 +38,15 @@ def _get_session() -> requests.Session:
             proxies["http"] = HTTP_PROXY
         if HTTPS_PROXY:
             proxies["https"] = HTTPS_PROXY
+        if not proxies and PROXY_URL:
+            proxies["http"] = PROXY_URL
+            proxies["https"] = PROXY_URL
         if proxies:
             _session.proxies.update(proxies)
-            print(f"🌐 [HTTP] Proxy configured: http={'yes' if HTTP_PROXY else 'no'}, https={'yes' if HTTPS_PROXY else 'no'}")
+            proxy_display = list(proxies.values())[0]
+            if "@" in proxy_display:
+                proxy_display = proxy_display.split("@")[1]
+            print(f"🌐 [HTTP] Proxy configured: {proxy_display} (source: {'PROXY_URL' if PROXY_URL and not HTTP_PROXY and not HTTPS_PROXY else 'HTTP(S)_PROXY'})")
         else:
             print("🌐 [HTTP] No proxy configured (direct connections)")
     return _session
