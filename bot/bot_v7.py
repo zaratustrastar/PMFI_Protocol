@@ -3974,6 +3974,65 @@ def api_arb_health():
     return jsonify(merged)
 
 
+@flask_app.route('/api/arbs/diag', methods=['GET'])
+def api_arb_diag():
+    """Run a single diagnostic fetch from each API to help debug VPS connectivity.
+
+    Returns proxy config, response status, body preview, and timing for each venue.
+    """
+    import time as _time
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({'status': 'unavailable', 'reason': 'arb_monitor not installed'}), 503
+
+    from arb_monitor import http_client
+    from arb_monitor.config import POLY_GAMMA_URL, KALSHI_BASE_URL
+
+    results = {
+        "proxy": {
+            "HTTP_PROXY": os.environ.get("HTTP_PROXY", ""),
+            "HTTPS_PROXY": os.environ.get("HTTPS_PROXY", ""),
+            "PROXY_URL": ("set" if os.environ.get("PROXY_URL") else "not set"),
+        },
+        "polymarket": {},
+        "kalshi": {},
+    }
+
+    for venue, url, params, headers in [
+        ("polymarket", f"{POLY_GAMMA_URL}/markets", {"closed": "false", "limit": 2, "offset": 0}, {}),
+        ("kalshi", f"{KALSHI_BASE_URL}/events", {"limit": 2, "status": "open", "with_nested_markets": "true"}, {"accept": "application/json"}),
+    ]:
+        t0 = _time.time()
+        try:
+            resp = http_client.get(url, venue=venue, params=params, headers=headers, max_retries=1, timeout=15)
+            elapsed = round((_time.time() - t0) * 1000)
+            if resp is None:
+                results[venue] = {
+                    "status": "FAILED",
+                    "detail": "http_client returned None (proxy error, Cloudflare block, or timeout)",
+                    "elapsedMs": elapsed,
+                }
+            else:
+                body_preview = resp.text[:300] if resp.text else "(empty)"
+                ct = resp.headers.get("Content-Type", "")
+                results[venue] = {
+                    "status": "OK" if resp.status_code == 200 else f"HTTP_{resp.status_code}",
+                    "httpStatus": resp.status_code,
+                    "contentType": ct,
+                    "bodyPreview": body_preview,
+                    "bodyLength": len(resp.text) if resp.text else 0,
+                    "elapsedMs": elapsed,
+                }
+        except Exception as e:
+            elapsed = round((_time.time() - t0) * 1000)
+            results[venue] = {
+                "status": "ERROR",
+                "detail": str(e),
+                "elapsedMs": elapsed,
+            }
+
+    return jsonify(results)
+
+
 # =============================================================================
 # Background NAV Refresh
 # =============================================================================

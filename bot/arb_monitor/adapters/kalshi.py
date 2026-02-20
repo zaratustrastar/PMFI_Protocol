@@ -81,8 +81,11 @@ def fetch_events_page(limit: int = 200, cursor: str = "", status: str = "open") 
         params["cursor"] = cursor
 
     resp = http_client.get(url, venue="kalshi", params=params, headers=_headers())
-    if resp is None or resp.status_code != 200:
-        log(f"Events API returned {resp.status_code if resp is not None else 'None'}")
+    if resp is None:
+        log(f"❌ Events API returned None (likely proxy/network/Cloudflare error)")
+        return [], ""
+    if resp.status_code != 200:
+        log(f"❌ Events API returned HTTP {resp.status_code}, body: {resp.text[:200] if resp.text else '(empty)'}")
         return [], ""
     try:
         data = resp.json()
@@ -90,7 +93,7 @@ def fetch_events_page(limit: int = 200, cursor: str = "", status: str = "open") 
         next_cursor = data.get("cursor", "")
         return events, next_cursor
     except Exception as e:
-        log(f"Events parse error: {e}")
+        log(f"❌ Events parse error: {e}, body: {resp.text[:200] if resp.text else '(empty)'}")
         return [], ""
 
 
@@ -104,8 +107,11 @@ def fetch_markets_page(limit: int = 200, cursor: str = "", status: str = "open")
         params["cursor"] = cursor
 
     resp = http_client.get(url, venue="kalshi", params=params, headers=_headers())
-    if resp is None or resp.status_code != 200:
-        log(f"Markets API returned {resp.status_code if resp is not None else 'None'}")
+    if resp is None:
+        log(f"❌ Markets API returned None (likely proxy/network/Cloudflare error)")
+        return [], ""
+    if resp.status_code != 200:
+        log(f"❌ Markets API returned HTTP {resp.status_code}, body: {resp.text[:200] if resp.text else '(empty)'}")
         return [], ""
     try:
         data = resp.json()
@@ -113,7 +119,7 @@ def fetch_markets_page(limit: int = 200, cursor: str = "", status: str = "open")
         next_cursor = data.get("cursor", "")
         return markets, next_cursor
     except Exception as e:
-        log(f"Parse error: {e}")
+        log(f"❌ Markets parse error: {e}, body: {resp.text[:200] if resp.text else '(empty)'}")
         return [], ""
 
 

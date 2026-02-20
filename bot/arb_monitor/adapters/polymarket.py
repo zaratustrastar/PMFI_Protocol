@@ -69,6 +69,8 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
     seen_ids: set[str] = set()
     accepted: list[dict] = []
 
+    api_errors: list[str] = []
+
     for page in range(ARB_MAX_PAGES_POLY):
         offset = page * ARB_PAGE_SIZE_POLY
         url = f"{POLY_GAMMA_URL}/markets"
@@ -79,8 +81,15 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
         }
         log(f"Fetching page {page + 1}: offset={offset} limit={ARB_PAGE_SIZE_POLY}")
         resp = http_client.get(url, venue="polymarket", params=params)
-        if resp is None or resp.status_code != 200:
-            log(f"Markets API returned {resp.status_code if resp else 'None'}, stopping pagination")
+        if resp is None:
+            err = f"Page {page + 1}: API returned None (likely proxy/network/Cloudflare error)"
+            log(f"❌ {err}")
+            api_errors.append(err)
+            break
+        if resp.status_code != 200:
+            err = f"Page {page + 1}: API returned HTTP {resp.status_code}"
+            log(f"❌ {err}")
+            api_errors.append(err)
             break
 
         try:
@@ -88,7 +97,9 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
             if not isinstance(markets, list):
                 markets = markets.get("data", markets.get("markets", []))
         except Exception as e:
-            log(f"Parse error on page {page + 1}: {e}")
+            err = f"Page {page + 1}: JSON parse error: {e}"
+            log(f"❌ {err}")
+            api_errors.append(err)
             break
 
         if not markets:
@@ -133,10 +144,13 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
             break
 
     stats["includedFinal"] = len(accepted)
+    stats["apiErrors"] = api_errors
     _last_poly_stats = stats
     log(f"Total: {stats['fetchedTotal']} fetched → {stats['includedFinal']} included "
         f"(closed={stats['excludedClosed']}, archived={stats['excludedArchived']}, "
         f"missingTokens={stats['excludedMissingTokens']}, expiry={stats['excludedExpiry']})")
+    if api_errors:
+        log(f"⚠️ API errors during fetch: {api_errors}")
     return accepted, stats
 
 

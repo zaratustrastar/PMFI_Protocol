@@ -90,7 +90,8 @@ def run_scan():
             log(f"Using cached Polymarket data ({len(poly_markets)} markets)")
         else:
             poly_markets = get_polymarket_markets()
-            arb_cache.set("poly_normalized", poly_markets)
+            if poly_markets:
+                arb_cache.set("poly_normalized", poly_markets)
 
         cached_kalshi = arb_cache.get("kalshi_normalized")
         if cached_kalshi is not None:
@@ -98,14 +99,29 @@ def run_scan():
             log(f"Using cached Kalshi data ({len(kalshi_markets)} markets)")
         else:
             kalshi_markets = get_kalshi_markets()
-            arb_cache.set("kalshi_normalized", kalshi_markets)
+            if kalshi_markets:
+                arb_cache.set("kalshi_normalized", kalshi_markets)
 
         _scanner_health["polyMarketsFetched"] = len(poly_markets)
         _scanner_health["kalshiMarketsFetched"] = len(kalshi_markets)
         _scanner_health["lastScanTimestamp"] = int(time.time())
-        _scanner_health["lastError"] = None
 
         log(f"Discovered: {len(poly_markets)} Poly, {len(kalshi_markets)} Kalshi")
+
+        if len(poly_markets) == 0 and len(kalshi_markets) == 0:
+            err_msg = "Both Polymarket and Kalshi returned 0 markets — likely a network/proxy issue"
+            log(f"❌ {err_msg}")
+            _scanner_health["lastError"] = err_msg
+            arb_store.set_error(err_msg)
+            return
+        elif len(poly_markets) == 0:
+            _scanner_health["lastError"] = "Polymarket returned 0 markets — API may be blocked"
+            log(f"⚠️ {_scanner_health['lastError']}")
+        elif len(kalshi_markets) == 0:
+            _scanner_health["lastError"] = "Kalshi returned 0 markets — API may be blocked"
+            log(f"⚠️ {_scanner_health['lastError']}")
+        else:
+            _scanner_health["lastError"] = None
 
         poly_sports = [m for m in poly_markets if m.sport]
         kalshi_sports = [m for m in kalshi_markets if m.sport]
