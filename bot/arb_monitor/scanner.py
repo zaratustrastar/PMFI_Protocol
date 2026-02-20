@@ -16,14 +16,54 @@ def log(msg: str):
 
 
 _last_discovery_stats: dict = {}
+_tracked_pairs: list[dict] = []
+_tracked_pairs_lock = threading.Lock()
 
 
 def get_discovery_stats() -> dict:
     return dict(_last_discovery_stats)
 
 
+def get_tracked_pairs() -> list[dict]:
+    with _tracked_pairs_lock:
+        return list(_tracked_pairs)
+
+
+def run_debug_analysis(max_pairs: int = 25) -> dict:
+    """Re-analyze tracked pairs with debug=True for on-demand debug requests.
+
+    Returns dict with opportunities and watchlist including debugPrices.
+    """
+    pairs = get_tracked_pairs()[:max_pairs]
+    if not pairs:
+        return {"opportunities": [], "watchlist": [], "pairsAnalyzed": 0}
+
+    opportunities = []
+    watchlist = []
+    for pair in pairs:
+        try:
+            result = analyze_pair(pair, debug=True)
+            if result is None:
+                continue
+            if result.get("type") == "opportunity":
+                opportunities.append(result)
+            else:
+                watchlist.append(result)
+        except Exception as e:
+            log(f"Debug analysis error for {pair.get('pair_id', '?')}: {e}")
+
+    opportunities.sort(key=lambda x: x.get("edge", 0), reverse=True)
+    watchlist.sort(key=lambda x: x.get("expiryTs", 0))
+
+    return {
+        "opportunities": opportunities,
+        "watchlist": watchlist,
+        "pairsAnalyzed": len(pairs),
+    }
+
+
 def run_scan():
-    global _last_discovery_stats
+    global _last_discovery_stats, _tracked_pairs
     start = time.time()
     log("Starting scan cycle...")
 
@@ -63,12 +103,15 @@ def run_scan():
         pairs = find_pairs(poly_markets, kalshi_markets)
         log(f"Matched {len(pairs)} pairs, analyzing orderbooks...")
 
+        with _tracked_pairs_lock:
+            _tracked_pairs = list(pairs)
+
         opportunities = []
         watchlist = []
 
         for pair in pairs:
             try:
-                result = analyze_pair(pair)
+                result = analyze_pair(pair, debug=False)
                 if result is None:
                     continue
                 if result.get("type") == "opportunity":

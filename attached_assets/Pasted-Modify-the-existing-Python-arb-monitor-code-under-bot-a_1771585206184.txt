@@ -1,0 +1,117 @@
+Modify the existing Python arb monitor code under bot/arb_monitor/ and the Flask API in bot/bot_v7.py.
+
+Goal: Fix all currently found bugs/challenges so the arbitrage monitor is trustworthy:
+- Kalshi price scaling is likely wrong (don’t blindly divide by 100).
+- Watchlist items currently return legs: [] so the UI shows ?¢. Always return legs (best route).
+- Ensure Kalshi identifier passed to get_best_prices is the market ticker / marketId, not “yes_token” accidentally.
+- Optionally hide negative-edge watchlist items unless debug=1.
+- Add debugPrices when debug=1 to quickly verify inputs.
+- Fix Kalshi sizes: don’t use open_interest as bid/ask size; only include sizes if real top-of-book sizes exist; otherwise set to None/0 and adjust liquidity warnings accordingly.
+
+Please implement the following changes:
+
+1) bot/arb_monitor/adapters/kalshi.py
+   A) Add a robust helper to normalize price units:
+
+      def _to_dollars(x):
+          if x is None: return None
+          try:
+              v = float(x)
+          except: return None
+          # Heuristic:
+          # - If v > 1.0 => treat as cents (e.g., 95 or 95.6) and convert to dollars by /100
+          # - If 0 <= v <= 1.0 => already dollars
+          # - If v looks like an integer >= 1000 (rare), still assume cents; /100
+          # Clamp to [0,1] if slightly out due to rounding
+          d = v/100.0 if v > 1.0 else v
+          if d < 0: return None
+          if d > 1.0 and d < 1.2:  # minor rounding cases
+              d = min(d, 1.0)
+          return d
+
+   B) In get_best_prices(ticker), do NOT assume the response is cents. Apply _to_dollars() to yes_bid/yes_ask/no_bid/no_ask.
+      Return:
+        {
+          "yes_best_bid": ..., "yes_best_ask": ...,
+          "no_best_bid": ...,  "no_best_ask": ...,
+          "yes_bid_size": None, "yes_ask_size": None,
+          "no_bid_size": None,  "no_ask_size": None,
+          "raw": { "yes_bid":..., "yes_ask":..., "no_bid":..., "no_ask":... }  # only when debug flag passed
+        }
+      Keep backward-compatible aliases too:
+        "best_bid" -> yes_best_bid
+        "best_ask" -> yes_best_ask
+        "no_best_bid" -> no_best_bid
+        "no_best_ask" -> no_best_ask
+
+   C) Add an optional parameter debug: bool=False to get_best_prices(). When debug=True, include the raw fields (no unit conversion) to help diagnose.
+
+2) bot/arb_monitor/core/arb_engine.py
+   A) Fix Kalshi identifier usage:
+      - Replace: km_ticker = km.get("yes_token")
+      - With: km_ticker = km.get("marketId") or km.get("ticker") or km.get("yesTokenId")
+      - The NormalizedMarket for Kalshi uses marketId=ticker; use that.
+
+   B) Update reading from Kalshi prices:
+      - Use keys: yes_best_ask / no_best_ask (or their aliases).
+      - Ensure the “NO” leg uses no_best_ask, not yes ask.
+
+   C) Always include legs for watchlist items:
+      - In _build_watchlist_item, store candidates as (route, cost, legs)
+      - The returned watchlist item must include the legs from the best (lowest cost) route, with per-leg venue, side, tokenId/ticker, price, and size (size can be None/0).
+
+   D) Don’t show negative-edge watchlist items unless debug=1:
+      - If best_cost >= 1.0: return a watchlist item with:
+          minCost = round(best_cost,4)
+          edge = round(1.0 - best_cost,4)  (negative)
+          BUT only include it if debug mode is enabled.
+      - If debug is disabled and best_cost >= 1.0, return a watchlist item with:
+          route="no_arb_currently", minCost=None, edge=0, roi=0, legs=[]
+        OR return None (choose whichever keeps the UI clean; preferred: return the “no_arb_currently” item but without misleading negative ROI).
+
+   E) Add debugPrices into the opportunity/watchlist response only when debug mode is enabled:
+      debugPrices: {
+        "poly_yes_ask": ..., "poly_no_ask": ...,
+        "kalshi_yes_ask": ..., "kalshi_no_ask": ...,
+        "raw_kalshi": {...} (optional, from kalshi.get_best_prices(debug=True))
+      }
+
+   F) Liquidity warnings:
+      - Since sizes may be None, only apply low_liquidity if you have real sizes; otherwise omit that warning.
+
+   G) IMPORTANT: Keep the arb math exactly:
+      - Route A: poly YES ask + kalshi NO ask
+      - Route B: kalshi YES ask + poly NO ask
+      - Arb exists if min(routeA, routeB) < 1.0
+      - edge = 1 - cost, roi = edge / cost * 100
+
+3) bot/arb_monitor/scanner.py and bot/bot_v7.py (API)
+   A) Ensure /api/arbs forwards debug=1 into the arb engine so it can include debugPrices and (optionally) negative-edge diagnostics.
+      - If your scanner caches results, store both:
+        - normal view (debug off)
+        - debug view (debug on) OR recompute on request if cheap
+      - Keep it simple: if debug=1 is requested, recompute for the currently tracked pairs during that request (limit to e.g. 25 pairs) to avoid heavy load.
+
+   B) Update the mini-app JSON schema returned by /api/arbs:
+      - opportunities[] and watchlist[] items should include:
+        pairId, title, expiryTs, edge, roi, minCost, route, updatedTs, warnings, legs[]
+      - legs[] must include:
+        venue, side, tokenId, price, size
+      - Add asOf, lastScanMs, pairsTracked, refreshInMs (if available)
+      - When debug=1, include debugPrices for each item.
+
+4) Add one small “verification endpoint” tweak:
+   - In /api/arbs/overlap_debug, include for each sample a direct “marketId/ticker” field so I can copy/paste it into Kalshi get_best_prices quickly.
+
+5) After implementing, add a short section in docs/ or README (or a comment block) explaining:
+   - Kalshi price normalization heuristic
+   - Why negative watchlist items are hidden by default
+   - How to debug: curl /api/arbs?debug=1 and inspect debugPrices
+
+Finally: run basic sanity checks in code:
+- No syntax errors.
+- Ensure existing imports still work.
+- Do not remove existing endpoints.
+- Keep changes minimal and localized.
+
+Deliverable: commit-ready code changes across the mentioned files, with clear comments where logic changed.

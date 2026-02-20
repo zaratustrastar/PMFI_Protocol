@@ -3814,21 +3814,43 @@ def api_xp_leaderboard():
 
 @flask_app.route('/api/arbs', methods=['GET'])
 def api_arb_opportunities():
-    """Return latest arb scan results. Query: ?sports=nba,esports&minEdge=0.01&sort=expiry&limit=50"""
+    """Return latest arb scan results.
+
+    Query params:
+      ?sports=nba,esports  - filter by sport
+      &minEdge=0.01        - minimum edge threshold
+      &sort=expiry|edge|roi - sort order
+      &limit=50            - max results
+      &debug=1             - include debugPrices, show negative-edge watchlist items
+    """
     if not ARB_MONITOR_AVAILABLE:
         return jsonify({'error': 'Arb monitor not available'}), 503
     try:
-        results = arb_store.get_results()
-
+        debug = flask_request.args.get('debug', '0') == '1'
         sports_param = flask_request.args.get('sports', '')
         min_edge = float(flask_request.args.get('minEdge', '0'))
         sort_by = flask_request.args.get('sort', 'expiry')
         limit = int(flask_request.args.get('limit', '50'))
 
-        sport_filters = [s.strip().lower() for s in sports_param.split(',') if s.strip()] if sports_param else []
+        from arb_monitor.config import SCAN_INTERVAL_SECONDS as _arb_interval
 
-        opportunities = results.get('opportunities', [])
-        watchlist = results.get('watchlist', [])
+        if debug:
+            from arb_monitor.scanner import run_debug_analysis
+            debug_results = run_debug_analysis(max_pairs=25)
+            opportunities = debug_results.get('opportunities', [])
+            watchlist = debug_results.get('watchlist', [])
+            as_of = int(time.time())
+            pairs_tracked = debug_results.get('pairsAnalyzed', 0)
+            last_scan_ms = 0
+        else:
+            results = arb_store.get_results()
+            opportunities = results.get('opportunities', [])
+            watchlist = results.get('watchlist', [])
+            as_of = results.get('asOf', 0)
+            pairs_tracked = results.get('pairsTracked', 0)
+            last_scan_ms = results.get('lastScanMs', 0)
+
+        sport_filters = [s.strip().lower() for s in sports_param.split(',') if s.strip()] if sports_param else []
 
         if sport_filters:
             opportunities = [o for o in opportunities if o.get('sport') in sport_filters]
@@ -3850,13 +3872,16 @@ def api_arb_opportunities():
         opportunities = opportunities[:limit]
         watchlist = watchlist[:limit]
 
-        return jsonify({
-            'asOf': results.get('asOf', 0),
+        resp = {
+            'asOf': as_of,
             'opportunities': opportunities,
             'watchlist': watchlist,
-            'pairsTracked': results.get('pairsTracked', 0),
-            'lastScanMs': results.get('lastScanMs', 0),
-        })
+            'pairsTracked': pairs_tracked,
+            'lastScanMs': last_scan_ms,
+            'refreshInMs': _arb_interval * 1000 if not debug else None,
+        }
+
+        return jsonify(resp)
     except Exception as e:
         print(f"❌ [Arb] /api/arbs error: {e}")
         return jsonify({'error': str(e)}), 500
@@ -3914,11 +3939,12 @@ def api_arb_overlap_debug():
             kalshi_by_sport[s] = kalshi_by_sport.get(s, 0) + 1
 
         poly_samples = [
-            {"marketId": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs}
+            {"marketId": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs,
+             "yesTokenId": m.yesTokenId, "noTokenId": m.noTokenId}
             for m in poly[:50]
         ]
         kalshi_samples = [
-            {"ticker": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs}
+            {"ticker": m.marketId, "marketId": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs}
             for m in kalshi[:50]
         ]
 

@@ -5,6 +5,10 @@ Discovery strategy:
   2. For each event, fetch nested markets
   3. Filter out parlays using definitive metadata: mve_collection_ticker / mve_selected_legs
   4. NO fallback — prefer fewer clean markets over polluted parlay data
+
+Price normalization:
+  Kalshi API returns prices that may be in cents (0-100) or dollars (0.0-1.0)
+  depending on endpoint/version. _to_dollars() detects and normalizes to [0.0, 1.0].
 """
 
 import time
@@ -17,6 +21,31 @@ from ..models import NormalizedMarket, extract_team_key
 
 def log(msg: str):
     print(f"🎯 [Arb/Kalshi] {msg}")
+
+
+def _to_dollars(x) -> Optional[float]:
+    """Normalize a Kalshi price to dollar units [0.0, 1.0].
+
+    Heuristic:
+      - If x > 1.0 => treat as cents and divide by 100
+      - If 0 <= x <= 1.0 => already in dollars
+      - Clamp minor rounding overshoots (e.g. 1.006) to 1.0
+      - Return None for invalid/negative values
+    """
+    if x is None:
+        return None
+    try:
+        v = float(x)
+    except (ValueError, TypeError):
+        return None
+    d = v / 100.0 if v > 1.0 else v
+    if d < 0:
+        return None
+    if d > 1.0 and d < 1.2:
+        d = min(d, 1.0)
+    elif d > 1.2:
+        return None
+    return round(d, 6)
 
 
 def _headers() -> dict:
@@ -233,31 +262,71 @@ def normalize_market(market: dict) -> NormalizedMarket:
     )
 
 
-def get_best_prices(ticker: str) -> dict:
+def get_best_prices(ticker: str, debug: bool = False) -> dict:
+    """Fetch best prices for a Kalshi market ticker.
+
+    Uses _to_dollars() to normalize price units (cents vs dollars).
+    Does NOT use open_interest as bid/ask size — sizes are set to None
+    since the single-market endpoint doesn't provide top-of-book sizes.
+
+    Args:
+        ticker: Kalshi market ticker (e.g. "KXBTC-25FEB21-T100500")
+        debug: If True, include raw (unconverted) values for diagnostics
+    """
+    empty = {
+        "yes_best_bid": None, "yes_best_ask": None,
+        "no_best_bid": None, "no_best_ask": None,
+        "yes_bid_size": None, "yes_ask_size": None,
+        "no_bid_size": None, "no_ask_size": None,
+        "best_bid": None, "best_ask": None,
+        "bid_size": None, "ask_size": None,
+    }
+
     url = f"{KALSHI_BASE_URL}/markets/{ticker}"
     resp = http_client.get(url, venue="kalshi", headers=_headers(), timeout=10)
     if resp is None or resp.status_code != 200:
-        return {"best_bid": None, "best_ask": None, "no_best_bid": None, "no_best_ask": None, "bid_size": 0, "ask_size": 0}
+        return empty
     try:
         data = resp.json()
         market = data.get("market", data)
 
-        yes_bid = market.get("yes_bid")
-        yes_ask = market.get("yes_ask")
-        no_bid = market.get("no_bid")
-        no_ask = market.get("no_ask")
+        raw_yes_bid = market.get("yes_bid")
+        raw_yes_ask = market.get("yes_ask")
+        raw_no_bid = market.get("no_bid")
+        raw_no_ask = market.get("no_ask")
 
-        return {
-            "best_bid": yes_bid / 100.0 if yes_bid is not None else None,
-            "best_ask": yes_ask / 100.0 if yes_ask is not None else None,
-            "no_best_bid": no_bid / 100.0 if no_bid is not None else None,
-            "no_best_ask": no_ask / 100.0 if no_ask is not None else None,
-            "bid_size": market.get("open_interest", 0),
-            "ask_size": market.get("open_interest", 0),
+        yes_best_bid = _to_dollars(raw_yes_bid)
+        yes_best_ask = _to_dollars(raw_yes_ask)
+        no_best_bid = _to_dollars(raw_no_bid)
+        no_best_ask = _to_dollars(raw_no_ask)
+
+        result = {
+            "yes_best_bid": yes_best_bid,
+            "yes_best_ask": yes_best_ask,
+            "no_best_bid": no_best_bid,
+            "no_best_ask": no_best_ask,
+            "yes_bid_size": None,
+            "yes_ask_size": None,
+            "no_bid_size": None,
+            "no_ask_size": None,
+            "best_bid": yes_best_bid,
+            "best_ask": yes_best_ask,
+            "bid_size": None,
+            "ask_size": None,
         }
+
+        if debug:
+            result["raw"] = {
+                "yes_bid": raw_yes_bid,
+                "yes_ask": raw_yes_ask,
+                "no_bid": raw_no_bid,
+                "no_ask": raw_no_ask,
+            }
+
+        return result
     except Exception as e:
         log(f"Price fetch error for {ticker}: {e}")
-        return {"best_bid": None, "best_ask": None, "no_best_bid": None, "no_best_ask": None, "bid_size": 0, "ask_size": 0}
+        return empty
 
 
 def get_kalshi_markets() -> list[NormalizedMarket]:
