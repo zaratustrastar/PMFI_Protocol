@@ -3867,12 +3867,41 @@ def api_arb_overlap_debug():
     """Debug endpoint: returns market samples + sport counts from both venues."""
     if not ARB_MONITOR_AVAILABLE:
         return jsonify({'error': 'Arb monitor not available'}), 503
+
+    errors = []
+
     try:
         from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats
-        from arb_monitor.adapters.kalshi import get_kalshi_markets, get_exclusion_stats
+    except ImportError as e:
+        errors.append(f"polymarket import: {e}")
+        get_polymarket_markets = None
+        get_discovery_stats = lambda: {}
 
-        poly = get_polymarket_markets()
-        kalshi = get_kalshi_markets()
+    try:
+        from arb_monitor.adapters.kalshi import get_kalshi_markets, get_exclusion_stats
+    except ImportError as e:
+        errors.append(f"kalshi import: {e}")
+        get_kalshi_markets = None
+        get_exclusion_stats = lambda: {}
+
+    try:
+        poly = []
+        poly_stats = {}
+        if get_polymarket_markets:
+            try:
+                poly = get_polymarket_markets()
+                poly_stats = get_discovery_stats()
+            except Exception as pe:
+                errors.append(f"polymarket fetch: {pe}")
+
+        kalshi = []
+        kalshi_stats = {}
+        if get_kalshi_markets:
+            try:
+                kalshi = get_kalshi_markets()
+                kalshi_stats = get_exclusion_stats()
+            except Exception as ke:
+                errors.append(f"kalshi fetch: {ke}")
 
         poly_by_sport = {}
         for m in poly:
@@ -3898,12 +3927,13 @@ def api_arb_overlap_debug():
             "polymarketSamples": poly_samples,
             "kalshiCountBySport": kalshi_by_sport,
             "polyCountBySport": poly_by_sport,
-            "rawPolyCounts": get_discovery_stats(),
-            "rawKalshiCounts": get_exclusion_stats(),
+            "rawPolyCounts": poly_stats,
+            "rawKalshiCounts": kalshi_stats,
+            "polyErrors": errors if errors else None,
         })
     except Exception as e:
         print(f"❌ [Arb] /api/arbs/overlap_debug error: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e), "polyErrors": errors}), 500
 
 
 @flask_app.route('/api/arbs/health', methods=['GET'])
@@ -4209,7 +4239,14 @@ def main():
     if ARB_MONITOR_AVAILABLE:
         try:
             start_scanner()
-            print("🔎 Arb monitor scanner started")
+            print("🔎 arb_monitor scanner started")
+            try:
+                from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats
+                test_poly = get_polymarket_markets()
+                stats = get_discovery_stats()
+                print(f"🔎 polymarket markets included: {len(test_poly)} (fetched: {stats.get('fetchedTotal', '?')})")
+            except Exception as pe:
+                print(f"⚠️ Polymarket startup probe failed: {pe}")
         except Exception as e:
             print(f"⚠️ Arb monitor failed to start: {e}")
     
@@ -4223,6 +4260,7 @@ def main():
     print(f"   - GET  /sign-nav     - Get signed NavDataV7 (for transactions)")
     print(f"   - GET  /sign-nav/debug - Debug NAV calculation")
     print(f"   - GET  /api/arbs      - Arbitrage opportunities")
+    print(f"   - GET  /api/arbs/overlap_debug - Discovery debug")
     print(f"   - GET  /api/arbs/health - Arb scanner health")
     print(f"\n   Press Ctrl+C to stop\n")
     

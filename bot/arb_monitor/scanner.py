@@ -44,10 +44,10 @@ def run_scan():
             kalshi_markets = get_kalshi_markets()
             arb_cache.set("kalshi_normalized", kalshi_markets)
 
+        log(f"Discovered: {len(poly_markets)} Poly, {len(kalshi_markets)} Kalshi")
+
         poly_sports = [m for m in poly_markets if m.sport]
         kalshi_sports = [m for m in kalshi_markets if m.sport]
-
-        log(f"Sports markets: {len(poly_sports)} Poly, {len(kalshi_sports)} Kalshi (total: {len(poly_markets)} Poly, {len(kalshi_markets)} Kalshi)")
 
         _last_discovery_stats = {
             "polymarket_total": len(poly_markets),
@@ -60,7 +60,7 @@ def run_scan():
             "kalshi_sport_breakdown": _sport_breakdown(kalshi_markets),
         }
 
-        pairs = find_pairs(poly_sports, kalshi_sports)
+        pairs = find_pairs(poly_markets, kalshi_markets)
         log(f"Matched {len(pairs)} pairs, analyzing orderbooks...")
 
         opportunities = []
