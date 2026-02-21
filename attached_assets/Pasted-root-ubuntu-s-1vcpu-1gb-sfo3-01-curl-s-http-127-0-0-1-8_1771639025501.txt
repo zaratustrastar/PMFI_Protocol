@@ -1,0 +1,138 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# curl -s "http://127.0.0.1:8080/api/arbs?minEdge=0&debug=1&limit=50" | jq '.pairsTracked, .opportunities, .watchlist, .debugNonArbs? // empty'
+3
+[]
+[
+  {
+    "confidence": 0,
+    "debugPrices": {
+      "kalshi_no_ask": 0.86,
+      "kalshi_yes_ask": 0.16,
+      "poly_no_ask": 0.99,
+      "poly_yes_ask": 0.99,
+      "raw_kalshi": {
+        "no_ask": 86,
+        "no_bid": 84,
+        "yes_ask": 16,
+        "yes_bid": 14
+      }
+    },
+    "edge": -0.15,
+    "expiryTs": 1772496000,
+    "legs": [
+      {
+        "price": 0.16,
+        "side": "YES",
+        "size": null,
+        "tokenId": "KXTRUMPENDORSE-26SEP15-KPAX",
+        "venue": "kalshi"
+      },
+      {
+        "price": 0.99,
+        "side": "NO",
+        "size": 44257.55,
+        "tokenId": null,
+        "venue": "polymarket"
+      }
+    ],
+    "minCost": 1.15,
+    "pairId": "polymarket:562186___kalshi:KXTRUMPENDORSE-26SEP15-KPAX",
+    "roi": -13.04,
+    "route": "kalshi_YES + poly_NO",
+    "sport": null,
+    "title": "Will Ken Paxton win the 2026 Texas Republican Primary?",
+    "type": "watchlist",
+    "updatedTs": 1771638558,
+    "warnings": [
+      "no_arb_currently"
+    ]
+  },
+  {
+    "confidence": 0,
+    "debugPrices": {
+      "kalshi_no_ask": 0.83,
+      "kalshi_yes_ask": 0.21,
+      "poly_no_ask": 0.99,
+      "poly_yes_ask": 0.99,
+      "raw_kalshi": {
+        "no_ask": 83,
+        "no_bid": 79,
+        "yes_ask": 21,
+        "yes_bid": 17
+      }
+    },
+    "edge": -0.2,
+    "expiryTs": 1772496000,
+    "legs": [
+      {
+        "price": 0.21,
+        "side": "YES",
+        "size": null,
+        "tokenId": "KXTRUMPENDORSE-26SEP15-JCOR",
+        "venue": "kalshi"
+      },
+      {
+        "price": 0.99,
+        "side": "NO",
+        "size": 4096.25,
+        "tokenId": null,
+        "venue": "polymarket"
+      }
+    ],
+    "minCost": 1.2,
+    "pairId": "polymarket:562187___kalshi:KXTRUMPENDORSE-26SEP15-JCOR",
+    "roi": -16.67,
+    "route": "kalshi_YES + poly_NO",
+    "sport": null,
+    "title": "Will John Cornyn win the 2026 Texas Republican Primary?",
+    "type": "watchlist",
+    "updatedTs": 1771638559,
+    "warnings": [
+      "no_arb_currently"
+    ]
+  },
+  {
+    "confidence": 0,
+    "debugPrices": {
+      "kalshi_no_ask": 0.93,
+      "kalshi_yes_ask": 0.08,
+      "poly_no_ask": 0.999,
+      "poly_yes_ask": 0.999,
+      "raw_kalshi": {
+        "no_ask": 93,
+        "no_bid": 92,
+        "yes_ask": 8,
+        "yes_bid": 7
+      }
+    },
+    "edge": -0.079,
+    "expiryTs": 1772496000,
+    "legs": [
+      {
+        "price": 0.08,
+        "side": "YES",
+        "size": null,
+        "tokenId": "KXTRUMPENDORSE-26SEP15-WHUN",
+        "venue": "kalshi"
+      },
+      {
+        "price": 0.999,
+        "side": "NO",
+        "size": 176023.18,
+        "tokenId": null,
+        "venue": "polymarket"
+      }
+    ],
+    "minCost": 1.079,
+    "pairId": "polymarket:562190___kalshi:KXTRUMPENDORSE-26SEP15-WHUN",
+    "roi": -7.32,
+    "route": "kalshi_YES + poly_NO",
+    "sport": null,
+    "title": "Will Wesley Hunt win the 2026 Texas Republican Primary?",
+    "type": "watchlist",
+    "updatedTs": 1771638560,
+    "warnings": [
+      "no_arb_currently"
+    ]
+  }
+]
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
