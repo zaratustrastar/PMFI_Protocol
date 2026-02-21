@@ -1,14 +1,17 @@
 """Background scanner that periodically fetches markets, matches pairs, and detects arb opportunities.
 
-MVP mode: Polymarket × Opinion (Kalshi disabled but code preserved).
+Uses PMXT unified stack for Polymarket × Kalshi discovery and orderbooks.
+Seed pairs from seedPairs.json are always included for guaranteed coverage.
 """
 
 import time
 import threading
 from .config import SCAN_INTERVAL_SECONDS
-from .adapters.polymarket import get_polymarket_markets
-from .adapters.opinion import get_opinion_markets
-from .core.filters import classify_sport
+from .adapters.pmxt_adapter import (
+    fetch_polymarket_markets, fetch_kalshi_markets,
+    load_seed_pairs, fetch_seed_pair_markets,
+    get_poly_discovery_stats, get_kalshi_discovery_stats,
+)
 from .core.matcher import find_pairs
 from .core.arb_engine import analyze_pair
 from .storage import arb_store, arb_cache
@@ -23,9 +26,12 @@ _tracked_pairs: list[dict] = []
 _tracked_pairs_lock = threading.Lock()
 _scanner_health: dict = {
     "polyMarketsFetched": 0,
-    "opinionMarketsFetched": 0,
+    "kalshiMarketsFetched": 0,
+    "pairsMatched": 0,
     "lastError": None,
     "lastScanTimestamp": 0,
+    "lastScanMs": 0,
+    "scanCount": 0,
 }
 
 
@@ -37,9 +43,12 @@ def get_scanner_health() -> dict:
     return {
         "scannerRunning": _scanner_thread is not None and _scanner_thread.is_alive(),
         "polyMarketsFetched": _scanner_health.get("polyMarketsFetched", 0),
-        "opinionMarketsFetched": _scanner_health.get("opinionMarketsFetched", 0),
+        "kalshiMarketsFetched": _scanner_health.get("kalshiMarketsFetched", 0),
+        "pairsMatched": _scanner_health.get("pairsMatched", 0),
         "lastError": _scanner_health.get("lastError"),
         "lastScanTimestamp": _scanner_health.get("lastScanTimestamp", 0),
+        "lastScanMs": _scanner_health.get("lastScanMs", 0),
+        "scanCount": _scanner_health.get("scanCount", 0),
     }
 
 
@@ -49,33 +58,35 @@ def get_tracked_pairs() -> list[dict]:
 
 
 def run_debug_analysis(max_pairs: int = 25) -> dict:
-    """Re-analyze tracked pairs with debug=True for on-demand debug requests.
-
-    Returns dict with opportunities and watchlist including debugPrices.
-    """
     pairs = get_tracked_pairs()[:max_pairs]
     if not pairs:
-        return {"opportunities": [], "watchlist": [], "pairsAnalyzed": 0}
+        return {"opportunities": [], "watchlist": [], "nearArbs": [], "pairsAnalyzed": 0}
 
     opportunities = []
     watchlist = []
+    near_arbs = []
     for pair in pairs:
         try:
             result = analyze_pair(pair, debug=True)
             if result is None:
                 continue
-            if result.get("type") == "opportunity":
+            rtype = result.get("type", "")
+            if rtype == "opportunity":
                 opportunities.append(result)
+            elif rtype == "near_arb":
+                near_arbs.append(result)
             else:
                 watchlist.append(result)
         except Exception as e:
             log(f"Debug analysis error for {pair.get('pair_id', '?')}: {e}")
 
     opportunities.sort(key=lambda x: x.get("edge", 0), reverse=True)
+    near_arbs.sort(key=lambda x: x.get("minCost", 2))
     watchlist.sort(key=lambda x: x.get("expiryTs", 0))
 
     return {
         "opportunities": opportunities,
+        "nearArbs": near_arbs,
         "watchlist": watchlist,
         "pairsAnalyzed": len(pairs),
     }
@@ -92,70 +103,90 @@ def run_scan():
             poly_markets = cached_poly
             log(f"Using cached Polymarket data ({len(poly_markets)} markets)")
         else:
-            poly_markets = get_polymarket_markets()
+            poly_markets, poly_stats = fetch_polymarket_markets()
             if poly_markets:
                 arb_cache.set("poly_normalized", poly_markets)
 
-        cached_opinion = arb_cache.get("opinion_normalized")
-        if cached_opinion is not None:
-            opinion_markets = cached_opinion
-            log(f"Using cached Opinion data ({len(opinion_markets)} markets)")
+        cached_kalshi = arb_cache.get("kalshi_normalized")
+        if cached_kalshi is not None:
+            kalshi_markets = cached_kalshi
+            log(f"Using cached Kalshi data ({len(kalshi_markets)} markets)")
         else:
-            opinion_markets = get_opinion_markets()
-            if opinion_markets:
-                arb_cache.set("opinion_normalized", opinion_markets)
+            kalshi_markets, kalshi_stats = fetch_kalshi_markets()
+            if kalshi_markets:
+                arb_cache.set("kalshi_normalized", kalshi_markets)
+
+        seed_pairs_config = load_seed_pairs()
+        if seed_pairs_config:
+            seed_poly, seed_kalshi = fetch_seed_pair_markets(seed_pairs_config)
+            poly_ids = {m.marketId for m in poly_markets}
+            kalshi_ids = {m.marketId for m in kalshi_markets}
+            for m in seed_poly:
+                if m.marketId not in poly_ids:
+                    poly_markets.append(m)
+                    poly_ids.add(m.marketId)
+            for m in seed_kalshi:
+                if m.marketId not in kalshi_ids:
+                    kalshi_markets.append(m)
+                    kalshi_ids.add(m.marketId)
+            log(f"After seed injection: {len(poly_markets)} Poly, {len(kalshi_markets)} Kalshi")
 
         _scanner_health["polyMarketsFetched"] = len(poly_markets)
-        _scanner_health["opinionMarketsFetched"] = len(opinion_markets)
+        _scanner_health["kalshiMarketsFetched"] = len(kalshi_markets)
         _scanner_health["lastScanTimestamp"] = int(time.time())
+        _scanner_health["scanCount"] = _scanner_health.get("scanCount", 0) + 1
 
-        log(f"Discovered: {len(poly_markets)} Poly, {len(opinion_markets)} Opinion")
+        log(f"Discovered: {len(poly_markets)} Poly, {len(kalshi_markets)} Kalshi")
 
-        if len(poly_markets) == 0 and len(opinion_markets) == 0:
-            err_msg = "Both Polymarket and Opinion returned 0 markets — likely a network/API key issue"
+        if len(poly_markets) == 0 and len(kalshi_markets) == 0:
+            err_msg = "Both Polymarket and Kalshi returned 0 markets — likely PMXT server issue"
             log(f"❌ {err_msg}")
             _scanner_health["lastError"] = err_msg
             arb_store.set_error(err_msg)
             return
         elif len(poly_markets) == 0:
-            _scanner_health["lastError"] = "Polymarket returned 0 markets — API may be blocked"
+            _scanner_health["lastError"] = "Polymarket returned 0 markets"
             log(f"⚠️ {_scanner_health['lastError']}")
-        elif len(opinion_markets) == 0:
-            _scanner_health["lastError"] = "Opinion returned 0 markets — check API key"
+        elif len(kalshi_markets) == 0:
+            _scanner_health["lastError"] = "Kalshi returned 0 markets — may be rate limited"
             log(f"⚠️ {_scanner_health['lastError']}")
         else:
             _scanner_health["lastError"] = None
 
-        poly_sports = [m for m in poly_markets if m.sport]
-        opinion_sports = [m for m in opinion_markets if m.sport]
-
         _last_discovery_stats = {
             "polymarket_total": len(poly_markets),
-            "polymarket_sports": len(poly_sports),
-            "opinion_total": len(opinion_markets),
-            "opinion_sports": len(opinion_sports),
+            "kalshi_total": len(kalshi_markets),
             "poly_sample_titles": [m.title for m in poly_markets[:5]],
-            "opinion_sample_titles": [m.title for m in opinion_markets[:5]],
+            "kalshi_sample_titles": [m.title for m in kalshi_markets[:5]],
             "poly_sport_breakdown": _sport_breakdown(poly_markets),
-            "opinion_sport_breakdown": _sport_breakdown(opinion_markets),
+            "kalshi_sport_breakdown": _sport_breakdown(kalshi_markets),
+            "poly_stats": get_poly_discovery_stats(),
+            "kalshi_stats": get_kalshi_discovery_stats(),
         }
 
-        pairs = find_pairs(poly_markets, opinion_markets)
-        log(f"Matched {len(pairs)} pairs, analyzing orderbooks...")
+        pairs = find_pairs(poly_markets, kalshi_markets)
+        _scanner_health["pairsMatched"] = len(pairs)
+        log(f"Matched {len(pairs)} pairs, analyzing prices...")
 
         with _tracked_pairs_lock:
             _tracked_pairs = list(pairs)
 
+        _inject_kalshi_prices_into_pairs(pairs, kalshi_markets)
+
         opportunities = []
         watchlist = []
+        near_arbs = []
 
         for pair in pairs:
             try:
                 result = analyze_pair(pair, debug=False)
                 if result is None:
                     continue
-                if result.get("type") == "opportunity":
+                rtype = result.get("type", "")
+                if rtype == "opportunity":
                     opportunities.append(result)
+                elif rtype == "near_arb":
+                    near_arbs.append(result)
                 else:
                     watchlist.append(result)
             except Exception as e:
@@ -163,17 +194,20 @@ def run_scan():
                 continue
 
         opportunities.sort(key=lambda x: x.get("edge", 0), reverse=True)
+        near_arbs.sort(key=lambda x: x.get("minCost", 2))
         watchlist.sort(key=lambda x: x.get("expiryTs", 0))
 
         elapsed_ms = int((time.time() - start) * 1000)
+        _scanner_health["lastScanMs"] = elapsed_ms
+
         arb_store.update(
             opportunities=opportunities,
-            watchlist=watchlist,
+            watchlist=near_arbs + watchlist,
             pairs_tracked=len(pairs),
             scan_ms=elapsed_ms,
         )
 
-        log(f"Scan complete in {elapsed_ms}ms: {len(opportunities)} opportunities, {len(watchlist)} watchlist, {len(pairs)} pairs")
+        log(f"Scan complete in {elapsed_ms}ms: {len(opportunities)} opps, {len(near_arbs)} near-arbs, {len(watchlist)} watchlist, {len(pairs)} pairs")
 
     except Exception as e:
         log(f"Scan error: {e}")
@@ -182,6 +216,17 @@ def run_scan():
         _scanner_health["lastError"] = str(e)
         _scanner_health["lastScanTimestamp"] = int(time.time())
         arb_store.set_error(str(e))
+
+
+def _inject_kalshi_prices_into_pairs(pairs: list[dict], kalshi_markets: list):
+    kalshi_by_id = {m.marketId: m for m in kalshi_markets}
+    for pair in pairs:
+        kl = pair.get("kalshi", {})
+        kl_id = kl.get("id", "")
+        km = kalshi_by_id.get(kl_id)
+        if km:
+            kl["yes_price"] = km.meta.get("yes_price", 0)
+            kl["no_price"] = km.meta.get("no_price", 0)
 
 
 def _sport_breakdown(markets) -> dict:

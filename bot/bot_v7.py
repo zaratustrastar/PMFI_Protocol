@@ -3838,7 +3838,8 @@ def api_arb_opportunities():
             from arb_monitor.scanner import run_debug_analysis
             debug_results = run_debug_analysis(max_pairs=25)
             opportunities = debug_results.get('opportunities', [])
-            watchlist = debug_results.get('watchlist', [])
+            near_arbs = debug_results.get('nearArbs', [])
+            watchlist = near_arbs + debug_results.get('watchlist', [])
             as_of = int(time.time())
             pairs_tracked = debug_results.get('pairsAnalyzed', 0)
             last_scan_ms = 0
@@ -3896,66 +3897,62 @@ def api_arb_overlap_debug():
     errors = []
 
     try:
-        from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats as poly_discovery_stats
+        from arb_monitor.adapters.pmxt_adapter import (
+            fetch_polymarket_markets, fetch_kalshi_markets,
+            get_poly_discovery_stats, get_kalshi_discovery_stats,
+        )
     except ImportError as e:
-        errors.append(f"polymarket import: {e}")
-        get_polymarket_markets = None
-        poly_discovery_stats = lambda: {}
-
-    try:
-        from arb_monitor.adapters.opinion import get_opinion_markets, get_discovery_stats as opinion_discovery_stats
-    except ImportError as e:
-        errors.append(f"opinion import: {e}")
-        get_opinion_markets = None
-        opinion_discovery_stats = lambda: {}
+        errors.append(f"pmxt_adapter import: {e}")
+        fetch_polymarket_markets = None
+        fetch_kalshi_markets = None
+        get_poly_discovery_stats = lambda: {}
+        get_kalshi_discovery_stats = lambda: {}
 
     try:
         poly = []
         poly_stats = {}
-        if get_polymarket_markets:
+        if fetch_polymarket_markets:
             try:
-                poly = get_polymarket_markets()
-                poly_stats = poly_discovery_stats()
+                poly, poly_stats = fetch_polymarket_markets()
             except Exception as pe:
                 errors.append(f"polymarket fetch: {pe}")
 
-        opinion = []
-        opinion_stats = {}
-        if get_opinion_markets:
+        kalshi = []
+        kalshi_stats = {}
+        if fetch_kalshi_markets:
             try:
-                opinion = get_opinion_markets()
-                opinion_stats = opinion_discovery_stats()
-            except Exception as oe:
-                errors.append(f"opinion fetch: {oe}")
+                kalshi, kalshi_stats = fetch_kalshi_markets()
+            except Exception as ke:
+                errors.append(f"kalshi fetch: {ke}")
 
         poly_by_sport = {}
         for m in poly:
             s = m.sport or "uncategorized"
             poly_by_sport[s] = poly_by_sport.get(s, 0) + 1
 
-        opinion_by_sport = {}
-        for m in opinion:
+        kalshi_by_sport = {}
+        for m in kalshi:
             s = m.sport or "uncategorized"
-            opinion_by_sport[s] = opinion_by_sport.get(s, 0) + 1
+            kalshi_by_sport[s] = kalshi_by_sport.get(s, 0) + 1
 
         poly_samples = [
             {"marketId": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs,
-             "yesTokenId": m.yesTokenId, "noTokenId": m.noTokenId}
+             "yesTokenId": m.yesTokenId, "noTokenId": m.noTokenId, "volume": m.meta.get("volume", 0)}
             for m in poly[:50]
         ]
-        opinion_samples = [
+        kalshi_samples = [
             {"marketId": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs,
-             "yesTokenId": m.yesTokenId, "noTokenId": m.noTokenId}
-            for m in opinion[:50]
+             "yesTokenId": m.yesTokenId, "noTokenId": m.noTokenId, "volume": m.meta.get("volume", 0)}
+            for m in kalshi[:50]
         ]
 
         return jsonify({
-            "opinionSamples": opinion_samples,
+            "kalshiSamples": kalshi_samples,
             "polymarketSamples": poly_samples,
-            "opinionCountBySport": opinion_by_sport,
+            "kalshiCountBySport": kalshi_by_sport,
             "polyCountBySport": poly_by_sport,
             "rawPolyCounts": poly_stats,
-            "rawOpinionCounts": opinion_stats,
+            "rawKalshiCounts": kalshi_stats,
             "errors": errors if errors else None,
         })
     except Exception as e:
@@ -3985,8 +3982,8 @@ def api_arb_diag():
     if not ARB_MONITOR_AVAILABLE:
         return jsonify({'status': 'unavailable', 'reason': 'arb_monitor not installed'}), 503
 
-    from arb_monitor import http_client
-    from arb_monitor.config import POLY_GAMMA_URL, OPINION_BASE_URL, OPINION_API_KEY
+    from arb_monitor.config import POLY_GAMMA_URL
+    import requests as _requests
 
     results = {
         "proxy": {
@@ -3995,16 +3992,26 @@ def api_arb_diag():
             "PROXY_URL": ("set" if os.environ.get("PROXY_URL") else "not set"),
         },
         "polymarket": {},
-        "opinion": {},
+        "kalshi": {},
+        "pmxt_server": {},
     }
+
+    t0 = _time.time()
+    try:
+        import pmxt
+        pmxt_poly = pmxt.Polymarket()
+        m = pmxt_poly.fetch_markets(limit=1)
+        results["pmxt_server"] = {"status": "OK", "marketsFetched": len(m), "elapsedMs": round((_time.time() - t0) * 1000)}
+    except Exception as pe:
+        results["pmxt_server"] = {"status": "FAILED", "error": str(pe), "elapsedMs": round((_time.time() - t0) * 1000)}
 
     for venue, url, params, headers in [
         ("polymarket", f"{POLY_GAMMA_URL}/markets", {"closed": "false", "limit": 2, "offset": 0}, {}),
-        ("opinion", f"{OPINION_BASE_URL}/market", {"status": "activated", "limit": 2}, {"apikey": OPINION_API_KEY, "Content-Type": "application/json"}),
+        ("kalshi", "https://api.elections.kalshi.com/trade-api/v2/markets", {"limit": 2}, {}),
     ]:
         t0 = _time.time()
         try:
-            resp = http_client.get(url, venue=venue, params=params, headers=headers, max_retries=1, timeout=15)
+            resp = _requests.get(url, params=params, headers=headers, timeout=15)
             elapsed = round((_time.time() - t0) * 1000)
             if resp is None:
                 results[venue] = {
@@ -4330,20 +4337,7 @@ def main():
         try:
             start_scanner()
             print("🔎 arb_monitor scanner started")
-            try:
-                from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats as poly_disc
-                test_poly = get_polymarket_markets()
-                stats = poly_disc()
-                print(f"🔎 polymarket markets included: {len(test_poly)} (fetched: {stats.get('fetchedTotal', '?')})")
-            except Exception as pe:
-                print(f"⚠️ Polymarket startup probe failed: {pe}")
-            try:
-                from arb_monitor.adapters.opinion import get_opinion_markets, get_discovery_stats as opinion_disc
-                test_op = get_opinion_markets()
-                op_stats = opinion_disc()
-                print(f"💬 opinion markets included: {len(test_op)} (fetched: {op_stats.get('fetchedTotal', '?')})")
-            except Exception as oe:
-                print(f"⚠️ Opinion startup probe failed: {oe}")
+            print("🔎 PMXT-based arb scanner started (Polymarket × Kalshi)")
         except Exception as e:
             print(f"⚠️ Arb monitor failed to start: {e}")
     

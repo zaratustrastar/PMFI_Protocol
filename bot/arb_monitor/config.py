@@ -19,6 +19,22 @@ ARB_MAX_PAGES_POLY = int(os.environ.get("ARB_MAX_PAGES_POLY", "10"))
 ARB_PAGE_SIZE_POLY = int(os.environ.get("ARB_PAGE_SIZE_POLY", "100"))
 ARB_EXPIRY_WINDOW_DAYS = int(os.environ.get("ARB_EXPIRY_WINDOW_DAYS", "30"))
 
+PMXT_DISCOVERY_QUERIES = os.environ.get(
+    "PMXT_DISCOVERY_QUERIES",
+    "Trump,Fed,election,bitcoin,crypto,pope,tariff,AI,Musk,Israel,Ukraine,congress,senate,governor"
+).split(",")
+PMXT_QUERY_LIMIT = int(os.environ.get("PMXT_QUERY_LIMIT", "50"))
+PMXT_KALSHI_RATE_DELAY = float(os.environ.get("PMXT_KALSHI_RATE_DELAY", "1.5"))
+PMXT_POLY_RATE_DELAY = float(os.environ.get("PMXT_POLY_RATE_DELAY", "0.3"))
+
+SEED_PAIRS_PATH = os.environ.get(
+    "SEED_PAIRS_PATH",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "seedPairs.json")
+)
+
+MIN_PRICE_THRESHOLD = float(os.environ.get("MIN_PRICE_THRESHOLD", "0.02"))
+NEAR_ARB_MAX_COST = float(os.environ.get("NEAR_ARB_MAX_COST", "1.01"))
+
 MIN_EDGE_DEFAULT = 0.01
 MAX_RESULTS_DEFAULT = 50
 

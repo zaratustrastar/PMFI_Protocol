@@ -1,0 +1,20 @@
+{
+  "_comment": "Pinned market pairs that always get scanned regardless of auto-discovery. Each entry maps a Polymarket event slug to a Kalshi event ticker. Add pairs here to guarantee coverage.",
+  "pairs": [
+    {
+      "poly_query": "Fed Chair",
+      "kalshi_query": "Fed Chair",
+      "note": "Who will Trump nominate as Fed Chair"
+    },
+    {
+      "poly_query": "pope",
+      "kalshi_query": "pope",
+      "note": "Next Pope prediction"
+    },
+    {
+      "poly_query": "tariffs",
+      "kalshi_query": "tariffs",
+      "note": "Tariff revenue predictions"
+    }
+  ]
+}

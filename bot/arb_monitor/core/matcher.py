@@ -1,10 +1,12 @@
-"""Matcher - finds matching markets across Polymarket and a second venue (Opinion for MVP).
+"""Matcher - finds matching markets across Polymarket and Kalshi.
 
-Matching strategy:
-  1. If both markets have a team_key (matchup with vs/@/versus), use team_key exact match
-     weighted 0.7, plus token jaccard on titles weighted 0.3.
-  2. If neither has a team_key (non-matchup markets), use token jaccard on titles.
-  3. Expiry proximity gates: 12h for esports, 24h for nba/sports/mma.
+Matching strategy (constrained hybrid):
+  1. Predicate gating: hard block on ENDORSE↔WIN mismatches (computed first, zero cost).
+  2. Expiry gate: markets must be within time window per sport category.
+  3. Fast pass: token Jaccard on titles to build top-K shortlist.
+  4. Refine: Levenshtein on shortlist only (expensive, constrained to top candidates).
+  5. Combined score: 0.6 * Jaccard + 0.4 * Levenshtein (like reference bot).
+  6. Team key boost: if both have matching team_key, boost to max(score, 0.90).
 """
 
 import re
@@ -25,6 +27,9 @@ EXPIRY_GATES = {
 }
 
 DEFAULT_EXPIRY_GATE = 72 * 3600
+
+JACCARD_SHORTLIST_K = 5
+MIN_JACCARD_FOR_LEVENSHTEIN = 0.15
 
 
 def _normalize_vs(text: str) -> str:
@@ -82,16 +87,43 @@ def token_jaccard(a: str, b: str) -> float:
     return len(intersection) / len(union) if union else 0.0
 
 
+def _levenshtein_similarity(s1: str, s2: str) -> float:
+    s1 = s1.lower()
+    s2 = s2.lower()
+    if s1 == s2:
+        return 1.0
+    len1, len2 = len(s1), len(s2)
+    if len1 == 0 or len2 == 0:
+        return 0.0
+
+    prev = list(range(len2 + 1))
+    for i in range(1, len1 + 1):
+        curr = [i] + [0] * len2
+        for j in range(1, len2 + 1):
+            cost = 0 if s1[i - 1] == s2[j - 1] else 1
+            curr[j] = min(curr[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost)
+        prev = curr
+
+    max_len = max(len1, len2)
+    return 1.0 - prev[len2] / max_len
+
+
+def combined_similarity(a: str, b: str) -> float:
+    jaccard = token_jaccard(a, b)
+    lev = _levenshtein_similarity(a, b)
+    return 0.6 * jaccard + 0.4 * lev
+
+
 def compute_similarity(pm: NormalizedMarket, km: NormalizedMarket) -> float:
     pm_title = _normalize_vs(pm.title)
     km_title = _normalize_vs(km.title)
 
-    if pm.team_key and km.team_key:
-        team_exact = 1.0 if pm.team_key == km.team_key else 0.0
-        jaccard = token_jaccard(pm_title, km_title)
-        return 0.7 * team_exact + 0.3 * jaccard
+    score = combined_similarity(pm_title, km_title)
 
-    return token_jaccard(pm_title, km_title)
+    if pm.team_key and km.team_key and pm.team_key == km.team_key:
+        score = max(score, 0.90)
+
+    return score
 
 
 def _expiry_close_enough(pm: NormalizedMarket, km: NormalizedMarket) -> bool:
@@ -103,63 +135,87 @@ def _expiry_close_enough(pm: NormalizedMarket, km: NormalizedMarket) -> bool:
     return abs(pm.expiryTs - km.expiryTs) <= gate
 
 
-def find_pairs(poly_markets: list[NormalizedMarket], venue_b_markets: list[NormalizedMarket],
+def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[NormalizedMarket],
                min_similarity: float = 0.45) -> list[dict]:
     pairs = []
-    used_b: set[int] = set()
+    used_k: set[int] = set()
 
     for pm in poly_markets:
         if not pm.title:
             continue
 
+        pm_title_norm = _normalize_vs(pm.title)
+        pm_pred = _extract_predicate(pm.title)
+
+        candidates = []
+        for i, km in enumerate(kalshi_markets):
+            if i in used_k:
+                continue
+            if not km.title:
+                continue
+
+            if not _expiry_close_enough(pm, km):
+                continue
+
+            km_pred = _extract_predicate(km.title)
+            if not _predicates_compatible(pm_pred, km_pred):
+                continue
+
+            km_title_norm = _normalize_vs(km.title)
+            jaccard = token_jaccard(pm_title_norm, km_title_norm)
+
+            if pm_pred != km_pred and pm_pred != _PREDICATE_OTHER and km_pred != _PREDICATE_OTHER:
+                if jaccard < 0.30:
+                    continue
+
+            if pm.team_key and km.team_key and pm.team_key == km.team_key:
+                jaccard = max(jaccard, 0.50)
+
+            if jaccard >= MIN_JACCARD_FOR_LEVENSHTEIN:
+                candidates.append((i, km, jaccard, km_title_norm))
+
+        candidates.sort(key=lambda x: x[2], reverse=True)
+        top_candidates = candidates[:JACCARD_SHORTLIST_K]
+
         best_match = None
         best_score = 0.0
 
-        pm_pred = _extract_predicate(pm.title)
+        for i, km, jaccard, km_title_norm in top_candidates:
+            lev = _levenshtein_similarity(pm_title_norm, km_title_norm)
+            score = 0.6 * jaccard + 0.4 * lev
 
-        for i, bm in enumerate(venue_b_markets):
-            if i in used_b:
-                continue
-            if not bm.title:
-                continue
+            if pm.team_key and km.team_key and pm.team_key == km.team_key:
+                score = max(score, 0.90)
 
-            if not _expiry_close_enough(pm, bm):
-                continue
-
-            bm_pred = _extract_predicate(bm.title)
-            if not _predicates_compatible(pm_pred, bm_pred):
-                continue
-
-            score = compute_similarity(pm, bm)
-
-            if pm_pred != bm_pred and pm_pred != _PREDICATE_OTHER and bm_pred != _PREDICATE_OTHER:
+            km_pred = _extract_predicate(km.title)
+            if pm_pred != km_pred and pm_pred != _PREDICATE_OTHER and km_pred != _PREDICATE_OTHER:
                 if score < 0.75:
                     continue
 
             if score > best_score and score >= min_similarity:
                 best_score = score
-                best_match = (i, bm)
+                best_match = (i, km)
 
         if best_match:
-            idx, bm = best_match
-            used_b.add(idx)
+            idx, km = best_match
+            used_k.add(idx)
 
             if not pm.yesTokenId or not pm.noTokenId:
-                log(f"Skipping pair (Polymarket tokens incomplete): {pm.marketId} yes={pm.yesTokenId!r} no={pm.noTokenId!r}")
+                log(f"Skipping pair (Polymarket tokens incomplete): {pm.marketId}")
                 continue
 
-            if not bm.yesTokenId or not bm.noTokenId:
-                log(f"Skipping pair ({bm.venue} tokens incomplete): {bm.marketId} yes={bm.yesTokenId!r} no={bm.noTokenId!r}")
+            if not km.yesTokenId or not km.noTokenId:
+                log(f"Skipping pair (Kalshi tokens incomplete): {km.marketId}")
                 continue
 
-            venue_b_name = bm.venue or "opinion"
-            pair_id = f"polymarket:{pm.marketId}___{venue_b_name}:{bm.marketId}"
-            sport = pm.sport or bm.sport
-            expiry = pm.expiryTs or bm.expiryTs
+            pair_id = f"polymarket:{pm.marketId}___kalshi:{km.marketId}"
+            sport = pm.sport or km.sport
+            expiry = pm.expiryTs or km.expiryTs
 
             pairs.append({
                 "pair_id": pair_id,
                 "title": pm.title,
+                "kalshi_title": km.title,
                 "sport": sport,
                 "expiry_ts": expiry or 0,
                 "similarity": round(best_score, 3),
@@ -172,18 +228,20 @@ def find_pairs(poly_markets: list[NormalizedMarket], venue_b_markets: list[Norma
                     "no_token": pm.noTokenId,
                     "expiry_ts": pm.expiryTs,
                     "sport": pm.sport,
+                    "volume": pm.meta.get("volume", 0),
                 },
-                "opinion": {
-                    "venue": venue_b_name,
-                    "id": bm.marketId,
-                    "question": bm.title,
-                    "team_key": bm.team_key,
-                    "yes_token": bm.yesTokenId,
-                    "no_token": bm.noTokenId,
-                    "expiry_ts": bm.expiryTs,
-                    "sport": bm.sport,
+                "kalshi": {
+                    "venue": "kalshi",
+                    "id": km.marketId,
+                    "question": km.title,
+                    "team_key": km.team_key,
+                    "yes_token": km.yesTokenId,
+                    "no_token": km.noTokenId,
+                    "expiry_ts": km.expiryTs,
+                    "sport": km.sport,
+                    "volume": km.meta.get("volume", 0),
                 },
             })
 
-    log(f"Found {len(pairs)} matched pairs from {len(poly_markets)} Poly x {len(venue_b_markets)} {venue_b_markets[0].venue if venue_b_markets else 'venue_b'} markets")
+    log(f"Found {len(pairs)} matched pairs from {len(poly_markets)} Poly x {len(kalshi_markets)} Kalshi markets")
     return pairs

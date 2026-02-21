@@ -1,20 +1,21 @@
-"""Arb Engine - detects arbitrage opportunities from matched market pairs using orderbook prices.
+"""Arb Engine - detects arbitrage opportunities from matched Polymarket × Kalshi pairs.
 
-MVP mode: Polymarket × Opinion (both have real orderbooks with top-of-book ask prices).
+Uses PMXT unified stack:
+  - Polymarket: real orderbook asks via PMXT fetch_order_book (no auth needed)
+  - Kalshi: listing prices from market data (orderbook requires auth)
 
 Arb math:
-  Route A: poly YES ask + opinion NO ask
-  Route B: opinion YES ask + poly NO ask
+  Route A: poly YES ask + kalshi NO price
+  Route B: kalshi YES price + poly NO ask
   Arb exists if min(routeA, routeB) < 1.0
-  edge = 1 - cost, roi = edge / cost * 100
 
-Negative-edge watchlist items are hidden by default (debug=True to show).
+Near-arb: pairs where minCost <= NEAR_ARB_MAX_COST (default 1.01) shown on watchlist
+so UI isn't empty even without live arbs.
 """
 
 import time
-from ..adapters import polymarket as poly_adapter
-from ..adapters import opinion as opinion_adapter
-from ..config import OPINION_ORDERBOOK_DELAY
+from ..adapters import pmxt_adapter
+from ..config import NEAR_ARB_MAX_COST, MIN_PRICE_THRESHOLD
 
 
 def log(msg: str):
@@ -22,26 +23,20 @@ def log(msg: str):
 
 
 def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
-    """Analyze a matched pair for arbitrage opportunities using live orderbook data.
-
-    Args:
-        pair: Matched pair dict from matcher
-        debug: If True, include debugPrices and show negative-edge watchlist items
-    """
     pm = pair["polymarket"]
-    op = pair["opinion"]
+    kl = pair["kalshi"]
 
     pm_yes_token = pm.get("yes_token")
     pm_no_token = pm.get("no_token")
-    op_yes_token = op.get("yes_token")
-    op_no_token = op.get("no_token")
+    kl_yes_token = kl.get("yes_token")
+    kl_no_token = kl.get("no_token")
 
     warnings = []
 
     if not pm_yes_token or not pm_no_token:
         return None
-    if not op_yes_token or not op_no_token:
-        warnings.append("opinion_token_missing")
+    if not kl_yes_token or not kl_no_token:
+        warnings.append("kalshi_token_missing")
         if debug:
             return {
                 "type": "watchlist",
@@ -60,82 +55,98 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
                 "debugPrices": {
                     "poly_yes_token": pm_yes_token,
                     "poly_no_token": pm_no_token,
-                    "opinion_yes_token": op_yes_token,
-                    "opinion_no_token": op_no_token,
+                    "kalshi_yes_token": kl_yes_token,
+                    "kalshi_no_token": kl_no_token,
                 },
             }
         return None
 
-    pm_yes_prices = poly_adapter.get_best_prices(pm_yes_token)
-    pm_no_prices = poly_adapter.get_best_prices(pm_no_token)
+    pm_yes_book = pmxt_adapter.fetch_poly_orderbook(pm_yes_token)
+    pm_no_book = pmxt_adapter.fetch_poly_orderbook(pm_no_token)
 
-    if OPINION_ORDERBOOK_DELAY > 0:
-        time.sleep(OPINION_ORDERBOOK_DELAY)
+    kl_prices = {
+        "yes_best_ask": kl.get("yes_price") or pair.get("kalshi", {}).get("yes_price"),
+        "no_best_ask": kl.get("no_price") or pair.get("kalshi", {}).get("no_price"),
+        "yes_ask_size": 0,
+        "no_ask_size": 0,
+        "source": "listing_price",
+    }
 
-    op_prices = opinion_adapter.get_best_prices(op_yes_token, op_no_token)
+    kalshi_market = None
+    for key in ("_normalized_market",):
+        if key in kl:
+            kalshi_market = kl[key]
+            break
+    if kalshi_market and hasattr(kalshi_market, "meta"):
+        kl_prices["yes_best_ask"] = kalshi_market.meta.get("yes_price")
+        kl_prices["no_best_ask"] = kalshi_market.meta.get("no_price")
 
-    op_yes_ask = op_prices.get("yes_best_ask")
-    op_no_ask = op_prices.get("no_best_ask")
+    if kl_prices["yes_best_ask"] is None and kl_prices["no_best_ask"] is None:
+        kl_prices = _get_kalshi_prices_from_pair(pair)
 
     routes = []
 
-    pm_yes_ask = pm_yes_prices.get("best_ask")
-    if pm_yes_ask is not None and op_no_ask is not None:
-        cost = pm_yes_ask + op_no_ask
-        edge = round(1.0 - cost, 4)
-        roi = round(edge / cost * 100, 2) if cost > 0 else 0
-        legs = [
-            {
-                "venue": "polymarket",
-                "side": "YES",
-                "tokenId": pm_yes_token,
-                "price": pm_yes_ask,
-                "size": pm_yes_prices.get("ask_size") or 0,
-            },
-            {
-                "venue": "opinion",
-                "side": "NO",
-                "tokenId": op_no_token,
-                "price": op_no_ask,
-                "size": op_prices.get("no_ask_size") or 0,
-            },
-        ]
-        routes.append({
-            "route": "poly_YES + opinion_NO",
-            "min_cost": round(cost, 4),
-            "edge": edge,
-            "roi": roi,
-            "legs": legs,
-        })
+    pm_yes_ask = pm_yes_book.get("best_ask")
+    kl_no_ask = kl_prices.get("no_best_ask")
+    if pm_yes_ask is not None and kl_no_ask is not None:
+        if pm_yes_ask > MIN_PRICE_THRESHOLD and kl_no_ask > MIN_PRICE_THRESHOLD:
+            cost = pm_yes_ask + kl_no_ask
+            edge = round(1.0 - cost, 4)
+            roi = round(edge / cost * 100, 2) if cost > 0 else 0
+            legs = [
+                {
+                    "venue": "polymarket",
+                    "side": "YES",
+                    "tokenId": pm_yes_token,
+                    "price": pm_yes_ask,
+                    "size": pm_yes_book.get("ask_size") or 0,
+                },
+                {
+                    "venue": "kalshi",
+                    "side": "NO",
+                    "tokenId": kl_no_token,
+                    "price": kl_no_ask,
+                    "size": kl_prices.get("no_ask_size") or 0,
+                },
+            ]
+            routes.append({
+                "route": "poly_YES + kalshi_NO",
+                "min_cost": round(cost, 4),
+                "edge": edge,
+                "roi": roi,
+                "legs": legs,
+            })
 
-    pm_no_ask = pm_no_prices.get("best_ask")
-    if op_yes_ask is not None and pm_no_ask is not None:
-        cost = op_yes_ask + pm_no_ask
-        edge = round(1.0 - cost, 4)
-        roi = round(edge / cost * 100, 2) if cost > 0 else 0
-        legs = [
-            {
-                "venue": "opinion",
-                "side": "YES",
-                "tokenId": op_yes_token,
-                "price": op_yes_ask,
-                "size": op_prices.get("yes_ask_size") or 0,
-            },
-            {
-                "venue": "polymarket",
-                "side": "NO",
-                "tokenId": pm_no_token,
-                "price": pm_no_ask,
-                "size": pm_no_prices.get("ask_size") or 0,
-            },
-        ]
-        routes.append({
-            "route": "opinion_YES + poly_NO",
-            "min_cost": round(cost, 4),
-            "edge": edge,
-            "roi": roi,
-            "legs": legs,
-        })
+    kl_yes_ask = kl_prices.get("yes_best_ask")
+    pm_no_ask = pm_no_book.get("best_ask")
+    if kl_yes_ask is not None and pm_no_ask is not None:
+        if kl_yes_ask > MIN_PRICE_THRESHOLD and pm_no_ask > MIN_PRICE_THRESHOLD:
+            cost = kl_yes_ask + pm_no_ask
+            edge = round(1.0 - cost, 4)
+            roi = round(edge / cost * 100, 2) if cost > 0 else 0
+            legs = [
+                {
+                    "venue": "kalshi",
+                    "side": "YES",
+                    "tokenId": kl_yes_token,
+                    "price": kl_yes_ask,
+                    "size": kl_prices.get("yes_ask_size") or 0,
+                },
+                {
+                    "venue": "polymarket",
+                    "side": "NO",
+                    "tokenId": pm_no_token,
+                    "price": pm_no_ask,
+                    "size": pm_no_book.get("ask_size") or 0,
+                },
+            ]
+            routes.append({
+                "route": "kalshi_YES + poly_NO",
+                "min_cost": round(cost, 4),
+                "edge": edge,
+                "roi": roi,
+                "legs": legs,
+            })
 
     debug_prices = None
     if debug:
@@ -144,18 +155,19 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
             "poly_no_token": pm_no_token,
             "poly_yes_ask": pm_yes_ask,
             "poly_no_ask": pm_no_ask,
-            "opinion_yes_token": op_yes_token,
-            "opinion_no_token": op_no_token,
-            "opinion_yes_ask": op_yes_ask,
-            "opinion_no_ask": op_no_ask,
+            "poly_yes_bid": pm_yes_book.get("best_bid"),
+            "poly_no_bid": pm_no_book.get("best_bid"),
+            "kalshi_yes_token": kl_yes_token,
+            "kalshi_no_token": kl_no_token,
+            "kalshi_yes_ask": kl_prices.get("yes_best_ask"),
+            "kalshi_no_ask": kl_prices.get("no_best_ask"),
+            "kalshi_source": kl_prices.get("source", "listing_price"),
         }
 
     arb_routes = [r for r in routes if r["min_cost"] < 1.0]
 
     if not arb_routes:
-        watchlist_item = _build_watchlist_item(
-            pair, pm_yes_prices, pm_no_prices, op_prices, debug=debug
-        )
+        watchlist_item = _build_watchlist_item(pair, routes, debug=debug)
         if debug_prices and watchlist_item:
             watchlist_item["debugPrices"] = debug_prices
         return watchlist_item
@@ -172,11 +184,14 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
         warnings.append("fuzzy_match")
     if best["edge"] < 0.02:
         warnings.append("thin_edge")
+    if kl_prices.get("source") == "listing_price":
+        warnings.append("kalshi_listing_price_only")
 
     result = {
         "type": "opportunity",
         "pairId": pair["pair_id"],
         "title": pair["title"],
+        "kalshiTitle": pair.get("kalshi_title", ""),
         "sport": pair.get("sport"),
         "expiryTs": pair.get("expiry_ts", 0),
         "minCost": best["min_cost"],
@@ -195,87 +210,85 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
     return result
 
 
-def _build_watchlist_item(pair, pm_yes, pm_no, op_prices, debug: bool = False) -> dict | None:
-    """Build a watchlist item for pairs without a live arb but close enough to track.
+def _get_kalshi_prices_from_pair(pair: dict) -> dict:
+    kl = pair.get("kalshi", {})
+    return {
+        "yes_best_ask": kl.get("yes_price"),
+        "no_best_ask": kl.get("no_price"),
+        "yes_ask_size": 0,
+        "no_ask_size": 0,
+        "source": "listing_price",
+    }
 
-    Negative-edge items (best_cost >= 1.0) are hidden unless debug=True.
-    Always includes legs from the best route.
-    """
+
+def _build_watchlist_item(pair, routes, debug: bool = False) -> dict | None:
     pm_data = pair.get("polymarket", {})
-    op_data = pair.get("opinion", {})
-    candidates = []
+    kl_data = pair.get("kalshi", {})
 
-    pm_y_ask = pm_yes.get("best_ask")
-    op_n_ask = op_prices.get("no_best_ask")
-    if pm_y_ask is not None and op_n_ask is not None:
-        legs = [
-            {"venue": "polymarket", "side": "YES", "tokenId": pm_data.get("yes_token"), "price": pm_y_ask, "size": pm_yes.get("ask_size") or 0},
-            {"venue": "opinion", "side": "NO", "tokenId": op_data.get("no_token"), "price": op_n_ask, "size": op_prices.get("no_ask_size") or 0},
-        ]
-        candidates.append(("poly_YES + opinion_NO", pm_y_ask + op_n_ask, legs))
-
-    op_y_ask = op_prices.get("yes_best_ask")
-    pm_n_ask = pm_no.get("best_ask")
-    if op_y_ask is not None and pm_n_ask is not None:
-        legs = [
-            {"venue": "opinion", "side": "YES", "tokenId": op_data.get("yes_token"), "price": op_y_ask, "size": op_prices.get("yes_ask_size") or 0},
-            {"venue": "polymarket", "side": "NO", "tokenId": pm_data.get("no_token"), "price": pm_n_ask, "size": pm_no.get("ask_size") or 0},
-        ]
-        candidates.append(("opinion_YES + poly_NO", op_y_ask + pm_n_ask, legs))
-
-    if not candidates:
-        return {
-            "type": "watchlist",
-            "pairId": pair["pair_id"],
-            "title": pair["title"],
-            "sport": pair.get("sport"),
-            "expiryTs": pair.get("expiry_ts", 0),
-            "minCost": None,
-            "edge": 0,
-            "roi": 0,
-            "route": "no_prices",
-            "confidence": 0,
-            "legs": [],
-            "updatedTs": int(time.time()),
-            "warnings": ["no_orderbook_data"],
-        }
-
-    best_route, best_cost, best_legs = min(candidates, key=lambda x: x[1])
-    edge = round(1.0 - best_cost, 4)
-
-    if best_cost >= 1.0 and not debug:
+    if not routes:
+        if debug:
+            return {
+                "type": "watchlist",
+                "pairId": pair["pair_id"],
+                "title": pair["title"],
+                "kalshiTitle": pair.get("kalshi_title", ""),
+                "sport": pair.get("sport"),
+                "expiryTs": pair.get("expiry_ts", 0),
+                "minCost": None,
+                "edge": 0,
+                "roi": 0,
+                "route": "no_prices",
+                "confidence": 0,
+                "legs": [],
+                "updatedTs": int(time.time()),
+                "warnings": ["no_orderbook_data"],
+            }
         return None
 
+    best = min(routes, key=lambda r: r["min_cost"])
+    best_cost = best["min_cost"]
+
+    if best_cost > NEAR_ARB_MAX_COST and not debug:
+        return None
+
+    edge = round(1.0 - best_cost, 4)
+    is_near_arb = best_cost <= NEAR_ARB_MAX_COST and best_cost >= 1.0
+
+    item_warnings = []
+    if best_cost >= 1.0:
+        item_warnings.append("no_arb_currently")
+    if is_near_arb:
+        item_warnings.append("near_arb")
+
     return {
-        "type": "watchlist",
+        "type": "near_arb" if is_near_arb else "watchlist",
         "pairId": pair["pair_id"],
         "title": pair["title"],
+        "kalshiTitle": pair.get("kalshi_title", ""),
         "sport": pair.get("sport"),
         "expiryTs": pair.get("expiry_ts", 0),
         "minCost": round(best_cost, 4),
         "edge": edge,
         "roi": round(edge / best_cost * 100, 2) if best_cost > 0 else 0,
-        "route": best_route,
+        "route": best["route"],
         "confidence": 0,
-        "legs": best_legs,
+        "legs": best["legs"],
         "updatedTs": int(time.time()),
-        "warnings": ["no_arb_currently"] if best_cost >= 1.0 else ["near_arb"],
+        "warnings": item_warnings,
+        "similarity": pair.get("similarity", 0),
     }
 
 
 def _has_real_sizes(legs: list[dict]) -> bool:
-    """Check if any leg has a real (non-None, non-zero) size."""
     return any(leg.get("size") is not None and leg.get("size", 0) > 0 for leg in legs)
 
 
 def _calc_min_size(legs: list[dict]) -> float:
-    """Calculate minimum size across legs, ignoring None sizes."""
     real_sizes = [leg["size"] for leg in legs if leg.get("size") is not None and leg["size"] > 0]
     return min(real_sizes) if real_sizes else 0
 
 
 def _calc_confidence(edge: float, min_size: float, similarity: float) -> float:
-    """Calculate confidence score 0-1 based on edge, liquidity, and match quality."""
     edge_score = min(edge / 0.10, 1.0) * 0.4
     liq_score = min(min_size / 100, 1.0) * 0.3
     match_score = similarity * 0.3

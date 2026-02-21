@@ -1154,6 +1154,21 @@ wheels = [
 ]
 
 [[package]]
+name = "pmxt"
+version = "2.10.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "python-dateutil" },
+    { name = "typing-extensions" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/69/7a/c44792a1e0831e1d17c042399280e769f6417906e71764b044dd82934504/pmxt-2.10.0.tar.gz", hash = "sha256:bf95aa3717bd0fccc270f07d96b9fa57b0bd80c4cd76b06b5c122cc2c1ab103a", size = 2023822, upload-time = "2026-02-19T11:57:35.239Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/03/cc9583f0592f3f0ac069ba9f98c28bfb203a5a697351b84f790b7ea3bf1d/pmxt-2.10.0-py3-none-any.whl", hash = "sha256:935d73f88923ec3f4a946c54a44f973b82330cf149dc66055ef3a611737661b1", size = 2124444, upload-time = "2026-02-19T11:57:33.547Z" },
+]
+
+[[package]]
 name = "poly-eip712-structs"
 version = "0.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1550,6 +1565,18 @@ wheels = [
 ]
 
 [[package]]
+name = "python-dateutil"
+version = "2.9.0.post0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3", size = 342432, upload-time = "2024-03-01T18:36:20.211Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427", size = 229892, upload-time = "2024-03-01T18:36:18.57Z" },
+]
+
+[[package]]
 name = "python-dotenv"
 version = "1.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1685,6 +1712,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "curl-cffi" },
     { name = "flask-cors" },
+    { name = "pmxt" },
     { name = "psycopg2-binary" },
     { name = "py-clob-client" },
     { name = "pysocks" },
@@ -1696,6 +1724,7 @@ dependencies = [
 requires-dist = [
     { name = "curl-cffi", specifier = ">=0.13.0" },
     { name = "flask-cors", specifier = ">=6.0.2" },
+    { name = "pmxt", specifier = ">=2.10.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "py-clob-client", specifier = ">=0.28.0" },
     { name = "pysocks", specifier = ">=1.7.1" },
@@ -1733,6 +1762,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/1b/2d/439b0728a92964a04d9c88ea1ca9ebb128893fbbd5834faa31f987f2fd4c/rlp-4.1.0.tar.gz", hash = "sha256:be07564270a96f3e225e2c107db263de96b5bc1f27722d2855bd3459a08e95a9", size = 33429, upload-time = "2025-02-04T22:05:59.089Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/99/fb/e4c0ced9893b84ac95b7181d69a9786ce5879aeb3bbbcbba80a164f85d6a/rlp-4.1.0-py3-none-any.whl", hash = "sha256:8eca394c579bad34ee0b937aecb96a57052ff3716e19c7a578883e767bc5da6f", size = 19973, upload-time = "2025-02-04T22:05:57.05Z" },
+]
+
+[[package]]
+name = "six"
+version = "1.17.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
 ]
 
 [[package]]
