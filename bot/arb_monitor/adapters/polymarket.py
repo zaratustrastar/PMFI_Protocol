@@ -154,10 +154,29 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
     return accepted, stats
 
 
-def normalize_market(market: dict) -> NormalizedMarket:
+def normalize_market(market: dict) -> NormalizedMarket | None:
+    """Normalize a raw Polymarket market dict into a NormalizedMarket.
+
+    Returns None if the market lacks exactly 2 CLOB token IDs (non-binary market).
+    """
     clob_ids = market.get("_parsed_clob_ids", [])
     if not clob_ids:
-        clob_ids = _parse_clob_token_ids(market.get("clobTokenIds"))
+        raw_clob = market.get("clobTokenIds")
+        if isinstance(raw_clob, str):
+            try:
+                raw_clob = json.loads(raw_clob)
+            except (json.JSONDecodeError, TypeError):
+                pass
+        if isinstance(raw_clob, list):
+            clob_ids = [str(t) for t in raw_clob if t]
+        else:
+            clob_ids = []
+
+    if len(clob_ids) < 2:
+        mid = market.get("id", market.get("condition_id", ""))
+        question = market.get("question", market.get("title", ""))[:60]
+        log(f"⚠️ Skipping market {mid} (need 2 clobTokenIds, got {len(clob_ids)}): {question}")
+        return None
 
     yes_token = ""
     no_token = ""
@@ -180,6 +199,12 @@ def normalize_market(market: dict) -> NormalizedMarket:
     if not yes_token and len(clob_ids) >= 2:
         yes_token = clob_ids[0]
         no_token = clob_ids[1]
+
+    if not yes_token or not no_token:
+        mid = market.get("id", market.get("condition_id", ""))
+        question = market.get("question", market.get("title", ""))[:60]
+        log(f"⚠️ Skipping market {mid} (could not resolve YES/NO tokens): {question}")
+        return None
 
     expiry_ts = market.get("_parsed_expiry") or _parse_expiry(market)
 
@@ -206,10 +231,13 @@ def normalize_market(market: dict) -> NormalizedMarket:
 def get_polymarket_markets() -> list[NormalizedMarket]:
     from ..core.filters import classify_sport
     raw, _stats = fetch_all_active_markets()
-    normalized = [normalize_market(m) for m in raw]
-    for nm in normalized:
-        sport = classify_sport(nm.title)
-        nm.sport = sport
+    normalized = []
+    for m in raw:
+        nm = normalize_market(m)
+        if nm is not None:
+            sport = classify_sport(nm.title)
+            nm.sport = sport
+            normalized.append(nm)
     return normalized
 
 

@@ -36,9 +36,40 @@ def _tokenize(text: str) -> set[str]:
     t = text.lower().strip()
     t = re.sub(r'[^\w\s]', ' ', t)
     t = re.sub(r'\s+', ' ', t)
-    stopwords = {"will", "the", "a", "an", "to", "in", "of", "for", "on", "at", "by", "is", "be", "win", "winner"}
+    stopwords = {"will", "the", "a", "an", "to", "in", "of", "for", "on", "at", "by", "is", "be"}
     tokens = {w for w in t.split() if w not in stopwords and len(w) > 1}
     return tokens
+
+
+_PREDICATE_ENDORSE = "ENDORSE"
+_PREDICATE_WIN_PRIMARY = "WIN_PRIMARY"
+_PREDICATE_WIN_GENERAL = "WIN_GENERAL"
+_PREDICATE_OTHER = "OTHER"
+
+
+def _extract_predicate(title: str) -> str:
+    t = title.lower()
+    if "endorse" in t:
+        return _PREDICATE_ENDORSE
+    if "win" in t or "winner" in t:
+        if any(kw in t for kw in ("primary", "nominee", "nomination", "runoff")):
+            return _PREDICATE_WIN_PRIMARY
+        if any(kw in t for kw in ("election", "general", "electoral")):
+            return _PREDICATE_WIN_GENERAL
+        return _PREDICATE_WIN_PRIMARY
+    return _PREDICATE_OTHER
+
+
+def _predicates_compatible(pred_a: str, pred_b: str) -> bool:
+    if pred_a == _PREDICATE_ENDORSE and pred_b in (_PREDICATE_WIN_PRIMARY, _PREDICATE_WIN_GENERAL):
+        return False
+    if pred_b == _PREDICATE_ENDORSE and pred_a in (_PREDICATE_WIN_PRIMARY, _PREDICATE_WIN_GENERAL):
+        return False
+    if pred_a == _PREDICATE_ENDORSE and pred_b == _PREDICATE_OTHER:
+        return False
+    if pred_b == _PREDICATE_ENDORSE and pred_a == _PREDICATE_OTHER:
+        return False
+    return True
 
 
 def token_jaccard(a: str, b: str) -> float:
@@ -84,6 +115,8 @@ def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[Normal
         best_match = None
         best_score = 0.0
 
+        pm_pred = _extract_predicate(pm.title)
+
         for i, km in enumerate(kalshi_markets):
             if i in used_kalshi:
                 continue
@@ -93,7 +126,16 @@ def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[Normal
             if not _expiry_close_enough(pm, km):
                 continue
 
+            km_pred = _extract_predicate(km.title)
+            if not _predicates_compatible(pm_pred, km_pred):
+                continue
+
             score = compute_similarity(pm, km)
+
+            if pm_pred != km_pred and pm_pred != _PREDICATE_OTHER and km_pred != _PREDICATE_OTHER:
+                if score < 0.75:
+                    continue
+
             if score > best_score and score >= min_similarity:
                 best_score = score
                 best_match = (i, km)
@@ -101,6 +143,11 @@ def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[Normal
         if best_match:
             idx, km = best_match
             used_kalshi.add(idx)
+
+            if not pm.yesTokenId or not pm.noTokenId:
+                log(f"Skipping pair (Polymarket tokens incomplete): {pm.marketId} yes={pm.yesTokenId!r} no={pm.noTokenId!r}")
+                continue
+
             pair_id = f"polymarket:{pm.marketId}___kalshi:{km.marketId}"
             sport = pm.sport or km.sport
             expiry = pm.expiryTs or km.expiryTs

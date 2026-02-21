@@ -32,11 +32,18 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
     pm_no_token = pm.get("no_token")
     km_ticker = km.get("id") or km.get("marketId") or km.get("ticker") or km.get("yesTokenId")
 
+    warnings = []
+
     if not pm_yes_token or not km_ticker:
         return None
 
     pm_yes_prices = poly_adapter.get_best_prices(pm_yes_token)
-    pm_no_prices = poly_adapter.get_best_prices(pm_no_token) if pm_no_token else {"best_ask": None}
+
+    if pm_no_token:
+        pm_no_prices = poly_adapter.get_best_prices(pm_no_token)
+    else:
+        pm_no_prices = {"best_ask": None}
+        warnings.append("poly_no_token_missing")
 
     km_prices = kalshi_adapter.get_best_prices(km_ticker, debug=debug)
 
@@ -106,10 +113,13 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
     debug_prices = None
     if debug:
         debug_prices = {
+            "poly_yes_token": pm_yes_token,
+            "poly_no_token": pm_no_token,
             "poly_yes_ask": pm_yes_ask,
             "poly_no_ask": pm_no_ask,
             "kalshi_yes_ask": km_yes_ask,
             "kalshi_no_ask": km_no_ask,
+            "kalshi_ticker": km_ticker,
             "raw_kalshi": km_prices.get("raw"),
         }
 
@@ -129,7 +139,6 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
 
     confidence = _calc_confidence(best["edge"], min_size, pair.get("similarity", 0))
 
-    warnings = []
     if _has_real_sizes(best["legs"]) and min_size < 10:
         warnings.append("low_liquidity")
     if pair.get("similarity", 1.0) < 0.8:
