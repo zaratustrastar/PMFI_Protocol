@@ -1,4 +1,4 @@
-"""Matcher - finds matching markets across Kalshi and Polymarket.
+"""Matcher - finds matching markets across Polymarket and a second venue (Opinion for MVP).
 
 Matching strategy:
   1. If both markets have a team_key (matchup with vs/@/versus), use team_key exact match
@@ -103,10 +103,10 @@ def _expiry_close_enough(pm: NormalizedMarket, km: NormalizedMarket) -> bool:
     return abs(pm.expiryTs - km.expiryTs) <= gate
 
 
-def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[NormalizedMarket],
+def find_pairs(poly_markets: list[NormalizedMarket], venue_b_markets: list[NormalizedMarket],
                min_similarity: float = 0.45) -> list[dict]:
     pairs = []
-    used_kalshi: set[int] = set()
+    used_b: set[int] = set()
 
     for pm in poly_markets:
         if not pm.title:
@@ -117,40 +117,45 @@ def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[Normal
 
         pm_pred = _extract_predicate(pm.title)
 
-        for i, km in enumerate(kalshi_markets):
-            if i in used_kalshi:
+        for i, bm in enumerate(venue_b_markets):
+            if i in used_b:
                 continue
-            if not km.title:
-                continue
-
-            if not _expiry_close_enough(pm, km):
+            if not bm.title:
                 continue
 
-            km_pred = _extract_predicate(km.title)
-            if not _predicates_compatible(pm_pred, km_pred):
+            if not _expiry_close_enough(pm, bm):
                 continue
 
-            score = compute_similarity(pm, km)
+            bm_pred = _extract_predicate(bm.title)
+            if not _predicates_compatible(pm_pred, bm_pred):
+                continue
 
-            if pm_pred != km_pred and pm_pred != _PREDICATE_OTHER and km_pred != _PREDICATE_OTHER:
+            score = compute_similarity(pm, bm)
+
+            if pm_pred != bm_pred and pm_pred != _PREDICATE_OTHER and bm_pred != _PREDICATE_OTHER:
                 if score < 0.75:
                     continue
 
             if score > best_score and score >= min_similarity:
                 best_score = score
-                best_match = (i, km)
+                best_match = (i, bm)
 
         if best_match:
-            idx, km = best_match
-            used_kalshi.add(idx)
+            idx, bm = best_match
+            used_b.add(idx)
 
             if not pm.yesTokenId or not pm.noTokenId:
                 log(f"Skipping pair (Polymarket tokens incomplete): {pm.marketId} yes={pm.yesTokenId!r} no={pm.noTokenId!r}")
                 continue
 
-            pair_id = f"polymarket:{pm.marketId}___kalshi:{km.marketId}"
-            sport = pm.sport or km.sport
-            expiry = pm.expiryTs or km.expiryTs
+            if not bm.yesTokenId or not bm.noTokenId:
+                log(f"Skipping pair ({bm.venue} tokens incomplete): {bm.marketId} yes={bm.yesTokenId!r} no={bm.noTokenId!r}")
+                continue
+
+            venue_b_name = bm.venue or "opinion"
+            pair_id = f"polymarket:{pm.marketId}___{venue_b_name}:{bm.marketId}"
+            sport = pm.sport or bm.sport
+            expiry = pm.expiryTs or bm.expiryTs
 
             pairs.append({
                 "pair_id": pair_id,
@@ -168,17 +173,17 @@ def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[Normal
                     "expiry_ts": pm.expiryTs,
                     "sport": pm.sport,
                 },
-                "kalshi": {
-                    "venue": "kalshi",
-                    "id": km.marketId,
-                    "question": km.title,
-                    "team_key": km.team_key,
-                    "yes_token": km.yesTokenId,
-                    "no_token": km.noTokenId,
-                    "expiry_ts": km.expiryTs,
-                    "sport": km.sport,
+                "opinion": {
+                    "venue": venue_b_name,
+                    "id": bm.marketId,
+                    "question": bm.title,
+                    "team_key": bm.team_key,
+                    "yes_token": bm.yesTokenId,
+                    "no_token": bm.noTokenId,
+                    "expiry_ts": bm.expiryTs,
+                    "sport": bm.sport,
                 },
             })
 
-    log(f"Found {len(pairs)} matched pairs from {len(poly_markets)} Poly x {len(kalshi_markets)} Kalshi markets")
+    log(f"Found {len(pairs)} matched pairs from {len(poly_markets)} Poly x {len(venue_b_markets)} {venue_b_markets[0].venue if venue_b_markets else 'venue_b'} markets")
     return pairs

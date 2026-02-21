@@ -6,6 +6,11 @@ KALSHI_BASE_URL = os.environ.get("KALSHI_BASE_URL", "https://api.elections.kalsh
 POLY_GAMMA_URL = os.environ.get("POLY_GAMMA_URL", "https://gamma-api.polymarket.com")
 POLY_CLOB_URL = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
 
+OPINION_BASE_URL = os.environ.get("OPINION_BASE_URL", "https://proxy.opinion.trade:8443/openapi")
+OPINION_API_KEY = os.environ.get("OPINION_API_KEY", "")
+OPINION_MAX_PAGES = int(os.environ.get("OPINION_MAX_PAGES", "10"))
+OPINION_ORDERBOOK_DELAY = float(os.environ.get("OPINION_ORDERBOOK_DELAY", "0.08"))
+
 SCAN_INTERVAL_SECONDS = int(os.environ.get("ARB_SCAN_INTERVAL", "60"))
 CACHE_TTL_SECONDS = int(os.environ.get("ARB_CACHE_TTL", "45"))
 

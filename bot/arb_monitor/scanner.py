@@ -1,10 +1,13 @@
-"""Background scanner that periodically fetches markets, matches pairs, and detects arb opportunities."""
+"""Background scanner that periodically fetches markets, matches pairs, and detects arb opportunities.
+
+MVP mode: Polymarket × Opinion (Kalshi disabled but code preserved).
+"""
 
 import time
 import threading
 from .config import SCAN_INTERVAL_SECONDS
 from .adapters.polymarket import get_polymarket_markets
-from .adapters.kalshi import get_kalshi_markets
+from .adapters.opinion import get_opinion_markets
 from .core.filters import classify_sport
 from .core.matcher import find_pairs
 from .core.arb_engine import analyze_pair
@@ -20,7 +23,7 @@ _tracked_pairs: list[dict] = []
 _tracked_pairs_lock = threading.Lock()
 _scanner_health: dict = {
     "polyMarketsFetched": 0,
-    "kalshiMarketsFetched": 0,
+    "opinionMarketsFetched": 0,
     "lastError": None,
     "lastScanTimestamp": 0,
 }
@@ -34,7 +37,7 @@ def get_scanner_health() -> dict:
     return {
         "scannerRunning": _scanner_thread is not None and _scanner_thread.is_alive(),
         "polyMarketsFetched": _scanner_health.get("polyMarketsFetched", 0),
-        "kalshiMarketsFetched": _scanner_health.get("kalshiMarketsFetched", 0),
+        "opinionMarketsFetched": _scanner_health.get("opinionMarketsFetched", 0),
         "lastError": _scanner_health.get("lastError"),
         "lastScanTimestamp": _scanner_health.get("lastScanTimestamp", 0),
     }
@@ -93,23 +96,23 @@ def run_scan():
             if poly_markets:
                 arb_cache.set("poly_normalized", poly_markets)
 
-        cached_kalshi = arb_cache.get("kalshi_normalized")
-        if cached_kalshi is not None:
-            kalshi_markets = cached_kalshi
-            log(f"Using cached Kalshi data ({len(kalshi_markets)} markets)")
+        cached_opinion = arb_cache.get("opinion_normalized")
+        if cached_opinion is not None:
+            opinion_markets = cached_opinion
+            log(f"Using cached Opinion data ({len(opinion_markets)} markets)")
         else:
-            kalshi_markets = get_kalshi_markets()
-            if kalshi_markets:
-                arb_cache.set("kalshi_normalized", kalshi_markets)
+            opinion_markets = get_opinion_markets()
+            if opinion_markets:
+                arb_cache.set("opinion_normalized", opinion_markets)
 
         _scanner_health["polyMarketsFetched"] = len(poly_markets)
-        _scanner_health["kalshiMarketsFetched"] = len(kalshi_markets)
+        _scanner_health["opinionMarketsFetched"] = len(opinion_markets)
         _scanner_health["lastScanTimestamp"] = int(time.time())
 
-        log(f"Discovered: {len(poly_markets)} Poly, {len(kalshi_markets)} Kalshi")
+        log(f"Discovered: {len(poly_markets)} Poly, {len(opinion_markets)} Opinion")
 
-        if len(poly_markets) == 0 and len(kalshi_markets) == 0:
-            err_msg = "Both Polymarket and Kalshi returned 0 markets — likely a network/proxy issue"
+        if len(poly_markets) == 0 and len(opinion_markets) == 0:
+            err_msg = "Both Polymarket and Opinion returned 0 markets — likely a network/API key issue"
             log(f"❌ {err_msg}")
             _scanner_health["lastError"] = err_msg
             arb_store.set_error(err_msg)
@@ -117,27 +120,27 @@ def run_scan():
         elif len(poly_markets) == 0:
             _scanner_health["lastError"] = "Polymarket returned 0 markets — API may be blocked"
             log(f"⚠️ {_scanner_health['lastError']}")
-        elif len(kalshi_markets) == 0:
-            _scanner_health["lastError"] = "Kalshi returned 0 markets — API may be blocked"
+        elif len(opinion_markets) == 0:
+            _scanner_health["lastError"] = "Opinion returned 0 markets — check API key"
             log(f"⚠️ {_scanner_health['lastError']}")
         else:
             _scanner_health["lastError"] = None
 
         poly_sports = [m for m in poly_markets if m.sport]
-        kalshi_sports = [m for m in kalshi_markets if m.sport]
+        opinion_sports = [m for m in opinion_markets if m.sport]
 
         _last_discovery_stats = {
             "polymarket_total": len(poly_markets),
             "polymarket_sports": len(poly_sports),
-            "kalshi_total": len(kalshi_markets),
-            "kalshi_sports": len(kalshi_sports),
+            "opinion_total": len(opinion_markets),
+            "opinion_sports": len(opinion_sports),
             "poly_sample_titles": [m.title for m in poly_markets[:5]],
-            "kalshi_sample_titles": [m.title for m in kalshi_markets[:5]],
+            "opinion_sample_titles": [m.title for m in opinion_markets[:5]],
             "poly_sport_breakdown": _sport_breakdown(poly_markets),
-            "kalshi_sport_breakdown": _sport_breakdown(kalshi_markets),
+            "opinion_sport_breakdown": _sport_breakdown(opinion_markets),
         }
 
-        pairs = find_pairs(poly_markets, kalshi_markets)
+        pairs = find_pairs(poly_markets, opinion_markets)
         log(f"Matched {len(pairs)} pairs, analyzing orderbooks...")
 
         with _tracked_pairs_lock:

@@ -3896,18 +3896,18 @@ def api_arb_overlap_debug():
     errors = []
 
     try:
-        from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats
+        from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats as poly_discovery_stats
     except ImportError as e:
         errors.append(f"polymarket import: {e}")
         get_polymarket_markets = None
-        get_discovery_stats = lambda: {}
+        poly_discovery_stats = lambda: {}
 
     try:
-        from arb_monitor.adapters.kalshi import get_kalshi_markets, get_exclusion_stats
+        from arb_monitor.adapters.opinion import get_opinion_markets, get_discovery_stats as opinion_discovery_stats
     except ImportError as e:
-        errors.append(f"kalshi import: {e}")
-        get_kalshi_markets = None
-        get_exclusion_stats = lambda: {}
+        errors.append(f"opinion import: {e}")
+        get_opinion_markets = None
+        opinion_discovery_stats = lambda: {}
 
     try:
         poly = []
@@ -3915,51 +3915,52 @@ def api_arb_overlap_debug():
         if get_polymarket_markets:
             try:
                 poly = get_polymarket_markets()
-                poly_stats = get_discovery_stats()
+                poly_stats = poly_discovery_stats()
             except Exception as pe:
                 errors.append(f"polymarket fetch: {pe}")
 
-        kalshi = []
-        kalshi_stats = {}
-        if get_kalshi_markets:
+        opinion = []
+        opinion_stats = {}
+        if get_opinion_markets:
             try:
-                kalshi = get_kalshi_markets()
-                kalshi_stats = get_exclusion_stats()
-            except Exception as ke:
-                errors.append(f"kalshi fetch: {ke}")
+                opinion = get_opinion_markets()
+                opinion_stats = opinion_discovery_stats()
+            except Exception as oe:
+                errors.append(f"opinion fetch: {oe}")
 
         poly_by_sport = {}
         for m in poly:
             s = m.sport or "uncategorized"
             poly_by_sport[s] = poly_by_sport.get(s, 0) + 1
 
-        kalshi_by_sport = {}
-        for m in kalshi:
+        opinion_by_sport = {}
+        for m in opinion:
             s = m.sport or "uncategorized"
-            kalshi_by_sport[s] = kalshi_by_sport.get(s, 0) + 1
+            opinion_by_sport[s] = opinion_by_sport.get(s, 0) + 1
 
         poly_samples = [
             {"marketId": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs,
              "yesTokenId": m.yesTokenId, "noTokenId": m.noTokenId}
             for m in poly[:50]
         ]
-        kalshi_samples = [
-            {"ticker": m.marketId, "marketId": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs}
-            for m in kalshi[:50]
+        opinion_samples = [
+            {"marketId": m.marketId, "title": m.title, "teamKey": m.team_key, "expiryTs": m.expiryTs,
+             "yesTokenId": m.yesTokenId, "noTokenId": m.noTokenId}
+            for m in opinion[:50]
         ]
 
         return jsonify({
-            "kalshiSamples": kalshi_samples,
+            "opinionSamples": opinion_samples,
             "polymarketSamples": poly_samples,
-            "kalshiCountBySport": kalshi_by_sport,
+            "opinionCountBySport": opinion_by_sport,
             "polyCountBySport": poly_by_sport,
             "rawPolyCounts": poly_stats,
-            "rawKalshiCounts": kalshi_stats,
-            "polyErrors": errors if errors else None,
+            "rawOpinionCounts": opinion_stats,
+            "errors": errors if errors else None,
         })
     except Exception as e:
         print(f"❌ [Arb] /api/arbs/overlap_debug error: {e}")
-        return jsonify({"error": str(e), "polyErrors": errors}), 500
+        return jsonify({"error": str(e), "errors": errors}), 500
 
 
 @flask_app.route('/api/arbs/health', methods=['GET'])
@@ -3985,7 +3986,7 @@ def api_arb_diag():
         return jsonify({'status': 'unavailable', 'reason': 'arb_monitor not installed'}), 503
 
     from arb_monitor import http_client
-    from arb_monitor.config import POLY_GAMMA_URL, KALSHI_BASE_URL
+    from arb_monitor.config import POLY_GAMMA_URL, OPINION_BASE_URL, OPINION_API_KEY
 
     results = {
         "proxy": {
@@ -3994,12 +3995,12 @@ def api_arb_diag():
             "PROXY_URL": ("set" if os.environ.get("PROXY_URL") else "not set"),
         },
         "polymarket": {},
-        "kalshi": {},
+        "opinion": {},
     }
 
     for venue, url, params, headers in [
         ("polymarket", f"{POLY_GAMMA_URL}/markets", {"closed": "false", "limit": 2, "offset": 0}, {}),
-        ("kalshi", f"{KALSHI_BASE_URL}/events", {"limit": 2, "status": "open", "with_nested_markets": "true"}, {"accept": "application/json"}),
+        ("opinion", f"{OPINION_BASE_URL}/market", {"status": "activated", "limit": 2}, {"apikey": OPINION_API_KEY, "Content-Type": "application/json"}),
     ]:
         t0 = _time.time()
         try:
@@ -4330,12 +4331,19 @@ def main():
             start_scanner()
             print("🔎 arb_monitor scanner started")
             try:
-                from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats
+                from arb_monitor.adapters.polymarket import get_polymarket_markets, get_discovery_stats as poly_disc
                 test_poly = get_polymarket_markets()
-                stats = get_discovery_stats()
+                stats = poly_disc()
                 print(f"🔎 polymarket markets included: {len(test_poly)} (fetched: {stats.get('fetchedTotal', '?')})")
             except Exception as pe:
                 print(f"⚠️ Polymarket startup probe failed: {pe}")
+            try:
+                from arb_monitor.adapters.opinion import get_opinion_markets, get_discovery_stats as opinion_disc
+                test_op = get_opinion_markets()
+                op_stats = opinion_disc()
+                print(f"💬 opinion markets included: {len(test_op)} (fetched: {op_stats.get('fetchedTotal', '?')})")
+            except Exception as oe:
+                print(f"⚠️ Opinion startup probe failed: {oe}")
         except Exception as e:
             print(f"⚠️ Arb monitor failed to start: {e}")
     
