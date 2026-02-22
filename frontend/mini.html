@@ -1060,8 +1060,6 @@
         .arb-dot { width: 7px; height: 7px; border-radius: 50%; background: #555; flex-shrink: 0; }
         .arb-dot.live { background: #00c853; }
         .arb-dot.error { background: #ff4444; }
-        .arb-filter-row { display: flex; gap: 8px; }
-        .arb-filter-select { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border-subtle); color: var(--text-primary); border-radius: 8px; padding: 6px 10px; font-size: 12px; appearance: none; -webkit-appearance: none; }
         .arb-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); margin: 16px 0 6px; }
         .arb-card { background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
         .arb-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
@@ -1073,6 +1071,7 @@
         .arb-venue { flex: 1; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 6px 8px; }
         .arb-venue-name { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
         .arb-venue-price { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+        .arb-venue-link { text-decoration: none; color: inherit; display: block; }
         .arb-card-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); }
         .arb-empty { text-align: center; color: var(--text-secondary); font-size: 13px; padding: 40px 0; }
     </style>
@@ -1220,21 +1219,6 @@
                 <div class="arb-status" id="arbStatus">
                     <span class="arb-dot"></span>
                     <span id="arbStatusText">Loading...</span>
-                </div>
-                <div class="arb-filter-row">
-                    <select class="arb-filter-select" id="arbSportFilter">
-                        <option value="">All Sports</option>
-                        <option value="nba">NBA</option>
-                        <option value="nfl">NFL</option>
-                        <option value="soccer">Soccer</option>
-                        <option value="esports">Esports</option>
-                        <option value="mma">MMA</option>
-                    </select>
-                    <select class="arb-filter-select" id="arbSortFilter">
-                        <option value="edge">Edge %</option>
-                        <option value="roi">ROI</option>
-                        <option value="expiry">Expiry</option>
-                    </select>
                 </div>
             </div>
             <div id="arbOpportunities"></div>
@@ -1649,9 +1633,7 @@
         let arbRefreshTimer = null;
         
         async function loadArbData() {
-            const sport = document.getElementById('arbSportFilter')?.value || '';
-            const sort = document.getElementById('arbSortFilter')?.value || 'edge';
-            const url = '/api/arbs?sort=' + sort + (sport ? '&sports=' + sport : '') + '&limit=50';
+            const url = '/api/arbs?sort=edge&limit=50';
             try {
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Status ' + res.status);
@@ -1717,35 +1699,50 @@
             const roiPct = (item.roi || 0).toFixed(1);
             const legs = item.legs || [];
             let polyLeg = legs.find(l => l.venue === 'polymarket');
-            let opinLeg = legs.find(l => l.venue === 'opinion');
+            let kalshiLeg = legs.find(l => l.venue === 'kalshi');
             const polyPrice = polyLeg ? (polyLeg.price * 100).toFixed(0) : '?';
-            const opinPrice = opinLeg ? (opinLeg.price * 100).toFixed(0) : '?';
+            const kalshiPrice = kalshiLeg ? (kalshiLeg.price * 100).toFixed(0) : '?';
             const polySide = polyLeg ? polyLeg.side : '';
-            const opinSide = opinLeg ? opinLeg.side : '';
-            const sport = item.sport || '';
+            const kalshiSide = kalshiLeg ? kalshiLeg.side : '';
             const expiry = item.expiryTs ? new Date(item.expiryTs * 1000).toLocaleDateString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
-            
+
+            var polyUrl = '';
+            var kalshiUrl = '';
+            var pairId = item.pairId || '';
+            var parts = pairId.split('___');
+            if (parts.length === 2) {
+                var kalshiTicker = parts[1].replace('kalshi:', '');
+                if (kalshiTicker) kalshiUrl = 'https://kalshi.com/markets/' + kalshiTicker;
+            }
+            var title = item.title || '';
+            if (title) polyUrl = 'https://polymarket.com/markets?_q=' + encodeURIComponent(title);
+
             return '<div class="arb-card">' +
                 '<div class="arb-card-header">' +
                     '<div class="arb-card-title">' + (item.title || 'Unknown') + '</div>' +
                     '<span class="arb-badge ' + type + '">' + edgePct + '%</span>' +
                 '</div>' +
                 '<div class="arb-card-prices">' +
-                    '<div class="arb-venue"><div class="arb-venue-name">Poly ' + polySide + '</div><div class="arb-venue-price">' + polyPrice + '\u00a2</div></div>' +
-                    '<div class="arb-venue"><div class="arb-venue-name">Opinion ' + opinSide + '</div><div class="arb-venue-price">' + opinPrice + '\u00a2</div></div>' +
+                    '<div class="arb-venue">' +
+                        (polyUrl ? '<a href="' + polyUrl + '" target="_blank" class="arb-venue-link">' : '') +
+                        '<div class="arb-venue-name">POLY ' + polySide + '</div><div class="arb-venue-price">' + polyPrice + '\u00a2</div>' +
+                        (polyUrl ? '</a>' : '') +
+                    '</div>' +
+                    '<div class="arb-venue">' +
+                        (kalshiUrl ? '<a href="' + kalshiUrl + '" target="_blank" class="arb-venue-link">' : '') +
+                        '<div class="arb-venue-name">KALSHI ' + kalshiSide + '</div><div class="arb-venue-price">' + kalshiPrice + '\u00a2</div>' +
+                        (kalshiUrl ? '</a>' : '') +
+                    '</div>' +
                 '</div>' +
                 '<div class="arb-card-meta">' +
-                    '<span>' + sport.toUpperCase() + (expiry ? ' \u00b7 ' + expiry : '') + '</span>' +
+                    '<span>' + (expiry || '') + '</span>' +
                     '<span>ROI ' + roiPct + '%</span>' +
                 '</div>' +
             '</div>';
         }
 
         (function() {
-            const sf = document.getElementById('arbSportFilter');
-            const so = document.getElementById('arbSortFilter');
-            if (sf) sf.addEventListener('change', loadArbData);
-            if (so) so.addEventListener('change', loadArbData);
+            loadArbData();
         })();
 
         // ============================================
