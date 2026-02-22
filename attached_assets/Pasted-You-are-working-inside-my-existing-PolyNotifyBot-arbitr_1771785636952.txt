@@ -1,0 +1,93 @@
+You are working inside my existing PolyNotifyBot arbitrage monitor (Polymarket × Kalshi via PMXT). The pipeline already works end-to-end (fetch → normalize → match → price → /api/arbs output with indicative vs executable), but the matcher is still too permissive and creates embarrassing false matches, especially:
+
+- Tariff-rate series: Polymarket “between X% and Y% on March 31” matching Kalshi “tariff rate on China on July 1” (wrong date + wrong contract type + ladder spam)
+- Pope series: “Trump talk to Pope Leo XIV” matching “Taylor Swift meet Pope Leo XIV” (wrong subject entity + wrong action)
+- Generally: any match accepted mostly on generic anchors (“tariff”, “rate”, “pope”) and loose similarity.
+
+GOAL
+Make the MVP investor-safe by hardening matching + deduping Kalshi ladder markets BEFORE matching, without breaking current working endpoints (/api/arbs, /api/arbs/health, /api/arbs/diag, /api/arbs/match_debug, /api/arbs/overlap_debug).
+
+TASKS (IMPLEMENT ALL)
+
+(1) Matcher hardening gates (core fix)
+In arb_monitor/core/matcher.py (or wherever matcher logic lives), add deterministic gating rules that run BEFORE final acceptance:
+
+A) Anchor quality requirement
+- Split tokens into:
+  - STRONG entities: country/region names (china, eu, canada, russia, etc), major assets (bitcoin, eth), well-known named entities (trump, swift, pope, leo, xiv), major institutions (fed), places (greenland), and numerically-meaningful units ($, %, bps).
+  - GENERIC tokens: rate, tariff, will, before, by, meet, talk, etc.
+- Acceptance must require >= 2 STRONG overlaps OR (1 STRONG overlap + a second STRONG concept like bitcoin/fed/greenland).
+- Never accept a match if shared anchors are only GENERIC.
+
+B) Subject entity match gate (prevents Pope/Trump/Taylor errors)
+- Extract “primary subject entity” from title tokens:
+  - For people: detect proper-name patterns / known-entity tokens (e.g. trump, swift, biden, powell, pope leo xiv).
+  - For countries/regions: china/eu/canada etc.
+- If both sides contain a subject entity and they differ, hard reject with whyRejected="entity_mismatch".
+Example: Trump vs Taylor Swift should reject even if “pope leo xiv” overlaps.
+
+C) Date compatibility gate (prevents March 31 ↔ July 1 mismatches)
+- Detect explicit month/day references and month-only references (e.g., “March 31”, “July 1”, “in February”, “by Sep 15”, “before 2027”).
+- If BOTH titles contain a specific date/month window, require compatibility:
+  - same month for month-only
+  - for exact dates, allow only if same date OR within a small window (<= 7 days) OR if one is “by <date>” and the other is “before <same date>”.
+- Otherwise hard reject with whyRejected="date_mismatch".
+This should reject “March 31” vs “July 1”.
+
+D) Contract-type gate (range vs point/ladder)
+- Detect “range/inequality” language: between, less than, more than, at least, at most, under, over.
+- Detect “point/strike ladder” language/structure on Kalshi: repeated identical titles across many tickers with different strikes; and/or tickers containing numeric strike suffixes.
+- If one side is range/inequality and the other side is point/strike (or lacks range words), reject with whyRejected="contract_type_mismatch" unless score is extremely high AND dates/entities align (very rare).
+
+Implementation notes:
+- Preserve existing scoring (Jaccard shortlist + Levenshtein refinement + team_key boosts + predicate gating).
+- The new gates must be “hard blocks” that prevent acceptance even if similarity is high.
+- Update match_debug output to include:
+  - subjectA/subjectB (or null)
+  - dateA/dateB (parsed summary string)
+  - contractTypeA/contractTypeB ("range"|"point"|"unknown")
+  - whyRejected (string) and whyAccepted (string)
+so I can see exactly why it matched or rejected.
+
+(2) Deduplicate Kalshi ladder markets BEFORE matching (noise reduction)
+In the Kalshi normalization path (pmxt_adapter or kalshi adapter), implement grouping to prevent matching one Polymarket market against 20+ Kalshi strike variants:
+
+- Define a “dedupe key” for Kalshi markets:
+  - cleaned_title (after _clean_pmxt_title) + expiryTs (day-level) + optional event identifier if available.
+- Group all Kalshi markets by this dedupe key.
+- Keep only the TOP N per group by liquidity/volume/open_interest (prefer volume if available; fallback to open interest).
+  - Choose N=3 (safe default).
+- Expose counters in overlap_debug/diag:
+  - kalshiDedupGroups
+  - kalshiDedupDropped
+so I can confirm this is working.
+
+(3) Reduce false positives for tariff-rate families specifically
+Add a lightweight “domain rule”:
+- If tokens contain tariff + rate:
+  - require the counterparty entity (china/eu/canada) to match exactly.
+  - require the date gate to pass strictly.
+This can be implemented as a special-case inside the gates.
+
+(4) Keep MVP UX honest: executable vs indicative
+Do NOT remove the existing behavior:
+- If Kalshi is listing-price-only (no orderbook), results should be type="indicative" and include warnings:
+  - kalshi_listing_price_only
+  - not_executable_without_orderbook
+Ensure /api/arbs supports allowIndicative=1 and defaults to hiding indicative unless explicitly allowed (if already implemented, keep it; if not, implement now).
+
+DELIVERABLES / VERIFICATION
+After changes, add/confirm these quick checks:
+
+1) match_debug should show Pope mismatches rejected:
+- “Trump talk to Pope…” vs “Taylor Swift meet Pope…” must show whyRejected="entity_mismatch" or "contract_type_mismatch"/"predicate_mismatch".
+
+2) match_debug should show tariff mismatches rejected:
+- “tariff rate on China … March 31 … between …” should NOT match “tariff rate on China … July 1 …” (whyRejected="date_mismatch" or "contract_type_mismatch").
+
+3) /api/arbs should not be filled with dozens of near-identical tariff strike pairs.
+kalshiDedupDropped should be >0 when those ladder series exist.
+
+4) Do not break existing endpoints and health reporting.
+
+Implement with minimal invasive changes but correct behavior. Add clear inline comments. Avoid new heavy dependencies.

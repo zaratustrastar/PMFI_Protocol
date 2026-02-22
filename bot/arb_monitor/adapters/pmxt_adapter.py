@@ -8,6 +8,7 @@ Seed pairs: loaded from seedPairs.json for guaranteed coverage of known overlapp
 
 import json
 import os
+import re
 import time
 import threading
 from datetime import datetime, timezone
@@ -213,6 +214,52 @@ def fetch_polymarket_markets() -> tuple[list[NormalizedMarket], dict]:
     return normalized, stats
 
 
+KALSHI_DEDUP_TOP_N = 3
+_KALSHI_STRIKE_SUFFIX = re.compile(r'\s*[-–]\s*\d+\s*$')
+
+
+def _kalshi_dedup_key(nm: NormalizedMarket) -> str:
+    """Generate a dedup key for Kalshi ladder markets.
+
+    Groups by cleaned title (strip numeric strike suffix) + day-level expiry.
+    """
+    title = nm.title.lower().strip()
+    title = _KALSHI_STRIKE_SUFFIX.sub('', title)
+    title = re.sub(r'\s+', ' ', title).strip()
+
+    day_expiry = (nm.expiryTs // 86400) * 86400 if nm.expiryTs > 0 else 0
+    return f"{title}||{day_expiry}"
+
+
+def _dedup_kalshi_markets(markets: list[NormalizedMarket], top_n: int = KALSHI_DEDUP_TOP_N) -> tuple[list[NormalizedMarket], int, int]:
+    """Deduplicate Kalshi ladder markets by keeping top N per group.
+
+    Groups by cleaned title + day-level expiry.
+    Keeps top N by volume (fallback to open_interest).
+    Returns (deduped_list, num_groups, num_dropped).
+    """
+    groups: dict[str, list[NormalizedMarket]] = {}
+    for nm in markets:
+        key = _kalshi_dedup_key(nm)
+        if key not in groups:
+            groups[key] = []
+        groups[key].append(nm)
+
+    deduped = []
+    total_dropped = 0
+    for key, group in groups.items():
+        group.sort(
+            key=lambda m: (m.meta.get("volume", 0) or 0, m.meta.get("open_interest", 0) or 0),
+            reverse=True
+        )
+        kept = group[:top_n]
+        dropped = len(group) - len(kept)
+        total_dropped += dropped
+        deduped.extend(kept)
+
+    return deduped, len(groups), total_dropped
+
+
 def fetch_kalshi_markets() -> tuple[list[NormalizedMarket], dict]:
     global _last_kalshi_stats
     _ensure_clients()
@@ -224,6 +271,9 @@ def fetch_kalshi_markets() -> tuple[list[NormalizedMarket], dict]:
         "excludedExpiry": 0,
         "excludedPrice": 0,
         "apiErrors": [],
+        "kalshiDedupGroups": 0,
+        "kalshiDedupDropped": 0,
+        "kalshiPreDedup": 0,
     }
 
     log(f"Fetching Kalshi via PMXT ({len(PMXT_DISCOVERY_QUERIES)} queries, limit={PMXT_QUERY_LIMIT})...")
@@ -246,10 +296,20 @@ def fetch_kalshi_markets() -> tuple[list[NormalizedMarket], dict]:
             else:
                 stats["excludedExpiry"] += 1
 
-    stats["normalized"] = len(normalized)
+    stats["kalshiPreDedup"] = len(normalized)
+
+    # Deduplicate ladder markets (keep top N per title+expiry group)
+    deduped, num_groups, num_dropped = _dedup_kalshi_markets(normalized)
+    stats["kalshiDedupGroups"] = num_groups
+    stats["kalshiDedupDropped"] = num_dropped
+    stats["normalized"] = len(deduped)
+
+    if num_dropped > 0:
+        log(f"Kalshi dedup: {len(normalized)} → {len(deduped)} ({num_dropped} dropped from {num_groups} groups)")
+
     _last_kalshi_stats = stats
-    log(f"Kalshi: {stats['fetchedRaw']} raw → {stats['normalized']} normalized")
-    return normalized, stats
+    log(f"Kalshi: {stats['fetchedRaw']} raw → {stats['normalized']} normalized (dedup dropped {num_dropped})")
+    return deduped, stats
 
 
 def get_poly_discovery_stats() -> dict:

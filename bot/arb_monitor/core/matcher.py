@@ -1,15 +1,20 @@
 """Matcher - finds matching markets across Polymarket and Kalshi.
 
-Matching strategy (hardened v2):
+Matching strategy (hardened v3 — investor-safe):
   1. Tokenize with expanded stopwords + boilerplate removal.
   2. Drop pure year/time tokens unless both sides share a non-time anchor.
   3. Topic classification (crypto, geopolitics, companies, politics, sports) — block cross-topic.
   4. Predicate gating with expanded verb classes (acquire≠expel, nominate≠invade, etc.).
-  5. Anchor entity requirement: at least one shared non-stopword token len>=4 OR shared curated keyword.
-  6. Fast pass: token Jaccard on titles to build top-K shortlist.
-  7. Refine: Levenshtein on shortlist only (expensive, constrained to top candidates).
-  8. Combined score: 0.6 * Jaccard + 0.4 * Levenshtein.
-  9. Team key boost: if both have matching team_key, boost to max(score, 0.90).
+  5. STRONG anchor requirement: >=2 strong entity overlaps, or 1 strong + 1 strong concept.
+     Never accept if only generic tokens overlap.
+  6. Subject entity gate: if both titles have a primary subject and they differ, reject.
+  7. Date compatibility gate: month/day references must be compatible.
+  8. Contract-type gate: range/inequality vs point/strike ladder detection.
+  9. Tariff domain rule: tariff+rate requires exact counterparty entity + date match.
+  10. Fast pass: token Jaccard on titles to build top-K shortlist.
+  11. Refine: Levenshtein on shortlist only (expensive, constrained to top candidates).
+  12. Combined score: 0.6 * Jaccard + 0.4 * Levenshtein.
+  13. Team key boost: if both have matching team_key, boost to max(score, 0.90).
 """
 
 import re
@@ -58,16 +63,41 @@ TIME_TOKENS = frozenset({
     "q1", "q2", "q3", "q4",
 })
 
-ANCHOR_KEYWORDS = frozenset({
-    "bitcoin", "btc", "ethereum", "eth", "crypto", "solana", "xrp", "dogecoin",
-    "greenland", "openai", "tesla", "ukraine", "russia", "china", "taiwan",
-    "fed", "chair", "warsh", "powell", "yellen", "trump", "biden", "harris",
-    "congress", "senate", "house", "supreme", "court", "nato", "eu",
-    "spacex", "google", "apple", "amazon", "microsoft", "meta", "nvidia",
-    "tiktok", "musk", "bezos", "pope", "vatican", "israel", "gaza", "iran",
-    "korea", "tariff", "recession", "inflation", "rate", "gdp",
-    "olympics", "fifa", "nba", "nfl", "mlb", "nhl", "ufc",
-    "ai", "gpt", "agi", "nuclear", "asteroid", "mars",
+# --- STRONG vs GENERIC entity classification ---
+# Strong entities: countries, regions, major assets, named persons/institutions, places
+STRONG_ENTITIES = frozenset({
+    # Countries / regions
+    "china", "eu", "canada", "mexico", "russia", "ukraine", "taiwan", "greenland",
+    "israel", "gaza", "iran", "korea", "japan", "india", "brazil", "turkey",
+    "uk", "germany", "france", "australia", "saudi", "arabia",
+    # Major assets
+    "bitcoin", "btc", "ethereum", "eth", "solana", "xrp", "dogecoin", "doge",
+    "gold", "silver", "oil", "nasdaq", "sp500",
+    # Named people
+    "trump", "biden", "harris", "musk", "bezos", "powell", "warsh", "yellen",
+    "pope", "leo", "xiv", "swift", "taylor", "obama", "putin", "xi",
+    "zuckerberg", "altman", "desantis", "newsom", "vance",
+    # Major institutions / orgs
+    "fed", "nato", "congress", "senate", "supreme", "court", "sec", "fbi",
+    "cia", "pentagon", "un", "who", "imf", "ecb",
+    # Companies
+    "openai", "tesla", "spacex", "google", "apple", "amazon", "microsoft",
+    "meta", "nvidia", "tiktok", "twitter",
+    # Places
+    "mars", "moon", "antarctica",
+    # Major events/concepts with specific meaning
+    "olympics", "fifa", "super", "bowl", "nba", "nfl", "mlb", "nhl", "ufc",
+    "recession", "inflation", "gdp", "agi",
+})
+
+# Generic tokens that alone should never anchor a match
+GENERIC_TOKENS = frozenset({
+    "rate", "tariff", "meet", "talk", "visit", "reach", "hit", "drop",
+    "rise", "fall", "increase", "decrease", "change", "price", "level",
+    "market", "trade", "deal", "agreement", "announce", "announcement",
+    "new", "next", "first", "last", "top", "high", "low", "close",
+    "open", "start", "begin", "happen", "occur", "likely", "possible",
+    "chance", "probability", "odds",
 })
 
 TOPIC_KEYWORDS = {
@@ -75,7 +105,7 @@ TOPIC_KEYWORDS = {
         "bitcoin", "btc", "ethereum", "eth", "crypto", "solana", "xrp",
         "dogecoin", "doge", "cardano", "ada", "polygon", "matic",
         "defi", "nft", "blockchain", "halving", "stablecoin", "usdc",
-        "usdt", "binance", "coinbase", "sec", "etf", "altcoin",
+        "usdt", "binance", "coinbase", "etf", "altcoin",
         "litecoin", "ripple", "avalanche", "chainlink",
     },
     "geopolitics": {
@@ -90,7 +120,7 @@ TOPIC_KEYWORDS = {
         "microsoft", "meta", "nvidia", "tiktok", "twitter",
         "acquired", "acquire", "acquisition", "merger", "ipo",
         "ceo", "founder", "valuation", "stock", "shares",
-        "revenue", "earnings", "profit", "market cap",
+        "revenue", "earnings", "profit",
     },
     "politics": {
         "trump", "biden", "harris", "congress", "senate", "house",
@@ -99,7 +129,7 @@ TOPIC_KEYWORDS = {
         "impeach", "expelled", "expel", "resign", "indicted",
         "cabinet", "veto", "legislation", "bill", "law",
         "fed", "chair", "warsh", "powell", "yellen",
-        "tariff", "recession", "inflation", "rate",
+        "tariff", "recession", "inflation",
     },
     "sports": {
         "nba", "nfl", "mlb", "nhl", "ufc", "mma", "boxing",
@@ -110,6 +140,7 @@ TOPIC_KEYWORDS = {
     },
 }
 
+# --- Predicate verb classes ---
 _PREDICATE_ENDORSE = "ENDORSE"
 _PREDICATE_WIN_PRIMARY = "WIN_PRIMARY"
 _PREDICATE_WIN_GENERAL = "WIN_GENERAL"
@@ -121,6 +152,7 @@ _PREDICATE_INVADE = "INVADE"
 _PREDICATE_RESIGN = "RESIGN"
 _PREDICATE_BAN = "BAN"
 _PREDICATE_APPROVE = "APPROVE"
+_PREDICATE_MEET = "MEET"
 _PREDICATE_OTHER = "OTHER"
 
 _PREDICATE_VERB_CLASSES = {
@@ -129,10 +161,11 @@ _PREDICATE_VERB_CLASSES = {
     _PREDICATE_NOMINATE: {"nominate", "nominated", "nomination", "appoint", "appointed", "appointment", "pick", "select"},
     _PREDICATE_INDEPENDENCE: {"independence", "independent", "secede", "secession", "sovereignty", "autonomous"},
     _PREDICATE_INVADE: {"invade", "invaded", "invasion", "annex", "annexed", "annexation", "occupy", "occupied", "seize"},
-    _PREDICATE_RESIGN: {"resign", "resigned", "resignation", "step down", "quit"},
-    _PREDICATE_BAN: {"ban", "banned", "banning", "prohibit", "prohibited", "block", "blocked", "restrict"},
-    _PREDICATE_APPROVE: {"approve", "approved", "approval", "pass", "passed", "ratify", "ratified", "enact"},
-    _PREDICATE_ENDORSE: {"endorse", "endorsed", "endorsement", "endors", "backing", "back"},
+    _PREDICATE_RESIGN: {"resign", "resigned", "resignation", "quit"},
+    _PREDICATE_BAN: {"ban", "banned", "banning", "prohibit", "prohibited", "restrict"},
+    _PREDICATE_APPROVE: {"approve", "approved", "approval", "ratify", "ratified", "enact"},
+    _PREDICATE_ENDORSE: {"endorse", "endorsed", "endorsement", "endors", "backing"},
+    _PREDICATE_MEET: {"meet", "meeting", "talk", "talks", "speak", "visit", "visiting", "conversation"},
     _PREDICATE_WIN_PRIMARY: {"win", "winner", "primary", "nominee", "nomination", "runoff"},
     _PREDICATE_WIN_GENERAL: {"election", "general", "electoral"},
 }
@@ -144,12 +177,15 @@ _INCOMPATIBLE_PREDICATES = {
     frozenset({_PREDICATE_ACQUIRE, _PREDICATE_INVADE}),
     frozenset({_PREDICATE_ACQUIRE, _PREDICATE_RESIGN}),
     frozenset({_PREDICATE_ACQUIRE, _PREDICATE_BAN}),
+    frozenset({_PREDICATE_ACQUIRE, _PREDICATE_MEET}),
     frozenset({_PREDICATE_EXPEL, _PREDICATE_NOMINATE}),
     frozenset({_PREDICATE_EXPEL, _PREDICATE_INDEPENDENCE}),
     frozenset({_PREDICATE_EXPEL, _PREDICATE_APPROVE}),
+    frozenset({_PREDICATE_EXPEL, _PREDICATE_MEET}),
     frozenset({_PREDICATE_NOMINATE, _PREDICATE_INVADE}),
     frozenset({_PREDICATE_NOMINATE, _PREDICATE_EXPEL}),
     frozenset({_PREDICATE_NOMINATE, _PREDICATE_BAN}),
+    frozenset({_PREDICATE_NOMINATE, _PREDICATE_MEET}),
     frozenset({_PREDICATE_INDEPENDENCE, _PREDICATE_INVADE}),
     frozenset({_PREDICATE_INDEPENDENCE, _PREDICATE_ACQUIRE}),
     frozenset({_PREDICATE_RESIGN, _PREDICATE_NOMINATE}),
@@ -160,6 +196,59 @@ _INCOMPATIBLE_PREDICATES = {
     frozenset({_PREDICATE_ENDORSE, _PREDICATE_EXPEL}),
     frozenset({_PREDICATE_ENDORSE, _PREDICATE_ACQUIRE}),
     frozenset({_PREDICATE_ENDORSE, _PREDICATE_INVADE}),
+    frozenset({_PREDICATE_ENDORSE, _PREDICATE_MEET}),
+}
+
+# --- Date extraction patterns ---
+_MONTH_MAP = {
+    "january": 1, "jan": 1, "february": 2, "feb": 2, "march": 3, "mar": 3,
+    "april": 4, "apr": 4, "may": 5, "june": 6, "jun": 6, "july": 7, "jul": 7,
+    "august": 8, "aug": 8, "september": 9, "sep": 9, "october": 10, "oct": 10,
+    "november": 11, "nov": 11, "december": 12, "dec": 12,
+}
+_DATE_FULL_RE = re.compile(
+    r'\b(?:' + '|'.join(_MONTH_MAP.keys()) + r')\s+(\d{1,2})(?:\s*,?\s*(\d{4}))?\b',
+    re.IGNORECASE
+)
+_DATE_MONTH_ONLY_RE = re.compile(
+    r'\b(?:in|by|before|after|during)?\s*(?:' + '|'.join(_MONTH_MAP.keys()) + r')\b',
+    re.IGNORECASE
+)
+
+# --- Contract type patterns ---
+_RANGE_WORDS = re.compile(
+    r'\b(?:between|less\s+than|more\s+than|at\s+least|at\s+most|under|over|above|below)\b',
+    re.IGNORECASE
+)
+_RANGE_PATTERN = re.compile(r'\d+%?\s*(?:and|to|-)\s*\d+%?')
+_STRIKE_SUFFIX_RE = re.compile(r'-\d+$')
+
+# --- Known subject entities for extraction ---
+_KNOWN_PEOPLE = {
+    "trump": "trump", "donald trump": "trump",
+    "biden": "biden", "joe biden": "biden",
+    "harris": "harris", "kamala harris": "harris",
+    "musk": "musk", "elon musk": "musk",
+    "bezos": "bezos", "jeff bezos": "bezos",
+    "powell": "powell", "jerome powell": "powell",
+    "warsh": "warsh", "kevin warsh": "warsh",
+    "yellen": "yellen", "janet yellen": "yellen",
+    "swift": "swift", "taylor swift": "swift",
+    "pope": "pope", "pope leo": "pope", "pope leo xiv": "pope",
+    "pope francis": "pope",
+    "obama": "obama", "putin": "putin", "xi": "xi", "xi jinping": "xi",
+    "zuckerberg": "zuckerberg", "altman": "altman", "sam altman": "altman",
+    "desantis": "desantis", "newsom": "newsom", "vance": "vance",
+}
+
+_KNOWN_COUNTRY_ENTITIES = {
+    "china": "china", "eu": "eu", "european union": "eu",
+    "canada": "canada", "mexico": "mexico",
+    "russia": "russia", "ukraine": "ukraine", "taiwan": "taiwan",
+    "greenland": "greenland", "israel": "israel", "iran": "iran",
+    "korea": "korea", "north korea": "korea", "south korea": "korea",
+    "japan": "japan", "india": "india", "turkey": "turkey",
+    "saudi arabia": "saudi",
 }
 
 
@@ -170,7 +259,7 @@ def _normalize_vs(text: str) -> str:
 
 def _tokenize(text: str) -> set[str]:
     t = text.lower().strip()
-    t = re.sub(r'[^\w\s]', ' ', t)
+    t = re.sub(r'[^\w\s%$]', ' ', t)
     t = re.sub(r'\s+', ' ', t)
     tokens = {w for w in t.split() if w not in STOPWORDS and len(w) > 1}
     return tokens
@@ -185,11 +274,6 @@ def _is_time_token(token: str) -> bool:
 def _filter_time_tokens(tokens_a: set[str], tokens_b: set[str]) -> tuple[set[str], set[str]]:
     non_time_a = {t for t in tokens_a if not _is_time_token(t)}
     non_time_b = {t for t in tokens_b if not _is_time_token(t)}
-
-    shared_non_time = non_time_a & non_time_b
-    if shared_non_time:
-        return non_time_a, non_time_b
-
     return non_time_a, non_time_b
 
 
@@ -205,7 +289,6 @@ def _classify_topic(tokens: set[str], title_lower: str) -> str | None:
                     hits += 1
             elif kw in tokens:
                 hits += 1
-
         if hits > best_hits:
             best_hits = hits
             best_topic = topic
@@ -221,7 +304,6 @@ def _topics_compatible(topic_a: str | None, topic_b: str | None) -> bool:
 
 def _extract_predicate(title: str) -> str:
     t = title.lower()
-
     for pred, verb_set in _PREDICATE_VERB_CLASSES.items():
         for verb in verb_set:
             if " " in verb:
@@ -229,7 +311,6 @@ def _extract_predicate(title: str) -> str:
                     return pred
             elif re.search(r'\b' + re.escape(verb) + r'\b', t):
                 return pred
-
     return _PREDICATE_OTHER
 
 
@@ -242,28 +323,291 @@ def _predicates_compatible(pred_a: str, pred_b: str) -> bool:
     return pair not in _INCOMPATIBLE_PREDICATES
 
 
-def _find_shared_anchors(tokens_a: set[str], tokens_b: set[str]) -> set[str]:
-    shared = tokens_a & tokens_b
+# --- Gate A: Strong anchor quality ---
+def _classify_token_strength(token: str) -> str:
+    """Classify a token as STRONG or GENERIC."""
+    if token in STRONG_ENTITIES:
+        return "STRONG"
+    if token in GENERIC_TOKENS:
+        return "GENERIC"
+    # Tokens >= 4 chars that aren't in the generic list count as STRONG
+    # (likely proper nouns, specific terms)
+    if len(token) >= 4 and not _is_time_token(token):
+        return "STRONG"
+    return "GENERIC"
 
-    anchors = set()
-    for t in shared:
-        if _is_time_token(t):
-            continue
-        if t in ANCHOR_KEYWORDS:
-            anchors.add(t)
-        elif len(t) >= 4:
-            anchors.add(t)
 
-    return anchors
+def _check_anchor_quality(tokens_a: set[str], tokens_b: set[str],
+                           sport_a: str | None, sport_b: str | None) -> tuple[bool, set[str], set[str]]:
+    """Check if shared anchors meet the strong-entity requirement.
 
-
-def _has_anchor(tokens_a: set[str], tokens_b: set[str], sport_a: str | None, sport_b: str | None) -> bool:
+    Returns (passed, strong_shared, generic_shared).
+    Requires >= 2 STRONG overlaps, or 1 STRONG overlap if it's a curated strong entity.
+    Sports bypass this check.
+    """
     if sport_a or sport_b:
-        return True
+        shared = tokens_a & tokens_b
+        strong = {t for t in shared if _classify_token_strength(t) == "STRONG"}
+        generic = {t for t in shared if _classify_token_strength(t) == "GENERIC"}
+        return True, strong, generic
 
-    return len(_find_shared_anchors(tokens_a, tokens_b)) > 0
+    shared = tokens_a & tokens_b
+    non_time_shared = {t for t in shared if not _is_time_token(t)}
+
+    strong_shared = set()
+    generic_shared = set()
+    for t in non_time_shared:
+        strength = _classify_token_strength(t)
+        if strength == "STRONG":
+            strong_shared.add(t)
+        else:
+            generic_shared.add(t)
+
+    # Curated strong entities (in the STRONG_ENTITIES set) count double
+    curated_strong = strong_shared & STRONG_ENTITIES
+    # Accept if: >=2 strong tokens, or 1 curated strong + any other strong
+    if len(strong_shared) >= 2:
+        return True, strong_shared, generic_shared
+    if len(curated_strong) >= 1 and len(strong_shared) >= 1:
+        return True, strong_shared, generic_shared
+    # Single curated strong entity with specific meaning is OK
+    if len(curated_strong) >= 1:
+        return True, strong_shared, generic_shared
+
+    return False, strong_shared, generic_shared
 
 
+# --- Gate B: Subject entity extraction ---
+def _extract_subject_entity(title: str) -> str | None:
+    """Extract the primary subject entity (person or country) from a title.
+
+    Checks multi-word patterns first (e.g. "Taylor Swift"), then single words.
+    Returns a normalized canonical name or None.
+    """
+    t_lower = title.lower()
+
+    # Check multi-word patterns first (longest match wins)
+    found_entities = []
+    for pattern, canonical in sorted(_KNOWN_PEOPLE.items(), key=lambda x: -len(x[0])):
+        if " " in pattern:
+            if pattern in t_lower:
+                found_entities.append(canonical)
+                break
+    if not found_entities:
+        for pattern, canonical in _KNOWN_PEOPLE.items():
+            if " " not in pattern:
+                if re.search(r'\b' + re.escape(pattern) + r'\b', t_lower):
+                    found_entities.append(canonical)
+                    break
+
+    # Also check country entities
+    for pattern, canonical in sorted(_KNOWN_COUNTRY_ENTITIES.items(), key=lambda x: -len(x[0])):
+        if " " in pattern:
+            if pattern in t_lower:
+                found_entities.append(canonical)
+                break
+        elif re.search(r'\b' + re.escape(pattern) + r'\b', t_lower):
+            found_entities.append(canonical)
+            break
+
+    return found_entities[0] if found_entities else None
+
+
+def _extract_all_subjects(title: str) -> list[str]:
+    """Extract all subject entities from a title (may have multiple)."""
+    t_lower = title.lower()
+    found = []
+    seen = set()
+
+    # People
+    for pattern, canonical in sorted(_KNOWN_PEOPLE.items(), key=lambda x: -len(x[0])):
+        if canonical in seen:
+            continue
+        if " " in pattern:
+            if pattern in t_lower:
+                found.append(canonical)
+                seen.add(canonical)
+        elif re.search(r'\b' + re.escape(pattern) + r'\b', t_lower):
+            found.append(canonical)
+            seen.add(canonical)
+
+    # Countries
+    for pattern, canonical in sorted(_KNOWN_COUNTRY_ENTITIES.items(), key=lambda x: -len(x[0])):
+        if canonical in seen:
+            continue
+        if " " in pattern:
+            if pattern in t_lower:
+                found.append(canonical)
+                seen.add(canonical)
+        elif re.search(r'\b' + re.escape(pattern) + r'\b', t_lower):
+            found.append(canonical)
+            seen.add(canonical)
+
+    return found
+
+
+def _subjects_compatible(subjects_a: list[str], subjects_b: list[str]) -> tuple[bool, str | None]:
+    """Check if the primary subjects are compatible.
+
+    If both titles have identified subjects, they must be the same set.
+    Having one entity in common isn't enough if they differ on other entities
+    (e.g. "Trump talk to Pope" vs "Taylor Swift meet Pope" — pope overlaps but
+    Trump ≠ Swift, so reject).
+    Returns (compatible, reason_if_rejected).
+    """
+    if not subjects_a or not subjects_b:
+        return True, None
+
+    set_a = set(subjects_a)
+    set_b = set(subjects_b)
+
+    # All entities from both sides must match
+    only_in_a = set_a - set_b
+    only_in_b = set_b - set_a
+
+    if only_in_a and only_in_b:
+        return False, f"entity_mismatch: {sorted(only_in_a)} vs {sorted(only_in_b)}"
+
+    # One side is a subset of the other — acceptable
+    return True, None
+
+
+# --- Gate C: Date compatibility ---
+def _extract_date_info(title: str) -> dict | None:
+    """Extract date/month references from a title.
+
+    Returns dict with month (int), day (int or None), year (int or None),
+    or None if no date found.
+    """
+    t_lower = title.lower()
+
+    # Try full date: "March 31", "July 1, 2025"
+    match = _DATE_FULL_RE.search(t_lower)
+    if match:
+        month_str = match.group(0).split()[0].lower()
+        month = _MONTH_MAP.get(month_str)
+        day = int(match.group(1)) if match.group(1) else None
+        year = int(match.group(2)) if match.group(2) else None
+        return {"month": month, "day": day, "year": year,
+                "summary": f"{month_str.title()} {day}" + (f", {year}" if year else "")}
+
+    # Try month-only: "in February", "by September"
+    match = _DATE_MONTH_ONLY_RE.search(t_lower)
+    if match:
+        month_str = None
+        for m_name in _MONTH_MAP:
+            if m_name in match.group(0).lower():
+                month_str = m_name
+                break
+        if month_str:
+            month = _MONTH_MAP[month_str]
+            return {"month": month, "day": None, "year": None,
+                    "summary": month_str.title()}
+
+    return None
+
+
+def _dates_compatible(date_a: dict | None, date_b: dict | None) -> tuple[bool, str | None]:
+    """Check if two date references are compatible.
+
+    Both must have dates for this gate to apply.
+    Same month required for month-only. For exact dates, allow within 7 days.
+    """
+    if date_a is None or date_b is None:
+        return True, None
+
+    m_a, d_a = date_a["month"], date_a.get("day")
+    m_b, d_b = date_b["month"], date_b.get("day")
+
+    if m_a is None or m_b is None:
+        return True, None
+
+    # Different months — hard reject
+    if m_a != m_b:
+        return False, f"date_mismatch: {date_a['summary']} vs {date_b['summary']}"
+
+    # Same month, check days if both present
+    if d_a is not None and d_b is not None:
+        if abs(d_a - d_b) > 7:
+            return False, f"date_mismatch: {date_a['summary']} vs {date_b['summary']}"
+
+    return True, None
+
+
+# --- Gate D: Contract type ---
+def _detect_contract_type(title: str, market_id: str = "") -> str:
+    """Detect if a market is a range/inequality contract or point/strike.
+
+    Returns "range", "point", or "unknown".
+    """
+    t_lower = title.lower()
+
+    # Range/inequality language
+    if _RANGE_WORDS.search(t_lower):
+        return "range"
+    if _RANGE_PATTERN.search(t_lower):
+        return "range"
+
+    # Strike suffix in market ID (e.g., KXTARIFF-27, KXTARIFF-30)
+    if market_id and _STRIKE_SUFFIX_RE.search(market_id):
+        # Kalshi ladder markets often have numeric suffixes
+        if any(w in t_lower for w in ("rate", "price", "level", "percent", "%")):
+            return "point"
+
+    return "unknown"
+
+
+def _contract_types_compatible(type_a: str, type_b: str) -> tuple[bool, str | None]:
+    """Check if contract types are compatible.
+
+    Range vs point is almost always a mismatch.
+    """
+    if type_a == "unknown" or type_b == "unknown":
+        return True, None
+    if type_a == type_b:
+        return True, None
+    return False, f"contract_type_mismatch: {type_a} vs {type_b}"
+
+
+# --- Gate: Tariff domain rule ---
+def _check_tariff_domain(tokens_a: set[str], tokens_b: set[str],
+                          title_a: str, title_b: str) -> tuple[bool, str | None]:
+    """Special tariff+rate domain rule.
+
+    If both titles mention tariff+rate, require:
+    1. Exact counterparty entity match (china, eu, canada, etc.)
+    2. Date gate passes strictly
+    """
+    tariff_words = {"tariff", "tariffs"}
+    a_has_tariff = bool(tokens_a & tariff_words)
+    b_has_tariff = bool(tokens_b & tariff_words)
+
+    if not a_has_tariff or not b_has_tariff:
+        return True, None
+
+    # Both are tariff markets — apply strict rules
+    counterparties = {"china", "eu", "canada", "mexico", "japan", "india",
+                      "korea", "taiwan", "russia", "uk", "germany", "france",
+                      "brazil", "turkey", "vietnam", "indonesia"}
+
+    cp_a = tokens_a & counterparties
+    cp_b = tokens_b & counterparties
+
+    if cp_a and cp_b and cp_a != cp_b:
+        return False, f"tariff_counterparty_mismatch: {cp_a} vs {cp_b}"
+
+    # Strict date check for tariff markets
+    date_a = _extract_date_info(title_a)
+    date_b = _extract_date_info(title_b)
+    if date_a and date_b:
+        compatible, reason = _dates_compatible(date_a, date_b)
+        if not compatible:
+            return False, f"tariff_{reason}"
+
+    return True, None
+
+
+# --- Core matching functions ---
 def token_jaccard(a: str, b: str) -> float:
     ta = _tokenize(a)
     tb = _tokenize(b)
@@ -309,19 +653,15 @@ def combined_similarity(a: str, b: str) -> float:
 def compute_similarity(pm: NormalizedMarket, km: NormalizedMarket) -> float:
     pm_title = _normalize_vs(pm.title)
     km_title = _normalize_vs(km.title)
-
     score = combined_similarity(pm_title, km_title)
-
     if pm.team_key and km.team_key and pm.team_key == km.team_key:
         score = max(score, 0.90)
-
     return score
 
 
 def _expiry_close_enough(pm: NormalizedMarket, km: NormalizedMarket) -> bool:
     if pm.expiryTs <= 0 or km.expiryTs <= 0:
         return True
-
     sport = pm.sport or km.sport or ""
     gate = EXPIRY_GATES.get(sport, DEFAULT_EXPIRY_GATE)
     return abs(pm.expiryTs - km.expiryTs) <= gate
@@ -330,63 +670,159 @@ def _expiry_close_enough(pm: NormalizedMarket, km: NormalizedMarket) -> bool:
 def _evaluate_candidate(pm_title_norm: str, km_title_norm: str,
                          pm: NormalizedMarket, km: NormalizedMarket,
                          pm_pred: str, km_pred: str) -> dict:
+    """Evaluate a candidate pair with all hardening gates.
+
+    Returns debug dict with full scoring details and accept/reject reasons.
+    """
     tokens_a = _tokenize(pm_title_norm)
     tokens_b = _tokenize(km_title_norm)
-
     tokens_a_filtered, tokens_b_filtered = _filter_time_tokens(tokens_a, tokens_b)
 
     topic_a = _classify_topic(tokens_a, pm_title_norm.lower())
     topic_b = _classify_topic(tokens_b, km_title_norm.lower())
 
-    shared_anchors = _find_shared_anchors(tokens_a_filtered, tokens_b_filtered)
-
+    # Compute raw scores
     intersection = tokens_a_filtered & tokens_b_filtered
     union = tokens_a_filtered | tokens_b_filtered
     jaccard = len(intersection) / len(union) if union else 0.0
-
     lev = _levenshtein_similarity(pm_title_norm, km_title_norm)
     final_score = 0.6 * jaccard + 0.4 * lev
 
     if pm.team_key and km.team_key and pm.team_key == km.team_key:
         final_score = max(final_score, 0.90)
 
+    # Extract gate inputs
+    subjects_a = _extract_all_subjects(pm_title_norm)
+    subjects_b = _extract_all_subjects(km_title_norm)
+    date_a = _extract_date_info(pm_title_norm)
+    date_b = _extract_date_info(km_title_norm)
+    contract_a = _detect_contract_type(pm_title_norm, pm.marketId)
+    contract_b = _detect_contract_type(km_title_norm, km.marketId)
+
+    # Gate A: Anchor quality
+    anchor_ok, strong_shared, generic_shared = _check_anchor_quality(
+        tokens_a_filtered, tokens_b_filtered, pm.sport, km.sport
+    )
+
     reject_reasons = []
     accept_reasons = []
 
+    # Gate: Predicate compatibility
     if not _predicates_compatible(pm_pred, km_pred):
         reject_reasons.append(f"predicate_conflict: {pm_pred} vs {km_pred}")
         final_score = 0.0
 
+    # Gate: Topic compatibility
     if not _topics_compatible(topic_a, topic_b):
         reject_reasons.append(f"topic_mismatch: {topic_a} vs {topic_b}")
         final_score = 0.0
 
-    if not _has_anchor(tokens_a_filtered, tokens_b_filtered, pm.sport, km.sport):
-        reject_reasons.append("no_shared_anchor_entity")
+    # Gate A: Strong anchor quality
+    if not anchor_ok:
+        reject_reasons.append(f"weak_anchors_only: shared_generic={sorted(generic_shared)}")
         final_score = 0.0
 
+    # Gate B: Subject entity match
+    subj_ok, subj_reason = _subjects_compatible(subjects_a, subjects_b)
+    if not subj_ok:
+        reject_reasons.append(subj_reason)
+        final_score = 0.0
+
+    # Gate C: Date compatibility
+    date_ok, date_reason = _dates_compatible(date_a, date_b)
+    if not date_ok:
+        reject_reasons.append(date_reason)
+        final_score = 0.0
+
+    # Gate D: Contract type
+    ct_ok, ct_reason = _contract_types_compatible(contract_a, contract_b)
+    if not ct_ok:
+        reject_reasons.append(ct_reason)
+        final_score = 0.0
+
+    # Tariff domain rule
+    tariff_ok, tariff_reason = _check_tariff_domain(
+        tokens_a_filtered, tokens_b_filtered, pm_title_norm, km_title_norm
+    )
+    if not tariff_ok:
+        reject_reasons.append(tariff_reason)
+        final_score = 0.0
+
+    # Build accept reasons
     if final_score > 0 and not reject_reasons:
         if pm.team_key and km.team_key and pm.team_key == km.team_key:
             accept_reasons.append("team_key_match")
-        if shared_anchors:
-            accept_reasons.append(f"anchors: {', '.join(sorted(shared_anchors)[:5])}")
+        if strong_shared:
+            accept_reasons.append(f"strong_anchors: {', '.join(sorted(strong_shared)[:5])}")
         if topic_a and topic_a == topic_b:
             accept_reasons.append(f"same_topic: {topic_a}")
+        if subjects_a and subjects_b and set(subjects_a) & set(subjects_b):
+            accept_reasons.append(f"same_subject: {list(set(subjects_a) & set(subjects_b))}")
 
     return {
         "tokensA": sorted(tokens_a),
         "tokensB": sorted(tokens_b),
-        "sharedAnchors": sorted(shared_anchors),
+        "sharedAnchors": sorted(strong_shared),
+        "genericShared": sorted(generic_shared),
         "topicA": topic_a,
         "topicB": topic_b,
         "predicateA": pm_pred,
         "predicateB": km_pred,
+        "subjectA": subjects_a if subjects_a else None,
+        "subjectB": subjects_b if subjects_b else None,
+        "dateA": date_a["summary"] if date_a else None,
+        "dateB": date_b["summary"] if date_b else None,
+        "contractTypeA": contract_a,
+        "contractTypeB": contract_b,
         "jaccard": round(jaccard, 4),
         "levenshtein": round(lev, 4),
         "finalScore": round(final_score, 4),
         "whyAccepted": "; ".join(accept_reasons) if accept_reasons else None,
         "whyRejected": "; ".join(reject_reasons) if reject_reasons else None,
     }
+
+
+def _apply_hard_gates(pm_title_norm: str, km_title_norm: str,
+                       pm: NormalizedMarket, km: NormalizedMarket,
+                       tokens_a_filtered: set[str], tokens_b_filtered: set[str]) -> str | None:
+    """Apply all hard gates quickly. Returns rejection reason or None if passed."""
+
+    # Gate A: anchor quality
+    anchor_ok, _, _ = _check_anchor_quality(
+        tokens_a_filtered, tokens_b_filtered, pm.sport, km.sport
+    )
+    if not anchor_ok:
+        return "weak_anchors"
+
+    # Gate B: subject entity
+    subjects_a = _extract_all_subjects(pm_title_norm)
+    subjects_b = _extract_all_subjects(km_title_norm)
+    subj_ok, _ = _subjects_compatible(subjects_a, subjects_b)
+    if not subj_ok:
+        return "entity_mismatch"
+
+    # Gate C: date compatibility
+    date_a = _extract_date_info(pm_title_norm)
+    date_b = _extract_date_info(km_title_norm)
+    date_ok, _ = _dates_compatible(date_a, date_b)
+    if not date_ok:
+        return "date_mismatch"
+
+    # Gate D: contract type
+    ct_a = _detect_contract_type(pm_title_norm, pm.marketId)
+    ct_b = _detect_contract_type(km_title_norm, km.marketId)
+    ct_ok, _ = _contract_types_compatible(ct_a, ct_b)
+    if not ct_ok:
+        return "contract_type_mismatch"
+
+    # Tariff domain rule
+    tariff_ok, _ = _check_tariff_domain(
+        tokens_a_filtered, tokens_b_filtered, pm_title_norm, km_title_norm
+    )
+    if not tariff_ok:
+        return "tariff_rule"
+
+    return None
 
 
 def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[NormalizedMarket],
@@ -420,16 +856,18 @@ def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[Normal
 
             km_title_norm = _normalize_vs(km.title)
             km_tokens = _tokenize(km_title_norm)
-            km_tokens_filtered, _ = _filter_time_tokens(km_tokens, km_tokens)
             km_topic = _classify_topic(km_tokens, km_title_norm.lower())
 
             if not _topics_compatible(pm_topic, km_topic):
                 continue
 
-            _, filtered_b = _filter_time_tokens(pm_tokens, km_tokens)
             pm_filt, km_filt = _filter_time_tokens(pm_tokens, km_tokens)
 
-            if not _has_anchor(pm_filt, km_filt, pm.sport, km.sport):
+            # Apply all hard gates early (cheap reject)
+            gate_reject = _apply_hard_gates(
+                pm_title_norm, km_title_norm, pm, km, pm_filt, km_filt
+            )
+            if gate_reject:
                 continue
 
             intersection = pm_filt & km_filt
@@ -520,6 +958,10 @@ def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[Normal
 def debug_match_candidates(poly_markets: list[NormalizedMarket],
                             kalshi_markets: list[NormalizedMarket],
                             top_n: int = 50) -> list[dict]:
+    """Generate detailed debug output for match candidates.
+
+    Returns top accepted + interesting rejected candidates with full scoring details.
+    """
     candidates = []
 
     for pm in poly_markets[:200]:
@@ -538,6 +980,7 @@ def debug_match_candidates(poly_markets: list[NormalizedMarket],
                 pm_title_norm, km_title_norm, pm, km, pm_pred, km_pred
             )
 
+            # Include candidates with any score or any rejection reason
             if eval_result["finalScore"] > 0.05 or eval_result["whyRejected"]:
                 candidates.append({
                     "polyTitle": pm.title,
@@ -550,7 +993,7 @@ def debug_match_candidates(poly_markets: list[NormalizedMarket],
     candidates.sort(key=lambda x: x["finalScore"], reverse=True)
 
     accepted = [c for c in candidates if c["whyRejected"] is None and c["finalScore"] >= 0.35]
-    rejected_interesting = [c for c in candidates if c["whyRejected"] is not None][:20]
+    rejected_interesting = [c for c in candidates if c["whyRejected"] is not None][:25]
 
     result = accepted[:top_n]
     remaining = top_n - len(result)
