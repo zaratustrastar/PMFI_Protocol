@@ -284,16 +284,18 @@ def run_migration():
     
     try:
         import psycopg2
-        db_url = os.getenv("DATABASE_URL")
+        db_url = os.getenv("TRADING_DATABASE_URL", os.getenv("DATABASE_URL"))
         if not db_url:
             # Try loading from .env
             env_file = "/opt/polymarket-bot/.env"
             if os.path.exists(env_file):
                 with open(env_file) as f:
                     for line in f:
-                        if line.startswith("DATABASE_URL="):
+                        if line.startswith("TRADING_DATABASE_URL="):
                             db_url = line.split("=", 1)[1].strip().strip('"')
                             break
+                        elif line.startswith("DATABASE_URL=") and not db_url:
+                            db_url = line.split("=", 1)[1].strip().strip('"')
         
         if not db_url:
             print("⚠️  DATABASE_URL not found - run migration manually")

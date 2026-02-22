@@ -13,7 +13,7 @@ try:
 except ImportError:
     pass
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("TRADING_DATABASE_URL", os.getenv("DATABASE_URL"))
 
 def cleanup_old_jobs(nuclear: bool = False):
     """

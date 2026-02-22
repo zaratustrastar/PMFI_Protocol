@@ -38,7 +38,9 @@ SELL_LADDER_CONFIG = [
 POLL_INTERVAL_SECONDS = 10  # Check for filled orders every 10 seconds
 
 # Database
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+# TRADING_DATABASE_URL is the shared Neon DB reachable from both Replit and VPS
+# Falls back to DATABASE_URL for backwards compatibility
+DATABASE_URL = os.getenv("TRADING_DATABASE_URL", os.getenv("DATABASE_URL", ""))
 
 # Proxy settings (optional - for residential IP bypass)
 # Format: Use socks5:// for SOCKS proxies, http:// for HTTP proxies

@@ -11,7 +11,7 @@ try:
 except ImportError:
     pass
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("TRADING_DATABASE_URL", os.getenv("DATABASE_URL"))
 
 def add_market_date_columns():
     """Add market_created_at and market_closed_time columns to trading_jobs table"""

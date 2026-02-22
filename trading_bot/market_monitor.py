@@ -26,7 +26,7 @@ import html
 import time
 
 # Configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+DATABASE_URL = os.getenv("TRADING_DATABASE_URL", os.getenv("DATABASE_URL", ""))
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHANNEL = "@ponnymarket"
 REFERRAL_CODE = "via=q2XDjZW"

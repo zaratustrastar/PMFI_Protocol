@@ -25,9 +25,9 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from decimal import Decimal
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("TRADING_DATABASE_URL", os.getenv("DATABASE_URL"))
 if not DATABASE_URL:
-    print("❌ DATABASE_URL not set!")
+    print("❌ TRADING_DATABASE_URL / DATABASE_URL not set!")
     sys.exit(1)
 
 # Import from centralized config

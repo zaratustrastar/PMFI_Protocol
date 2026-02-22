@@ -195,7 +195,7 @@ const monitorAndPost = createStep({
     logger?.info("🚀 [monitorAndPost] Starting Polymarket monitoring");
 
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: process.env.TRADING_DATABASE_URL || process.env.DATABASE_URL,
     });
 
     try {
