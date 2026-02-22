@@ -1,0 +1,22 @@
+We have a working PMXT-based Poly×Kalshi arb monitor, but it produces dangerous false-positive matches and uses Kalshi listing prices (non-executable). Fix for investor-safe MVP.
+
+1) Matcher hardening (must):
+- Update tokenizer to drop boilerplate tokens: will, before, by, end, in, on, of, the, any, member, be, to, during, etc.
+- Drop all pure year tokens (2025-2035) and generic time units (year, month, feb, mar) unless both sides share a non-time anchor token too.
+- Add an “anchor entity” requirement for non-sports: after tokenization, require at least one shared non-stopword token of length >=4 OR a shared keyword from a curated set (bitcoin, greenland, openai, tesla, ukraine, fed, chair, warsh, powell, etc.). If no anchor token shared, similarity = 0 (no match).
+- Add a tiny topic classifier (crypto, geopolitics, companies, politics, sports) using keywords; block matches across different topics.
+- Keep predicate gating but expand verb classes so “acquire” never matches “expel”, “nominate” never matches “acquire”, “independence” never matches “invade”, etc.
+- Add a new debug endpoint /api/arbs/match_debug that returns top 50 candidate matches with: polyTitle, kalshiTitle, tokensA, tokensB, sharedAnchors, topicA/topicB, predicateA/predicateB, jaccard, levenshtein, finalScore, and whyAccepted/whyRejected.
+
+2) Kalshi pricing honesty (must):
+- In arb_engine output, if kalshi_source != "orderbook", do NOT classify as type="opportunity".
+  Instead classify as type="indicative" (or near_arb), add warning "kalshi_listing_price_only" and "not_executable_without_orderbook".
+- Add a query param allowIndicative=1 that includes these indicative opportunities; default should hide them.
+
+3) Polymarket URL correctness (should):
+- Ensure polyUrl corresponds to the correct market/event. If PMXT provides slug/event_url use it; otherwise include marketId and provide a stable link field. Do not show misleading polyUrl.
+
+After changes, run local sanity checks:
+- Ensure the previous false match "OpenAI acquired" vs "Congress expelled" is rejected.
+- Ensure Greenland and Bitcoin reserve remain matched.
+- Ensure opportunities array only contains executable (orderbook-based) opportunities unless allowIndicative=1.
