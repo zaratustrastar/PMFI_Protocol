@@ -33,8 +33,16 @@ def _build_urls(pair: dict) -> tuple[str, str]:
     else:
         poly_url = ""
 
-    kalshi_ticker = pair.get("kalshi_ticker", "")
-    kalshi_url = f"https://kalshi.com/markets/{kalshi_ticker.lower()}" if kalshi_ticker else ""
+    kalshi_url = pair.get("kalshi_url", "")
+    if kalshi_url and kalshi_url.startswith("http"):
+        pass
+    else:
+        kalshi_title = pair.get("kalshi_title", "") or pair.get("kalshi", {}).get("question", "")
+        if kalshi_title:
+            from urllib.parse import quote_plus
+            kalshi_url = f"https://kalshi.com/browse?query={quote_plus(kalshi_title)}"
+        else:
+            kalshi_url = "https://kalshi.com"
     return poly_url, kalshi_url
 
 
