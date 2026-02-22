@@ -4001,9 +4001,18 @@ def api_arb_diag():
         import pmxt
         pmxt_poly = pmxt.Polymarket()
         m = pmxt_poly.fetch_markets(limit=1)
-        results["pmxt_server"] = {"status": "OK", "marketsFetched": len(m), "elapsedMs": round((_time.time() - t0) * 1000)}
+        results["pmxt_server"] = {"status": "OK", "venue": "polymarket", "marketsFetched": len(m), "elapsedMs": round((_time.time() - t0) * 1000)}
     except Exception as pe:
-        results["pmxt_server"] = {"status": "FAILED", "error": str(pe), "elapsedMs": round((_time.time() - t0) * 1000)}
+        results["pmxt_server"] = {"status": "FAILED", "venue": "polymarket", "error": str(pe), "elapsedMs": round((_time.time() - t0) * 1000)}
+
+    t0 = _time.time()
+    try:
+        import pmxt
+        pmxt_kalshi = pmxt.Kalshi()
+        km = pmxt_kalshi.fetch_markets(limit=1)
+        results["pmxt_kalshi"] = {"status": "OK", "marketsFetched": len(km), "elapsedMs": round((_time.time() - t0) * 1000)}
+    except Exception as ke:
+        results["pmxt_kalshi"] = {"status": "FAILED", "error": str(ke), "elapsedMs": round((_time.time() - t0) * 1000)}
 
     for venue, url, params, headers in [
         ("polymarket", f"{POLY_GAMMA_URL}/markets", {"closed": "false", "limit": 2, "offset": 0}, {}),

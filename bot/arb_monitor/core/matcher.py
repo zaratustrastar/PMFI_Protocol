@@ -136,7 +136,7 @@ def _expiry_close_enough(pm: NormalizedMarket, km: NormalizedMarket) -> bool:
 
 
 def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[NormalizedMarket],
-               min_similarity: float = 0.45) -> list[dict]:
+               min_similarity: float = 0.35) -> list[dict]:
     pairs = []
     used_k: set[int] = set()
 

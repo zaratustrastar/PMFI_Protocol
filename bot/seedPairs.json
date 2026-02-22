@@ -1,5 +1,5 @@
 {
-  "_comment": "Pinned market pairs that always get scanned regardless of auto-discovery. Each entry maps a Polymarket event slug to a Kalshi event ticker. Add pairs here to guarantee coverage.",
+  "_comment": "Pinned market pairs that always get scanned regardless of auto-discovery. Each entry maps a Polymarket query to a Kalshi query. Seed pairs use relaxed matching (0.20 threshold) to guarantee coverage.",
   "pairs": [
     {
       "poly_query": "Fed Chair",
@@ -15,6 +15,31 @@
       "poly_query": "tariffs",
       "kalshi_query": "tariffs",
       "note": "Tariff revenue predictions"
+    },
+    {
+      "poly_query": "Bitcoin price",
+      "kalshi_query": "Bitcoin price",
+      "note": "Bitcoin price targets"
+    },
+    {
+      "poly_query": "Bitcoin reserve",
+      "kalshi_query": "Bitcoin reserve",
+      "note": "National Bitcoin reserve"
+    },
+    {
+      "poly_query": "Greenland",
+      "kalshi_query": "Greenland",
+      "note": "Trump Greenland acquisition"
+    },
+    {
+      "poly_query": "Ukraine ceasefire",
+      "kalshi_query": "Ukraine ceasefire",
+      "note": "Ukraine peace deal / ceasefire"
+    },
+    {
+      "poly_query": "Elon Musk",
+      "kalshi_query": "Elon Musk",
+      "note": "Elon Musk DOGE / government role"
     }
   ]
 }

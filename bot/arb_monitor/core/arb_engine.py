@@ -64,25 +64,26 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
     pm_yes_book = pmxt_adapter.fetch_poly_orderbook(pm_yes_token)
     pm_no_book = pmxt_adapter.fetch_poly_orderbook(pm_no_token)
 
+    kl_yes_book = pmxt_adapter.fetch_kalshi_orderbook(kl_yes_token)
+    kl_no_book = pmxt_adapter.fetch_kalshi_orderbook(kl_no_token)
+
+    kl_yes_has_book = kl_yes_book.get("source") == "orderbook" and kl_yes_book.get("best_ask") is not None
+    kl_no_has_book = kl_no_book.get("source") == "orderbook" and kl_no_book.get("best_ask") is not None
+
+    kl_yes_price = kl.get("yes_price") or pair.get("kalshi", {}).get("yes_price")
+    kl_no_price = kl.get("no_price") or pair.get("kalshi", {}).get("no_price")
+
     kl_prices = {
-        "yes_best_ask": kl.get("yes_price") or pair.get("kalshi", {}).get("yes_price"),
-        "no_best_ask": kl.get("no_price") or pair.get("kalshi", {}).get("no_price"),
-        "yes_ask_size": 0,
-        "no_ask_size": 0,
-        "source": "listing_price",
+        "yes_best_ask": kl_yes_book.get("best_ask") if kl_yes_has_book else kl_yes_price,
+        "no_best_ask": kl_no_book.get("best_ask") if kl_no_has_book else kl_no_price,
+        "yes_ask_size": kl_yes_book.get("ask_size", 0) if kl_yes_has_book else 0,
+        "no_ask_size": kl_no_book.get("ask_size", 0) if kl_no_has_book else 0,
+        "source": "orderbook" if (kl_yes_has_book or kl_no_has_book) else "listing_price",
     }
 
-    kalshi_market = None
-    for key in ("_normalized_market",):
-        if key in kl:
-            kalshi_market = kl[key]
-            break
-    if kalshi_market and hasattr(kalshi_market, "meta"):
-        kl_prices["yes_best_ask"] = kalshi_market.meta.get("yes_price")
-        kl_prices["no_best_ask"] = kalshi_market.meta.get("no_price")
-
     if kl_prices["yes_best_ask"] is None and kl_prices["no_best_ask"] is None:
-        kl_prices = _get_kalshi_prices_from_pair(pair)
+        log(f"No Kalshi prices for pair {pair.get('pair_id', '?')}: orderbook={kl_yes_book.get('source')}, listing yes={kl_yes_price} no={kl_no_price}")
+        warnings.append("no_kalshi_prices")
 
     routes = []
 
@@ -208,17 +209,6 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
         result["debugPrices"] = debug_prices
 
     return result
-
-
-def _get_kalshi_prices_from_pair(pair: dict) -> dict:
-    kl = pair.get("kalshi", {})
-    return {
-        "yes_best_ask": kl.get("yes_price"),
-        "no_best_ask": kl.get("no_price"),
-        "yes_ask_size": 0,
-        "no_ask_size": 0,
-        "source": "listing_price",
-    }
 
 
 def _build_watchlist_item(pair, routes, debug: bool = False) -> dict | None:

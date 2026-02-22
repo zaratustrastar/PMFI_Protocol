@@ -117,6 +117,7 @@ def run_scan():
                 arb_cache.set("kalshi_normalized", kalshi_markets)
 
         seed_pairs_config = load_seed_pairs()
+        seed_direct_pairs = []
         if seed_pairs_config:
             seed_poly, seed_kalshi = fetch_seed_pair_markets(seed_pairs_config)
             poly_ids = {m.marketId for m in poly_markets}
@@ -129,7 +130,8 @@ def run_scan():
                 if m.marketId not in kalshi_ids:
                     kalshi_markets.append(m)
                     kalshi_ids.add(m.marketId)
-            log(f"After seed injection: {len(poly_markets)} Poly, {len(kalshi_markets)} Kalshi")
+            seed_direct_pairs = _build_seed_direct_pairs(seed_poly, seed_kalshi)
+            log(f"After seed injection: {len(poly_markets)} Poly, {len(kalshi_markets)} Kalshi, {len(seed_direct_pairs)} direct seed pairs")
 
         _scanner_health["polyMarketsFetched"] = len(poly_markets)
         _scanner_health["kalshiMarketsFetched"] = len(kalshi_markets)
@@ -164,9 +166,23 @@ def run_scan():
             "kalshi_stats": get_kalshi_discovery_stats(),
         }
 
-        pairs = find_pairs(poly_markets, kalshi_markets)
+        fuzzy_pairs = find_pairs(poly_markets, kalshi_markets)
+
+        seen_pair_ids = set()
+        pairs = []
+        for p in seed_direct_pairs:
+            pid = p.get("pair_id", "")
+            if pid not in seen_pair_ids:
+                seen_pair_ids.add(pid)
+                pairs.append(p)
+        for p in fuzzy_pairs:
+            pid = p.get("pair_id", "")
+            if pid not in seen_pair_ids:
+                seen_pair_ids.add(pid)
+                pairs.append(p)
+
         _scanner_health["pairsMatched"] = len(pairs)
-        log(f"Matched {len(pairs)} pairs, analyzing prices...")
+        log(f"Matched {len(pairs)} pairs ({len(seed_direct_pairs)} seed + {len(fuzzy_pairs)} fuzzy), analyzing prices...")
 
         with _tracked_pairs_lock:
             _tracked_pairs = list(pairs)
@@ -216,6 +232,19 @@ def run_scan():
         _scanner_health["lastError"] = str(e)
         _scanner_health["lastScanTimestamp"] = int(time.time())
         arb_store.set_error(str(e))
+
+
+def _build_seed_direct_pairs(seed_poly: list, seed_kalshi: list) -> list[dict]:
+    from .core.matcher import find_pairs as _find_pairs
+    if not seed_poly or not seed_kalshi:
+        return []
+    pairs = _find_pairs(seed_poly, seed_kalshi, min_similarity=0.20)
+    for p in pairs:
+        p["seed_direct"] = True
+        if p["similarity"] < 0.35:
+            p["similarity"] = max(p["similarity"], 0.35)
+    log(f"Seed direct matching: {len(seed_poly)} poly x {len(seed_kalshi)} kalshi → {len(pairs)} pairs")
+    return pairs
 
 
 def _inject_kalshi_prices_into_pairs(pairs: list[dict], kalshi_markets: list):

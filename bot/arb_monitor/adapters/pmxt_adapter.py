@@ -46,6 +46,24 @@ def _ensure_clients():
             log("Kalshi client initialized")
 
 
+def _clean_pmxt_title(title: str) -> str:
+    if " - " in title:
+        parts = title.split(" - ", 1)
+        market_q = parts[1].strip()
+        if len(market_q) > 15:
+            return market_q
+    if " | " in title:
+        parts = title.split(" | ", 1)
+        market_q = parts[0].strip()
+        if len(market_q) > 15:
+            return market_q
+    if ": " in title:
+        parts = title.split(": ", 1)
+        if len(parts[0]) < 30 and len(parts[1]) > 15:
+            return parts[1].strip()
+    return title
+
+
 def _parse_resolution_date(rd) -> int:
     if not rd:
         return 0
@@ -77,9 +95,10 @@ def _pmxt_market_to_normalized(m, venue: str) -> Optional[NormalizedMarket]:
     if yes_price <= MIN_PRICE_THRESHOLD and no_price <= MIN_PRICE_THRESHOLD:
         return None
 
-    title = m.title or m.question or ""
-    if not title:
+    raw_title = m.title or m.question or ""
+    if not raw_title:
         return None
+    title = _clean_pmxt_title(raw_title)
 
     expiry_ts = _parse_resolution_date(m.resolution_date)
 
@@ -116,7 +135,7 @@ def _pmxt_market_to_normalized(m, venue: str) -> Optional[NormalizedMarket]:
     )
 
 
-def _fetch_venue_markets(client, venue: str, queries: list[str], limit: int, rate_delay: float) -> list:
+def _fetch_venue_markets(client, venue: str, queries: list[str], limit: int, rate_delay: float) -> tuple[list, list]:
     raw_markets = {}
     errors = []
 
@@ -258,6 +277,26 @@ def fetch_poly_orderbook(outcome_id: str) -> dict:
     except Exception as e:
         log(f"Poly orderbook error for {outcome_id[:20]}...: {e}")
         return {"best_ask": None, "best_bid": None, "ask_size": 0, "bid_size": 0}
+
+
+def fetch_kalshi_orderbook(outcome_id: str) -> dict:
+    _ensure_clients()
+    try:
+        book = _kalshi_client.fetch_order_book(outcome_id)
+        best_ask = book.asks[0].price if book.asks else None
+        best_bid = book.bids[0].price if book.bids else None
+        ask_size = book.asks[0].size if book.asks else 0
+        bid_size = book.bids[0].size if book.bids else 0
+        return {
+            "best_ask": best_ask,
+            "best_bid": best_bid,
+            "ask_size": ask_size,
+            "bid_size": bid_size,
+            "source": "orderbook",
+        }
+    except Exception as e:
+        log(f"Kalshi orderbook error for {outcome_id[:20]}...: {e}")
+        return {"best_ask": None, "best_bid": None, "ask_size": 0, "bid_size": 0, "source": "error"}
 
 
 def get_kalshi_prices_from_listing(market: NormalizedMarket) -> dict:
