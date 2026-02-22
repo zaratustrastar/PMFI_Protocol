@@ -1,0 +1,52 @@
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# journalctl -u psniper-bot -n 50 --no-pager
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064402]: ModuleNotFoundError: No module named 'requests'
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 5.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Start request repeated too quickly.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Failed to start psniper-bot.service - pSNIPER Bot V7.
+Feb 22 01:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 22 01:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064813]: Traceback (most recent call last):
+Feb 22 01:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064813]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 88, in <module>
+Feb 22 01:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064813]:     import psycopg2
+Feb 22 01:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064813]: ModuleNotFoundError: No module named 'psycopg2'
+Feb 22 01:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 01:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 1.
+Feb 22 01:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064831]: Traceback (most recent call last):
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064831]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 88, in <module>
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064831]:     import psycopg2
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064831]: ModuleNotFoundError: No module named 'psycopg2'
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 2.
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064833]: Traceback (most recent call last):
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064833]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 88, in <module>
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064833]:     import psycopg2
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064833]: ModuleNotFoundError: No module named 'psycopg2'
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 3.
+Feb 22 01:20:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064835]: Traceback (most recent call last):
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064835]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 88, in <module>
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064835]:     import psycopg2
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064835]: ModuleNotFoundError: No module named 'psycopg2'
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 4.
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064841]: Traceback (most recent call last):
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064841]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 88, in <module>
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064841]:     import psycopg2
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064841]: ModuleNotFoundError: No module named 'psycopg2'
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 5.
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Start request repeated too quickly.
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:20:45 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Failed to start psniper-bot.service - pSNIPER Bot V7.
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

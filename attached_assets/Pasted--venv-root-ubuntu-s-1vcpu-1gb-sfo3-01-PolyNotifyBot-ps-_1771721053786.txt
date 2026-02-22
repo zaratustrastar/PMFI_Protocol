@@ -1,0 +1,76 @@
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# ps aux | grep -E "bot_v7\.py|flask" | grep -v grep
+root     3060171  1.2  3.2 517732 129296 ?       Ssl  Feb21   0:14 /usr/bin/python3 bot/bot_v7.py
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# ^C
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# pip install pmxt
+Requirement already satisfied: pmxt in ./.venv/lib/python3.12/site-packages (2.10.0)
+Requirement already satisfied: urllib3>=1.26.0 in ./.venv/lib/python3.12/site-packages (from pmxt) (2.6.3)
+Requirement already satisfied: python-dateutil>=2.8.0 in ./.venv/lib/python3.12/site-packages (from pmxt) (2.9.0.post0)
+Requirement already satisfied: pydantic>=2.0.0 in ./.venv/lib/python3.12/site-packages (from pmxt) (2.12.5)
+Requirement already satisfied: typing-extensions>=4.0.0 in ./.venv/lib/python3.12/site-packages (from pmxt) (4.15.0)
+Requirement already satisfied: annotated-types>=0.6.0 in ./.venv/lib/python3.12/site-packages (from pydantic>=2.0.0->pmxt) (0.7.0)
+Requirement already satisfied: pydantic-core==2.41.5 in ./.venv/lib/python3.12/site-packages (from pydantic>=2.0.0->pmxt) (2.41.5)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./.venv/lib/python3.12/site-packages (from pydantic>=2.0.0->pmxt) (0.4.2)
+Requirement already satisfied: six>=1.5 in ./.venv/lib/python3.12/site-packages (from python-dateutil>=2.8.0->pmxt) (1.17.0)
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# python3 -c "import pmxt; p = pmxt.Polymarket(); m = p.fetch_markets(limit=1); print(f'OK: {len(m)} market, title={m[0].title[:50]}')"
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/server_manager.py", line 287, in _start_server_via_launcher
+    raise Exception(
+Exception: Failed to start server: file:///root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/_server/bin/pmxt-ensure-server:16
+const fs = require('fs');
+           ^
+
+ReferenceError: require is not defined in ES module scope, you can use import instead
+    at file:///root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/_server/bin/pmxt-ensure-server:16:12
+    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v20.19.5
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/client.py", line 239, in __init__
+    self._server_manager.ensure_server_running()
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/server_manager.py", line 85, in ensure_server_running
+    self._start_server_via_launcher()
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/server_manager.py", line 293, in _start_server_via_launcher
+    raise Exception(f"Failed to start server: {e}")
+Exception: Failed to start server: Failed to start server: file:///root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/_server/bin/pmxt-ensure-server:16
+const fs = require('fs');
+           ^
+
+ReferenceError: require is not defined in ES module scope, you can use import instead
+    at file:///root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/_server/bin/pmxt-ensure-server:16:12
+    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v20.19.5
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/client.py", line 1538, in __init__
+    super().__init__(
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/client.py", line 247, in __init__
+    raise Exception(
+Exception: Failed to start PMXT server: Failed to start server: Failed to start server: file:///root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/_server/bin/pmxt-ensure-server:16
+const fs = require('fs');
+           ^
+
+ReferenceError: require is not defined in ES module scope, you can use import instead
+    at file:///root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/_server/bin/pmxt-ensure-server:16:12
+    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v20.19.5
+
+
+Please ensure 'pmxtjs' is installed: npm install -g pmxtjs
+Or start the server manually: pmxt-server
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

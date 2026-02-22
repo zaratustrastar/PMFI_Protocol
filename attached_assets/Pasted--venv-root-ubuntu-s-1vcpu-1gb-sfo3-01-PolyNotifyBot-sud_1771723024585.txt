@@ -1,0 +1,45 @@
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl status psniper-bot
+× psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: failed (Result: exit-code) since Sun 2026-02-22 01:13:10 UTC; 3min 9s ago
+   Duration: 172ms
+    Process: 3064402 ExecStart=/root/PolyNotifyBot/.venv/bin/python3 bot/bot_v7.py (code=exited, status=1/FAILURE)
+   Main PID: 3064402 (code=exited, status=1/FAILURE)
+        CPU: 168ms
+
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 5.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Start request repeated too quickly.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Failed to start psniper-bot.service - pSNIPER Bot V7.
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# journalctl -u psniper-bot -n 30 --no-pager
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 2.
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064397]: Traceback (most recent call last):
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064397]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 87, in <module>
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064397]:     import requests
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064397]: ModuleNotFoundError: No module named 'requests'
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 3.
+Feb 22 01:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064399]: Traceback (most recent call last):
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064399]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 87, in <module>
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064399]:     import requests
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064399]: ModuleNotFoundError: No module named 'requests'
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 4.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064402]: Traceback (most recent call last):
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064402]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 87, in <module>
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064402]:     import requests
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3064402]: ModuleNotFoundError: No module named 'requests'
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 5.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Start request repeated too quickly.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 22 01:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Failed to start psniper-bot.service - pSNIPER Bot V7.
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

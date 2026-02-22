@@ -1,0 +1,126 @@
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo /usr/bin/pip3 install pmxt
+error: externally-managed-environment
+
+× This environment is externally managed
+╰─> To install Python packages system-wide, try apt install
+    python3-xyz, where xyz is the package you are trying to
+    install.
+    
+    If you wish to install a non-Debian-packaged Python package,
+    create a virtual environment using python3 -m venv path/to/venv.
+    Then use path/to/venv/bin/python and path/to/venv/bin/pip. Make
+    sure you have python3-full installed.
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# ages.thon installation or OS distribution provider. You can override this, at the risk of breaking your 
+-bash: root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot#: No such file or directory
+-bash: syntax error near unexpected token `most'
+-bash: syntax error near unexpected token `newline'
+ModuleNotFoundError:: command not found
+-bash: root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot#: No such file or directory
+Traceback (most recent call last):
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/client.py", line 239, in __init__
+    self._server_manager.ensure_server_running()
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/server_manager.py", line 85, in ensure_server_running
+    self._start_server_via_launcher()
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/server_manager.py", line 265, in _start_server_via_launcher
+    raise Exception(
+Exception: pmxt-ensure-server not found.
+This should have been bundled with the package.
+Please reinstall: pip install --force-reinstall pmxt
+Or install the server manually: npm install -g pmxt-core
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/client.py", line 1538, in __init__
+    super().__init__(
+  File "/root/PolyNotifyBot/.venv/lib/python3.12/site-packages/pmxt/client.py", line 247, in __init__
+    raise Exception(
+Exception: Failed to start PMXT server: pmxt-ensure-server not found.
+This should have been bundled with the package.
+Please reinstall: pip install --force-reinstall pmxt
+Or install the server manually: npm install -g pmxt-core
+
+Please ensure 'pmxtjs' is installed: npm install -g pmxtjs
+Or start the server manually: pmxt-server
+-bash: syntax error near unexpected token `most'
+Command 'File' not found, did you mean:
+  command 'vile' from deb vile (9.8y-3)
+  command 'zile' from deb zile (2.6.2-2)
+  command 'kile' from deb kile (4:2.9.93-2)
+  command 'file' from deb file (1:5.45-2)
+Try: apt install <deb name>
+-bash: syntax error near unexpected token `File'
+-bash: syntax error near unexpected token `File'
+-bash: syntax error near unexpected token `('
+Exception:: command not found
+This: command not found
+Command 'Please' not found, did you mean:
+  command 'please' from deb pleaser (0.5.4-1)
+Try: apt install <deb name>
+Or: command not found
+Command 'During' not found, did you mean:
+  command 'turing' from deb turing (0.11~beta-4)
+Try: apt install <deb name>
+-bash: syntax error near unexpected token `most'
+-bash: syntax error near unexpected token `newline'
+Command 'File' not found, did you mean:
+  command 'kile' from deb kile (4:2.9.93-2)
+  command 'vile' from deb vile (9.8y-3)
+  command 'zile' from deb zile (2.6.2-2)
+  command 'file' from deb file (1:5.45-2)
+Try: apt install <deb name>
+-bash: syntax error near unexpected token `.__init__'
+Command 'File' not found, did you mean:
+  command 'zile' from deb zile (2.6.2-2)
+  command 'kile' from deb kile (4:2.9.93-2)
+  command 'vile' from deb vile (9.8y-3)
+  command 'file' from deb file (1:5.45-2)
+Try: apt install <deb name>
+-bash: syntax error near unexpected token `('
+Exception:: command not found
+This: command not found
+Command 'Please' not found, did you mean:
+  command 'please' from deb pleaser (0.5.4-1)
+Try: apt install <deb name>
+Or: command not found
+Command 'Please' not found, did you mean:
+  command 'please' from deb pleaser (0.5.4-1)
+Try: apt install <deb name>
+Or: command not found
+-bash: syntax error near unexpected token `root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot#'
+error:: command not found
+×: command not found
+╰─: command not found
+python3-xyz,: command not found
+Command 'install.' not found, did you mean:
+  command 'install' from deb coreutils (9.4-3ubuntu6.1)
+Try: apt install <deb name>
+If: command not found
+Command 'create' not found, did you mean:
+  command 'pcreate' from deb pbuilder-scripts (22)
+Try: apt install <deb name>
+Command 'Then' not found, did you mean:
+  command 'when' from deb when (1.1.45-1)
+Try: apt install <deb name>
+Command 'sure' not found, but can be installed with:
+apt install python3-sure
+If: command not found
+it: command not found
+Command 'virtual' not found, did you mean:
+  command 'virtaal' from deb virtaal (0.7.1+git20191021+ds1-2)
+Try: apt install <deb name>
+Command 'See' not found, did you mean:
+  command 'tee' from deb coreutils (9.4-3ubuntu6.1)
+  command 'ree' from deb ree (1.4.1-2)
+  command 'see' from deb mailcap (3.70+nmu1ubuntu1)
+  command 'pee' from deb moreutils (0.67-1)
+Try: apt install <deb name>
+Command 'note:' not found, did you mean:
+  command 'notex' from snap notex (0+git.ff14b3d)
+  command 'notes' from snap notes (2.3.1+g0b13300)
+  command 'note' from deb note (1.3.26-3)
+See 'snap info <snapname>' for additional versions.
+hint:: command not found
+-bash: syntax error near unexpected token `root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot#'
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

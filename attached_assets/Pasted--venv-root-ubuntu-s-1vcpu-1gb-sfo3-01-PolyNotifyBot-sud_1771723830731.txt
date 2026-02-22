@@ -1,0 +1,28 @@
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo sed -i 's|/root/PolyNotifyBot/.venv/bin/python3|/usr/bin/python3|' /etc/systemd/system/psniper-bot.service
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo /usr/bin/pip3 install --break-system-packages pmxt
+Collecting pmxt
+  Using cached pmxt-2.10.0-py3-none-any.whl.metadata (7.1 kB)
+Requirement already satisfied: urllib3>=1.26.0 in /usr/local/lib/python3.12/dist-packages (from pmxt) (2.6.2)
+Requirement already satisfied: python-dateutil>=2.8.0 in /usr/lib/python3/dist-packages (from pmxt) (2.8.2)
+Requirement already satisfied: pydantic>=2.0.0 in /usr/local/lib/python3.12/dist-packages (from pmxt) (2.12.5)
+Requirement already satisfied: typing-extensions>=4.0.0 in /usr/local/lib/python3.12/dist-packages (from pmxt) (4.15.0)
+Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.12/dist-packages (from pydantic>=2.0.0->pmxt) (0.7.0)
+Requirement already satisfied: pydantic-core==2.41.5 in /usr/local/lib/python3.12/dist-packages (from pydantic>=2.0.0->pmxt) (2.41.5)
+Requirement already satisfied: typing-inspection>=0.4.2 in /usr/local/lib/python3.12/dist-packages (from pydantic>=2.0.0->pmxt) (0.4.2)
+Using cached pmxt-2.10.0-py3-none-any.whl (2.1 MB)
+Installing collected packages: pmxt
+Successfully installed pmxt-2.10.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl daemon-reload && sudo systemctl restart psniper-bot && sleep 3 && sudo systemctl status psniper-bot
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: active (running) since Sun 2026-02-22 01:30:10 UTC; 3s ago
+   Main PID: 3065354 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 74.9M (peak: 75.2M)
+        CPU: 2.098s
+     CGroup: /system.slice/psniper-bot.service
+             └─3065354 /usr/bin/python3 bot/bot_v7.py
+
+Feb 22 01:30:10 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+(.venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
