@@ -1,0 +1,306 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# journalctl -u polymarket-worker --since "2 min ago" --no-pager
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]: ❌ Worker crashed: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]: Traceback (most recent call last):
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 399, in <module>
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:     main()
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 373, in main
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:     pending_jobs = get_pending_jobs(limit=batch_size)
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:   File "/opt/polymarket-bot/trading_bot/database.py", line 443, in get_pending_jobs
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:     conn = get_db_connection()
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:            ^^^^^^^^^^^^^^^^^^^
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:   File "/opt/polymarket-bot/trading_bot/database.py", line 30, in get_db_connection
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:     raise last_error
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:   File "/opt/polymarket-bot/trading_bot/database.py", line 23, in get_db_connection
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:     return psycopg2.connect(db_url)
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:            ^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105318]: psycopg2.OperationalError: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 16:36:46 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Feb 22 16:36:56 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 4518.
+Feb 22 16:36:56 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Feb 22 16:36:56 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: ✅ Loaded environment variables from .env file
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: 🤖 Polymarket Auto-Trading Worker Starting...
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:    Notifications: Telegram @ponnymarket (sells only)
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:    Mode: Queue-based worker
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: 🤖 Initializing Polymarket Trading Bot...
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:    🌐 Using proxy: 92.113.180.106:42563
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: 🔑 Using explicit API credentials from environment...
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:    ✅ API key: 4f57006e...
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: ✅ Trading bot initialized!
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: 📊 Configuration:
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:    Poll Interval: 30s
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:    Batch Size: 5 jobs
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: 🔄 Starting worker loop (press Ctrl+C to stop)
+Feb 22 16:36:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:37:00 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: ❌ Worker crashed: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (23.21.74.185), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: Traceback (most recent call last):
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 399, in <module>
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:     main()
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 373, in main
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:     pending_jobs = get_pending_jobs(limit=batch_size)
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:   File "/opt/polymarket-bot/trading_bot/database.py", line 443, in get_pending_jobs
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:     conn = get_db_connection()
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:            ^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:   File "/opt/polymarket-bot/trading_bot/database.py", line 30, in get_db_connection
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:     raise last_error
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:   File "/opt/polymarket-bot/trading_bot/database.py", line 23, in get_db_connection
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:     return psycopg2.connect(db_url)
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:            ^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105333]: psycopg2.OperationalError: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (23.21.74.185), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Feb 22 16:37:04 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Consumed 1.033s CPU time.
+Feb 22 16:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Feb 22 16:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Consumed 1.033s CPU time.
+Feb 22 16:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Feb 22 16:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: ✅ Loaded environment variables from .env file
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: 🤖 Polymarket Auto-Trading Worker Starting...
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:    Notifications: Telegram @ponnymarket (sells only)
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:    Mode: Queue-based worker
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: 🤖 Initializing Polymarket Trading Bot...
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:    🌐 Using proxy: 92.113.180.106:42563
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: 🔑 Using explicit API credentials from environment...
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:    ✅ API key: 4f57006e...
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: ✅ Trading bot initialized!
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: 📊 Configuration:
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:    Poll Interval: 30s
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:    Batch Size: 5 jobs
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: 🔄 Starting worker loop (press Ctrl+C to stop)
+Feb 22 16:37:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:37:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: ❌ Worker crashed: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: Traceback (most recent call last):
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 399, in <module>
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:     main()
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 373, in main
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:     pending_jobs = get_pending_jobs(limit=batch_size)
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:   File "/opt/polymarket-bot/trading_bot/database.py", line 443, in get_pending_jobs
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:     conn = get_db_connection()
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:            ^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:   File "/opt/polymarket-bot/trading_bot/database.py", line 30, in get_db_connection
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:     raise last_error
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:   File "/opt/polymarket-bot/trading_bot/database.py", line 23, in get_db_connection
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:     return psycopg2.connect(db_url)
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:            ^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105400]: psycopg2.OperationalError: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Feb 22 16:37:31 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 4519.
+Feb 22 16:37:31 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Feb 22 16:37:31 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: ✅ Loaded environment variables from .env file
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: 🤖 Polymarket Auto-Trading Worker Starting...
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:    Notifications: Telegram @ponnymarket (sells only)
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:    Mode: Queue-based worker
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: 🤖 Initializing Polymarket Trading Bot...
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:    🌐 Using proxy: 92.113.180.106:42563
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: 🔑 Using explicit API credentials from environment...
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:    ✅ API key: 4f57006e...
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: ✅ Trading bot initialized!
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: 📊 Configuration:
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:    Poll Interval: 30s
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:    Batch Size: 5 jobs
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: 🔄 Starting worker loop (press Ctrl+C to stop)
+Feb 22 16:37:32 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:37:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: ❌ Worker crashed: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: Traceback (most recent call last):
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 399, in <module>
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:     main()
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 373, in main
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:     pending_jobs = get_pending_jobs(limit=batch_size)
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:   File "/opt/polymarket-bot/trading_bot/database.py", line 443, in get_pending_jobs
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:     conn = get_db_connection()
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:            ^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:   File "/opt/polymarket-bot/trading_bot/database.py", line 30, in get_db_connection
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:     raise last_error
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:   File "/opt/polymarket-bot/trading_bot/database.py", line 23, in get_db_connection
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:     return psycopg2.connect(db_url)
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:            ^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105437]: psycopg2.OperationalError: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 16:37:39 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Feb 22 16:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 4520.
+Feb 22 16:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Feb 22 16:37:49 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: ✅ Loaded environment variables from .env file
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: 🤖 Polymarket Auto-Trading Worker Starting...
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:    Notifications: Telegram @ponnymarket (sells only)
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:    Mode: Queue-based worker
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: 🤖 Initializing Polymarket Trading Bot...
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:    🌐 Using proxy: 92.113.180.106:42563
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: 🔑 Using explicit API credentials from environment...
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:    ✅ API key: 4f57006e...
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: ✅ Trading bot initialized!
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: 📊 Configuration:
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:    Poll Interval: 30s
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:    Batch Size: 5 jobs
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: 🔄 Starting worker loop (press Ctrl+C to stop)
+Feb 22 16:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:37:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: ❌ Worker crashed: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: Traceback (most recent call last):
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 399, in <module>
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:     main()
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 373, in main
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:     pending_jobs = get_pending_jobs(limit=batch_size)
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:   File "/opt/polymarket-bot/trading_bot/database.py", line 443, in get_pending_jobs
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:     conn = get_db_connection()
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:            ^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:   File "/opt/polymarket-bot/trading_bot/database.py", line 30, in get_db_connection
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:     raise last_error
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:   File "/opt/polymarket-bot/trading_bot/database.py", line 23, in get_db_connection
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:     return psycopg2.connect(db_url)
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:            ^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105441]: psycopg2.OperationalError: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 16:37:57 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Feb 22 16:38:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 4521.
+Feb 22 16:38:07 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Feb 22 16:38:07 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: ✅ Loaded environment variables from .env file
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: 🤖 Polymarket Auto-Trading Worker Starting...
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:    Notifications: Telegram @ponnymarket (sells only)
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:    Mode: Queue-based worker
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: 🤖 Initializing Polymarket Trading Bot...
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:    🌐 Using proxy: 92.113.180.106:42563
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: 🔑 Using explicit API credentials from environment...
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:    ✅ API key: 4f57006e...
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: ✅ Trading bot initialized!
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: 📊 Configuration:
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:    Poll Interval: 30s
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:    Batch Size: 5 jobs
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: 🔄 Starting worker loop (press Ctrl+C to stop)
+Feb 22 16:38:09 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:38:11 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: ❌ Worker crashed: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: Traceback (most recent call last):
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 399, in <module>
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:     main()
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 373, in main
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:     pending_jobs = get_pending_jobs(limit=batch_size)
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:   File "/opt/polymarket-bot/trading_bot/database.py", line 443, in get_pending_jobs
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:     conn = get_db_connection()
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:            ^^^^^^^^^^^^^^^^^^^
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:   File "/opt/polymarket-bot/trading_bot/database.py", line 30, in get_db_connection
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:     raise last_error
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:   File "/opt/polymarket-bot/trading_bot/database.py", line 23, in get_db_connection
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:     return psycopg2.connect(db_url)
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:            ^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:38:15 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105466]: psycopg2.OperationalError: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:38:16 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 16:38:16 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 4522.
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: ✅ Loaded environment variables from .env file
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: 🤖 Polymarket Auto-Trading Worker Starting...
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:    Budget: $2 per market ($0.20 × 10 orders × 2 sides)
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:    Strategy: Ladder buys 1¢-3¢, ladder sells 3x-10x profit
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:    Notifications: Telegram @ponnymarket (sells only)
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:    Mode: Queue-based worker
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: 🤖 Initializing Polymarket Trading Bot...
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:    🌐 Using proxy: 92.113.180.106:42563
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: 🔑 Using explicit API credentials from environment...
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:    ✅ API key: 4f57006e...
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: ✅ Trading bot initialized!
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: 📊 Configuration:
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:    Poll Interval: 30s
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:    Batch Size: 5 jobs
+Feb 22 16:38:26 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: 🔄 Starting worker loop (press Ctrl+C to stop)
+Feb 22 16:38:27 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:38:29 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: ❌ Worker crashed: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: Traceback (most recent call last):
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 399, in <module>
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:     main()
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:   File "/opt/polymarket-bot/trading_bot/auto_trader.py", line 373, in main
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:     pending_jobs = get_pending_jobs(limit=batch_size)
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:   File "/opt/polymarket-bot/trading_bot/database.py", line 443, in get_pending_jobs
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:     conn = get_db_connection()
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:            ^^^^^^^^^^^^^^^^^^^
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:   File "/opt/polymarket-bot/trading_bot/database.py", line 30, in get_db_connection
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:     raise last_error
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:   File "/opt/polymarket-bot/trading_bot/database.py", line 23, in get_db_connection
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:     return psycopg2.connect(db_url)
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:            ^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:   File "/opt/polymarket-bot/trading_bot/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105469]: psycopg2.OperationalError: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (18.215.6.120), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Main process exited, code=exited, status=1/FAILURE
+Feb 22 16:38:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Failed with result 'exit-code'.
+Feb 22 16:38:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-worker.service: Scheduled restart job, restart counter is at 4523.
+Feb 22 16:38:44 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-worker.service - Polymarket Trading Worker - Processes Job Queue.
+Feb 22 16:38:44 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105474]: ✅ Loaded environment variables from .env file
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# journalctl -u polymarket-monitor --since "2 min ago" --no-pager
+Feb 22 16:37:10 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3104083]: ⚠️  Error in monitoring cycle: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (98.89.62.209), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopping polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells...
+Feb 22 16:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Deactivated successfully.
+Feb 22 16:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Stopped polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Feb 22 16:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: polymarket-monitor.service: Consumed 2.869s CPU time.
+Feb 22 16:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started polymarket-monitor.service - Polymarket Order Monitor - Monitors Fills and Places Sells.
+Feb 22 16:37:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ✅ Loaded environment variables from .env file
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: 👁️  Polymarket Order Monitor Starting...
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]:    Monitors: All open buy/sell orders
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]:    Buys filled: Auto-place sell ladder
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]:    Sells filled: Notify Telegram (@ponnymarket)
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: 🤖 Initializing Polymarket Trading Bot...
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]:    🌐 Using proxy: 92.113.180.106:42563
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: 🔑 Using explicit API credentials from environment...
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]:    ✅ API key: 4f57006e...
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ✅ Trading bot initialized!
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: 📊 Configuration:
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]:    Poll Interval: 30s
+Feb 22 16:37:13 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: 🔄 Starting monitor loop (press Ctrl+C to stop)
+Feb 22 16:37:14 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:37:16 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️  Error cancelling stale orders: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (98.89.62.209), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:37:23 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:37:28 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️  Error in monitoring cycle: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (23.21.74.185), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:37:58 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:38:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:38:05 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️  Error cancelling stale orders: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (23.21.74.185), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:38:06 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:38:08 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:38:12 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️  Error in monitoring cycle: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (23.21.74.185), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:38:43 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:38:45 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:38:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️  Error cancelling stale orders: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (98.89.62.209), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+Feb 22 16:38:50 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 1/3 failed, retrying in 2s...
+Feb 22 16:38:53 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️ DB connection attempt 2/3 failed, retrying in 4s...
+Feb 22 16:38:57 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-monitor[3105402]: ⚠️  Error in monitoring cycle: connection to server at "ep-noisy-lab-ahf3wcvu.c-3.us-east-1.aws.neon.tech" (23.21.74.185), port 5432 failed: ERROR:  The endpoint has been disabled. Enable it using Neon API and retry.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
