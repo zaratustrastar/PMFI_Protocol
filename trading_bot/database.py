@@ -5,12 +5,29 @@ Database schema for tracking trading positions
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import config
+import time
 from typing import List, Dict, Optional
 
+MAX_RETRIES = 3
+RETRY_DELAY = 2
 
-def get_db_connection():
-    """Get database connection"""
-    return psycopg2.connect(config.DATABASE_URL)
+
+def get_db_connection(retries=MAX_RETRIES):
+    """Get database connection with retry logic for transient failures"""
+    db_url = config.DATABASE_URL
+    if not db_url:
+        raise RuntimeError("DATABASE_URL / TRADING_DATABASE_URL is not set - cannot connect to database")
+    last_error = None
+    for attempt in range(retries):
+        try:
+            return psycopg2.connect(db_url)
+        except psycopg2.OperationalError as e:
+            last_error = e
+            if attempt < retries - 1:
+                wait = RETRY_DELAY * (attempt + 1)
+                print(f"⚠️ DB connection attempt {attempt + 1}/{retries} failed, retrying in {wait}s...")
+                time.sleep(wait)
+    raise last_error
 
 
 def init_database():

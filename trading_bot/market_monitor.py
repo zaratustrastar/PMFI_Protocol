@@ -196,12 +196,22 @@ def log(message: str):
     print(f"[{timestamp}] {message}")
 
 
-def get_db_connection():
-    """Get database connection"""
+def get_db_connection(retries=3):
+    """Get database connection with retry logic"""
     if not DATABASE_URL:
-        log("ERROR: DATABASE_URL not set")
+        log("ERROR: DATABASE_URL / TRADING_DATABASE_URL not set")
         sys.exit(1)
-    return psycopg2.connect(DATABASE_URL)
+    last_error = None
+    for attempt in range(retries):
+        try:
+            return psycopg2.connect(DATABASE_URL)
+        except psycopg2.OperationalError as e:
+            last_error = e
+            if attempt < retries - 1:
+                wait = 2 * (attempt + 1)
+                log(f"DB connection attempt {attempt + 1}/{retries} failed, retrying in {wait}s...")
+                time.sleep(wait)
+    raise last_error
 
 
 def init_tables():
