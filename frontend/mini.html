@@ -1706,16 +1706,11 @@
             const kalshiSide = kalshiLeg ? kalshiLeg.side : '';
             const expiry = item.expiryTs ? new Date(item.expiryTs * 1000).toLocaleDateString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
 
-            var polyUrl = '';
-            var kalshiUrl = '';
-            var pairId = item.pairId || '';
-            var parts = pairId.split('___');
-            if (parts.length === 2) {
-                var kalshiTicker = parts[1].replace('kalshi:', '');
-                if (kalshiTicker) kalshiUrl = 'https://kalshi.com/markets/' + kalshiTicker;
+            var polyUrl = item.polyUrl || '';
+            var kalshiUrl = item.kalshiUrl || '';
+            if (!polyUrl && item.title) {
+                polyUrl = 'https://polymarket.com/markets?_q=' + encodeURIComponent(item.title);
             }
-            var title = item.title || '';
-            if (title) polyUrl = 'https://polymarket.com/markets?_q=' + encodeURIComponent(title);
 
             return '<div class="arb-card">' +
                 '<div class="arb-card-header">' +

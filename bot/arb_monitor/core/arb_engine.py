@@ -22,6 +22,13 @@ def log(msg: str):
     print(f"⚡ [Arb/Engine] {msg}")
 
 
+def _build_urls(pair: dict) -> tuple[str, str]:
+    poly_url = pair.get("polymarket_url", "")
+    kalshi_ticker = pair.get("kalshi_ticker", "")
+    kalshi_url = f"https://kalshi.com/markets/{kalshi_ticker.lower()}" if kalshi_ticker else ""
+    return poly_url, kalshi_url
+
+
 def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
     pm = pair["polymarket"]
     kl = pair["kalshi"]
@@ -38,10 +45,13 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
     if not kl_yes_token or not kl_no_token:
         warnings.append("kalshi_token_missing")
         if debug:
+            _poly_url, _kalshi_url = _build_urls(pair)
             return {
                 "type": "watchlist",
                 "pairId": pair["pair_id"],
                 "title": pair["title"],
+                "polyUrl": _poly_url,
+                "kalshiUrl": _kalshi_url,
                 "sport": pair.get("sport"),
                 "expiryTs": pair.get("expiry_ts", 0),
                 "minCost": None,
@@ -188,11 +198,14 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
     if kl_prices.get("source") == "listing_price":
         warnings.append("kalshi_listing_price_only")
 
+    poly_url, kalshi_url = _build_urls(pair)
     result = {
         "type": "opportunity",
         "pairId": pair["pair_id"],
         "title": pair["title"],
         "kalshiTitle": pair.get("kalshi_title", ""),
+        "polyUrl": poly_url,
+        "kalshiUrl": kalshi_url,
         "sport": pair.get("sport"),
         "expiryTs": pair.get("expiry_ts", 0),
         "minCost": best["min_cost"],
@@ -217,11 +230,14 @@ def _build_watchlist_item(pair, routes, debug: bool = False) -> dict | None:
 
     if not routes:
         if debug:
+            _poly_url2, _kalshi_url2 = _build_urls(pair)
             return {
                 "type": "watchlist",
                 "pairId": pair["pair_id"],
                 "title": pair["title"],
                 "kalshiTitle": pair.get("kalshi_title", ""),
+                "polyUrl": _poly_url2,
+                "kalshiUrl": _kalshi_url2,
                 "sport": pair.get("sport"),
                 "expiryTs": pair.get("expiry_ts", 0),
                 "minCost": None,
@@ -250,11 +266,14 @@ def _build_watchlist_item(pair, routes, debug: bool = False) -> dict | None:
     if is_near_arb:
         item_warnings.append("near_arb")
 
+    w_poly_url, w_kalshi_url = _build_urls(pair)
     return {
         "type": "near_arb" if is_near_arb else "watchlist",
         "pairId": pair["pair_id"],
         "title": pair["title"],
         "kalshiTitle": pair.get("kalshi_title", ""),
+        "polyUrl": w_poly_url,
+        "kalshiUrl": w_kalshi_url,
         "sport": pair.get("sport"),
         "expiryTs": pair.get("expiry_ts", 0),
         "minCost": round(best_cost, 4),

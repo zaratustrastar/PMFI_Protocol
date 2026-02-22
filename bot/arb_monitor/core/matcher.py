@@ -219,6 +219,8 @@ def find_pairs(poly_markets: list[NormalizedMarket], kalshi_markets: list[Normal
                 "sport": sport,
                 "expiry_ts": expiry or 0,
                 "similarity": round(best_score, 3),
+                "polymarket_url": pm.meta.get("url", ""),
+                "kalshi_ticker": km.marketId,
                 "polymarket": {
                     "venue": "polymarket",
                     "id": pm.marketId,
