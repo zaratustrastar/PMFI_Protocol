@@ -1,0 +1,44 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -s "http://127.0.0.1:8080/api/arbs/diag" | jq .
+{
+  "kalshi": {
+    "bodyLength": 5278,
+    "bodyPreview": "{\"cursor\":\"CgwIkI7pzAYQ0OzrzAESOUtYTVZFU1BPUlRTTVVMVElHQU1FRVhURU5ERUQtUzIwMjY1NEEyM0FDQzg3RS1CRDJGNUIzODU2NA\",\"markets\":[{\"can_close_early\":true,\"close_time\":\"2026-03-07T22:00:00Z\",\"created_time\":\"2026-02-22T00:00:16.561976Z\",\"custom_strike\":{\"Associated Events\":\"KXNBATOTAL-26FEB21ORLPHX,KXNBATOTAL",
+    "contentType": "application/json",
+    "elapsedMs": 169,
+    "httpStatus": 200,
+    "status": "OK"
+  },
+  "pmxt_server": {
+    "elapsedMs": 0,
+    "error": "No module named 'pmxt'",
+    "status": "FAILED"
+  },
+  "polymarket": {
+    "bodyLength": 10959,
+    "bodyPreview": "[{\"id\":\"517310\",\"question\":\"Will Trump deport less than 250,000?\",\"conditionId\":\"0xaf9d0e448129a9f657f851d49495ba4742055d80e0ef1166ba0ee81d4d594214\",\"slug\":\"will-trump-deport-less-than-250000\",\"resolutionSource\":\"\",\"endDate\":\"2025-12-31T12:00:00Z\",\"liquidity\":\"20230.35124\",\"startDate\":\"2025-01-05T18",
+    "contentType": "application/json",
+    "elapsedMs": 290,
+    "httpStatus": 200,
+    "status": "OK"
+  },
+  "proxy": {
+    "HTTPS_PROXY": "",
+    "HTTP_PROXY": "",
+    "PROXY_URL": "set"
+  }
+}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -s "http://127.0.0.1:8080/api/arbs/overlap_debug" | jq '{polyLen:(.polySamples|length), kalshiLen:(.kalshiSamples|length)}'
+{
+  "polyLen": 0,
+  "kalshiLen": 0
+}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -s "http://127.0.0.1:8080/api/arbs?minEdge=0&debug=1&limit=50" | jq '{pairsTracked, oppCount:(.opportunities|length), watchCount:(.watchlist|length), nearCount:(.near_arb|length)}'
+{
+  "pairsTracked": 0,
+  "oppCount": 0,
+  "watchCount": 0,
+  "nearCount": 0
+}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -s "http://127.0.0.1:8080/api/arbs?minEdge=0&debug=1&limit=5" | jq '.watchlist[0] // .near_arb[0] // .opportunities[0]'
+null
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
