@@ -3822,11 +3822,13 @@ def api_arb_opportunities():
       &sort=expiry|edge|roi - sort order
       &limit=50            - max results
       &debug=1             - include debugPrices, show negative-edge watchlist items
+      &allowIndicative=1   - include indicative (listing-price-only) opportunities
     """
     if not ARB_MONITOR_AVAILABLE:
         return jsonify({'error': 'Arb monitor not available'}), 503
     try:
         debug = flask_request.args.get('debug', '0') == '1'
+        allow_indicative = flask_request.args.get('allowIndicative', '0') == '1'
         sports_param = flask_request.args.get('sports', '')
         min_edge = float(flask_request.args.get('minEdge', '0'))
         sort_by = flask_request.args.get('sort', 'expiry')
@@ -3852,6 +3854,11 @@ def api_arb_opportunities():
             last_scan_ms = results.get('lastScanMs', 0)
 
         sport_filters = [s.strip().lower() for s in sports_param.split(',') if s.strip()] if sports_param else []
+
+        if not allow_indicative:
+            indicative = [o for o in opportunities if o.get('type') == 'indicative']
+            opportunities = [o for o in opportunities if o.get('type') != 'indicative']
+            watchlist = watchlist + indicative
 
         if sport_filters:
             opportunities = [o for o in opportunities if o.get('sport') in sport_filters]
@@ -3886,6 +3893,50 @@ def api_arb_opportunities():
     except Exception as e:
         print(f"❌ [Arb] /api/arbs error: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/arbs/match_debug', methods=['GET'])
+def api_arb_match_debug():
+    """Debug endpoint: returns top 50 candidate matches with full scoring details.
+
+    Shows tokensA, tokensB, sharedAnchors, topicA/B, predicateA/B,
+    jaccard, levenshtein, finalScore, whyAccepted/whyRejected.
+    """
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({'error': 'Arb monitor not available'}), 503
+    try:
+        from arb_monitor.adapters.pmxt_adapter import (
+            fetch_polymarket_markets, fetch_kalshi_markets,
+        )
+        from arb_monitor.core.matcher import debug_match_candidates
+        from arb_monitor.storage import arb_cache
+
+        cached_poly = arb_cache.get("poly_normalized")
+        if cached_poly:
+            poly = cached_poly
+        else:
+            poly, _ = fetch_polymarket_markets()
+
+        cached_kalshi = arb_cache.get("kalshi_normalized")
+        if cached_kalshi:
+            kalshi = cached_kalshi
+        else:
+            kalshi, _ = fetch_kalshi_markets()
+
+        top_n = int(flask_request.args.get('limit', '50'))
+        candidates = debug_match_candidates(poly, kalshi, top_n=top_n)
+
+        return jsonify({
+            "candidates": candidates,
+            "polyCount": len(poly),
+            "kalshiCount": len(kalshi),
+            "candidatesReturned": len(candidates),
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"❌ [Arb] /api/arbs/match_debug error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 @flask_app.route('/api/arbs/overlap_debug', methods=['GET'])

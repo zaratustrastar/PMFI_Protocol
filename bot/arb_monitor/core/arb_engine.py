@@ -24,6 +24,15 @@ def log(msg: str):
 
 def _build_urls(pair: dict) -> tuple[str, str]:
     poly_url = pair.get("polymarket_url", "")
+    pm_id = pair.get("polymarket", {}).get("id", "")
+
+    if poly_url and poly_url.startswith("http"):
+        pass
+    elif pm_id:
+        poly_url = f"https://polymarket.com/event/{pm_id}"
+    else:
+        poly_url = ""
+
     kalshi_ticker = pair.get("kalshi_ticker", "")
     kalshi_url = f"https://kalshi.com/markets/{kalshi_ticker.lower()}" if kalshi_ticker else ""
     return poly_url, kalshi_url
@@ -195,12 +204,16 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
         warnings.append("fuzzy_match")
     if best["edge"] < 0.02:
         warnings.append("thin_edge")
-    if kl_prices.get("source") == "listing_price":
+    kalshi_source = kl_prices.get("source", "listing_price")
+    is_listing_only = kalshi_source != "orderbook"
+
+    if is_listing_only:
         warnings.append("kalshi_listing_price_only")
+        warnings.append("not_executable_without_orderbook")
 
     poly_url, kalshi_url = _build_urls(pair)
     result = {
-        "type": "opportunity",
+        "type": "indicative" if is_listing_only else "opportunity",
         "pairId": pair["pair_id"],
         "title": pair["title"],
         "kalshiTitle": pair.get("kalshi_title", ""),
