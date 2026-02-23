@@ -65,6 +65,12 @@ def _clean_pmxt_title(title: str) -> str:
     return title
 
 
+def _extract_event_ticker(market_id: str) -> str:
+    if "-" not in market_id:
+        return market_id
+    return market_id.rsplit("-", 1)[0]
+
+
 def _parse_resolution_date(rd) -> int:
     if not rd:
         return 0
@@ -131,6 +137,7 @@ def _pmxt_market_to_normalized(m, venue: str) -> Optional[NormalizedMarket]:
             "yes_price": yes_price,
             "no_price": no_price,
             "url": getattr(m, "url", ""),
+            "event_ticker": _extract_event_ticker(market_id) if venue == "kalshi" else "",
             "category": getattr(m, "category", ""),
         },
     )
