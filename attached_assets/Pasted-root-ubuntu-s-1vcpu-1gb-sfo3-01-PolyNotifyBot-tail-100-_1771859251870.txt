@@ -1,0 +1,102 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# tail -100 ~/PolyNotifyBot/bot.log
+✅ NAV cache updated, sleeping 45s
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=11.0000, buffer=0.00, forwarded=11.00, lastRoundId=2
+
+============================================================
+💰 CALCULATING V7 NAV (3-State)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions for 0x9cbc5577...
+✅ Found 0 active positions
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+
+📊 Asset Breakdown:
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $6.00
+   • Credited cash:            $0.00
+   • Credited positions:       $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $6.00
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 100.0% exceeds 50%
+✅ Signed NAV: $0.5455/share (round 3) [pause]
+✅ NAV cache updated, sleeping 45s
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=11.0000, buffer=0.00, forwarded=11.00, lastRoundId=2
+
+============================================================
+💰 CALCULATING V7 NAV (3-State)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions for 0x9cbc5577...
+✅ Found 0 active positions
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+
+📊 Asset Breakdown:
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $6.00
+   • Credited cash:            $0.00
+   • Credited positions:       $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $6.00
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 100.0% exceeds 50%
+✅ Signed NAV: $0.5455/share (round 3) [pause]
+✅ NAV cache updated, sleeping 45s
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=11.0000, buffer=0.00, forwarded=11.00, lastRoundId=2
+
+============================================================
+💰 CALCULATING V7 NAV (3-State)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions for 0x9cbc5577...
+✅ Found 0 active positions
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+
+📊 Asset Breakdown:
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $6.00
+   • Credited cash:            $0.00
+   • Credited positions:       $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $6.00
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 100.0% exceeds 50%
+✅ Signed NAV: $0.5455/share (round 3) [pause]
+✅ NAV cache updated, sleeping 45s
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=11.0000, buffer=0.00, forwarded=11.00, lastRoundId=2
+
+============================================================
+💰 CALCULATING V7 NAV (3-State)
+============================================================
+❌ Error fetching in-flight balance: 429 Client Error: Too Many Requests for url: https://mainnet.base.org/
+📡 Fetching positions for 0x9cbc5577...
+✅ Found 0 active positions
+❌ Error fetching cash: 404 Client Error: Not Found for url: https://data-api.polymarket.com/balance?user=0x9cbc5577e6f1B3a097d579C6A28D0cDbd247B6A5
+
+📊 Asset Breakdown:
+   • In-flight (deposit addr): $0.00
+   • Pending credit:           $6.00
+   • Credited cash:            $0.00
+   • Credited positions:       $0.00
+   ─────────────────────────────
+   • TOTAL ASSETS:             $6.00
+🛑 SAFETY VALVE TRIGGERED: Pending ratio 100.0% exceeds 50%
+✅ Signed NAV: $0.5455/share (round 3) [pause]
+✅ NAV cache updated, sleeping 45s
+============================================================
+🔄 BACKGROUND NAV REFRESH
+============================================================
+📊 On-chain: supply=11.0000, buffer=0.00, forwarded=11.00, lastRoundId=2
+
+============================================================
+💰 CALCULATING V7 NAV (3-State)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
