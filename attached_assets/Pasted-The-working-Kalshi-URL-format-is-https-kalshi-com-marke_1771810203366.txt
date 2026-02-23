@@ -1,0 +1,74 @@
+The working Kalshi URL format is:
+
+https://kalshi.com/markets/{EVENT_TICKER}/{MARKET_TICKER}
+
+But you cannot reliably derive {EVENT_TICKER} from {MARKET_TICKER} just by string tricks.
+
+KXGREENIND-27 happens to live under event ticker KXGREENIND, so it works:
+
+Event: KXGREENIND
+
+Market: KXGREENIND-27
+
+URL: https://kalshi.com/markets/KXGREENIND/KXGREENIND-27
+
+Why your other two fail
+1) https://kalshi.com/markets/KXTARIFF/KXTARIFF-25APR01 → 404
+
+Most “tariff” markets on Kalshi are not under an event called KXTARIFF, and the market ticker probably isn’t KXTARIFF-25APR01 either (many look like KXTARIFFRATEPRC-... etc).
+
+So you’re constructing a URL for an event page that doesn’t exist.
+
+2) https://kalshi.com/markets/KXINX-SPX → 404
+
+That’s the single-segment form (/markets/<something>). Kalshi often doesn’t support that for direct navigation.
+
+Even if KXINX-SPX is a valid market ticker, the URL likely needs the two-segment form:
+/markets/{event_ticker}/{market_ticker}
+
+But again: you need the correct event_ticker.
+
+The correct solution for your bot (deterministic, no guessing)
+✅ Always build Kalshi links using event_ticker from the API, not from the ticker string.
+
+When you fetch markets, capture/store the parent event ticker:
+
+If you use your direct Kalshi adapter via /events?with_nested_markets=true, you already have:
+
+event["event_ticker"] ✅
+
+market["ticker"] ✅
+
+So store it on the market (you already do something like _event_ticker_parent).
+
+Then URL is always:
+
+kalshi_url = f"https://kalshi.com/markets/{event_ticker}/{market_ticker}"
+If you’re using PMXT for Kalshi discovery
+
+Make sure you keep whatever PMXT gives you for the event / series / collection identifier (often called something like event_ticker, event, series, etc.). Use that as the {EVENT_TICKER}.
+
+Practical fallback when event_ticker is missing
+
+If you truly don’t have the parent event ticker for a market:
+
+Don’t build a URL (set kalshiUrl: null)
+
+Show the ticker in UI with a “copy ticker” button
+
+Because any “search fallback” will be noisy and can mislead investors in a demo.
+
+What to change right now in your code
+
+In your Kalshi-normalized object, include:
+
+meta.event_ticker (parent)
+
+marketId (market ticker)
+
+Then build links only if meta.event_ticker exists:
+
+def kalshi_market_url(event_ticker: str | None, market_ticker: str) -> str | None:
+    if not event_ticker or not market_ticker:
+        return None
+    return f"https://kalshi.com/markets/{event_ticker}/{market_ticker}"
