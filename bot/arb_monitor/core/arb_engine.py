@@ -36,7 +36,7 @@ def _build_urls(pair: dict) -> tuple[str, str]:
 
     kalshi_title = pair.get("kalshi_title", "") or pair.get("kalshi", {}).get("title", "") or pair.get("kalshi", {}).get("question", "")
     if kalshi_title:
-        kalshi_url = f"https://kalshi.com/browse?q={quote_plus(kalshi_title)}"
+        kalshi_url = f"https://kalshi.com/search?q={quote_plus(kalshi_title)}&order_by=querymatch"
     else:
         kalshi_url = ""
     return poly_url, kalshi_url
@@ -275,6 +275,11 @@ def _build_watchlist_item(pair, routes, debug: bool = False) -> dict | None:
         return None
 
     edge = round(1.0 - best_cost, 4)
+    roi = round(edge / best_cost * 100, 2) if best_cost > 0 else 0
+
+    if roi < 1.0:
+        return None
+
     is_near_arb = best_cost <= NEAR_ARB_MAX_COST and best_cost >= 1.0
 
     item_warnings = []
@@ -295,7 +300,7 @@ def _build_watchlist_item(pair, routes, debug: bool = False) -> dict | None:
         "expiryTs": pair.get("expiry_ts", 0),
         "minCost": round(best_cost, 4),
         "edge": edge,
-        "roi": round(edge / best_cost * 100, 2) if best_cost > 0 else 0,
+        "roi": roi,
         "route": best["route"],
         "confidence": 0,
         "legs": best["legs"],
