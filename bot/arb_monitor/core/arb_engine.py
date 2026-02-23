@@ -34,7 +34,7 @@ def _build_urls(pair: dict) -> tuple[str, str]:
     else:
         poly_url = ""
 
-    kalshi_title = pair.get("kalshi", {}).get("title", "")
+    kalshi_title = pair.get("kalshi_title", "") or pair.get("kalshi", {}).get("title", "") or pair.get("kalshi", {}).get("question", "")
     if kalshi_title:
         kalshi_url = f"https://kalshi.com/browse?q={quote_plus(kalshi_title)}"
     else:
@@ -188,7 +188,7 @@ def analyze_pair(pair: dict, debug: bool = False) -> dict | None:
             "kalshi_source": kl_prices.get("source", "listing_price"),
         }
 
-    arb_routes = [r for r in routes if r["min_cost"] < 1.0]
+    arb_routes = [r for r in routes if r["min_cost"] < 1.0 and r["edge"] >= 0.01]
 
     if not arb_routes:
         watchlist_item = _build_watchlist_item(pair, routes, debug=debug)
