@@ -1,0 +1,111 @@
+What you’re seeing is almost always **a redirect-loop that only happens inside an in-app browser / webview**, not in a normal desktop/mobile browser.
+
+Even though the URLs *look* “equivalent”, the path you open and the environment you open it in can trigger a different redirect chain.
+
+Here are the two big things going on in your specific case:
+
+---
+
+## 1) `.../KXGREENIND-27/KXGREENIND-27` is **not** equivalent to `.../KXGREENIND/KXGREENIND-27`
+
+Kalshi’s canonical pattern is:
+
+`/markets/{EVENT_TICKER}/{MARKET_TICKER}`
+
+So:
+
+* ✅ `https://kalshi.com/markets/KXGREENIND/KXGREENIND-27` (correct)
+* ❌ `https://kalshi.com/markets/KXGREENIND-27/KXGREENIND-27` (wrong parent)
+
+In a normal browser, Kalshi might “recover” via internal routing and land you on the canonical SEO route:
+`/markets/kxgreenind/greenland-independence/kxgreenind-27`
+
+But in a webview, that recovery can become:
+
+**wrong URL → redirect → canonicalize → security check → redirect → canonicalize → …**
+…and it looks like “constant reloading”.
+
+So first fix is simple: **never generate the parent segment from the market ticker**. Always use the event ticker you got from the API.
+
+---
+
+## 2) Why it reloads only when opened from Farcaster mini app
+
+Warpcast / Farcaster mini app is typically a **webview** with different rules:
+
+* stricter cookie / storage behavior (sometimes 3rd-party cookie restrictions)
+* extra redirect handling (opening external links can get re-wrapped)
+* sometimes “open in in-app browser” does not persist cookies across redirects
+
+Kalshi uses redirects for canonicalization + sometimes auth/geo/risk checks.
+If the webview drops a cookie or blocks storage during that redirect chain, Kalshi can’t “stick” to the final canonical URL and you get a loop.
+
+This is *especially* likely if you’re opening a URL that needs multiple hops (like the wrong parent form, or mixed-case canonicalization).
+
+---
+
+# What to do (practical MVP-safe fixes)
+
+## A) Always output the canonical Kalshi URL (2-segment) — and prefer lowercase
+
+Use exactly:
+
+`https://kalshi.com/markets/{eventTicker}/{marketTicker}`
+
+…and make it lowercase to reduce canonicalization hops:
+
+`https://kalshi.com/markets/kxgreenind/kxgreenind-27`
+
+Even better: if you already know the SEO slug path (like `greenland-independence`), use it, because it often reduces redirects:
+
+`https://kalshi.com/markets/kxgreenind/greenland-independence/kxgreenind-27`
+
+(But slug requires extra lookup; the 2-segment event/market form is usually enough.)
+
+## B) Make sure your mini app opens it as a true external navigation
+
+If you’re using an `<a>` tag, do:
+
+```html
+<a href="https://kalshi.com/markets/kxgreenind/kxgreenind-27"
+   target="_blank"
+   rel="noopener noreferrer">
+  Open on Kalshi
+</a>
+```
+
+If you’re doing JS:
+
+```js
+window.open(url, "_blank", "noopener,noreferrer");
+```
+
+## C) Kill hidden characters
+
+A surprisingly common cause: the URL string coming from JSON has a trailing space/newline or gets concatenated with something.
+
+In your mini app, log:
+
+```js
+console.log("kalshiUrl raw:", JSON.stringify(kalshiUrl));
+```
+
+If you see `"https://...-27\n"` or `" ...-27 "` → `.trim()` it before rendering.
+
+---
+
+# Quick diagnosis checklist
+
+1. Does the reloading happen with the **correct** URL (`/markets/KXGREENIND/KXGREENIND-27`) opened from mini app?
+2. If yes, does it stop if you switch to **lowercase** (`/markets/kxgreenind/kxgreenind-27`)?
+3. If still yes, does it stop if you show a **copy link** button instead of auto opening? (this tests webview navigation quirks)
+
+---
+
+## Bottom line
+
+* The “reload forever” is almost certainly the webview getting stuck in Kalshi’s redirect/canonicalization/security chain.
+* The wrong parent form (`.../KXGREENIND-27/...`) makes that chain worse and can trigger the loop.
+* The MVP fix: **use event_ticker + market_ticker URL, lowercase it, trim it, open in a new tab**.
+
+If you paste **one** of your current `kalshiUrl` strings exactly as it’s returned by `/api/arbs` (copy from `jq` output), I can tell you if it has the wrong parent, mixed-case, or hidden whitespace immediately.
