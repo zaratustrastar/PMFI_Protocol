@@ -14,61 +14,13 @@ so UI isn't empty even without live arbs.
 """
 
 import time
-import requests
+from urllib.parse import quote_plus
 from ..adapters import pmxt_adapter
 from ..config import NEAR_ARB_MAX_COST, MIN_PRICE_THRESHOLD
-
-_KALSHI_API_BASE = "https://api.elections.kalshi.com/trade-api/v2"
-_event_ticker_cache: dict[str, str] = {}
 
 
 def log(msg: str):
     print(f"⚡ [Arb/Engine] {msg}")
-
-
-def fetch_kalshi_event_tickers(tickers: list[str]) -> dict[str, str]:
-    if not tickers:
-        return {}
-
-    uncached = [t for t in tickers if t not in _event_ticker_cache]
-    if uncached:
-        for i in range(0, len(uncached), 100):
-            batch = uncached[i:i+100]
-            ticker_param = ",".join(batch)
-            try:
-                resp = requests.get(
-                    f"{_KALSHI_API_BASE}/markets",
-                    params={"tickers": ticker_param, "limit": 1000},
-                    timeout=10,
-                )
-                if resp.status_code == 200:
-                    data = resp.json()
-                    for m in data.get("markets", []):
-                        _event_ticker_cache[m["ticker"]] = m["event_ticker"]
-                    log(f"Fetched {len(data.get('markets', []))} event_tickers from Kalshi API (batch {i//100+1})")
-                else:
-                    log(f"Kalshi API returned {resp.status_code} for event_ticker lookup")
-            except Exception as e:
-                log(f"Kalshi API event_ticker lookup failed: {e}")
-
-    return {t: _event_ticker_cache.get(t, "") for t in tickers}
-
-
-def enrich_pairs_with_event_tickers(pairs: list[dict]) -> None:
-    kalshi_tickers = []
-    for p in pairs:
-        ticker = p.get("kalshi_ticker", "") or p.get("kalshi", {}).get("id", "")
-        if ticker:
-            kalshi_tickers.append(ticker)
-
-    if not kalshi_tickers:
-        return
-
-    ticker_map = fetch_kalshi_event_tickers(kalshi_tickers)
-    for p in pairs:
-        ticker = p.get("kalshi_ticker", "") or p.get("kalshi", {}).get("id", "")
-        if ticker and ticker in ticker_map:
-            p["kalshi_event_ticker"] = ticker_map[ticker]
 
 
 def _build_urls(pair: dict) -> tuple[str, str]:
@@ -82,10 +34,9 @@ def _build_urls(pair: dict) -> tuple[str, str]:
     else:
         poly_url = ""
 
-    event_ticker = pair.get("kalshi_event_ticker", "")
-    market_id = pair.get("kalshi_ticker", "") or pair.get("kalshi", {}).get("id", "")
-    if event_ticker and market_id:
-        kalshi_url = f"https://kalshi.com/markets/{event_ticker}/{market_id}".strip()
+    kalshi_title = pair.get("kalshi", {}).get("title", "")
+    if kalshi_title:
+        kalshi_url = f"https://kalshi.com/browse?q={quote_plus(kalshi_title)}"
     else:
         kalshi_url = ""
     return poly_url, kalshi_url
