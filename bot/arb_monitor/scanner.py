@@ -13,7 +13,7 @@ from .adapters.pmxt_adapter import (
     get_poly_discovery_stats, get_kalshi_discovery_stats,
 )
 from .core.matcher import find_pairs
-from .core.arb_engine import analyze_pair
+from .core.arb_engine import analyze_pair, enrich_pairs_with_event_tickers
 from .storage import arb_store, arb_cache
 
 
@@ -61,6 +61,8 @@ def run_debug_analysis(max_pairs: int = 25) -> dict:
     pairs = get_tracked_pairs()[:max_pairs]
     if not pairs:
         return {"opportunities": [], "watchlist": [], "nearArbs": [], "pairsAnalyzed": 0}
+
+    enrich_pairs_with_event_tickers(pairs)
 
     opportunities = []
     watchlist = []
@@ -188,6 +190,8 @@ def run_scan():
             _tracked_pairs = list(pairs)
 
         _inject_kalshi_prices_into_pairs(pairs, kalshi_markets)
+
+        enrich_pairs_with_event_tickers(pairs)
 
         opportunities = []
         watchlist = []
