@@ -13,13 +13,21 @@ Near-arb: pairs where minCost <= NEAR_ARB_MAX_COST (default 1.01) shown on watch
 so UI isn't empty even without live arbs.
 """
 
+import re
 import time
 from ..adapters import pmxt_adapter
 from ..config import NEAR_ARB_MAX_COST, MIN_PRICE_THRESHOLD
 
+_EVENT_TICKER_RE = re.compile(r'^([A-Z]+(?:-[A-Z]+)*)', re.IGNORECASE)
+
 
 def log(msg: str):
     print(f"⚡ [Arb/Engine] {msg}")
+
+
+def _extract_event_ticker(market_id: str) -> str:
+    m = _EVENT_TICKER_RE.match(market_id)
+    return m.group(1) if m else ""
 
 
 def _build_urls(pair: dict) -> tuple[str, str]:
@@ -33,8 +41,11 @@ def _build_urls(pair: dict) -> tuple[str, str]:
     else:
         poly_url = ""
 
-    kalshi_url = pair.get("kalshi_url", "")
-    if not kalshi_url or not kalshi_url.startswith("http"):
+    market_id = pair.get("kalshi_ticker", "") or pair.get("kalshi", {}).get("id", "")
+    event_ticker = _extract_event_ticker(market_id)
+    if event_ticker and market_id:
+        kalshi_url = f"https://kalshi.com/markets/{event_ticker}/{market_id}".lower().strip()
+    else:
         kalshi_url = ""
     return poly_url, kalshi_url
 
