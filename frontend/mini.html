@@ -1676,8 +1676,6 @@
             if (opps.length > 0) {
                 html += '<div class="arb-section-label">Opportunities</div>';
                 opps.forEach(o => { html += renderArbCard(o, 'opportunity'); });
-            } else {
-                html += '<div class="arb-section-label">No live arbs right now</div>';
             }
             opContainer.innerHTML = html;
 
