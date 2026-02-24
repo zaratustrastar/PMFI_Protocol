@@ -102,6 +102,14 @@ except ImportError:
     ARB_MONITOR_AVAILABLE = False
     print("⚠️ arb_monitor package not found, /api/arbs endpoints disabled")
 
+try:
+    from arb_monitor.oddscreeners import start_oddscreeners, oddscreeners_store
+    ODDSCREENERS_AVAILABLE = True
+except ImportError:
+    ODDSCREENERS_AVAILABLE = False
+    oddscreeners_store = None
+    print("⚠️ oddscreeners module not found, /api/oddscreeners endpoints disabled")
+
 # Cloudflare bypass with curl_cffi (residential proxy support)
 try:
     from curl_cffi import requests as curl_requests
@@ -3867,6 +3875,16 @@ def api_arb_opportunities():
         if min_edge > 0:
             opportunities = [o for o in opportunities if o.get('edge', 0) >= min_edge]
 
+        if ODDSCREENERS_AVAILABLE and oddscreeners_store:
+            os_verified, os_at = oddscreeners_store.get_verified()
+            os_opps = [v for v in os_verified if v.get('roi', 0) >= 0.5]
+            if min_edge > 0:
+                os_opps = [v for v in os_opps if v.get('edge', 0) >= min_edge]
+            existing_ids = {o.get('pairId') for o in opportunities}
+            for opp in os_opps:
+                if opp.get('pairId') not in existing_ids:
+                    opportunities.append(opp)
+
         if sort_by == 'edge':
             opportunities.sort(key=lambda x: x.get('edge', 0), reverse=True)
             watchlist.sort(key=lambda x: x.get('edge', 0), reverse=True)
@@ -4099,6 +4117,43 @@ def api_arb_diag():
             }
 
     return jsonify(results)
+
+
+# =============================================================================
+# OddScreeners Endpoints (Polymarket vs Opinion)
+# =============================================================================
+
+@flask_app.route('/api/oddscreeners/status', methods=['GET'])
+def api_oddscreeners_status():
+    if not ODDSCREENERS_AVAILABLE:
+        return jsonify({'status': 'unavailable', 'reason': 'oddscreeners not installed'}), 503
+    return jsonify(oddscreeners_store.get_status())
+
+
+@flask_app.route('/api/oddscreeners/pairs', methods=['GET'])
+def api_oddscreeners_pairs():
+    if not ODDSCREENERS_AVAILABLE:
+        return jsonify({'error': 'oddscreeners not available'}), 503
+    try:
+        min_edge_signal = float(flask_request.args.get('minEdgeSignal', '0'))
+        limit = int(flask_request.args.get('limit', '100'))
+
+        verified, verified_at = oddscreeners_store.get_verified()
+
+        if min_edge_signal > 0:
+            verified = [v for v in verified if v.get('roi', 0) >= min_edge_signal]
+
+        verified = verified[:limit]
+
+        return jsonify({
+            'asOf': int(verified_at),
+            'pairs': verified,
+            'total': len(verified),
+            'status': oddscreeners_store.get_status(),
+        })
+    except Exception as e:
+        print(f"❌ /api/oddscreeners/pairs error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 
 # =============================================================================
@@ -4400,6 +4455,14 @@ def main():
             print("🔎 PMXT-based arb scanner started (Polymarket × Kalshi)")
         except Exception as e:
             print(f"⚠️ Arb monitor failed to start: {e}")
+
+    # Start OddScreeners collector (Polymarket vs Opinion)
+    if ODDSCREENERS_AVAILABLE:
+        try:
+            start_oddscreeners()
+            print("🔍 OddScreeners SSE collector started (Polymarket × Opinion)")
+        except Exception as e:
+            print(f"⚠️ OddScreeners failed to start: {e}")
     
     # Start HTTP server
     print(f"\n🚀 Starting HTTP API on port {HTTP_PORT}")

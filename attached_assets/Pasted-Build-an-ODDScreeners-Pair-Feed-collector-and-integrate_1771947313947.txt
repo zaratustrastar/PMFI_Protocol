@@ -1,0 +1,118 @@
+Build an “ODDScreeners Pair Feed” collector and integrate it into our existing arbitrage monitor backend.
+
+Goal
+
+Consume ODDScreeners SSE feed of matched Polymarket ↔ Opinion markets:
+GET https://www.oddscreeners.com/api/arbitage/stream?priceMode=asks&minArbPct=0.1&limit=100&scanMode=full
+(content-type text/event-stream)
+
+Parse event: batch and event: match messages:
+
+batch contains data: {"rows":[...], "total": N}
+
+match contains data: {...pair...}
+Ignore progress.
+
+Persist pairs/opportunities in DB (or Redis) and expose them to the existing arb engine so we can:
+
+use ODDScreeners only for pairing and rough signal
+
+fetch fresh orderbooks ourselves from Polymarket + Opinion
+
+compute verified arbitrage and stream to mini app if edge >= 0.5%.
+
+Data shape to store (from each pair object)
+
+Store at minimum:
+
+pairId = id (e.g. "auto-bin-5060" / "auto-cat-83-1452")
+
+opinionMarketId
+
+title, parentTitle, outcome, imageUrl, endDate
+
+polyUrl = poly.url
+
+opinionUrl = opinion.url
+
+strategy[]
+
+arbPct (as a signal only)
+
+prices + sizes (optional but useful)
+
+autoMatched, similarity, isWhitelisted, priceMode, label
+
+timestamps: firstSeenAt, lastSeenAt
+
+Normalize/clean weird encodings (e.g. â†‘ etc.) when storing title/outcome.
+
+Collector service
+
+Implement a backend worker that:
+
+Connects to SSE URL
+
+Parses stream into events (split by blank lines; each event has event: and data: lines)
+
+For batch: upsert each row
+
+For match: upsert the single object
+
+Reconnects automatically on disconnect with exponential backoff
+
+Has a heartbeat watchdog: if no events for >60s, reconnect
+
+Rate limit: do not open more than 1–2 concurrent stream connections per process
+
+Store last error + status for monitoring
+
+Important: do NOT call ODDScreeners from frontend. Backend only.
+
+Integration with arb engine
+
+Add a new pipeline:
+
+pairs_source = "oddscreeners"
+
+For each stored pair, fetch orderbooks from:
+
+Polymarket (derive identifiers from polyUrl as needed)
+
+Opinion (derive from opinionMarketId / opinionUrl)
+
+Compute verified edge including fees/slippage
+
+Emit opportunities if verified edge >= 0.5% and market not near expiry (configurable cutoff like 3h)
+
+API endpoints
+
+Add backend endpoints used by mini app:
+
+GET /api/oddscreeners/pairs (returns stored pairs; supports query params: minEdgeSignal, limit, updatedSince)
+
+GET /api/arbs/live (or existing endpoint) includes new opportunities generated from ODDScreeners-derived pairs; only show verified edge >= 0.5%.
+
+Optional: GET /api/oddscreeners/status (connected, lastEventAt, lastError)
+
+Deployment
+
+Run collector as a separate process (or as part of backend) on the VPS with systemd/pm2, so it stays alive and reconnects.
+
+Acceptance checks
+
+A local test prints N pairs from the SSE within ~1 minute and stores them.
+
+/api/oddscreeners/pairs returns objects that include both polyUrl and opinionUrl.
+
+Verified arb engine fetches orderbooks and produces at least one opportunity when conditions match.
+
+Mini app shows only verified opportunities with edge >= 0.5%.
+
+Extra notes to include (so Replit doesn’t get stuck)
+
+The SSE uses content-type: text/event-stream and includes events: progress, batch, match.
+
+The ODDScreeners feed is “early access”; don’t hardcode cookies unless needed. First try without auth; if blocked, we’ll add header/cookie forwarding later.
+
+Build the parser tolerant to partial chunks.

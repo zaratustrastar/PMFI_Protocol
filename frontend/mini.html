@@ -1699,16 +1699,18 @@
             const edgePct = ((item.edge || 0) * 100).toFixed(1);
             const roiPct = (item.roi || 0).toFixed(1);
             const legs = item.legs || [];
+            const isOddScreeners = item.source === 'oddscreeners';
             let polyLeg = legs.find(l => l.venue === 'polymarket');
-            let kalshiLeg = legs.find(l => l.venue === 'kalshi');
+            let otherLeg = legs.find(l => l.venue === 'kalshi') || legs.find(l => l.venue === 'opinion');
             const polyPrice = polyLeg ? (polyLeg.price * 100).toFixed(0) : '?';
-            const kalshiPrice = kalshiLeg ? (kalshiLeg.price * 100).toFixed(0) : '?';
+            const otherPrice = otherLeg ? (otherLeg.price * 100).toFixed(0) : '?';
             const polySide = polyLeg ? polyLeg.side : '';
-            const kalshiSide = kalshiLeg ? kalshiLeg.side : '';
+            const otherSide = otherLeg ? otherLeg.side : '';
+            const otherVenue = isOddScreeners ? 'OPINION' : 'KALSHI';
             const expiry = item.expiryTs ? new Date(item.expiryTs * 1000).toLocaleDateString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
 
             var polyUrl = item.polyUrl || '';
-            var kalshiUrl = item.kalshiUrl || '';
+            var otherUrl = isOddScreeners ? (item.opinionUrl || '') : (item.kalshiUrl || '');
             if (!polyUrl && item.title) {
                 polyUrl = 'https://polymarket.com/markets?_q=' + encodeURIComponent(item.title);
             }
@@ -1725,9 +1727,9 @@
                         (polyUrl ? '</a>' : '') +
                     '</div>' +
                     '<div class="arb-venue">' +
-                        (kalshiUrl ? '<a href="' + kalshiUrl + '" target="_blank" class="arb-venue-link">' : '') +
-                        '<div class="arb-venue-name">KALSHI ' + kalshiSide + '</div><div class="arb-venue-price">' + kalshiPrice + '\u00a2</div>' +
-                        (kalshiUrl ? '</a>' : '') +
+                        (otherUrl ? '<a href="' + otherUrl + '" target="_blank" class="arb-venue-link">' : '') +
+                        '<div class="arb-venue-name">' + otherVenue + ' ' + otherSide + '</div><div class="arb-venue-price">' + otherPrice + '\u00a2</div>' +
+                        (otherUrl ? '</a>' : '') +
                     '</div>' +
                 '</div>' +
                 '<div class="arb-card-meta">' +
