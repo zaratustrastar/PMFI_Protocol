@@ -1,0 +1,66 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo systemctl status psniper-bot
+sudo journalctl -u psniper-bot -n 50 --no-pager
+× psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: failed (Result: exit-code) since Tue 2026-02-24 16:29:36 UTC; 6h ago
+   Duration: 1.622s
+    Process: 3270276 ExecStart=/usr/bin/python3 bot/bot_v7.py (code=exited, status=1/FAILURE)
+   Main PID: 3270276 (code=exited, status=1/FAILURE)
+        CPU: 1.532s
+
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 10.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Start request repeated too quickly.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Failed to start psniper-bot.service - pSNIPER Bot V7.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Consumed 1.532s CPU time.
+Feb 24 16:29:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270269]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 106, in <module>
+Feb 24 16:29:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270269]:     from arb_monitor.oddscreeners import start_oddscreeners, oddscreeners_store
+Feb 24 16:29:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270269]:   File "/root/PolyNotifyBot/bot/arb_monitor/oddscreeners.py", line 52
+Feb 24 16:29:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270269]:     text = text.replace("â€"", "-")
+Feb 24 16:29:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270269]:                                  ^
+Feb 24 16:29:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270269]: SyntaxError: unterminated string literal (detected at line 52)
+Feb 24 16:29:30 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 24 16:29:30 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 24 16:29:30 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Consumed 1.407s CPU time.
+Feb 24 16:29:31 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 7.
+Feb 24 16:29:31 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270271]: Traceback (most recent call last):
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270271]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 106, in <module>
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270271]:     from arb_monitor.oddscreeners import start_oddscreeners, oddscreeners_store
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270271]:   File "/root/PolyNotifyBot/bot/arb_monitor/oddscreeners.py", line 52
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270271]:     text = text.replace("â€"", "-")
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270271]:                                  ^
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270271]: SyntaxError: unterminated string literal (detected at line 52)
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Consumed 1.393s CPU time.
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 8.
+Feb 24 16:29:32 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270274]: Traceback (most recent call last):
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270274]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 106, in <module>
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270274]:     from arb_monitor.oddscreeners import start_oddscreeners, oddscreeners_store
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270274]:   File "/root/PolyNotifyBot/bot/arb_monitor/oddscreeners.py", line 52
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270274]:     text = text.replace("â€"", "-")
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270274]:                                  ^
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270274]: SyntaxError: unterminated string literal (detected at line 52)
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Consumed 1.424s CPU time.
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 9.
+Feb 24 16:29:34 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started psniper-bot.service - pSNIPER Bot V7.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270276]: Traceback (most recent call last):
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270276]:   File "/root/PolyNotifyBot/bot/bot_v7.py", line 106, in <module>
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270276]:     from arb_monitor.oddscreeners import start_oddscreeners, oddscreeners_store
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270276]:   File "/root/PolyNotifyBot/bot/arb_monitor/oddscreeners.py", line 52
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270276]:     text = text.replace("â€"", "-")
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270276]:                                  ^
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3270276]: SyntaxError: unterminated string literal (detected at line 52)
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Main process exited, code=exited, status=1/FAILURE
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Consumed 1.532s CPU time.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Scheduled restart job, restart counter is at 10.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Start request repeated too quickly.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Failed with result 'exit-code'.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Failed to start psniper-bot.service - pSNIPER Bot V7.
+Feb 24 16:29:36 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: psniper-bot.service: Consumed 1.532s CPU time.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
