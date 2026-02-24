@@ -48,10 +48,6 @@ def _clean_text(text: str) -> str:
     text = text.replace("\u00e2\u0080\u0093", "-")
     text = text.replace("\u00e2\u0080\u009c", '"')
     text = text.replace("\u00e2\u0080\u009d", '"')
-    text = text.replace("â€™", "'")
-    text = text.replace("â€"", "-")
-    text = text.replace("â€œ", '"')
-    text = text.replace("â€\x9d", '"')
     return text.strip()
 
 
