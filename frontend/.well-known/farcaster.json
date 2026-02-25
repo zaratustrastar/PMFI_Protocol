@@ -8,6 +8,7 @@
     "version": "1",
     "name": "pSNIPER Vault",
     "iconUrl": "https://app.pmfi.cc/icon.png",
+    "imageUrl": "https://app.pmfi.cc/hero.png?v=2",
     "splashImageUrl": "https://app.pmfi.cc/splash.png",
     "splashBackgroundColor": "#0d1117",
     "homeUrl": "https://app.pmfi.cc/mini",
