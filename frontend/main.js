@@ -1174,15 +1174,16 @@ let webActiveTab = 'arbitrage';
 function webSwitchTab(tabName) {
     WEB_TABS.forEach(t => {
         const panel = document.getElementById('webPanel' + capitalize(t));
-        const btn = document.getElementById('webTabBtn' + capitalize(t));
+        const btn = document.getElementById('webNavBtn' + capitalize(t));
         if (panel) panel.classList.remove('active');
         if (btn) btn.classList.remove('active');
     });
     const panel = document.getElementById('webPanel' + capitalize(tabName));
-    const btn = document.getElementById('webTabBtn' + capitalize(tabName));
+    const btn = document.getElementById('webNavBtn' + capitalize(tabName));
     if (panel) panel.classList.add('active');
     if (btn) btn.classList.add('active');
     webActiveTab = tabName;
+    window.location.hash = tabName;
     if (tabName === 'arbitrage') webLoadArb();
     if (tabName === 'rankings') webLoadLeaderboard();
     if (tabName === 'tasks') { webLoadTasks(); webLoadInviteCodes(); }
@@ -1201,40 +1202,38 @@ async function webLoadArb() {
     oppEl.innerHTML = '<div class="arb-empty">Loading arbitrage data...</div>';
     watchEl.innerHTML = '';
     try {
-        const res = await fetch('/api/arb/live');
-        if (!res.ok) throw new Error('API error');
+        const res = await fetch('/api/arbs');
+        if (!res.ok) throw new Error('API error ' + res.status);
         const data = await res.json();
-        const opps = (data.opportunities || []).filter(x => x.type === 'opportunity' || x.edge_pct >= 5);
-        const watch = (data.opportunities || []).filter(x => x.type === 'watchlist' || (x.edge_pct > 0 && x.edge_pct < 5));
+        if (data.error) throw new Error(data.error);
+        const opps = data.opportunities || [];
+        const watch = data.watchlist || [];
         oppEl.innerHTML = opps.length
-            ? '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Opportunities</div>' + opps.map(webRenderArbCard).join('')
+            ? '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Opportunities</div>' + opps.map(o => webRenderArbCard(o, true)).join('')
             : '<div class="arb-empty">No arbitrage opportunities right now</div>';
         watchEl.innerHTML = watch.length
-            ? '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.45);margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.5px;">Watchlist</div>' + watch.map(webRenderArbCard).join('')
+            ? '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.45);margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.5px;">Watchlist</div>' + watch.map(o => webRenderArbCard(o, false)).join('')
             : '';
     } catch (e) {
-        oppEl.innerHTML = '<div class="arb-empty">Could not load arbitrage data</div>';
+        oppEl.innerHTML = '<div class="arb-empty">Could not load arbitrage data: ' + e.message + '</div>';
         watchEl.innerHTML = '';
     }
 }
 
-function webRenderArbCard(item) {
-    const isOpp = (item.type === 'opportunity' || item.edge_pct >= 5);
+function webRenderArbCard(item, isOpp) {
     const badge = isOpp
         ? '<span class="arb-badge opportunity">Opportunity</span>'
         : '<span class="arb-badge watchlist">Watchlist</span>';
-    const edge = item.edge_pct != null ? `<span class="arb-edge">${item.edge_pct.toFixed(1)}% edge</span>` : '';
-    const venues = (item.venues || []).map(v =>
-        `<span class="arb-venue">${v.name}: <strong>${v.yes_price != null ? (v.yes_price * 100).toFixed(1) + '¢' : 'N/A'}</strong></span>`
-    ).join('');
-    const links = (item.venues || []).filter(v => v.url).map(v =>
-        `<a class="arb-link" href="${v.url}" target="_blank">${v.name} →</a>`
-    ).join('');
+    const edgePct = item.edge != null ? (item.edge * 100).toFixed(1) : null;
+    const edgeHtml = edgePct > 0 ? `<span class="arb-edge">${edgePct}% edge</span>` : '';
+    const links = [];
+    if (item.polyUrl) links.push(`<a class="arb-link" href="${item.polyUrl}" target="_blank">Polymarket →</a>`);
+    if (item.kalshiUrl) links.push(`<a class="arb-link" href="${item.kalshiUrl}" target="_blank">Kalshi →</a>`);
+    const sportBadge = item.sport ? `<span style="font-size:10px;color:rgba(255,255,255,0.35);margin-left:6px;">${item.sport}</span>` : '';
     return `<div class="arb-card">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">${badge}${edge}</div>
-        <div class="arb-card-title">${item.question || item.title || 'Unknown market'}</div>
-        <div class="arb-venues">${venues}</div>
-        ${links ? `<div class="arb-links">${links}</div>` : ''}
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">${badge}${edgeHtml}${sportBadge}</div>
+        <div class="arb-card-title">${item.title || 'Unknown market'}</div>
+        ${links.length ? `<div class="arb-links">${links.join('')}</div>` : ''}
     </div>`;
 }
 
@@ -1271,27 +1270,26 @@ async function webLoadLeaderboard() {
 // TASKS
 // =============================================================================
 
-let webXpState = null;
+const WEB_TASK_DEFINITIONS = [
+    { id: 'follow_fc', label: 'Follow PMFI on Farcaster', xp: 100, url: 'https://warpcast.com/pmfi' },
+    { id: 'deposit_10', label: 'Deposit $10+ USDC into pSNIPER vault', xp: 500, url: null },
+    { id: 'invite', label: 'Invite a friend with your code', xp: 250, url: null },
+    { id: 'follow_x', label: 'Follow PMFI on X', xp: 100, url: 'https://x.com/pmfi_cc' },
+];
 
-async function webLoadTasks() {
+function webLoadTasks() {
     const el = document.getElementById('webTasksList');
     if (!el) return;
-    if (!userAddress) {
-        el.innerHTML = '<div class="task-row"><div class="task-info"><div class="task-name" style="color:rgba(255,255,255,0.4)">Connect wallet to see your tasks</div></div></div>';
-        return;
-    }
-    el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;padding:8px 0;">Loading tasks...</div>';
-    try {
-        const res = await fetch('/api/state?wallet=' + userAddress);
-        if (!res.ok) throw new Error('API error');
-        const data = await res.json();
-        webXpState = data;
-        const tasks = data.tasks || [];
-        if (!tasks.length) { el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">No tasks available</div>'; return; }
-        el.innerHTML = tasks.map(task => webRenderTask(task)).join('');
-    } catch (e) {
-        el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">Could not load tasks</div>';
-    }
+    el.innerHTML = WEB_TASK_DEFINITIONS.map(task => {
+        const btnHtml = task.url ? `<a href="${task.url}" target="_blank"><button class="task-btn">Go</button></a>` : '';
+        return `<div class="task-row">
+            <div class="task-info">
+                <div class="task-name">${task.label}</div>
+                <div class="task-xp">+${task.xp} XP</div>
+            </div>
+            ${btnHtml}`;
+    }).join('</div>') + (WEB_TASK_DEFINITIONS.length ? '</div>' : '') +
+    `<div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.35);">Open the PMFI mini app on Farcaster to track your XP progress.</div>`;
 }
 
 function webRenderTask(task) {
@@ -1395,8 +1393,13 @@ function webCopyCode(code, idx) {
         }
     }
     
-    // Load default tab on page load
-    webLoadArb();
+    // Read hash to determine initial tab, default to arbitrage
+    const hashTab = window.location.hash.replace('#', '');
+    if (WEB_TABS.includes(hashTab)) {
+        webSwitchTab(hashTab);
+    } else {
+        webLoadArb();
+    }
     
     // Log price API configuration
     if (PRICE_API_URL) {

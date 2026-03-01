@@ -207,6 +207,59 @@
             justify-content: space-between;
             padding: 20px 40px;
             border-bottom: 1px solid rgba(255,255,255,0.06);
+            position: relative;
+        }
+
+        .header-nav {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .header-nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 7px 16px;
+            border-radius: 8px;
+            transition: background 0.15s;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .header-nav-btn:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); }
+        .header-nav-btn.active { color: #fff; background: rgba(56,139,253,0.1); }
+
+        .header-nav-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.45;
+            transition: opacity 0.15s;
+        }
+
+        .header-nav-btn.active .header-nav-icon { opacity: 1; }
+        .header-nav-svg { width: 20px; height: 20px; stroke: currentColor; }
+
+        .header-nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .header { padding: 14px 16px; }
+            .header-nav { gap: 2px; }
+            .header-nav-btn { padding: 6px 10px; }
+            .header-nav-label { display: none; }
+            .header-logo { width: 40px; height: 40px; }
         }
 
         .logo-link {
@@ -930,7 +983,22 @@
         <a href="https://pmfi.cc" target="_blank" class="logo-link">
             <img src="logo.png" alt="PMFI" class="header-logo">
         </a>
-        
+
+        <nav class="header-nav">
+            <button class="header-nav-btn active" id="webNavBtnArbitrage" onclick="webSwitchTab('arbitrage')">
+                <img src="/icon-arbitrage.png" alt="Arbitrage" class="header-nav-icon">
+                <span class="header-nav-label">Arbitrage</span>
+            </button>
+            <button class="header-nav-btn" id="webNavBtnRankings" onclick="webSwitchTab('rankings')">
+                <svg class="header-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="14" width="4" height="7" rx="0.5"/><rect x="10" y="6" width="4" height="15" rx="0.5"/><rect x="17" y="10" width="4" height="11" rx="0.5"/></svg>
+                <span class="header-nav-label">Rankings</span>
+            </button>
+            <button class="header-nav-btn" id="webNavBtnTasks" onclick="webSwitchTab('tasks')">
+                <img src="/icon-rewards.png" alt="Tasks" class="header-nav-icon">
+                <span class="header-nav-label">Tasks</span>
+            </button>
+        </nav>
+
         <button id="connectBtn" class="connect-btn">Connect Wallet</button>
     </header>
 
@@ -984,11 +1052,16 @@
             </div>
         </div>
 
-        <!-- Tab Bar -->
-        <div class="web-tab-bar">
-            <button class="web-tab-btn active" id="webTabBtnArbitrage" onclick="webSwitchTab('arbitrage')">Arbitrage</button>
-            <button class="web-tab-btn" id="webTabBtnRankings" onclick="webSwitchTab('rankings')">Rankings</button>
-            <button class="web-tab-btn" id="webTabBtnTasks" onclick="webSwitchTab('tasks')">Tasks & Codes</button>
+        <!-- Coming Soon Strategies -->
+        <div class="coming-soon-section">
+            <div class="coming-soon-grid">
+                <div class="teaser-card"><div class="teaser-ticker">pARBITRAGE</div><div class="teaser-soon">soon ...</div></div>
+                <div class="teaser-card"><div class="teaser-ticker">pVOLATILITY</div><div class="teaser-soon">soon ...</div></div>
+                <div class="teaser-card"><div class="teaser-ticker">pCOPY</div><div class="teaser-soon">soon ...</div></div>
+                <div class="teaser-card"><div class="teaser-ticker">pLP</div><div class="teaser-soon">soon ...</div></div>
+                <div class="teaser-card"><div class="teaser-ticker">pENDSPIEL</div><div class="teaser-soon">soon ...</div></div>
+                <div class="teaser-card"><div class="teaser-ticker">pINSIDER</div><div class="teaser-soon">soon ...</div></div>
+            </div>
         </div>
 
         <!-- Arbitrage Panel -->
@@ -1009,7 +1082,6 @@
             <div id="webTasksList"></div>
             <div class="invite-codes-section">
                 <div class="invite-codes-title">Your Invite Codes</div>
-                <div class="invite-codes-subtitle">Share these codes — friends get access, you earn 250 XP each</div>
                 <div id="webInviteCodesList"></div>
             </div>
         </div>
