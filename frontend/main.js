@@ -656,6 +656,7 @@ async function connectWallet() {
 
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
+        if (window.__builderAttribution) signer = window.__builderAttribution.wrapSigner(signer);
         userAddress = await signer.getAddress();
 
         vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);

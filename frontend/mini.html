@@ -25,6 +25,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    <script src="/builder-attribution.js"></script>
     
     <!-- Farcaster Mini App SDK -->
     <link rel="preconnect" href="https://auth.farcaster.xyz" />
@@ -2324,6 +2325,7 @@
                 }
                 
                 signer = await provider.getSigner();
+                if (window.__builderAttribution) signer = window.__builderAttribution.wrapSigner(signer);
                 userAddress = await signer.getAddress();
                 
                 const connectBtn = document.getElementById('connectBtn');
