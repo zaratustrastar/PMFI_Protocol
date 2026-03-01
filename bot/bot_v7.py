@@ -257,10 +257,23 @@ def init_invite_tables():
                 whitelisted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS user_invite_codes (
+                code VARCHAR(16) PRIMARY KEY,
+                owner_wallet VARCHAR(42),
+                owner_fid BIGINT,
+                used_by_wallet VARCHAR(42),
+                used_by_fid BIGINT,
+                used_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        """)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_user_invite_codes_owner_wallet ON user_invite_codes(owner_wallet)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_user_invite_codes_owner_fid ON user_invite_codes(owner_fid)")
         conn.commit()
         cur.close()
         conn.close()
-        print("✅ Invite code tables initialized (including whitelisted_fids)")
+        print("✅ Invite code tables initialized (including whitelisted_fids, user_invite_codes)")
         return True
     except Exception as e:
         print(f"❌ Failed to init invite tables: {e}")
@@ -409,8 +422,146 @@ def hash_invite_code(code: str) -> str:
     ).hexdigest()
 
 def generate_invite_code() -> str:
-    """Generate a random 8-character invite code"""
+    """Generate a random 8-character invite code (admin codes)"""
     return secrets.token_hex(4).upper()
+
+def generate_user_code() -> str:
+    """Generate a PMFI-XXXXXX style user referral code"""
+    chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    suffix = ''.join(secrets.choice(chars) for _ in range(6))
+    return f"PMFI-{suffix}"
+
+def ensure_user_has_codes(wallet=None, fid=None):
+    """Ensure a user has 3 personal invite codes. Idempotent."""
+    if not DATABASE_URL or (not wallet and not fid):
+        return
+    try:
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        if wallet:
+            cur.execute("SELECT code FROM user_invite_codes WHERE owner_wallet = %s", (wallet.lower(),))
+        else:
+            cur.execute("SELECT code FROM user_invite_codes WHERE owner_fid = %s", (fid,))
+        existing = [r['code'] for r in cur.fetchall()]
+        needed = 3 - len(existing)
+        for _ in range(needed):
+            for attempt in range(10):
+                code = generate_user_code()
+                try:
+                    cur.execute(
+                        "INSERT INTO user_invite_codes (code, owner_wallet, owner_fid) VALUES (%s, %s, %s)",
+                        (code, wallet.lower() if wallet else None, fid)
+                    )
+                    conn.commit()
+                    break
+                except Exception:
+                    conn.rollback()
+                    continue
+        cur.close()
+        conn.close()
+        print(f"✅ ensure_user_has_codes: wallet={wallet} fid={fid} needed={needed}")
+    except Exception as e:
+        print(f"⚠️ ensure_user_has_codes error: {e}")
+
+def redeem_code_unified(code: str, wallet: str = None, fid: int = None):
+    """
+    Unified code redemption. Checks user_invite_codes first, then admin invite_codes.
+    Returns: (success: bool, message: str, is_user_code: bool, owner_fid: int|None)
+    """
+    code = code.strip().upper()
+    if not code:
+        return False, 'Invalid code', False, None
+
+    try:
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # --- Try user_invite_codes first ---
+        cur.execute("SELECT * FROM user_invite_codes WHERE code = %s FOR UPDATE", (code,))
+        user_code = cur.fetchone()
+
+        if user_code:
+            if user_code['used_at']:
+                cur.close(); conn.close()
+                return False, 'Code already used', True, None
+
+            # Prevent self-use
+            if wallet and user_code['owner_wallet'] and user_code['owner_wallet'] == wallet.lower():
+                cur.close(); conn.close()
+                return False, 'You cannot use your own code', True, None
+            if fid and user_code['owner_fid'] and user_code['owner_fid'] == fid:
+                cur.close(); conn.close()
+                return False, 'You cannot use your own code', True, None
+
+            cur.execute(
+                "UPDATE user_invite_codes SET used_by_wallet=%s, used_by_fid=%s, used_at=NOW() WHERE code=%s",
+                (wallet.lower() if wallet else None, fid, code)
+            )
+            # Whitelist the new user
+            if wallet:
+                cur.execute(
+                    "INSERT INTO whitelisted_wallets (wallet_address) VALUES (%s) ON CONFLICT DO NOTHING",
+                    (wallet.lower(),)
+                )
+            if fid:
+                cur.execute(
+                    "INSERT INTO whitelisted_fids (fid) VALUES (%s) ON CONFLICT DO NOTHING",
+                    (fid,)
+                )
+            conn.commit()
+            owner_fid = user_code.get('owner_fid')
+            cur.close(); conn.close()
+
+            # Award referral XP to code owner
+            if owner_fid and fid and fid != owner_fid:
+                try:
+                    award_xp(owner_fid, 'invite', 250,
+                             meta={'referee_fid': fid, 'code': code},
+                             unique_key=f"invite_code_{code}")
+                except Exception as xp_err:
+                    print(f"⚠️ Could not award referral XP: {xp_err}")
+
+            return True, 'Access granted! Welcome to pSNIPER Beta.', True, owner_fid
+
+        # --- Fall back to admin invite_codes ---
+        code_hash = hash_invite_code(code)
+        cur.execute("SELECT * FROM invite_codes WHERE code_hash = %s FOR UPDATE", (code_hash,))
+        admin_code = cur.fetchone()
+
+        if not admin_code:
+            cur.close(); conn.close()
+            return False, 'Invalid invite code', False, None
+        if admin_code['status'] in ('used', 'redeemed') or admin_code.get('redeemed_by'):
+            cur.close(); conn.close()
+            return False, 'Code already used', False, None
+        if admin_code['status'] == 'revoked':
+            cur.close(); conn.close()
+            return False, 'Code has been revoked', False, None
+        if admin_code.get('expires_at') and admin_code['expires_at'] < datetime.now():
+            cur.close(); conn.close()
+            return False, 'Code expired', False, None
+
+        cur.execute(
+            "UPDATE invite_codes SET status='used', redeemed_by=%s, redeemed_at=CURRENT_TIMESTAMP WHERE id=%s",
+            (wallet or f'fid:{fid}', admin_code['id'])
+        )
+        if wallet:
+            cur.execute(
+                "INSERT INTO whitelisted_wallets (wallet_address, code_id) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                (wallet.lower(), admin_code['id'])
+            )
+        if fid:
+            cur.execute(
+                "INSERT INTO whitelisted_fids (fid, code_id) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                (fid, admin_code['id'])
+            )
+        conn.commit()
+        cur.close(); conn.close()
+        return True, 'Access granted! Welcome to pSNIPER Beta.', False, None
+
+    except Exception as e:
+        print(f"❌ redeem_code_unified error: {e}")
+        return False, 'Server error. Please try again.', False, None
 
 def check_invite_rate_limit(ip: str) -> bool:
     """Check if IP is rate limited for invite operations"""
@@ -2590,7 +2741,8 @@ def api_mini_redeem():
             return jsonify({'error': 'Invalid token'}), 401
         
         if is_fid_whitelisted(fid):
-            print(f"✅ FID {fid} already whitelisted, skipping code redeem")
+            print(f"✅ FID {fid} already whitelisted")
+            ensure_user_has_codes(fid=fid)
             return jsonify({'success': True, 'message': 'Already have access!', 'alreadyWhitelisted': True, 'fid': fid})
         
         data = flask_request.get_json() or {}
@@ -2602,56 +2754,14 @@ def api_mini_redeem():
         ip = flask_request.remote_addr or '0.0.0.0'
         if not check_invite_rate_limit(ip):
             return jsonify({'error': 'Too many attempts. Please wait 1 minute.'}), 429
-        
-        code_hash = hash_invite_code(code)
-        
-        conn = get_invite_db()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        try:
-            cur.execute('BEGIN')
-            
-            cur.execute('SELECT * FROM invite_codes WHERE code_hash = %s FOR UPDATE', (code_hash,))
-            invite_code = cur.fetchone()
-            
-            if not invite_code:
-                cur.execute('ROLLBACK')
-                print(f"❌ FID {fid} tried invalid code")
-                return jsonify({'error': 'Invalid invite code'}), 400
-            
-            if invite_code['status'] == 'used' or invite_code['redeemed_by']:
-                cur.execute('ROLLBACK')
-                return jsonify({'error': 'This code has already been used'}), 400
-            
-            if invite_code['status'] == 'revoked':
-                cur.execute('ROLLBACK')
-                return jsonify({'error': 'This code has been revoked'}), 400
-            
-            if invite_code.get('expires_at') and invite_code['expires_at'] < datetime.now():
-                cur.execute('ROLLBACK')
-                return jsonify({'error': 'This code has expired'}), 400
-            
-            cur.execute(
-                "UPDATE invite_codes SET status = 'used', redeemed_by = %s, redeemed_at = CURRENT_TIMESTAMP WHERE id = %s",
-                (f'fid:{fid}', invite_code['id'])
-            )
-            
-            cur.execute(
-                'INSERT INTO whitelisted_fids (fid, code_id) VALUES (%s, %s) ON CONFLICT (fid) DO NOTHING',
-                (fid, invite_code['id'])
-            )
-            
-            cur.execute('COMMIT')
-            print(f"✅ FID {fid} redeemed invite code and whitelisted")
-            return jsonify({'success': True, 'message': 'Access granted! Welcome to pSNIPER Beta.', 'fid': fid})
-            
-        except Exception as db_err:
-            cur.execute('ROLLBACK')
-            print(f"❌ Mini redeem DB error: {db_err}")
-            return jsonify({'error': 'Server error. Please try again.'}), 500
-        finally:
-            cur.close()
-            conn.close()
+
+        success, message, is_user_code, owner_fid = redeem_code_unified(code, fid=fid)
+        if success:
+            print(f"✅ FID {fid} redeemed code (user_code={is_user_code}), whitelisted")
+            ensure_user_has_codes(fid=fid)
+            return jsonify({'success': True, 'message': message, 'fid': fid})
+        else:
+            return jsonify({'error': message}), 400
     
     except ImportError:
         return jsonify({'error': 'JWT verification not available'}), 500
@@ -2825,70 +2935,15 @@ def api_verify_fc_token():
             return jsonify({'allowed': False, 'error': 'No FID in token'}), 401
         
         fid = int(fid)
-        
-        NEYNAR_MIN_SCORE = 0.7
-        neynar_api_key = os.environ.get('NEYNAR_API_KEY', '')
-        
-        if not neynar_api_key:
-            print(f"❌ NEYNAR_API_KEY not set, cannot check score for FID {fid}")
-            return jsonify({'allowed': False, 'error': 'score_unavailable', 'fid': fid}), 403
-        
-        try:
-            import urllib.request as urllib_req
-            import urllib.error
-            neynar_url = f"https://api.neynar.com/v2/farcaster/user/bulk?fids={fid}&viewer_fid={fid}"
-            neynar_request = urllib_req.Request(neynar_url, headers={
-                'accept': 'application/json',
-                'x-api-key': neynar_api_key
-            })
-            neynar_ctx = ssl.create_default_context()
-            neynar_resp = urllib_req.urlopen(neynar_request, timeout=10, context=neynar_ctx)
-            neynar_data = json_mod.loads(neynar_resp.read().decode())
-            
-            users = neynar_data.get('users', [])
-            if not users:
-                print(f"❌ Neynar returned no users for FID {fid}")
-                return jsonify({'allowed': False, 'error': 'score_unavailable', 'fid': fid}), 403
-            
-            user_data = users[0]
-            experimental = user_data.get('experimental', {})
-            neynar_score = experimental.get('neynar_user_score')
-            
-            if neynar_score is None or not isinstance(neynar_score, (int, float)):
-                print(f"❌ Neynar score missing or invalid for FID {fid}: {neynar_score}")
-                return jsonify({'allowed': False, 'error': 'score_unavailable', 'fid': fid}), 403
-            
-            neynar_score = float(neynar_score)
-            
-            if neynar_score < NEYNAR_MIN_SCORE:
-                print(f"❌ FID {fid} score {neynar_score} below threshold {NEYNAR_MIN_SCORE}")
-                return jsonify({
-                    'allowed': False,
-                    'error': 'score_too_low',
-                    'fid': fid,
-                    'score': round(neynar_score, 4),
-                    'min': NEYNAR_MIN_SCORE,
-                    'verified': True
-                }), 403
-            
-            print(f"✅ FID {fid} verified, Neynar score {neynar_score} >= {NEYNAR_MIN_SCORE}, access granted")
-            return jsonify({
-                'allowed': True,
-                'fid': fid,
-                'verified': True,
-                'score': round(neynar_score, 4),
-                'source': 'farcaster'
-            })
-            
-        except urllib.error.HTTPError as http_err:
-            print(f"❌ Neynar API HTTP error for FID {fid}: {http_err.code} {http_err.reason}")
-            return jsonify({'allowed': False, 'error': 'neynar_error', 'fid': fid, 'details': f'HTTP {http_err.code}'}), 502
-        except urllib.error.URLError as url_err:
-            print(f"❌ Neynar API connection error for FID {fid}: {url_err.reason}")
-            return jsonify({'allowed': False, 'error': 'neynar_error', 'fid': fid, 'details': str(url_err.reason)}), 502
-        except Exception as neynar_err:
-            print(f"❌ Neynar score check failed for FID {fid}: {neynar_err}")
-            return jsonify({'allowed': False, 'error': 'neynar_error', 'fid': fid, 'details': str(neynar_err)}), 502
+
+        whitelisted = is_fid_whitelisted(fid)
+        print(f"✅ FID {fid} JWT verified, whitelisted={whitelisted}")
+        return jsonify({
+            'allowed': whitelisted,
+            'fid': fid,
+            'verified': True,
+            'source': 'farcaster'
+        })
             
     except ImportError:
         print("⚠️ PyJWT not installed - cannot verify Farcaster tokens")
@@ -2974,7 +3029,7 @@ def api_validate_code():
 
 @flask_app.route('/api/invite/redeem', methods=['POST'])
 def api_redeem_code():
-    """Redeem an invite code and whitelist a wallet"""
+    """Redeem an invite code and whitelist a wallet (unified: user codes + admin codes)"""
     ip = flask_request.headers.get('X-Forwarded-For', flask_request.remote_addr or 'unknown')
     
     if not check_invite_rate_limit(ip):
@@ -2982,77 +3037,76 @@ def api_redeem_code():
     
     try:
         data = flask_request.get_json() or {}
-        code = data.get('code', '').strip().upper()
-        wallet = data.get('wallet', '').lower()
+        code = data.get('code', '').strip()
+        wallet = data.get('wallet', '').strip().lower()
+        fid = data.get('fid')
+        if fid:
+            try: fid = int(fid)
+            except: fid = None
         
-        if not code or len(code) != 8:
-            return jsonify({'success': False, 'error': 'Invalid code format'}), 400
+        if not code:
+            return jsonify({'success': False, 'error': 'Please enter an invite code'}), 400
         
         if not wallet or len(wallet) != 42:
             return jsonify({'success': False, 'error': 'Invalid wallet address'}), 400
-        
-        code_hash = hash_invite_code(code)
-        
-        conn = get_invite_db()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
+
         # Check if wallet already whitelisted
-        cur.execute("SELECT wallet_address FROM whitelisted_wallets WHERE wallet_address = %s", (wallet,))
-        if cur.fetchone():
-            cur.close()
-            conn.close()
-            return jsonify({'success': True, 'message': 'Wallet already whitelisted'})
+        if DATABASE_URL:
+            conn = get_invite_db()
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute("SELECT wallet_address FROM whitelisted_wallets WHERE wallet_address = %s", (wallet,))
+            already = cur.fetchone()
+            cur.close(); conn.close()
+            if already:
+                ensure_user_has_codes(wallet=wallet, fid=fid)
+                return jsonify({'success': True, 'message': 'Already have access!'})
+
+        success, message, is_user_code, owner_fid = redeem_code_unified(code, wallet=wallet, fid=fid)
+        if success:
+            print(f"✅ Wallet {wallet[:10]}... redeemed code (user_code={is_user_code})")
+            ensure_user_has_codes(wallet=wallet, fid=fid)
+            log_invite_action('redeem', wallet=wallet, ip=ip, success=True)
+        else:
+            log_invite_action('redeem', wallet=wallet, ip=ip, success=False, error=message)
         
-        # Check code validity
-        cur.execute("""
-            SELECT id, status, expires_at 
-            FROM invite_codes 
-            WHERE code_hash = %s
-        """, (code_hash,))
-        result = cur.fetchone()
-        
-        if not result:
-            log_invite_action('redeem', code_hash=code_hash[:16], wallet=wallet, ip=ip, success=False, error='Code not found')
-            cur.close()
-            conn.close()
-            return jsonify({'success': False, 'error': 'Invalid code'})
-        
-        if result['status'] != 'active':
-            log_invite_action('redeem', code_hash=code_hash[:16], wallet=wallet, ip=ip, success=False, error='Code already used')
-            cur.close()
-            conn.close()
-            return jsonify({'success': False, 'error': 'Code already used'})
-        
-        if result['expires_at'] and result['expires_at'] < datetime.now():
-            cur.close()
-            conn.close()
-            return jsonify({'success': False, 'error': 'Code expired'})
-        
-        # Redeem the code
-        cur.execute("""
-            UPDATE invite_codes 
-            SET status = 'redeemed', redeemed_by = %s, redeemed_at = CURRENT_TIMESTAMP
-            WHERE id = %s
-        """, (wallet, result['id']))
-        
-        # Whitelist the wallet
-        cur.execute("""
-            INSERT INTO whitelisted_wallets (wallet_address, code_id)
-            VALUES (%s, %s)
-            ON CONFLICT (wallet_address) DO NOTHING
-        """, (wallet, result['id']))
-        
-        conn.commit()
-        log_invite_action('redeem', code_hash=code_hash[:16], wallet=wallet, ip=ip, success=True)
-        
-        cur.close()
-        conn.close()
-        
-        print(f"✅ Wallet {wallet[:10]}... whitelisted with code {code}")
-        return jsonify({'success': True, 'message': 'Access granted!'})
+        return jsonify({'success': success, 'message': message if success else None, 'error': message if not success else None})
         
     except Exception as e:
         print(f"❌ redeem error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@flask_app.route('/api/invite/my-codes', methods=['GET'])
+def api_my_codes():
+    """Get the 3 personal invite codes for a user"""
+    wallet = flask_request.args.get('wallet', '').strip().lower()
+    fid = flask_request.args.get('fid')
+    if fid:
+        try: fid = int(fid)
+        except: fid = None
+
+    if not wallet and not fid:
+        return jsonify({'error': 'wallet or fid required'}), 400
+
+    try:
+        ensure_user_has_codes(wallet=wallet or None, fid=fid)
+        conn = get_invite_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        if wallet:
+            cur.execute(
+                "SELECT code, used_by_wallet, used_by_fid, used_at FROM user_invite_codes WHERE owner_wallet = %s ORDER BY created_at",
+                (wallet,)
+            )
+        else:
+            cur.execute(
+                "SELECT code, used_by_wallet, used_by_fid, used_at FROM user_invite_codes WHERE owner_fid = %s ORDER BY created_at",
+                (fid,)
+            )
+        rows = cur.fetchall()
+        cur.close(); conn.close()
+        codes = [{'code': r['code'], 'used': bool(r['used_at']), 'used_at': r['used_at'].isoformat() if r['used_at'] else None} for r in rows]
+        return jsonify({'codes': codes})
+    except Exception as e:
+        print(f"❌ /api/invite/my-codes error: {e}")
         return jsonify({'error': str(e)}), 500
 
 @flask_app.route('/api/admin/codes', methods=['GET', 'POST'])

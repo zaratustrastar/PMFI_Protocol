@@ -962,33 +962,59 @@
             font-size: 13px;
             font-weight: 600;
             color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .referral-subtitle {
+            font-size: 11px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 4px;
+        }
+
+        .invite-code-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 10px 12px;
             margin-bottom: 8px;
         }
 
-        .referral-link-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .invite-code-text {
+            flex: 1;
+            font-family: 'SF Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 1px;
         }
 
-        .referral-link-input {
-            flex: 1;
-            padding: 10px 12px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 12px;
-            font-family: 'SF Mono', monospace;
+        .invite-code-status {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .invite-code-status.available {
+            background: rgba(126,231,135,0.15);
+            color: #7ee787;
+        }
+
+        .invite-code-status.used {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.35);
         }
 
         .referral-copy-btn {
             background: var(--accent-blue);
             color: #fff;
             border: none;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
@@ -1201,11 +1227,9 @@
                 <div id="xpTasksList"></div>
             </div>
             <div class="referral-section" id="referralSection">
-                <div class="referral-title">Your Referral Link</div>
-                <div class="referral-link-box">
-                    <input type="text" class="referral-link-input" id="referralLinkInput" readonly>
-                    <button class="referral-copy-btn" id="referralCopyBtn" onclick="copyReferralLink()">Copy</button>
-                </div>
+                <div class="referral-title">Your Invite Codes</div>
+                <div class="referral-subtitle">Share these codes with friends — they get access, you earn 250 XP each</div>
+                <div id="inviteCodesList" style="margin-top:12px;"></div>
             </div>
         </div>
 
@@ -1427,10 +1451,9 @@
         
         async function authenticateWithFarcaster() {
             if (!fcSdk || !isInFarcaster) {
-                console.log('[FC] Not in Farcaster frame');
+                console.log('[FC] Not in Farcaster frame - skipping FC auth, showing code gate');
                 hideBootLoader();
-                showGateError('Please open in Warpcast to access');
-                gateFid.innerHTML = 'This app requires Farcaster authentication';
+                showGateCodeSection();
                 return;
             }
             
@@ -1506,27 +1529,10 @@
                     grantAccess();
                     xpBootstrap();
                     return 'granted';
-                } else if (data.error === 'score_too_low') {
-                    hideBootLoader();
-                    showScoreGate(data.score, data.min);
-                    return 'score_too_low';
-                } else if (data.error === 'score_unavailable') {
-                    hideBootLoader();
-                    showGateError('Could not verify your Farcaster score. Please try again later.');
-                    return 'score_unavailable';
-                } else if (data.error === 'neynar_error') {
-                    hideBootLoader();
-                    showGateError('Score verification service is temporarily unavailable. Please try again later.');
-                    return 'neynar_error';
-                } else if (data.fid && !data.verified) {
-                    hideBootLoader();
-                    showGateError('Could not verify your identity securely. Please update Warpcast and try again.');
-                    return 'unverified';
                 } else {
-                    console.error('[FC] Server verify response:', JSON.stringify(data));
                     hideBootLoader();
-                    showGateError(data.error || 'Could not verify token');
-                    return false;
+                    showGateCodeSection();
+                    return 'need_code';
                 }
             } catch (e) {
                 console.error('[FC] Token verification fetch error:', e);
@@ -1536,16 +1542,10 @@
             }
         }
         
-        function showScoreGate(score, minScore) {
-            const scoreDisplay = score !== undefined ? score.toFixed(2) : '—';
-            gateStatus.style.display = 'none';
-            
-            const neynarGate = document.getElementById('neynarGateText');
-            const neynarScoreVal = document.getElementById('neynarScoreValue');
-            if (neynarGate && neynarScoreVal) {
-                neynarScoreVal.textContent = scoreDisplay;
-                neynarGate.style.display = 'block';
-            }
+        function showGateCodeSection() {
+            const codeSection = document.getElementById('gateCodeSection');
+            if (codeSection) codeSection.style.display = 'block';
+            if (gateStatus) gateStatus.style.display = 'none';
         }
         
         // ============================================
@@ -1564,9 +1564,9 @@
             if (activeContent) activeContent.classList.add('active');
             if (activeNav) activeNav.classList.add('active');
 
-            if (tabName === 'tasks' && xpState) {
-                renderXpTasks(xpState.tasks || []);
-                updateReferralLink();
+            if (tabName === 'tasks') {
+                if (xpState) renderXpTasks(xpState.tasks || []);
+                loadInviteCodes();
             }
             if (tabName === 'rankings') {
                 loadLeaderboard('all');
@@ -1576,23 +1576,44 @@
             }
         }
 
-        function updateReferralLink() {
-            const input = document.getElementById('referralLinkInput');
-            if (input && userFid) {
-                input.value = 'https://app.pmfi.cc/mini?ref=' + userFid;
+        async function loadInviteCodes() {
+            const container = document.getElementById('inviteCodesList');
+            if (!container) return;
+            const wallet = userAddress;
+            const fid = userFid;
+            if (!wallet && !fid) {
+                container.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">Connect wallet to see your codes</div>';
+                return;
+            }
+            container.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">Loading codes...</div>';
+            try {
+                const params = wallet ? 'wallet=' + wallet : 'fid=' + fid;
+                const res = await fetch('/api/invite/my-codes?' + params);
+                const data = await res.json();
+                const codes = data.codes || [];
+                if (codes.length === 0) {
+                    container.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">No codes yet</div>';
+                    return;
+                }
+                container.innerHTML = codes.map((c, i) => `
+                    <div class="invite-code-row" id="codeRow${i}">
+                        <span class="invite-code-text">${c.code}</span>
+                        <span class="invite-code-status ${c.used ? 'used' : 'available'}">${c.used ? 'Used' : 'Available'}</span>
+                        ${!c.used ? `<button class="referral-copy-btn" onclick="copyInviteCode('${c.code}', ${i})">Copy</button>` : ''}
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">Could not load codes</div>';
             }
         }
 
-        function copyReferralLink() {
-            const input = document.getElementById('referralLinkInput');
-            if (!input || !input.value) return;
-            navigator.clipboard.writeText(input.value).then(() => {
-                const btn = document.getElementById('referralCopyBtn');
-                btn.textContent = 'Copied!';
-                setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+        function copyInviteCode(code, idx) {
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.querySelector('#codeRow' + idx + ' .referral-copy-btn');
+                if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
             }).catch(() => {
-                input.select();
-                document.execCommand('copy');
+                const el = document.createElement('textarea');
+                el.value = code; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
             });
         }
 
@@ -1798,7 +1819,7 @@
             if (!xpState || xpState.error) return;
             const tasks = xpState.tasks || [];
             renderXpTasks(tasks);
-            updateReferralLink();
+            loadInviteCodes();
         }
 
         const TASK_LABELS = {
@@ -2067,7 +2088,7 @@
                 }
             }
             
-            if (!isInFarcaster && window.ethereum) {
+            if (window.ethereum) {
                 ethProvider = window.ethereum;
                 console.log('[FC] Using window.ethereum (external wallet)');
             }
@@ -2273,6 +2294,12 @@
                         console.log('[FC] eth_requestAccounts failed:', reqErr.message);
                         if (!silent) alert('Wallet connection was rejected.');
                         return;
+                    }
+                } else {
+                    try {
+                        await ep.request({ method: 'eth_requestAccounts' });
+                    } catch (reqErr) {
+                        console.log('[FC] eth_requestAccounts in FC failed (non-fatal):', reqErr.message);
                     }
                 }
                 

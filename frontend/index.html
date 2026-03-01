@@ -864,30 +864,65 @@
         .teaser-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: linear-gradient(135deg, rgba(126,231,135,0.03) 0%, transparent 50%);
             pointer-events: none;
         }
+        .teaser-ticker { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; color: #484f58; letter-spacing: -0.3px; margin-bottom: 8px; }
+        .teaser-soon { font-size: 11px; font-weight: 500; color: #30363d; text-transform: uppercase; letter-spacing: 1.5px; }
 
-        .teaser-ticker {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            font-weight: 500;
-            color: #484f58;
-            letter-spacing: -0.3px;
-            margin-bottom: 8px;
-        }
+        /* ---- Tab Bar ---- */
+        .web-tab-bar { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin: 24px 0 0 0; }
+        .web-tab-btn { flex: 1; background: none; border: none; color: rgba(255,255,255,0.45); font-size: 13px; font-weight: 600; padding: 12px 8px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .web-tab-btn.active { color: #fff; border-bottom-color: #388bfd; }
+        .web-tab-panel { display: none; padding: 24px 0; }
+        .web-tab-panel.active { display: block; }
 
-        .teaser-soon {
-            font-size: 11px;
-            font-weight: 500;
-            color: #30363d;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
+        /* ---- Arb Cards ---- */
+        .arb-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+        .arb-card-title { font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 8px; line-height: 1.4; }
+        .arb-venues { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+        .arb-venue { font-size: 12px; color: rgba(255,255,255,0.55); }
+        .arb-venue strong { color: #fff; }
+        .arb-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-right: 6px; }
+        .arb-badge.opportunity { background: rgba(126,231,135,0.15); color: #7ee787; }
+        .arb-badge.watchlist { background: rgba(255,193,7,0.15); color: #ffc107; }
+        .arb-edge { font-size: 13px; font-weight: 700; color: #7ee787; }
+        .arb-empty { color: rgba(255,255,255,0.35); font-size: 13px; padding: 24px 0; text-align: center; }
+        .arb-links { display: flex; gap: 12px; margin-top: 8px; }
+        .arb-link { font-size: 11px; color: #388bfd; text-decoration: none; }
+        .arb-link:hover { text-decoration: underline; }
+
+        /* ---- Leaderboard ---- */
+        .leaderboard-table { display: flex; flex-direction: column; gap: 6px; }
+        .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; }
+        .leaderboard-row.current-user { background: rgba(56,139,253,0.1); border-color: rgba(56,139,253,0.3); }
+        .lb-rank { width: 28px; color: rgba(255,255,255,0.4); font-size: 12px; }
+        .lb-user { flex: 1; font-size: 13px; color: rgba(255,255,255,0.85); }
+        .lb-xp { font-size: 13px; font-weight: 600; color: #7ee787; }
+        .leaderboard-empty { color: rgba(255,255,255,0.35); font-size: 13px; padding: 24px 0; text-align: center; }
+
+        /* ---- Tasks ---- */
+        .task-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; margin-bottom: 8px; }
+        .task-info { flex: 1; }
+        .task-name { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 500; }
+        .task-xp { font-size: 11px; color: #7ee787; margin-top: 2px; }
+        .task-status { font-size: 12px; font-weight: 600; white-space: nowrap; }
+        .task-status.done { color: rgba(255,255,255,0.3); }
+        .task-status.pending { color: #ffc107; }
+        .task-btn { background: #388bfd; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .task-btn:disabled { opacity: 0.5; cursor: default; }
+
+        /* ---- Invite Codes (web) ---- */
+        .invite-codes-section { margin-top: 28px; }
+        .invite-codes-title { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.85); margin-bottom: 4px; }
+        .invite-codes-subtitle { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 14px; }
+        .invite-code-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; }
+        .invite-code-text { flex: 1; font-family: 'SF Mono', monospace; font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 1px; }
+        .invite-code-status { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+        .invite-code-status.available { background: rgba(126,231,135,0.15); color: #7ee787; }
+        .invite-code-status.used { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.35); }
+        .invite-copy-btn { background: #388bfd; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -949,33 +984,33 @@
             </div>
         </div>
 
-        <!-- Coming Soon Strategies -->
-        <div class="coming-soon-section">
-            <div class="coming-soon-grid">
-                <div class="teaser-card">
-                    <div class="teaser-ticker">pARBITRAGE</div>
-                    <div class="teaser-soon">soon ...</div>
-                </div>
-                <div class="teaser-card">
-                    <div class="teaser-ticker">pVOLATILITY</div>
-                    <div class="teaser-soon">soon ...</div>
-                </div>
-                <div class="teaser-card">
-                    <div class="teaser-ticker">pCOPY</div>
-                    <div class="teaser-soon">soon ...</div>
-                </div>
-                <div class="teaser-card">
-                    <div class="teaser-ticker">pLP</div>
-                    <div class="teaser-soon">soon ...</div>
-                </div>
-                <div class="teaser-card">
-                    <div class="teaser-ticker">pENDSPIEL</div>
-                    <div class="teaser-soon">soon ...</div>
-                </div>
-                <div class="teaser-card">
-                    <div class="teaser-ticker">pINSIDER</div>
-                    <div class="teaser-soon">soon ...</div>
-                </div>
+        <!-- Tab Bar -->
+        <div class="web-tab-bar">
+            <button class="web-tab-btn active" id="webTabBtnArbitrage" onclick="webSwitchTab('arbitrage')">Arbitrage</button>
+            <button class="web-tab-btn" id="webTabBtnRankings" onclick="webSwitchTab('rankings')">Rankings</button>
+            <button class="web-tab-btn" id="webTabBtnTasks" onclick="webSwitchTab('tasks')">Tasks & Codes</button>
+        </div>
+
+        <!-- Arbitrage Panel -->
+        <div class="web-tab-panel active" id="webPanelArbitrage">
+            <div id="webArbOpportunities"></div>
+            <div id="webArbWatchlist"></div>
+        </div>
+
+        <!-- Rankings Panel -->
+        <div class="web-tab-panel" id="webPanelRankings">
+            <div class="leaderboard-table" id="webLeaderboardContent">
+                <div class="leaderboard-empty">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Tasks & Codes Panel -->
+        <div class="web-tab-panel" id="webPanelTasks">
+            <div id="webTasksList"></div>
+            <div class="invite-codes-section">
+                <div class="invite-codes-title">Your Invite Codes</div>
+                <div class="invite-codes-subtitle">Share these codes — friends get access, you earn 250 XP each</div>
+                <div id="webInviteCodesList"></div>
             </div>
         </div>
     </main>

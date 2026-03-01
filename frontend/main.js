@@ -672,6 +672,10 @@ async function connectWallet() {
         await refreshAll();
         startAutoRefresh();
 
+        // Refresh tab content that depends on wallet
+        if (webActiveTab === 'tasks') { webLoadTasks(); webLoadInviteCodes(); }
+        if (webActiveTab === 'rankings') webLoadLeaderboard();
+
         window.ethereum.on("accountsChanged", handleAccountsChanged);
         window.ethereum.on("chainChanged", handleChainChanged);
 
@@ -1160,6 +1164,204 @@ async function initReadOnlyProvider() {
     }
 }
 
+// =============================================================================
+// TAB NAVIGATION
+// =============================================================================
+
+const WEB_TABS = ['arbitrage', 'rankings', 'tasks'];
+let webActiveTab = 'arbitrage';
+
+function webSwitchTab(tabName) {
+    WEB_TABS.forEach(t => {
+        const panel = document.getElementById('webPanel' + capitalize(t));
+        const btn = document.getElementById('webTabBtn' + capitalize(t));
+        if (panel) panel.classList.remove('active');
+        if (btn) btn.classList.remove('active');
+    });
+    const panel = document.getElementById('webPanel' + capitalize(tabName));
+    const btn = document.getElementById('webTabBtn' + capitalize(tabName));
+    if (panel) panel.classList.add('active');
+    if (btn) btn.classList.add('active');
+    webActiveTab = tabName;
+    if (tabName === 'arbitrage') webLoadArb();
+    if (tabName === 'rankings') webLoadLeaderboard();
+    if (tabName === 'tasks') { webLoadTasks(); webLoadInviteCodes(); }
+}
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// =============================================================================
+// ARBITRAGE
+// =============================================================================
+
+async function webLoadArb() {
+    const oppEl = document.getElementById('webArbOpportunities');
+    const watchEl = document.getElementById('webArbWatchlist');
+    if (!oppEl || !watchEl) return;
+    oppEl.innerHTML = '<div class="arb-empty">Loading arbitrage data...</div>';
+    watchEl.innerHTML = '';
+    try {
+        const res = await fetch('/api/arb/live');
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        const opps = (data.opportunities || []).filter(x => x.type === 'opportunity' || x.edge_pct >= 5);
+        const watch = (data.opportunities || []).filter(x => x.type === 'watchlist' || (x.edge_pct > 0 && x.edge_pct < 5));
+        oppEl.innerHTML = opps.length
+            ? '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Opportunities</div>' + opps.map(webRenderArbCard).join('')
+            : '<div class="arb-empty">No arbitrage opportunities right now</div>';
+        watchEl.innerHTML = watch.length
+            ? '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.45);margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.5px;">Watchlist</div>' + watch.map(webRenderArbCard).join('')
+            : '';
+    } catch (e) {
+        oppEl.innerHTML = '<div class="arb-empty">Could not load arbitrage data</div>';
+        watchEl.innerHTML = '';
+    }
+}
+
+function webRenderArbCard(item) {
+    const isOpp = (item.type === 'opportunity' || item.edge_pct >= 5);
+    const badge = isOpp
+        ? '<span class="arb-badge opportunity">Opportunity</span>'
+        : '<span class="arb-badge watchlist">Watchlist</span>';
+    const edge = item.edge_pct != null ? `<span class="arb-edge">${item.edge_pct.toFixed(1)}% edge</span>` : '';
+    const venues = (item.venues || []).map(v =>
+        `<span class="arb-venue">${v.name}: <strong>${v.yes_price != null ? (v.yes_price * 100).toFixed(1) + '¢' : 'N/A'}</strong></span>`
+    ).join('');
+    const links = (item.venues || []).filter(v => v.url).map(v =>
+        `<a class="arb-link" href="${v.url}" target="_blank">${v.name} →</a>`
+    ).join('');
+    return `<div class="arb-card">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">${badge}${edge}</div>
+        <div class="arb-card-title">${item.question || item.title || 'Unknown market'}</div>
+        <div class="arb-venues">${venues}</div>
+        ${links ? `<div class="arb-links">${links}</div>` : ''}
+    </div>`;
+}
+
+// =============================================================================
+// LEADERBOARD
+// =============================================================================
+
+async function webLoadLeaderboard() {
+    const el = document.getElementById('webLeaderboardContent');
+    if (!el) return;
+    el.innerHTML = '<div class="leaderboard-empty">Loading...</div>';
+    try {
+        const res = await fetch('/api/leaderboard?scope=all&limit=50');
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        const rows = data.leaderboard || data.rows || [];
+        if (!rows.length) { el.innerHTML = '<div class="leaderboard-empty">No data yet</div>'; return; }
+        el.innerHTML = rows.map((row, i) => {
+            const isCurrent = userAddress && row.wallet && row.wallet.toLowerCase() === userAddress.toLowerCase();
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+            const displayName = row.username || (row.wallet ? row.wallet.slice(0, 6) + '...' + row.wallet.slice(-4) : 'Unknown');
+            return `<div class="leaderboard-row${isCurrent ? ' current-user' : ''}">
+                <span class="lb-rank">${medal}</span>
+                <span class="lb-user">${displayName}</span>
+                <span class="lb-xp">${(row.xp || 0).toLocaleString()} XP</span>
+            </div>`;
+        }).join('');
+    } catch (e) {
+        el.innerHTML = '<div class="leaderboard-empty">Could not load leaderboard</div>';
+    }
+}
+
+// =============================================================================
+// TASKS
+// =============================================================================
+
+let webXpState = null;
+
+async function webLoadTasks() {
+    const el = document.getElementById('webTasksList');
+    if (!el) return;
+    if (!userAddress) {
+        el.innerHTML = '<div class="task-row"><div class="task-info"><div class="task-name" style="color:rgba(255,255,255,0.4)">Connect wallet to see your tasks</div></div></div>';
+        return;
+    }
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;padding:8px 0;">Loading tasks...</div>';
+    try {
+        const res = await fetch('/api/state?wallet=' + userAddress);
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        webXpState = data;
+        const tasks = data.tasks || [];
+        if (!tasks.length) { el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">No tasks available</div>'; return; }
+        el.innerHTML = tasks.map(task => webRenderTask(task)).join('');
+    } catch (e) {
+        el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">Could not load tasks</div>';
+    }
+}
+
+function webRenderTask(task) {
+    const done = task.completed || task.status === 'completed';
+    const pending = task.status === 'PENDING_REVIEW';
+    let statusHtml = '';
+    let btnHtml = '';
+    if (done) {
+        statusHtml = '<span class="task-status done">Done</span>';
+    } else if (pending) {
+        statusHtml = '<span class="task-status pending">Pending Review</span>';
+    } else if (task.action_url) {
+        btnHtml = `<a href="${task.action_url}" target="_blank"><button class="task-btn">Go</button></a>`;
+    }
+    return `<div class="task-row">
+        <div class="task-info">
+            <div class="task-name">${task.label || task.type || 'Task'}</div>
+            <div class="task-xp">+${task.xp || 0} XP</div>
+        </div>
+        ${statusHtml}${btnHtml}
+    </div>`;
+}
+
+// =============================================================================
+// INVITE CODES (web)
+// =============================================================================
+
+async function webLoadInviteCodes() {
+    const el = document.getElementById('webInviteCodesList');
+    if (!el) return;
+    if (!userAddress) {
+        el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">Connect wallet to see your codes</div>';
+        return;
+    }
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">Loading codes...</div>';
+    try {
+        const res = await fetch('/api/invite/my-codes?wallet=' + userAddress);
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        const codes = data.codes || [];
+        if (!codes.length) {
+            el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">No codes yet</div>';
+            return;
+        }
+        el.innerHTML = codes.map((c, i) => `
+            <div class="invite-code-row" id="webCodeRow${i}">
+                <span class="invite-code-text">${c.code}</span>
+                <span class="invite-code-status ${c.used ? 'used' : 'available'}">${c.used ? 'Used' : 'Available'}</span>
+                ${!c.used ? `<button class="invite-copy-btn" onclick="webCopyCode('${c.code}', ${i})">Copy</button>` : ''}
+            </div>
+        `).join('');
+    } catch (e) {
+        el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">Could not load codes</div>';
+    }
+}
+
+function webCopyCode(code, idx) {
+    navigator.clipboard.writeText(code).then(() => {
+        const btn = document.querySelector('#webCodeRow' + idx + ' .invite-copy-btn');
+        if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
+    }).catch(() => {
+        const el = document.createElement('textarea');
+        el.value = code; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+    });
+}
+
+// =============================================================================
+// INIT
+// =============================================================================
+
 (async function init() {
     initDisclaimer();
     initDepositModal();
@@ -1192,6 +1394,9 @@ async function initReadOnlyProvider() {
             }
         }
     }
+    
+    // Load default tab on page load
+    webLoadArb();
     
     // Log price API configuration
     if (PRICE_API_URL) {
