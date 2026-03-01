@@ -521,7 +521,7 @@ def redeem_code_unified(code: str, wallet: str = None, fid: int = None):
                 except Exception as xp_err:
                     print(f"⚠️ Could not award referral XP: {xp_err}")
 
-            return True, 'Access granted! Welcome to pSNIPER Beta.', True, owner_fid
+            return True, 'Access granted! Welcome to PMFI Beta.', True, owner_fid
 
         # --- Fall back to admin invite_codes ---
         code_hash = hash_invite_code(code)
@@ -557,7 +557,7 @@ def redeem_code_unified(code: str, wallet: str = None, fid: int = None):
             )
         conn.commit()
         cur.close(); conn.close()
-        return True, 'Access granted! Welcome to pSNIPER Beta.', False, None
+        return True, 'Access granted! Welcome to PMFI Beta.', False, None
 
     except Exception as e:
         print(f"❌ redeem_code_unified error: {e}")
@@ -2705,7 +2705,7 @@ def api_mini_redeem():
         if payload is None:
             try:
                 ctx = ssl.create_default_context()
-                req = urllib_req.Request(FARCASTER_JWKS_URL, headers={'User-Agent': 'pSNIPER/1.0'})
+                req = urllib_req.Request(FARCASTER_JWKS_URL, headers={'User-Agent': 'PMFI/1.0'})
                 resp = urllib_req.urlopen(req, timeout=10, context=ctx)
                 jwks_data = json_mod.loads(resp.read().decode())
                 if jwks_data and jwks_data.get('keys'):
@@ -2843,7 +2843,7 @@ def api_verify_fc_token():
         def fetch_jwks_manual():
             try:
                 ctx = ssl.create_default_context()
-                req = urllib.request.Request(FARCASTER_JWKS_URL, headers={'User-Agent': 'pSNIPER/1.0'})
+                req = urllib.request.Request(FARCASTER_JWKS_URL, headers={'User-Agent': 'PMFI/1.0'})
                 resp = urllib.request.urlopen(req, timeout=10, context=ctx)
                 jwks_data = json_mod.loads(resp.read().decode())
                 print(f"🔑 Manual JWKS fetch succeeded, got {len(jwks_data.get('keys', []))} keys")
