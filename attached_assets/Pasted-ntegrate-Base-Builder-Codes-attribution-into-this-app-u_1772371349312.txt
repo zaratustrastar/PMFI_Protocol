@@ -1,0 +1,52 @@
+ntegrate Base Builder Codes attribution into this app using Base docs:
+https://docs.base.org/base-chain/builder-codes/app-developers
+
+Goal:
+- I already have a Builder Code from base.dev (format like "bc_xxxxx").
+- Ensure ALL onchain transactions initiated by this app append the ERC-8021 attribution dataSuffix generated from that Builder Code.
+- Do this in the cleanest, most centralized place (global client/config), not per-transaction, unless unavoidable.
+
+Steps:
+1) Inspect the repo and identify how transactions are sent:
+   - wagmi + viem
+   - viem walletClient directly
+   - ethers / thirdweb / rainbowkit / privy / web3modal / coinbase smart wallet / 4337, etc.
+   Report what you found (files + approach).
+
+2) Add dependencies:
+   - Install `ox` (for ERC-8021 Attribution helper).
+   - If using wagmi/viem, ensure viem is >= 2.45.0 (upgrade if needed).
+   Use the project’s package manager (npm/yarn/pnpm/bun) based on lockfile.
+
+3) Implement attribution suffix:
+   - Create a single module (e.g. `src/lib/builderCode.ts`) that exports:
+     - `BUILDER_CODE` (read from env, fallback to hardcoded placeholder)
+     - `DATA_SUFFIX` computed via:
+       `Attribution.toDataSuffix({ codes: [BUILDER_CODE] })`
+     - Handle missing env var with a clear console warning in dev.
+
+4) Wire it into the transaction client globally:
+   - If wagmi: add `dataSuffix: DATA_SUFFIX` to `createConfig(...)`.
+   - If viem wallet client: add `dataSuffix: DATA_SUFFIX` to `createWalletClient(...)`.
+   - If there are multiple clients (mainnet/base/sepolia), apply to all Base chain configs used.
+   - Do NOT break SSR builds (Next.js): ensure module does not access `window` at import time.
+
+5) Verification:
+   - Add a small dev-only log to confirm `DATA_SUFFIX` is set (do not log the raw builder code in production).
+   - If the project has a “send tx” button or example flow, run it locally and confirm:
+     - tx succeeds
+     - attribution suffix is appended (best effort: print tx data length or show where it’s attached)
+   - Provide instructions on where I can verify on base.dev analytics or by checking tx input data on an explorer.
+
+6) Output:
+   - Show the diffs/changes (files modified + brief explanation).
+   - Tell me what env var to set (e.g. `NEXT_PUBLIC_BASE_BUILDER_CODE=bc_...` or `VITE_BASE_BUILDER_CODE=bc_...`), depending on the framework.
+
+My Builder Code:
+- Set it as an env var named `BASE_BUILDER_CODE` (or the appropriate public-prefixed env var if required by the framework).
+- Use placeholder value "bc_REPLACE_ME" in code if you can’t access my real env.
+
+Constraints:
+- Keep changes minimal.
+- No refactors unrelated to attribution.
+- Don’t add per-transaction suffixes unless there is no global config path.
