@@ -1196,73 +1196,134 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 // =============================================================================
 
 let webFcFid = localStorage.getItem('pmfi_web_fid') ? parseInt(localStorage.getItem('pmfi_web_fid')) : null;
+let webFcUsername = localStorage.getItem('pmfi_web_fc_username') || null;
+let _siwfAbort = null;
 
 function webUpdateFcState() {
     const elDisconnected = document.getElementById('webFcDisconnected');
-    const elInputRow = document.getElementById('webFcInputRow');
     const elConnected = document.getElementById('webFcConnected');
     const elLabel = document.getElementById('webFcConnectedLabel');
     if (!elDisconnected || !elConnected) return;
     if (webFcFid) {
         elDisconnected.style.display = 'none';
-        elInputRow.style.display = 'none';
         elConnected.style.display = 'block';
-        if (elLabel) elLabel.textContent = 'Farcaster FID ' + webFcFid + ' connected';
+        const name = webFcUsername ? '@' + webFcUsername : 'FID ' + webFcFid;
+        if (elLabel) elLabel.textContent = name + ' connected';
     } else {
         elDisconnected.style.display = 'block';
-        elInputRow.style.display = 'none';
         elConnected.style.display = 'none';
     }
     webLoadTasks();
 }
 
-function webShowFcInput() {
-    const elDisconnected = document.getElementById('webFcDisconnected');
-    const elInputRow = document.getElementById('webFcInputRow');
-    if (elDisconnected) elDisconnected.style.display = 'none';
-    if (elInputRow) elInputRow.style.display = 'block';
-    const input = document.getElementById('webFcFidInput');
-    if (input) input.focus();
-}
-
-function webHideFcInput() {
-    const elDisconnected = document.getElementById('webFcDisconnected');
-    const elInputRow = document.getElementById('webFcInputRow');
-    if (elDisconnected) elDisconnected.style.display = 'block';
-    if (elInputRow) elInputRow.style.display = 'none';
-    webSetFcStatus('', '');
-}
-
-function webSaveFid() {
-    const input = document.getElementById('webFcFidInput');
-    if (!input) return;
-    const val = parseInt(input.value);
-    if (!val || val < 1) {
-        webSetFcStatus('Enter a valid Farcaster FID', '#f85149');
-        return;
-    }
-    webFcFid = val;
-    localStorage.setItem('pmfi_web_fid', val);
-    webUpdateFcState();
-}
-
 function webDisconnectFc() {
     webFcFid = null;
+    webFcUsername = null;
     localStorage.removeItem('pmfi_web_fid');
+    localStorage.removeItem('pmfi_web_fc_username');
+    if (_siwfAbort) { _siwfAbort(); _siwfAbort = null; }
     webUpdateFcState();
 }
 
 function webRestoreFid() {
     const saved = localStorage.getItem('pmfi_web_fid');
-    if (saved) {
-        webFcFid = parseInt(saved);
-    }
+    if (saved) webFcFid = parseInt(saved);
     webUpdateFcState();
 }
 
-function webSetFcStatus(msg, color) {
-    const el = document.getElementById('webFcStatus');
-    if (el) { el.textContent = msg; el.style.color = color || 'rgba(255,255,255,0.4)'; }
+function webSetSiwfStatus(msg) {
+    const el = document.getElementById('webFcSiwfStatus');
+    if (el) el.textContent = msg;
+}
+
+function webCloseSiwfModal() {
+    const modal = document.getElementById('siwfModal');
+    if (modal) modal.style.display = 'none';
+    if (_siwfAbort) { _siwfAbort(); _siwfAbort = null; }
+    const qrWrap = document.getElementById('siwfQrWrap');
+    if (qrWrap) { qrWrap.style.display = 'none'; qrWrap.innerHTML = '<div id="webFcQrCanvas" style="display:inline-block;background:#fff;padding:8px;border-radius:8px;"></div><p style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:8px;">Scan with Warpcast</p>'; }
+    const deeplink = document.getElementById('webFcDeeplink');
+    if (deeplink) deeplink.style.display = 'none';
+}
+
+async function webConnectFarcaster() {
+    const modal = document.getElementById('siwfModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    webSetSiwfStatus('Generating sign-in link...');
+    const qrWrap = document.getElementById('siwfQrWrap');
+    if (qrWrap) qrWrap.style.display = 'none';
+    const deeplink = document.getElementById('webFcDeeplink');
+    if (deeplink) deeplink.style.display = 'none';
+
+    try {
+        const { createAppClient, viem } = await import('https://esm.sh/@farcaster/auth-client@0.3.0');
+        const client = createAppClient({ relay: 'https://relay.farcaster.xyz', ethereum: viem() });
+
+        const nonce = Math.random().toString(36).slice(2, 18);
+        const { data: channelData, isError: chanErr } = await client.createChannel({
+            siweUri: 'https://pmfi.cc',
+            domain: 'pmfi.cc',
+            nonce,
+        });
+        if (chanErr || !channelData) { webSetSiwfStatus('Failed to create sign-in channel. Try again.'); return; }
+
+        const { url, channelToken } = channelData;
+
+        const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            if (deeplink) { deeplink.href = url; deeplink.style.display = 'block'; }
+            webSetSiwfStatus('Tap the button below to open Warpcast');
+        } else {
+            if (qrWrap) {
+                qrWrap.style.display = 'block';
+                qrWrap.innerHTML = '<div id="webFcQrCanvas"></div><p style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:8px;">Scan with Warpcast</p>';
+                new QRCode(document.getElementById('webFcQrCanvas'), {
+                    text: url,
+                    width: 220,
+                    height: 220,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M,
+                });
+            }
+            webSetSiwfStatus('Scan the QR code with Warpcast to sign in');
+        }
+
+        let aborted = false;
+        _siwfAbort = () => { aborted = true; };
+
+        const timeout = setTimeout(() => { if (!aborted) { aborted = true; webSetSiwfStatus('Timed out — please try again.'); } }, 5 * 60 * 1000);
+
+        const { data: statusData, isError: statusErr } = await client.watchStatus({
+            channelToken,
+            timeout: 5 * 60 * 1000,
+            interval: 2000,
+            onResponse: ({ data }) => {
+                if (aborted) return;
+                if (data?.state === 'pending') webSetSiwfStatus('Waiting for approval in Warpcast...');
+            },
+        });
+
+        clearTimeout(timeout);
+        if (aborted) return;
+
+        if (statusErr || !statusData?.fid) {
+            webSetSiwfStatus('Sign-in was not completed. Try again.');
+            return;
+        }
+
+        webFcFid = statusData.fid;
+        webFcUsername = statusData.username || null;
+        localStorage.setItem('pmfi_web_fid', webFcFid);
+        if (webFcUsername) localStorage.setItem('pmfi_web_fc_username', webFcUsername);
+        webCloseSiwfModal();
+        webUpdateFcState();
+
+    } catch (e) {
+        console.error('[SIWF]', e);
+        webSetSiwfStatus('Error: ' + (e.message || 'Something went wrong'));
+    }
 }
 
 async function webVerifyFollow() {
@@ -1278,11 +1339,12 @@ async function webVerifyFollow() {
         const data = await res.json();
         if (data.verified) {
             const elLabel = document.getElementById('webFcConnectedLabel');
-            if (elLabel) elLabel.textContent = 'Farcaster FID ' + webFcFid + ' connected · Follow verified ✓';
+            const name = webFcUsername ? '@' + webFcUsername : 'FID ' + webFcFid;
+            if (elLabel) elLabel.textContent = name + ' connected · Follow verified ✓';
         } else if (data.error === 'User not registered') {
-            alert('FID ' + webFcFid + ' is not registered. Open the PMFI mini app on Farcaster first to create your account.');
+            alert('Your Farcaster account is not registered with PMFI yet. Open the PMFI mini app on Warpcast first to create your account.');
         } else {
-            alert(data.reason || data.error || 'You are not following PMFI on Farcaster yet. Follow first, then verify.');
+            alert(data.reason || data.error || 'You are not following PMFI on Farcaster yet. Follow @pmfi first, then verify.');
         }
     } catch (e) {
         alert('Verification failed — check your connection and try again.');

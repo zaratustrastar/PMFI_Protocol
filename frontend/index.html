@@ -1091,24 +1091,15 @@
         <div class="web-tab-panel" id="webPanelTasks">
             <!-- Farcaster Connect -->
             <div id="webFcDisconnected" style="margin-bottom:20px;">
-                <button onclick="webShowFcInput()" class="deposit-btn" style="width:100%;padding:12px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <button onclick="webConnectFarcaster()" class="deposit-btn" style="width:100%;padding:12px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <svg width="18" height="18" viewBox="0 0 1000 1000" fill="currentColor"><path d="M257.778 155.556H742.222V844.444H671.111V528.889H670.414C662.554 441.677 589.258 373.333 500 373.333C410.742 373.333 337.446 441.677 329.586 528.889H328.889V844.444H257.778V155.556Z"/><path d="M128.889 253.333L157.778 351.111H182.222V746.667C169.949 746.667 160 756.616 160 768.889V795.556H155.556C143.283 795.556 133.333 805.505 133.333 817.778V844.444H382.222V817.778C382.222 805.505 372.273 795.556 360 795.556H355.556V768.889C355.556 756.616 345.606 746.667 333.333 746.667H306.667V253.333H128.889Z"/><path d="M675.556 746.667C663.283 746.667 653.333 756.616 653.333 768.889V795.556H648.889C636.616 795.556 626.667 805.505 626.667 817.778V844.444H875.556V817.778C875.556 805.505 865.606 795.556 853.333 795.556H848.889V768.889C848.889 756.616 838.939 746.667 826.667 746.667V351.111H851.111L880 253.333H702.222V746.667H675.556Z"/></svg>
-                    Connect Farcaster
+                    Sign In With Farcaster
                 </button>
             </div>
-            <div id="webFcInputRow" style="display:none;margin-bottom:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:16px;">
-                <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:10px;">Enter your Farcaster FID to connect</div>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input id="webFcFidInput" type="number" placeholder="e.g. 12345" style="flex:1;padding:9px 12px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#fff;font-size:14px;" min="1">
-                    <button onclick="webSaveFid()" class="deposit-btn" style="padding:9px 20px;">Connect</button>
-                    <button onclick="webHideFcInput()" style="background:none;border:none;color:rgba(255,255,255,0.35);cursor:pointer;padding:8px;font-size:18px;line-height:1;">&times;</button>
-                </div>
-                <div id="webFcStatus" style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.4);"></div>
-            </div>
-            <div id="webFcConnected" style="display:none;margin-bottom:20px;background:rgba(126,231,135,0.06);border:1px solid rgba(126,231,135,0.2);border-radius:10px;padding:12px 16px;display:none;">
+            <div id="webFcConnected" style="display:none;margin-bottom:20px;background:rgba(126,231,135,0.06);border:1px solid rgba(126,231,135,0.2);border-radius:10px;padding:12px 16px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;">
                     <div style="display:flex;align-items:center;gap:8px;">
-                        <svg width="16" height="16" viewBox="0 0 1000 1000" fill="#7ee787"><path d="M257.778 155.556H742.222V844.444H671.111V528.889H670.414C662.554 441.677 589.258 373.333 500 373.333C410.742 373.333 337.446 441.677 329.586 528.889H328.889V844.444H257.778V155.556Z"/><path d="M128.889 253.333L157.778 351.111H182.222V746.667C169.949 746.667 160 756.616 160 768.889V795.556H155.556C143.283 795.556 133.333 805.505 133.333 817.778V844.444H382.222V817.778C382.222 805.505 372.273 795.556 360 795.556H355.556V768.889C355.556 756.616 345.606 746.667 333.333 746.667H306.667V253.333H128.889Z"/><path d="M675.556 746.667C663.283 746.667 653.333 768.889V795.556H648.889C636.616 795.556 626.667 805.505 626.667 817.778V844.444H875.556V817.778C875.556 805.505 865.606 795.556 853.333 795.556H848.889V768.889C848.889 756.616 838.939 746.667 826.667 746.667V351.111H851.111L880 253.333H702.222V746.667H675.556Z"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 1000 1000" fill="#7ee787"><path d="M257.778 155.556H742.222V844.444H671.111V528.889H670.414C662.554 441.677 589.258 373.333 500 373.333C410.742 373.333 337.446 441.677 329.586 528.889H328.889V844.444H257.778V155.556Z"/><path d="M128.889 253.333L157.778 351.111H182.222V746.667C169.949 746.667 160 756.616 160 768.889V795.556H155.556C143.283 795.556 133.333 805.505 133.333 817.778V844.444H382.222V817.778C382.222 805.505 372.273 795.556 360 795.556H355.556V768.889C355.556 756.616 345.606 746.667 333.333 746.667H306.667V253.333H128.889Z"/><path d="M675.556 746.667C663.283 746.667 653.333 756.616 653.333 768.889V795.556H648.889C636.616 795.556 626.667 805.505 626.667 817.778V844.444H875.556V817.778C875.556 805.505 865.606 795.556 853.333 795.556H848.889V768.889C848.889 756.616 838.939 746.667 826.667 746.667V351.111H851.111L880 253.333H702.222V746.667H675.556Z"/></svg>
                         <span id="webFcConnectedLabel" style="font-size:13px;font-weight:600;color:#7ee787;"></span>
                     </div>
                     <button onclick="webDisconnectFc()" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:12px;padding:2px 6px;">Disconnect</button>
@@ -1121,6 +1112,22 @@
             </div>
         </div>
     </main>
+
+    <!-- SIWF Modal -->
+    <div id="siwfModal" class="modal-overlay" style="display:none;">
+        <div class="modal" style="max-width:380px;text-align:center;">
+            <h2 class="modal-title" style="margin-bottom:8px;">Sign In With Farcaster</h2>
+            <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;" id="webFcSiwfStatus">Generating sign-in link...</p>
+            <div id="siwfQrWrap" style="display:none;margin-bottom:16px;">
+                <div id="webFcQrCanvas" style="display:inline-block;background:#fff;padding:8px;border-radius:8px;"></div>
+                <p style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:8px;">Scan with Warpcast</p>
+            </div>
+            <a id="webFcDeeplink" href="#" target="_blank" class="deposit-btn" style="display:none;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;padding:12px;margin-bottom:12px;">
+                Open in Warpcast
+            </a>
+            <button onclick="webCloseSiwfModal()" class="withdraw-btn" style="width:100%;margin-top:4px;">Cancel</button>
+        </div>
+    </div>
 
     <div id="disclaimerModal" class="modal-overlay">
         <div class="modal">
@@ -1222,6 +1229,7 @@
             VAULT_ADDRESS: '{{ vault_address | default("0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1") }}'
         };
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="builder-attribution.js"></script>
     <script src="main.js"></script>
 </body>
