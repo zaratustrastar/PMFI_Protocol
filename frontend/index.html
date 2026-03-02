@@ -937,19 +937,19 @@
         .web-tab-panel.active { display: block; }
 
         /* ---- Arb Cards ---- */
-        .arb-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
-        .arb-card-title { font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 8px; line-height: 1.4; }
-        .arb-venues { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
-        .arb-venue { font-size: 12px; color: rgba(255,255,255,0.55); }
-        .arb-venue strong { color: #fff; }
-        .arb-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-right: 6px; }
+        .arb-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
+        .arb-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .arb-card-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); line-height: 1.3; flex: 1; margin-right: 8px; }
+        .arb-card-prices { display: flex; gap: 6px; margin-bottom: 6px; }
+        .arb-venue-box { flex: 1; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 6px 8px; text-decoration: none; color: inherit; display: block; }
+        .arb-venue-box:hover { background: rgba(255,255,255,0.06); }
+        .arb-venue-name { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
+        .arb-venue-price { font-size: 14px; font-weight: 700; color: #fff; margin-top: 2px; }
+        .arb-card-meta { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.35); }
+        .arb-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
         .arb-badge.opportunity { background: rgba(126,231,135,0.15); color: #7ee787; }
         .arb-badge.watchlist { background: rgba(255,193,7,0.15); color: #ffc107; }
-        .arb-edge { font-size: 13px; font-weight: 700; color: #7ee787; }
         .arb-empty { color: rgba(255,255,255,0.35); font-size: 13px; padding: 24px 0; text-align: center; }
-        .arb-links { display: flex; gap: 12px; margin-top: 8px; }
-        .arb-link { font-size: 11px; color: #388bfd; text-decoration: none; }
-        .arb-link:hover { text-decoration: underline; }
 
         /* ---- Leaderboard ---- */
         .leaderboard-table { display: flex; flex-direction: column; gap: 6px; }
@@ -1078,7 +1078,6 @@
         <!-- Arbitrage Panel -->
         <div class="web-tab-panel" id="webPanelArbitrage">
             <div id="webArbOpportunities"></div>
-            <div id="webArbWatchlist"></div>
         </div>
 
         <!-- Rankings Panel -->
@@ -1090,22 +1089,6 @@
 
         <!-- Tasks & Codes Panel -->
         <div class="web-tab-panel" id="webPanelTasks">
-            <!-- Farcaster Connect -->
-            <div id="webFcDisconnected" style="margin-bottom:20px;">
-                <button onclick="webConnectFarcaster()" class="deposit-btn" style="width:100%;padding:12px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg width="18" height="18" viewBox="0 0 1000 1000" fill="currentColor"><path d="M257.778 155.556H742.222V844.444H671.111V528.889H670.414C662.554 441.677 589.258 373.333 500 373.333C410.742 373.333 337.446 441.677 329.586 528.889H328.889V844.444H257.778V155.556Z"/><path d="M128.889 253.333L157.778 351.111H182.222V746.667C169.949 746.667 160 756.616 160 768.889V795.556H155.556C143.283 795.556 133.333 805.505 133.333 817.778V844.444H382.222V817.778C382.222 805.505 372.273 795.556 360 795.556H355.556V768.889C355.556 756.616 345.606 746.667 333.333 746.667H306.667V253.333H128.889Z"/><path d="M675.556 746.667C663.283 746.667 653.333 756.616 653.333 768.889V795.556H648.889C636.616 795.556 626.667 805.505 626.667 817.778V844.444H875.556V817.778C875.556 805.505 865.606 795.556 853.333 795.556H848.889V768.889C848.889 756.616 838.939 746.667 826.667 746.667V351.111H851.111L880 253.333H702.222V746.667H675.556Z"/></svg>
-                    Sign In With Farcaster
-                </button>
-            </div>
-            <div id="webFcConnected" style="display:none;margin-bottom:20px;background:rgba(126,231,135,0.06);border:1px solid rgba(126,231,135,0.2);border-radius:10px;padding:12px 16px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <svg width="16" height="16" viewBox="0 0 1000 1000" fill="#7ee787"><path d="M257.778 155.556H742.222V844.444H671.111V528.889H670.414C662.554 441.677 589.258 373.333 500 373.333C410.742 373.333 337.446 441.677 329.586 528.889H328.889V844.444H257.778V155.556Z"/><path d="M128.889 253.333L157.778 351.111H182.222V746.667C169.949 746.667 160 756.616 160 768.889V795.556H155.556C143.283 795.556 133.333 805.505 133.333 817.778V844.444H382.222V817.778C382.222 805.505 372.273 795.556 360 795.556H355.556V768.889C355.556 756.616 345.606 746.667 333.333 746.667H306.667V253.333H128.889Z"/><path d="M675.556 746.667C663.283 746.667 653.333 756.616 653.333 768.889V795.556H648.889C636.616 795.556 626.667 805.505 626.667 817.778V844.444H875.556V817.778C875.556 805.505 865.606 795.556 853.333 795.556H848.889V768.889C848.889 756.616 838.939 746.667 826.667 746.667V351.111H851.111L880 253.333H702.222V746.667H675.556Z"/></svg>
-                        <span id="webFcConnectedLabel" style="font-size:13px;font-weight:600;color:#7ee787;"></span>
-                    </div>
-                    <button onclick="webDisconnectFc()" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:12px;padding:2px 6px;">Disconnect</button>
-                </div>
-            </div>
             <div id="webTasksList"></div>
             <div class="invite-codes-section">
                 <div class="invite-codes-title">Your Invite Codes</div>

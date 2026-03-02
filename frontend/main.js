@@ -1198,22 +1198,20 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 let webFcFid = localStorage.getItem('pmfi_web_fid') ? parseInt(localStorage.getItem('pmfi_web_fid')) : null;
 let webFcUsername = localStorage.getItem('pmfi_web_fc_username') || null;
 let _siwfAbort = null;
+let _siwfCallback = null;
 
 function webUpdateFcState() {
-    const elDisconnected = document.getElementById('webFcDisconnected');
-    const elConnected = document.getElementById('webFcConnected');
-    const elLabel = document.getElementById('webFcConnectedLabel');
-    if (!elDisconnected || !elConnected) return;
-    if (webFcFid) {
-        elDisconnected.style.display = 'none';
-        elConnected.style.display = 'block';
-        const name = webFcUsername ? '@' + webFcUsername : 'FID ' + webFcFid;
-        if (elLabel) elLabel.textContent = name + ' connected';
-    } else {
-        elDisconnected.style.display = 'block';
-        elConnected.style.display = 'none';
-    }
     webLoadTasks();
+}
+
+function webFollowFarcaster() {
+    const warpcastUrl = 'https://warpcast.com/pmfi';
+    if (webFcFid) {
+        window.open(warpcastUrl, '_blank');
+    } else {
+        _siwfCallback = () => { window.open(warpcastUrl, '_blank'); };
+        webConnectFarcaster();
+    }
 }
 
 function webDisconnectFc() {
@@ -1319,6 +1317,7 @@ async function webConnectFarcaster() {
         if (webFcUsername) localStorage.setItem('pmfi_web_fc_username', webFcUsername);
         webCloseSiwfModal();
         webUpdateFcState();
+        if (_siwfCallback) { const cb = _siwfCallback; _siwfCallback = null; cb(); }
 
     } catch (e) {
         console.error('[SIWF]', e);
@@ -1338,9 +1337,8 @@ async function webVerifyFollow() {
         });
         const data = await res.json();
         if (data.verified) {
-            const elLabel = document.getElementById('webFcConnectedLabel');
-            const name = webFcUsername ? '@' + webFcUsername : 'FID ' + webFcFid;
-            if (elLabel) elLabel.textContent = name + ' connected · Follow verified ✓';
+            if (btn) { btn.textContent = 'Verified ✓'; btn.style.background = 'rgba(126,231,135,0.2)'; btn.style.color = '#7ee787'; }
+            return;
         } else if (data.error === 'User not registered') {
             alert('Your Farcaster account is not registered with PMFI yet. Open the PMFI mini app on Warpcast first to create your account.');
         } else {
@@ -1349,7 +1347,7 @@ async function webVerifyFollow() {
     } catch (e) {
         alert('Verification failed — check your connection and try again.');
     } finally {
-        if (btn) { btn.textContent = 'Verify Follow'; btn.disabled = false; }
+        if (btn) { btn.textContent = 'Verify'; btn.disabled = false; }
     }
 }
 
@@ -1358,44 +1356,69 @@ async function webVerifyFollow() {
 // =============================================================================
 
 async function webLoadArb() {
-    const oppEl = document.getElementById('webArbOpportunities');
-    const watchEl = document.getElementById('webArbWatchlist');
-    if (!oppEl || !watchEl) return;
-    oppEl.innerHTML = '<div class="arb-empty">Loading arbitrage data...</div>';
-    watchEl.innerHTML = '';
+    const el = document.getElementById('webArbOpportunities');
+    if (!el) return;
+    el.innerHTML = '<div class="arb-empty">Loading arbitrage data...</div>';
     try {
-        const res = await fetch('/api/arbs');
+        const res = await fetch('/api/arbs?sort=expiry');
         if (!res.ok) throw new Error('API error ' + res.status);
         const data = await res.json();
         if (data.error) throw new Error(data.error);
-        const opps = data.opportunities || [];
-        const watch = data.watchlist || [];
-        oppEl.innerHTML = opps.length
-            ? '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.45);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Opportunities</div>' + opps.map(o => webRenderArbCard(o, true)).join('')
+        const opps = (data.opportunities || []).map(o => ({ ...o, _type: 'opportunity' }));
+        const watch = (data.watchlist || []).map(o => ({ ...o, _type: 'watchlist' }));
+        const all = [...opps, ...watch].sort((a, b) => (a.expiryTs || 0) - (b.expiryTs || 0));
+        el.innerHTML = all.length
+            ? all.map(o => webRenderArbCard(o)).join('')
             : '<div class="arb-empty">No arbitrage opportunities right now</div>';
-        watchEl.innerHTML = watch.length
-            ? '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.45);margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.5px;">Watchlist</div>' + watch.map(o => webRenderArbCard(o, false)).join('')
-            : '';
     } catch (e) {
-        oppEl.innerHTML = '<div class="arb-empty">Could not load arbitrage data: ' + e.message + '</div>';
-        watchEl.innerHTML = '';
+        el.innerHTML = '<div class="arb-empty">Could not load arbitrage data: ' + e.message + '</div>';
     }
 }
 
-function webRenderArbCard(item, isOpp) {
+function webRenderArbCard(item) {
+    const isOpp = item._type === 'opportunity';
+    const edgePct = ((item.edge || 0) * 100).toFixed(1);
+    const roiPct = (item.roi || 0).toFixed(1);
     const badge = isOpp
-        ? '<span class="arb-badge opportunity">Opportunity</span>'
-        : '<span class="arb-badge watchlist">Watchlist</span>';
-    const edgePct = item.edge != null ? (item.edge * 100).toFixed(1) : null;
-    const edgeHtml = edgePct > 0 ? `<span class="arb-edge">${edgePct}% edge</span>` : '';
-    const links = [];
-    if (item.polyUrl) links.push(`<a class="arb-link" href="${item.polyUrl}" target="_blank">Polymarket →</a>`);
-    if (item.kalshiUrl) links.push(`<a class="arb-link" href="${item.kalshiUrl}" target="_blank">Kalshi →</a>`);
-    const sportBadge = item.sport ? `<span style="font-size:10px;color:rgba(255,255,255,0.35);margin-left:6px;">${item.sport}</span>` : '';
+        ? `<span class="arb-badge opportunity">${edgePct}%</span>`
+        : `<span class="arb-badge watchlist">${edgePct}%</span>`;
+
+    const legs = item.legs || [];
+    const isOddScreeners = item.source === 'oddscreeners';
+    const polyLeg = legs.find(l => l.venue === 'polymarket');
+    const otherLeg = legs.find(l => l.venue === 'kalshi') || legs.find(l => l.venue === 'opinion');
+    const polyPrice = polyLeg ? (polyLeg.price * 100).toFixed(0) : '?';
+    const otherPrice = otherLeg ? (otherLeg.price * 100).toFixed(0) : '?';
+    const polySide = polyLeg ? polyLeg.side : '';
+    const otherSide = otherLeg ? otherLeg.side : '';
+    const otherVenueName = isOddScreeners ? 'OPINION' : 'KALSHI';
+
+    let polyUrl = item.polyUrl || '';
+    let otherUrl = isOddScreeners ? (item.opinionUrl || '') : (item.kalshiUrl || '');
+    if (!polyUrl && item.title) polyUrl = 'https://polymarket.com/markets?_q=' + encodeURIComponent(item.title);
+
+    const expiry = item.expiryTs ? new Date(item.expiryTs * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+
+    const polyVenue = `<${polyUrl ? `a href="${polyUrl}" target="_blank"` : 'div'} class="arb-venue-box">
+        <div class="arb-venue-name">POLY ${polySide}</div>
+        <div class="arb-venue-price">${polyPrice}\u00a2</div>
+    </${polyUrl ? 'a' : 'div'}>`;
+
+    const otherVenue = `<${otherUrl ? `a href="${otherUrl}" target="_blank"` : 'div'} class="arb-venue-box">
+        <div class="arb-venue-name">${otherVenueName} ${otherSide}</div>
+        <div class="arb-venue-price">${otherPrice}\u00a2</div>
+    </${otherUrl ? 'a' : 'div'}>`;
+
     return `<div class="arb-card">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">${badge}${edgeHtml}${sportBadge}</div>
-        <div class="arb-card-title">${item.title || 'Unknown market'}</div>
-        ${links.length ? `<div class="arb-links">${links.join('')}</div>` : ''}
+        <div class="arb-card-header">
+            <div class="arb-card-title">${item.title || 'Unknown'}</div>
+            ${badge}
+        </div>
+        <div class="arb-card-prices">${polyVenue}${otherVenue}</div>
+        <div class="arb-card-meta">
+            <span>${expiry}</span>
+            <span>ROI ${roiPct}%</span>
+        </div>
     </div>`;
 }
 
@@ -1445,11 +1468,15 @@ function webLoadTasks() {
     el.innerHTML = WEB_TASK_DEFINITIONS.map(task => {
         let actionsHtml = '';
         if (task.id === 'follow_fc') {
-            const goBtn = `<a href="${task.url}" target="_blank"><button class="task-btn">Follow</button></a>`;
-            const verifyBtn = webFcFid
-                ? `<button id="webVerifyFollowBtn" class="task-btn" onclick="webVerifyFollow()" style="margin-left:6px;">Verify</button>`
-                : '';
-            actionsHtml = `<div style="display:flex;align-items:center;">${goBtn}${verifyBtn}</div>`;
+            if (webFcFid) {
+                const name = webFcUsername ? '@' + webFcUsername : 'FID ' + webFcFid;
+                actionsHtml = `<div style="display:flex;align-items:center;gap:6px;">
+                    <button id="webVerifyFollowBtn" class="task-btn" onclick="webVerifyFollow()">Verify</button>
+                    <button onclick="webDisconnectFc()" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:11px;padding:2px 4px;" title="${name}">✕</button>
+                </div>`;
+            } else {
+                actionsHtml = `<button class="task-btn" onclick="webFollowFarcaster()">Follow</button>`;
+            }
         } else if (task.url) {
             actionsHtml = `<a href="${task.url}" target="_blank"><button class="task-btn">Go</button></a>`;
         }

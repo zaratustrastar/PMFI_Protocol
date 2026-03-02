@@ -270,6 +270,7 @@ def init_invite_tables():
         """)
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_invite_codes_owner_wallet ON user_invite_codes(owner_wallet)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_invite_codes_owner_fid ON user_invite_codes(owner_fid)")
+        cur.execute("DELETE FROM user_invite_codes WHERE code LIKE 'PMFI-%'")
         conn.commit()
         cur.close()
         conn.close()
