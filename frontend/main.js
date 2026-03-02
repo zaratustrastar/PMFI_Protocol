@@ -1197,6 +1197,42 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 let webFcFid = localStorage.getItem('pmfi_web_fid') ? parseInt(localStorage.getItem('pmfi_web_fid')) : null;
 
+function webUpdateFcState() {
+    const elDisconnected = document.getElementById('webFcDisconnected');
+    const elInputRow = document.getElementById('webFcInputRow');
+    const elConnected = document.getElementById('webFcConnected');
+    const elLabel = document.getElementById('webFcConnectedLabel');
+    if (!elDisconnected || !elConnected) return;
+    if (webFcFid) {
+        elDisconnected.style.display = 'none';
+        elInputRow.style.display = 'none';
+        elConnected.style.display = 'block';
+        if (elLabel) elLabel.textContent = 'Farcaster FID ' + webFcFid + ' connected';
+    } else {
+        elDisconnected.style.display = 'block';
+        elInputRow.style.display = 'none';
+        elConnected.style.display = 'none';
+    }
+    webLoadTasks();
+}
+
+function webShowFcInput() {
+    const elDisconnected = document.getElementById('webFcDisconnected');
+    const elInputRow = document.getElementById('webFcInputRow');
+    if (elDisconnected) elDisconnected.style.display = 'none';
+    if (elInputRow) elInputRow.style.display = 'block';
+    const input = document.getElementById('webFcFidInput');
+    if (input) input.focus();
+}
+
+function webHideFcInput() {
+    const elDisconnected = document.getElementById('webFcDisconnected');
+    const elInputRow = document.getElementById('webFcInputRow');
+    if (elDisconnected) elDisconnected.style.display = 'block';
+    if (elInputRow) elInputRow.style.display = 'none';
+    webSetFcStatus('', '');
+}
+
 function webSaveFid() {
     const input = document.getElementById('webFcFidInput');
     if (!input) return;
@@ -1207,18 +1243,21 @@ function webSaveFid() {
     }
     webFcFid = val;
     localStorage.setItem('pmfi_web_fid', val);
-    webSetFcStatus('FID ' + val + ' saved', '#7ee787');
-    webLoadTasks();
+    webUpdateFcState();
+}
+
+function webDisconnectFc() {
+    webFcFid = null;
+    localStorage.removeItem('pmfi_web_fid');
+    webUpdateFcState();
 }
 
 function webRestoreFid() {
     const saved = localStorage.getItem('pmfi_web_fid');
     if (saved) {
-        const input = document.getElementById('webFcFidInput');
-        if (input) input.value = saved;
         webFcFid = parseInt(saved);
-        webSetFcStatus('FID ' + saved + ' connected', '#7ee787');
     }
+    webUpdateFcState();
 }
 
 function webSetFcStatus(msg, color) {
@@ -1227,7 +1266,7 @@ function webSetFcStatus(msg, color) {
 }
 
 async function webVerifyFollow() {
-    if (!webFcFid) { webSetFcStatus('Save your Farcaster FID first', '#f85149'); return; }
+    if (!webFcFid) return;
     const btn = document.getElementById('webVerifyFollowBtn');
     if (btn) { btn.textContent = 'Checking...'; btn.disabled = true; }
     try {
@@ -1238,15 +1277,15 @@ async function webVerifyFollow() {
         });
         const data = await res.json();
         if (data.verified) {
-            webSetFcStatus('Follow verified! +100 XP earned', '#7ee787');
-            webLoadTasks();
+            const elLabel = document.getElementById('webFcConnectedLabel');
+            if (elLabel) elLabel.textContent = 'Farcaster FID ' + webFcFid + ' connected · Follow verified ✓';
         } else if (data.error === 'User not registered') {
-            webSetFcStatus('FID not registered — open the PMFI mini app on Farcaster first to register', '#ffc107');
+            alert('FID ' + webFcFid + ' is not registered. Open the PMFI mini app on Farcaster first to create your account.');
         } else {
-            webSetFcStatus(data.reason || data.error || 'Not following PMFI yet', '#f85149');
+            alert(data.reason || data.error || 'You are not following PMFI on Farcaster yet. Follow first, then verify.');
         }
     } catch (e) {
-        webSetFcStatus('Verification failed — try again', '#f85149');
+        alert('Verification failed — check your connection and try again.');
     } finally {
         if (btn) { btn.textContent = 'Verify Follow'; btn.disabled = false; }
     }
