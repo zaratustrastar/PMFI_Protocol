@@ -240,6 +240,7 @@
             width: 20px;
             height: 20px;
             opacity: 0.45;
+            filter: invert(1);
             transition: opacity 0.15s;
         }
 
@@ -315,7 +316,7 @@
             min-height: calc(100vh - 120px);
         }
 
-        #webPanelHome {
+        #webPanelHome.active {
             display: flex;
             flex-direction: column;
             justify-content: center;
