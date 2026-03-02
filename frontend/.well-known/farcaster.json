@@ -1,17 +1,37 @@
 {
   "accountAssociation": {
-    "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0",
+    "header": "eyJmaWQiOjE1NTAwODgsInR5cGUiOiJhdXRoIiwia2V5IjoiMHg3RDdFRTA1MWNFNkM2MkQyMDhkQkVjZmM0YjY5MjAwQ2FlNjcwZGQ5In0",
     "payload": "eyJkb21haW4iOiJhcHAucG1maS5jYyJ9",
-    "signature": "REPLACE_WITH_REAL_SIGNATURE_AFTER_FID_REGISTRATION"
+    "signature": "j/qAcVKiyTUj1UOFkMUt3X13Tqexw9yb22mHusXfQ55+Os9XJSK8R/RsJUxSbKE7v0pJVz2qTBp3HdWSs8GmFBs="
   },
   "frame": {
     "version": "1",
     "name": "PMFI",
     "iconUrl": "https://app.pmfi.cc/icon.png",
-    "imageUrl": "https://app.pmfi.cc/hero.png?v=2",
+    "homeUrl": "https://app.pmfi.cc/mini",
+    "imageUrl": "https://app.pmfi.cc/screenshot2.png",
+    "buttonTitle": "Launch App",
     "splashImageUrl": "https://app.pmfi.cc/splash.png",
     "splashBackgroundColor": "#0d1117",
-    "homeUrl": "https://app.pmfi.cc/mini",
-    "webhookUrl": "https://app.pmfi.cc/api/farcaster/webhook"
+    "webhookUrl": "https://app.pmfi.cc/api/farcaster/webhook",
+    "subtitle": "the next generation of finance",
+    "description": "Integrating defi primitives into prediction markets through automated strategy vaults.",
+    "screenshotUrls": [
+      "https://app.pmfi.cc/screenshot1.png"
+    ],
+    "primaryCategory": "finance",
+    "tags": [
+      "defi",
+      "prediction",
+      "app",
+      "finance",
+      "markets"
+    ],
+    "heroImageUrl": "https://app.pmfi.cc/hero.png",
+    "tagline": "turn uncertainty into returns",
+    "ogTitle": "Prediction Market Vaults",
+    "ogDescription": "DeFi-style vaults for prediction markets.",
+    "ogImageUrl": "https://app.pmfi.cc/hero.png",
+    "castShareUrl": "https://app.pmfi.cc/share"
   }
 }
