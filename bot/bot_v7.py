@@ -82,7 +82,7 @@ import secrets
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 import psycopg2
@@ -4210,6 +4210,124 @@ def api_oddscreeners_pairs():
 
 
 # =============================================================================
+# Daily Holding XP Snapshot
+# =============================================================================
+
+def run_daily_holding_xp_snapshot(date_str=None):
+    """Award holding XP to all xp_users with vault shares. 1 XP per $1 held, max 100/day.
+    Returns dict with awarded/skipped/errors counts."""
+    if not date_str:
+        date_str = datetime.utcnow().strftime('%Y-%m-%d')
+
+    print(f"📸 [HoldingXP] Starting daily snapshot for {date_str}")
+
+    if vault_v7 is None:
+        print(f"⚠️ [HoldingXP] vault_v7 not initialized, skipping snapshot")
+        return {'awarded': 0, 'skipped': 0, 'errors': 0, 'reason': 'vault_v7 not ready'}
+
+    with nav_lock:
+        nav_raw = cached_nav.get('nav', 0)
+
+    if not nav_raw:
+        print(f"⚠️ [HoldingXP] cached_nav empty, skipping snapshot")
+        return {'awarded': 0, 'skipped': 0, 'errors': 0, 'reason': 'cached_nav not ready'}
+
+    share_price_usd = nav_raw / 1e6
+    print(f"📸 [HoldingXP] Share price = ${share_price_usd:.6f}")
+
+    if not DATABASE_URL:
+        return {'awarded': 0, 'skipped': 0, 'errors': 0, 'reason': 'no database'}
+
+    conn = get_invite_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cur.execute("SELECT fid, wallet FROM xp_users WHERE wallet IS NOT NULL")
+        users = cur.fetchall()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"❌ [HoldingXP] DB error fetching users: {e}")
+        try:
+            cur.close(); conn.close()
+        except Exception:
+            pass
+        return {'awarded': 0, 'skipped': 0, 'errors': 1}
+
+    awarded = 0
+    skipped = 0
+    errors = 0
+
+    for user in users:
+        fid = user['fid']
+        wallet = user['wallet']
+        try:
+            checksum = Web3.to_checksum_address(wallet)
+            raw_balance = vault_v7.functions.balanceOf(checksum).call()
+            shares = raw_balance / 1e18
+            usd_value = shares * share_price_usd
+
+            if usd_value < 1.0:
+                print(f"⏭️ [HoldingXP] fid={fid} wallet={wallet[:8]}... ${usd_value:.2f} < $1, skip")
+                skipped += 1
+                continue
+
+            xp = min(100, int(usd_value))
+            unique_key = f"holding_xp:{fid}:{date_str}"
+            _, was_awarded = award_xp(
+                fid, 'holding_xp', xp,
+                meta={'usd_value': round(usd_value, 4), 'shares': round(shares, 6), 'date': date_str, 'share_price': share_price_usd},
+                unique_key=unique_key
+            )
+            if was_awarded:
+                print(f"✅ [HoldingXP] fid={fid} ${usd_value:.2f} → {xp} XP awarded")
+                awarded += 1
+            else:
+                print(f"⏭️ [HoldingXP] fid={fid} already awarded for {date_str}, skip")
+                skipped += 1
+        except Exception as e:
+            print(f"❌ [HoldingXP] fid={fid} error: {e}")
+            errors += 1
+
+    print(f"✅ [HoldingXP] Snapshot complete: awarded={awarded} skipped={skipped} errors={errors}")
+    return {'awarded': awarded, 'skipped': skipped, 'errors': errors}
+
+
+def daily_holding_xp_loop():
+    """Background daemon thread: runs holding XP snapshot once per day at UTC midnight."""
+    print("⏰ [HoldingXP] Daily snapshot thread started")
+    while True:
+        try:
+            now = datetime.utcnow()
+            midnight_tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            sleep_secs = (midnight_tomorrow - now).total_seconds()
+            print(f"⏰ [HoldingXP] Next snapshot in {sleep_secs/3600:.1f}h (at {midnight_tomorrow.strftime('%Y-%m-%d %H:%M')} UTC)")
+            time.sleep(sleep_secs)
+            run_daily_holding_xp_snapshot()
+        except Exception as e:
+            print(f"❌ [HoldingXP] Loop error: {e}")
+            time.sleep(3600)
+
+
+@flask_app.route('/api/admin/daily-xp-snapshot', methods=['POST'])
+def api_admin_daily_xp_snapshot():
+    """Admin endpoint to manually trigger daily holding XP snapshot."""
+    try:
+        auth = flask_request.headers.get('Authorization', '')
+        if not auth.startswith('Bearer ') or auth[7:] != PMFI_ADMIN_TOKEN:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        data = flask_request.get_json(force=True, silent=True) or {}
+        date_str = data.get('date') or None
+        print(f"📝 [HoldingXP] Admin triggered snapshot date={date_str}")
+
+        result = run_daily_holding_xp_snapshot(date_str=date_str)
+        return jsonify(result)
+    except Exception as e:
+        print(f"❌ [HoldingXP] /api/admin/daily-xp-snapshot error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# =============================================================================
 # Background NAV Refresh
 # =============================================================================
 
@@ -4499,6 +4617,10 @@ def main():
     # Start background refresh
     refresh_thread = threading.Thread(target=nav_refresh_loop, daemon=True)
     refresh_thread.start()
+
+    # Start daily holding XP snapshot thread
+    holding_xp_thread = threading.Thread(target=daily_holding_xp_loop, daemon=True)
+    holding_xp_thread.start()
     
     # Start arb monitor scanner
     if ARB_MONITOR_AVAILABLE:

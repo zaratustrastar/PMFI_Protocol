@@ -1462,39 +1462,72 @@ const WEB_TASK_DEFINITIONS = [
     { id: 'follow_x', label: 'Follow PMFI on X', xp: 100, url: 'https://x.com/pmfi_cc' },
 ];
 
+function webRenderTaskRow(task, serverTask) {
+    const el = document.getElementById('webTasksList');
+    const status = serverTask ? serverTask.status : null;
+    const locked = serverTask ? serverTask.locked : false;
+    let actionsHtml = '';
+
+    if (status === 'COMPLETED') {
+        actionsHtml = `<span style="color:#7ee787;font-size:13px;font-weight:600;">Done ✓</span>`;
+    } else if (status === 'PENDING_REVIEW') {
+        actionsHtml = `<span style="color:#f59e0b;font-size:13px;font-weight:600;">Pending ⏳</span>`;
+    } else if (status === 'LOCKED' || locked) {
+        actionsHtml = `<span style="color:rgba(255,255,255,0.3);font-size:13px;font-weight:600;">🔒 Locked</span>`;
+    } else if (task.id === 'follow_fc') {
+        if (webFcFid) {
+            const name = webFcUsername ? '@' + webFcUsername : 'FID ' + webFcFid;
+            actionsHtml = `<div style="display:flex;align-items:center;gap:6px;">
+                <button id="webVerifyFollowBtn" class="task-btn" onclick="webVerifyFollow()">Verify</button>
+                <button onclick="webDisconnectFc()" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:11px;padding:2px 4px;" title="${name}">✕</button>
+            </div>`;
+        } else {
+            actionsHtml = `<button class="task-btn" onclick="webFollowFarcaster()">Follow</button>`;
+        }
+    } else if (task.id === 'follow_x') {
+        if (webFcFid) {
+            actionsHtml = `<button class="task-btn" id="webClaimXBtn" onclick="webClaimFollowX(this)" style="background:#f59e0b;color:#000;">Claim</button>`;
+        } else {
+            actionsHtml = `<a href="${task.url}" target="_blank"><button class="task-btn">Go</button></a>`;
+        }
+    } else if (task.url) {
+        actionsHtml = `<a href="${task.url}" target="_blank"><button class="task-btn">Go</button></a>`;
+    }
+
+    return `<div class="task-row">
+        <div class="task-info">
+            <div class="task-name">${task.label}</div>
+            <div class="task-xp">+${task.xp} XP</div>
+        </div>
+        ${actionsHtml}
+    </div>`;
+}
+
 function webLoadTasks() {
     const el = document.getElementById('webTasksList');
     if (!el) return;
-    el.innerHTML = WEB_TASK_DEFINITIONS.map(task => {
-        let actionsHtml = '';
-        if (task.id === 'follow_fc') {
-            if (webFcFid) {
-                const name = webFcUsername ? '@' + webFcUsername : 'FID ' + webFcFid;
-                actionsHtml = `<div style="display:flex;align-items:center;gap:6px;">
-                    <button id="webVerifyFollowBtn" class="task-btn" onclick="webVerifyFollow()">Verify</button>
-                    <button onclick="webDisconnectFc()" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:11px;padding:2px 4px;" title="${name}">✕</button>
-                </div>`;
-            } else {
-                actionsHtml = `<button class="task-btn" onclick="webFollowFarcaster()">Follow</button>`;
+
+    const footer = `<div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.35);">Open the PMFI mini app on Farcaster to track your XP progress.</div>`;
+
+    if (!webFcFid) {
+        el.innerHTML = WEB_TASK_DEFINITIONS.map(task => webRenderTaskRow(task, null)).join('') + footer;
+        return;
+    }
+
+    el.innerHTML = `<div style="color:rgba(255,255,255,0.35);font-size:13px;padding:12px 0;">Loading tasks...</div>`;
+
+    fetch(`/api/state?fid=${webFcFid}`)
+        .then(r => r.json())
+        .then(data => {
+            const taskMap = {};
+            if (data.tasks && Array.isArray(data.tasks)) {
+                data.tasks.forEach(t => { taskMap[t.id] = t; });
             }
-        } else if (task.id === 'follow_x') {
-            if (webFcFid) {
-                actionsHtml = `<button class="task-btn" id="webClaimXBtn" onclick="webClaimFollowX(this)" style="background:#f59e0b;color:#000;">Claim</button>`;
-            } else {
-                actionsHtml = `<a href="${task.url}" target="_blank"><button class="task-btn">Go</button></a>`;
-            }
-        } else if (task.url) {
-            actionsHtml = `<a href="${task.url}" target="_blank"><button class="task-btn">Go</button></a>`;
-        }
-        return `<div class="task-row">
-            <div class="task-info">
-                <div class="task-name">${task.label}</div>
-                <div class="task-xp">+${task.xp} XP</div>
-            </div>
-            ${actionsHtml}
-        </div>`;
-    }).join('') +
-    `<div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.35);">Open the PMFI mini app on Farcaster to track your XP progress.</div>`;
+            el.innerHTML = WEB_TASK_DEFINITIONS.map(task => webRenderTaskRow(task, taskMap[task.id] || null)).join('') + footer;
+        })
+        .catch(() => {
+            el.innerHTML = WEB_TASK_DEFINITIONS.map(task => webRenderTaskRow(task, null)).join('') + footer;
+        });
 }
 
 async function webClaimFollowX(btn) {
