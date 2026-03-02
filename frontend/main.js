@@ -1582,7 +1582,7 @@ async function webVerifyDeposit10(btn) {
         const res = await fetch('/api/tasks/verify/deposit_10', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fid: webFcFid })
+            body: JSON.stringify({ fid: webFcFid, wallet: userAddress || null })
         });
         const data = await res.json();
         if (data.verified) {

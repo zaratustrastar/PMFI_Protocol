@@ -3522,11 +3522,29 @@ def api_verify_deposit_10():
         if not user:
             return jsonify({'error': 'User not registered'}), 403
 
-        if not user.get('wallet'):
-            print(f"❌ [XP] FID {fid} has no wallet linked")
-            return jsonify({'verified': False, 'reason': 'No wallet connected. Please connect your wallet first.'}), 200
+        # Use wallet from request body (MetaMask) if valid, else fall back to stored wallet
+        req_wallet = (data.get('wallet') or '').strip().lower()
+        stored_wallet = (user.get('wallet') or '').strip().lower()
 
-        wallet = user['wallet']
+        if req_wallet and len(req_wallet) == 42 and req_wallet.startswith('0x'):
+            wallet = req_wallet
+            # Update stored wallet if it differs so future checks use the correct one
+            if wallet != stored_wallet:
+                print(f"🔄 [XP] Updating wallet for fid={fid}: {stored_wallet[:10] if stored_wallet else 'none'}... → {wallet[:10]}...")
+                try:
+                    conn_upd = get_invite_db()
+                    cur_upd = conn_upd.cursor()
+                    cur_upd.execute("UPDATE xp_users SET wallet = %s WHERE fid = %s", (wallet, fid))
+                    conn_upd.commit()
+                    cur_upd.close(); conn_upd.close()
+                except Exception as upd_err:
+                    print(f"⚠️ [XP] Wallet update failed: {upd_err}")
+        elif stored_wallet:
+            wallet = stored_wallet
+        else:
+            print(f"❌ [XP] FID {fid} has no wallet linked and none provided")
+            return jsonify({'verified': False, 'reason': 'No wallet connected. Connect your wallet on the web app first.'}), 200
+
         wallet_short = f"{wallet[:8]}...{wallet[-4:]}"
         print(f"🔍 [XP] Checking deposits for wallet {wallet_short} on vault {VAULT_ADDRESS_CONFIG}")
 
