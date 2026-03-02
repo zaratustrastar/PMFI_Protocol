@@ -3527,17 +3527,40 @@ def api_verify_deposit_10():
             return jsonify({'verified': False, 'reason': 'No wallet connected. Please connect your wallet first.'}), 200
 
         wallet = user['wallet']
-        print(f"🔍 [XP] Checking deposits for wallet {wallet} on vault {VAULT_ADDRESS_CONFIG}")
+        wallet_short = f"{wallet[:8]}...{wallet[-4:]}"
+        print(f"🔍 [XP] Checking deposits for wallet {wallet_short} on vault {VAULT_ADDRESS_CONFIG}")
 
         w3_check = Web3(Web3.HTTPProvider(RPC_URL))
         if not w3_check.is_connected():
             print("❌ [XP] Cannot connect to Base RPC")
             return jsonify({'error': 'RPC connection failed'}), 500
 
-        deposit_event_sig = Web3.keccak(text="Deposit(address,address,uint256,uint256)")
         wallet_checksum = Web3.to_checksum_address(wallet)
         vault_checksum = Web3.to_checksum_address(VAULT_ADDRESS_CONFIG)
 
+        # --- Fast path: check current share balance first ---
+        balance_usd = 0.0
+        try:
+            if vault_v7:
+                raw_balance = vault_v7.functions.balanceOf(wallet_checksum).call()
+                with nav_lock:
+                    nav_raw = cached_nav.get('nav', 10**6)
+                share_price = nav_raw / 1e6
+                balance_usd = (raw_balance / 1e18) * share_price
+                print(f"🔍 [XP] Current vault balance: {raw_balance / 1e18:.6f} shares = ${balance_usd:.2f}")
+                if balance_usd >= XP_DEPOSIT_MIN_USDC:
+                    print(f"✅ [XP] Fast path: balance ${balance_usd:.2f} >= ${XP_DEPOSIT_MIN_USDC}, awarding XP")
+                    event_id, awarded = award_xp(fid, 'deposit_10', 500, {'wallet': wallet, 'balance_usd': round(balance_usd, 2)}, f"deposit_10:{fid}")
+                    print(f"✅ [XP] deposit_10 verified for fid={fid}, awarded={awarded}, balance=${balance_usd:.2f}")
+                    return jsonify({'verified': True, 'awarded': awarded, 'xp': 500, 'deposited': round(balance_usd, 2)})
+        except Exception as bal_err:
+            print(f"⚠️ [XP] Balance check failed: {bal_err}")
+
+        # --- Fallback: scan on-chain Deposit events ---
+        # Vault event: Deposit(address indexed user, uint256 usdcAmount, uint256 sharesReceived, uint256 navUsed)
+        # Note: only ONE indexed address (user), NOT ERC-4626's two-address form
+        deposit_event_sig = Web3.keccak(text="Deposit(address,uint256,uint256,uint256)")
+        sig_hex = '0x' + deposit_event_sig.hex() if isinstance(deposit_event_sig, bytes) else deposit_event_sig
         owner_topic = '0x' + wallet_checksum[2:].lower().zfill(64)
 
         latest_block = w3_check.eth.block_number
@@ -3550,50 +3573,34 @@ def api_verify_deposit_10():
         while current_block <= latest_block:
             to_block = min(current_block + chunk_size - 1, latest_block)
             try:
-                sig_hex = deposit_event_sig.hex() if isinstance(deposit_event_sig, bytes) else deposit_event_sig
-                logs_as_caller = w3_check.eth.get_logs({
+                logs = w3_check.eth.get_logs({
                     'address': vault_checksum,
                     'topics': [sig_hex, owner_topic],
                     'fromBlock': current_block,
                     'toBlock': to_block,
                 })
-                logs_as_owner = w3_check.eth.get_logs({
-                    'address': vault_checksum,
-                    'topics': [sig_hex, None, owner_topic],
-                    'fromBlock': current_block,
-                    'toBlock': to_block,
-                })
-                seen_txs = set()
-                all_logs = list(logs_as_caller) + list(logs_as_owner)
-                for log in all_logs:
+                for log in logs:
                     tx_hash = log['transactionHash'].hex() if hasattr(log['transactionHash'], 'hex') else str(log['transactionHash'])
-                    log_idx = log.get('logIndex', 0)
-                    dedup_key = f"{tx_hash}:{log_idx}"
-                    if dedup_key in seen_txs:
-                        continue
-                    seen_txs.add(dedup_key)
                     raw = log['data']
                     if isinstance(raw, str):
                         raw = bytes.fromhex(raw[2:] if raw.startswith('0x') else raw)
-                    elif isinstance(raw, bytes):
-                        pass
-                    else:
+                    elif not isinstance(raw, bytes):
                         raw = bytes(raw)
-                    if len(raw) >= 64:
-                        assets_raw = int.from_bytes(raw[:32], 'big')
-                        total_deposited += assets_raw
-                        print(f"   Found deposit: {assets_raw / 1e6:.2f} USDC in tx {tx_hash}")
+                    if len(raw) >= 32:
+                        usdc_amount = int.from_bytes(raw[:32], 'big')
+                        total_deposited += usdc_amount
+                        print(f"   Found deposit: {usdc_amount / 1e6:.2f} USDC in tx {tx_hash}")
             except Exception as log_err:
                 print(f"⚠️ [XP] Log query error block {current_block}-{to_block}: {log_err}")
             current_block = to_block + 1
 
         total_usdc = total_deposited / 1e6
-        print(f"🔍 [XP] Total deposited by {wallet}: {total_usdc:.2f} USDC (min: {XP_DEPOSIT_MIN_USDC})")
+        print(f"🔍 [XP] Total deposited by {wallet_short}: ${total_usdc:.2f} USDC (min: ${XP_DEPOSIT_MIN_USDC})")
 
         if total_usdc < XP_DEPOSIT_MIN_USDC:
             return jsonify({
                 'verified': False,
-                'reason': f'Total deposits: ${total_usdc:.2f}. Need at least ${XP_DEPOSIT_MIN_USDC}.',
+                'reason': f'Wallet {wallet_short}: deposits ${total_usdc:.2f}, position ${balance_usd:.2f}. Need at least ${XP_DEPOSIT_MIN_USDC}.',
                 'deposited': round(total_usdc, 2)
             }), 200
 
