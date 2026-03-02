@@ -1397,7 +1397,7 @@ function webRenderArbCard(item) {
     let otherUrl = isOddScreeners ? (item.opinionUrl || '') : (item.kalshiUrl || '');
     if (!polyUrl && item.title) polyUrl = 'https://polymarket.com/markets?_q=' + encodeURIComponent(item.title);
 
-    const expiry = item.expiryTs ? new Date(item.expiryTs * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+    const expiry = item.expiryTs ? new Date(item.expiryTs * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null;
 
     const polyVenue = `<${polyUrl ? `a href="${polyUrl}" target="_blank"` : 'div'} class="arb-venue-box">
         <div class="arb-venue-name">POLY ${polySide}</div>
@@ -1416,7 +1416,7 @@ function webRenderArbCard(item) {
         </div>
         <div class="arb-card-prices">${polyVenue}${otherVenue}</div>
         <div class="arb-card-meta">
-            <span>${expiry}</span>
+            ${expiry ? `<span>${expiry}</span>` : '<span></span>'}
             <span>ROI ${roiPct}%</span>
         </div>
     </div>`;
@@ -1483,6 +1483,14 @@ function webRenderTaskRow(task, serverTask) {
             </div>`;
         } else {
             actionsHtml = `<button class="task-btn" onclick="webFollowFarcaster()">Follow</button>`;
+        }
+    } else if (task.id === 'deposit_10') {
+        if (webFcFid) {
+            actionsHtml = `<button class="task-btn" onclick="webVerifyDeposit10(this)">Verify</button>`;
+        }
+    } else if (task.id === 'invite') {
+        if (webFcFid) {
+            actionsHtml = `<button class="task-btn" onclick="webVerifyInvite(this)">Verify</button>`;
         }
     } else if (task.id === 'follow_x') {
         if (webFcFid) {
@@ -1563,6 +1571,65 @@ async function webClaimFollowX(btn) {
     } catch (e) {
         btn.textContent = 'Claim';
         btn.disabled = false;
+    }
+}
+
+async function webVerifyDeposit10(btn) {
+    if (!webFcFid) return;
+    btn.disabled = true;
+    btn.textContent = 'Checking...';
+    try {
+        const res = await fetch('/api/tasks/verify/deposit_10', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fid: webFcFid })
+        });
+        const data = await res.json();
+        if (data.verified) {
+            btn.textContent = 'Done ✓';
+            btn.style.background = 'rgba(126,231,135,0.15)';
+            btn.style.color = '#7ee787';
+            btn.disabled = true;
+            setTimeout(() => webLoadTasks(), 800);
+        } else {
+            btn.textContent = 'Verify';
+            btn.disabled = false;
+            alert(data.reason || data.error || 'No deposit of $10+ found yet. Make a deposit first.');
+        }
+    } catch (e) {
+        btn.textContent = 'Verify';
+        btn.disabled = false;
+        alert('Network error. Please try again.');
+    }
+}
+
+async function webVerifyInvite(btn) {
+    if (!webFcFid) return;
+    btn.disabled = true;
+    btn.textContent = 'Checking...';
+    try {
+        const res = await fetch('/api/tasks/verify/invite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fid: webFcFid })
+        });
+        const data = await res.json();
+        if (data.verified) {
+            btn.textContent = 'Done ✓';
+            btn.style.background = 'rgba(126,231,135,0.15)';
+            btn.style.color = '#7ee787';
+            btn.disabled = true;
+            setTimeout(() => webLoadTasks(), 800);
+        } else {
+            btn.textContent = 'Verify';
+            btn.disabled = false;
+            const msg = data.reason || data.error || 'No qualified referral found yet.';
+            alert(msg);
+        }
+    } catch (e) {
+        btn.textContent = 'Verify';
+        btn.disabled = false;
+        alert('Network error. Please try again.');
     }
 }
 
