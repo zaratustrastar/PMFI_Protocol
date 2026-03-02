@@ -311,11 +311,15 @@
         .main-content {
             max-width: 900px;
             margin: 0 auto;
-            padding: 0 40px;
+            padding: 0 40px 40px;
             min-height: calc(100vh - 120px);
+        }
+
+        #webPanelHome {
             display: flex;
             flex-direction: column;
             justify-content: center;
+            min-height: 60vh;
         }
 
         .page-title {
@@ -985,7 +989,11 @@
         </a>
 
         <nav class="header-nav">
-            <button class="header-nav-btn active" id="webNavBtnArbitrage" onclick="webSwitchTab('arbitrage')">
+            <button class="header-nav-btn active" id="webNavBtnHome" onclick="webSwitchTab('home')">
+                <img src="/icon-home.png" alt="Home" class="header-nav-icon">
+                <span class="header-nav-label">Home</span>
+            </button>
+            <button class="header-nav-btn" id="webNavBtnArbitrage" onclick="webSwitchTab('arbitrage')">
                 <img src="/icon-arbitrage.png" alt="Arbitrage" class="header-nav-icon">
                 <span class="header-nav-label">Arbitrage</span>
             </button>
@@ -1008,64 +1016,66 @@
     </div>
 
     <main class="main-content">
-        <div class="cards-grid">
-            <div class="card">
-                <div class="vault-header">
-                    <span class="vault-name">pSNIPER</span>
-                </div>
-                
-                <div id="userStats" class="user-stats hidden">
-                    <div class="user-stat">
-                        <div class="user-stat-label">Position</div>
-                        <div class="user-stat-value" id="positionValue">$0.00</div>
+
+        <!-- Home Panel -->
+        <div class="web-tab-panel active" id="webPanelHome">
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="vault-header">
+                        <span class="vault-name">pSNIPER</span>
                     </div>
-                    <div class="user-stat">
-                        <div class="user-stat-label">pSNIPER</div>
-                        <div class="user-stat-value" id="sharesBalance">0.00</div>
+                    
+                    <div id="userStats" class="user-stats hidden">
+                        <div class="user-stat">
+                            <div class="user-stat-label">Position</div>
+                            <div class="user-stat-value" id="positionValue">$0.00</div>
+                        </div>
+                        <div class="user-stat">
+                            <div class="user-stat-label">pSNIPER</div>
+                            <div class="user-stat-value" id="sharesBalance">0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="openDepositBtn" class="deposit-btn" disabled>Deposit</button>
+                        <button id="openWithdrawBtn" class="withdraw-btn">Withdraw</button>
                     </div>
                 </div>
-                
-                <div class="action-buttons">
-                    <button id="openDepositBtn" class="deposit-btn" disabled>Deposit</button>
-                    <button id="openWithdrawBtn" class="withdraw-btn">Withdraw</button>
+
+                <div class="card">
+                    <div class="stats-card-title">Stats</div>
+                    <div class="big-stat">
+                        <div class="big-stat-label">Total Value Locked</div>
+                        <div class="big-stat-value" id="tvlValue">$0.00</div>
+                    </div>
+                    <div class="big-stat">
+                        <div class="big-stat-label">pSNIPER Price</div>
+                        <div class="big-stat-value" id="statsSharePrice">$1.00</div>
+                    </div>
                 </div>
+            </div>
+            
+            <!-- Pending Withdrawals Section -->
+            <div id="pendingWithdrawalsSection" class="pending-withdrawals-section hidden">
+                <h3 class="section-title">Pending Withdrawals</h3>
+                <div id="pendingWithdrawalsList" class="pending-list"></div>
             </div>
 
-            <div class="card">
-                <div class="stats-card-title">Stats</div>
-                <div class="big-stat">
-                    <div class="big-stat-label">Total Value Locked</div>
-                    <div class="big-stat-value" id="tvlValue">$0.00</div>
+            <!-- Coming Soon Strategies -->
+            <div class="coming-soon-section">
+                <div class="coming-soon-grid">
+                    <div class="teaser-card"><div class="teaser-ticker">pARBITRAGE</div><div class="teaser-soon">soon ...</div></div>
+                    <div class="teaser-card"><div class="teaser-ticker">pVOLATILITY</div><div class="teaser-soon">soon ...</div></div>
+                    <div class="teaser-card"><div class="teaser-ticker">pCOPY</div><div class="teaser-soon">soon ...</div></div>
+                    <div class="teaser-card"><div class="teaser-ticker">pLP</div><div class="teaser-soon">soon ...</div></div>
+                    <div class="teaser-card"><div class="teaser-ticker">pENDSPIEL</div><div class="teaser-soon">soon ...</div></div>
+                    <div class="teaser-card"><div class="teaser-ticker">pINSIDER</div><div class="teaser-soon">soon ...</div></div>
                 </div>
-                <div class="big-stat">
-                    <div class="big-stat-label">pSNIPER Price</div>
-                    <div class="big-stat-value" id="statsSharePrice">$1.00</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Pending Withdrawals Section -->
-        <div id="pendingWithdrawalsSection" class="pending-withdrawals-section hidden">
-            <h3 class="section-title">Pending Withdrawals</h3>
-            <div id="pendingWithdrawalsList" class="pending-list">
-                <!-- Dynamically populated -->
-            </div>
-        </div>
-
-        <!-- Coming Soon Strategies -->
-        <div class="coming-soon-section">
-            <div class="coming-soon-grid">
-                <div class="teaser-card"><div class="teaser-ticker">pARBITRAGE</div><div class="teaser-soon">soon ...</div></div>
-                <div class="teaser-card"><div class="teaser-ticker">pVOLATILITY</div><div class="teaser-soon">soon ...</div></div>
-                <div class="teaser-card"><div class="teaser-ticker">pCOPY</div><div class="teaser-soon">soon ...</div></div>
-                <div class="teaser-card"><div class="teaser-ticker">pLP</div><div class="teaser-soon">soon ...</div></div>
-                <div class="teaser-card"><div class="teaser-ticker">pENDSPIEL</div><div class="teaser-soon">soon ...</div></div>
-                <div class="teaser-card"><div class="teaser-ticker">pINSIDER</div><div class="teaser-soon">soon ...</div></div>
             </div>
         </div>
 
         <!-- Arbitrage Panel -->
-        <div class="web-tab-panel active" id="webPanelArbitrage">
+        <div class="web-tab-panel" id="webPanelArbitrage">
             <div id="webArbOpportunities"></div>
             <div id="webArbWatchlist"></div>
         </div>
@@ -1079,6 +1089,15 @@
 
         <!-- Tasks & Codes Panel -->
         <div class="web-tab-panel" id="webPanelTasks">
+            <!-- Farcaster Connect -->
+            <div id="webFcSection" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+                <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:8px;">Connect Farcaster to earn XP</div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input id="webFcFidInput" type="number" placeholder="Your Farcaster FID" style="flex:1;padding:8px 12px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:#fff;font-size:13px;" min="1">
+                    <button onclick="webSaveFid()" class="task-btn" style="padding:8px 16px;">Save</button>
+                </div>
+                <div id="webFcStatus" style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.4);"></div>
+            </div>
             <div id="webTasksList"></div>
             <div class="invite-codes-section">
                 <div class="invite-codes-title">Your Invite Codes</div>

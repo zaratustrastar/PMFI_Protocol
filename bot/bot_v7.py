@@ -426,10 +426,8 @@ def generate_invite_code() -> str:
     return secrets.token_hex(4).upper()
 
 def generate_user_code() -> str:
-    """Generate a PMFI-XXXXXX style user referral code"""
-    chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-    suffix = ''.join(secrets.choice(chars) for _ in range(6))
-    return f"PMFI-{suffix}"
+    """Generate an 8-character uppercase hex user referral code (e.g. 256C6DC0)"""
+    return secrets.token_hex(4).upper()
 
 def ensure_user_has_codes(wallet=None, fid=None):
     """Ensure a user has 3 personal invite codes. Idempotent."""

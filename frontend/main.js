@@ -1168,8 +1168,8 @@ async function initReadOnlyProvider() {
 // TAB NAVIGATION
 // =============================================================================
 
-const WEB_TABS = ['arbitrage', 'rankings', 'tasks'];
-let webActiveTab = 'arbitrage';
+const WEB_TABS = ['home', 'arbitrage', 'rankings', 'tasks'];
+let webActiveTab = 'home';
 
 function webSwitchTab(tabName) {
     WEB_TABS.forEach(t => {
@@ -1183,13 +1183,74 @@ function webSwitchTab(tabName) {
     if (panel) panel.classList.add('active');
     if (btn) btn.classList.add('active');
     webActiveTab = tabName;
-    window.location.hash = tabName;
+    window.location.hash = tabName === 'home' ? '' : tabName;
     if (tabName === 'arbitrage') webLoadArb();
     if (tabName === 'rankings') webLoadLeaderboard();
-    if (tabName === 'tasks') { webLoadTasks(); webLoadInviteCodes(); }
+    if (tabName === 'tasks') { webLoadTasks(); webLoadInviteCodes(); webRestoreFid(); }
 }
 
 function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// =============================================================================
+// FARCASTER CONNECT (Tasks tab)
+// =============================================================================
+
+let webFcFid = localStorage.getItem('pmfi_web_fid') ? parseInt(localStorage.getItem('pmfi_web_fid')) : null;
+
+function webSaveFid() {
+    const input = document.getElementById('webFcFidInput');
+    if (!input) return;
+    const val = parseInt(input.value);
+    if (!val || val < 1) {
+        webSetFcStatus('Enter a valid Farcaster FID', '#f85149');
+        return;
+    }
+    webFcFid = val;
+    localStorage.setItem('pmfi_web_fid', val);
+    webSetFcStatus('FID ' + val + ' saved', '#7ee787');
+    webLoadTasks();
+}
+
+function webRestoreFid() {
+    const saved = localStorage.getItem('pmfi_web_fid');
+    if (saved) {
+        const input = document.getElementById('webFcFidInput');
+        if (input) input.value = saved;
+        webFcFid = parseInt(saved);
+        webSetFcStatus('FID ' + saved + ' connected', '#7ee787');
+    }
+}
+
+function webSetFcStatus(msg, color) {
+    const el = document.getElementById('webFcStatus');
+    if (el) { el.textContent = msg; el.style.color = color || 'rgba(255,255,255,0.4)'; }
+}
+
+async function webVerifyFollow() {
+    if (!webFcFid) { webSetFcStatus('Save your Farcaster FID first', '#f85149'); return; }
+    const btn = document.getElementById('webVerifyFollowBtn');
+    if (btn) { btn.textContent = 'Checking...'; btn.disabled = true; }
+    try {
+        const res = await fetch('/api/tasks/verify/follow_fc', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fid: webFcFid })
+        });
+        const data = await res.json();
+        if (data.verified) {
+            webSetFcStatus('Follow verified! +100 XP earned', '#7ee787');
+            webLoadTasks();
+        } else if (data.error === 'User not registered') {
+            webSetFcStatus('FID not registered — open the PMFI mini app on Farcaster first to register', '#ffc107');
+        } else {
+            webSetFcStatus(data.reason || data.error || 'Not following PMFI yet', '#f85149');
+        }
+    } catch (e) {
+        webSetFcStatus('Verification failed — try again', '#f85149');
+    } finally {
+        if (btn) { btn.textContent = 'Verify Follow'; btn.disabled = false; }
+    }
+}
 
 // =============================================================================
 // ARBITRAGE
@@ -1281,14 +1342,24 @@ function webLoadTasks() {
     const el = document.getElementById('webTasksList');
     if (!el) return;
     el.innerHTML = WEB_TASK_DEFINITIONS.map(task => {
-        const btnHtml = task.url ? `<a href="${task.url}" target="_blank"><button class="task-btn">Go</button></a>` : '';
+        let actionsHtml = '';
+        if (task.id === 'follow_fc') {
+            const goBtn = `<a href="${task.url}" target="_blank"><button class="task-btn">Follow</button></a>`;
+            const verifyBtn = webFcFid
+                ? `<button id="webVerifyFollowBtn" class="task-btn" onclick="webVerifyFollow()" style="margin-left:6px;">Verify</button>`
+                : '';
+            actionsHtml = `<div style="display:flex;align-items:center;">${goBtn}${verifyBtn}</div>`;
+        } else if (task.url) {
+            actionsHtml = `<a href="${task.url}" target="_blank"><button class="task-btn">Go</button></a>`;
+        }
         return `<div class="task-row">
             <div class="task-info">
                 <div class="task-name">${task.label}</div>
                 <div class="task-xp">+${task.xp} XP</div>
             </div>
-            ${btnHtml}`;
-    }).join('</div>') + (WEB_TASK_DEFINITIONS.length ? '</div>' : '') +
+            ${actionsHtml}
+        </div>`;
+    }).join('') +
     `<div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.35);">Open the PMFI mini app on Farcaster to track your XP progress.</div>`;
 }
 
@@ -1393,12 +1464,12 @@ function webCopyCode(code, idx) {
         }
     }
     
-    // Read hash to determine initial tab, default to arbitrage
+    // Read hash to determine initial tab, default to home
     const hashTab = window.location.hash.replace('#', '');
     if (WEB_TABS.includes(hashTab)) {
         webSwitchTab(hashTab);
     } else {
-        webLoadArb();
+        webSwitchTab('home');
     }
     
     // Log price API configuration
