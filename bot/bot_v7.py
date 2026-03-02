@@ -3807,21 +3807,21 @@ def api_xp_leaderboard():
         cur = conn.cursor(cursor_factory=RealDictCursor)
         if scope == 'weekly':
             cur.execute("""
-                SELECT e.fid, COALESCE(u.username, '') as username, SUM(e.xp) as xp_total
+                SELECT e.fid, COALESCE(u.username, '') as username, u.wallet, SUM(e.xp) as xp_total
                 FROM xp_events e
                 LEFT JOIN xp_users u ON e.fid = u.fid
                 WHERE e.status = 'COMPLETED' AND e.created_at >= NOW() - INTERVAL '7 days'
-                GROUP BY e.fid, u.username
+                GROUP BY e.fid, u.username, u.wallet
                 ORDER BY xp_total DESC
                 LIMIT 50
             """)
         else:
             cur.execute("""
-                SELECT e.fid, COALESCE(u.username, '') as username, SUM(e.xp) as xp_total
+                SELECT e.fid, COALESCE(u.username, '') as username, u.wallet, SUM(e.xp) as xp_total
                 FROM xp_events e
                 LEFT JOIN xp_users u ON e.fid = u.fid
                 WHERE e.status = 'COMPLETED'
-                GROUP BY e.fid, u.username
+                GROUP BY e.fid, u.username, u.wallet
                 ORDER BY xp_total DESC
                 LIMIT 50
             """)

@@ -2037,6 +2037,7 @@
                     gateCodeSection.classList.remove('visible');
                     hideBootLoader();
                     grantAccess();
+                    xpBootstrap();
                 } else {
                     gateCodeError.textContent = data.error || 'Failed to redeem code';
                     gateCodeError.classList.add('show');

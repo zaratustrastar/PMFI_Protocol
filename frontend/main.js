@@ -1255,8 +1255,8 @@ async function webConnectFarcaster() {
     if (deeplink) deeplink.style.display = 'none';
 
     try {
-        const { createAppClient, viem } = await import('https://esm.sh/@farcaster/auth-client@0.3.0');
-        const client = createAppClient({ relay: 'https://relay.farcaster.xyz', ethereum: viem() });
+        const { createAppClient, viemConnector } = await import('https://esm.sh/@farcaster/auth-client@0.3.0');
+        const client = createAppClient({ relay: 'https://relay.farcaster.xyz', ethereum: viemConnector() });
 
         const nonce = Math.random().toString(36).slice(2, 18);
         const { data: channelData, isError: chanErr } = await client.createChannel({
@@ -1439,11 +1439,11 @@ async function webLoadLeaderboard() {
         el.innerHTML = rows.map((row, i) => {
             const isCurrent = userAddress && row.wallet && row.wallet.toLowerCase() === userAddress.toLowerCase();
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
-            const displayName = row.username || (row.wallet ? row.wallet.slice(0, 6) + '...' + row.wallet.slice(-4) : 'Unknown');
+            const displayName = row.username ? '@' + row.username : (row.wallet ? row.wallet.slice(0, 6) + '...' + row.wallet.slice(-4) : 'FID ' + row.fid);
             return `<div class="leaderboard-row${isCurrent ? ' current-user' : ''}">
                 <span class="lb-rank">${medal}</span>
                 <span class="lb-user">${displayName}</span>
-                <span class="lb-xp">${(row.xp || 0).toLocaleString()} XP</span>
+                <span class="lb-xp">${(row.xp_total || row.xp || 0).toLocaleString()} XP</span>
             </div>`;
         }).join('');
     } catch (e) {
@@ -1477,6 +1477,12 @@ function webLoadTasks() {
             } else {
                 actionsHtml = `<button class="task-btn" onclick="webFollowFarcaster()">Follow</button>`;
             }
+        } else if (task.id === 'follow_x') {
+            if (webFcFid) {
+                actionsHtml = `<button class="task-btn" id="webClaimXBtn" onclick="webClaimFollowX(this)" style="background:#f59e0b;color:#000;">Claim</button>`;
+            } else {
+                actionsHtml = `<a href="${task.url}" target="_blank"><button class="task-btn">Go</button></a>`;
+            }
         } else if (task.url) {
             actionsHtml = `<a href="${task.url}" target="_blank"><button class="task-btn">Go</button></a>`;
         }
@@ -1489,6 +1495,42 @@ function webLoadTasks() {
         </div>`;
     }).join('') +
     `<div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.35);">Open the PMFI mini app on Farcaster to track your XP progress.</div>`;
+}
+
+async function webClaimFollowX(btn) {
+    if (!webFcFid) return;
+    btn.disabled = true;
+    btn.textContent = 'Claiming...';
+    window.open('https://x.com/pmfi_cc', '_blank');
+    try {
+        const res = await fetch('/api/tasks/claim/follow_x', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fid: webFcFid })
+        });
+        const data = await res.json();
+        if (data.claimed || data.success) {
+            btn.textContent = 'Pending';
+            btn.style.background = 'rgba(245,158,11,0.2)';
+            btn.style.color = '#f59e0b';
+            btn.disabled = true;
+        } else if (data.locked) {
+            btn.textContent = 'Locked';
+            btn.style.background = 'rgba(255,255,255,0.06)';
+            btn.style.color = 'rgba(255,255,255,0.4)';
+            btn.disabled = true;
+            alert(data.reason || 'Complete other tasks first');
+        } else {
+            btn.textContent = 'Claim';
+            btn.style.background = '#f59e0b';
+            btn.style.color = '#000';
+            btn.disabled = false;
+            if (data.reason) alert(data.reason);
+        }
+    } catch (e) {
+        btn.textContent = 'Claim';
+        btn.disabled = false;
+    }
 }
 
 function webRenderTask(task) {
