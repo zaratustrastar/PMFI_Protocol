@@ -1,0 +1,83 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Check raw recent bot logs (no filtering)
+sudo journalctl -u psniper-bot --no-pager --since "1 hour ago" | tail -80
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 55038779482410370558...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT]   kalshi query 'governor': 50 results (567 unique total)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT] Kalshi dedup: 229 → 99 (130 dropped from 56 groups)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT] Kalshi: 567 raw → 99 normalized (dedup dropped 130)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT] Loaded 8 seed pairs from /root/PolyNotifyBot/bot/arb_monitor/../seedPairs.json
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📊 Got 0 bids, 20 asks
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 91720067331278107951...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📊 Got 0 bids, 22 asks
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 99475817819398349510...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 99475817819398349510380913864206588692477284839559449459646849928120952503218
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 11560573602959748768...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT]   Seed 'Fed Chair' → 20 poly results
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📊 Got 4 bids, 5 asks
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ✅ Gençlerbirliği SK: 2.0 → liq value $0.08
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 59221631030989981316...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📊 Got 8 bids, 3 asks
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ✅ Over: 2.0 → liq value $0.20
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 98074124978492567922...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📊 Got 6 bids, 3 asks
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ✅ Over: 2.0 → liq value $0.41
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 25433790848916390709...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 25433790848916390709475485710548348768864839468248483388221068307272403996666
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Tabilo: 1.5 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 99236985388813725973...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 99236985388813725973349399644586683722956694427287553434048549119681217739741
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 1.1 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 24939388921070319586...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 24939388921070319586595174454393494256090454240688186827598998249120200237131
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Matias: 1.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 26438265600740423472...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📊 Got 0 bids, 81 asks
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 1.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 53445025834790299521...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 53445025834790299521588368162517797091911861844273169106033742948224578356734
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 1.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 63593631533942851082...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 63593631533942851082450530130417748192194680160910362184507872443814473335546
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 1.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 73274171367090230039...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 7327417136709023003967323943057079464443803134892140600268751645327107724238
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 1.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 74961904866769611275...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 74961904866769611275573351664237554495626394246871892361876421417106224529008
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 1.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 81662470586150123737...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 8166247058615012373780523588801554674467269852889714287616679799199294666779
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 1.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 85480497736321095280...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 85480497736321095280042974969917575554646108888875170702553646190333360684031
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ No: 1.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    📖 Orderbook via CLOB client: 96468941942371710996...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT]   Seed 'Fed Chair' → 20 kalshi results
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:       Full token: 96468941942371710996052550360175261619393076474647515662298557665396364619243
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]:    ❌ Yes: 1.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 Fetching cash balance via Polygon RPC...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT]   Seed 'pope' → 6 poly results
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 💵 Polymarket cash (Polygon): $6.94
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 Fetching open orders via L2 auth...
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT]   Seed 'pope' → 20 kalshi results
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT]   Seed 'tariffs' → 2 poly results
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT]   Seed 'tariffs' → 8 kalshi results
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT]   Seed 'Bitcoin price' → 20 poly results
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT]   Seed 'Bitcoin price' → 20 kalshi results
+Mar 08 23:43:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 📡 [Arb/PMXT]   Seed 'Bitcoin reserve' → 1 poly results
+Mar 08 23:44:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079528]: 127.0.0.1 - - [08/Mar/2026 23:44:19] "GET /sign-nav HTTP/1.1" 200 -
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

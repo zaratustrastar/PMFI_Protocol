@@ -1595,6 +1595,10 @@
         // TAB SWITCHING
         // ============================================
         function switchTab(tabName) {
+            if (tabName !== 'arbitrage' && arbRefreshTimer) {
+                clearTimeout(arbRefreshTimer);
+                arbRefreshTimer = null;
+            }
             const tabs = ['home', 'tasks', 'rankings', 'arbitrage'];
             tabs.forEach(t => {
                 const content = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -1698,12 +1702,18 @@
         let arbRefreshTimer = null;
         
         async function loadArbData() {
+            if (arbRefreshTimer) { clearTimeout(arbRefreshTimer); arbRefreshTimer = null; }
             const url = '/api/arbs?sort=edge&limit=50';
             try {
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Status ' + res.status);
                 const data = await res.json();
                 renderArbData(data);
+                const refreshMs = data.refreshInMs || 60000;
+                arbRefreshTimer = setTimeout(() => {
+                    const arbTab = document.getElementById('tabArbitrage');
+                    if (arbTab && arbTab.classList.contains('active')) loadArbData();
+                }, refreshMs);
             } catch (e) {
                 console.error('[Arb] fetch error:', e);
                 document.getElementById('arbStatusText').textContent = 'Scanner unavailable';
@@ -1711,6 +1721,10 @@
                 document.getElementById('arbWatchlist').innerHTML = '';
                 const dot = document.querySelector('.arb-dot');
                 if (dot) { dot.className = 'arb-dot error'; }
+                arbRefreshTimer = setTimeout(() => {
+                    const arbTab = document.getElementById('tabArbitrage');
+                    if (arbTab && arbTab.classList.contains('active')) loadArbData();
+                }, 60000);
             }
         }
 

@@ -1,0 +1,117 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~#: command not found
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 74585640553563357334...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📊 Got 2 bids, 62 asks
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ✅ Yes: 100.0 → liq value $0.20
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 74744558542482624813...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 74744558542482624813419031778993532658915201544663946396827329029261280437730
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 76666090955661055687...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 76666090955661055687061324087858100630274363731005206729622083083419613514926
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 80027402304319749255...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 80027402304319749255824809564378401748755176732070899513328564468772675008999
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 23183837487369274931...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 23183837487369274931142628948967799150513106161411500819849899633604214611254
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 48350233035471488941...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 48350233035471488941886048676225483471816125295833961142071869482913553279672
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 43694130361756169222...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 4369413036175616922241957135632377946942281346872696209549975953254108901688
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 40086696960855010454...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 4008669696085501045489161319857051003950474795493052459831657861170782576798
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 80102707303828685885...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 8010270730382868588546130570365383621891724310853848910851331100920214793828
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 36546250052433275152...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 36546250052433275152118752480995568566472973793027035060392771129211418800668
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Hewitt: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 28357021308877216011...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 2835702130887721601174382909314139097306021275568325616474142166004097795018
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 55787199278741291766...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 55787199278741291766815809135762176562042974755837158852889960778083573056545
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Italy: 100.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 10150473754135588765...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 101504737541355887654713383433244368251071020478609351696835523645449501057413
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 91.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 26362369430128252543...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 26362369430128252543042342811185303767875186453085468451237580030399333595235
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 40080073443559771802...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 40080073443559771802478075385003533322215024231941579068450178915645898721678
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 89744013950177979263...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 89744013950177979263972771932686093606025880307336809983753945919397222389271
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 30482453220971678112...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 30482453220971678112415395617042125578610678692561070157922796896123774994307
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 95208625385765141549...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 95208625385765141549600421635788127431805408547232524510050149845715517867881
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 67812092618195747409...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 67812092618195747409995417825199567341209650874438457265662243471027001839140
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 87.3 - NO BIDS (illiquid, valued at $0)
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    📖 Orderbook via CLOB client: 45029034586020745321...
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:       Full token: 45029034586020745321762268745699748947840457285820351968580839794867697380532
+Mar 08 23:45:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079757]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+-bash: syntax error near unexpected token `('
+Command 'Mar' not found, but there are 19 similar ones.
+-bash: syntax error near unexpected token `('
+-bash: syntax error near unexpected token `('
+-bash: syntax error near unexpected token `('
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+-bash: syntax error near unexpected token `('
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+-bash: syntax error near unexpected token `('
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+-bash: syntax error near unexpected token `('
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+-bash: syntax error near unexpected token `('
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+-bash: syntax error near unexpected token `('
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.
+Command 'Mar' not found, but there are 19 similar ones.

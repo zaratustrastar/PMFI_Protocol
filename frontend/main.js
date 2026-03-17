@@ -248,6 +248,7 @@ let usdcContract = null;
 let abisLoaded = false;
 let refreshTimer = null;
 let priceRefreshTimer = null;
+let arbRefreshTimer = null;
 let isConnected = false;
 let lastPriceData = null;
 
@@ -1172,6 +1173,9 @@ const WEB_TABS = ['home', 'arbitrage', 'rankings', 'tasks'];
 let webActiveTab = 'home';
 
 function webSwitchTab(tabName) {
+    if (webActiveTab === 'arbitrage' && tabName !== 'arbitrage') {
+        if (arbRefreshTimer) { clearTimeout(arbRefreshTimer); arbRefreshTimer = null; }
+    }
     WEB_TABS.forEach(t => {
         const panel = document.getElementById('webPanel' + capitalize(t));
         const btn = document.getElementById('webNavBtn' + capitalize(t));
@@ -1356,22 +1360,42 @@ async function webVerifyFollow() {
 // =============================================================================
 
 async function webLoadArb() {
+    if (arbRefreshTimer) { clearTimeout(arbRefreshTimer); arbRefreshTimer = null; }
     const el = document.getElementById('webArbOpportunities');
+    const statusEl = document.getElementById('webArbStatus');
     if (!el) return;
-    el.innerHTML = '<div class="arb-empty">Loading arbitrage data...</div>';
     try {
         const res = await fetch('/api/arbs?sort=expiry');
         if (!res.ok) throw new Error('API error ' + res.status);
         const data = await res.json();
         if (data.error) throw new Error(data.error);
+
+        if (statusEl) {
+            const ago = data.asOf ? Math.round((Date.now() / 1000 - data.asOf)) : null;
+            const agoText = ago !== null ? (ago < 60 ? ago + 's ago' : Math.round(ago / 60) + 'm ago') : '';
+            const pairsText = data.pairsTracked ? data.pairsTracked + ' pairs' : '';
+            statusEl.innerHTML = '<span class="arb-dot live"></span>Live' +
+                (pairsText ? ' \u00b7 ' + pairsText : '') +
+                (agoText ? ' \u00b7 Updated ' + agoText : '');
+        }
+
         const opps = (data.opportunities || []).map(o => ({ ...o, _type: 'opportunity' }));
         const watch = (data.watchlist || []).map(o => ({ ...o, _type: 'watchlist' }));
         const all = [...opps, ...watch].sort((a, b) => (a.expiryTs || 0) - (b.expiryTs || 0));
         el.innerHTML = all.length
             ? all.map(o => webRenderArbCard(o)).join('')
-            : '<div class="arb-empty">No arbitrage opportunities right now</div>';
+            : '<div class="arb-empty">No arbitrage opportunities right now.<br>Scanner checks all platforms every 60s.</div>';
+
+        const refreshMs = data.refreshInMs || 60000;
+        arbRefreshTimer = setTimeout(() => {
+            if (webActiveTab === 'arbitrage') webLoadArb();
+        }, refreshMs);
     } catch (e) {
+        if (statusEl) statusEl.innerHTML = '<span class="arb-dot error"></span>Scanner unavailable';
         el.innerHTML = '<div class="arb-empty">Could not load arbitrage data: ' + e.message + '</div>';
+        arbRefreshTimer = setTimeout(() => {
+            if (webActiveTab === 'arbitrage') webLoadArb();
+        }, 60000);
     }
 }
 

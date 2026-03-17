@@ -950,6 +950,10 @@
         .arb-badge.opportunity { background: rgba(126,231,135,0.15); color: #7ee787; }
         .arb-badge.watchlist { background: rgba(126,231,135,0.15); color: #7ee787; }
         .arb-empty { color: rgba(255,255,255,0.35); font-size: 13px; padding: 24px 0; text-align: center; }
+        .web-arb-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(255,255,255,0.4); padding: 4px 0 10px; }
+        .arb-dot { width: 7px; height: 7px; border-radius: 50%; background: #555; flex-shrink: 0; }
+        .arb-dot.live { background: #00c853; }
+        .arb-dot.error { background: #ff4444; }
 
         /* ---- Leaderboard ---- */
         .leaderboard-table { display: flex; flex-direction: column; gap: 6px; }
@@ -1077,6 +1081,7 @@
 
         <!-- Arbitrage Panel -->
         <div class="web-tab-panel" id="webPanelArbitrage">
+            <div id="webArbStatus" class="web-arb-status"><span class="arb-dot"></span>Loading...</div>
             <div id="webArbOpportunities"></div>
         </div>
 

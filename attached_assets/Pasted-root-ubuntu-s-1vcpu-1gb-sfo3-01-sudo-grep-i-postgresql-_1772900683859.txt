@@ -1,0 +1,41 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo grep -i "postgresql\|Mar  7 06:2" /var/log/unattended-upgrades/unattended-upgrades.log 2>/dev/null | tail -20
+
+# Also see what else happened at exactly that time
+sudo journalctl --since "2026-03-07 06:20" --until "2026-03-07 06:30" --no-pager | head -30
+2026-03-06 06:38:34,392 INFO Packages that will be upgraded: libnss3 libpq5 postgresql-16 postgresql-client-16
+2026-03-06 06:38:42,336 INFO Package postgresql-16 is kept back because a related package is kept back or due to local apt_preferences(5).
+2026-03-06 06:38:42,340 INFO Package postgresql-client-16 is kept back because a related package is kept back or due to local apt_preferences(5).
+2026-03-07 06:23:42,994 INFO Packages that will be upgraded: libpq5 postgresql-16 postgresql-client-16
+2026-03-07 06:23:55,201 INFO Package postgresql-16 is kept back because a related package is kept back or due to local apt_preferences(5).
+2026-03-07 06:23:55,204 INFO Package postgresql-client-16 is kept back because a related package is kept back or due to local apt_preferences(5).
+Mar 07 06:20:00 ubuntu-s-1vcpu-1gb-sfo3-01 sshd[3963484]: Invalid user cockpit from 101.47.161.84 port 52880
+Mar 07 06:20:00 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Starting sysstat-collect.service - system activity accounting tool...
+Mar 07 06:20:00 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: sysstat-collect.service: Deactivated successfully.
+Mar 07 06:20:00 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Finished sysstat-collect.service - system activity accounting tool.
+Mar 07 06:20:01 ubuntu-s-1vcpu-1gb-sfo3-01 sshd[3963484]: Received disconnect from 101.47.161.84 port 52880:11: Bye Bye [preauth]
+Mar 07 06:20:01 ubuntu-s-1vcpu-1gb-sfo3-01 sshd[3963484]: Disconnected from invalid user cockpit 101.47.161.84 port 52880 [preauth]
+Mar 07 06:20:01 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105849]:    ❌ Buy @ $0.0100 error: PolyApiException[status_code=400, error_message={'error': 'not enough balance / allowance'}]
+Mar 07 06:20:01 ubuntu-s-1vcpu-1gb-sfo3-01 CRON[3963489]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+Mar 07 06:20:01 ubuntu-s-1vcpu-1gb-sfo3-01 CRON[3963490]: (root) CMD (cd /opt/polymarket-bot && export $(cat .env | grep -v '^#' | xargs) && python3 trading_bot/market_monitor.py >> /var/log/market_monitor.log 2>&1)
+Mar 07 06:20:02 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105849]:    ❌ Buy @ $0.0120 error: PolyApiException[status_code=400, error_message={'error': 'not enough balance / allowance'}]
+Mar 07 06:20:03 ubuntu-s-1vcpu-1gb-sfo3-01 CRON[3963489]: pam_unix(cron:session): session closed for user root
+Mar 07 06:20:03 ubuntu-s-1vcpu-1gb-sfo3-01 polymarket-worker[3105849]:    ❌ Buy @ $0.0140 error: PolyApiException[status_code=400, error_message={'error': 'not enough balance / allowance'}]
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    📖 Orderbook via CLOB client: 84766627272842185799...
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:       Full token: 84766627272842185799901063179342550180923056946614880192351912630746842758267
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    ❌ Yes: 20.0 - NO BIDS (illiquid, valued at $0)
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    📖 Orderbook via CLOB client: 85512309563758806958...
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    📊 Got 4 bids, 19 asks
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    ✅ Yes: 20.0 → liq value $0.24
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    📖 Orderbook via CLOB client: 87902004136533034059...
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    📊 Got 0 bids, 25 asks
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    ❌ Yes: 20.0 - NO BIDS (illiquid, valued at $0)
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    📖 Orderbook via CLOB client: 88945247278750629913...
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    📊 Got 3 bids, 35 asks
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    ✅ Yes: 20.0 → liq value $0.06
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    📖 Orderbook via CLOB client: 89062020957785035366...
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:       Full token: 89062020957785035366310887351186039231703008408692616658407306970775539449472
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    ❌ Yes: 20.0 - NO BIDS (illiquid, valued at $0)
+Mar 07 06:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3639377]:    📖 Orderbook via CLOB client: 92093212940309739495...
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

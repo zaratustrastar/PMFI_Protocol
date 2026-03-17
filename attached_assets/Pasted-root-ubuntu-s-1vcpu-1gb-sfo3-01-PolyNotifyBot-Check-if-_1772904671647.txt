@@ -1,0 +1,50 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# # Check if postgres is still running
+pg_lsclusters
+
+# Check if the bot is running
+sudo systemctl status psniper-bot --no-pager | tail -20
+
+# Check if postgres is in a restart loop
+sudo systemctl status postgresql@16-main --no-pager | tail -20
+Ver Cluster Port Status Owner    Data directory              Log file
+16  main    5432 online postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2026-03-07 17:30:01 UTC; 56s ago
+   Main PID: 3997031 (python3)
+      Tasks: 1 (limit: 4653)
+     Memory: 79.1M (peak: 79.6M)
+        CPU: 3.109s
+     CGroup: /system.slice/psniper-bot.service
+             └─3997031 /usr/bin/python3 bot/bot_v7.py
+
+Mar 07 17:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997031]:    📖 Orderbook via CLOB client: 89880239118931406374...
+Mar 07 17:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997031]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 07 17:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997031]:       Full token: 89880239118931406374496208495202439850314779095438358976317369750512479110396
+Mar 07 17:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997031]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 07 17:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997031]:    📖 Orderbook via CLOB client: 62573046842272350720...
+Mar 07 17:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997031]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 07 17:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997031]:       Full token: 62573046842272350720187509053018028839865336463652044986150172860252417177256
+Mar 07 17:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997031]:    ❌ Yes: 3.9 - NO BIDS (illiquid, valued at $0)
+Mar 07 17:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997031]:    📖 Orderbook via CLOB client: 11411018820460775215...
+Mar 07 17:30:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997031]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+● postgresql@16-main.service - PostgreSQL Cluster 16-main
+     Loaded: loaded (/usr/lib/systemd/system/postgresql@.service; enabled; preset: enabled)
+    Drop-In: /etc/systemd/system/postgresql@16-main.service.d
+             └─override.conf
+     Active: active (running) since Sat 2026-03-07 15:55:28 UTC; 1h 35min ago
+   Main PID: 3984701 (postgres)
+      Tasks: 6 (limit: 4653)
+     Memory: 163.2M (peak: 168.0M)
+        CPU: 2min 38.657s
+     CGroup: /system.slice/system-postgresql.slice/postgresql@16-main.service
+             ├─3984701 /usr/lib/postgresql/16/bin/postgres -D /var/lib/postgresql/16/main -c config_file=/etc/postgresql/16/main/postgresql.conf
+             ├─3984702 "postgres: 16/main: checkpointer "
+             ├─3984703 "postgres: 16/main: background writer "
+             ├─3984705 "postgres: 16/main: walwriter "
+             ├─3984706 "postgres: 16/main: autovacuum launcher "
+             └─3984707 "postgres: 16/main: logical replication launcher "
+
+Mar 07 15:55:26 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Starting postgresql@16-main.service - PostgreSQL Cluster 16-main...
+Mar 07 15:55:28 ubuntu-s-1vcpu-1gb-sfo3-01 systemd[1]: Started postgresql@16-main.service - PostgreSQL Cluster 16-main.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
