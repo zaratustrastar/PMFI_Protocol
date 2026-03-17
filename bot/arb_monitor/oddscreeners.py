@@ -35,7 +35,7 @@ HEARTBEAT_TIMEOUT_SECONDS = 90
 MAX_STORED_PAIRS = 500
 MAX_RECONNECT_DELAY = 120
 NEAR_EXPIRY_HOURS = 3
-PAIR_STALE_SECONDS = 300        # drop pairs not seen in SSE for >5 min
+PAIR_STALE_SECONDS = 7200       # drop pairs not seen in SSE for >2 hours
 TOKEN_CACHE_TTL_SECONDS = 3600  # re-fetch token IDs once per hour per pair
 
 
@@ -340,7 +340,7 @@ def _run_verifier():
 
                     pair_id = pair.get("id", "")
                     poly_slug = pair.get("polySlug", "")
-                    op_market_id = str(pair.get("opinionMarketId", ""))
+                    op_market_id = str(pair.get("opinionMarketId", "") or "")
                     prices = pair.get("prices", {})  # SSE cached prices (fallback)
 
                     # 2. Refresh token ID cache if stale or missing
@@ -348,7 +348,7 @@ def _run_verifier():
                     cache_age = now - cached.get("cachedAt", 0)
                     if cache_age > TOKEN_CACHE_TTL_SECONDS or not cached.get("polyYesToken"):
                         poly_tokens = lookup_token_ids_by_slug(poly_slug) if poly_slug else None
-                        op_tokens = lookup_token_ids_by_market_id(op_market_id) if op_market_id else None
+                        op_tokens = lookup_token_ids_by_market_id(op_market_id) if op_market_id and op_market_id != "0" else None
                         cached = {
                             "polyYesToken": poly_tokens[0] if poly_tokens else None,
                             "polyNoToken":  poly_tokens[1] if poly_tokens else None,
