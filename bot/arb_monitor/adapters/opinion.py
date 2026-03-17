@@ -228,6 +228,53 @@ def get_opinion_markets() -> list[NormalizedMarket]:
     return normalized
 
 
+def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
+    """Fetch YES/NO token IDs for an Opinion market by its marketId.
+    Returns (yes_token_id, no_token_id) or None on failure.
+    Tries the single-market endpoint first, then falls back to filtered list.
+    """
+    if not market_id or not OPINION_API_KEY:
+        return None
+    try:
+        resp = http_client.get(
+            f"{OPINION_BASE_URL}/market/{market_id}",
+            venue="opinion",
+            headers=_headers(),
+            timeout=10,
+        )
+        if resp and resp.status_code == 200:
+            data = resp.json()
+            result = data.get("result", data)
+            if isinstance(result, dict):
+                yes = result.get("yesTokenId", "")
+                no = result.get("noTokenId", "")
+                if yes and no:
+                    log(f"✅ Token lookup for marketId={market_id!r}: YES={yes[:12]}... NO={no[:12]}...")
+                    return (yes, no)
+        resp2 = http_client.get(
+            f"{OPINION_BASE_URL}/market",
+            venue="opinion",
+            params={"marketId": market_id, "limit": 5},
+            headers=_headers(),
+            timeout=10,
+        )
+        if resp2 and resp2.status_code == 200:
+            data = resp2.json()
+            result = data.get("result", {})
+            markets = result.get("list", []) if isinstance(result, dict) else []
+            for m in markets:
+                if str(m.get("marketId", "")) == str(market_id):
+                    yes = m.get("yesTokenId", "")
+                    no = m.get("noTokenId", "")
+                    if yes and no:
+                        log(f"✅ Token lookup (list fallback) marketId={market_id!r}: YES={yes[:12]}...")
+                        return (yes, no)
+    except Exception as e:
+        log(f"⚠️ lookup_token_ids_by_market_id({market_id!r}): {e}")
+    log(f"⚠️ lookup_token_ids_by_market_id: no tokens found for marketId={market_id!r}")
+    return None
+
+
 def fetch_orderbook(token_id: str) -> Optional[dict]:
     if not token_id:
         return None

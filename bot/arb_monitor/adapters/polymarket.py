@@ -241,6 +241,50 @@ def get_polymarket_markets() -> list[NormalizedMarket]:
     return normalized
 
 
+def lookup_token_ids_by_slug(slug: str) -> Optional[tuple[str, str]]:
+    """Fetch YES/NO CLOB token IDs for a Polymarket event by its URL slug.
+    Returns (yes_token_id, no_token_id) or None on failure.
+    Tries the /events endpoint first (event slug → markets), then /markets with slug filter.
+    """
+    if not slug:
+        return None
+    try:
+        resp = http_client.get(
+            f"{POLY_GAMMA_URL}/events",
+            venue="polymarket",
+            params={"slug": slug, "limit": 3},
+            timeout=10,
+        )
+        if resp and resp.status_code == 200:
+            payload = resp.json()
+            events = payload if isinstance(payload, list) else payload.get("events", [payload])
+            for event in events:
+                for m in event.get("markets", []):
+                    clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
+                    if len(clob_ids) >= 2:
+                        log(f"✅ Token lookup for slug={slug!r}: YES={clob_ids[0][:12]}... NO={clob_ids[1][:12]}...")
+                        return (clob_ids[0], clob_ids[1])
+        resp2 = http_client.get(
+            f"{POLY_GAMMA_URL}/markets",
+            venue="polymarket",
+            params={"slug": slug, "limit": 3},
+            timeout=10,
+        )
+        if resp2 and resp2.status_code == 200:
+            markets = resp2.json()
+            if isinstance(markets, dict):
+                markets = markets.get("markets", [markets])
+            for m in (markets if isinstance(markets, list) else []):
+                clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
+                if len(clob_ids) >= 2:
+                    log(f"✅ Token lookup (markets fallback) slug={slug!r}: YES={clob_ids[0][:12]}...")
+                    return (clob_ids[0], clob_ids[1])
+    except Exception as e:
+        log(f"⚠️ lookup_token_ids_by_slug({slug!r}): {e}")
+    log(f"⚠️ lookup_token_ids_by_slug: no tokens found for slug={slug!r}")
+    return None
+
+
 def fetch_orderbook(token_id: str) -> Optional[dict]:
     url = f"{POLY_CLOB_URL}/book"
     resp = http_client.get(url, venue="polymarket", params={"token_id": token_id}, timeout=10)

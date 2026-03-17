@@ -35,6 +35,8 @@ HEARTBEAT_TIMEOUT_SECONDS = 90
 MAX_STORED_PAIRS = 500
 MAX_RECONNECT_DELAY = 120
 NEAR_EXPIRY_HOURS = 3
+PAIR_STALE_SECONDS = 300        # drop pairs not seen in SSE for >5 min
+TOKEN_CACHE_TTL_SECONDS = 3600  # re-fetch token IDs once per hour per pair
 
 
 def log(msg: str):
@@ -123,6 +125,17 @@ class OddScreenersPairStore:
     def get_status(self) -> dict:
         with self._lock:
             return dict(self._status)
+
+    def remove_stale_pairs(self, max_age_seconds: int) -> int:
+        """Remove pairs not updated by SSE for longer than max_age_seconds. Returns count removed."""
+        now = time.time()
+        with self._lock:
+            stale = [k for k, v in self._pairs.items()
+                     if now - v.get("lastSeenAt", 0) > max_age_seconds]
+            for k in stale:
+                del self._pairs[k]
+            self._status["pairsStored"] = len(self._pairs)
+            return len(stale)
 
 
 oddscreeners_store = OddScreenersPairStore()
@@ -235,6 +248,7 @@ def _run_sse_collector():
             oddscreeners_store.update_status(connected=True, lastError=None)
             delay = 2
             batch_count = 0
+            _logged_raw_sample = False
 
             for event_type, data_str in _parse_sse_events(resp):
                 now = time.time()
@@ -248,6 +262,13 @@ def _run_sse_collector():
                         batch = json.loads(data_str)
                         rows = batch.get("rows", [])
                         for raw in rows:
+                            if not _logged_raw_sample and rows:
+                                log(f"📋 Raw SSE sample keys — top: {list(raw.keys())}, "
+                                    f"poly: {list(raw.get('poly', {}).keys())}, "
+                                    f"opinion: {list(raw.get('opinion', {}).keys())}, "
+                                    f"prices: {list(raw.get('prices', {}).keys())}, "
+                                    f"strategy[0]: {raw.get('strategy', [None])[0]}")
+                                _logged_raw_sample = True
                             pair = _process_pair(raw)
                             oddscreeners_store.upsert_pair(pair)
                         batch_count += 1
@@ -278,48 +299,114 @@ def _run_sse_collector():
 
 
 def _run_verifier():
-    from .adapters.polymarket import get_best_prices as poly_best_prices
-    from .adapters.opinion import get_best_prices as opinion_best_prices
+    from .adapters.polymarket import (
+        get_best_prices as poly_best_prices,
+        lookup_token_ids_by_slug,
+    )
+    from .adapters.opinion import (
+        get_best_prices as opinion_best_prices,
+        lookup_token_ids_by_market_id,
+    )
+
+    # pair_id → {polyYesToken, polyNoToken, opYesToken, opNoToken, cachedAt}
+    _token_cache: dict = {}
 
     while True:
         try:
+            # 1. Evict pairs that oddscreeners stopped reporting (no longer real arbs)
+            removed = oddscreeners_store.remove_stale_pairs(PAIR_STALE_SECONDS)
+            if removed:
+                log(f"🗑️ Evicted {removed} stale pairs (not seen in SSE for >{PAIR_STALE_SECONDS}s)")
+
             pairs = oddscreeners_store.get_all_pairs()
             if not pairs:
+                log("No pairs to verify yet, waiting...")
                 time.sleep(VERIFY_INTERVAL_SECONDS)
                 continue
 
             now = int(time.time())
             near_expiry_cutoff = now + NEAR_EXPIRY_HOURS * 3600
-
+            live_count = 0
+            fallback_count = 0
+            skipped_count = 0
             verified = []
+
             for pair in pairs:
                 try:
                     expiry = pair.get("expiryTs", 0)
                     if expiry > 0 and expiry < near_expiry_cutoff:
+                        skipped_count += 1
                         continue
 
-                    prices = pair.get("prices", {})
-                    poly_yes_price = prices.get("polyYes")
-                    poly_no_price = prices.get("polyNo")
-                    op_yes_price = prices.get("opYes")
-                    op_no_price = prices.get("opNo")
+                    pair_id = pair.get("id", "")
+                    poly_slug = pair.get("polySlug", "")
+                    op_market_id = str(pair.get("opinionMarketId", ""))
+                    prices = pair.get("prices", {})  # SSE cached prices (fallback)
 
-                    if poly_yes_price is None or poly_no_price is None:
-                        continue
-                    if op_yes_price is None or op_no_price is None:
-                        continue
+                    # 2. Refresh token ID cache if stale or missing
+                    cached = _token_cache.get(pair_id, {})
+                    cache_age = now - cached.get("cachedAt", 0)
+                    if cache_age > TOKEN_CACHE_TTL_SECONDS or not cached.get("polyYesToken"):
+                        poly_tokens = lookup_token_ids_by_slug(poly_slug) if poly_slug else None
+                        op_tokens = lookup_token_ids_by_market_id(op_market_id) if op_market_id else None
+                        cached = {
+                            "polyYesToken": poly_tokens[0] if poly_tokens else None,
+                            "polyNoToken":  poly_tokens[1] if poly_tokens else None,
+                            "opYesToken":   op_tokens[0]   if op_tokens   else None,
+                            "opNoToken":    op_tokens[1]   if op_tokens   else None,
+                            "cachedAt": now,
+                        }
+                        _token_cache[pair_id] = cached
+                        log(f"  Token cache refresh [{pair_id[:10]}]: "
+                            f"poly={'✅' if poly_tokens else '❌'} "
+                            f"opinion={'✅' if op_tokens else '❌'}")
 
-                    poly_yes = poly_yes_price / 100.0
-                    poly_no = poly_no_price / 100.0
-                    op_yes = op_yes_price / 100.0
-                    op_no = op_no_price / 100.0
+                    # 3. Fetch live orderbook ask prices
+                    live_poly_yes = live_poly_no = live_op_yes = live_op_no = None
+                    using_live = False
 
+                    if cached.get("polyYesToken") and cached.get("polyNoToken"):
+                        py_book = poly_best_prices(cached["polyYesToken"])
+                        pn_book = poly_best_prices(cached["polyNoToken"])
+                        live_poly_yes = py_book.get("best_ask")
+                        live_poly_no  = pn_book.get("best_ask")
+
+                    if cached.get("opYesToken") and cached.get("opNoToken"):
+                        op_book = opinion_best_prices(cached["opYesToken"], cached["opNoToken"])
+                        live_op_yes = op_book.get("yes_best_ask")
+                        live_op_no  = op_book.get("no_best_ask")
+
+                    # 4. Decide price source: live preferred, SSE cached as fallback
+                    if (live_poly_yes is not None and live_poly_no is not None
+                            and live_op_yes is not None and live_op_no is not None):
+                        poly_yes = live_poly_yes
+                        poly_no  = live_poly_no
+                        op_yes   = live_op_yes
+                        op_no    = live_op_no
+                        using_live = True
+                        live_count += 1
+                    else:
+                        # Fall back to SSE prices (still useful, but may be slightly stale)
+                        py_raw = prices.get("polyYes")
+                        pn_raw = prices.get("polyNo")
+                        oy_raw = prices.get("opYes")
+                        on_raw = prices.get("opNo")
+                        if None in (py_raw, pn_raw, oy_raw, on_raw):
+                            skipped_count += 1
+                            continue
+                        poly_yes = py_raw / 100.0
+                        poly_no  = pn_raw / 100.0
+                        op_yes   = oy_raw / 100.0
+                        op_no    = on_raw / 100.0
+                        fallback_count += 1
+
+                    # 5. Calculate both routes
                     routes = []
 
                     if poly_yes > MIN_PRICE_THRESHOLD and op_no > MIN_PRICE_THRESHOLD:
                         cost = poly_yes + op_no
                         edge = round(1.0 - cost, 4)
-                        roi = round(edge / cost * 100, 2) if cost > 0 else 0
+                        roi  = round(edge / cost * 100, 2) if cost > 0 else 0
                         if edge > 0:
                             routes.append({
                                 "route": "poly_YES + opinion_NO",
@@ -328,14 +415,14 @@ def _run_verifier():
                                 "roi": roi,
                                 "legs": [
                                     {"venue": "polymarket", "side": prices.get("polyYesLabel", "YES"), "price": poly_yes},
-                                    {"venue": "opinion", "side": prices.get("opNoLabel", "NO"), "price": op_no},
+                                    {"venue": "opinion",    "side": prices.get("opNoLabel", "NO"),   "price": op_no},
                                 ],
                             })
 
                     if op_yes > MIN_PRICE_THRESHOLD and poly_no > MIN_PRICE_THRESHOLD:
                         cost = op_yes + poly_no
                         edge = round(1.0 - cost, 4)
-                        roi = round(edge / cost * 100, 2) if cost > 0 else 0
+                        roi  = round(edge / cost * 100, 2) if cost > 0 else 0
                         if edge > 0:
                             routes.append({
                                 "route": "opinion_YES + poly_NO",
@@ -343,8 +430,8 @@ def _run_verifier():
                                 "edge": edge,
                                 "roi": roi,
                                 "legs": [
-                                    {"venue": "opinion", "side": prices.get("opYesLabel", "YES"), "price": op_yes},
-                                    {"venue": "polymarket", "side": prices.get("polyNoLabel", "NO"), "price": poly_no},
+                                    {"venue": "opinion",    "side": prices.get("opYesLabel", "YES"),  "price": op_yes},
+                                    {"venue": "polymarket", "side": prices.get("polyNoLabel", "NO"),  "price": poly_no},
                                 ],
                             })
 
@@ -355,19 +442,16 @@ def _run_verifier():
                     if best["roi"] < MIN_VERIFIED_EDGE_PCT:
                         continue
 
-                    poly_url = pair.get("polyUrl", "")
-                    opinion_url = pair.get("opinionUrl", "")
-
                     verified.append({
                         "type": "opportunity",
                         "source": "oddscreeners",
-                        "pairId": pair.get("id", ""),
+                        "pairId": pair_id,
                         "title": pair.get("title", ""),
                         "polyTitle": pair.get("polyTitle", ""),
                         "opinionTitle": pair.get("opinionTitle", ""),
-                        "polyUrl": poly_url,
-                        "opinionUrl": opinion_url,
-                        "expiryTs": pair.get("expiryTs", 0),
+                        "polyUrl": pair.get("polyUrl", ""),
+                        "opinionUrl": pair.get("opinionUrl", ""),
+                        "expiryTs": expiry,
                         "minCost": best["cost"],
                         "edge": best["edge"],
                         "roi": best["roi"],
@@ -377,8 +461,9 @@ def _run_verifier():
                         "arbPctSignal": pair.get("arbPct", 0),
                         "similarity": pair.get("similarity", 0),
                         "sizes": pair.get("sizes", {}),
+                        "priceSource": "live_orderbook" if using_live else "sse_cache",
                         "updatedTs": int(time.time()),
-                        "warnings": [],
+                        "warnings": [] if using_live else ["sse_price_fallback"],
                     })
 
                 except Exception as e:
@@ -386,10 +471,13 @@ def _run_verifier():
 
             verified.sort(key=lambda x: x.get("edge", 0), reverse=True)
             oddscreeners_store.set_verified(verified)
-            log(f"Verified {len(verified)} opportunities from {len(pairs)} pairs")
+            log(f"✅ Verified {len(verified)} opps from {len(pairs)} pairs "
+                f"(live={live_count} fallback={fallback_count} skipped={skipped_count})")
 
         except Exception as e:
             log(f"❌ Verifier error: {e}")
+            import traceback
+            traceback.print_exc()
 
         time.sleep(VERIFY_INTERVAL_SECONDS)
 
