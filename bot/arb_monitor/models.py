@@ -44,6 +44,7 @@ class NormalizedMarket:
     noTokenId: str
     sport: Optional[str] = None
     team_key: Optional[str] = None
+    description: str = ""
     meta: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:

@@ -199,6 +199,13 @@ def normalize_market(market: dict) -> Optional[NormalizedMarket]:
     expiry_ts = market.get("_parsed_expiry") or _parse_expiry(market)
     team_key = extract_team_key(title)
 
+    description = (
+        market.get("marketQuestion", "")
+        or market.get("question", "")
+        or market.get("description", "")
+        or ""
+    ).strip()
+
     return NormalizedMarket(
         venue="opinion",
         marketId=mid,
@@ -207,9 +214,11 @@ def normalize_market(market: dict) -> Optional[NormalizedMarket]:
         yesTokenId=yes_token,
         noTokenId=no_token,
         team_key=team_key,
+        description=description,
         meta={
             "volume": market.get("volume", "0"),
             "volume24h": market.get("volume24h", "0"),
+            "marketId": mid,
         },
     )
 

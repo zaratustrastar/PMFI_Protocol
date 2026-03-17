@@ -6,14 +6,17 @@ Seed pairs from seedPairs.json are always included for guaranteed coverage.
 
 import time
 import threading
-from .config import SCAN_INTERVAL_SECONDS
+from .config import SCAN_INTERVAL_SECONDS, OPENAI_API_KEY
 from .adapters.pmxt_adapter import (
     fetch_polymarket_markets, fetch_kalshi_markets,
     load_seed_pairs, fetch_seed_pair_markets,
     get_poly_discovery_stats, get_kalshi_discovery_stats,
 )
+from .adapters.opinion import get_opinion_markets
 from .core.matcher import find_pairs
 from .core.arb_engine import analyze_pair
+from .core.ai_matcher import find_opinion_pairs
+from .core.opinion_arb_engine import analyze_opinion_pair
 from .storage import arb_store, arb_cache
 
 
@@ -184,8 +187,36 @@ def run_scan():
         _scanner_health["pairsMatched"] = len(pairs)
         log(f"Matched {len(pairs)} pairs ({len(seed_direct_pairs)} seed + {len(fuzzy_pairs)} fuzzy), analyzing prices...")
 
+        # --- Opinion × Polymarket scan (AI-enhanced matching) ---
+        opinion_pairs = []
+        if OPENAI_API_KEY:
+            try:
+                cached_opinion = arb_cache.get("opinion_normalized")
+                if cached_opinion is not None:
+                    opinion_markets = cached_opinion
+                    log(f"Using cached Opinion data ({len(opinion_markets)} markets)")
+                else:
+                    opinion_markets = get_opinion_markets()
+                    if opinion_markets:
+                        arb_cache.set("opinion_normalized", opinion_markets)
+                    log(f"Fetched {len(opinion_markets)} Opinion markets")
+
+                _scanner_health["opinionMarketsFetched"] = len(opinion_markets)
+
+                if opinion_markets and poly_markets:
+                    opinion_pairs = find_opinion_pairs(poly_markets, opinion_markets)
+                    log(f"Opinion×Poly: {len(opinion_pairs)} AI-matched pairs")
+                    for p in opinion_pairs:
+                        pid = p.get("pair_id", "")
+                        if pid not in seen_pair_ids:
+                            seen_pair_ids.add(pid)
+            except Exception as e:
+                log(f"⚠️ Opinion scan error: {e}")
+        else:
+            log("Skipping Opinion scan (OPENAI_API_KEY not set)")
+
         with _tracked_pairs_lock:
-            _tracked_pairs = list(pairs)
+            _tracked_pairs = list(pairs) + opinion_pairs
 
         _inject_kalshi_prices_into_pairs(pairs, kalshi_markets)
 
@@ -206,7 +237,25 @@ def run_scan():
                 else:
                     watchlist.append(result)
             except Exception as e:
-                log(f"Error analyzing pair {pair.get('pair_id', '?')}: {e}")
+                log(f"Error analyzing Kalshi pair {pair.get('pair_id', '?')}: {e}")
+                continue
+
+        op_opps = 0
+        for pair in opinion_pairs:
+            try:
+                result = analyze_opinion_pair(pair, debug=False)
+                if result is None:
+                    continue
+                rtype = result.get("type", "")
+                if rtype == "opportunity":
+                    opportunities.append(result)
+                    op_opps += 1
+                elif rtype == "near_arb":
+                    near_arbs.append(result)
+                else:
+                    watchlist.append(result)
+            except Exception as e:
+                log(f"Error analyzing Opinion pair {pair.get('pair_id', '?')}: {e}")
                 continue
 
         opportunities.sort(key=lambda x: x.get("edge", 0), reverse=True)
@@ -215,15 +264,22 @@ def run_scan():
 
         elapsed_ms = int((time.time() - start) * 1000)
         _scanner_health["lastScanMs"] = elapsed_ms
+        _scanner_health["opinionPairsMatched"] = len(opinion_pairs)
+        _scanner_health["opinionOpportunities"] = op_opps
 
+        total_pairs = len(pairs) + len(opinion_pairs)
         arb_store.update(
             opportunities=opportunities,
             watchlist=near_arbs + watchlist,
-            pairs_tracked=len(pairs),
+            pairs_tracked=total_pairs,
             scan_ms=elapsed_ms,
         )
 
-        log(f"Scan complete in {elapsed_ms}ms: {len(opportunities)} opps, {len(near_arbs)} near-arbs, {len(watchlist)} watchlist, {len(pairs)} pairs")
+        log(
+            f"Scan complete in {elapsed_ms}ms: {len(opportunities)} opps "
+            f"({op_opps} opinion), {len(near_arbs)} near-arbs, "
+            f"{len(watchlist)} watchlist, {total_pairs} pairs total"
+        )
 
     except Exception as e:
         log(f"Scan error: {e}")

@@ -38,6 +38,12 @@ NEAR_ARB_MAX_COST = float(os.environ.get("NEAR_ARB_MAX_COST", "1.01"))
 MIN_EDGE_DEFAULT = 0.01
 MAX_RESULTS_DEFAULT = 50
 
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+AI_MATCH_CACHE_PATH = os.environ.get("AI_MATCH_CACHE_PATH", "/tmp/arb_ai_match_cache.json")
+AI_MATCH_CACHE_TTL = int(os.environ.get("AI_MATCH_CACHE_TTL", str(7 * 86400)))
+AI_MATCH_MIN_CONFIDENCE = int(os.environ.get("AI_MATCH_MIN_CONFIDENCE", "60"))
+AI_MATCH_MIN_RULES_SCORE = int(os.environ.get("AI_MATCH_MIN_RULES_SCORE", "40"))
+
 SPORTS_KEYWORDS = {
     "esports": [
         "cs2", "counter-strike", "dota", "lol", "league of legends",

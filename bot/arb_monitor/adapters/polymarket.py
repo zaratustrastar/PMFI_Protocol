@@ -210,6 +210,7 @@ def normalize_market(market: dict) -> NormalizedMarket | None:
 
     question = market.get("question", market.get("title", ""))
     mid = market.get("id", market.get("condition_id", market.get("conditionId", "")))
+    description = (market.get("description", "") or "").strip()
 
     team_key = extract_team_key(question)
 
@@ -221,6 +222,7 @@ def normalize_market(market: dict) -> NormalizedMarket | None:
         yesTokenId=yes_token,
         noTokenId=no_token,
         team_key=team_key,
+        description=description,
         meta={
             "slug": market.get("slug", ""),
             "volume": float(market.get("volume", 0) or 0),
