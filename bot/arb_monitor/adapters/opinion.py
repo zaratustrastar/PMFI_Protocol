@@ -60,6 +60,17 @@ def _parse_expiry(market: dict) -> int:
     return 0
 
 
+_DIRECTION_MARKET_KEYWORDS = (
+    "up or down", "hourly", "1hr", "15m", "30m", "4hr", "daily close",
+)
+
+
+def _is_direction_market(title: str) -> bool:
+    """Return True for short-term price-direction markets that can never arb against Polymarket."""
+    t = title.lower()
+    return any(kw in t for kw in _DIRECTION_MARKET_KEYWORDS)
+
+
 def fetch_all_active_markets() -> tuple[list[dict], dict]:
     global _last_opinion_stats
     stats = {
@@ -67,6 +78,7 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
         "excludedClosed": 0,
         "excludedMissingTokens": 0,
         "excludedExpiry": 0,
+        "excludedDirection": 0,
         "includedFinal": 0,
         "apiErrors": [],
     }
@@ -84,13 +96,16 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
     accepted: list[dict] = []
     seen_ids: set = set()
 
-    API_PAGE_SIZE = 20
+    # NOTE: We intentionally omit status=activated from the request.
+    # The Opinion API ignores the offset param when status is set, returning
+    # the same 20 markets on every page. Without the status filter, we get all
+    # 484 markets across pages and filter locally for statusEnum=Activated.
+    API_PAGE_SIZE = 50  # API caps at ~20 per response regardless, but try higher
 
     for page in range(OPINION_MAX_PAGES):
         offset = page * API_PAGE_SIZE
         url = f"{OPINION_BASE_URL}/market"
         params = {
-            "status": "activated",
             "limit": API_PAGE_SIZE,
             "offset": offset,
         }
@@ -138,11 +153,13 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
             break
 
         page_new = 0
+        page_dupes = 0
         for m in markets:
             stats["fetchedTotal"] += 1
 
             mid = m.get("marketId")
             if not mid or mid in seen_ids:
+                page_dupes += 1
                 continue
             seen_ids.add(mid)
 
@@ -157,6 +174,11 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
                 stats["excludedMissingTokens"] += 1
                 continue
 
+            title = m.get("marketTitle", "") or m.get("title", "")
+            if _is_direction_market(title):
+                stats["excludedDirection"] += 1
+                continue
+
             expiry_ts = _parse_expiry(m)
             if expiry_ts > 0 and (expiry_ts <= now or expiry_ts > max_expiry):
                 stats["excludedExpiry"] += 1
@@ -166,19 +188,26 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
             accepted.append(m)
             page_new += 1
 
-        log(f"Page {page + 1}: {len(markets)} fetched, {page_new} new accepted")
+        log(f"Page {page + 1}: {len(markets)} fetched, {page_new} new accepted, {page_dupes} dupes")
+
+        # If all markets on this page were duplicates, the API has looped — stop
+        if page_dupes == len(markets) and page > 0:
+            log(f"Page {page + 1}: all dupes detected — API pagination exhausted, stopping")
+            break
 
         total_available = result.get("total", 0)
-        if offset + len(markets) >= total_available:
+        if total_available and offset + len(markets) >= total_available:
             break
-        if len(markets) < API_PAGE_SIZE:
+        if len(markets) < 10:
             break
 
     stats["includedFinal"] = len(accepted)
     _last_opinion_stats = stats
-    log(f"Total: {stats['fetchedTotal']} fetched → {stats['includedFinal']} included "
+    log(
+        f"Total: {stats['fetchedTotal']} fetched → {stats['includedFinal']} included "
         f"(closed={stats['excludedClosed']}, missingTokens={stats['excludedMissingTokens']}, "
-        f"expiry={stats['excludedExpiry']})")
+        f"direction={stats['excludedDirection']}, expiry={stats['excludedExpiry']})"
+    )
     if stats["apiErrors"]:
         log(f"⚠️ API errors: {stats['apiErrors']}")
     return accepted, stats

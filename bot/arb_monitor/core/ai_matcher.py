@@ -34,7 +34,11 @@ def log(msg: str):
 
 
 _JACCARD_SHORTLIST_K = 5
-_MIN_JACCARD_PREFILTER = 0.12
+_MIN_JACCARD_PREFILTER = 0.20  # raised from 0.12 to cut false-positive LLM calls
+
+_DIRECTION_MARKET_KEYWORDS = (
+    "up or down", "hourly", "1hr", "15m", "30m", "4hr", "daily close",
+)
 
 _STOPWORDS = frozenset({
     "will", "the", "a", "an", "to", "in", "of", "for", "on", "at", "by",
@@ -208,12 +212,23 @@ def find_opinion_pairs(
 
     log(f"Matching {len(poly_markets)} Poly × {len(opinion_markets)} Opinion markets")
 
-    op_tokenized = [(_tokenize(m.title), m) for m in opinion_markets]
+    # Pre-filter Opinion markets: remove direction/hourly markets that can never match Poly
+    def _is_direction(title: str) -> bool:
+        t = title.lower()
+        return any(kw in t for kw in _DIRECTION_MARKET_KEYWORDS)
+
+    opinion_filtered = [m for m in opinion_markets if not _is_direction(m.title)]
+    filtered_count = len(opinion_markets) - len(opinion_filtered)
+    if filtered_count:
+        log(f"Filtered {filtered_count} direction/hourly Opinion markets before matching")
+
+    op_tokenized = [(_tokenize(m.title), m) for m in opinion_filtered]
     pairs = []
     used_op_ids: set = set()
     llm_calls = 0
     cache_hits = 0
     rejected = 0
+    team_key_hits = 0
 
     for pm in poly_markets:
         if not pm.title or not pm.yesTokenId or not pm.noTokenId:
@@ -223,8 +238,67 @@ def find_opinion_pairs(
         if not pm_tokens:
             continue
 
+        # ── Fast path: team_key hard-match (no LLM needed) ─────────────────
+        if pm.team_key:
+            for _, om in op_tokenized:
+                if om.marketId in used_op_ids:
+                    continue
+                if om.team_key and om.team_key == pm.team_key:
+                    used_op_ids.add(om.marketId)
+                    team_key_hits += 1
+                    pair_id = f"polymarket:{pm.marketId}___opinion:{om.marketId}"
+                    sport = pm.sport or om.sport
+                    expiry = pm.expiryTs or om.expiryTs
+                    pairs.append({
+                        "pair_id": pair_id,
+                        "title": pm.title,
+                        "opinion_title": om.title,
+                        "sport": sport,
+                        "expiry_ts": expiry or 0,
+                        "similarity": 1.0,
+                        "ai_score": {
+                            "confidence": 95,
+                            "title_score": 95,
+                            "rules_score": 90,
+                            "entity_score": 95,
+                            "time_score": 95,
+                            "reason": f"team_key hard-match: {pm.team_key}",
+                        },
+                        "polymarket_url": pm.meta.get("url", ""),
+                        "polymarket": {
+                            "venue": "polymarket",
+                            "id": pm.marketId,
+                            "question": pm.title,
+                            "team_key": pm.team_key,
+                            "yes_token": pm.yesTokenId,
+                            "no_token": pm.noTokenId,
+                            "expiry_ts": pm.expiryTs,
+                            "sport": pm.sport,
+                            "volume": pm.meta.get("volume", 0),
+                        },
+                        "opinion": {
+                            "venue": "opinion",
+                            "id": om.marketId,
+                            "question": om.title,
+                            "team_key": om.team_key,
+                            "yes_token": om.yesTokenId,
+                            "no_token": om.noTokenId,
+                            "expiry_ts": om.expiryTs,
+                            "sport": om.sport,
+                            "volume": om.meta.get("volume", 0),
+                        },
+                    })
+                    log(
+                        f"✅ Team-key match: {pm.title[:50]} × {om.title[:50]} "
+                        f"(team_key={pm.team_key})"
+                    )
+                    break  # one Opinion market per Poly market
+        # ────────────────────────────────────────────────────────────────────
+
         candidates = []
         for op_tokens, om in op_tokenized:
+            if om.marketId in used_op_ids:
+                continue
             j = _jaccard(pm_tokens, op_tokens)
             if j >= _MIN_JACCARD_PREFILTER:
                 candidates.append((j, om))
@@ -318,7 +392,8 @@ def find_opinion_pairs(
             break
 
     log(
-        f"Done: {len(pairs)} pairs accepted, {rejected} rejected, "
+        f"Done: {len(pairs)} pairs accepted ({team_key_hits} via team_key, "
+        f"{len(pairs) - team_key_hits} via LLM), {rejected} rejected, "
         f"{llm_calls} LLM calls, {cache_hits} cache hits"
     )
     return pairs
