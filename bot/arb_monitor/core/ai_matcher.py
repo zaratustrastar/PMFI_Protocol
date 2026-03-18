@@ -239,6 +239,7 @@ def find_opinion_pairs(
             continue
 
         # ── Fast path: team_key hard-match (no LLM needed) ─────────────────
+        matched_via_team_key = False
         if pm.team_key:
             for _, om in op_tokenized:
                 if om.marketId in used_op_ids:
@@ -246,6 +247,7 @@ def find_opinion_pairs(
                 if om.team_key and om.team_key == pm.team_key:
                     used_op_ids.add(om.marketId)
                     team_key_hits += 1
+                    matched_via_team_key = True
                     pair_id = f"polymarket:{pm.marketId}___opinion:{om.marketId}"
                     sport = pm.sport or om.sport
                     expiry = pm.expiryTs or om.expiryTs
@@ -293,6 +295,9 @@ def find_opinion_pairs(
                         f"(team_key={pm.team_key})"
                     )
                     break  # one Opinion market per Poly market
+        # Skip LLM path if already matched via team_key
+        if matched_via_team_key:
+            continue
         # ────────────────────────────────────────────────────────────────────
 
         candidates = []

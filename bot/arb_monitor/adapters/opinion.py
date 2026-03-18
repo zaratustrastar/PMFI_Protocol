@@ -100,10 +100,12 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
     # The Opinion API ignores the offset param when status is set, returning
     # the same 20 markets on every page. Without the status filter, we get all
     # 484 markets across pages and filter locally for statusEnum=Activated.
+    # We advance offset by the actual number of items returned (not a fixed page
+    # size) so we never skip records when the API returns fewer than requested.
     API_PAGE_SIZE = 50  # API caps at ~20 per response regardless, but try higher
 
+    offset = 0
     for page in range(OPINION_MAX_PAGES):
-        offset = page * API_PAGE_SIZE
         url = f"{OPINION_BASE_URL}/market"
         params = {
             "limit": API_PAGE_SIZE,
@@ -190,13 +192,16 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
 
         log(f"Page {page + 1}: {len(markets)} fetched, {page_new} new accepted, {page_dupes} dupes")
 
+        # Advance offset by actual returned count to avoid skipping records
+        offset += len(markets)
+
         # If all markets on this page were duplicates, the API has looped — stop
         if page_dupes == len(markets) and page > 0:
             log(f"Page {page + 1}: all dupes detected — API pagination exhausted, stopping")
             break
 
         total_available = result.get("total", 0)
-        if total_available and offset + len(markets) >= total_available:
+        if total_available and offset >= total_available:
             break
         if len(markets) < 10:
             break
