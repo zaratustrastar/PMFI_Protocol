@@ -165,8 +165,8 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
                 continue
             seen_ids.add(mid)
 
-            status_enum = m.get("statusEnum", "")
-            if status_enum and status_enum.lower() not in ("activated", "active"):
+            status_enum = (m.get("statusEnum", "") or "").lower()
+            if status_enum not in ("activated", "active", ""):
                 stats["excludedClosed"] += 1
                 continue
 
