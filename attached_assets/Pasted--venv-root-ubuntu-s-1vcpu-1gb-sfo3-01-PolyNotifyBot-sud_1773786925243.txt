@@ -1,0 +1,61 @@
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "AI Matcher|Opinion"
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 💬 [Arb/Opinion] Fetching page 1: offset=0 limit=20
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 💬 [Arb/Opinion] Page 1: 20 fetched, 14 new accepted
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 💬 [Arb/Opinion] Fetching page 2: offset=20 limit=20
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 💬 [Arb/Opinion] Page 2: 20 fetched, 0 new accepted
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 💬 [Arb/Opinion] Fetching page 3: offset=40 limit=20
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 💬 [Arb/Opinion] Page 3: 20 fetched, 0 new accepted
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 💬 [Arb/Opinion] Total: 60 fetched → 14 included (closed=0, missingTokens=0, expiry=6)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 💬 [Arb/Opinion] Normalized 14 markets from 14 raw
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🔎 [Arb/Scanner] Fetched 14 Opinion markets
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] Matching 365 Poly × 14 Opinion markets
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin reach $150,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin reach $110,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin reach $105,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin reach $100,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin reach $95,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin reach $90,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin reach $85,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin reach $80,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin reach $75,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin reach $70,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin dip to $65,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin dip to $60,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin dip to $55,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin dip to $50,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin dip to $45,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin dip to $40,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin dip to $35,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin dip to $30,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin dip to $25,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Bitcoin dip to $20,000 in March? × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Powell say "Crypto" or "Bitcoin" during March × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: Will Trump say "Crypto" or "Bitcoin" this week? (M × Bitcoin Up or Down on March 18?(12:00 ET)
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: March 24, 2026? - Will Elon Musk post 0-19 tweets  × ETH Up or Down - Hourly (Mar 17, 2026 23:00 UTC Cl
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: March 24, 2026? - Will Elon Musk post 0-19 tweets  × BTC Up or Down - Hourly (Mar 17, 2026 23:00 UTC Cl
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] LLM scoring: March 24, 2026? - Will Elon Musk post 0-19 tweets  × BNB Up or Down - Hourly (Mar 17, 2026 23:00 UTC Cl
+Mar 17 22:35:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[22626]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring

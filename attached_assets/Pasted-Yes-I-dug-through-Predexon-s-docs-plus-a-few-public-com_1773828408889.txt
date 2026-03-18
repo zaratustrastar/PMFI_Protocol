@@ -1,0 +1,35 @@
+Yes. I dug through Predexon’s docs plus a few public comparables, and the pattern is pretty consistent: cross-platform matching is usually a **three-layer system** rather than one single “AI match” call. Predexon’s own docs say it uses **LLM-based analysis of market titles, descriptions, and resolution criteria**, assigns a similarity score, treats **≥95 as exact** and **80–94 as related**, and exposes both a single-market lookup endpoint and an all-pairs endpoint with per-platform expiration timestamps. ([docs.predexon.com][1])
+
+The clearest public blueprint I found is: first **normalize venue data**, then do **high-recall candidate retrieval**, then run a **strict semantic verifier**. A recent academic paper on cross-platform prediction-market identity uses exactly that shape: structural filtering first, then embeddings for nearest-neighbor retrieval, then an LLM pass that checks whether two markets are truly **equivalent**, **subset-related**, or unrelated based on resolution semantics, timing, oracle details, and scope. ([arXiv][2])
+
+For PMFI, the normalization layer should be treated as mandatory. On Polymarket, the relevant public fields include things like `question`, `conditionId`, `resolutionSource`, `endDate`, `startDate`, and event-level `title` / `description`. On Kalshi, the docs expose event and market structure plus market metadata such as `latest_expiration_time`, `settlement_timer_seconds`, status, and explicit settlement-rule context. Those are exactly the kinds of fields you want in your canonical schema before you even try semantic matching. ([Polymarket Documentation][3])
+
+The strongest public evidence for the retrieval stage is also pretty clear. The paper builds embeddings from **title, description, outcome labels, and resolution metadata**, retrieves nearest neighbors by cosine similarity, and reports that **more than 99.9%** of verified equivalent or subset relations appear within the **top 20** candidates after structural filtering. A public Kalshi/Polymarket matcher on GitHub uses a lighter version of the same idea: sentence embeddings, a **FAISS** index, then top-k retrieval. ([arXiv][2])
+
+After retrieval, the verifier is where the real value sits. Predexon explicitly warns that LLM matching can hallucinate. The paper’s verifier compares markets using cutoff times, oracle identities, dispute procedures, scope qualifiers, and conditional clauses, and then classifies pairs as equivalent or subset-related. A public repo takes a more classical route and uses **XGBoost** over features like cosine similarity, date difference, numeric-threshold difference, and Jaccard similarity, with a manual labeling loop to improve precision. A separate open-source project, Themis, is even more conservative and still does grouping manually because small differences in resolution can matter economically. ([docs.predexon.com][4])
+
+That helps explain what the “similar products” are actually doing. **Dome** publicly described its product as a unified API that “matches identical markets across multiple platforms” and streams real-time data through one interface. **PolyRouter** looks more like a normalization-first product: one API across seven platforms, plus **standardized IDs** for NFL games. **pmxt** is similar on the SDK side: it exposes a single unified market/event/orderbook model across Polymarket, Kalshi, and Limitless. So in practice, some products are selling a semantic matcher, while others reduce the problem by standardizing schemas or IDs in domains where deterministic mapping is easier. ([Y Combinator][5])
+
+The biggest design lesson for PMFI is that you should not only model **exact matches**. The research shows a lot of the opportunity graph is made of **equivalence classes, subset relations, and negative-risk constructions**, not just “same market on two venues.” It also shows that even liquid matched markets can remain **2–4% away from execution-adjusted parity** on average, because prediction-market claims are not truly fungible across venues and capital stays locked until resolution. ([arXiv][2])
+
+So the PMFI-friendly implementation would look like this:
+
+* Build a **canonical market object** per venue with: title, description, outcome labels, entity names, thresholds/strikes, resolution source, close time, settle time, platform fees, best bid/ask, and depth. Use official platform fields as the source of truth. ([Polymarket Documentation][3])
+* Run a **structural filter** before embeddings: same broad category, overlapping active window, similar market family, and compatible outcome shape. That is exactly how the academic pipeline makes the search tractable. ([arXiv][2])
+* Use embeddings only for **candidate generation**, not final truth. Top 10–20 candidates is a good starting point. ([arXiv][2])
+* Add a second-stage verifier that outputs at least: `exact`, `subset`, `inverse/outcome-map`, `independent`, `reject`. The public systems and papers all converge on this “retrieve first, verify second” pattern. ([docs.predexon.com][4])
+* Keep a **manual review queue** for borderline matches. Themis’ manual grouping workflow is a good sign that human review still matters for economically sensitive pairs. ([GitHub][6])
+
+My practical recommendation for PMFI is to start with **Polymarket ↔ Kalshi**, because that is where Predexon documents matching today and where the public research/open-source examples are richest. I would split the system into an **offline matcher** that refreshes a pair graph every few minutes and a **real-time arb engine** that only watches validated pairs. That keeps your expensive semantic work separate from your latency-sensitive monitor. ([docs.predexon.com][1])
+
+The one place where you can be more deterministic is sports or other highly structured contracts. PolyRouter’s standardized NFL game IDs are a sign that when markets share a known event key, you should prefer hard mapping over LLM matching. For politics, macro, crypto thresholds, and weird headline markets, the semantic pipeline is still the safer route. ([polyrouter.mintlify.app][7])
+
+If you want, I can turn this into a concrete PMFI matching spec with a canonical schema, scoring formula, and confidence thresholds for `exact` / `subset` / `reject`.
+
+[1]: https://docs.predexon.com/concepts/matching "Cross-Platform Matching - Predexon API"
+[2]: https://arxiv.org/html/2601.01706v1 "Semantic Non-Fungibility and Violations of the Law of One Price in Prediction Markets"
+[3]: https://docs.polymarket.com/api-reference/markets/get-market-by-slug "Get market by slug - Polymarket Documentation"
+[4]: https://docs.predexon.com/api-reference/matching/find-matches "Find Matching Markets - Predexon API"
+[5]: https://www.ycombinator.com/companies/dome "Dome: A unified API for prediction markets, like Kalshi and Polymarket | Y Combinator"
+[6]: https://github.com/wasabipesto/themis "GitHub - wasabipesto/themis: How accurate are prediction markets? · GitHub"
+[7]: https://polyrouter.mintlify.app/ "Welcome to PolyRouter - PolyRouter"
