@@ -1,0 +1,82 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBotsudo journalctl -u psniper-bot -n 200 --no-pager | grep -E "(Opinion|opinion|Matcher|matcher|arb|pair|Page|fetched|direction|Team-key|Matched|✅|❌|⚠️)" | tail -8080
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 10.0 → liq value $0.01
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Over: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 10.0 → liq value $0.04
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 10.0 → liq value $0.01
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 10.0 → liq value $0.02
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 9.1 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ No: 9.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 9.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 8.4 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 7.5 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 7.2 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 7.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.07
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ✅ Yes: 6.0 → liq value $0.35
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 5.2 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 5.2 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 3.9 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 3.6 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 3.6 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 3.4 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 11:22:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 18 11:23:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 127.0.0.1 - - [18/Mar/2026 11:23:01] "GET /api/arbs?sort=expiry HTTP/1.1" 200 -
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

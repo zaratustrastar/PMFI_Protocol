@@ -96,18 +96,19 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
     accepted: list[dict] = []
     seen_ids: set = set()
 
-    # NOTE: We intentionally omit status=activated from the request.
-    # The Opinion API ignores the offset param when status is set, returning
-    # the same 20 markets on every page. Without the status filter, we get all
-    # 484 markets across pages and filter locally for statusEnum=Activated.
-    # We advance offset by the actual number of items returned (not a fixed page
-    # size) so we never skip records when the API returns fewer than requested.
-    API_PAGE_SIZE = 50  # API caps at ~20 per response regardless, but try higher
+    # We use status=activated so the API pre-filters to live markets, giving us
+    # a much higher density of useful markets per page (~12-14 activated vs ~2-3
+    # without the filter). Pagination with status=activated appears to return the
+    # same ~20 markets regardless of offset (server-side bug), so we stop early
+    # via the all-dupes guard. Dynamic offset advances by actual returned count to
+    # avoid skipping records if the API ever fixes its pagination.
+    API_PAGE_SIZE = 20
 
     offset = 0
     for page in range(OPINION_MAX_PAGES):
         url = f"{OPINION_BASE_URL}/market"
         params = {
+            "status": "activated",
             "limit": API_PAGE_SIZE,
             "offset": offset,
         }

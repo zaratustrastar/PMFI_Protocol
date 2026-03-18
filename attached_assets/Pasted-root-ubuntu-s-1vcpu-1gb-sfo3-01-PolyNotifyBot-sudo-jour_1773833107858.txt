@@ -1,0 +1,32 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "30 minutes ago" --no-pager | grep -E "(scan|Scan|opinion scan|kalshi scan|poly_opinion|Running|cycle)" | head -30
+Mar 18 10:55:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Starting scan cycle...
+Mar 18 10:55:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Seed direct matching: 70 poly x 77 kalshi → 4 pairs
+Mar 18 10:55:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] After seed injection: 372 Poly, 160 Kalshi, 4 direct seed pairs
+Mar 18 10:55:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Discovered: 372 Poly, 160 Kalshi
+Mar 18 10:55:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Matched 7 pairs (4 seed + 7 fuzzy), analyzing prices...
+Mar 18 10:55:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Fetched 5 Opinion markets
+Mar 18 10:55:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Opinion×Poly: 0 AI-matched pairs
+Mar 18 10:55:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Scan complete in 59726ms: 0 opps (0 opinion), 0 near-arbs, 5 watchlist, 7 pairs total
+Mar 18 10:57:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Starting scan cycle...
+Mar 18 10:57:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Seed direct matching: 70 poly x 77 kalshi → 4 pairs
+Mar 18 10:57:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] After seed injection: 372 Poly, 160 Kalshi, 4 direct seed pairs
+Mar 18 10:57:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Discovered: 372 Poly, 160 Kalshi
+Mar 18 10:57:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Matched 7 pairs (4 seed + 7 fuzzy), analyzing prices...
+Mar 18 10:57:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Fetched 5 Opinion markets
+Mar 18 10:57:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Opinion×Poly: 0 AI-matched pairs
+Mar 18 10:57:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Scan complete in 61271ms: 0 opps (0 opinion), 0 near-arbs, 5 watchlist, 7 pairs total
+Mar 18 10:59:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Starting scan cycle...
+Mar 18 10:59:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Seed direct matching: 70 poly x 77 kalshi → 4 pairs
+Mar 18 10:59:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] After seed injection: 372 Poly, 160 Kalshi, 4 direct seed pairs
+Mar 18 10:59:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Discovered: 372 Poly, 160 Kalshi
+Mar 18 10:59:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Matched 7 pairs (4 seed + 7 fuzzy), analyzing prices...
+Mar 18 10:59:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Fetched 5 Opinion markets
+Mar 18 10:59:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Opinion×Poly: 0 AI-matched pairs
+Mar 18 10:59:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Scan complete in 51549ms: 0 opps (0 opinion), 0 near-arbs, 5 watchlist, 7 pairs total
+Mar 18 11:01:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Starting scan cycle...
+Mar 18 11:01:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Seed direct matching: 70 poly x 77 kalshi → 4 pairs
+Mar 18 11:01:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] After seed injection: 372 Poly, 160 Kalshi, 4 direct seed pairs
+Mar 18 11:01:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Discovered: 372 Poly, 160 Kalshi
+Mar 18 11:01:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Matched 7 pairs (4 seed + 7 fuzzy), analyzing prices...
+Mar 18 11:01:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[58807]: 🔎 [Arb/Scanner] Fetched 5 Opinion markets
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
