@@ -1,0 +1,444 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "10 minutes ago" --no-pager | grep -E "(Scan complete|Opinion×Poly|pairs accepted|Done:)"
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Opinion×Poly: 0 AI-matched pairs
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Scan complete in 52923ms: 0 opps (0 opinion), 0 near-arbs, 5 watchlist, 7 pairs total
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Opinion×Poly: 0 AI-matched pairs
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Scan complete in 66894ms: 0 opps (0 opinion), 0 near-arbs, 5 watchlist, 7 pairs total
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Opinion×Poly: 0 AI-matched pairs
+Mar 18 12:39:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Scan complete in 50933ms: 0 opps (0 opinion), 0 near-arbs, 5 watchlist, 7 pairs total
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Opinion×Poly: 0 AI-matched pairs
+Mar 18 12:41:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Scan complete in 52902ms: 0 opps (0 opinion), 0 near-arbs, 5 watchlist, 7 pairs total
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Opinion×Poly: 0 AI-matched pairs
+Mar 18 12:44:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Scan complete in 67711ms: 0 opps (0 opinion), 0 near-arbs, 5 watchlist, 7 pairs total
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "10 minutes ago" --no-pager | grep "AI Matcher"
+Mar 18 12:35:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Matching 373 Poly × 9 Opinion markets
+Mar 18 12:35:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Trump out as President by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:35:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump meet with Putin by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump and Putin meet next in another country? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be less than 5% × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be between 5% a × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump create a tariff dividend by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Congress pass any tariffs by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will OpenAI be acquired before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: OpenAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: xAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Pump.fun perform an airdrop by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: AI Industry Downturn by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 7? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Israel strike 1 country in 2026? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Russia x Ukraine ceasefire by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump send Tomahawk to Ukraine by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Ukraine hits Moscow by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Congress passes Iran war powers resolution by Marc × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump visit Greenland by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:35:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Matching 373 Poly × 9 Opinion markets
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Trump out as President by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump meet with Putin by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump and Putin meet next in another country? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be less than 5% × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be between 5% a × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump create a tariff dividend by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Congress pass any tariffs by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will OpenAI be acquired before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: OpenAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: xAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Pump.fun perform an airdrop by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: AI Industry Downturn by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 7? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Israel strike 1 country in 2026? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Russia x Ukraine ceasefire by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump send Tomahawk to Ukraine by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Ukraine hits Moscow by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Congress passes Iran war powers resolution by Marc × Will another country strike Iran by March 31?
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump visit Greenland by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Matching 373 Poly × 9 Opinion markets
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Trump out as President by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump meet with Putin by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump and Putin meet next in another country? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be less than 5% × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be between 5% a × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump create a tariff dividend by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Congress pass any tariffs by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will OpenAI be acquired before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: OpenAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: xAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Pump.fun perform an airdrop by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: AI Industry Downturn by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 7? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Israel strike 1 country in 2026? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Russia x Ukraine ceasefire by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump send Tomahawk to Ukraine by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Ukraine hits Moscow by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Congress passes Iran war powers resolution by Marc × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump visit Greenland by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Matching 373 Poly × 9 Opinion markets
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Trump out as President by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump meet with Putin by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump and Putin meet next in another country? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be less than 5% × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be between 5% a × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump create a tariff dividend by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Congress pass any tariffs by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will OpenAI be acquired before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: OpenAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: xAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Pump.fun perform an airdrop by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: AI Industry Downturn by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 7? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Israel strike 1 country in 2026? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Russia x Ukraine ceasefire by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump send Tomahawk to Ukraine by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Ukraine hits Moscow by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Congress passes Iran war powers resolution by Marc × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump visit Greenland by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Matching 373 Poly × 9 Opinion markets
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Trump out as President by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump meet with Putin by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump and Putin meet next in another country? × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be less than 5% × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be between 5% a × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump create a tariff dividend by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Congress pass any tariffs by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will OpenAI be acquired before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: OpenAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: xAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Pump.fun perform an airdrop by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: AI Industry Downturn by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 7? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Israel strike 1 country in 2026? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Russia x Ukraine ceasefire by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump send Tomahawk to Ukraine by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Ukraine hits Moscow by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Congress passes Iran war powers resolution by Marc × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump visit Greenland by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "10 minutes ago" --no-pager | grep -E "(Arb/Scanner.*Matched|fuzzy|seed)"
+Mar 18 12:35:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 📡 [Arb/PMXT] Loaded 8 seed pairs from /root/PolyNotifyBot/bot/arb_monitor/../seedPairs.json
+Mar 18 12:35:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] After seed injection: 373 Poly, 160 Kalshi, 4 direct seed pairs
+Mar 18 12:35:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Matched 7 pairs (4 seed + 7 fuzzy), analyzing prices...
+Mar 18 12:37:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 📡 [Arb/PMXT] Loaded 8 seed pairs from /root/PolyNotifyBot/bot/arb_monitor/../seedPairs.json
+Mar 18 12:37:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] After seed injection: 373 Poly, 160 Kalshi, 4 direct seed pairs
+Mar 18 12:37:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Matched 7 pairs (4 seed + 7 fuzzy), analyzing prices...
+Mar 18 12:39:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 📡 [Arb/PMXT] Loaded 8 seed pairs from /root/PolyNotifyBot/bot/arb_monitor/../seedPairs.json
+Mar 18 12:39:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] After seed injection: 373 Poly, 160 Kalshi, 4 direct seed pairs
+Mar 18 12:39:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Matched 7 pairs (4 seed + 7 fuzzy), analyzing prices...
+Mar 18 12:41:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 📡 [Arb/PMXT] Loaded 8 seed pairs from /root/PolyNotifyBot/bot/arb_monitor/../seedPairs.json
+Mar 18 12:41:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] After seed injection: 373 Poly, 160 Kalshi, 4 direct seed pairs
+Mar 18 12:41:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Matched 7 pairs (4 seed + 7 fuzzy), analyzing prices...
+Mar 18 12:43:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 📡 [Arb/PMXT] Loaded 8 seed pairs from /root/PolyNotifyBot/bot/arb_monitor/../seedPairs.json
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] After seed injection: 373 Poly, 159 Kalshi, 4 direct seed pairs
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🔎 [Arb/Scanner] Matched 7 pairs (4 seed + 7 fuzzy), analyzing prices...
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "10 minutes ago" --no-pager | grep -E "(LLM scoring|OPENAI_API_KEY|openai package|gpt-4|pairs accepted|Done:)"
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Trump out as President by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump meet with Putin by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump and Putin meet next in another country? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be less than 5% × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be between 5% a × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump create a tariff dividend by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Congress pass any tariffs by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will OpenAI be acquired before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: OpenAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: xAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Pump.fun perform an airdrop by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: AI Industry Downturn by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 7? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Israel strike 1 country in 2026? × Will another country strike Iran by March 31?
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Russia x Ukraine ceasefire by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump send Tomahawk to Ukraine by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Ukraine hits Moscow by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Congress passes Iran war powers resolution by Marc × Will another country strike Iran by March 31?
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump visit Greenland by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:37:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Trump out as President by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump meet with Putin by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump and Putin meet next in another country? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be less than 5% × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be between 5% a × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump create a tariff dividend by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Congress pass any tariffs by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will OpenAI be acquired before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: OpenAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: xAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Pump.fun perform an airdrop by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: AI Industry Downturn by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 7? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Israel strike 1 country in 2026? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Russia x Ukraine ceasefire by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump send Tomahawk to Ukraine by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Ukraine hits Moscow by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Congress passes Iran war powers resolution by Marc × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump visit Greenland by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:39:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Trump out as President by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump meet with Putin by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump and Putin meet next in another country? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be less than 5% × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be between 5% a × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump create a tariff dividend by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Congress pass any tariffs by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will OpenAI be acquired before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: OpenAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: xAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Pump.fun perform an airdrop by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: AI Industry Downturn by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 7? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Israel strike 1 country in 2026? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Russia x Ukraine ceasefire by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump send Tomahawk to Ukraine by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Ukraine hits Moscow by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Congress passes Iran war powers resolution by Marc × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump visit Greenland by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:41:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Trump out as President by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump meet with Putin by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump and Putin meet next in another country? × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be less than 5% × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be between 5% a × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump create a tariff dividend by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Congress pass any tariffs by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will OpenAI be acquired before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: OpenAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: xAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Pump.fun perform an airdrop by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: AI Industry Downturn by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 7? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Israel strike 1 country in 2026? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Russia x Ukraine ceasefire by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump send Tomahawk to Ukraine by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Ukraine hits Moscow by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Congress passes Iran war powers resolution by Marc × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump visit Greenland by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:43:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] Done: 0 pairs accepted (0 via team_key, 0 via LLM), 20 rejected, 20 LLM calls, 0 cache hits
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Trump out as President by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump meet with Putin by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump and Putin meet next in another country? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be less than 5% × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will the U.S. tariff rate on China be between 5% a × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump create a tariff dividend by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Congress pass any tariffs by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will OpenAI be acquired before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: OpenAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: xAI IPO before 2027? × Will USD1 depeg before 2027?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Pump.fun perform an airdrop by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: AI Industry Downturn by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 7? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Iran x Israel/US conflict ends by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Israel strike 1 country in 2026? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Russia x Ukraine ceasefire by March 31, 2026? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Will Trump send Tomahawk to Ukraine by March 31? × Will another country strike Iran by March 31?
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] ⚠️ openai package not installed — skipping LLM scoring
+Mar 18 12:45:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[60524]: 🤖 [AI Matcher] LLM scoring: Ukraine hits Moscow by March 31, 2026? × Will another country strike Iran by March 31?
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

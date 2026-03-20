@@ -1,0 +1,93 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "2026-03-18 12:55:00" --no-pager | grep -iE "(arb|scan|opinion|matcher|error|traceback|import|module)" | head -40
+Mar 18 12:55:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]: 🔎 [Arb/Scanner] Scanner started (interval=60s)
+Mar 18 12:55:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]: 🔎 [Arb/Scanner] Scanner thread started
+Mar 18 12:55:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]: 🔎 arb_monitor scanner started
+Mar 18 12:55:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]: 🔎 PMXT-based arb scanner started (Polymarket × Kalshi)
+Mar 18 12:55:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]: 🔍 OddScreeners SSE collector started (Polymarket × Opinion)
+Mar 18 12:55:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    - GET  /api/arbs      - Arbitrage opportunities
+Mar 18 12:55:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    - GET  /api/arbs/overlap_debug - Discovery debug
+Mar 18 12:55:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    - GET  /api/arbs/health - Arb scanner health
+Mar 18 12:56:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: ❌ Error reading withdrawal exclusions: Could not decode contract function call to getVaultState() with return data: b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00i\xb1\xd2n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15\xcbFj"\x94x\x13<\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00K\x8b=\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\xf4\xb3\xd7\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06RK\xa9\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', output_types: ['uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'bool', 'bool', 'uint256']
+Mar 18 12:56:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 🔎 [Arb/Scanner] Scanner started (interval=60s)
+Mar 18 12:56:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 🔎 [Arb/Scanner] Scanner thread started
+Mar 18 12:56:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 🔎 arb_monitor scanner started
+Mar 18 12:56:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 🔎 PMXT-based arb scanner started (Polymarket × Kalshi)
+Mar 18 12:56:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 🔍 OddScreeners SSE collector started (Polymarket × Opinion)
+Mar 18 12:56:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:    - GET  /api/arbs      - Arbitrage opportunities
+Mar 18 12:56:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:    - GET  /api/arbs/overlap_debug - Discovery debug
+Mar 18 12:56:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:    - GET  /api/arbs/health - Arb scanner health
+Mar 18 12:56:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: Traceback (most recent call last):
+Mar 18 12:56:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:   File "/root/PolyNotifyBot/bot/arb_monitor/scanner.py", line 109, in run_scan
+Mar 18 12:56:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:   File "/root/PolyNotifyBot/bot/arb_monitor/adapters/pmxt_adapter.py", line 180, in fetch_polymarket_markets
+Mar 18 12:56:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:   File "/root/PolyNotifyBot/bot/arb_monitor/adapters/pmxt_adapter.py", line 41, in _ensure_clients
+Mar 18 12:56:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:     import pmxt
+Mar 18 12:56:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: ModuleNotFoundError: No module named 'pmxt'
+Mar 18 12:56:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: ❌ Error reading withdrawal exclusions: Could not decode contract function call to getVaultState() with return data: b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00i\xb1\xd2n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15\xcbFj"\x94x\x13<\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00K\x8b=\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\xf4\xb3\xd7\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06RK\xa9\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', output_types: ['uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'bool', 'bool', 'uint256']
+Mar 18 12:56:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 🔎 [Arb/Scanner] Starting scan cycle...
+Mar 18 12:56:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 🔎 [Arb/Scanner] Scan error: No module named 'pmxt'
+Mar 18 12:57:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 127.0.0.1 - - [18/Mar/2026 12:57:31] "GET /api/arbs?sort=expiry HTTP/1.1" 200 -
+Mar 18 12:57:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: Traceback (most recent call last):
+Mar 18 12:57:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:   File "/root/PolyNotifyBot/bot/arb_monitor/scanner.py", line 109, in run_scan
+Mar 18 12:57:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:   File "/root/PolyNotifyBot/bot/arb_monitor/adapters/pmxt_adapter.py", line 180, in fetch_polymarket_markets
+Mar 18 12:57:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:   File "/root/PolyNotifyBot/bot/arb_monitor/adapters/pmxt_adapter.py", line 41, in _ensure_clients
+Mar 18 12:57:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:     import pmxt
+Mar 18 12:57:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: ModuleNotFoundError: No module named 'pmxt'
+Mar 18 12:58:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 127.0.0.1 - - [18/Mar/2026 12:58:32] "GET /api/arbs?sort=expiry HTTP/1.1" 200 -
+Mar 18 12:58:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 🔎 [Arb/Scanner] Starting scan cycle...
+Mar 18 12:58:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: 🔎 [Arb/Scanner] Scan error: No module named 'pmxt'
+Mar 18 12:58:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: ❌ Error reading withdrawal exclusions: Could not decode contract function call to getVaultState() with return data: b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00i\xb1\xd2n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15\xcbFj"\x94x\x13<\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00K\x8b=\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\xf4\xb3\xd7\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06RK\xa9\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', output_types: ['uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'bool', 'bool', 'uint256']
+Mar 18 12:58:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]: Traceback (most recent call last):
+Mar 18 12:58:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:   File "/root/PolyNotifyBot/bot/arb_monitor/scanner.py", line 109, in run_scan
+Mar 18 12:58:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63509]:   File "/root/PolyNotifyBot/bot/arb_monitor/adapters/pmxt_adapter.py", line 180, in fetch_polymarket_markets
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "2026-03-18 12:55:00" --no-pager | head -50
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 95208625385765141549...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 95208625385765141549600421635788127431805408547232524510050149845715517867881
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 67812092618195747409...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 67812092618195747409995417825199567341209650874438457265662243471027001839140
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 87.3 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 84861048811492575708...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 84861048811492575708148520522873512697427250625755239760703591610825008428107
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 45029034586020745321...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 45029034586020745321762268745699748947840457285820351968580839794867697380532
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 10762418854582734413...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 107624188545827344133859938699047858663779390656209594618801173133871583761671
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 26717421886670521810...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 26717421886670521810902055204150836366799036019532059411922483139181409538997
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 76.5 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 69611839231420690100...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 69611839231420690100821672489199933458980304447077481750656629119646938032687
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 85076448872710844646...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 85076448872710844646112981302782068588938501492043635834561264074618873918784
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 84943539769541793042...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 84943539769541793042550593258808865049886781326207586468878125210234289158146
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 33546368093381832066...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 3354636809338183206646216222519541185395128381690016592965323606604816222444
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 10395852579545943991...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 103958525795459439912387073241303596120712088891084261349142639738006234603838
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 46897146702997413194...
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:       Full token: 46897146702997413194395626184561384324252380465993669718502603019442811452205
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 18 12:55:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[63378]:    📖 Orderbook via CLOB client: 71624342405211217757...
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
