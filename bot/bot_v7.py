@@ -3947,6 +3947,71 @@ def api_arb_opportunities():
 
         sport_filters = [s.strip().lower() for s in sports_param.split(',') if s.strip()] if sports_param else []
 
+        # --- Merge Oddpool opportunities from /api/arb-vault cache ---
+        # Proactively populate the Oddpool cache if empty or stale (poll interval = 30s default)
+        _oddpool_cache_age = time.time() - _oddpool_opportunities_cache.get('updated_at', 0)
+        if ARB_MONITOR_AVAILABLE and _oddpool_cache_age > 30:
+            try:
+                from arb_monitor.adapters.oddpool import fetch_opportunities as _fetch_oddpool
+                print(f"📊 [Arb] Proactively fetching Oddpool opportunities (cache age {round(_oddpool_cache_age)}s)...")
+                _lock = _get_oddpool_cache_lock()
+                with _lock:
+                    if (time.time() - _oddpool_opportunities_cache.get('updated_at', 0)) > 30:
+                        _opps = _fetch_oddpool()
+                        _oddpool_opportunities_cache['opportunities'] = [o.to_dict() for o in _opps]
+                        _oddpool_opportunities_cache['updated_at'] = time.time()
+                        print(f"📊 [Arb] Oddpool cache refreshed: {len(_opps)} opportunities")
+            except Exception as _e:
+                print(f"⚠️ [Arb] Oddpool proactive fetch failed: {_e}")
+
+        oddpool_raw = _oddpool_opportunities_cache.get('opportunities', [])
+        if oddpool_raw:
+            print(f"📊 [Arb] Merging {len(oddpool_raw)} Oddpool opportunities into /api/arbs")
+            existing_pair_ids = {o.get('pairId') for o in opportunities}
+            oddpool_updated = _oddpool_opportunities_cache.get('updated_at', 0)
+            for op in oddpool_raw:
+                pair_id = op.get('pair_id', '')
+                if pair_id in existing_pair_ids:
+                    continue
+                venue2 = op.get('venue2', 'kalshi')
+                kalshi_side = op.get('kalshi_side', 'YES')
+                poly_price = op.get('poly_yes_ask', 0)
+                other_price = op.get('kalshi_yes_ask', 0)
+                title = op.get('poly_title') or op.get('kalshi_title') or pair_id
+                edge_pct = op.get('gross_edge_pct', 0)
+                expiry_ts = op.get('expiry_ts', 0)
+                kalshi_ticker = op.get('kalshi_ticker', '')
+                poly_url = f"https://polymarket.com/markets?_q={title}" if title else ''
+                if venue2 == 'opinion':
+                    other_url = f"https://www.opinlabs.com/markets/{op.get('opinion_slug', op.get('opinion_market_id', ''))}"
+                else:
+                    other_url = f"https://kalshi.com/markets/{kalshi_ticker.split('-')[0].lower()}#{kalshi_ticker.lower()}" if kalshi_ticker else ''
+                mapped = {
+                    'pairId': pair_id,
+                    'title': title,
+                    'edge': edge_pct / 100.0,
+                    'roi': edge_pct,
+                    'expiryTs': expiry_ts,
+                    'legs': [
+                        {'venue': 'polymarket', 'price': poly_price, 'side': 'YES'},
+                        {'venue': venue2, 'price': other_price, 'side': kalshi_side},
+                    ],
+                    'polyUrl': poly_url,
+                    'kalshiUrl': other_url if venue2 == 'kalshi' else '',
+                    'opinionUrl': other_url if venue2 == 'opinion' else '',
+                    'source': 'oddpool',
+                    'type': 'opportunity',
+                }
+                if min_edge > 0 and mapped['edge'] < min_edge:
+                    continue
+                opportunities.append(mapped)
+                existing_pair_ids.add(pair_id)
+            if oddpool_updated > as_of:
+                as_of = int(oddpool_updated)
+            pairs_tracked = (pairs_tracked or 0) + len(oddpool_raw)
+            print(f"📊 [Arb] Total after Oddpool merge: {len(opportunities)} opportunities")
+        # --- End Oddpool merge ---
+
         if not allow_indicative:
             indicative = [o for o in opportunities if o.get('type') == 'indicative']
             opportunities = [o for o in opportunities if o.get('type') != 'indicative']

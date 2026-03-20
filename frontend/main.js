@@ -1408,17 +1408,18 @@ function webRenderArbCard(item) {
         : `<span class="arb-badge watchlist">${edgePct}%</span>`;
 
     const legs = item.legs || [];
-    const isOddScreeners = item.source === 'oddscreeners';
     const polyLeg = legs.find(l => l.venue === 'polymarket');
-    const otherLeg = legs.find(l => l.venue === 'kalshi') || legs.find(l => l.venue === 'opinion');
+    const opinionLeg = legs.find(l => l.venue === 'opinion');
+    const kalshiLeg = legs.find(l => l.venue === 'kalshi');
+    const otherLeg = kalshiLeg || opinionLeg;
     const polyPrice = polyLeg ? (polyLeg.price * 100).toFixed(0) : '?';
     const otherPrice = otherLeg ? (otherLeg.price * 100).toFixed(0) : '?';
     const polySide = polyLeg ? polyLeg.side : '';
     const otherSide = otherLeg ? otherLeg.side : '';
-    const otherVenueName = isOddScreeners ? 'OPINION' : 'KALSHI';
+    const otherVenueName = opinionLeg ? 'OPINION' : 'KALSHI';
 
     let polyUrl = item.polyUrl || '';
-    let otherUrl = isOddScreeners ? (item.opinionUrl || '') : (item.kalshiUrl || '');
+    let otherUrl = opinionLeg ? (item.opinionUrl || '') : (item.kalshiUrl || '');
     if (!polyUrl && item.title) polyUrl = 'https://polymarket.com/markets?_q=' + encodeURIComponent(item.title);
 
     const expiry = item.expiryTs ? new Date(item.expiryTs * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null;

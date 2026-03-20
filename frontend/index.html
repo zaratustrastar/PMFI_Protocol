@@ -928,6 +928,12 @@
         }
         .teaser-ticker { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; color: #484f58; letter-spacing: -0.3px; margin-bottom: 8px; }
         .teaser-soon { font-size: 11px; font-weight: 500; color: #30363d; text-transform: uppercase; letter-spacing: 1.5px; }
+        .teaser-card-live { text-decoration: none; cursor: pointer; border-color: rgba(126,231,135,0.15) !important; transition: border-color 0.2s, background 0.2s; }
+        .teaser-card-live:hover { border-color: rgba(126,231,135,0.35) !important; background: linear-gradient(180deg, rgba(30,45,35,0.8) 0%, rgba(20,35,25,0.8) 100%) !important; }
+        .teaser-card-live .teaser-ticker { color: #7ee787; }
+        .teaser-card-live .teaser-live-badge { font-size: 10px; font-weight: 600; color: #7ee787; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 5px; }
+        .teaser-card-live .teaser-live-dot { width: 6px; height: 6px; background: #7ee787; border-radius: 50%; display: inline-block; animation: pulse-dot 2s infinite; }
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
         /* ---- Tab Bar ---- */
         .web-tab-bar { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin: 24px 0 0 0; }
@@ -1069,7 +1075,7 @@
             <!-- Coming Soon Strategies -->
             <div class="coming-soon-section">
                 <div class="coming-soon-grid">
-                    <div class="teaser-card"><div class="teaser-ticker">pARBITRAGE</div><div class="teaser-soon">soon ...</div></div>
+                    <a class="teaser-card teaser-card-live" href="/arbitrage" target="_blank"><div class="teaser-ticker">pARBITRAGE</div><div class="teaser-live-badge"><span class="teaser-live-dot"></span>Live</div></a>
                     <div class="teaser-card"><div class="teaser-ticker">pVOLATILITY</div><div class="teaser-soon">soon ...</div></div>
                     <div class="teaser-card"><div class="teaser-ticker">pCOPY</div><div class="teaser-soon">soon ...</div></div>
                     <div class="teaser-card"><div class="teaser-ticker">pLP</div><div class="teaser-soon">soon ...</div></div>
