@@ -80,7 +80,11 @@ ARB_SERVICER_WALLET=0xSERVICER_WALLET
 ARB_MAX_PAIR_USDC=500
 ARB_MAX_DEPLOYED_USDC=5000
 ODDPOOL_API_KEY=your_oddpool_key
-KALSHI_API_KEY=your_kalshi_key
+
+# Kalshi RSA auth (API key ID + PEM private key)
+KALSHI_API_KEY_ID=dc5fed12-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+KALSHI_PRIVATE_KEY_PATH=/home/user/kalshi_private_key.pem   # path to your .pem file on VPS
+
 POLY_PRIVATE_KEY=0xPOLY_TRADING_WALLET_KEY
 OPINION_API_KEY=your_opinion_key   # if using Opinion Labs
 ```

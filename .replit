@@ -7,7 +7,7 @@ automationTriggerConnectorName = "legacy_timebased"
 
 [nix]
 channel = "stable-24_11"
-packages = ["jq"]
+packages = ["cargo", "jq", "libiconv", "libxcrypt", "openssl", "pkg-config", "rustc"]
 
 [env]
 MASTRA_HIDE_CLOUD_CTA = "true"

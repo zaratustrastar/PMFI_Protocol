@@ -177,24 +177,27 @@ def _get_servicer_balances() -> tuple[float, float]:
     else:
         log("ℹ️ POLY_API_KEY not set — poly_cash = 0")
 
-    kalshi_api_key = os.environ.get("KALSHI_API_KEY", "")
-    if kalshi_api_key:
+    from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
+    if kalshi_auth_available():
         try:
             import requests
             from ..config import KALSHI_BASE_URL
-            resp = requests.get(
-                f"{KALSHI_BASE_URL}/portfolio/balance",
-                headers={"Authorization": f"Bearer {kalshi_api_key}"},
-                timeout=10,
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                kalshi_cash = float(data.get("balance", 0)) / 100.0
-                log(f"Kalshi servicer cash: {kalshi_cash} USDC")
+            url = f"{KALSHI_BASE_URL}/portfolio/balance"
+            headers = get_kalshi_headers("GET", url)
+            if headers:
+                resp = requests.get(url, headers=headers, timeout=10)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    kalshi_cash = float(data.get("balance", 0)) / 100.0
+                    log(f"Kalshi servicer cash: {kalshi_cash} USDC")
+                else:
+                    log(f"⚠️ Kalshi balance HTTP {resp.status_code}: {resp.text[:100]}")
+            else:
+                log("⚠️ Kalshi RSA signing failed — kalshi_cash = 0")
         except Exception as e:
             log(f"⚠️ Error fetching kalshi servicer balance: {e}")
     else:
-        log("ℹ️ KALSHI_API_KEY not set — kalshi_cash = 0")
+        log("ℹ️ Kalshi credentials not configured (KALSHI_API_KEY_ID / KALSHI_PRIVATE_KEY_PATH) — kalshi_cash = 0")
 
     return poly_cash, kalshi_cash
 

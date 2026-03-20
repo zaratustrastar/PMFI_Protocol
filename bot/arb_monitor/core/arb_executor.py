@@ -140,9 +140,9 @@ def _place_kalshi_order(
     """
     log(f"📤 [KALSHI] Placing {side} order: ticker={ticker} price={price} size_usdc={size_usdc}")
 
-    kalshi_api_key = os.environ.get("KALSHI_API_KEY", "")
-    if not kalshi_api_key:
-        err = "KALSHI_API_KEY not set — cannot place real Kalshi order"
+    from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
+    if not kalshi_auth_available():
+        err = "Kalshi credentials not configured — set KALSHI_API_KEY_ID and KALSHI_PRIVATE_KEY_PATH"
         log(f"❌ [KALSHI] {err}")
         return False, "", err
 
@@ -150,10 +150,11 @@ def _place_kalshi_order(
         from ..config import KALSHI_BASE_URL
         import requests
         url = f"{KALSHI_BASE_URL}/portfolio/orders"
-        headers = {
-            "Authorization": f"Bearer {kalshi_api_key}",
-            "Content-Type": "application/json",
-        }
+        headers = get_kalshi_headers("POST", url)
+        if not headers:
+            err = "Kalshi RSA signing failed — check KALSHI_API_KEY_ID and KALSHI_PRIVATE_KEY_PATH"
+            log(f"❌ [KALSHI] {err}")
+            return False, "", err
         # Use the explicit contract_count when provided to avoid float/int precision drift
         if contract_count is not None:
             contracts = int(contract_count)
@@ -651,9 +652,10 @@ def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float, si
     """
     side_lower = side.lower() if side in ("YES", "NO") else "yes"
     log(f"🔄 [KALSHI] Best-effort unwind: ticker={ticker} shares={shares:.4f} side={side}")
-    kalshi_api_key = os.environ.get("KALSHI_API_KEY", "")
-    if not kalshi_api_key:
-        log("❌ [KALSHI] KALSHI_API_KEY not set — cannot unwind Kalshi position")
+
+    from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
+    if not kalshi_auth_available():
+        log("❌ [KALSHI] Kalshi credentials not configured — cannot unwind Kalshi position")
         return False
 
     try:
@@ -663,10 +665,10 @@ def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float, si
         # Place sell limit 5 cents below fill price (in cents) to ensure fill
         sell_price_cents = max(int(fill_price * 100) - 5, 1)
         url = f"{KALSHI_BASE_URL}/portfolio/orders"
-        headers = {
-            "Authorization": f"Bearer {kalshi_api_key}",
-            "Content-Type": "application/json",
-        }
+        headers = get_kalshi_headers("POST", url)
+        if not headers:
+            log("❌ [KALSHI] RSA signing failed — cannot unwind Kalshi position")
+            return False
         contracts = max(1, int(shares))
         payload = {
             "ticker": ticker,

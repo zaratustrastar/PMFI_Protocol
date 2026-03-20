@@ -3,6 +3,13 @@
 import os
 
 KALSHI_BASE_URL = os.environ.get("KALSHI_BASE_URL", "https://api.elections.kalshi.com/trade-api/v2")
+
+# Kalshi RSA authentication (API v2 — replaces simple Bearer token)
+# Get your API key ID and private key from: https://kalshi.com/account/api
+KALSHI_API_KEY_ID = os.environ.get("KALSHI_API_KEY_ID", "")
+KALSHI_PRIVATE_KEY_PATH = os.environ.get("KALSHI_PRIVATE_KEY_PATH", "")  # path to .pem file
+KALSHI_PRIVATE_KEY_PEM = os.environ.get("KALSHI_PRIVATE_KEY_PEM", "")   # PEM content directly
+
 POLY_GAMMA_URL = os.environ.get("POLY_GAMMA_URL", "https://gamma-api.polymarket.com")
 POLY_CLOB_URL = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
 
