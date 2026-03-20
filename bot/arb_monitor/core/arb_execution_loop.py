@@ -23,6 +23,11 @@ from ..config import (
     ARB_USE_ODDPOOL_ONLY,
 )
 
+# Minimum hours before market close to act on an opportunity.
+# Markets closing too soon have low fill probability and high settlement risk.
+ARB_MIN_HOURS_TO_EXPIRY = float(os.environ.get("ARB_MIN_HOURS_TO_EXPIRY", "15"))
+ARB_MIN_DAYS_TO_EXPIRY = ARB_MIN_HOURS_TO_EXPIRY / 24.0
+
 
 def log(msg: str):
     print(f"🔁 [ArbExecLoop] {msg}")
@@ -101,11 +106,22 @@ def _execution_cycle():
     executed = 0
     skipped_thin = 0
     skipped_caps = 0
+    skipped_expiry = 0
 
     for opp in opportunities:
         if not _loop_running:
             break
 
+        # ── Expiry guard: don't enter markets closing too soon ─────────────
+        if opp.days_to_expiry < ARB_MIN_DAYS_TO_EXPIRY:
+            skipped_expiry += 1
+            log(
+                f"⏭ Skipping {opp.pair_id}: expires in {opp.days_to_expiry*24:.1f}h "
+                f"< MIN={ARB_MIN_HOURS_TO_EXPIRY:.0f}h"
+            )
+            continue
+
+        # ── Edge guard: skip thin / marginal opportunities ─────────────────
         if opp.gross_edge_pct < ARB_MIN_EDGE_PCT:
             skipped_thin += 1
             log(
@@ -114,6 +130,7 @@ def _execution_cycle():
             )
             continue
 
+        # ── Capital caps: respect per-pair and total limits ────────────────
         ok, reason = can_deploy_capital(opp)
         if not ok:
             skipped_caps += 1
@@ -128,8 +145,10 @@ def _execution_cycle():
 
         log(
             f"🚀 Executing pair_id={opp.pair_id} "
+            f"venue2={opp.venue2} "
             f"edge={opp.gross_edge_pct:.3%} "
             f"pnl_velocity={opp.pnl_velocity:.4f}/d "
+            f"days_to_expiry={opp.days_to_expiry:.2f}d "
             f"size_usdc={size_usdc:.2f}"
         )
 
@@ -169,6 +188,7 @@ def _execution_cycle():
     log(
         f"⚡ Cycle complete: executed={executed} "
         f"skipped_thin_edge={skipped_thin} "
+        f"skipped_expiry={skipped_expiry} "
         f"skipped_caps={skipped_caps}"
     )
 

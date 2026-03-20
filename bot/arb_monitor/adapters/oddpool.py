@@ -38,6 +38,11 @@ class ArbOpportunity:
     # "NO"   → buy Kalshi NO  (market is the same direction as Poly; NO completes the spread)
     # Defaults to "YES" when Oddpool does not specify; update if their schema adds a side field.
     kalshi_side: str = "YES"
+    # Which venue is leg 2. "kalshi" (default) or "opinion" (Opinion Labs).
+    # When venue2 == "opinion", opinion_market_id / opinion_slug are used for execution.
+    venue2: str = "kalshi"
+    opinion_market_id: str = ""
+    opinion_slug: str = ""
     raw: dict = None
 
     def to_dict(self) -> dict:
@@ -55,6 +60,9 @@ class ArbOpportunity:
             "poly_title": self.poly_title,
             "kalshi_title": self.kalshi_title,
             "kalshi_side": self.kalshi_side,
+            "venue2": self.venue2,
+            "opinion_market_id": self.opinion_market_id,
+            "opinion_slug": self.opinion_slug,
         }
 
 
@@ -128,8 +136,33 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             ""
         )
 
-        if not poly_yes_token or not kalshi_ticker:
-            log(f"⚠️ Skipping entry missing poly_yes_token or kalshi_ticker: {entry}")
+        # Detect venue for leg 2: Oddpool may return Kalshi or Opinion Labs opportunities
+        venue2_raw = (
+            entry.get("venue2") or
+            entry.get("leg2_venue") or
+            entry.get("exchange2") or
+            ""
+        ).lower()
+        opinion_market_id = (
+            entry.get("opinion_market_id") or
+            entry.get("opinion_id") or
+            entry.get("opinion_slug") or
+            ""
+        )
+        opinion_slug = entry.get("opinion_slug") or entry.get("opinion_market_slug") or ""
+
+        if not poly_yes_token:
+            log(f"⚠️ Skipping entry missing poly_yes_token: {entry}")
+            return None
+
+        # Determine which venue is leg 2
+        # Opinion Labs: explicit venue2=="opinion" or opinion_market_id present but no kalshi_ticker
+        is_opinion = (
+            "opinion" in venue2_raw or
+            (opinion_market_id and not kalshi_ticker)
+        )
+        if not is_opinion and not kalshi_ticker:
+            log(f"⚠️ Skipping entry missing kalshi_ticker (and not Opinion): {entry}")
             return None
 
         poly_yes_ask = float(
@@ -204,6 +237,8 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             else:
                 kalshi_side = "YES"
 
+        venue2 = "opinion" if is_opinion else "kalshi"
+
         return ArbOpportunity(
             pair_id=pair_id,
             poly_yes_token=poly_yes_token,
@@ -218,6 +253,9 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             poly_title=poly_title,
             kalshi_title=kalshi_title,
             kalshi_side=kalshi_side,
+            venue2=venue2,
+            opinion_market_id=opinion_market_id,
+            opinion_slug=opinion_slug,
             raw=entry,
         )
     except Exception as e:

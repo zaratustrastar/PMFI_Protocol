@@ -304,6 +304,89 @@ class ExecutionResult:
         }
 
 
+def _place_opinion_order(
+    market_id: str,
+    side: str,
+    price: float,
+    size_usdc: float,
+    contract_count: int,
+) -> tuple[bool, str, str]:
+    """Place a limit buy order on Opinion Labs.
+
+    API reference: https://docs.opinion.trade/developer-guide/opinion-open-api
+    Auth: `apikey` header.
+
+    Returns (ok, order_id, error_msg). Never raises.
+    """
+    opinion_api_key = os.environ.get("OPINION_API_KEY", "")
+    if not opinion_api_key:
+        return False, "", "OPINION_API_KEY not set"
+
+    from ..config import OPINION_BASE_URL
+    import requests
+
+    log(f"📤 [OPINION] Placing {side} BUY: market_id={market_id} contracts={contract_count} @ {price:.4f}")
+    try:
+        url = f"{OPINION_BASE_URL}/orders"
+        headers = {
+            "apikey": opinion_api_key,
+            "Content-Type": "application/json",
+        }
+        price_cents = int(price * 100)
+        payload = {
+            "marketId": market_id,
+            "side": side.lower(),      # "yes" or "no"
+            "action": "buy",
+            "amount": contract_count,  # number of contracts
+            "price": price_cents,      # cents (0-100)
+            "type": "limit",
+            "clientOrderId": f"arb_{int(time.time())}",
+        }
+        resp = requests.post(url, json=payload, headers=headers, timeout=10)
+        if resp.status_code in (200, 201):
+            data = resp.json()
+            order_id = (
+                data.get("orderId") or
+                data.get("order_id") or
+                data.get("id") or
+                ""
+            )
+            log(f"✅ [OPINION] Order placed: orderId={order_id}")
+            return True, str(order_id), ""
+        else:
+            err = f"HTTP {resp.status_code}: {resp.text[:200]}"
+            log(f"❌ [OPINION] {err}")
+            return False, "", err
+    except Exception as e:
+        err = str(e)
+        log(f"❌ [OPINION] Order error: {err}")
+        return False, "", err
+
+
+def _opinion_get_best_ask(market_id: str) -> Optional[float]:
+    """Fetch best ask for a given Opinion Labs market.
+
+    Returns the YES best ask price (0.0–1.0) or None if unavailable.
+    """
+    from ..adapters.opinion import fetch_orderbook
+    try:
+        book = fetch_orderbook(market_id)
+        if not book:
+            return None
+        asks = book.get("asks") or []
+        if not asks:
+            return None
+        # asks sorted best-first (lowest ask at index 0)
+        best = asks[0]
+        price = best.get("price") or best.get("yes_price")
+        if price is None:
+            return None
+        return float(price) / 100.0 if float(price) > 1 else float(price)
+    except Exception as e:
+        log(f"⚠️ [OPINION] fetch best ask error: {e}")
+        return None
+
+
 def execute_arb(
     opportunity: ArbOpportunity,
     size_usdc: float,
@@ -311,13 +394,17 @@ def execute_arb(
 ) -> ExecutionResult:
     """Execute both legs of an arbitrage opportunity with live price verification.
 
+    Routes based on opportunity.venue2:
+    - "kalshi"  → Polymarket YES + Kalshi complementary side (default)
+    - "opinion" → Polymarket YES + Opinion Labs complementary side
+
     Steps:
-    1. Re-fetch live asks on both Polymarket CLOB and Kalshi
-    2. Recompute live_edge = 1 - live_poly_ask - live_kalshi_ask
+    1. Re-fetch live asks on both Polymarket CLOB and leg-2 venue
+    2. Recompute live_edge = 1 - live_poly_ask - live_leg2_ask
     3. Abort if live_edge < MIN_EDGE_PCT (accounts for fees)
     4. Verify slippage: reject if live ask is >50 bps worse than Oddpool quote
     5. Place leg 1 (Polymarket YES)
-    6. Place leg 2 (Kalshi YES complement / NO as needed)
+    6. Place leg 2 (Kalshi or Opinion Labs)
     7. If leg 2 fails: auto-unwind leg 1 immediately
     8. Log both legs to arb_executions DB table
     """
@@ -325,18 +412,31 @@ def execute_arb(
         min_edge_pct = ARB_MIN_EDGE_PCT
 
     pair_id = opportunity.pair_id
+    venue2 = getattr(opportunity, "venue2", "kalshi")
     result = ExecutionResult(success=False, pair_id=pair_id)
-    log(f"🔍 Starting execution for pair {pair_id}")
+    log(f"🔍 Starting execution for pair {pair_id} (venue2={venue2})")
 
     poly_yes_token = opportunity.poly_yes_token
     kalshi_ticker = opportunity.kalshi_ticker
+    opinion_market_id = getattr(opportunity, "opinion_market_id", "")
+    opinion_side = getattr(opportunity, "kalshi_side", "NO")  # reuse kalshi_side for opinion side
 
-    log(f"📊 Re-checking live prices for poly={poly_yes_token[:16]}... kalshi={kalshi_ticker}")
+    log(
+        f"📊 Re-checking live prices for poly={poly_yes_token[:16]}... "
+        f"venue2={venue2} "
+        f"{'kalshi=' + kalshi_ticker if venue2 != 'opinion' else 'opinion=' + opinion_market_id}"
+    )
     poly_prices = poly_get_best_prices(poly_yes_token)
     live_poly_ask = poly_prices.get("best_ask")
 
-    kalshi_prices = kalshi_get_best_prices(kalshi_ticker)
-    live_kalshi_ask = kalshi_prices.get("yes_best_ask")
+    # Fetch live leg-2 ask based on venue
+    if venue2 == "opinion":
+        live_kalshi_ask = _opinion_get_best_ask(opinion_market_id)
+        leg2_venue_label = "opinion"
+    else:
+        kalshi_prices = kalshi_get_best_prices(kalshi_ticker)
+        live_kalshi_ask = kalshi_prices.get("yes_best_ask")
+        leg2_venue_label = "kalshi"
 
     result.live_poly_ask = live_poly_ask
     result.live_kalshi_ask = live_kalshi_ask
@@ -347,13 +447,13 @@ def execute_arb(
         return result
 
     if live_kalshi_ask is None:
-        result.error = "kalshi_orderbook_missing: could not fetch live Kalshi ask"
+        result.error = f"{leg2_venue_label}_orderbook_missing: could not fetch live {leg2_venue_label} ask"
         log(f"❌ {result.error}")
         return result
 
     live_edge = 1.0 - live_poly_ask - live_kalshi_ask
     result.live_edge = live_edge
-    log(f"📐 Live edge: {live_edge:.4f} (poly_ask={live_poly_ask}, kalshi_ask={live_kalshi_ask})")
+    log(f"📐 Live edge: {live_edge:.4f} (poly_ask={live_poly_ask}, {leg2_venue_label}_ask={live_kalshi_ask})")
 
     if live_edge < min_edge_pct:
         result.error = (
@@ -365,7 +465,7 @@ def execute_arb(
 
     slippage_bps = ARB_SLIPPAGE_GUARD_BPS / 10000
     poly_slippage = live_poly_ask - opportunity.poly_yes_ask
-    kalshi_slippage = live_kalshi_ask - opportunity.kalshi_yes_ask
+    leg2_slippage = live_kalshi_ask - opportunity.kalshi_yes_ask
     if poly_slippage > slippage_bps:
         result.error = (
             f"poly_slippage_exceeded: live={live_poly_ask:.4f} quote={opportunity.poly_yes_ask:.4f} "
@@ -373,15 +473,15 @@ def execute_arb(
         )
         log(f"❌ {result.error}")
         return result
-    if kalshi_slippage > slippage_bps:
+    if leg2_slippage > slippage_bps:
         result.error = (
-            f"kalshi_slippage_exceeded: live={live_kalshi_ask:.4f} quote={opportunity.kalshi_yes_ask:.4f} "
-            f"slippage={kalshi_slippage:.4f} > {slippage_bps:.4f}"
+            f"{leg2_venue_label}_slippage_exceeded: live={live_kalshi_ask:.4f} quote={opportunity.kalshi_yes_ask:.4f} "
+            f"slippage={leg2_slippage:.4f} > {slippage_bps:.4f}"
         )
         log(f"❌ {result.error}")
         return result
 
-    # Compute contract count as an integer first — Kalshi trades in whole contracts.
+    # Compute contract count as an integer first — both venues trade in whole contracts.
     # Use the more expensive leg's ask as the sizing denominator so the integer count
     # fits within budget for BOTH legs simultaneously (no partial unmatched exposure).
     # Both legs get EXACTLY the same integer contract_count.
@@ -435,20 +535,40 @@ def execute_arb(
     log(f"✅ Leg 1 placed: {contract_count} contracts orderId={leg1_order_id}")
 
     kalshi_side = opportunity.kalshi_side if hasattr(opportunity, "kalshi_side") else "YES"
-    log(f"📤 Placing LEG 2: Kalshi {kalshi_side} buy {contract_count} contracts @ {live_kalshi_ask}")
-    leg2_ok, leg2_order_id, leg2_err = _place_kalshi_order(
-        ticker=kalshi_ticker,
-        side=kalshi_side,
-        price=live_kalshi_ask,
-        size_usdc=leg2_usdc,
-        contract_count=contract_count,
-    )
+
+    # ── Place Leg 2: Kalshi or Opinion Labs ───────────────────────────────
+    if venue2 == "opinion":
+        log(f"📤 Placing LEG 2: Opinion Labs {opinion_side} buy {contract_count} contracts @ {live_kalshi_ask}")
+        leg2_ok, leg2_order_id, leg2_err = _place_opinion_order(
+            market_id=opinion_market_id,
+            side=opinion_side,
+            price=live_kalshi_ask,
+            size_usdc=leg2_usdc,
+            contract_count=contract_count,
+        )
+        log_execution_to_db(
+            pair_id=pair_id, leg=2, venue="opinion", side=f"{opinion_side}_BUY",
+            price=live_kalshi_ask, size=float(contract_count),
+            success=leg2_ok, error=leg2_err, order_id=leg2_order_id,
+        )
+        result.kalshi_side = opinion_side
+    else:
+        log(f"📤 Placing LEG 2: Kalshi {kalshi_side} buy {contract_count} contracts @ {live_kalshi_ask}")
+        leg2_ok, leg2_order_id, leg2_err = _place_kalshi_order(
+            ticker=kalshi_ticker,
+            side=kalshi_side,
+            price=live_kalshi_ask,
+            size_usdc=leg2_usdc,
+            contract_count=contract_count,
+        )
+        log_execution_to_db(
+            pair_id=pair_id, leg=2, venue="kalshi", side=f"{kalshi_side}_BUY",
+            price=live_kalshi_ask, size=float(contract_count),
+            success=leg2_ok, error=leg2_err, order_id=leg2_order_id,
+        )
+        result.kalshi_side = kalshi_side
+
     result.leg2_order_id = leg2_order_id
-    log_execution_to_db(
-        pair_id=pair_id, leg=2, venue="kalshi", side=f"{kalshi_side}_BUY",
-        price=live_kalshi_ask, size=float(contract_count),
-        success=leg2_ok, error=leg2_err, order_id=leg2_order_id,
-    )
 
     if not leg2_ok:
         log(f"❌ Leg 2 failed: {leg2_err} — initiating AUTO-UNWIND of leg 1")
@@ -466,24 +586,23 @@ def execute_arb(
         log(f"{'✅' if unwind_ok else '❌'} Auto-unwind: {result.error}")
         return result
 
-    # Store kalshi_side in result so caller can persist it
-    result.kalshi_side = kalshi_side
-
     # Post-placement validation: re-check live prices immediately after both legs are placed.
     # If the actual fill caused the locked spread to deteriorate below the minimum edge threshold,
     # trigger immediate unwind of both legs to prevent holding a loss-making position.
     log("🔍 Post-placement validation: re-checking live prices after both fills...")
     try:
         post_poly = poly_get_best_prices(poly_yes_token)
-        post_kalshi = kalshi_get_best_prices(kalshi_ticker)
         post_poly_ask = post_poly.get("best_ask", live_poly_ask)
-        post_kalshi_ask = post_kalshi.get("yes_best_ask", live_kalshi_ask)
-        post_edge = 1.0 - post_poly_ask - post_kalshi_ask
+        if venue2 == "opinion":
+            post_leg2_ask = _opinion_get_best_ask(opinion_market_id) or live_kalshi_ask
+        else:
+            post_kalshi = kalshi_get_best_prices(kalshi_ticker)
+            post_leg2_ask = post_kalshi.get("yes_best_ask", live_kalshi_ask)
+        post_edge = 1.0 - post_poly_ask - post_leg2_ask
         log(
             f"📐 Post-fill edge check: poly_ask={post_poly_ask:.4f} "
-            f"kalshi_ask={post_kalshi_ask:.4f} edge={post_edge:.4f}"
+            f"{leg2_venue_label}_ask={post_leg2_ask:.4f} edge={post_edge:.4f}"
         )
-        # Allow a generous 0.5x headroom on post-fill edge (market may move slightly during fills)
         post_edge_threshold = min_edge_pct * 0.5
         if post_edge < post_edge_threshold:
             log(
@@ -496,8 +615,8 @@ def execute_arb(
                 filled_size_usdc=leg1_usdc,
                 filled_price=live_poly_ask,
             )
-            # Best-effort Kalshi unwind (sell back the side we bought)
-            _kalshi_unwind_best_effort(kalshi_ticker, float(contract_count), live_kalshi_ask, kalshi_side)
+            if venue2 != "opinion":
+                _kalshi_unwind_best_effort(kalshi_ticker, float(contract_count), live_kalshi_ask, kalshi_side)
             result.unwound = unwind_ok
             result.error = (
                 f"post_fill_edge_too_thin: post_edge={post_edge:.4f} < {post_edge_threshold:.4f}. "
@@ -506,9 +625,6 @@ def execute_arb(
             log(f"⚠️ Post-fill unwind: {result.error}")
             return result
     except Exception as e:
-        # Only log price-check errors (e.g. API timeout during validation).
-        # The post-fill unwind block above does not raise — it returns early with error.
-        # Do NOT mark success after catching here; only continue to success if we reach below.
         log(f"⚠️ Post-placement price validation error (non-fatal): {e}")
 
     log(f"✅ Both legs placed and validated! pair_id={pair_id} contracts={contract_count}")
