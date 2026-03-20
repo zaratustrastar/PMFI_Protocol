@@ -1246,8 +1246,8 @@
       ]
     },
     "/home/runner/workspace/contracts/PredictFiSniperVaultV7.sol": {
-      "lastModificationDate": 1769426050815,
-      "contentHash": "87e6c22f0532d569c71aa607195b2f46",
+      "lastModificationDate": 1770293850518,
+      "contentHash": "423cda1e219a08a89da0802d0d31f4dc",
       "sourceName": "contracts/PredictFiSniperVaultV7.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -1287,6 +1287,124 @@
       ],
       "artifacts": [
         "PredictFiSniperVaultV7"
+      ]
+    },
+    "/home/runner/workspace/contracts/PredictFiArbVaultV1.sol": {
+      "lastModificationDate": 1774011982304,
+      "contentHash": "15125d21ef84dde05d9ea5df77b1c450",
+      "sourceName": "contracts/PredictFiArbVaultV1.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
+        "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "PredictFiArbVaultV1"
+      ]
+    },
+    "/home/runner/workspace/contracts/PredictFiSniperVaultV7_flattened.sol": {
+      "lastModificationDate": 1770679576566,
+      "contentHash": "5db1a5a94f51794fb1005912530bcb11",
+      "sourceName": "contracts/PredictFiSniperVaultV7_flattened.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20",
+        "^0.8.20",
+        ">=0.4.16",
+        ">=0.4.16",
+        ">=0.4.16",
+        ">=0.4.16",
+        ">=0.6.2",
+        ">=0.8.4",
+        ">=0.6.2",
+        "^0.8.20",
+        "^0.8.20",
+        "^0.8.20",
+        "^0.8.20",
+        "^0.8.20",
+        "^0.8.20",
+        "^0.8.20",
+        "^0.8.20",
+        "^0.8.20",
+        "^0.8.20",
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Context",
+        "ECDSA",
+        "ERC20",
+        "IERC1155Errors",
+        "IERC1363",
+        "IERC165",
+        "IERC20",
+        "IERC20Errors",
+        "IERC20Metadata",
+        "IERC721Errors",
+        "Math",
+        "MessageHashUtils",
+        "Ownable",
+        "Panic",
+        "PredictFiSniperVaultV7",
+        "ReentrancyGuard",
+        "SafeCast",
+        "SafeERC20",
+        "SignedMath",
+        "Strings"
       ]
     }
   }

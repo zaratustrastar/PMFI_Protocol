@@ -103,6 +103,13 @@ def vault():
         vault_address=os.getenv('VAULT_V7_ADDRESS', '0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1')
     )
 
+@app.route('/arbitrage')
+def arbitrage():
+    """pARB Arbitrage Vault page"""
+    return render_template('arbitrage.html',
+        vault_address=os.getenv('ARB_VAULT_V1_ADDRESS', 'None')
+    )
+
 @app.route('/admin')
 def admin():
     """Admin panel for managing invite codes"""

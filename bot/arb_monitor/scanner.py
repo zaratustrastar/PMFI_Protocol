@@ -2,11 +2,19 @@
 
 Uses PMXT unified stack for Polymarket × Kalshi discovery and orderbooks.
 Seed pairs from seedPairs.json are always included for guaranteed coverage.
+
+DEPRECATION NOTE:
+  When ARB_USE_ODDPOOL_ONLY=true (default), all legacy matching paths are DISABLED:
+  - AI/LLM matcher (ai_matcher.find_opinion_pairs) — preserved but bypassed
+  - Opinion SSE collector / Opinion scanner — preserved but bypassed
+  - Fuzzy Kalshi matcher (matcher.find_pairs) — preserved but bypassed
+  Oddpool /arb-current is the sole source of matched pairs for the pArbitrage vault.
+  All old code files are preserved for reference.
 """
 
 import time
 import threading
-from .config import SCAN_INTERVAL_SECONDS, OPENAI_API_KEY
+from .config import SCAN_INTERVAL_SECONDS, OPENAI_API_KEY, ARB_USE_ODDPOOL_ONLY
 from .adapters.pmxt_adapter import (
     fetch_polymarket_markets, fetch_kalshi_markets,
     load_seed_pairs, fetch_seed_pair_markets,
@@ -98,7 +106,24 @@ def run_debug_analysis(max_pairs: int = 25) -> dict:
 def run_scan():
     global _last_discovery_stats, _tracked_pairs, _scanner_health
     start = time.time()
-    log("Starting scan cycle...")
+
+    # Short-circuit: when Oddpool is sole source, the pArb execution loop handles
+    # opportunity fetching and capital deployment. The legacy PMXT discovery pipeline
+    # is not needed and is fully bypassed here to avoid dependency on PMXT infrastructure.
+    if ARB_USE_ODDPOOL_ONLY:
+        log("ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. "
+            "pArb execution loop handles opportunities via Oddpool.")
+        _scanner_health["lastScanTimestamp"] = int(time.time())
+        _scanner_health["scanCount"] = _scanner_health.get("scanCount", 0) + 1
+        _scanner_health["lastError"] = None
+        _last_discovery_stats = {
+            "mode": "oddpool_only",
+            "legacy_scanner": "disabled",
+            "note": "Oddpool /arb-current is sole source; pArb execution loop active",
+        }
+        return
+
+    log("Starting scan cycle (legacy PMXT mode)...")
 
     try:
         cached_poly = arb_cache.get("poly_normalized")
@@ -119,8 +144,9 @@ def run_scan():
             if kalshi_markets:
                 arb_cache.set("kalshi_normalized", kalshi_markets)
 
-        seed_pairs_config = load_seed_pairs()
+        # Seed/direct pairs in legacy mode only
         seed_direct_pairs = []
+        seed_pairs_config = load_seed_pairs()
         if seed_pairs_config:
             seed_poly, seed_kalshi = fetch_seed_pair_markets(seed_pairs_config)
             poly_ids = {m.marketId for m in poly_markets}
@@ -169,7 +195,11 @@ def run_scan():
             "kalshi_stats": get_kalshi_discovery_stats(),
         }
 
-        fuzzy_pairs = find_pairs(poly_markets, kalshi_markets)
+        if ARB_USE_ODDPOOL_ONLY:
+            log("⚠️ ARB_USE_ODDPOOL_ONLY=true — fuzzy Kalshi matcher is DISABLED (Oddpool is sole source)")
+            fuzzy_pairs = []
+        else:
+            fuzzy_pairs = find_pairs(poly_markets, kalshi_markets)
 
         seen_pair_ids = set()
         pairs = []
@@ -188,8 +218,12 @@ def run_scan():
         log(f"Matched {len(pairs)} pairs ({len(seed_direct_pairs)} seed + {len(fuzzy_pairs)} fuzzy), analyzing prices...")
 
         # --- Opinion × Polymarket scan (AI-enhanced matching) ---
+        # DEPRECATED: Disabled when ARB_USE_ODDPOOL_ONLY=true
+        # Code preserved for reference. Opinion.Markets arb is a separate future task.
         opinion_pairs = []
-        if OPENAI_API_KEY:
+        if ARB_USE_ODDPOOL_ONLY:
+            log("⚠️ ARB_USE_ODDPOOL_ONLY=true — Opinion AI matcher is DISABLED (Oddpool is sole source)")
+        elif OPENAI_API_KEY:
             try:
                 cached_opinion = arb_cache.get("opinion_normalized")
                 if cached_opinion is not None:

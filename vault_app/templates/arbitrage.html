@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pARB - Arbitrage Vault</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e14;
+            color: #e8edf3;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo img { width: 48px; height: 48px; border-radius: 50%; }
+        .logo-text { font-size: 20px; font-weight: 500; letter-spacing: -0.5px; }
+
+        .nav-links { display: flex; gap: 20px; }
+        .nav-link {
+            font-size: 14px;
+            color: #8899aa;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.15s;
+        }
+        .nav-link:hover, .nav-link.active { color: #e8edf3; background: rgba(255,255,255,0.06); }
+        .nav-link.active { color: #7ee8a2; }
+
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .wallet-display {
+            font-size: 13px;
+            color: #ffffff;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 14px;
+            border-radius: 8px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.06);
+            color: #e8edf3;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn:hover { background: rgba(255,255,255,0.1); }
+        .btn-primary {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border-color: transparent;
+            color: white;
+        }
+        .btn-primary:hover { background: linear-gradient(135deg, #16a34a, #15803d); }
+        .btn-secondary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-color: transparent;
+            color: white;
+        }
+        .btn-secondary:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+
+        .main { padding: 32px 40px; max-width: 1400px; margin: 0 auto; }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .page-subtitle {
+            font-size: 14px;
+            color: #8899aa;
+            margin-bottom: 32px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #8899aa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #e8edf3;
+        }
+
+        .stat-sub {
+            font-size: 12px;
+            color: #8899aa;
+            margin-top: 4px;
+        }
+
+        .stat-up { color: #22c55e; }
+        .stat-down { color: #ef4444; }
+
+        /* Section */
+        .section { margin-bottom: 32px; }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .section-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 100px;
+            background: rgba(34,197,94,0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34,197,94,0.2);
+        }
+        .refresh-btn {
+            font-size: 13px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: #8899aa;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .refresh-btn:hover { background: rgba(255,255,255,0.08); color: #e8edf3; }
+
+        /* Table */
+        .table-wrapper {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #8899aa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.02);
+        }
+
+        tbody tr {
+            transition: background 0.1s;
+        }
+        tbody tr:hover { background: rgba(255,255,255,0.03); }
+        tbody tr + tr { border-top: 1px solid rgba(255,255,255,0.04); }
+
+        tbody td {
+            padding: 14px 16px;
+            font-size: 13px;
+        }
+
+        .edge-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .edge-high { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .edge-medium { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .edge-low { background: rgba(156,163,175,0.12); color: #9ca3af; }
+
+        .pair-title {
+            font-weight: 500;
+            color: #e8edf3;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .pair-subtitle { font-size: 11px; color: #8899aa; margin-top: 2px; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #8899aa;
+        }
+        .empty-icon { font-size: 36px; margin-bottom: 12px; }
+        .empty-title { font-size: 16px; font-weight: 500; margin-bottom: 6px; color: #e8edf3; }
+        .empty-sub { font-size: 13px; }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 32px;
+            color: #8899aa;
+            font-size: 13px;
+        }
+
+        /* Deposit/Withdraw Panel */
+        .action-panel {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .action-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .action-tab {
+            flex: 1;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #8899aa;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .action-tab.active { background: rgba(255,255,255,0.08); color: #e8edf3; }
+
+        .input-group { margin-bottom: 16px; }
+        .input-label { font-size: 13px; color: #8899aa; margin-bottom: 6px; display: block; }
+        .input-row { display: flex; gap: 8px; }
+        .amount-input {
+            flex: 1;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #e8edf3;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+        }
+        .amount-input:focus { outline: none; border-color: rgba(34,197,94,0.4); }
+        .max-btn {
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.2);
+            border-radius: 8px;
+            color: #22c55e;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .max-btn:hover { background: rgba(34,197,94,0.2); }
+
+        .action-info {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: #8899aa;
+        }
+        .action-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .action-info-row:last-child { margin-bottom: 0; }
+        .action-info-val { color: #e8edf3; font-weight: 500; }
+
+        /* Two-column layout */
+        .two-col { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+
+        @media (max-width: 900px) {
+            .main { padding: 24px 20px; }
+            .two-col { grid-template-columns: 1fr; }
+            .header { padding: 16px 20px; }
+        }
+
+        /* Status indicators */
+        .dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .dot-green { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+        .dot-yellow { background: #fbbf24; }
+        .dot-red { background: #ef4444; }
+
+        /* Nav display */
+        .nav-display {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .nav-price { font-size: 32px; font-weight: 700; color: #e8edf3; }
+        .nav-unit { font-size: 16px; color: #8899aa; }
+
+        #status-msg {
+            font-size: 13px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: none;
+        }
+        .status-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); color: #22c55e; }
+        .status-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #ef4444; }
+        .status-info { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #60a5fa; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        <img src="/static/logo.png" alt="PredictFi">
+        <div class="logo-text">PredictFi</div>
+    </div>
+    <div class="nav-links">
+        <a href="/vault" class="nav-link">pSNIPER</a>
+        <a href="/arbitrage" class="nav-link active">pARB</a>
+    </div>
+    <div class="header-right">
+        <div class="wallet-display" id="wallet-display">Not connected</div>
+        <button class="btn" id="connect-btn" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+</div>
+
+<div class="main">
+    <div class="page-title">pARB — Arbitrage Vault</div>
+    <div class="page-subtitle">
+        Cross-venue arbitrage on Polymarket × Kalshi. Guaranteed spread profits from price discrepancies.
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">pARB NAV / share</div>
+            <div class="nav-display">
+                <div class="stat-value nav-price" id="nav-price">—</div>
+                <div class="nav-unit">USDC</div>
+            </div>
+            <div class="stat-sub" id="nav-updated">Loading...</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Deployed Capital</div>
+            <div class="stat-value" id="deployed-capital">—</div>
+            <div class="stat-sub">In open positions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Settled PnL</div>
+            <div class="stat-value stat-up" id="settled-pnl">—</div>
+            <div class="stat-sub">Cumulative realized</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Estimated APY</div>
+            <div class="stat-value stat-up" id="est-apy">—</div>
+            <div class="stat-sub">Based on velocity</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Live Opportunities</div>
+            <div class="stat-value" id="opp-count">—</div>
+            <div class="stat-sub"><span class="dot dot-green"></span>Oddpool powered</div>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <!-- Left column: tables -->
+        <div>
+            <!-- Opportunities Table -->
+            <div class="section">
+                <div class="section-header">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div class="section-title">Live Opportunities</div>
+                        <span class="section-badge" id="opp-badge">Loading</span>
+                    </div>
+                    <button class="refresh-btn" onclick="loadOpportunities()">↻ Refresh</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pair</th>
+                                <th>Edge %</th>
+                                <th>Days to Expiry</th>
+                                <th>PnL/day</th>
+                                <th>Expiry</th>
+                            </tr>
+                        </thead>
+                        <tbody id="opp-table-body">
+                            <tr><td colspan="5" class="loading">Loading opportunities...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Open Positions Table -->
+            <div class="section">
+                <div class="section-header">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div class="section-title">Open Positions</div>
+                        <span class="section-badge" id="pos-badge">—</span>
+                    </div>
+                    <button class="refresh-btn" onclick="loadPositions()">↻ Refresh</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pair</th>
+                                <th>Contracts</th>
+                                <th>Cost Basis</th>
+                                <th>Liquid Value</th>
+                                <th>Expected Payout</th>
+                                <th>Days Left</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pos-table-body">
+                            <tr><td colspan="6" class="loading">Loading positions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right column: deposit/withdraw -->
+        <div>
+            <div class="action-panel">
+                <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Deposit / Withdraw</div>
+
+                <div class="action-tabs">
+                    <button class="action-tab active" id="tab-deposit" onclick="switchTab('deposit')">Deposit</button>
+                    <button class="action-tab" id="tab-withdraw" onclick="switchTab('withdraw')">Withdraw</button>
+                </div>
+
+                <!-- Deposit tab -->
+                <div id="panel-deposit">
+                    <div class="input-group">
+                        <label class="input-label">Amount (USDC)</label>
+                        <div class="input-row">
+                            <input type="number" class="amount-input" id="deposit-amount" placeholder="Min $10" min="10" step="1">
+                            <button class="max-btn" onclick="setMaxDeposit()">MAX</button>
+                        </div>
+                    </div>
+                    <div class="action-info">
+                        <div class="action-info-row">
+                            <span>Minimum deposit</span>
+                            <span class="action-info-val">$10 USDC</span>
+                        </div>
+                        <div class="action-info-row">
+                            <span>pARB NAV/share</span>
+                            <span class="action-info-val" id="deposit-nav">—</span>
+                        </div>
+                        <div class="action-info-row">
+                            <span>Shares received</span>
+                            <span class="action-info-val" id="deposit-shares-preview">—</span>
+                        </div>
+                        <div class="action-info-row">
+                            <span>Vault contract</span>
+                            <span class="action-info-val" style="font-size:11px;word-break:break-all;">{{ vault_address }}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width:100%;" onclick="executeDeposit()">
+                        Deposit USDC
+                    </button>
+                </div>
+
+                <!-- Withdraw tab -->
+                <div id="panel-withdraw" style="display:none;">
+                    <div class="input-group">
+                        <label class="input-label">pARB Shares to redeem</label>
+                        <div class="input-row">
+                            <input type="number" class="amount-input" id="withdraw-shares" placeholder="0" min="0" step="any">
+                            <button class="max-btn" onclick="setMaxWithdraw()">MAX</button>
+                        </div>
+                    </div>
+                    <div class="action-info">
+                        <div class="action-info-row">
+                            <span>Your pARB balance</span>
+                            <span class="action-info-val" id="user-shares">—</span>
+                        </div>
+                        <div class="action-info-row">
+                            <span>pARB NAV/share</span>
+                            <span class="action-info-val" id="withdraw-nav">—</span>
+                        </div>
+                        <div class="action-info-row">
+                            <span>Expected USDC</span>
+                            <span class="action-info-val" id="withdraw-usdc-preview">—</span>
+                        </div>
+                        <div class="action-info-row">
+                            <span>Queue time</span>
+                            <span class="action-info-val">Up to 7 days</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" style="width:100%;" onclick="executeWithdraw()">
+                        Request Withdrawal
+                    </button>
+                </div>
+
+                <div id="status-msg"></div>
+            </div>
+
+            <!-- Vault Info -->
+            <div class="action-panel" style="margin-top:16px;">
+                <div style="font-size:14px;font-weight:600;margin-bottom:12px;">Vault Info</div>
+                <div class="action-info-row" style="margin-bottom:8px;">
+                    <span style="font-size:12px;color:#8899aa;">Strategy</span>
+                    <span style="font-size:12px;color:#e8edf3;">Cross-venue arb (Poly × Kalshi)</span>
+                </div>
+                <div class="action-info-row" style="margin-bottom:8px;">
+                    <span style="font-size:12px;color:#8899aa;">Data source</span>
+                    <span style="font-size:12px;color:#e8edf3;">Oddpool /arb-current</span>
+                </div>
+                <div class="action-info-row" style="margin-bottom:8px;">
+                    <span style="font-size:12px;color:#8899aa;">Execution guard</span>
+                    <span style="font-size:12px;color:#22c55e;">Live price re-check</span>
+                </div>
+                <div class="action-info-row" style="margin-bottom:8px;">
+                    <span style="font-size:12px;color:#8899aa;">Auto-unwind</span>
+                    <span style="font-size:12px;color:#22c55e;">Yes (leg 2 fail)</span>
+                </div>
+                <div class="action-info-row" style="margin-bottom:8px;">
+                    <span style="font-size:12px;color:#8899aa;">Min edge threshold</span>
+                    <span style="font-size:12px;color:#e8edf3;">2.5% (incl. fees)</span>
+                </div>
+                <div class="action-info-row">
+                    <span style="font-size:12px;color:#8899aa;">Per-pair cap</span>
+                    <span style="font-size:12px;color:#e8edf3;">$500 USDC</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const VAULT_ADDRESS = "{{ vault_address }}";
+const API_BASE = "";
+
+let currentNavUsd = null;
+let walletAddress = null;
+let provider = null;
+let signer = null;
+let activeTab = 'deposit';
+
+// ─── Wallet ───────────────────────────────────────────────────────────────
+
+async function connectWallet() {
+    if (typeof window.ethereum === 'undefined') {
+        showStatus('Please install MetaMask to connect.', 'error');
+        return;
+    }
+    try {
+        provider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await provider.send('eth_requestAccounts', []);
+        signer = await provider.getSigner();
+        walletAddress = accounts[0];
+        document.getElementById('wallet-display').textContent =
+            walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4);
+        document.getElementById('connect-btn').textContent = 'Connected';
+        document.getElementById('connect-btn').disabled = true;
+        loadUserBalance();
+    } catch (e) {
+        showStatus('Wallet connection failed: ' + e.message, 'error');
+    }
+}
+
+async function loadUserBalance() {
+    if (!walletAddress || !VAULT_ADDRESS || VAULT_ADDRESS === 'None') return;
+    try {
+        const pARB_ABI = ["function balanceOf(address) view returns (uint256)"];
+        const contract = new ethers.Contract(VAULT_ADDRESS, pARB_ABI, provider);
+        const bal = await contract.balanceOf(walletAddress);
+        const formatted = (Number(bal) / 1e18).toFixed(4);
+        document.getElementById('user-shares').textContent = formatted + ' pARB';
+    } catch (e) {
+        document.getElementById('user-shares').textContent = '—';
+    }
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────────
+
+async function loadNav() {
+    try {
+        const resp = await fetch(`${API_BASE}/api/arb-vault/nav`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        const totalAssets = data.total_assets_usdc || 0;
+        const settledPnl = data.settled_pnl || 0;
+        const openVal = data.open_positions_value || 0;
+
+        // NAV/share = totalAssets / totalSupply, read from contract if connected
+        // If contract not deployed or wallet not connected, fallback to $1.00 (initial NAV)
+        let navPerShare = 1.0;
+        if (VAULT_ADDRESS && VAULT_ADDRESS !== 'None' && provider) {
+            try {
+                const pARB_ABI = [
+                    "function totalSupply() view returns (uint256)"
+                ];
+                const contract = new ethers.Contract(VAULT_ADDRESS, pARB_ABI, provider);
+                const totalSupplyWei = await contract.totalSupply();
+                const totalSupply = Number(totalSupplyWei) / 1e18;
+                if (totalSupply > 0) {
+                    navPerShare = totalAssets / totalSupply;
+                } else {
+                    navPerShare = 1.0;
+                }
+            } catch (_) {
+                navPerShare = totalAssets > 0 ? 1.0 : 1.0;
+            }
+        }
+
+        const navDisplay = navPerShare.toFixed(6);
+        document.getElementById('nav-price').textContent = navDisplay;
+        currentNavUsd = navPerShare;
+
+        document.getElementById('deposit-nav').textContent = '$' + navDisplay;
+        document.getElementById('withdraw-nav').textContent = '$' + navDisplay;
+
+        document.getElementById('settled-pnl').textContent =
+            '$' + settledPnl.toFixed(2);
+        document.getElementById('deployed-capital').textContent =
+            '$' + openVal.toFixed(2);
+
+        const ts = new Date(data.timestamp * 1000);
+        document.getElementById('nav-updated').textContent =
+            'Updated ' + ts.toLocaleTimeString();
+    } catch (e) {
+        document.getElementById('nav-price').textContent = '—';
+        document.getElementById('nav-updated').textContent = 'NAV unavailable';
+    }
+}
+
+// ─── Opportunities ────────────────────────────────────────────────────────
+
+async function loadOpportunities() {
+    try {
+        document.getElementById('opp-table-body').innerHTML =
+            '<tr><td colspan="5" class="loading">Loading...</td></tr>';
+        const resp = await fetch(`${API_BASE}/api/arb-vault/opportunities`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        const opps = data.opportunities || [];
+        document.getElementById('opp-count').textContent = opps.length;
+        document.getElementById('opp-badge').textContent = `${opps.length} live`;
+
+        if (opps.length === 0) {
+            document.getElementById('opp-table-body').innerHTML = `
+                <tr><td colspan="5">
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-title">No opportunities right now</div>
+                    <div class="empty-sub">Oddpool is scanning — check back in 30s</div>
+                </div>
+                </td></tr>`;
+            estimateApy([]);
+            return;
+        }
+
+        const rows = opps.map(opp => {
+            const edgePct = (opp.gross_edge_pct * 100).toFixed(2);
+            const pnlDay = (opp.pnl_velocity * 100).toFixed(2);
+            const days = opp.days_to_expiry.toFixed(1);
+            const expiry = opp.expiry_ts
+                ? new Date(opp.expiry_ts * 1000).toLocaleDateString()
+                : '—';
+            const edgeClass = opp.gross_edge_pct >= 0.05 ? 'edge-high'
+                : opp.gross_edge_pct >= 0.025 ? 'edge-medium' : 'edge-low';
+            const title = opp.poly_title || opp.pair_id || '—';
+            const subtitle = opp.kalshi_title ? opp.kalshi_title : '';
+
+            return `<tr>
+                <td>
+                    <div class="pair-title" title="${title}">${title}</div>
+                    ${subtitle ? `<div class="pair-subtitle">${subtitle}</div>` : ''}
+                </td>
+                <td><span class="edge-badge ${edgeClass}">${edgePct}%</span></td>
+                <td>${days}d</td>
+                <td>${pnlDay}%/d</td>
+                <td>${expiry}</td>
+            </tr>`;
+        }).join('');
+        document.getElementById('opp-table-body').innerHTML = rows;
+        estimateApy(opps);
+    } catch (e) {
+        document.getElementById('opp-table-body').innerHTML =
+            `<tr><td colspan="5" class="empty-state"><div class="empty-icon">⚠️</div>
+            <div class="empty-title">Error loading opportunities</div>
+            <div class="empty-sub">${e.message}</div></td></tr>`;
+    }
+}
+
+function estimateApy(opps) {
+    if (!opps.length) {
+        document.getElementById('est-apy').textContent = '—';
+        return;
+    }
+    const avgVelocity = opps.reduce((s, o) => s + o.pnl_velocity, 0) / opps.length;
+    const apy = (avgVelocity * 365 * 100).toFixed(1);
+    document.getElementById('est-apy').textContent = apy + '%';
+}
+
+// ─── Positions ────────────────────────────────────────────────────────────
+
+async function loadPositions() {
+    try {
+        document.getElementById('pos-table-body').innerHTML =
+            '<tr><td colspan="5" class="loading">Loading...</td></tr>';
+        const resp = await fetch(`${API_BASE}/api/arb-vault/positions`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        const positions = data.positions || [];
+        document.getElementById('pos-badge').textContent = positions.length + ' open';
+
+        if (positions.length === 0) {
+            document.getElementById('pos-table-body').innerHTML = `
+                <tr><td colspan="5">
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <div class="empty-title">No open positions</div>
+                    <div class="empty-sub">Positions will appear here once trades are executed</div>
+                </div>
+                </td></tr>`;
+            return;
+        }
+
+        const now = Date.now() / 1000;
+        const rows = positions.map(pos => {
+            const costBasis = '$' + (pos.cost_basis_usdc || 0).toFixed(2);
+            const liquidVal = '$' + (pos.total_liquid_value || 0).toFixed(2);
+            const daysLeft = pos.expiry_ts > now
+                ? ((pos.expiry_ts - now) / 86400).toFixed(1) + 'd'
+                : 'Expired';
+            const title = pos.poly_title || pos.pair_id || '—';
+            const contracts = (pos.shares || 0).toFixed(0);
+            // Expected payout = contracts × $1 (YES on both venues settles at $1 each at resolution)
+            // minus the cost paid, net of any edge captured
+            const contractsInt = Math.round(pos.shares || 0);
+            const expectedPayout = '$' + (contractsInt * 2.0).toFixed(2); // both legs pay $1 at resolution
+            const expectedProfit = '$' + Math.max(0, contractsInt * 2.0 - (pos.cost_basis_usdc || 0)).toFixed(2);
+
+            return `<tr>
+                <td>
+                    <div class="pair-title" title="${title}">${title}</div>
+                    <div class="pair-subtitle">${pos.kalshi_ticker || ''}</div>
+                </td>
+                <td>${contracts}</td>
+                <td>${costBasis}</td>
+                <td>${liquidVal}</td>
+                <td title="Both YES legs pay $1 at resolution; gross payout ${expectedPayout}, profit ${expectedProfit}">${expectedPayout}</td>
+                <td>${daysLeft}</td>
+            </tr>`;
+        }).join('');
+        document.getElementById('pos-table-body').innerHTML = rows;
+    } catch (e) {
+        document.getElementById('pos-table-body').innerHTML =
+            `<tr><td colspan="6" class="empty-state"><div class="empty-icon">⚠️</div>
+            <div class="empty-title">Error loading positions</div>
+            <div class="empty-sub">${e.message}</div></td></tr>`;
+    }
+}
+
+// ─── Deposit / Withdraw ───────────────────────────────────────────────────
+
+function switchTab(tab) {
+    activeTab = tab;
+    document.getElementById('tab-deposit').classList.toggle('active', tab === 'deposit');
+    document.getElementById('tab-withdraw').classList.toggle('active', tab === 'withdraw');
+    document.getElementById('panel-deposit').style.display = tab === 'deposit' ? '' : 'none';
+    document.getElementById('panel-withdraw').style.display = tab === 'withdraw' ? '' : 'none';
+    document.getElementById('status-msg').style.display = 'none';
+}
+
+document.getElementById('deposit-amount').addEventListener('input', function() {
+    const amount = parseFloat(this.value) || 0;
+    if (currentNavUsd && currentNavUsd > 0) {
+        const shares = (amount / currentNavUsd).toFixed(4);
+        document.getElementById('deposit-shares-preview').textContent = shares + ' pARB';
+    }
+});
+
+document.getElementById('withdraw-shares').addEventListener('input', function() {
+    const shares = parseFloat(this.value) || 0;
+    if (currentNavUsd && currentNavUsd > 0) {
+        const usdc = (shares * currentNavUsd).toFixed(2);
+        document.getElementById('withdraw-usdc-preview').textContent = '$' + usdc;
+    }
+});
+
+function setMaxDeposit() {
+    showStatus('Connect wallet to see your USDC balance.', 'info');
+}
+
+function setMaxWithdraw() {
+    const userShares = document.getElementById('user-shares').textContent;
+    const match = userShares.match(/[\d.]+/);
+    if (match) {
+        document.getElementById('withdraw-shares').value = match[0];
+        document.getElementById('withdraw-shares').dispatchEvent(new Event('input'));
+    }
+}
+
+async function executeDeposit() {
+    if (!signer) { showStatus('Connect your wallet first.', 'error'); return; }
+    const amount = parseFloat(document.getElementById('deposit-amount').value);
+    if (!amount || amount < 10) { showStatus('Minimum deposit is $10 USDC.', 'error'); return; }
+    if (!VAULT_ADDRESS || VAULT_ADDRESS === 'None') {
+        showStatus('Vault contract not deployed yet.', 'error'); return;
+    }
+
+    showStatus('Fetching NAV from oracle...', 'info');
+    try {
+        const navResp = await fetch(`${API_BASE}/api/arb-vault/nav`);
+        if (!navResp.ok) throw new Error('Could not fetch NAV from oracle');
+        const navData = await navResp.json();
+
+        if (!navData.signature) {
+            showStatus('NAV oracle signature not available. Ensure ARB_NAV_SIGNER_PRIVATE_KEY is set.', 'error');
+            return;
+        }
+
+        const USDC_ABI = [
+            "function approve(address spender, uint256 amount) returns (bool)",
+            "function allowance(address owner, address spender) view returns (uint256)"
+        ];
+        const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+        const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
+        const amountWei = BigInt(Math.floor(amount * 1e6));
+
+        showStatus('Approving USDC spend...', 'info');
+        const approveTx = await usdcContract.approve(VAULT_ADDRESS, amountWei);
+        await approveTx.wait();
+
+        const VAULT_ABI = [
+            "function deposit(uint256 usdcAmount, tuple(uint256 totalAssets, uint256 polyCash, uint256 kalshiCash, uint256 openPositionsValue, uint256 settledPnl, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) external"
+        ];
+        const vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+
+        const navTuple = [
+            BigInt(Math.round(navData.total_assets_usdc * 1e6)),
+            BigInt(Math.round(navData.poly_cash * 1e6)),
+            BigInt(Math.round(navData.kalshi_cash * 1e6)),
+            BigInt(Math.round(navData.open_positions_value * 1e6)),
+            BigInt(Math.round(navData.settled_pnl * 1e6)),
+            BigInt(navData.timestamp),
+            BigInt(navData.deadline),
+            BigInt(navData.round_id),
+        ];
+
+        showStatus('Submitting deposit transaction...', 'info');
+        const tx = await vaultContract.deposit(amountWei, navTuple, navData.signature);
+        showStatus('Waiting for confirmation...', 'info');
+        await tx.wait();
+        showStatus(`Deposit successful! TX: ${tx.hash.slice(0,12)}...`, 'success');
+        loadUserBalance();
+        loadNav();
+    } catch (e) {
+        showStatus('Deposit failed: ' + e.message, 'error');
+    }
+}
+
+async function executeWithdraw() {
+    if (!signer) { showStatus('Connect your wallet first.', 'error'); return; }
+    const shares = parseFloat(document.getElementById('withdraw-shares').value);
+    if (!shares || shares <= 0) { showStatus('Enter a valid share amount.', 'error'); return; }
+    if (!VAULT_ADDRESS || VAULT_ADDRESS === 'None') {
+        showStatus('Vault contract not deployed yet.', 'error'); return;
+    }
+
+    showStatus('Fetching NAV from oracle...', 'info');
+    try {
+        const navResp = await fetch(`${API_BASE}/api/arb-vault/nav`);
+        if (!navResp.ok) throw new Error('Could not fetch NAV from oracle');
+        const navData = await navResp.json();
+
+        if (!navData.signature) {
+            showStatus('NAV oracle signature not available.', 'error');
+            return;
+        }
+
+        const VAULT_ABI = [
+            "function requestWithdraw(uint256 shareAmount, tuple(uint256 totalAssets, uint256 polyCash, uint256 kalshiCash, uint256 openPositionsValue, uint256 settledPnl, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) external returns (uint256)"
+        ];
+        const vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+
+        const sharesWei = BigInt(Math.round(shares * 1e18));
+        const navTuple = [
+            BigInt(Math.round(navData.total_assets_usdc * 1e6)),
+            BigInt(Math.round(navData.poly_cash * 1e6)),
+            BigInt(Math.round(navData.kalshi_cash * 1e6)),
+            BigInt(Math.round(navData.open_positions_value * 1e6)),
+            BigInt(Math.round(navData.settled_pnl * 1e6)),
+            BigInt(navData.timestamp),
+            BigInt(navData.deadline),
+            BigInt(navData.round_id),
+        ];
+
+        showStatus('Submitting withdrawal request...', 'info');
+        const tx = await vaultContract.requestWithdraw(sharesWei, navTuple, navData.signature);
+        showStatus('Waiting for confirmation...', 'info');
+        await tx.wait();
+        showStatus('Withdrawal requested! Funds typically available within 7 days.', 'success');
+        loadUserBalance();
+    } catch (e) {
+        showStatus('Withdrawal failed: ' + e.message, 'error');
+    }
+}
+
+function showStatus(msg, type) {
+    const el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.className = 'status-' + type;
+    el.style.display = 'block';
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+
+async function init() {
+    await Promise.all([loadNav(), loadOpportunities(), loadPositions()]);
+    setInterval(loadOpportunities, 30000);
+    setInterval(loadNav, 60000);
+}
+
+init();
+</script>
+</body>
+</html>

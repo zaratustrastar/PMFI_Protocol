@@ -4198,6 +4198,156 @@ def api_arb_diag():
 
 
 # =============================================================================
+# pArbitrage Vault API (Oddpool-powered)
+# =============================================================================
+
+_oddpool_opportunities_cache: dict = {"opportunities": [], "updated_at": 0}
+_oddpool_cache_lock = None
+
+def _get_oddpool_cache_lock():
+    global _oddpool_cache_lock
+    if _oddpool_cache_lock is None:
+        import threading
+        _oddpool_cache_lock = threading.Lock()
+    return _oddpool_cache_lock
+
+
+@flask_app.route('/api/arb-vault/opportunities', methods=['GET'])
+def api_arb_vault_opportunities():
+    """Return live arbitrage opportunities from Oddpool /arb-current.
+
+    Sorted by pnl_velocity (= edge_pct / days_to_expiry) descending.
+    Polled every 30s from Oddpool. Results are cached in memory.
+    """
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({'error': 'arb_monitor not available'}), 503
+    try:
+        from arb_monitor.adapters.oddpool import fetch_opportunities
+        from arb_monitor.config import ODDPOOL_POLL_INTERVAL
+
+        lock = _get_oddpool_cache_lock()
+        now = time.time()
+        cache_age = now - _oddpool_opportunities_cache.get("updated_at", 0)
+        force = flask_request.args.get("force", "0") == "1"
+
+        if force or cache_age > ODDPOOL_POLL_INTERVAL:
+            with lock:
+                if force or (time.time() - _oddpool_opportunities_cache.get("updated_at", 0)) > ODDPOOL_POLL_INTERVAL:
+                    print("🔀 [ArbVault] Refreshing Oddpool opportunities...")
+                    opps = fetch_opportunities()
+                    _oddpool_opportunities_cache["opportunities"] = [o.to_dict() for o in opps]
+                    _oddpool_opportunities_cache["updated_at"] = time.time()
+                    print(f"🔀 [ArbVault] Cached {len(opps)} opportunities")
+
+        limit = int(flask_request.args.get("limit", "50"))
+        opportunities = _oddpool_opportunities_cache.get("opportunities", [])[:limit]
+        updated_at = _oddpool_opportunities_cache.get("updated_at", 0)
+
+        return jsonify({
+            "opportunities": opportunities,
+            "count": len(opportunities),
+            "updated_at": updated_at,
+            "cache_age_s": round(time.time() - updated_at, 1),
+            "sorted_by": "pnl_velocity_desc",
+        })
+    except Exception as e:
+        print(f"❌ [ArbVault] /api/arb-vault/opportunities error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@flask_app.route('/api/arb-vault/nav', methods=['GET'])
+def api_arb_vault_nav():
+    """Compute and return signed pARB vault NAV.
+
+    NAV = poly_cash + kalshi_cash + sum(open_positions_liquid_value) + sum(settled_pnl)
+    Uses live bid prices for open positions (liquidation value, not cost basis).
+    Returns ECDSA-signed payload compatible with PredictFiArbVaultV1 contract.
+    """
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({'error': 'arb_monitor not available'}), 503
+    try:
+        from arb_monitor.core.arb_nav import compute_nav
+        nav_payload = compute_nav()
+        return jsonify(nav_payload)
+    except Exception as e:
+        print(f"❌ [ArbVault] /api/arb-vault/nav error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@flask_app.route('/api/arb-vault/positions', methods=['GET'])
+def api_arb_vault_positions():
+    """Return all open arb positions with liquid value."""
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({'error': 'arb_monitor not available'}), 503
+    try:
+        from arb_monitor.core.arb_positions_db import get_open_positions
+        from arb_monitor.core.arb_nav import fetch_position_liquid_value, ArbPosition
+        positions = get_open_positions()
+        enriched = []
+        for pos in positions:
+            ap = ArbPosition(
+                pair_id=pos["pair_id"],
+                poly_yes_token=pos["poly_yes_token"],
+                kalshi_ticker=pos["kalshi_ticker"],
+                shares=pos["shares"],
+                cost_basis_usdc=pos["cost_basis_usdc"],
+                expiry_ts=pos["expiry_ts"],
+                status=pos["status"],
+            )
+            lv = fetch_position_liquid_value(ap)
+            enriched.append({
+                **pos,
+                "poly_yes_bid": lv.poly_yes_bid,
+                "kalshi_yes_bid": lv.kalshi_yes_bid,
+                "liquid_value_per_share": round(lv.liquid_value_per_share, 6),
+                "total_liquid_value": round(lv.total_liquid_value, 6),
+                "warning": lv.warning,
+            })
+        return jsonify({"positions": enriched, "count": len(enriched)})
+    except Exception as e:
+        print(f"❌ [ArbVault] /api/arb-vault/positions error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@flask_app.route('/api/arb-vault/executions', methods=['GET'])
+def api_arb_vault_executions():
+    """Return recent arb execution logs."""
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({'error': 'arb_monitor not available'}), 503
+    try:
+        from arb_monitor.core.arb_positions_db import get_executions
+        pair_id = flask_request.args.get("pair_id")
+        limit = int(flask_request.args.get("limit", "50"))
+        executions = get_executions(pair_id=pair_id, limit=limit)
+        return jsonify({"executions": executions, "count": len(executions)})
+    except Exception as e:
+        print(f"❌ [ArbVault] /api/arb-vault/executions error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@flask_app.route('/api/arb-vault/health', methods=['GET'])
+def api_arb_vault_health():
+    """Health check for pArb vault: Oddpool connectivity, DB, scanner status."""
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({"status": "unavailable", "reason": "arb_monitor not installed"}), 503
+    try:
+        from arb_monitor.config import ARB_USE_ODDPOOL_ONLY, ODDPOOL_BASE_URL, ODDPOOL_API_KEY
+        oddpool_key_set = bool(ODDPOOL_API_KEY)
+        cache_age = time.time() - _oddpool_opportunities_cache.get("updated_at", 0)
+        opp_count = len(_oddpool_opportunities_cache.get("opportunities", []))
+        return jsonify({
+            "status": "ok",
+            "arb_use_oddpool_only": ARB_USE_ODDPOOL_ONLY,
+            "oddpool_api_key_set": oddpool_key_set,
+            "oddpool_base_url": ODDPOOL_BASE_URL,
+            "cached_opportunities": opp_count,
+            "cache_age_s": round(cache_age, 1),
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+
+
+# =============================================================================
 # OddScreeners Endpoints (Polymarket vs Opinion)
 # =============================================================================
 
@@ -4647,6 +4797,28 @@ def main():
     holding_xp_thread = threading.Thread(target=daily_holding_xp_loop, daemon=True)
     holding_xp_thread.start()
     
+    # Initialize pArb vault DB tables
+    if ARB_MONITOR_AVAILABLE:
+        try:
+            from arb_monitor.core.arb_positions_db import init_arb_tables
+            init_arb_tables()
+            print("🗄️ pArb vault DB tables initialized")
+        except Exception as e:
+            print(f"⚠️ pArb vault DB init failed: {e}")
+
+    # Start pArb execution loop (Oddpool-powered capital deployment)
+    if ARB_MONITOR_AVAILABLE:
+        try:
+            from arb_monitor.core.arb_execution_loop import start_execution_loop
+            from arb_monitor.config import ARB_USE_ODDPOOL_ONLY
+            if ARB_USE_ODDPOOL_ONLY:
+                start_execution_loop()
+                print("🚀 pArb execution loop started (Oddpool-only mode, pnl_velocity sorted)")
+            else:
+                print("ℹ️ ARB_USE_ODDPOOL_ONLY=false — pArb execution loop skipped")
+        except Exception as e:
+            print(f"⚠️ pArb execution loop failed to start: {e}")
+
     # Start arb monitor scanner
     if ARB_MONITOR_AVAILABLE:
         try:
@@ -4657,12 +4829,21 @@ def main():
             print(f"⚠️ Arb monitor failed to start: {e}")
 
     # Start OddScreeners collector (Polymarket vs Opinion)
+    # DISABLED when ARB_USE_ODDPOOL_ONLY=true — Oddpool is the sole data source
     if ODDSCREENERS_AVAILABLE:
         try:
-            start_oddscreeners()
-            print("🔍 OddScreeners SSE collector started (Polymarket × Opinion)")
-        except Exception as e:
-            print(f"⚠️ OddScreeners failed to start: {e}")
+            from arb_monitor.config import ARB_USE_ODDPOOL_ONLY as _arb_oddpool_only
+        except Exception:
+            _arb_oddpool_only = True
+
+        if _arb_oddpool_only:
+            print("ℹ️ ARB_USE_ODDPOOL_ONLY=true — OddScreeners (Opinion SSE) is DISABLED (Oddpool is sole source)")
+        else:
+            try:
+                start_oddscreeners()
+                print("🔍 OddScreeners SSE collector started (Polymarket × Opinion)")
+            except Exception as e:
+                print(f"⚠️ OddScreeners failed to start: {e}")
     
     # Start HTTP server
     print(f"\n🚀 Starting HTTP API on port {HTTP_PORT}")
