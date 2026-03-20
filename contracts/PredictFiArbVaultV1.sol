@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 /**
  * @title PredictFiArbVaultV1
- * @notice pARB vault — cross-venue arbitrage vault (Polymarket × Kalshi)
+ * @notice pARB vault — PMFI cross-venue arbitrage vault (Polymarket × Kalshi × Opinion Labs)
  * @dev
  *
  * Architecture:
@@ -188,7 +188,7 @@ contract PredictFiArbVaultV1 is ERC20, Ownable, ReentrancyGuard {
         address _taxCollector,
         address _arbServicerWallet,
         uint256 _maxTotal
-    ) ERC20("PredictFi Arb", "pARB") Ownable(msg.sender) {
+    ) ERC20("PMFI Arb", "pARB") Ownable(msg.sender) {
         require(_usdc != address(0), "Invalid USDC");
         require(_navSigner != address(0), "Invalid signer");
         require(_taxCollector != address(0), "Invalid tax collector");

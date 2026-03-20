@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PredictFi Sniper Vault V7.5 - NAV Signing Bot with Withdrawal Exclusion
+PMFI Sniper Vault V7.5 - NAV Signing Bot with Withdrawal Exclusion
 
 =============================================================================
 V7.5 CHANGE: Withdrawal Exclusion from NAV
@@ -4332,6 +4332,79 @@ def api_arb_vault_executions():
         return jsonify({"error": str(e)}), 500
 
 
+@flask_app.route('/api/arb-vault/trade-history', methods=['GET'])
+def api_arb_vault_trade_history():
+    """Return all arb trades (open + settled) with expiry and PnL for LP transparency."""
+    if not ARB_MONITOR_AVAILABLE:
+        return jsonify({'error': 'arb_monitor not available'}), 503
+    try:
+        from arb_monitor.core.arb_positions_db import get_db_conn
+        conn = get_db_conn()
+        if not conn:
+            return jsonify({"error": "db_unavailable"}), 503
+        cur = conn.cursor()
+        limit = int(flask_request.args.get("limit", "100"))
+        cur.execute("""
+            SELECT
+                pair_id,
+                COALESCE(poly_title, '') AS poly_title,
+                COALESCE(kalshi_title, '') AS kalshi_title,
+                kalshi_ticker,
+                COALESCE(kalshi_side, 'YES') AS kalshi_side,
+                ROUND(shares::numeric, 4) AS contracts,
+                ROUND(cost_basis_usdc::numeric, 4) AS cost_usdc,
+                expiry_ts,
+                status,
+                ROUND(COALESCE(settled_pnl_usdc, 0)::numeric, 4) AS settled_pnl,
+                opened_at
+            FROM arb_positions
+            ORDER BY opened_at DESC
+            LIMIT %s
+        """, (limit,))
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        trades = []
+        import time as _time
+        now = _time.time()
+        for r in rows:
+            pair_id, poly_title, kalshi_title, kalshi_ticker, kalshi_side, \
+            contracts, cost_usdc, expiry_ts, status, settled_pnl, opened_at = r
+            contracts = float(contracts or 0)
+            cost_usdc = float(cost_usdc or 0)
+            settled_pnl = float(settled_pnl or 0)
+            expiry_ts = int(expiry_ts or 0)
+            # True arb: guaranteed $1 per contract at resolution
+            expected_payout = contracts * 1.0
+            expected_profit = expected_payout - cost_usdc
+            edge_pct = (expected_profit / cost_usdc * 100) if cost_usdc > 0 else 0
+            days_left = max(0, (expiry_ts - now) / 86400) if expiry_ts > now else 0
+            leg_label = f"Poly YES / Kalshi {'NO' if kalshi_side == 'NO' else 'YES'}"
+            title = poly_title or kalshi_title or pair_id
+            trades.append({
+                "pair_id": pair_id,
+                "title": title,
+                "kalshi_ticker": kalshi_ticker,
+                "leg_label": leg_label,
+                "contracts": round(contracts, 4),
+                "cost_usdc": round(cost_usdc, 4),
+                "expected_payout": round(expected_payout, 4),
+                "expected_profit": round(expected_profit, 4),
+                "edge_pct": round(edge_pct, 2),
+                "expiry_ts": expiry_ts,
+                "days_left": round(days_left, 2),
+                "status": status,
+                "settled_pnl": round(settled_pnl, 4),
+                "opened_at": opened_at.isoformat() if opened_at else None,
+            })
+
+        return jsonify({"trades": trades, "count": len(trades)})
+    except Exception as e:
+        print(f"❌ [ArbVault] /api/arb-vault/trade-history error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @flask_app.route('/api/arb-vault/health', methods=['GET'])
 def api_arb_vault_health():
     """Health check for pArb vault: Oddpool connectivity, DB, scanner status."""
@@ -4697,7 +4770,7 @@ def main():
     global w3, usdc, vault_v7, polymarket_client, nav_engine, oracle_account, pending_tracker, round_id_cache
     
     print("=" * 60)
-    print("🚀 PredictFi Sniper Vault V7 - NAV Signing Bot")
+    print("🚀 PMFI Sniper Vault V7 - NAV Signing Bot")
     print("   3-State Asset Tracking + Conservation Bounds")
     print("=" * 60)
     

@@ -23,9 +23,10 @@ from ..config import (
     ARB_USE_ODDPOOL_ONLY,
 )
 
-# Minimum hours before market close to act on an opportunity.
-# Markets closing too soon have low fill probability and high settlement risk.
-ARB_MIN_HOURS_TO_EXPIRY = float(os.environ.get("ARB_MIN_HOURS_TO_EXPIRY", "15"))
+# Expiry guard: disabled by default (Oddpool's actionable filter already removes
+# markets where liquidity is too thin or settlement is imminent).
+# Set ARB_MIN_HOURS_TO_EXPIRY > 0 to add a manual override if needed.
+ARB_MIN_HOURS_TO_EXPIRY = float(os.environ.get("ARB_MIN_HOURS_TO_EXPIRY", "0"))
 ARB_MIN_DAYS_TO_EXPIRY = ARB_MIN_HOURS_TO_EXPIRY / 24.0
 
 

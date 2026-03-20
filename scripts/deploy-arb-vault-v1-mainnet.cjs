@@ -1,5 +1,5 @@
 /**
- * Deploy PredictFiArbVaultV1 (pARB) to Base Mainnet
+ * Deploy PMFI pARB Vault (PredictFiArbVaultV1) to Base Mainnet
  *
  * Contract: PredictFiArbVaultV1
  * Token:    pARB
@@ -30,7 +30,7 @@ const path = require("path");
 
 async function main() {
     console.log("=".repeat(60));
-    console.log("🚀 Deploying PredictFiArbVaultV1 (pARB) to Base Mainnet");
+    console.log("🚀 Deploying PMFI pARB Vault to Base Mainnet");
     console.log("=".repeat(60));
 
     const [deployer] = await hre.ethers.getSigners();

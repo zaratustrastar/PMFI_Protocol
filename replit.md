@@ -1,6 +1,8 @@
 # Overview
 
-This project consists of two primary systems: the pSNIPER Vault (V7.5) for secure NAV-based share pricing using actual liquid asset values with withdrawal exclusion, and an Automated Polymarket Trading Bot. The vault calculates NAV from real position values (cash + positions liquidation value), excluding pending withdrawal liabilities from both assets and share supply to prevent NAV distortion. The trading bot provides fully automated market monitoring, Telegram notifications, and strategic trading, designed for efficient and timely execution on Polymarket. Together, these systems aim to optimize and automate Polymarket participation with accurate financial tracking and trading capabilities.
+**Brand: PMFI** (formerly PredictFi — all user-facing labels now use PMFI).
+
+This project consists of three primary systems under the PMFI brand: the **pSNIPER Vault (V7.5)** for secure NAV-based share pricing using actual liquid asset values with withdrawal exclusion, the **pARB Vault (V1)** for cross-venue arbitrage (Polymarket × Kalshi × Opinion Labs) using the Oddpool API, and an **Automated Polymarket Trading Bot**. The vaults calculate NAV from real position values; pARB uses guaranteed-spread arb with liquid NAV priced from order-book bids. The trading bot provides fully automated market monitoring, Telegram notifications, and strategic trading for efficient Polymarket participation.
 
 # User Preferences
 

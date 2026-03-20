@@ -353,8 +353,8 @@
 
 <div class="header">
     <div class="logo">
-        <img src="/static/logo.png" alt="PredictFi">
-        <div class="logo-text">PredictFi</div>
+        <img src="/static/logo.png" alt="PMFI">
+        <div class="logo-text">PMFI</div>
     </div>
     <div class="nav-links">
         <a href="/vault" class="nav-link">pSNIPER</a>
@@ -457,6 +457,34 @@
                         </thead>
                         <tbody id="pos-table-body">
                             <tr><td colspan="6" class="loading">Loading positions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Trade History Table -->
+            <div class="section" style="margin-top:20px;">
+                <div class="section-header">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div class="section-title">Trade History</div>
+                        <span class="section-badge" id="history-badge">—</span>
+                    </div>
+                    <button class="refresh-btn" onclick="loadTradeHistory()">↻ Refresh</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Market</th>
+                                <th>Venue</th>
+                                <th>Edge</th>
+                                <th>Cost</th>
+                                <th>Expected Profit</th>
+                                <th>Expires / Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <tr><td colspan="6" class="loading">Loading trade history...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -956,12 +984,82 @@ function showStatus(msg, type) {
     el.style.display = 'block';
 }
 
+// ─── Trade History ────────────────────────────────────────────────────────
+
+async function loadTradeHistory() {
+    const tbody = document.getElementById('history-table-body');
+    try {
+        tbody.innerHTML = '<tr><td colspan="6" class="loading">Loading...</td></tr>';
+        const resp = await fetch(`${API_BASE}/api/arb-vault/trade-history`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        const trades = data.trades || [];
+        document.getElementById('history-badge').textContent = trades.length + ' trades';
+
+        if (trades.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6">
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <div class="empty-title">No trades yet</div>
+                    <div class="empty-sub">Executed arbitrage trades will appear here</div>
+                </div></td></tr>`;
+            return;
+        }
+
+        const now = Date.now() / 1000;
+        const rows = trades.map(t => {
+            const title = (t.title || t.pair_id || '—').slice(0, 55);
+            const edgePct = `+${(t.edge_pct || 0).toFixed(1)}%`;
+            const cost = '$' + (t.cost_usdc || 0).toFixed(2);
+            const profit = '$' + (t.expected_profit || 0).toFixed(2);
+            const legLabel = t.leg_label || '—';
+            let expiryCell = '';
+            let statusBadge = '';
+            if (t.status === 'settled') {
+                const pnl = (t.settled_pnl || 0);
+                statusBadge = pnl >= 0
+                    ? `<span style="color:#22c55e;">✓ Settled +$${pnl.toFixed(2)}</span>`
+                    : `<span style="color:#ef4444;">✗ Settled -$${Math.abs(pnl).toFixed(2)}</span>`;
+                expiryCell = statusBadge;
+            } else {
+                const daysLeft = t.days_left > 0
+                    ? t.days_left.toFixed(1) + 'd left'
+                    : 'Expired';
+                const expDate = t.expiry_ts > 0
+                    ? new Date(t.expiry_ts * 1000).toLocaleDateString()
+                    : '—';
+                expiryCell = `<span class="stat-up">${daysLeft}</span><br><small style="opacity:0.5;">${expDate}</small>`;
+                statusBadge = `<span style="color:#60a5fa;">Open</span>`;
+                expiryCell = `<span class="stat-up">${daysLeft}</span> ${statusBadge}<br><small style="opacity:0.5;">${expDate}</small>`;
+            }
+            return `<tr>
+                <td>
+                    <div class="pair-title" title="${t.title || ''}">${title}</div>
+                    <div class="pair-subtitle">${t.kalshi_ticker || ''}</div>
+                </td>
+                <td><small style="opacity:0.6;">${legLabel}</small></td>
+                <td class="stat-up">${edgePct}</td>
+                <td>${cost}</td>
+                <td class="stat-up">${profit}</td>
+                <td>${expiryCell}</td>
+            </tr>`;
+        }).join('');
+        tbody.innerHTML = rows;
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <div class="empty-title">Error loading history</div>
+            <div class="empty-sub">${e.message}</div></td></tr>`;
+    }
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────
 
 async function init() {
-    await Promise.all([loadNav(), loadOpportunities(), loadPositions()]);
+    await Promise.all([loadNav(), loadOpportunities(), loadPositions(), loadTradeHistory()]);
     setInterval(loadOpportunities, 30000);
     setInterval(loadNav, 60000);
+    setInterval(loadTradeHistory, 120000);
 }
 
 init();

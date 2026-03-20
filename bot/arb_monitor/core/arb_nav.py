@@ -5,7 +5,7 @@ NAV = servicer_poly_cash + servicer_kalshi_cash + sum(open_positions_liquid_valu
 Liquid value per position uses orderbook BIDS (not asks, not cost basis) to reflect
 real liquidation value: liquid_value = poly_yes_bid + kalshi_yes_bid per share.
 
-Signing follows the same ABI-encoded struct hash pattern as PredictFiArbVaultV1.sol:
+Signing follows the same ABI-encoded struct hash pattern as the PMFI pARB Vault contract (PredictFiArbVaultV1.sol):
   keccak256(abi.encode(NAV_TYPEHASH, totalAssets, polyCash, kalshiCash,
                        openPositionsValue, settledPnl, timestamp, deadline,
                        roundId, vault, chainId, domainSalt))
