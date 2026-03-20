@@ -772,21 +772,25 @@ async function loadPositions() {
                 : 'Expired';
             const title = pos.poly_title || pos.pair_id || '—';
             const contracts = (pos.shares || 0).toFixed(0);
-            // Expected payout = contracts × $1 (YES on both venues settles at $1 each at resolution)
-            // minus the cost paid, net of any edge captured
+            // True arb: Poly YES + Kalshi complementary side → guaranteed $1 per contract regardless of outcome
+            // (one leg always pays $1, the other always pays $0 — net is always $1 × contracts)
             const contractsInt = Math.round(pos.shares || 0);
-            const expectedPayout = '$' + (contractsInt * 2.0).toFixed(2); // both legs pay $1 at resolution
-            const expectedProfit = '$' + Math.max(0, contractsInt * 2.0 - (pos.cost_basis_usdc || 0)).toFixed(2);
+            const expectedPayout = '$' + (contractsInt * 1.0).toFixed(2);
+            const expectedProfit = '$' + Math.max(0, contractsInt * 1.0 - (pos.cost_basis_usdc || 0)).toFixed(2);
+            const kalshiSide = pos.kalshi_side || 'YES';
+            const legLabel = kalshiSide === 'NO'
+                ? 'Poly YES / Kalshi NO'
+                : 'Poly YES / Kalshi YES';
 
             return `<tr>
                 <td>
                     <div class="pair-title" title="${title}">${title}</div>
-                    <div class="pair-subtitle">${pos.kalshi_ticker || ''}</div>
+                    <div class="pair-subtitle">${legLabel} · ${pos.kalshi_ticker || ''}</div>
                 </td>
                 <td>${contracts}</td>
                 <td>${costBasis}</td>
                 <td>${liquidVal}</td>
-                <td title="Both YES legs pay $1 at resolution; gross payout ${expectedPayout}, profit ${expectedProfit}">${expectedPayout}</td>
+                <td title="True arb: guaranteed $1 per contract; expected profit ${expectedProfit}">${expectedPayout}</td>
                 <td>${daysLeft}</td>
             </tr>`;
         }).join('');

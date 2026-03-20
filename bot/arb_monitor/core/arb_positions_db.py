@@ -50,6 +50,7 @@ def init_arb_tables():
                 poly_yes_token VARCHAR(255) NOT NULL,
                 poly_no_token VARCHAR(255) DEFAULT '',
                 kalshi_ticker VARCHAR(255) NOT NULL,
+                kalshi_side VARCHAR(3) NOT NULL DEFAULT 'YES',
                 shares DECIMAL(20, 8) NOT NULL DEFAULT 0,
                 cost_basis_usdc DECIMAL(20, 6) NOT NULL DEFAULT 0,
                 expiry_ts BIGINT NOT NULL DEFAULT 0,
@@ -61,6 +62,11 @@ def init_arb_tables():
                 kalshi_title TEXT DEFAULT '',
                 notes TEXT DEFAULT ''
             )
+        """)
+        # Add kalshi_side column to existing tables that may predate this schema
+        cur.execute("""
+            ALTER TABLE arb_positions
+            ADD COLUMN IF NOT EXISTS kalshi_side VARCHAR(3) NOT NULL DEFAULT 'YES'
         """)
 
         cur.execute("""
@@ -195,8 +201,16 @@ def upsert_position(
     poly_no_token: str = "",
     poly_title: str = "",
     kalshi_title: str = "",
+    kalshi_side: str = "YES",
 ) -> bool:
-    """Create or update an arb position record."""
+    """Create or update an arb position record.
+
+    kalshi_side: "YES" or "NO" — which side was purchased on Kalshi.
+    This is critical for NAV liquid value calculation and unwind logic.
+    """
+    if kalshi_side not in ("YES", "NO"):
+        log(f"⚠️ Invalid kalshi_side={kalshi_side!r}, defaulting to 'YES'")
+        kalshi_side = "YES"
     conn = get_db_conn()
     if not conn:
         return False
@@ -204,13 +218,14 @@ def upsert_position(
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO arb_positions
-                (pair_id, poly_yes_token, poly_no_token, kalshi_ticker, shares,
+                (pair_id, poly_yes_token, poly_no_token, kalshi_ticker, kalshi_side, shares,
                  cost_basis_usdc, expiry_ts, status, poly_title, kalshi_title)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, 'open', %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'open', %s, %s)
             ON CONFLICT (pair_id) DO UPDATE SET
                 shares = arb_positions.shares + EXCLUDED.shares,
-                cost_basis_usdc = arb_positions.cost_basis_usdc + EXCLUDED.cost_basis_usdc
-        """, (pair_id, poly_yes_token, poly_no_token, kalshi_ticker, shares,
+                cost_basis_usdc = arb_positions.cost_basis_usdc + EXCLUDED.cost_basis_usdc,
+                kalshi_side = EXCLUDED.kalshi_side
+        """, (pair_id, poly_yes_token, poly_no_token, kalshi_ticker, kalshi_side, shares,
               cost_basis_usdc, expiry_ts, poly_title, kalshi_title))
         conn.commit()
         cur.close()
@@ -255,6 +270,7 @@ def get_open_positions() -> list[dict]:
         cur = conn.cursor()
         cur.execute("""
             SELECT pair_id, poly_yes_token, poly_no_token, kalshi_ticker,
+                   COALESCE(kalshi_side, 'YES'),
                    shares, cost_basis_usdc, expiry_ts, status,
                    COALESCE(settled_pnl_usdc, 0), opened_at,
                    COALESCE(poly_title, ''), COALESCE(kalshi_title, '')
@@ -270,14 +286,15 @@ def get_open_positions() -> list[dict]:
                 "poly_yes_token": r[1],
                 "poly_no_token": r[2],
                 "kalshi_ticker": r[3],
-                "shares": float(r[4]),
-                "cost_basis_usdc": float(r[5]),
-                "expiry_ts": int(r[6]),
-                "status": r[7],
-                "settled_pnl_usdc": float(r[8]),
-                "opened_at": r[9].isoformat() if r[9] else None,
-                "poly_title": r[10],
-                "kalshi_title": r[11],
+                "kalshi_side": r[4],
+                "shares": float(r[5]),
+                "cost_basis_usdc": float(r[6]),
+                "expiry_ts": int(r[7]),
+                "status": r[8],
+                "settled_pnl_usdc": float(r[9]),
+                "opened_at": r[10].isoformat() if r[10] else None,
+                "poly_title": r[11],
+                "kalshi_title": r[12],
             }
             for r in rows
         ]

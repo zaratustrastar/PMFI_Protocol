@@ -926,6 +926,7 @@ flask_app = Flask(__name__, template_folder=str(FRONTEND_DIR))
 CORS(flask_app)
 
 VAULT_ADDRESS_CONFIG = os.getenv('VAULT_V7_ADDRESS', '0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1')
+ARB_VAULT_ADDRESS_CONFIG = os.getenv('ARB_VAULT_V1_ADDRESS', '')
 
 @flask_app.route('/')
 def serve_index():
@@ -940,6 +941,11 @@ def serve_index():
 def serve_mini():
     """Serve the Farcaster Mini App version with config from env"""
     return render_template('mini.html', vault_address=VAULT_ADDRESS_CONFIG)
+
+@flask_app.route('/arbitrage')
+def serve_arbitrage():
+    """Serve the pARB vault page"""
+    return render_template('arbitrage.html', vault_address=ARB_VAULT_ADDRESS_CONFIG or 'None')
 
 @flask_app.route('/share')
 def serve_share():
@@ -4293,6 +4299,7 @@ def api_arb_vault_positions():
                 cost_basis_usdc=pos["cost_basis_usdc"],
                 expiry_ts=pos["expiry_ts"],
                 status=pos["status"],
+                kalshi_side=pos.get("kalshi_side", "YES"),
             )
             lv = fetch_position_liquid_value(ap)
             enriched.append({

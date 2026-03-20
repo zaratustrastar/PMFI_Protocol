@@ -140,6 +140,7 @@ def _execution_cycle():
             log(f"✅ Execution succeeded for {opp.pair_id}")
             try:
                 # Use actual fill data from executor, not quoted/estimated values
+                kalshi_side = getattr(result, "kalshi_side", opp.kalshi_side)
                 upsert_position(
                     pair_id=opp.pair_id,
                     poly_yes_token=opp.poly_yes_token,
@@ -150,6 +151,7 @@ def _execution_cycle():
                     status="open",
                     poly_title=opp.poly_title,
                     kalshi_title=opp.kalshi_title,
+                    kalshi_side=kalshi_side,
                 )
                 log(
                     f"✅ Position persisted for {opp.pair_id}: "

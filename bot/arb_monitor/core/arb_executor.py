@@ -278,6 +278,8 @@ class ExecutionResult:
         self.live_poly_ask = None
         self.live_kalshi_ask = None
         self.live_edge = None
+        # Which side was bought on Kalshi ("YES" or "NO") — set by execute_arb
+        self.kalshi_side: str = "YES"
         # Actual fill quantities — populated on success
         self.filled_shares: float = 0.0
         self.filled_poly_price: float = 0.0
@@ -432,17 +434,18 @@ def execute_arb(
 
     log(f"✅ Leg 1 placed: {contract_count} contracts orderId={leg1_order_id}")
 
-    log(f"📤 Placing LEG 2: Kalshi YES buy {contract_count} contracts @ {live_kalshi_ask}")
+    kalshi_side = opportunity.kalshi_side if hasattr(opportunity, "kalshi_side") else "YES"
+    log(f"📤 Placing LEG 2: Kalshi {kalshi_side} buy {contract_count} contracts @ {live_kalshi_ask}")
     leg2_ok, leg2_order_id, leg2_err = _place_kalshi_order(
         ticker=kalshi_ticker,
-        side="YES",
+        side=kalshi_side,
         price=live_kalshi_ask,
         size_usdc=leg2_usdc,
         contract_count=contract_count,
     )
     result.leg2_order_id = leg2_order_id
     log_execution_to_db(
-        pair_id=pair_id, leg=2, venue="kalshi", side="YES_BUY",
+        pair_id=pair_id, leg=2, venue="kalshi", side=f"{kalshi_side}_BUY",
         price=live_kalshi_ask, size=float(contract_count),
         success=leg2_ok, error=leg2_err, order_id=leg2_order_id,
     )
@@ -462,6 +465,9 @@ def execute_arb(
         )
         log(f"{'✅' if unwind_ok else '❌'} Auto-unwind: {result.error}")
         return result
+
+    # Store kalshi_side in result so caller can persist it
+    result.kalshi_side = kalshi_side
 
     # Post-placement validation: re-check live prices immediately after both legs are placed.
     # If the actual fill caused the locked spread to deteriorate below the minimum edge threshold,
@@ -490,8 +496,8 @@ def execute_arb(
                 filled_size_usdc=leg1_usdc,
                 filled_price=live_poly_ask,
             )
-            # Best-effort Kalshi unwind (sell back YES position)
-            _kalshi_unwind_best_effort(kalshi_ticker, float(contract_count), live_kalshi_ask)
+            # Best-effort Kalshi unwind (sell back the side we bought)
+            _kalshi_unwind_best_effort(kalshi_ticker, float(contract_count), live_kalshi_ask, kalshi_side)
             result.unwound = unwind_ok
             result.error = (
                 f"post_fill_edge_too_thin: post_edge={post_edge:.4f} < {post_edge_threshold:.4f}. "
@@ -516,12 +522,19 @@ def execute_arb(
     return result
 
 
-def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float) -> bool:
-    """Best-effort Kalshi position unwind: sell YES back to market.
+def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float, side: str = "YES") -> bool:
+    """Best-effort Kalshi position unwind: sell back the side we originally bought.
+
+    Args:
+        ticker: Kalshi market ticker
+        shares: Number of contracts to unwind
+        fill_price: Price we paid (used as reference for limit price)
+        side: "YES" or "NO" — must match the side we originally bought
 
     Returns True if successful, False otherwise. Never raises.
     """
-    log(f"🔄 [KALSHI] Best-effort unwind: ticker={ticker} shares={shares:.4f}")
+    side_lower = side.lower() if side in ("YES", "NO") else "yes"
+    log(f"🔄 [KALSHI] Best-effort unwind: ticker={ticker} shares={shares:.4f} side={side}")
     kalshi_api_key = os.environ.get("KALSHI_API_KEY", "")
     if not kalshi_api_key:
         log("❌ [KALSHI] KALSHI_API_KEY not set — cannot unwind Kalshi position")
@@ -531,7 +544,8 @@ def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float) ->
         from ..config import KALSHI_BASE_URL
         import requests
 
-        sell_price = max(int(fill_price * 100) - 5, 1)  # 5 cents below fill as limit
+        # Place sell limit 5 cents below fill price (in cents) to ensure fill
+        sell_price_cents = max(int(fill_price * 100) - 5, 1)
         url = f"{KALSHI_BASE_URL}/portfolio/orders"
         headers = {
             "Authorization": f"Bearer {kalshi_api_key}",
@@ -543,14 +557,19 @@ def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float) ->
             "client_order_id": f"unwind_{int(time.time())}",
             "type": "limit",
             "action": "sell",
-            "side": "yes",
+            "side": side_lower,
             "count": contracts,
-            "yes_price": sell_price,
             "expiration_ts": int(time.time()) + 30,
         }
+        # Set the price field matching the side being sold
+        if side_lower == "yes":
+            payload["yes_price"] = sell_price_cents
+        else:
+            payload["no_price"] = sell_price_cents
+
         resp = requests.post(url, json=payload, headers=headers, timeout=10)
         if resp.status_code in (200, 201):
-            log(f"✅ [KALSHI] Unwind order placed")
+            log(f"✅ [KALSHI] Unwind order placed (side={side})")
             return True
         else:
             log(f"❌ [KALSHI] Unwind failed: HTTP {resp.status_code} — manual intervention needed")

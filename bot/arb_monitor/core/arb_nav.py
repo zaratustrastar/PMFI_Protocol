@@ -38,6 +38,9 @@ class ArbPosition:
     expiry_ts: int
     status: str
     settled_pnl_usdc: float = 0.0
+    # Which side was bought on Kalshi ("YES" or "NO")
+    # Determines whether to use kalshi_yes_bid or kalshi_no_bid for liquid value.
+    kalshi_side: str = "YES"
 
 
 @dataclass
@@ -54,33 +57,43 @@ class LiquidPositionValue:
 def fetch_position_liquid_value(position: ArbPosition) -> LiquidPositionValue:
     """Fetch live bids (not asks) for both legs of an open arb position.
 
-    Uses bids because we want liquidation value (what we can sell for today),
-    not cost basis or ask prices.
+    Uses bids because we want liquidation value (what we can sell for today).
+    Uses the CORRECT bid side per leg:
+    - Poly leg: always YES (we always buy Poly YES for the arb)
+    - Kalshi leg: YES bid or NO bid depending on position.kalshi_side
+      (e.g. if we bought Kalshi NO, the liquidation bid is kalshi_no_bid)
     """
-    log(f"Fetching liquid value for pair_id={position.pair_id}")
+    log(f"Fetching liquid value for pair_id={position.pair_id} (kalshi_side={position.kalshi_side})")
 
     poly_prices = poly_get_best_prices(position.poly_yes_token)
     poly_yes_bid = poly_prices.get("best_bid")
 
     kalshi_prices = kalshi_get_best_prices(position.kalshi_ticker)
-    kalshi_yes_bid = kalshi_prices.get("yes_best_bid")
+
+    # Determine Kalshi liquidation bid based on which side was bought
+    if position.kalshi_side == "NO":
+        kalshi_leg_bid = kalshi_prices.get("no_best_bid")
+        kalshi_bid_label = "no_bid"
+    else:
+        kalshi_leg_bid = kalshi_prices.get("yes_best_bid")
+        kalshi_bid_label = "yes_bid"
 
     warning = ""
     if poly_yes_bid is None:
         warning += "poly_bid_missing "
         poly_yes_bid = 0.0
         log(f"⚠️ poly_bid_missing for {position.pair_id}")
-    if kalshi_yes_bid is None:
-        warning += "kalshi_bid_missing "
-        kalshi_yes_bid = 0.0
-        log(f"⚠️ kalshi_bid_missing for {position.pair_id}")
+    if kalshi_leg_bid is None:
+        warning += f"kalshi_{kalshi_bid_label}_missing "
+        kalshi_leg_bid = 0.0
+        log(f"⚠️ kalshi_{kalshi_bid_label}_missing for {position.pair_id}")
 
-    liquid_value_per_share = poly_yes_bid + kalshi_yes_bid
+    liquid_value_per_share = poly_yes_bid + kalshi_leg_bid
     total_liquid_value = liquid_value_per_share * position.shares
 
     log(
         f"Position {position.pair_id}: "
-        f"poly_bid={poly_yes_bid}, kalshi_bid={kalshi_yes_bid}, "
+        f"poly_yes_bid={poly_yes_bid}, kalshi_{kalshi_bid_label}={kalshi_leg_bid}, "
         f"liquid_per_share={liquid_value_per_share:.4f}, "
         f"shares={position.shares}, total={total_liquid_value:.4f} USDC"
     )
@@ -88,7 +101,7 @@ def fetch_position_liquid_value(position: ArbPosition) -> LiquidPositionValue:
     return LiquidPositionValue(
         pair_id=position.pair_id,
         poly_yes_bid=poly_yes_bid,
-        kalshi_yes_bid=kalshi_yes_bid,
+        kalshi_yes_bid=kalshi_leg_bid,
         liquid_value_per_share=liquid_value_per_share,
         total_liquid_value=total_liquid_value,
         shares=position.shares,
@@ -108,7 +121,8 @@ def _load_open_positions() -> list[ArbPosition]:
         cur = conn.cursor()
         cur.execute("""
             SELECT pair_id, poly_yes_token, kalshi_ticker, shares, cost_basis_usdc,
-                   expiry_ts, status, COALESCE(settled_pnl_usdc, 0)
+                   expiry_ts, status, COALESCE(settled_pnl_usdc, 0),
+                   COALESCE(kalshi_side, 'YES')
             FROM arb_positions
             WHERE status = 'open'
         """)
@@ -126,6 +140,7 @@ def _load_open_positions() -> list[ArbPosition]:
                 expiry_ts=int(row[5]),
                 status=row[6],
                 settled_pnl_usdc=float(row[7]),
+                kalshi_side=row[8] if row[8] in ("YES", "NO") else "YES",
             ))
         log(f"Loaded {len(positions)} open positions from DB")
         return positions

@@ -33,6 +33,11 @@ class ArbOpportunity:
     pnl_velocity: float
     poly_title: str = ""
     kalshi_title: str = ""
+    # Which side to buy on Kalshi to complete the arb with Poly YES.
+    # "YES"  → buy Kalshi YES (market is already the mirror of Poly, e.g. "Will X NOT happen?")
+    # "NO"   → buy Kalshi NO  (market is the same direction as Poly; NO completes the spread)
+    # Defaults to "YES" when Oddpool does not specify; update if their schema adds a side field.
+    kalshi_side: str = "YES"
     raw: dict = None
 
     def to_dict(self) -> dict:
@@ -49,6 +54,7 @@ class ArbOpportunity:
             "pnl_velocity": round(self.pnl_velocity, 6),
             "poly_title": self.poly_title,
             "kalshi_title": self.kalshi_title,
+            "kalshi_side": self.kalshi_side,
         }
 
 
@@ -165,6 +171,39 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         poly_title = entry.get("poly_title") or entry.get("polymarket_title") or ""
         kalshi_title = entry.get("kalshi_title") or entry.get("kalshi_market_title") or ""
 
+        # Determine which side to buy on Kalshi for the arb leg.
+        # Oddpool may provide "kalshi_side": "YES" or "NO" explicitly.
+        # - "YES": Kalshi market is defined opposite to Poly (e.g. "Will X NOT happen?"), so buying
+        #          Kalshi YES is the complementary side that locks in the spread with Poly YES.
+        # - "NO":  Kalshi market is same-direction as Poly; buying Kalshi NO completes the arb.
+        # If Oddpool does not provide this field, we infer from context:
+        #   prefer "NO" when `kalshi_no_ask` is present and cheaper than YES (true NO-hedge),
+        #   otherwise default to "YES".
+        kalshi_side_raw = (
+            entry.get("kalshi_side") or
+            entry.get("kalshi_arb_side") or
+            entry.get("kalshi_leg_side") or
+            ""
+        ).upper()
+        if kalshi_side_raw in ("YES", "NO"):
+            kalshi_side = kalshi_side_raw
+        else:
+            # Infer: if Oddpool provides kalshi_no_ask and that's what forms the edge, use NO
+            kalshi_no_ask_raw = entry.get("kalshi_no_ask") or entry.get("kalshi_no_price")
+            if kalshi_no_ask_raw is not None:
+                kalshi_no_ask = float(kalshi_no_ask_raw)
+                # Edge is 1 - poly_yes_ask - kalshi_no_ask in this case
+                no_edge = 1.0 - poly_yes_ask - kalshi_no_ask if poly_yes_ask > 0 and kalshi_no_ask > 0 else -1
+                yes_edge = 1.0 - poly_yes_ask - kalshi_yes_ask if poly_yes_ask > 0 and kalshi_yes_ask > 0 else -1
+                kalshi_side = "NO" if no_edge > yes_edge else "YES"
+                if kalshi_side == "NO":
+                    # Override the ask to the NO ask for the edge/pricing formulas
+                    kalshi_yes_ask = kalshi_no_ask
+                    gross_edge_pct = max(0.0, no_edge)
+                    pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)
+            else:
+                kalshi_side = "YES"
+
         return ArbOpportunity(
             pair_id=pair_id,
             poly_yes_token=poly_yes_token,
@@ -178,6 +217,7 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             pnl_velocity=pnl_velocity,
             poly_title=poly_title,
             kalshi_title=kalshi_title,
+            kalshi_side=kalshi_side,
             raw=entry,
         )
     except Exception as e:
