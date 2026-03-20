@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 /**
- * @title PredictFiArbVaultV1
+ * @title PMFIArbVaultV1
  * @notice pARB vault — PMFI cross-venue arbitrage vault (Polymarket × Kalshi × Opinion Labs)
  * @dev
  *
@@ -21,7 +21,7 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
  * - Withdrawals are queued; claims require vault buffer to be refilled by servicer
  *
  * Key differences from pSNIPER:
- * - Domain salt: PredictFiArbVaultV1.v1
+ * - Domain salt: PMFIArbVaultV1.v1
  * - Token: pARB
  * - Deposits forwarded to dedicated pArb servicer wallet (not Polymarket deposit address)
  * - NAV includes poly_cash, kalshi_cash, open_positions_liquid_value, settled_pnl
@@ -37,7 +37,7 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
  * - Withdrawal tax BPS (configurable, default 0)
  * - Reentrancy guard
  */
-contract PredictFiArbVaultV1 is ERC20, Ownable, ReentrancyGuard {
+contract PMFIArbVaultV1 is ERC20, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
@@ -51,7 +51,7 @@ contract PredictFiArbVaultV1 is ERC20, Ownable, ReentrancyGuard {
     );
 
     /// @dev Domain salt isolates this vault from pSNIPER signatures
-    bytes32 public constant DOMAIN_SALT = keccak256("PredictFiArbVaultV1.v1");
+    bytes32 public constant DOMAIN_SALT = keccak256("PMFIArbVaultV1.v1");
 
     uint256 public constant MAX_NAV_AGE = 30;            // 30-second NAV validity window
     uint256 public constant MIN_NAV_INTERVAL = 25;       // 25s minimum between NAV updates

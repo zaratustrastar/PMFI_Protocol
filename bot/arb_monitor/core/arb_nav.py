@@ -5,7 +5,7 @@ NAV = servicer_poly_cash + servicer_kalshi_cash + sum(open_positions_liquid_valu
 Liquid value per position uses orderbook BIDS (not asks, not cost basis) to reflect
 real liquidation value: liquid_value = poly_yes_bid + kalshi_yes_bid per share.
 
-Signing follows the same ABI-encoded struct hash pattern as the PMFI pARB Vault contract (PredictFiArbVaultV1.sol):
+Signing follows the same ABI-encoded struct hash pattern as the PMFI pARB Vault contract (PMFIArbVaultV1.sol):
   keccak256(abi.encode(NAV_TYPEHASH, totalAssets, polyCash, kalshiCash,
                        openPositionsValue, settledPnl, timestamp, deadline,
                        roundId, vault, chainId, domainSalt))
@@ -24,7 +24,7 @@ def log(msg: str):
     print(f"📈 [Arb/NAV] {msg}")
 
 
-ARB_VAULT_DOMAIN_SALT = "PredictFiArbVaultV1.v1"
+ARB_VAULT_DOMAIN_SALT = "PMFIArbVaultV1.v1"
 NAV_VALIDITY_WINDOW = 30  # 30-second deadline window (contract MAX_NAV_AGE = 30)
 
 
@@ -234,7 +234,7 @@ def _sign_nav_abi_encoded(
 ) -> Optional[str]:
     """Sign NAV payload using ECDSA over ABI-encoded ArbNavDataV1 struct hash.
 
-    Matches the encoding verified on-chain in PredictFiArbVaultV1._verifyAndApplyNav:
+    Matches the encoding verified on-chain in PMFIArbVaultV1._verifyAndApplyNav:
       keccak256(abi.encode(NAV_TYPEHASH, totalAssets, polyCash, kalshiCash,
                            openPositionsValue, settledPnl, timestamp, deadline,
                            roundId, vault, chainId, domainSalt))

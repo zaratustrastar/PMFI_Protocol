@@ -1,7 +1,7 @@
 /**
- * Deploy PMFI pARB Vault (PredictFiArbVaultV1) to Base Mainnet
+ * Deploy PMFI pARB Vault (PMFIArbVaultV1) to Base Mainnet
  *
- * Contract: PredictFiArbVaultV1
+ * Contract: PMFIArbVaultV1
  * Token:    pARB
  * Venue:    Polymarket × Kalshi × Opinion Labs cross-venue arb vault
  *
@@ -72,7 +72,7 @@ async function main() {
     console.log(`   Tax Collector:     ${TAX_COLLECTOR}`);
     console.log(`   Servicer Wallet:   ${ARB_SERVICER_WALLET}`);
     console.log(`   Max Total Deposit: $${maxTotalUsdc} USDC`);
-    console.log(`   Domain Salt:       PredictFiArbVaultV1.v1`);
+    console.log(`   Domain Salt:       PMFIArbVaultV1.v1`);
     console.log(`   Token:             pARB`);
     console.log(`   Min Deposit:       $10 USDC`);
     console.log(`   Withdrawal Expiry: 7 days`);
@@ -80,7 +80,7 @@ async function main() {
     // ── Deploy ────────────────────────────────────────────────────────────
     console.log(`\n⏳ Deploying contract...`);
 
-    const VaultFactory = await hre.ethers.getContractFactory("PredictFiArbVaultV1");
+    const VaultFactory = await hre.ethers.getContractFactory("PMFIArbVaultV1");
     const vault = await VaultFactory.deploy(
         USDC_ADDRESS,
         ARB_NAV_SIGNER,
@@ -92,13 +92,13 @@ async function main() {
     await vault.waitForDeployment();
     const vaultAddress = await vault.getAddress();
 
-    console.log(`\n✅ PredictFiArbVaultV1 deployed!`);
+    console.log(`\n✅ PMFIArbVaultV1 deployed!`);
     console.log(`   Address: ${vaultAddress}`);
     console.log(`   Block:   ${await hre.ethers.provider.getBlockNumber()}`);
 
     // ── Save deployment info ──────────────────────────────────────────────
     const deploymentInfo = {
-        contract: "PredictFiArbVaultV1",
+        contract: "PMFIArbVaultV1",
         token: "pARB",
         address: vaultAddress,
         network: "base-mainnet",
@@ -111,7 +111,7 @@ async function main() {
         maxTotalUsdc: maxTotalUsdc,
         maxTotalRaw: MAX_TOTAL.toString(),
         minDepositUsdc: "10",
-        domainSalt: "PredictFiArbVaultV1.v1",
+        domainSalt: "PMFIArbVaultV1.v1",
         timestamp: new Date().toISOString(),
     };
 

@@ -39,7 +39,7 @@ npx hardhat run scripts/deploy-arb-vault-v1-mainnet.cjs --network base
 ```
 
 This will:
-- Deploy `PredictFiArbVaultV1` (token name: "PMFI Arb", symbol: "pARB")
+- Deploy `PMFIArbVaultV1` (token name: "PMFI Arb", symbol: "pARB")
 - Save deployment info to `deployments/arb-vault-v1-mainnet.json`
 - Print the contract address and a manual verify command
 
@@ -151,9 +151,9 @@ Or visit `https://app.pmfi.cc/arbitrage` → Trade History panel should populate
 
 ## Contract Info
 
-- **Name**: PMFI Arb Vault V1
-- **Token**: pARB
+- **Contract class**: `PMFIArbVaultV1`
+- **Token name / symbol**: PMFI Arb / pARB
 - **Network**: Base Mainnet (chainId: 8453)
 - **USDC**: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
-- **Domain salt** (for NAV signing): `PredictFiArbVaultV1.v1`
-  *(must stay as-is — this is baked into the deployed contract's verifier)*
+- **Domain salt** (for NAV signing): `PMFIArbVaultV1.v1`
+  *(this string is baked into `DOMAIN_SALT` in the contract and must match `ARB_VAULT_DOMAIN_SALT` in `arb_nav.py`)*
