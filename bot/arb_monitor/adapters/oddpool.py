@@ -38,11 +38,12 @@ from ..config import (
 )
 
 # ── Polymarket orderbook scorer cache ────────────────────────────────────────
-# Keyed by YES token ID. Value: (poly_fillable_contracts, cached_at).
-# TTL: 5 minutes — short enough to track liquidity changes between cycles,
-# long enough to avoid hammering the CLOB when many opportunities resolve to
-# the same token (e.g., YES and NO sides of the same market).
-_BOOK_CACHE: dict[str, tuple[int, float]] = {}
+# Keyed by (token_id, ask_price_cents) where ask_price_cents = round(ask * 100).
+# Including the fill price in the key prevents cross-price cache contamination:
+# the same token may appear in multiple opportunities at slightly different ask
+# prices, and fillable depth at 0.48 differs from depth at 0.52.
+# Value: (poly_fillable_contracts, cached_at). TTL: 5 minutes.
+_BOOK_CACHE: dict[tuple[str, int], tuple[int, float]] = {}
 _BOOK_CACHE_TTL = 300  # seconds
 
 def log(msg: str):
@@ -410,7 +411,11 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
 
         if scorer_token and our_poly_ask > 0:
             now_book = time.time()
-            cached_book = _BOOK_CACHE.get(scorer_token)
+            # Cache key includes quantised ask price (nearest cent) so opportunities
+            # for the same token at different ask prices get independent depth results.
+            ask_cents = round(our_poly_ask * 100)
+            cache_key = (scorer_token, ask_cents)
+            cached_book = _BOOK_CACHE.get(cache_key)
             if cached_book is not None and (now_book - cached_book[1]) < _BOOK_CACHE_TTL:
                 poly_contracts_fillable = cached_book[0]
             else:
@@ -420,7 +425,7 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
                     if book:
                         # max fill price = our quoted ask (depth at the spread)
                         poly_contracts_fillable, _ = compute_fillable_contracts(book, our_poly_ask)
-                        _BOOK_CACHE[scorer_token] = (poly_contracts_fillable, now_book)
+                        _BOOK_CACHE[cache_key] = (poly_contracts_fillable, now_book)
                     else:
                         poly_contracts_fillable = -1  # signal: book unavailable
                 except Exception as _e:

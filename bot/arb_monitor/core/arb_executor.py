@@ -516,11 +516,13 @@ def execute_arb(
     max_leg2_fill_price = max(0.0, 1.0 - live_poly_ask - min_edge_pct)
 
     # Polymarket: fetch full book and walk it.
-    # Fail policy: fail-open (fall back to top-of-book ask_size when book unavailable).
-    # Rationale: Poly CLOB is highly liquid and ask_size reflects real top-level capacity;
-    # a temporary book fetch failure should not block an otherwise valid trade.
-    # Contrast: Kalshi uses fail-closed (abort) because its API is less resilient and
-    # the bid-side structure matters more for size accuracy.
+    # Fail policy: FAIL-OPEN — fall back to top-of-book ask_size when full book unavailable.
+    # Product rationale: Poly's CLOB is highly available and ask_size is a reliable
+    # conservative proxy for top-level capacity; blocking a valid trade on a transient
+    # CLOB latency is a worse outcome than a slightly under-verified size estimate.
+    # This is an explicit asymmetry vs Kalshi (which FAIL-CLOSEs on depth unavailability).
+    # If your risk tolerance requires strict full-ladder verification on both legs,
+    # change the else branch to: `result.error = "poly_depth_unavailable: ..."; return result`.
     poly_book = poly_fetch_orderbook(poly_yes_token)
     if poly_book:
         poly_fillable, poly_depth_usdc = poly_compute_fillable(poly_book, max_poly_fill_price)
