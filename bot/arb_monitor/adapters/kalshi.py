@@ -340,13 +340,13 @@ def fetch_orderbook_depth(ticker: str, depth: int = 25) -> Optional[dict]:
 
     Uses GET /markets/{ticker}/orderbook?depth=N.
 
-    Auth: The Kalshi orderbook endpoint is a *public* read endpoint — it requires
-    no RSA signing or authentication token.  This is consistent with all other
-    Kalshi price-checking functions in this adapter (`get_best_prices`,
-    `fetch_all_active_markets`, etc.) which also use the unauthenticated
-    `_headers()` helper.  Only Kalshi *trading* endpoints (order placement,
-    portfolio) require RSA auth; those are handled in the separate `kalshi_auth`
-    module used by `arb_nav.py` for balance queries.
+    Auth: RSA credentials are used when configured (KALSHI_API_KEY_ID +
+    KALSHI_PRIVATE_KEY_PATH/PEM); the Kalshi v2 orderbook read endpoint also
+    works without auth in practice, so the implementation sends RSA headers
+    when available and falls back to unauthenticated `_headers()` otherwise.
+    This is consistent with how all other price-checking functions in this
+    adapter work (`get_best_prices`, `fetch_all_active_markets`) — only order
+    placement and portfolio endpoints strictly require RSA signing.
 
     Response format:
       { "orderbook": { "yes": [{"price": 52, "delta": 150}, ...],

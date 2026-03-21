@@ -15,8 +15,8 @@ Scoring (profit-maximising):
   net_edge_pct   = net_cents - slippage_guard_pct - risk_buffer_pct
   annualized_return = (1 + net_edge_pct/100)^(365 / max(days_to_expiry, 0.5)) - 1
   confidence     = logistic function of min(poly_liq, venue2_liq); 0 when net_edge <= 0
-  fillable_size  = min(real_poly_book_depth @ poly_ask, ARB_FILLABLE_FRACTION × bottleneck_liq)
-                   (falls back to heuristic when token unresolved or book unavailable)
+  fillable_size  = real_poly_book_depth_usdc @ poly_ask  (when token resolved & book available)
+                   fallback: ARB_FILLABLE_FRACTION × min(poly_liq, venue2_liq)  (heuristic)
   score          = annualized_return × confidence × fillable_size
 
 Opportunities are sorted by score descending. Deployment caps (ARB_MAX_PAIR_USDC etc.)
