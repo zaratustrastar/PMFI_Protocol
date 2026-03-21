@@ -1667,10 +1667,6 @@ async function webLoadArb() {
             }
         }
 
-        // Drop markets whose resolution time has already passed
-        const nowSec = Math.floor(Date.now() / 1000);
-        allOpps = allOpps.filter(o => !o.expiryTs || o.expiryTs > nowSec);
-
         allOpps.sort((a, b) => (a.expiryTs || 0) - (b.expiryTs || 0));
 
         if (statusEl) {
