@@ -490,25 +490,38 @@ def execute_arb(
         log(f"❌ {result.error}")
         return result
 
+    # ── Budget sizing (computed before depth check so fallbacks can reference it) ──
+    # Use the more expensive leg's ask as the sizing denominator so the integer count
+    # fits within budget for BOTH legs simultaneously (no partial unmatched exposure).
+    half_budget = min(size_usdc, ARB_MAX_PAIR_USDC) / 2.0
+    max_leg_ask = max(live_poly_ask, live_kalshi_ask)
+
+    if max_leg_ask <= 0:
+        result.error = "cannot_compute_contracts: max ask is zero"
+        log(f"❌ {result.error}")
+        return result
+
+    budget_contract_count = int(half_budget / max_leg_ask)
+
     # ── Order book depth cap ──────────────────────────────────────────────────
-    # The price check above only verified that the TOP of book is within edge.
-    # If the order book is thin, filling our full budget would walk up the ladder
-    # into unfavourable prices, erasing (or inverting) the edge.
+    # The slippage guard above only verifies the TOP of book is within edge.
+    # If the book is thin, filling our full budget walks into unfavourable prices,
+    # erasing the arb edge. We cap contract_count by actual book depth.
     #
-    # max_fill_price per leg: the highest price we can pay on that leg and still
-    # retain at least min_edge_pct of edge on the combined position.
+    # max_fill_price per leg: highest price we can pay on that leg and still retain
+    # at least min_edge_pct edge on the combined position.
     #   poly  leg: max = 1.0 - live_leg2_ask - min_edge_pct
     #   leg-2 leg: max = 1.0 - live_poly_ask  - min_edge_pct
     max_poly_fill_price = max(0.0, 1.0 - live_kalshi_ask - min_edge_pct)
     max_leg2_fill_price = max(0.0, 1.0 - live_poly_ask - min_edge_pct)
 
-    # Polymarket: reuse the full book (already fetched; one more call is cheap/cached)
+    # Polymarket: fetch full book and walk it.  Falls back to top-of-book ask_size.
     poly_book = poly_fetch_orderbook(poly_yes_token)
     if poly_book:
         poly_fillable, poly_depth_usdc = poly_compute_fillable(poly_book, max_poly_fill_price)
     else:
-        # Book unavailable — fall back to top-of-book ask_size (conservative)
-        poly_fillable = int(poly_prices.get("ask_size", 0))
+        # Book unavailable — conservative: use ask_size from the earlier best-price fetch.
+        poly_fillable = int(poly_prices.get("ask_size") or 0)
         poly_depth_usdc = poly_fillable * live_poly_ask
         log(f"⚠️ Poly full book unavailable, using ask_size={poly_fillable} as depth floor")
 
@@ -521,16 +534,21 @@ def execute_arb(
                 kalshi_book, kalshi_side_for_depth, max_leg2_fill_price
             )
         else:
-            # Orderbook endpoint unavailable — treat as unlimited depth to be safe;
-            # the slippage guard already caught major price movements.
-            leg2_fillable = 999_999
+            # Orderbook endpoint unavailable — conservative fallback: cap at budget-derived
+            # count so depth check never PERMITS more than budget would anyway.
+            # The slippage guard already protects against adverse price moves; this ensures
+            # we don't size beyond what we could afford at the quoted price regardless.
+            leg2_fillable = budget_contract_count
             leg2_depth_usdc = 0.0
-            log(f"⚠️ Kalshi orderbook unavailable for {kalshi_ticker} — depth cap skipped for leg 2")
+            log(
+                f"⚠️ Kalshi orderbook unavailable for {kalshi_ticker} — "
+                f"falling back to budget cap ({budget_contract_count} contracts)"
+            )
     else:
-        # Opinion Labs: no orderbook depth API available; depth cap skipped for leg 2
-        leg2_fillable = 999_999
+        # Opinion Labs: no orderbook depth API; Poly-side depth still applied.
+        leg2_fillable = budget_contract_count
         leg2_depth_usdc = 0.0
-        log(f"ℹ️ Opinion Labs depth API not available — depth cap skipped for leg 2")
+        log(f"ℹ️ Opinion Labs depth API not available — leg-2 capped at budget ({budget_contract_count} contracts)")
 
     log(
         f"📏 Depth summary: "
@@ -539,22 +557,9 @@ def execute_arb(
     )
     # ─────────────────────────────────────────────────────────────────────────
 
-    # Compute contract count as an integer first — both venues trade in whole contracts.
-    # Use the more expensive leg's ask as the sizing denominator so the integer count
-    # fits within budget for BOTH legs simultaneously (no partial unmatched exposure).
-    # Both legs get EXACTLY the same integer contract_count.
-    half_budget = min(size_usdc, ARB_MAX_PAIR_USDC) / 2.0
-    max_leg_ask = max(live_poly_ask, live_kalshi_ask)
-
-    if max_leg_ask <= 0:
-        result.error = "cannot_compute_contracts: max ask is zero"
-        log(f"❌ {result.error}")
-        return result
-
     # Integer contract count ensures both legs are exactly matched (no directional residual).
     # Cap to the minimum of budget-derived count and the depth-limited fillable count so
     # we never attempt to fill more contracts than the books can absorb at a profitable price.
-    budget_contract_count = int(half_budget / max_leg_ask)
     depth_limited_count = min(poly_fillable, leg2_fillable)
     contract_count = min(budget_contract_count, depth_limited_count)
 

@@ -15,7 +15,8 @@ Scoring (profit-maximising):
   net_edge_pct   = net_cents - slippage_guard_pct - risk_buffer_pct
   annualized_return = (1 + net_edge_pct/100)^(365 / max(days_to_expiry, 0.5)) - 1
   confidence     = logistic function of min(poly_liq, venue2_liq); 0 when net_edge <= 0
-  fillable_size  = ARB_FILLABLE_FRACTION × min(poly_liq, venue2_liq)   [no cap — scorer sees raw]
+  fillable_size  = min(real_poly_book_depth @ poly_ask, ARB_FILLABLE_FRACTION × bottleneck_liq)
+                   (falls back to heuristic when token unresolved or book unavailable)
   score          = annualized_return × confidence × fillable_size
 
 Opportunities are sorted by score descending. Deployment caps (ARB_MAX_PAIR_USDC etc.)
@@ -35,6 +36,14 @@ from ..config import (
     ODDPOOL_API_KEY, ODDPOOL_BASE_URL,
     ARB_SLIPPAGE_GUARD_BPS, ARB_RISK_BUFFER_PCT, ARB_FILLABLE_FRACTION,
 )
+
+# ── Polymarket orderbook scorer cache ────────────────────────────────────────
+# Keyed by YES token ID. Value: (poly_fillable_contracts, cached_at).
+# TTL: 5 minutes — short enough to track liquidity changes between cycles,
+# long enough to avoid hammering the CLOB when many opportunities resolve to
+# the same token (e.g., YES and NO sides of the same market).
+_BOOK_CACHE: dict[str, tuple[int, float]] = {}
+_BOOK_CACHE_TTL = 300  # seconds
 
 def log(msg: str):
     print(f"🔀 [Arb/Oddpool] {msg}")
@@ -334,6 +343,10 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         days_to_expiry = max(0.0, (expiry_ts - now) / 86400) if expiry_ts > now else 0.0
         pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)
 
+        # Resolve token early so the scorer (Step 4) can use it for real book depth.
+        # Cached for 60 min; failures cached 5 min to avoid Gamma hammering.
+        resolved_token = _resolve_poly_token(polymarket_slug)
+
         # ── Profit-maximising scorer ──────────────────────────────────────────
         # Step 1: net edge — subtract expected slippage and execution risk buffer.
         #   ARB_SLIPPAGE_GUARD_BPS is in bps (e.g. 50 bps = 0.5%), convert to pct.
@@ -373,10 +386,47 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             # k = 5000 → half-confidence at $5k liquidity; tuned for prediction markets
             confidence = max(0.05, min(1.0, bottleneck_liq / (bottleneck_liq + 5000.0)))
 
-        # Step 4: fillable size — conservative fraction of the bottleneck leg's liquidity.
-        #   No artificial cap here; deployment caps are applied at execution time.
-        #   Floor at $10 so tiny but valid markets still receive a non-zero score.
-        fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
+        # Step 4: fillable size — use real Polymarket ask-ladder depth when the YES
+        #   token has been resolved; fall back to the heuristic fraction of reported
+        #   liquidity otherwise (e.g., display-only markets whose tokens are pending).
+        #
+        #   Real depth walk: walk book asks at prices <= our_poly_ask to count contracts
+        #   immediately available at the quoted spread.  Result is cached 5 min per token
+        #   to avoid hammering the CLOB for every opportunity in the same cycle.
+        #
+        #   Heuristic fallback: ARB_FILLABLE_FRACTION × bottleneck_liq (same as before).
+        #   Floor at $10 so tiny-but-valid markets still receive a non-zero score.
+        fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)  # default heuristic
+        if resolved_token and our_poly_ask > 0:
+            now_book = time.time()
+            cached_book = _BOOK_CACHE.get(resolved_token)
+            if cached_book is not None and (now_book - cached_book[1]) < _BOOK_CACHE_TTL:
+                poly_contracts_fillable = cached_book[0]
+            else:
+                try:
+                    from .polymarket import fetch_orderbook, compute_fillable_contracts
+                    book = fetch_orderbook(resolved_token)
+                    if book:
+                        # max fill price = our quoted ask (depth at the spread, not below)
+                        poly_contracts_fillable, _ = compute_fillable_contracts(book, our_poly_ask)
+                        _BOOK_CACHE[resolved_token] = (poly_contracts_fillable, now_book)
+                    else:
+                        poly_contracts_fillable = -1  # signal: book unavailable
+                except Exception as _e:
+                    log(f"⚠️ Book depth fetch error for scorer (token={resolved_token[:16]}): {_e}")
+                    poly_contracts_fillable = -1
+
+            if poly_contracts_fillable >= 0:
+                # Convert contracts → USDC at the quoted poly ask price
+                poly_fillable_usdc = poly_contracts_fillable * our_poly_ask
+                # Take the minimum of real poly depth and the heuristic so we're
+                # never MORE optimistic than the reported liquidity suggests.
+                fillable_size_usdc = max(10.0, min(poly_fillable_usdc, bottleneck_liq * ARB_FILLABLE_FRACTION))
+                log(
+                    f"📏 [Scorer] real poly depth: {poly_contracts_fillable} contracts "
+                    f"= ${poly_fillable_usdc:.0f} USDC → fillable_size=${fillable_size_usdc:.0f}"
+                )
+            # else: book unavailable — keep heuristic computed above
 
         # Step 5: composite score — natural language: "expected annualised dollar edge"
         #   Ties together quality (annualized_return), reliability (confidence), and
@@ -392,9 +442,7 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         )
         # ─────────────────────────────────────────────────────────────────────
 
-        # Resolve Polymarket slug → real CLOB YES token ID so the executor can
-        # place live orders. Cached for 60 min. Falls back to slug if unavailable.
-        resolved_token = _resolve_poly_token(polymarket_slug)
+        # resolved_token was set earlier (before scorer) — reuse it here.
         poly_yes_token = resolved_token if resolved_token else polymarket_slug
         is_display_only = resolved_token is None  # False when we have a real token ID
 
