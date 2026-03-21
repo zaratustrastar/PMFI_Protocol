@@ -48,6 +48,10 @@ class ArbOpportunity:
     venue2: str = "kalshi"     # "kalshi" or "opinion"
     opinion_market_id: str = ""
     opinion_slug: str = ""
+    # True when poly_yes_token is a slug (not a real Polymarket token address).
+    # Oddpool /arbitrage/current does not return token IDs — only event slugs.
+    # Execution code must check this flag before attempting to place orders.
+    is_display_only: bool = True
     raw: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
@@ -69,6 +73,7 @@ class ArbOpportunity:
             "venue2": self.venue2,
             "opinion_market_id": self.opinion_market_id,
             "opinion_slug": self.opinion_slug,
+            "is_display_only": self.is_display_only,
         }
 
 
@@ -231,11 +236,20 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             our_venue2_ask = kalshi_yes_ask_raw
             kalshi_side = "NO"
 
-        # Edge: net_cents is profit in cents per $1 invested → convert to percent
-        # 1.0 cent → gross_edge_pct = 1.0 (1%), so frontend edgePct/100 = 0.01, display 1.0%
+        # Edge units:
+        #   Oddpool returns net_cents / gross_cents as CENTS per dollar (e.g. 1.0 = 1¢ profit).
+        #   ArbOpportunity.gross_edge_pct is stored in PERCENT units (1.0 = 1%).
+        #   Since 1 cent per $1 invested == 1% profit, we assign gross_edge_pct = gross_cents
+        #   DIRECTLY (no division by 100).
+        #
+        #   Frontend verification:
+        #     _oddpoolToCard: edge = gross_edge_pct / 100  (e.g. 1.0/100 = 0.01)
+        #     webRenderArbCard: edgePct = (edge * 100).toFixed(1) → "1.0"  → badge shows "1.0%"
+        #   Using net_cents/100 as the task description suggested would give gross_edge_pct=0.01
+        #   → edge=0.0001 → display "0.0%" which is wrong.
         net_cents = float(entry.get("net_cents") or 0)
         gross_cents = float(entry.get("gross_cents") or net_cents)
-        gross_edge_pct = gross_cents  # cents == percent for this display convention
+        gross_edge_pct = gross_cents  # direct: 1 cent/dollar == 1% → frontend renders "1.0%"
 
         # If Oddpool returned 0 cents but we have prices, compute from scratch (fallback)
         if gross_edge_pct == 0 and our_poly_ask > 0 and our_venue2_ask > 0:
@@ -269,6 +283,7 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             venue2=venue2,
             opinion_market_id=opinion_market_id,
             opinion_slug=opinion_market_id,   # use id as slug if no separate slug field
+            is_display_only=True,             # Oddpool doesn't return Poly token IDs
             raw=entry,
         )
     except Exception as e:
