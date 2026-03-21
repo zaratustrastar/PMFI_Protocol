@@ -534,12 +534,19 @@ def execute_arb(
                 kalshi_book, kalshi_side_for_depth, max_leg2_fill_price
             )
         else:
-            # Orderbook endpoint unavailable — abort rather than guess at depth.
-            # We cannot know how many contracts are available at profitable prices
-            # on Kalshi; proceeding could mean filling at a loss if the book is thin.
+            # Design policy: abort on Kalshi depth fetch failure rather than fall
+            # back to uncapped / heuristic sizing.  This is intentionally strict:
+            #   • The orderbook depth cap exists precisely to prevent over-sized fills
+            #     that erode the arb edge; guessing depth defeats that purpose.
+            #   • Transient API failures are expected to be short-lived; the arb
+            #     scanner re-evaluates every cycle so the opportunity is not lost.
+            #   • Proceeding blind risks placing a large order that walks into
+            #     unfavourable price levels and converts the arb into a loss.
+            # If you need a softer policy for high-reliability environments, set a
+            # small fallback cap (e.g. 1-5 contracts) and document the trade-off.
             result.error = (
                 f"depth_unavailable: Kalshi orderbook fetch failed for {kalshi_ticker}. "
-                f"Cannot cap trade size without real depth data. Skipping to protect edge."
+                f"Cannot verify fillable depth — aborting to protect edge integrity."
             )
             log(f"❌ {result.error}")
             return result

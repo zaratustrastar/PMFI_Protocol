@@ -407,17 +407,21 @@ def compute_kalshi_fillable_contracts(
     contracts = 0
     usdc_cost = 0.0
 
+    # Normalise and sort explicitly — API usually returns best-first but we
+    # cannot guarantee ordering across API versions or response edge cases.
+    parsed_levels: list[tuple[float, int]] = []
     for level in levels:
         try:
             price_cents = float(level.get("price", 0))
             qty = int(level.get("delta", 0))
+            parsed_levels.append((price_cents / 100.0, qty))
         except (ValueError, TypeError):
             continue
+    parsed_levels.sort(key=lambda x: x[0])  # ascending: cheapest ask first
 
-        price_dollars = price_cents / 100.0
-
+    for price_dollars, qty in parsed_levels:
         if price_dollars > max_fill_price:
-            break  # ladder is sorted best-first (lowest ask first); stop here
+            break  # sorted ascending — no cheaper levels remain
 
         if qty > 0:
             contracts += qty
