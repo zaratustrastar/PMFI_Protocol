@@ -934,8 +934,8 @@ def serve_index():
     fc_frame = flask_request.headers.get('Sec-Fetch-Dest', '')
     
     if 'farcaster' in user_agent or 'warpcast' in user_agent or fc_frame == 'iframe':
-        return render_template('mini.html', vault_address=VAULT_ADDRESS_CONFIG)
-    return render_template('index.html', vault_address=VAULT_ADDRESS_CONFIG)
+        return render_template('mini.html', vault_address=VAULT_ADDRESS_CONFIG, arb_vault_address=ARB_VAULT_ADDRESS_CONFIG or '')
+    return render_template('index.html', vault_address=VAULT_ADDRESS_CONFIG, arb_vault_address=ARB_VAULT_ADDRESS_CONFIG or '')
 
 @flask_app.route('/mini')
 def serve_mini():
