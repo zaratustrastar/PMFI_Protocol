@@ -4328,7 +4328,7 @@ def api_arb_vault_opportunities():
 
 @flask_app.route('/api/arb-vault/raw', methods=['GET'])
 def api_arb_vault_raw():
-    """Return raw Oddpool /arb-current response for field-mapping debug.
+    """Return raw Oddpool /arbitrage/current response for field-mapping debug.
 
     Makes a fresh Oddpool call, returns the ACTUAL unfiltered JSON from Oddpool
     so callers can see the true root-level structure, plus the post-extraction

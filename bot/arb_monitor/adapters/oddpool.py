@@ -1,16 +1,27 @@
-"""Oddpool adapter - fetches cross-venue arbitrage opportunities from Oddpool /arb-current API.
+"""Oddpool adapter — fetches cross-venue arb opportunities from Oddpool /arbitrage/current API.
 
-Oddpool is the sole source of matched Polymarket × Kalshi pairs for the pArbitrage vault.
-All previous LLM/fuzzy matching is bypassed when ARB_USE_ODDPOOL_ONLY=true.
+Actual Oddpool API (https://api.oddpool.com/arbitrage/current):
+  - Response: plain JSON array (no root wrapper key)
+  - Per-entry fields:
+      event_id, event_title, kalshi_event_ticker, polymarket_event_slug,
+      opinion_market_id, market_type, outcome_key, label,
+      timestamp, resolution_time,
+      kalshi:     { yes_ask, no_ask, volume, volume_24h, open_interest }
+      polymarket: { yes_ask, no_ask, volume, volume_24h, liquidity }
+      opinion:    { yes_ask, no_ask, volume, volume_24h, liquidity }
+      buy_yes_market, buy_no_market, gross_cents, fee_cents, net_cents
 
 Normalizes each entry into an ArbOpportunity dataclass and sorts by pnl_velocity
 (= gross_edge_pct / max(days_to_expiry, 0.5)) descending to prioritise highest PnL velocity.
+
+gross_edge_pct is stored in PERCENT units (e.g. 1.0 = 1% = 1 cent per dollar).
+This matches the frontend formula: edge = gross_edge_pct / 100 → display (edge * 100)%.
 """
 
 import time
-import os
 import requests
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Optional
 from ..config import ODDPOOL_API_KEY, ODDPOOL_BASE_URL
 
@@ -22,28 +33,22 @@ def log(msg: str):
 @dataclass
 class ArbOpportunity:
     pair_id: str
-    poly_yes_token: str
-    poly_no_token: str
-    kalshi_ticker: str
-    poly_yes_ask: float
-    kalshi_yes_ask: float
-    gross_edge_pct: float
-    expiry_ts: int
+    poly_yes_token: str        # polymarket_event_slug (slug, not a token address)
+    poly_no_token: str         # empty — Oddpool doesn't return token addresses
+    kalshi_ticker: str         # kalshi_event_ticker
+    poly_yes_ask: float        # price we pay on Polymarket leg (in dollars, e.g. 0.39)
+    kalshi_yes_ask: float      # price we pay on Kalshi/Opinion leg (in dollars, e.g. 0.60)
+    gross_edge_pct: float      # profit in PERCENT units (e.g. 1.0 = 1% = 1¢ per dollar)
+    expiry_ts: int             # Unix timestamp of resolution_time
     days_to_expiry: float
-    pnl_velocity: float
-    poly_title: str = ""
-    kalshi_title: str = ""
-    # Which side to buy on Kalshi to complete the arb with Poly YES.
-    # "YES"  → buy Kalshi YES (market is already the mirror of Poly, e.g. "Will X NOT happen?")
-    # "NO"   → buy Kalshi NO  (market is the same direction as Poly; NO completes the spread)
-    # Defaults to "YES" when Oddpool does not specify; update if their schema adds a side field.
-    kalshi_side: str = "YES"
-    # Which venue is leg 2. "kalshi" (default) or "opinion" (Opinion Labs).
-    # When venue2 == "opinion", opinion_market_id / opinion_slug are used for execution.
-    venue2: str = "kalshi"
+    pnl_velocity: float        # gross_edge_pct / max(days_to_expiry, 0.5)
+    poly_title: str = ""       # event_title
+    kalshi_title: str = ""     # label (outcome label)
+    kalshi_side: str = "NO"    # which side we buy on venue2: "YES" or "NO"
+    venue2: str = "kalshi"     # "kalshi" or "opinion"
     opinion_market_id: str = ""
     opinion_slug: str = ""
-    raw: dict = None
+    raw: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
@@ -53,10 +58,11 @@ class ArbOpportunity:
             "kalshi_ticker": self.kalshi_ticker,
             "poly_yes_ask": self.poly_yes_ask,
             "kalshi_yes_ask": self.kalshi_yes_ask,
-            "gross_edge_pct": round(self.gross_edge_pct, 6),
+            "gross_edge_pct": round(self.gross_edge_pct, 4),
+            "net_cents": round(self.gross_edge_pct, 2),   # alias: same value, clearer name
             "expiry_ts": self.expiry_ts,
             "days_to_expiry": round(self.days_to_expiry, 3),
-            "pnl_velocity": round(self.pnl_velocity, 6),
+            "pnl_velocity": round(self.pnl_velocity, 4),
             "poly_title": self.poly_title,
             "kalshi_title": self.kalshi_title,
             "kalshi_side": self.kalshi_side,
@@ -70,19 +76,19 @@ def _headers() -> dict:
     headers = {"accept": "application/json"}
     if ODDPOOL_API_KEY:
         headers["X-API-Key"] = ODDPOOL_API_KEY
-        headers["Authorization"] = f"Bearer {ODDPOOL_API_KEY}"
     return headers
 
 
 _ODDPOOL_RAW_CACHE: dict = {}
 
+
 def fetch_arb_current_raw() -> tuple[int, object]:
-    """Fetch /arb-current from Oddpool API. Returns (status_code, raw_json).
+    """Fetch /arbitrage/current from Oddpool API. Returns (status_code, raw_json).
 
     Caches the last raw response in _ODDPOOL_RAW_CACHE so /api/arb-vault/raw
-    can inspect the actual Oddpool response structure without a second network call.
+    can expose the actual Oddpool response structure without a second network call.
     """
-    url = f"{ODDPOOL_BASE_URL}/arb-current"
+    url = f"{ODDPOOL_BASE_URL}/arbitrage/current"
     log(f"Fetching {url}")
     try:
         resp = requests.get(url, headers=_headers(), timeout=15)
@@ -96,6 +102,9 @@ def fetch_arb_current_raw() -> tuple[int, object]:
         _ODDPOOL_RAW_CACHE["url"] = url
         if resp.status_code != 200:
             log(f"❌ HTTP {resp.status_code}: {str(raw)[:200]}")
+        else:
+            count = len(raw) if isinstance(raw, list) else "?"
+            log(f"✅ HTTP 200 — {count} entries from Oddpool")
         return resp.status_code, raw
     except Exception as e:
         log(f"❌ fetch_arb_current_raw error: {e}")
@@ -104,213 +113,166 @@ def fetch_arb_current_raw() -> tuple[int, object]:
 
 
 def fetch_arb_current() -> list[dict]:
-    """Fetch /arb-current from Oddpool API. Returns raw list of opportunity dicts."""
+    """Fetch /arbitrage/current from Oddpool API. Returns raw list of opportunity dicts."""
     status, data = fetch_arb_current_raw()
     if status != 200 or data is None:
         return []
     if isinstance(data, list):
-        log(f"✅ Oddpool returned list with {len(data)} entries")
         return data
+    # Oddpool docs say it's a plain array — if we get a dict, log and try common keys
     if isinstance(data, dict):
-        # Try every plausible root key — log which one worked
-        for key in ("opportunities", "data", "arb", "arbs", "results", "matches",
-                    "pairs", "items", "markets", "current", "live", "active"):
+        for key in ("opportunities", "data", "arb", "arbs", "results", "items"):
             if key in data and isinstance(data[key], list):
-                log(f"✅ Oddpool entries found under key '{key}': {len(data[key])} entries")
+                log(f"⚠️ Got dict wrapper with key '{key}' — extracted {len(data[key])} entries")
                 return data[key]
-        # Last resort: find any list value
-        for key, val in data.items():
-            if isinstance(val, list) and len(val) > 0:
-                log(f"✅ Oddpool entries found under fallback key '{key}': {len(val)} entries")
-                return val
-        log(f"⚠️ Oddpool dict has no list values. Top-level keys: {list(data.keys())}")
+        log(f"⚠️ Unexpected dict response. Root keys: {list(data.keys())}")
         return []
     log(f"⚠️ Unexpected response type: {type(data)}")
     return []
 
 
-def _parse_expiry(raw_entry: dict) -> int:
-    """Parse expiry timestamp from Oddpool entry."""
-    for field in ("expiry_ts", "expiry", "expires_at", "close_time", "end_time"):
-        val = raw_entry.get(field)
-        if not val:
-            continue
+def _parse_resolution_time(entry: dict) -> int:
+    """Parse expiry timestamp from resolution_time or fallback numeric fields."""
+    # Primary: ISO string resolution_time
+    resolution_time = entry.get("resolution_time") or entry.get("timestamp") or ""
+    if resolution_time:
         try:
-            if isinstance(val, (int, float)):
-                ts = int(val)
-                if ts > 1e12:
-                    ts = ts // 1000
-                return ts
-            from datetime import datetime
-            dt = datetime.fromisoformat(str(val).replace("Z", "+00:00"))
+            dt = datetime.fromisoformat(str(resolution_time).replace("Z", "+00:00"))
             return int(dt.timestamp())
         except Exception:
-            continue
+            pass
+    # Fallback: numeric fields
+    for field_name in ("expiry_ts", "expiry", "expires_at", "close_time", "end_time"):
+        val = entry.get(field_name)
+        if val:
+            try:
+                ts = int(float(val))
+                if ts > 1_000_000_000_000:
+                    ts //= 1000
+                return ts
+            except Exception:
+                pass
     return 0
 
 
 def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
-    """Normalize a raw Oddpool arb entry into an ArbOpportunity dataclass."""
+    """Normalize a raw Oddpool /arbitrage/current entry into an ArbOpportunity.
+
+    Actual Oddpool field structure:
+      - event_id, event_title, outcome_key, label
+      - kalshi_event_ticker, polymarket_event_slug, opinion_market_id
+      - resolution_time
+      - kalshi: { yes_ask, no_ask, ... }
+      - polymarket: { yes_ask, no_ask, ... }
+      - opinion: { yes_ask, no_ask, ... }
+      - buy_yes_market, buy_no_market  ("polymarket"/"kalshi"/"opinion")
+      - net_cents, gross_cents, fee_cents
+    """
     try:
-        poly_yes_token = (
-            entry.get("poly_yes_token") or
-            entry.get("polymarket_yes_token") or
-            entry.get("poly_token_id") or
-            entry.get("poly_yes_token_id") or
-            entry.get("yes_token_id") or
-            entry.get("token_id") or
-            entry.get("polymarket_token_id") or
-            entry.get("poly_outcome_token") or
-            ""
-        )
-        poly_no_token = (
-            entry.get("poly_no_token") or
-            entry.get("polymarket_no_token") or
-            entry.get("poly_no_token_id") or
-            entry.get("no_token_id") or
-            ""
-        )
-        kalshi_ticker = (
-            entry.get("kalshi_ticker") or
-            entry.get("kalshi_market_ticker") or
-            entry.get("kalshi_id") or
-            entry.get("ticker") or
-            entry.get("market_id") or
-            entry.get("kalshi_market") or
-            entry.get("kalshi_market_id") or
-            entry.get("kalshi_slug") or
-            ""
-        )
+        event_id = entry.get("event_id") or ""
+        outcome_key = entry.get("outcome_key") or "yes"
+        pair_id = f"{event_id}_{outcome_key}"
 
-        # Detect venue for leg 2: Oddpool may return Kalshi or Opinion Labs opportunities
-        venue2_raw = (
-            entry.get("venue2") or
-            entry.get("leg2_venue") or
-            entry.get("exchange2") or
-            ""
-        ).lower()
-        opinion_market_id = (
-            entry.get("opinion_market_id") or
-            entry.get("opinion_id") or
-            entry.get("opinion_slug") or
-            ""
-        )
-        opinion_slug = entry.get("opinion_slug") or entry.get("opinion_market_slug") or ""
+        event_title = entry.get("event_title") or ""
+        label = entry.get("label") or ""
+        kalshi_ticker = entry.get("kalshi_event_ticker") or entry.get("kalshi_ticker") or ""
+        polymarket_slug = entry.get("polymarket_event_slug") or entry.get("polymarket_slug") or ""
+        opinion_market_id_raw = entry.get("opinion_market_id") or ""
+        opinion_market_id = str(opinion_market_id_raw) if opinion_market_id_raw else ""
 
-        if not poly_yes_token:
-            log(f"⚠️ Dropped — poly_yes_token missing. Available keys: {sorted(entry.keys())}. Sample values: { {k: entry[k] for k in list(entry.keys())[:8]} }")
-            return None
+        # Nested price sub-objects
+        poly_data = entry.get("polymarket") or {}
+        kalshi_data = entry.get("kalshi") or {}
+        opinion_data = entry.get("opinion") or {}
 
-        # Determine which venue is leg 2
-        # Opinion Labs: explicit venue2=="opinion" or opinion_market_id present but no kalshi_ticker
-        is_opinion = (
-            "opinion" in venue2_raw or
-            (opinion_market_id and not kalshi_ticker)
-        )
-        if not is_opinion and not kalshi_ticker:
-            log(f"⚠️ Dropped — kalshi_ticker missing (not Opinion). Available keys: {sorted(entry.keys())}. Sample: { {k: entry[k] for k in list(entry.keys())[:8]} }")
-            return None
+        poly_yes_ask = float(poly_data.get("yes_ask") or 0)
+        poly_no_ask = float(poly_data.get("no_ask") or 0)
+        kalshi_yes_ask_raw = float(kalshi_data.get("yes_ask") or 0)
+        kalshi_no_ask_raw = float(kalshi_data.get("no_ask") or 0)
+        opinion_yes_ask_raw = float(opinion_data.get("yes_ask") or 0)
+        opinion_no_ask_raw = float(opinion_data.get("no_ask") or 0)
 
-        poly_yes_ask = float(
-            entry.get("poly_yes_ask") or
-            entry.get("polymarket_yes_ask") or
-            entry.get("poly_ask") or
-            0
-        )
-        kalshi_yes_ask = float(
-            entry.get("kalshi_yes_ask") or
-            entry.get("kalshi_ask") or
-            0
-        )
+        buy_yes_market = (entry.get("buy_yes_market") or "").lower()
+        buy_no_market = (entry.get("buy_no_market") or "").lower()
 
-        edge_from_api = (
-            entry.get("gross_edge_pct") or
-            entry.get("edge_pct") or
-            entry.get("edge") or
-            entry.get("spread_pct") or
-            entry.get("spread") or
-            entry.get("arb_edge") or
-            entry.get("net_edge_pct") or
-            entry.get("edge_percent")
-        )
-        if edge_from_api is not None:
-            gross_edge_pct = float(edge_from_api)
-        elif poly_yes_ask > 0 and kalshi_yes_ask > 0:
-            # Cross-venue YES+YES spread: edge = 1 - poly_yes_ask - kalshi_yes_ask
-            gross_edge_pct = max(0.0, 1.0 - poly_yes_ask - kalshi_yes_ask)
+        # Determine venue2 and prices
+        if "opinion" in (buy_yes_market, buy_no_market):
+            venue2 = "opinion"
+        elif kalshi_ticker:
+            venue2 = "kalshi"
         else:
-            gross_edge_pct = 0.0
+            venue2 = buy_no_market or "kalshi"
 
-        expiry_ts = _parse_expiry(entry)
+        # Map buy directions to what we actually pay on each leg
+        # buy_yes_market = which venue we buy YES on
+        # buy_no_market  = which venue we buy NO on
+        if buy_yes_market == "polymarket":
+            # We buy YES on Poly, the other side (NO or YES) on venue2
+            our_poly_ask = poly_yes_ask
+            poly_side_label = "YES"  # unused in dataclass but for clarity
+            if venue2 == "opinion":
+                our_venue2_ask = opinion_no_ask_raw if buy_no_market == "opinion" else opinion_yes_ask_raw
+                kalshi_side = "NO" if buy_no_market == "opinion" else "YES"
+            else:
+                # venue2 == "kalshi"
+                our_venue2_ask = kalshi_no_ask_raw
+                kalshi_side = "NO"
+        elif buy_yes_market in ("kalshi", "opinion"):
+            # We buy YES on Kalshi/Opinion, NO on Poly
+            our_poly_ask = poly_no_ask
+            if venue2 == "opinion":
+                our_venue2_ask = opinion_yes_ask_raw
+            else:
+                our_venue2_ask = kalshi_yes_ask_raw
+            kalshi_side = "YES"
+        else:
+            # Fallback: unknown direction — use raw yes prices
+            our_poly_ask = poly_yes_ask
+            our_venue2_ask = kalshi_yes_ask_raw
+            kalshi_side = "NO"
+
+        # Edge: net_cents is profit in cents per $1 invested → convert to percent
+        # 1.0 cent → gross_edge_pct = 1.0 (1%), so frontend edgePct/100 = 0.01, display 1.0%
+        net_cents = float(entry.get("net_cents") or 0)
+        gross_cents = float(entry.get("gross_cents") or net_cents)
+        gross_edge_pct = gross_cents  # cents == percent for this display convention
+
+        # If Oddpool returned 0 cents but we have prices, compute from scratch (fallback)
+        if gross_edge_pct == 0 and our_poly_ask > 0 and our_venue2_ask > 0:
+            gross_edge_pct = max(0.0, (1.0 - our_poly_ask - our_venue2_ask) * 100)
+
+        expiry_ts = _parse_resolution_time(entry)
         now = time.time()
-        days_to_expiry = max(0, (expiry_ts - now) / 86400) if expiry_ts > now else 0
-
+        days_to_expiry = max(0.0, (expiry_ts - now) / 86400) if expiry_ts > now else 0.0
         pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)
 
-        pair_id = (
-            entry.get("pair_id") or
-            f"poly:{poly_yes_token[:16]}___kalshi:{kalshi_ticker}"
+        log(
+            f"✅ pair={pair_id!r} edge={gross_edge_pct:.2f}¢ "
+            f"poly={our_poly_ask:.2f} venue2({venue2}/{kalshi_side})={our_venue2_ask:.2f} "
+            f"days={days_to_expiry:.1f} title={event_title[:50]!r}"
         )
-
-        poly_title = entry.get("poly_title") or entry.get("polymarket_title") or ""
-        kalshi_title = entry.get("kalshi_title") or entry.get("kalshi_market_title") or ""
-
-        # Determine which side to buy on Kalshi for the arb leg.
-        # Oddpool may provide "kalshi_side": "YES" or "NO" explicitly.
-        # - "YES": Kalshi market is defined opposite to Poly (e.g. "Will X NOT happen?"), so buying
-        #          Kalshi YES is the complementary side that locks in the spread with Poly YES.
-        # - "NO":  Kalshi market is same-direction as Poly; buying Kalshi NO completes the arb.
-        # If Oddpool does not provide this field, we infer from context:
-        #   prefer "NO" when `kalshi_no_ask` is present and cheaper than YES (true NO-hedge),
-        #   otherwise default to "YES".
-        kalshi_side_raw = (
-            entry.get("kalshi_side") or
-            entry.get("kalshi_arb_side") or
-            entry.get("kalshi_leg_side") or
-            ""
-        ).upper()
-        if kalshi_side_raw in ("YES", "NO"):
-            kalshi_side = kalshi_side_raw
-        else:
-            # Infer: if Oddpool provides kalshi_no_ask and that's what forms the edge, use NO
-            kalshi_no_ask_raw = entry.get("kalshi_no_ask") or entry.get("kalshi_no_price")
-            if kalshi_no_ask_raw is not None:
-                kalshi_no_ask = float(kalshi_no_ask_raw)
-                # Edge is 1 - poly_yes_ask - kalshi_no_ask in this case
-                no_edge = 1.0 - poly_yes_ask - kalshi_no_ask if poly_yes_ask > 0 and kalshi_no_ask > 0 else -1
-                yes_edge = 1.0 - poly_yes_ask - kalshi_yes_ask if poly_yes_ask > 0 and kalshi_yes_ask > 0 else -1
-                kalshi_side = "NO" if no_edge > yes_edge else "YES"
-                if kalshi_side == "NO":
-                    # Override the ask to the NO ask for the edge/pricing formulas
-                    kalshi_yes_ask = kalshi_no_ask
-                    gross_edge_pct = max(0.0, no_edge)
-                    pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)
-            else:
-                kalshi_side = "YES"
-
-        venue2 = "opinion" if is_opinion else "kalshi"
 
         return ArbOpportunity(
             pair_id=pair_id,
-            poly_yes_token=poly_yes_token,
-            poly_no_token=poly_no_token,
+            poly_yes_token=polymarket_slug,   # slug used as identifier; no token address from Oddpool
+            poly_no_token="",
             kalshi_ticker=kalshi_ticker,
-            poly_yes_ask=poly_yes_ask,
-            kalshi_yes_ask=kalshi_yes_ask,
+            poly_yes_ask=our_poly_ask,
+            kalshi_yes_ask=our_venue2_ask,
             gross_edge_pct=gross_edge_pct,
             expiry_ts=expiry_ts,
             days_to_expiry=days_to_expiry,
             pnl_velocity=pnl_velocity,
-            poly_title=poly_title,
-            kalshi_title=kalshi_title,
+            poly_title=event_title,
+            kalshi_title=label or event_title,
             kalshi_side=kalshi_side,
             venue2=venue2,
             opinion_market_id=opinion_market_id,
-            opinion_slug=opinion_slug,
+            opinion_slug=opinion_market_id,   # use id as slug if no separate slug field
             raw=entry,
         )
     except Exception as e:
-        log(f"❌ normalize_opportunity error: {e}, entry={entry}")
+        log(f"❌ normalize_opportunity error: {e}, entry keys={list(entry.keys())}")
         return None
 
 
@@ -326,5 +288,5 @@ def fetch_opportunities() -> list[ArbOpportunity]:
             opportunities.append(opp)
 
     opportunities.sort(key=lambda o: o.pnl_velocity, reverse=True)
-    log(f"Normalized {len(opportunities)} valid opportunities (sorted by pnl_velocity)")
+    log(f"Normalized {len(opportunities)}/{len(raw_entries)} valid opportunities (sorted by pnl_velocity)")
     return opportunities
