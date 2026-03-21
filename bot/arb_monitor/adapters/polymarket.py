@@ -299,6 +299,50 @@ def fetch_orderbook(token_id: str) -> Optional[dict]:
         return None
 
 
+def compute_fillable_contracts(book: dict, max_fill_price: float) -> tuple[int, float]:
+    """Walk the ask ladder and return contracts fillable at or below max_fill_price.
+
+    Polymarket order books list asks sorted best-first (lowest price first).
+    We accumulate volume at each price level until we hit a level that would
+    breach max_fill_price — anything beyond that would eat into the arb edge.
+
+    Args:
+        book:           Raw order book dict with "asks" list of {"price", "size"} entries.
+        max_fill_price: Maximum price per contract we are willing to pay on this leg.
+                        Caller derives this as: 1.0 - live_leg2_ask - min_edge_pct
+                        (i.e. the breakeven ask price on the Poly leg given the other leg's cost).
+
+    Returns:
+        (contracts_fillable, usdc_cost) — integer contracts and total USDC cost.
+        Returns (0, 0.0) when no depth exists below max_fill_price.
+    """
+    asks = book.get("asks", [])
+    contracts = 0
+    usdc_cost = 0.0
+
+    for level in asks:
+        try:
+            price = float(level.get("price", 0))
+            size = float(level.get("size", 0))
+        except (ValueError, TypeError):
+            continue
+
+        if price > max_fill_price:
+            break  # asks are sorted best-first; once we exceed the limit we're done
+
+        level_contracts = int(size)  # Polymarket trades in whole-number contract sizes
+        if level_contracts > 0:
+            contracts += level_contracts
+            usdc_cost += level_contracts * price
+
+    log(
+        f"📏 [Poly] depth walk: max_fill_price={max_fill_price:.4f} "
+        f"→ {contracts} contracts fillable (${usdc_cost:.2f} USDC) "
+        f"across {len(asks)} ask levels"
+    )
+    return contracts, usdc_cost
+
+
 def get_best_prices(token_id: str) -> dict:
     if not token_id:
         log("⚠️ poly_orderbook_missing: no token_id provided")

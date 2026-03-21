@@ -335,6 +335,83 @@ def get_best_prices(ticker: str, debug: bool = False) -> dict:
         return empty
 
 
+def fetch_orderbook_depth(ticker: str, depth: int = 25) -> Optional[dict]:
+    """Fetch the full Kalshi orderbook for a market ticker.
+
+    Uses GET /markets/{ticker}/orderbook?depth=N.
+    This endpoint is public (no auth required) and returns YES and NO ladders.
+
+    Response format:
+      { "orderbook": { "yes": [{"price": 52, "delta": 150}, ...],
+                       "no":  [{"price": 48, "delta": 200}, ...] } }
+
+    Prices are in CENTS (0-100). delta is quantity of contracts at that level.
+    Returns None on any error.
+    """
+    url = f"{KALSHI_BASE_URL}/markets/{ticker}/orderbook"
+    resp = http_client.get(url, venue="kalshi", headers=_headers(), params={"depth": depth}, timeout=10)
+    if resp is None or resp.status_code != 200:
+        log(f"⚠️ [Kalshi] orderbook_depth HTTP {resp.status_code if resp else 'None'} for {ticker}")
+        return None
+    try:
+        return resp.json()
+    except Exception as e:
+        log(f"⚠️ [Kalshi] orderbook_depth parse error for {ticker}: {e}")
+        return None
+
+
+def compute_kalshi_fillable_contracts(
+    orderbook: dict,
+    side: str,
+    max_fill_price: float,
+) -> tuple[int, float]:
+    """Walk a Kalshi orderbook and return contracts fillable at or below max_fill_price.
+
+    Kalshi's orderbook has "yes" and "no" ladders.  Each entry is {"price": cents, "delta": qty}.
+    Ask prices on Kalshi are ordered from lowest (best) to highest.
+
+    Args:
+        orderbook:      Raw response from fetch_orderbook_depth() (contains "orderbook" key).
+        side:           "YES" or "NO" — which side we are buying.
+        max_fill_price: Maximum dollar price (0.0-1.0) we will pay per contract on this leg.
+
+    Returns:
+        (contracts_fillable, usdc_cost).  Returns (0, 0.0) on error or no depth.
+    """
+    try:
+        book = orderbook.get("orderbook", orderbook)
+        key = "yes" if side.upper() == "YES" else "no"
+        levels = book.get(key, [])
+    except Exception as e:
+        log(f"⚠️ [Kalshi] depth parse error: {e}")
+        return 0, 0.0
+
+    contracts = 0
+    usdc_cost = 0.0
+
+    for level in levels:
+        try:
+            price_cents = float(level.get("price", 0))
+            qty = int(level.get("delta", 0))
+        except (ValueError, TypeError):
+            continue
+
+        price_dollars = price_cents / 100.0
+
+        if price_dollars > max_fill_price:
+            break  # ladder is sorted best-first (lowest ask first); stop here
+
+        if qty > 0:
+            contracts += qty
+            usdc_cost += qty * price_dollars
+
+    log(
+        f"📏 [Kalshi/{side}] depth walk: max_fill_price={max_fill_price:.4f} "
+        f"→ {contracts} contracts fillable (${usdc_cost:.2f} USDC)"
+    )
+    return contracts, usdc_cost
+
+
 def get_kalshi_markets() -> list[NormalizedMarket]:
     from ..core.filters import filter_by_expiry
     raw = fetch_all_active_markets()
