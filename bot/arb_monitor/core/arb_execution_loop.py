@@ -1,10 +1,18 @@
-"""Arb Execution Loop - continuously deploys capital into the highest-velocity opportunities.
+"""Arb Execution Loop - continuously deploys capital into the highest-scoring opportunities.
 
-Sorted by pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5) so capital flows
-to opportunities that generate the most PnL per day first.
+Ranking: score = annualized_return × confidence × fillable_size_usdc
+  annualized_return = (1 + net_edge/100)^(365/days) - 1   [captures compounding]
+  confidence        = logistic(bottleneck_liquidity)        [fill reliability]
+  fillable_size     = ARB_FILLABLE_FRACTION × min(poly_liq, venue2_liq)  [capacity]
+
+The score naturally outperforms pnl_velocity because it:
+  - Correctly annualises/compounds across different holding periods
+  - Weights capacity so deep markets beat tiny edge-only markets
+  - Zeroes out when net_edge is non-positive (fees+slippage eat the trade)
+  - Penalises illiquid legs via confidence
 
 Runs as a daemon thread started at bot startup. Polls Oddpool every ODDPOOL_POLL_INTERVAL
-seconds and executes eligible opportunities.
+seconds and executes eligible opportunities in score order (highest first).
 """
 
 import time
@@ -65,8 +73,13 @@ def can_deploy_capital(opportunity: ArbOpportunity) -> tuple[bool, str]:
 def compute_trade_size(opportunity: ArbOpportunity) -> float:
     """Compute how much USDC to deploy into this opportunity.
 
-    Respects per-pair cap and total vault cap.
-    Returns 0 if no budget remains.
+    Respects three constraints (takes the minimum):
+      1. fillable_size_usdc: conservative estimate of what the market can absorb
+         at the quoted spread (ARB_FILLABLE_FRACTION × bottleneck liquidity).
+      2. Per-pair cap: ARB_MAX_PAIR_USDC minus what's already in this pair.
+      3. Total vault cap: ARB_MAX_DEPLOYED_USDC minus total deployed USDC.
+
+    Returns 0 if no budget remains under any constraint.
     """
     try:
         total_deployed = get_total_deployed_usdc()
@@ -77,7 +90,11 @@ def compute_trade_size(opportunity: ArbOpportunity) -> float:
         pair_deployed = sum(p.get("cost_basis_usdc", 0) for p in pair_positions)
         remaining_pair = max(0, ARB_MAX_PAIR_USDC - pair_deployed)
 
-        size = min(remaining_pair, remaining_total, ARB_MAX_PAIR_USDC)
+        # Scorer's fillable estimate caps deployment to market-absorb capacity
+        fillable = getattr(opportunity, "fillable_size_usdc", ARB_MAX_PAIR_USDC)
+        fillable = max(0.0, fillable)
+
+        size = min(fillable, remaining_pair, remaining_total, ARB_MAX_PAIR_USDC)
         return max(0.0, size)
     except Exception as e:
         log(f"⚠️ compute_trade_size error: {e}")
@@ -102,7 +119,7 @@ def _execution_cycle():
         log("ℹ️ No opportunities from Oddpool this cycle")
         return
 
-    log(f"📊 {len(opportunities)} opportunities fetched, sorted by pnl_velocity desc")
+    log(f"📊 {len(opportunities)} opportunities fetched, sorted by score desc")
 
     executed = 0
     skipped_thin = 0
@@ -132,12 +149,16 @@ def _execution_cycle():
             )
             continue
 
-        # ── Edge guard: skip thin / marginal opportunities ─────────────────
-        if opp.gross_edge_pct < ARB_MIN_EDGE_PCT:
+        # ── Edge guard: skip opportunities where net_edge (after fees + slippage +
+        #    risk buffer) is below the minimum. Using net_edge_pct here means we
+        #    never enter a trade that looks profitable on paper but loses money
+        #    once real execution costs are accounted for.
+        net_edge = getattr(opp, "net_edge_pct", opp.gross_edge_pct)
+        if net_edge < ARB_MIN_EDGE_PCT:
             skipped_thin += 1
             log(
-                f"⏭ Skipping {opp.pair_id}: edge={opp.gross_edge_pct:.4f} < "
-                f"min_edge={ARB_MIN_EDGE_PCT:.4f}"
+                f"⏭ Skipping {opp.pair_id}: net_edge={net_edge:.4f}% < "
+                f"min_edge={ARB_MIN_EDGE_PCT:.4f}% (gross={opp.gross_edge_pct:.4f}%)"
             )
             continue
 
@@ -154,13 +175,15 @@ def _execution_cycle():
             skipped_caps += 1
             continue
 
+        net_edge_log = getattr(opp, "net_edge_pct", opp.gross_edge_pct)
+        ar_log = getattr(opp, "annualized_return", 0.0)
+        conf_log = getattr(opp, "confidence", 0.0)
+        score_log = getattr(opp, "score", 0.0)
         log(
-            f"🚀 Executing pair_id={opp.pair_id} "
-            f"venue2={opp.venue2} "
-            f"edge={opp.gross_edge_pct:.3%} "
-            f"pnl_velocity={opp.pnl_velocity:.4f}/d "
-            f"days_to_expiry={opp.days_to_expiry:.2f}d "
-            f"size_usdc={size_usdc:.2f}"
+            f"🚀 Executing pair_id={opp.pair_id} venue2={opp.venue2} | "
+            f"score={score_log:.1f} AR={ar_log:.2f}× "
+            f"net_edge={net_edge_log:.2f}% conf={conf_log:.2f} | "
+            f"days={opp.days_to_expiry:.2f}d size=${size_usdc:.2f}"
         )
 
         result = execute_arb(opp, size_usdc=size_usdc)

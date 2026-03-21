@@ -56,6 +56,17 @@ ARB_MIN_EDGE_PCT = float(os.environ.get("ARB_MIN_EDGE_PCT", "0.025"))
 ARB_SLIPPAGE_GUARD_BPS = int(os.environ.get("ARB_SLIPPAGE_GUARD_BPS", "50"))
 ARB_MAX_PAIR_USDC = float(os.environ.get("ARB_MAX_PAIR_USDC", "500"))
 ARB_MAX_DEPLOYED_USDC = float(os.environ.get("ARB_MAX_DEPLOYED_USDC", "10000"))
+
+# Profit-maximising scorer tuning
+# ARB_RISK_BUFFER_PCT: extra cost buffer subtracted from net_cents to build a conservative
+#   net_edge estimate. Absorbs residual execution risk (partial fills, spread widening, etc.)
+#   Units: percent (0.1 = 0.1%, i.e. 10 bps). Default 0.1%.
+ARB_RISK_BUFFER_PCT = float(os.environ.get("ARB_RISK_BUFFER_PCT", "0.1"))
+
+# ARB_FILLABLE_FRACTION: fraction of the thinner leg's reported liquidity we assume is
+#   realistically fillable at the quoted spread. 0.10 = 10% of listed liquidity.
+#   Lowering this makes the scorer more conservative; raising it makes it more aggressive.
+ARB_FILLABLE_FRACTION = float(os.environ.get("ARB_FILLABLE_FRACTION", "0.10"))
 AI_MATCH_CACHE_PATH = os.environ.get("AI_MATCH_CACHE_PATH", "/tmp/arb_ai_match_cache.json")
 AI_MATCH_CACHE_TTL = int(os.environ.get("AI_MATCH_CACHE_TTL", str(7 * 86400)))
 AI_MATCH_MIN_CONFIDENCE = int(os.environ.get("AI_MATCH_MIN_CONFIDENCE", "60"))

@@ -11,19 +11,30 @@ Actual Oddpool API (https://api.oddpool.com/arbitrage/current):
       opinion:    { yes_ask, no_ask, volume, volume_24h, liquidity }
       buy_yes_market, buy_no_market, gross_cents, fee_cents, net_cents
 
-Normalizes each entry into an ArbOpportunity dataclass and sorts by pnl_velocity
-(= gross_edge_pct / max(days_to_expiry, 0.5)) descending to prioritise highest PnL velocity.
+Scoring (profit-maximising):
+  net_edge_pct   = net_cents - slippage_guard_pct - risk_buffer_pct
+  annualized_return = (1 + net_edge_pct/100)^(365 / max(days_to_expiry, 0.5)) - 1
+  confidence     = logistic function of min(poly_liq, venue2_liq); 0 when net_edge <= 0
+  fillable_size  = ARB_FILLABLE_FRACTION × min(poly_liq, venue2_liq)   [no cap — scorer sees raw]
+  score          = annualized_return × confidence × fillable_size
+
+Opportunities are sorted by score descending. Deployment caps (ARB_MAX_PAIR_USDC etc.)
+are applied at execution time; fillable_size intentionally has no artificial cap here.
 
 gross_edge_pct is stored in PERCENT units (e.g. 1.0 = 1% = 1 cent per dollar).
 This matches the frontend formula: edge = gross_edge_pct / 100 → display (edge * 100)%.
 """
 
+import math
 import time
 import requests
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
-from ..config import ODDPOOL_API_KEY, ODDPOOL_BASE_URL
+from ..config import (
+    ODDPOOL_API_KEY, ODDPOOL_BASE_URL,
+    ARB_SLIPPAGE_GUARD_BPS, ARB_RISK_BUFFER_PCT, ARB_FILLABLE_FRACTION,
+)
 
 def log(msg: str):
     print(f"🔀 [Arb/Oddpool] {msg}")
@@ -83,7 +94,21 @@ class ArbOpportunity:
     gross_edge_pct: float      # profit in PERCENT units (e.g. 1.0 = 1% = 1¢ per dollar)
     expiry_ts: int             # Unix timestamp of resolution_time
     days_to_expiry: float
-    pnl_velocity: float        # gross_edge_pct / max(days_to_expiry, 0.5)
+    pnl_velocity: float        # gross_edge_pct / max(days_to_expiry, 0.5) [legacy, kept for display]
+
+    # ── Profit-maximising scorer fields ──────────────────────────────────────
+    # net_edge_pct: gross edge minus expected slippage and risk buffer (in %)
+    net_edge_pct: float = 0.0
+    # annualized_return: (1 + net_edge/100)^(365/days) - 1; captures compounding
+    annualized_return: float = 0.0
+    # confidence: [0.0, 1.0] — liquidity-weighted fill probability; 0.0 if net_edge <= 0
+    confidence: float = 0.0
+    # fillable_size_usdc: conservative estimate of deployable capital (BEFORE deployment caps)
+    fillable_size_usdc: float = 0.0
+    # score: annualized_return × confidence × fillable_size — primary ranking signal
+    score: float = 0.0
+    # ─────────────────────────────────────────────────────────────────────────
+
     poly_title: str = ""       # event_title
     kalshi_title: str = ""     # label (outcome label)
     kalshi_side: str = "NO"    # which side we buy on venue2: "YES" or "NO"
@@ -109,6 +134,13 @@ class ArbOpportunity:
             "expiry_ts": self.expiry_ts,
             "days_to_expiry": round(self.days_to_expiry, 3),
             "pnl_velocity": round(self.pnl_velocity, 4),
+            # scorer fields
+            "net_edge_pct": round(self.net_edge_pct, 4),
+            "annualized_return": round(self.annualized_return, 4),
+            "confidence": round(self.confidence, 4),
+            "fillable_size_usdc": round(self.fillable_size_usdc, 2),
+            "score": round(self.score, 4),
+            # metadata
             "poly_title": self.poly_title,
             "kalshi_title": self.kalshi_title,
             "kalshi_side": self.kalshi_side,
@@ -302,6 +334,64 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         days_to_expiry = max(0.0, (expiry_ts - now) / 86400) if expiry_ts > now else 0.0
         pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)
 
+        # ── Profit-maximising scorer ──────────────────────────────────────────
+        # Step 1: net edge — subtract expected slippage and execution risk buffer.
+        #   ARB_SLIPPAGE_GUARD_BPS is in bps (e.g. 50 bps = 0.5%), convert to pct.
+        #   ARB_RISK_BUFFER_PCT is already in pct (e.g. 0.1 = 0.1%).
+        slippage_pct = ARB_SLIPPAGE_GUARD_BPS / 100.0
+        net_edge_pct = net_cents - slippage_pct - ARB_RISK_BUFFER_PCT
+
+        # Step 2: annualized return — converts absolute edge into an annual rate,
+        #   correctly handling compounding (short-dated trades compound faster).
+        #   Use max(days_to_expiry, 0.5) so markets closing in hours still score.
+        if net_edge_pct > 0:
+            net_frac = net_edge_pct / 100.0
+            effective_days = max(days_to_expiry, 0.5)
+            annualized_return = (1.0 + net_frac) ** (365.0 / effective_days) - 1.0
+        else:
+            annualized_return = 0.0
+
+        # Step 3: liquidity-based confidence.
+        #   Uses the thinner of the two legs (bottleneck) as the limiting factor.
+        #   Logistic: $0 → 0.05, $5k → 0.50, $20k → 0.80, $100k → 0.95.
+        #   Zero confidence when net_edge is non-positive.
+        poly_liq = float(poly_data.get("liquidity") or poly_data.get("volume") or 0)
+        if venue2 == "opinion":
+            venue2_liq = float(opinion_data.get("liquidity") or opinion_data.get("volume") or 0)
+        else:
+            # Kalshi doesn't always report liquidity; use open_interest then volume as proxies
+            venue2_liq = float(
+                kalshi_data.get("open_interest")
+                or kalshi_data.get("liquidity")
+                or kalshi_data.get("volume")
+                or 0
+            )
+        bottleneck_liq = min(poly_liq, venue2_liq) if venue2_liq > 0 else poly_liq
+        if net_edge_pct <= 0 or bottleneck_liq <= 0:
+            confidence = 0.0
+        else:
+            # k = 5000 → half-confidence at $5k liquidity; tuned for prediction markets
+            confidence = max(0.05, min(1.0, bottleneck_liq / (bottleneck_liq + 5000.0)))
+
+        # Step 4: fillable size — conservative fraction of the bottleneck leg's liquidity.
+        #   No artificial cap here; deployment caps are applied at execution time.
+        #   Floor at $10 so tiny but valid markets still receive a non-zero score.
+        fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
+
+        # Step 5: composite score — natural language: "expected annualised dollar edge"
+        #   Ties together quality (annualized_return), reliability (confidence), and
+        #   capacity (fillable_size). Greedy sort on this is globally near-optimal
+        #   because capital units with the highest score-per-dollar come first.
+        score = annualized_return * confidence * fillable_size_usdc
+
+        log(
+            f"📊 Scored pair={pair_id!r}: "
+            f"net_edge={net_edge_pct:.2f}% AR={annualized_return:.2f}× "
+            f"conf={confidence:.2f} fill={fillable_size_usdc:.0f} score={score:.1f} "
+            f"| gross={gross_edge_pct:.2f}¢ days={days_to_expiry:.1f}"
+        )
+        # ─────────────────────────────────────────────────────────────────────
+
         # Resolve Polymarket slug → real CLOB YES token ID so the executor can
         # place live orders. Cached for 60 min. Falls back to slug if unavailable.
         resolved_token = _resolve_poly_token(polymarket_slug)
@@ -326,6 +416,11 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             expiry_ts=expiry_ts,
             days_to_expiry=days_to_expiry,
             pnl_velocity=pnl_velocity,
+            net_edge_pct=net_edge_pct,
+            annualized_return=annualized_return,
+            confidence=confidence,
+            fillable_size_usdc=fillable_size_usdc,
+            score=score,
             poly_title=event_title,
             kalshi_title=label or event_title,
             kalshi_side=kalshi_side,
@@ -341,7 +436,13 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
 
 
 def fetch_opportunities() -> list[ArbOpportunity]:
-    """Fetch, normalize, and sort opportunities by pnl_velocity descending."""
+    """Fetch, normalize, and sort opportunities by score descending.
+
+    Score = annualized_return × confidence × fillable_size_usdc
+    This ranking maximises expected risk-adjusted annualised dollar return
+    and naturally deprioritises thin/negative-edge and illiquid opportunities
+    without requiring manual threshold tuning for each dimension separately.
+    """
     raw_entries = fetch_arb_current()
     log(f"Fetched {len(raw_entries)} raw entries from Oddpool")
 
@@ -351,6 +452,17 @@ def fetch_opportunities() -> list[ArbOpportunity]:
         if opp is not None:
             opportunities.append(opp)
 
-    opportunities.sort(key=lambda o: o.pnl_velocity, reverse=True)
-    log(f"Normalized {len(opportunities)}/{len(raw_entries)} valid opportunities (sorted by pnl_velocity)")
+    opportunities.sort(key=lambda o: o.score, reverse=True)
+    log(
+        f"Normalized {len(opportunities)}/{len(raw_entries)} valid opportunities "
+        f"(sorted by score = annualized_return × confidence × fillable_size)"
+    )
+    if opportunities:
+        top = opportunities[0]
+        log(
+            f"🏆 Top opportunity: pair={top.pair_id!r} "
+            f"score={top.score:.1f} AR={top.annualized_return:.2f}× "
+            f"net_edge={top.net_edge_pct:.2f}% conf={top.confidence:.2f} "
+            f"fill=${top.fillable_size_usdc:.0f} days={top.days_to_expiry:.1f}"
+        )
     return opportunities
