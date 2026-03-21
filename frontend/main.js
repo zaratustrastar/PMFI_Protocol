@@ -1564,24 +1564,45 @@ async function webVerifyFollow() {
 // ARBITRAGE
 // =============================================================================
 
+function _toUrlSlug(str) {
+    if (!str) return '';
+    return String(str)
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip diacritics
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
 function _oddpoolToCard(op) {
     const venue2 = op.venue2 || 'kalshi';
     const kalshiSide = op.kalshi_side || 'YES';
     const polyPrice = op.poly_yes_ask || 0;
     const otherPrice = op.kalshi_yes_ask || 0;
-    const title = op.poly_title || op.kalshi_title || op.pair_id || 'Unknown';
+    const title = op.poly_title || op.pair_id || 'Unknown';
+    const outcome = op.kalshi_title || '';   // specific outcome label (e.g. "25bps cut", "Finland")
     const edgePct = op.gross_edge_pct || 0;
     const kalshiTicker = op.kalshi_ticker || '';
-    const polyUrl = title ? 'https://polymarket.com/markets?_q=' + encodeURIComponent(title) : '';
+
+    // Polymarket: use event slug directly if available, else search by title
+    const polySlug = op.poly_yes_token || '';
+    const polyUrl = polySlug
+        ? 'https://polymarket.com/event/' + polySlug
+        : 'https://polymarket.com/markets?_q=' + encodeURIComponent(title + (outcome ? ' ' + outcome : ''));
+
+    // Opinion Labs: correct domain is app.opinion.trade with slug-based URLs
+    // Slug format: {event-title-slug}-{outcome-slug} e.g. "next-president-of-vietnam-to-lam"
     let otherUrl = '';
     if (venue2 === 'opinion') {
-        otherUrl = 'https://www.opinlabs.com/markets/' + (op.opinion_slug || op.opinion_market_id || '');
+        const slug = _toUrlSlug(title) + (outcome ? '-' + _toUrlSlug(outcome) : '');
+        otherUrl = 'https://app.opinion.trade/market/' + (slug || op.opinion_market_id || '');
     } else if (kalshiTicker) {
         otherUrl = 'https://kalshi.com/markets/' + kalshiTicker.split('-')[0].toLowerCase() + '#' + kalshiTicker.toLowerCase();
     }
+
     return {
         pairId: op.pair_id || '',
         title,
+        outcome,
         edge: edgePct / 100,
         roi: edgePct,
         expiryTs: op.expiry_ts || 0,
@@ -1645,6 +1666,10 @@ async function webLoadArb() {
                 if (scannerError && allOpps.length > 0) scannerError = null;
             }
         }
+
+        // Drop markets whose resolution time has already passed
+        const nowSec = Math.floor(Date.now() / 1000);
+        allOpps = allOpps.filter(o => !o.expiryTs || o.expiryTs > nowSec);
 
         allOpps.sort((a, b) => (a.expiryTs || 0) - (b.expiryTs || 0));
 
@@ -1711,11 +1736,16 @@ function webRenderArbCard(item) {
         <div class="arb-venue-price">${otherPrice}\u00a2</div>
     </${otherUrl ? 'a' : 'div'}>`;
 
+    const outcomeHtml = item.outcome
+        ? `<div class="arb-card-outcome">${item.outcome}</div>`
+        : '';
+
     return `<div class="arb-card">
         <div class="arb-card-header">
             <div class="arb-card-title">${item.title || 'Unknown'}</div>
             ${badge}
         </div>
+        ${outcomeHtml}
         <div class="arb-card-prices">${polyVenue}${otherVenue}</div>
         <div class="arb-card-meta">
             ${expiry ? `<span>${expiry}</span>` : '<span></span>'}
