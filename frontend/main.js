@@ -1359,37 +1359,95 @@ async function webVerifyFollow() {
 // ARBITRAGE
 // =============================================================================
 
+function _oddpoolToCard(op) {
+    const venue2 = op.venue2 || 'kalshi';
+    const kalshiSide = op.kalshi_side || 'YES';
+    const polyPrice = op.poly_yes_ask || 0;
+    const otherPrice = op.kalshi_yes_ask || 0;
+    const title = op.poly_title || op.kalshi_title || op.pair_id || 'Unknown';
+    const edgePct = op.gross_edge_pct || 0;
+    const kalshiTicker = op.kalshi_ticker || '';
+    const polyUrl = title ? 'https://polymarket.com/markets?_q=' + encodeURIComponent(title) : '';
+    let otherUrl = '';
+    if (venue2 === 'opinion') {
+        otherUrl = 'https://www.opinlabs.com/markets/' + (op.opinion_slug || op.opinion_market_id || '');
+    } else if (kalshiTicker) {
+        otherUrl = 'https://kalshi.com/markets/' + kalshiTicker.split('-')[0].toLowerCase() + '#' + kalshiTicker.toLowerCase();
+    }
+    return {
+        pairId: op.pair_id || '',
+        title,
+        edge: edgePct / 100,
+        roi: edgePct,
+        expiryTs: op.expiry_ts || 0,
+        legs: [
+            { venue: 'polymarket', price: polyPrice, side: 'YES' },
+            { venue: venue2, price: otherPrice, side: kalshiSide },
+        ],
+        polyUrl,
+        kalshiUrl: venue2 === 'kalshi' ? otherUrl : '',
+        opinionUrl: venue2 === 'opinion' ? otherUrl : '',
+        source: 'oddpool',
+        type: 'opportunity',
+        _type: 'opportunity',
+    };
+}
+
 async function webLoadArb() {
     if (arbRefreshTimer) { clearTimeout(arbRefreshTimer); arbRefreshTimer = null; }
     const el = document.getElementById('webArbOpportunities');
     const statusEl = document.getElementById('webArbStatus');
     if (!el) return;
     try {
-        const res = await fetch('/api/arbs?sort=expiry');
-        if (!res.ok) throw new Error('API error ' + res.status);
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
+        const [oddRes, legacyRes] = await Promise.allSettled([
+            fetch('/api/arb-vault/opportunities?limit=200'),
+            fetch('/api/arbs?sort=expiry&limit=50'),
+        ]);
+
+        let allOpps = [];
+        let updatedAt = 0;
+        let count = 0;
+
+        if (oddRes.status === 'fulfilled' && oddRes.value.ok) {
+            const d = await oddRes.value.json();
+            if (!d.error) {
+                allOpps = (d.opportunities || []).map(op => _oddpoolToCard(op));
+                updatedAt = d.updated_at || 0;
+                count = d.count || allOpps.length;
+            }
+        }
+
+        const seenIds = new Set(allOpps.map(o => o.pairId));
+        if (legacyRes.status === 'fulfilled' && legacyRes.value.ok) {
+            const d2 = await legacyRes.value.json();
+            if (!d2.error) {
+                const legacyOpps = (d2.opportunities || []).map(o => ({ ...o, _type: 'opportunity' }));
+                const legacyWatch = (d2.watchlist || []).map(o => ({ ...o, _type: 'watchlist' }));
+                for (const o of [...legacyOpps, ...legacyWatch]) {
+                    if (!seenIds.has(o.pairId)) { allOpps.push(o); seenIds.add(o.pairId); }
+                }
+                if (!updatedAt && d2.asOf) updatedAt = d2.asOf;
+            }
+        }
+
+        allOpps.sort((a, b) => (a.expiryTs || 0) - (b.expiryTs || 0));
 
         if (statusEl) {
-            const ago = data.asOf ? Math.round((Date.now() / 1000 - data.asOf)) : null;
+            const ago = updatedAt ? Math.round(Date.now() / 1000 - updatedAt) : null;
             const agoText = ago !== null ? (ago < 60 ? ago + 's ago' : Math.round(ago / 60) + 'm ago') : '';
-            const pairsText = data.pairsTracked ? data.pairsTracked + ' pairs' : '';
+            const countText = allOpps.length ? allOpps.length + ' opportunities' : '';
             statusEl.innerHTML = '<span class="arb-dot live"></span>Live' +
-                (pairsText ? ' \u00b7 ' + pairsText : '') +
+                (countText ? ' \u00b7 ' + countText : '') +
                 (agoText ? ' \u00b7 Updated ' + agoText : '');
         }
 
-        const opps = (data.opportunities || []).map(o => ({ ...o, _type: 'opportunity' }));
-        const watch = (data.watchlist || []).map(o => ({ ...o, _type: 'watchlist' }));
-        const all = [...opps, ...watch].sort((a, b) => (a.expiryTs || 0) - (b.expiryTs || 0));
-        el.innerHTML = all.length
-            ? all.map(o => webRenderArbCard(o)).join('')
+        el.innerHTML = allOpps.length
+            ? allOpps.map(o => webRenderArbCard(o)).join('')
             : '<div class="arb-empty">No arbitrage opportunities right now.<br>Scanner checks all platforms every 60s.</div>';
 
-        const refreshMs = data.refreshInMs || 60000;
         arbRefreshTimer = setTimeout(() => {
             if (webActiveTab === 'arbitrage') webLoadArb();
-        }, refreshMs);
+        }, 30000);
     } catch (e) {
         if (statusEl) statusEl.innerHTML = '<span class="arb-dot error"></span>Scanner unavailable';
         el.innerHTML = '<div class="arb-empty">Could not load arbitrage data: ' + e.message + '</div>';
