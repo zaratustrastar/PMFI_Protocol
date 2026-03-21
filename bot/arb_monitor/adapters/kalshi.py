@@ -407,6 +407,18 @@ def compute_kalshi_fillable_contracts(
     contracts = 0
     usdc_cost = 0.0
 
+    # Validate schema: expect list of {"price": <cents>, "delta": <qty>} dicts.
+    # Warn loudly if the format looks wrong so production log scanning can catch
+    # Kalshi API shape changes before they silently produce zero-depth results.
+    if levels:
+        sample = levels[0]
+        if not isinstance(sample, dict) or "price" not in sample or "delta" not in sample:
+            log(
+                f"⚠️ [Kalshi/{side}] unexpected orderbook level format — "
+                f"expected {{price, delta}} got {type(sample).__name__}: {sample!r}. "
+                f"Depth may be underestimated. Update compute_kalshi_fillable_contracts()."
+            )
+
     # Normalise and sort explicitly — API usually returns best-first but we
     # cannot guarantee ordering across API versions or response edge cases.
     parsed_levels: list[tuple[float, int]] = []

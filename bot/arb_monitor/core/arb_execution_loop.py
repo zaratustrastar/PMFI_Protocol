@@ -126,6 +126,8 @@ def _execution_cycle():
     skipped_caps = 0
     skipped_expiry = 0
     skipped_display = 0
+    depth_insufficient = 0   # aborted: depth-capped size < 1 contract at profitable price
+    depth_unavailable = 0    # aborted: could not fetch orderbook to verify depth
 
     for opp in opportunities:
         if not _loop_running:
@@ -189,6 +191,13 @@ def _execution_cycle():
         result = execute_arb(opp, size_usdc=size_usdc)
         executed += 1
 
+        # Track depth-related execution failures for cycle summary
+        if not result.success and result.error:
+            if result.error.startswith("depth_insufficient"):
+                depth_insufficient += 1
+            elif result.error.startswith("depth_unavailable"):
+                depth_unavailable += 1
+
         if result.success:
             log(f"✅ Execution succeeded for {opp.pair_id}")
             try:
@@ -224,7 +233,9 @@ def _execution_cycle():
         f"skipped_display_only={skipped_display} "
         f"skipped_thin_edge={skipped_thin} "
         f"skipped_expiry={skipped_expiry} "
-        f"skipped_caps={skipped_caps}"
+        f"skipped_caps={skipped_caps} "
+        f"depth_insufficient={depth_insufficient} "
+        f"depth_unavailable={depth_unavailable}"
     )
 
 
