@@ -566,8 +566,8 @@ def execute_arb(
 
     log(
         f"📏 Depth summary: "
-        f"poly={poly_fillable} contracts/${poly_depth_usdc:.2f} (max_fill={max_poly_fill_price:.4f}) | "
-        f"leg2={leg2_fillable} contracts/${leg2_depth_usdc:.2f} (max_fill={max_leg2_fill_price:.4f})"
+        f"depth_poly={poly_fillable} contracts/${poly_depth_usdc:.2f} (max_fill={max_poly_fill_price:.4f}) | "
+        f"depth_leg2={leg2_fillable} contracts/${leg2_depth_usdc:.2f} (max_fill={max_leg2_fill_price:.4f})"
     )
     # ─────────────────────────────────────────────────────────────────────────
 
