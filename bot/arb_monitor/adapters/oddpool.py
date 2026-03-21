@@ -25,9 +25,51 @@ from datetime import datetime, timezone
 from typing import Optional
 from ..config import ODDPOOL_API_KEY, ODDPOOL_BASE_URL
 
-
 def log(msg: str):
     print(f"🔀 [Arb/Oddpool] {msg}")
+
+
+# ── Polymarket slug → CLOB token ID cache ────────────────────────────────────
+# Keyed by slug string. Value: (yes_token, no_token, cached_at) or (None, None, t).
+# TTL: 60 minutes so token IDs are re-validated occasionally without hammering Gamma.
+_SLUG_CACHE: dict[str, tuple[Optional[str], Optional[str], float]] = {}
+_SLUG_CACHE_TTL = 3600  # seconds
+
+
+def _resolve_poly_token(slug: str) -> Optional[str]:
+    """Resolve a Polymarket event slug to a CLOB YES token ID.
+
+    Uses a 60-minute in-memory cache. Returns None when the slug cannot be resolved
+    (network error, not found, etc.). Failure is cached briefly (5 min) to avoid
+    hammering Gamma on every cycle for a permanently missing market.
+    """
+    if not slug:
+        return None
+
+    now = time.time()
+    cached = _SLUG_CACHE.get(slug)
+    if cached is not None:
+        yes_tok, _no_tok, cached_at = cached
+        ttl = 300 if yes_tok is None else _SLUG_CACHE_TTL  # short TTL for failures
+        if now - cached_at < ttl:
+            return yes_tok  # None = previously failed (display-only until TTL expires)
+
+    try:
+        from .polymarket import lookup_token_ids_by_slug
+        result = lookup_token_ids_by_slug(slug)
+        if result:
+            yes_tok, no_tok = result
+            _SLUG_CACHE[slug] = (yes_tok, no_tok, now)
+            log(f"✅ Token resolved for slug={slug!r}: {yes_tok[:16]}...")
+            return yes_tok
+        else:
+            _SLUG_CACHE[slug] = (None, None, now)
+            log(f"⚠️ Could not resolve token for slug={slug!r} — display-only until retry")
+            return None
+    except Exception as e:
+        _SLUG_CACHE[slug] = (None, None, now)
+        log(f"⚠️ Token resolution error for slug={slug!r}: {e}")
+        return None
 
 
 @dataclass
@@ -260,15 +302,22 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         days_to_expiry = max(0.0, (expiry_ts - now) / 86400) if expiry_ts > now else 0.0
         pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)
 
+        # Resolve Polymarket slug → real CLOB YES token ID so the executor can
+        # place live orders. Cached for 60 min. Falls back to slug if unavailable.
+        resolved_token = _resolve_poly_token(polymarket_slug)
+        poly_yes_token = resolved_token if resolved_token else polymarket_slug
+        is_display_only = resolved_token is None  # False when we have a real token ID
+
         log(
-            f"✅ pair={pair_id!r} edge={gross_edge_pct:.2f}¢ "
+            f"{'✅' if not is_display_only else '👁'} pair={pair_id!r} edge={gross_edge_pct:.2f}¢ "
             f"poly={our_poly_ask:.2f} venue2({venue2}/{kalshi_side})={our_venue2_ask:.2f} "
-            f"days={days_to_expiry:.1f} title={event_title[:50]!r}"
+            f"days={days_to_expiry:.1f} token={'resolved' if not is_display_only else 'slug-only'} "
+            f"title={event_title[:40]!r}"
         )
 
         return ArbOpportunity(
             pair_id=pair_id,
-            poly_yes_token=polymarket_slug,   # slug used as identifier; no token address from Oddpool
+            poly_yes_token=poly_yes_token,    # real CLOB token ID when resolved, slug otherwise
             poly_no_token="",
             kalshi_ticker=kalshi_ticker,
             poly_yes_ask=our_poly_ask,
@@ -282,8 +331,8 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             kalshi_side=kalshi_side,
             venue2=venue2,
             opinion_market_id=opinion_market_id,
-            opinion_slug=opinion_market_id,   # use id as slug if no separate slug field
-            is_display_only=True,             # Oddpool doesn't return Poly token IDs
+            opinion_slug=opinion_market_id,
+            is_display_only=is_display_only,  # False = real token resolved, execution allowed
             raw=entry,
         )
     except Exception as e:

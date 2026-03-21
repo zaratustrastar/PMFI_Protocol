@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from typing import Optional
 from ..adapters.polymarket import get_best_prices as poly_get_best_prices
 from ..adapters.kalshi import get_best_prices as kalshi_get_best_prices
+from ..config import OPINION_BASE_URL, OPINION_API_KEY
 
 
 def log(msg: str):
@@ -149,10 +150,59 @@ def _load_open_positions() -> list[ArbPosition]:
         return []
 
 
-def _get_servicer_balances() -> tuple[float, float]:
-    """Get servicer wallet cash balances on Polymarket and Kalshi.
+def _get_opinion_cash() -> float:
+    """Get uninvested USDC balance from Opinion Labs account.
 
-    Returns (poly_cash_usdc, kalshi_cash_usdc).
+    Auth: apikey header.
+    Returns balance in USDC (float). Returns 0.0 on any error.
+    Tries /account/balance, then /account, then /balance as fallbacks.
+    """
+    if not OPINION_API_KEY:
+        log("ℹ️ OPINION_API_KEY not set — opinion_cash = 0")
+        return 0.0
+
+    import requests
+    headers = {
+        "apikey": OPINION_API_KEY,
+        "Content-Type": "application/json",
+    }
+
+    # Try each endpoint in order; return on first success
+    endpoints = [
+        f"{OPINION_BASE_URL}/account/balance",
+        f"{OPINION_BASE_URL}/account",
+        f"{OPINION_BASE_URL}/balance",
+    ]
+    for url in endpoints:
+        try:
+            resp = requests.get(url, headers=headers, timeout=10)
+            log(f"ℹ️ Opinion balance probe {url} → HTTP {resp.status_code}")
+            if resp.status_code == 200:
+                data = resp.json()
+                # Unwrap common wrappers
+                result = data.get("result", data)
+                # Try several field names; convert cents → dollars if value > 100
+                for field in ("balance", "usdc", "usdcBalance", "availableBalance", "available"):
+                    val = result.get(field)
+                    if val is not None:
+                        amount = float(val)
+                        # Opinion Labs often returns cents (integers); convert if > 100
+                        if amount > 100 and isinstance(val, int):
+                            amount = amount / 100.0
+                        log(f"✅ Opinion servicer cash: {amount:.2f} USDC (field={field!r})")
+                        return amount
+                log(f"⚠️ Opinion balance: no recognised field in response: {list(result.keys())[:10]}")
+        except Exception as e:
+            log(f"⚠️ Opinion balance error at {url}: {e}")
+
+    log("⚠️ Opinion cash could not be fetched from any endpoint — opinion_cash = 0")
+    return 0.0
+
+
+def _get_servicer_balances() -> tuple[float, float, float]:
+    """Get servicer wallet cash balances on Polymarket, Kalshi, and Opinion Labs.
+
+    Returns (poly_cash_usdc, kalshi_cash_usdc, opinion_cash_usdc).
     These are queried from the respective APIs and represent uninvested USDC.
     """
     poly_cash = 0.0
@@ -172,6 +222,8 @@ def _get_servicer_balances() -> tuple[float, float]:
                 data = resp.json()
                 poly_cash = float(data.get("balance", data.get("usdc", 0)))
                 log(f"Poly servicer cash: {poly_cash} USDC")
+            else:
+                log(f"⚠️ Poly balance HTTP {resp.status_code}: {resp.text[:100]}")
         except Exception as e:
             log(f"⚠️ Error fetching poly servicer balance: {e}")
     else:
@@ -199,7 +251,9 @@ def _get_servicer_balances() -> tuple[float, float]:
     else:
         log("ℹ️ Kalshi credentials not configured (KALSHI_API_KEY_ID / KALSHI_PRIVATE_KEY_PATH) — kalshi_cash = 0")
 
-    return poly_cash, kalshi_cash
+    opinion_cash = _get_opinion_cash()
+
+    return poly_cash, kalshi_cash, opinion_cash
 
 
 def _get_settled_pnl() -> float:
@@ -416,7 +470,7 @@ def compute_nav() -> dict:
     log("Computing arb vault NAV...")
     start = time.time()
 
-    poly_cash, kalshi_cash = _get_servicer_balances()
+    poly_cash, kalshi_cash, opinion_cash = _get_servicer_balances()
 
     positions = _load_open_positions()
     position_values = []
@@ -429,21 +483,26 @@ def compute_nav() -> dict:
 
     settled_pnl = _get_settled_pnl()
 
-    total_assets = poly_cash + kalshi_cash + total_liquid + settled_pnl
+    total_assets = poly_cash + kalshi_cash + opinion_cash + total_liquid + settled_pnl
 
     log(
         f"NAV breakdown: poly_cash={poly_cash:.4f}, kalshi_cash={kalshi_cash:.4f}, "
-        f"open_positions={total_liquid:.4f}, settled_pnl={settled_pnl:.4f}, "
-        f"TOTAL={total_assets:.4f} USDC"
+        f"opinion_cash={opinion_cash:.4f}, open_positions={total_liquid:.4f}, "
+        f"settled_pnl={settled_pnl:.4f}, TOTAL={total_assets:.4f} USDC"
     )
 
     timestamp = int(time.time())
     round_id = _get_next_round_id()
     deadline = timestamp + NAV_VALIDITY_WINDOW
 
+    # The contract struct has no opinionCash field — fold it into polyCash for the
+    # ABI encoding. The on-chain breakdown fields are informational only; totalAssets
+    # is what drives the share price math.
+    poly_cash_for_struct = poly_cash + opinion_cash
+
     signature = _sign_nav_abi_encoded(
         total_assets_usdc=total_assets,
-        poly_cash=poly_cash,
+        poly_cash=poly_cash_for_struct,
         kalshi_cash=kalshi_cash,
         open_positions_value=total_liquid,
         settled_pnl=settled_pnl,
@@ -456,7 +515,7 @@ def compute_nav() -> dict:
 
     _save_nav_snapshot(
         total_assets_usdc=total_assets,
-        poly_cash=poly_cash,
+        poly_cash=poly_cash_for_struct,
         kalshi_cash=kalshi_cash,
         open_positions_value=total_liquid,
         settled_pnl=settled_pnl,
@@ -466,8 +525,12 @@ def compute_nav() -> dict:
 
     payload = {
         "total_assets_usdc": round(total_assets, 6),
-        "poly_cash": round(poly_cash, 6),
+        # poly_cash in the signed struct = poly_cash + opinion_cash (no opinionCash slot in contract).
+        # The frontend passes this directly into the ABI struct, so it must match the signature.
+        "poly_cash": round(poly_cash_for_struct, 6),
+        "poly_cash_polymarket_only": round(poly_cash, 6),   # for display breakdown only
         "kalshi_cash": round(kalshi_cash, 6),
+        "opinion_cash": round(opinion_cash, 6),
         "open_positions_value": round(total_liquid, 6),
         "settled_pnl": round(settled_pnl, 6),
         "round_id": round_id,

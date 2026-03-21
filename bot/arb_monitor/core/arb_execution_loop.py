@@ -108,10 +108,20 @@ def _execution_cycle():
     skipped_thin = 0
     skipped_caps = 0
     skipped_expiry = 0
+    skipped_display = 0
 
     for opp in opportunities:
         if not _loop_running:
             break
+
+        # ── Display-only guard: skip markets whose Poly token ID is not yet resolved ──
+        if getattr(opp, "is_display_only", True):
+            skipped_display += 1
+            log(
+                f"👁 Skipping {opp.pair_id}: token not yet resolved from slug "
+                f"(will retry on next Oddpool cycle)"
+            )
+            continue
 
         # ── Expiry guard: don't enter markets closing too soon ─────────────
         if opp.days_to_expiry < ARB_MIN_DAYS_TO_EXPIRY:
@@ -188,6 +198,7 @@ def _execution_cycle():
 
     log(
         f"⚡ Cycle complete: executed={executed} "
+        f"skipped_display_only={skipped_display} "
         f"skipped_thin_edge={skipped_thin} "
         f"skipped_expiry={skipped_expiry} "
         f"skipped_caps={skipped_caps}"

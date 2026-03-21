@@ -86,10 +86,19 @@ KALSHI_API_KEY_ID=dc5fed12-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 KALSHI_PRIVATE_KEY_PATH=/home/user/kalshi_private_key.pem   # path to your .pem file on VPS
 
 POLY_PRIVATE_KEY=0xPOLY_TRADING_WALLET_KEY
-OPINION_API_KEY=your_opinion_key   # if using Opinion Labs
+
+# Polymarket API key for the pARB trading account (separate from pSNIPER's POLYMARKET_API_KEY).
+# Used by the NAV oracle to fetch uninvested cash balance on Polymarket.
+# Get from: https://polymarket.com/profile → API Keys → Create Key
+POLY_API_KEY=your_parb_polymarket_api_key
+
+OPINION_API_KEY=your_opinion_key
 ```
 
-> **Note**: `ARB_MIN_HOURS_TO_EXPIRY` is no longer needed — expiry filtering
+> **Note**: `POLY_API_KEY` must be from the **pARB Polymarket account**, not pSNIPER's.
+> pSNIPER uses `POLYMARKET_API_KEY`; pARB uses `POLY_API_KEY` so they stay fully isolated.
+>
+> `ARB_MIN_HOURS_TO_EXPIRY` is no longer needed — expiry filtering
 > is handled by Oddpool's actionable flag (default is 0, i.e. disabled).
 
 ---

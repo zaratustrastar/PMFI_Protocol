@@ -47,6 +47,36 @@ The vault calculates NAV using **ACTUAL LIQUID VALUE** with **withdrawal exclusi
 
 **Current Contract**: `0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1` (Base Mainnet, V7.5)
 
+## pARB Vault (V1) — Architecture
+
+Cross-venue arb vault trading Polymarket × Kalshi × Opinion Labs via Oddpool API.
+
+**NAV Oracle** (`bot/arb_monitor/core/arb_nav.py`):
+- Tracks cash on all 3 platforms: `poly_cash` (`POLY_API_KEY`), `kalshi_cash` (RSA auth), `opinion_cash` (`OPINION_API_KEY`)
+- Open position liquid value from orderbook bids (not cost basis)
+- `totalAssets = poly_cash + kalshi_cash + opinion_cash + open_positions + settled_pnl`
+- Contract struct has no `opinionCash` field → folded into `polyCash` in ABI encoding; `totalAssets` drives pricing
+- Signs `ArbNavDataV1` with `ARB_NAV_SIGNER_PRIVATE_KEY`, domain salt `PMFIArbVaultV1.v1`
+- Separate from pSNIPER oracle (`ORACLE_PRIVATE_KEY`, domain `PredictFiSniperVaultV7.v7`)
+
+**Key env vars** (pARB-specific, separate from pSNIPER):
+- `POLY_API_KEY` — pARB's Polymarket API key (not `POLYMARKET_API_KEY` which is pSNIPER's)
+- `POLY_PRIVATE_KEY` — pARB trading wallet private key
+- `ARB_NAV_SIGNER_PRIVATE_KEY` — signs NAV payloads for pARB contract
+- `ARB_VAULT_V1_ADDRESS` — deployed pARB contract address on Base
+- `KALSHI_API_KEY_ID` + `KALSHI_PRIVATE_KEY_PATH` — Kalshi RSA auth
+- `OPINION_API_KEY` — Opinion Labs API key
+
+**Execution** (`bot/arb_monitor/core/arb_execution_loop.py`):
+- Sorted by `pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)` descending
+- Oddpool slugs resolved to real Polymarket CLOB token IDs via Gamma API (60-min cache)
+- `is_display_only=False` when token resolved → execution enabled; `True` → skipped with retry
+- Per-pair cap (`ARB_MAX_PAIR_USDC`) and total cap (`ARB_MAX_DEPLOYED_USDC`) enforced
+- Live price re-check + slippage guard (50 bps) before every trade
+- Auto-unwind leg 1 if leg 2 fails (Kalshi or Opinion)
+
+**Current Contract**: `ARB_VAULT_V1_ADDRESS` (Base Mainnet, V1) — set in `.env`
+
 ## Polymarket Trading Bot
 
 This system automates Polymarket monitoring and trading.
