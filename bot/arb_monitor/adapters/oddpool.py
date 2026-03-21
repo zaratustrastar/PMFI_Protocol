@@ -397,23 +397,34 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         #   Heuristic fallback: ARB_FILLABLE_FRACTION × bottleneck_liq (same as before).
         #   Floor at $10 so tiny-but-valid markets still receive a non-zero score.
         fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)  # default heuristic
-        if resolved_token and our_poly_ask > 0:
+
+        # Determine the correct Poly token to walk based on which side we buy on Poly.
+        #   buy_yes_market == "polymarket" → we buy YES on Poly → use the YES token.
+        #   Otherwise                     → we buy NO  on Poly → use the NO token.
+        # The NO token is stored as the second element of the slug cache entry.
+        if buy_yes_market == "polymarket":
+            scorer_token = resolved_token  # YES token (already resolved above)
+        else:
+            cached_slug = _SLUG_CACHE.get(polymarket_slug)
+            scorer_token = cached_slug[1] if cached_slug and cached_slug[1] else resolved_token
+
+        if scorer_token and our_poly_ask > 0:
             now_book = time.time()
-            cached_book = _BOOK_CACHE.get(resolved_token)
+            cached_book = _BOOK_CACHE.get(scorer_token)
             if cached_book is not None and (now_book - cached_book[1]) < _BOOK_CACHE_TTL:
                 poly_contracts_fillable = cached_book[0]
             else:
                 try:
                     from .polymarket import fetch_orderbook, compute_fillable_contracts
-                    book = fetch_orderbook(resolved_token)
+                    book = fetch_orderbook(scorer_token)
                     if book:
-                        # max fill price = our quoted ask (depth at the spread, not below)
+                        # max fill price = our quoted ask (depth at the spread)
                         poly_contracts_fillable, _ = compute_fillable_contracts(book, our_poly_ask)
-                        _BOOK_CACHE[resolved_token] = (poly_contracts_fillable, now_book)
+                        _BOOK_CACHE[scorer_token] = (poly_contracts_fillable, now_book)
                     else:
                         poly_contracts_fillable = -1  # signal: book unavailable
                 except Exception as _e:
-                    log(f"⚠️ Book depth fetch error for scorer (token={resolved_token[:16]}): {_e}")
+                    log(f"⚠️ Book depth fetch error for scorer (token={scorer_token[:16]}): {_e}")
                     poly_contracts_fillable = -1
 
             if poly_contracts_fillable >= 0:
@@ -422,7 +433,8 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
                 poly_fillable_usdc = poly_contracts_fillable * our_poly_ask
                 fillable_size_usdc = max(10.0, poly_fillable_usdc)
                 log(
-                    f"📏 [Scorer] real poly depth: {poly_contracts_fillable} contracts "
+                    f"📏 [Scorer] real poly depth ({buy_yes_market}/{scorer_token[:12]}): "
+                    f"{poly_contracts_fillable} contracts "
                     f"= ${poly_fillable_usdc:.0f} USDC → fillable_size=${fillable_size_usdc:.0f}"
                 )
             # else: book unavailable — keep heuristic computed above
