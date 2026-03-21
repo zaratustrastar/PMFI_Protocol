@@ -4330,24 +4330,54 @@ def api_arb_vault_opportunities():
 def api_arb_vault_raw():
     """Return raw Oddpool /arb-current response for field-mapping debug.
 
-    Returns first N entries (default 5) with no normalization so callers can
-    inspect real field names returned by the Oddpool API.
+    Makes a fresh Oddpool call, returns the ACTUAL unfiltered JSON from Oddpool
+    so callers can see the true root-level structure, plus the post-extraction
+    sample for comparison.
     """
     try:
-        from arb_monitor.adapters.oddpool import fetch_arb_current
+        from arb_monitor.adapters.oddpool import (
+            fetch_arb_current_raw, fetch_arb_current, _ODDPOOL_RAW_CACHE
+        )
         limit = min(int(flask_request.args.get("limit", "5")), 50)
-        raw = fetch_arb_current()
-        print(f"🔍 [ArbVault] /api/arb-vault/raw fetched {len(raw)} raw entries, returning first {min(limit, len(raw))}")
-        sample = raw[:limit]
+
+        # Fresh call — fills _ODDPOOL_RAW_CACHE and also runs extraction
+        extracted = fetch_arb_current()
+        cache = dict(_ODDPOOL_RAW_CACHE)
+
+        print(f"🔍 [ArbVault] /api/arb-vault/raw: oddpool_status={cache.get('status')} "
+              f"extracted={len(extracted)} entries")
+
+        sample = extracted[:limit]
         keys = sorted(set(k for entry in sample for k in entry.keys())) if sample else []
+
+        # Summarise root-level keys of the raw response so we can see if extraction is wrong
+        raw_body = cache.get("body")
+        raw_summary: dict = {}
+        if isinstance(raw_body, dict):
+            raw_summary = {
+                "root_keys": list(raw_body.keys()),
+                "root_key_types": {k: type(v).__name__ for k, v in raw_body.items()},
+                "root_list_lengths": {
+                    k: len(v) for k, v in raw_body.items() if isinstance(v, list)
+                },
+            }
+        elif isinstance(raw_body, list):
+            raw_summary = {"root_type": "list", "root_length": len(raw_body)}
+        else:
+            raw_summary = {"root_type": type(raw_body).__name__, "preview": str(raw_body)[:300]}
+
         return jsonify({
-            "total_fetched": len(raw),
+            "oddpool_status_code": cache.get("status"),
+            "oddpool_url": cache.get("url"),
+            "oddpool_raw_summary": raw_summary,
+            "extracted_count": len(extracted),
             "sample_count": len(sample),
             "all_keys_seen": keys,
             "entries": sample,
         })
     except Exception as e:
         print(f"❌ [ArbVault] /api/arb-vault/raw error: {e}")
+        import traceback; traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 

@@ -74,25 +74,59 @@ def _headers() -> dict:
     return headers
 
 
-def fetch_arb_current() -> list[dict]:
-    """Fetch /arb-current from Oddpool API. Returns raw list of opportunity dicts."""
+_ODDPOOL_RAW_CACHE: dict = {}
+
+def fetch_arb_current_raw() -> tuple[int, object]:
+    """Fetch /arb-current from Oddpool API. Returns (status_code, raw_json).
+
+    Caches the last raw response in _ODDPOOL_RAW_CACHE so /api/arb-vault/raw
+    can inspect the actual Oddpool response structure without a second network call.
+    """
     url = f"{ODDPOOL_BASE_URL}/arb-current"
     log(f"Fetching {url}")
     try:
         resp = requests.get(url, headers=_headers(), timeout=15)
+        raw = None
+        try:
+            raw = resp.json()
+        except Exception:
+            raw = resp.text[:500]
+        _ODDPOOL_RAW_CACHE["status"] = resp.status_code
+        _ODDPOOL_RAW_CACHE["body"] = raw
+        _ODDPOOL_RAW_CACHE["url"] = url
         if resp.status_code != 200:
-            log(f"❌ HTTP {resp.status_code}: {resp.text[:200]}")
-            return []
-        data = resp.json()
-        if isinstance(data, list):
-            return data
-        if isinstance(data, dict):
-            return data.get("opportunities", data.get("data", data.get("arb", [])))
-        log(f"⚠️ Unexpected response type: {type(data)}")
-        return []
+            log(f"❌ HTTP {resp.status_code}: {str(raw)[:200]}")
+        return resp.status_code, raw
     except Exception as e:
-        log(f"❌ fetch_arb_current error: {e}")
+        log(f"❌ fetch_arb_current_raw error: {e}")
+        _ODDPOOL_RAW_CACHE["error"] = str(e)
+        return 0, None
+
+
+def fetch_arb_current() -> list[dict]:
+    """Fetch /arb-current from Oddpool API. Returns raw list of opportunity dicts."""
+    status, data = fetch_arb_current_raw()
+    if status != 200 or data is None:
         return []
+    if isinstance(data, list):
+        log(f"✅ Oddpool returned list with {len(data)} entries")
+        return data
+    if isinstance(data, dict):
+        # Try every plausible root key — log which one worked
+        for key in ("opportunities", "data", "arb", "arbs", "results", "matches",
+                    "pairs", "items", "markets", "current", "live", "active"):
+            if key in data and isinstance(data[key], list):
+                log(f"✅ Oddpool entries found under key '{key}': {len(data[key])} entries")
+                return data[key]
+        # Last resort: find any list value
+        for key, val in data.items():
+            if isinstance(val, list) and len(val) > 0:
+                log(f"✅ Oddpool entries found under fallback key '{key}': {len(val)} entries")
+                return val
+        log(f"⚠️ Oddpool dict has no list values. Top-level keys: {list(data.keys())}")
+        return []
+    log(f"⚠️ Unexpected response type: {type(data)}")
+    return []
 
 
 def _parse_expiry(raw_entry: dict) -> int:
