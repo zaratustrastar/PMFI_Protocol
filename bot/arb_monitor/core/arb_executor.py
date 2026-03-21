@@ -534,18 +534,19 @@ def execute_arb(
                 kalshi_book, kalshi_side_for_depth, max_leg2_fill_price
             )
         else:
-            # Orderbook endpoint unavailable — conservative fallback: cap at budget-derived
-            # count so depth check never PERMITS more than budget would anyway.
-            # The slippage guard already protects against adverse price moves; this ensures
-            # we don't size beyond what we could afford at the quoted price regardless.
-            leg2_fillable = budget_contract_count
-            leg2_depth_usdc = 0.0
-            log(
-                f"⚠️ Kalshi orderbook unavailable for {kalshi_ticker} — "
-                f"falling back to budget cap ({budget_contract_count} contracts)"
+            # Orderbook endpoint unavailable — abort rather than guess at depth.
+            # We cannot know how many contracts are available at profitable prices
+            # on Kalshi; proceeding could mean filling at a loss if the book is thin.
+            result.error = (
+                f"depth_unavailable: Kalshi orderbook fetch failed for {kalshi_ticker}. "
+                f"Cannot cap trade size without real depth data. Skipping to protect edge."
             )
+            log(f"❌ {result.error}")
+            return result
     else:
         # Opinion Labs: no orderbook depth API; Poly-side depth still applied.
+        # leg2_fillable is effectively unconstrained — the Poly depth cap and
+        # budget cap remain the binding constraints.
         leg2_fillable = budget_contract_count
         leg2_depth_usdc = 0.0
         log(f"ℹ️ Opinion Labs depth API not available — leg-2 capped at budget ({budget_contract_count} contracts)")

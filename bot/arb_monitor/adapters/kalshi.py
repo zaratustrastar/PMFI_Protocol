@@ -356,7 +356,18 @@ def fetch_orderbook_depth(ticker: str, depth: int = 25) -> Optional[dict]:
     Returns None on any error.
     """
     url = f"{KALSHI_BASE_URL}/markets/{ticker}/orderbook"
-    resp = http_client.get(url, venue="kalshi", headers=_headers(), params={"depth": depth}, timeout=10)
+    # Use RSA auth when credentials are available (required by some API environments);
+    # fall back to unauthenticated headers when not configured (public endpoint fallback).
+    try:
+        from ..core.kalshi_auth import get_kalshi_headers, kalshi_auth_available
+        if kalshi_auth_available():
+            auth_hdrs = get_kalshi_headers("GET", url)
+            headers = {**_headers(), **(auth_hdrs or {})}
+        else:
+            headers = _headers()
+    except Exception:
+        headers = _headers()
+    resp = http_client.get(url, venue="kalshi", headers=headers, params={"depth": depth}, timeout=10)
     if resp is None or resp.status_code != 200:
         log(f"⚠️ [Kalshi] orderbook_depth HTTP {resp.status_code if resp else 'None'} for {ticker}")
         return None

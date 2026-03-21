@@ -417,11 +417,10 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
                     poly_contracts_fillable = -1
 
             if poly_contracts_fillable >= 0:
-                # Convert contracts → USDC at the quoted poly ask price
+                # Convert contracts → USDC at the quoted poly ask price and use
+                # this as the primary estimate; heuristic is the fallback only.
                 poly_fillable_usdc = poly_contracts_fillable * our_poly_ask
-                # Take the minimum of real poly depth and the heuristic so we're
-                # never MORE optimistic than the reported liquidity suggests.
-                fillable_size_usdc = max(10.0, min(poly_fillable_usdc, bottleneck_liq * ARB_FILLABLE_FRACTION))
+                fillable_size_usdc = max(10.0, poly_fillable_usdc)
                 log(
                     f"📏 [Scorer] real poly depth: {poly_contracts_fillable} contracts "
                     f"= ${poly_fillable_usdc:.0f} USDC → fillable_size=${fillable_size_usdc:.0f}"
