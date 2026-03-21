@@ -1802,7 +1802,7 @@
                     wContainer.innerHTML = watch.map(o => renderArbCard(o, 'watchlist')).join('');
                 }
 
-                const refreshMs = 30000;
+                const refreshMs = 60000;
                 arbRefreshTimer = setTimeout(() => {
                     const arbTab = document.getElementById('tabArbitrage');
                     if (arbTab && arbTab.classList.contains('active')) loadArbData();

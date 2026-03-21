@@ -4335,7 +4335,7 @@ def api_arb_vault_raw():
     """
     try:
         from arb_monitor.adapters.oddpool import fetch_arb_current
-        limit = int(flask_request.args.get("limit", "5"))
+        limit = min(int(flask_request.args.get("limit", "5")), 50)
         raw = fetch_arb_current()
         print(f"🔍 [ArbVault] /api/arb-vault/raw fetched {len(raw)} raw entries, returning first {min(limit, len(raw))}")
         sample = raw[:limit]
