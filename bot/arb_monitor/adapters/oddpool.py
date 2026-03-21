@@ -122,17 +122,29 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             entry.get("poly_yes_token") or
             entry.get("polymarket_yes_token") or
             entry.get("poly_token_id") or
+            entry.get("poly_yes_token_id") or
+            entry.get("yes_token_id") or
+            entry.get("token_id") or
+            entry.get("polymarket_token_id") or
+            entry.get("poly_outcome_token") or
             ""
         )
         poly_no_token = (
             entry.get("poly_no_token") or
             entry.get("polymarket_no_token") or
+            entry.get("poly_no_token_id") or
+            entry.get("no_token_id") or
             ""
         )
         kalshi_ticker = (
             entry.get("kalshi_ticker") or
             entry.get("kalshi_market_ticker") or
             entry.get("kalshi_id") or
+            entry.get("ticker") or
+            entry.get("market_id") or
+            entry.get("kalshi_market") or
+            entry.get("kalshi_market_id") or
+            entry.get("kalshi_slug") or
             ""
         )
 
@@ -152,7 +164,7 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         opinion_slug = entry.get("opinion_slug") or entry.get("opinion_market_slug") or ""
 
         if not poly_yes_token:
-            log(f"⚠️ Skipping entry missing poly_yes_token: {entry}")
+            log(f"⚠️ Dropped — poly_yes_token missing. Available keys: {sorted(entry.keys())}. Sample values: { {k: entry[k] for k in list(entry.keys())[:8]} }")
             return None
 
         # Determine which venue is leg 2
@@ -162,7 +174,7 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             (opinion_market_id and not kalshi_ticker)
         )
         if not is_opinion and not kalshi_ticker:
-            log(f"⚠️ Skipping entry missing kalshi_ticker (and not Opinion): {entry}")
+            log(f"⚠️ Dropped — kalshi_ticker missing (not Opinion). Available keys: {sorted(entry.keys())}. Sample: { {k: entry[k] for k in list(entry.keys())[:8]} }")
             return None
 
         poly_yes_ask = float(
@@ -180,7 +192,12 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         edge_from_api = (
             entry.get("gross_edge_pct") or
             entry.get("edge_pct") or
-            entry.get("edge")
+            entry.get("edge") or
+            entry.get("spread_pct") or
+            entry.get("spread") or
+            entry.get("arb_edge") or
+            entry.get("net_edge_pct") or
+            entry.get("edge_percent")
         )
         if edge_from_api is not None:
             gross_edge_pct = float(edge_from_api)

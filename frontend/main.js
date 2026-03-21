@@ -1613,13 +1613,23 @@ async function webLoadArb() {
         let updatedAt = 0;
         let count = 0;
 
-        if (oddRes.status === 'fulfilled' && oddRes.value.ok) {
-            const d = await oddRes.value.json();
-            if (!d.error) {
-                allOpps = (d.opportunities || []).map(op => _oddpoolToCard(op));
-                updatedAt = d.updated_at || 0;
-                count = d.count || allOpps.length;
+        let scannerError = null;
+
+        if (oddRes.status === 'fulfilled') {
+            if (!oddRes.value.ok) {
+                scannerError = 'Scanner offline (' + oddRes.value.status + ')';
+            } else {
+                const d = await oddRes.value.json();
+                if (d.error) {
+                    scannerError = d.error;
+                } else {
+                    allOpps = (d.opportunities || []).map(op => _oddpoolToCard(op));
+                    updatedAt = d.updated_at || 0;
+                    count = d.count || allOpps.length;
+                }
             }
+        } else {
+            scannerError = 'Scanner offline';
         }
 
         const seenIds = new Set(allOpps.map(o => o.pairId));
@@ -1632,18 +1642,22 @@ async function webLoadArb() {
                     if (!seenIds.has(o.pairId)) { allOpps.push(o); seenIds.add(o.pairId); }
                 }
                 if (!updatedAt && d2.asOf) updatedAt = d2.asOf;
+                if (scannerError && allOpps.length > 0) scannerError = null;
             }
         }
 
         allOpps.sort((a, b) => (a.expiryTs || 0) - (b.expiryTs || 0));
 
         if (statusEl) {
-            const ago = updatedAt ? Math.round(Date.now() / 1000 - updatedAt) : null;
-            const agoText = ago !== null ? (ago < 60 ? ago + 's ago' : Math.round(ago / 60) + 'm ago') : '';
-            const countText = allOpps.length ? allOpps.length + ' opportunities' : '';
-            statusEl.innerHTML = '<span class="arb-dot live"></span>Live' +
-                (countText ? ' \u00b7 ' + countText : '') +
-                (agoText ? ' \u00b7 Updated ' + agoText : '');
+            if (scannerError && allOpps.length === 0) {
+                statusEl.innerHTML = '<span class="arb-dot error"></span>\u26a0\ufe0f ' + scannerError;
+            } else {
+                const ago = updatedAt ? Math.round(Date.now() / 1000 - updatedAt) : null;
+                const agoText = ago !== null ? (ago < 60 ? ago + 's ago' : Math.round(ago / 60) + 'm ago') : '';
+                const countText = allOpps.length + ' opportunit' + (allOpps.length === 1 ? 'y' : 'ies');
+                statusEl.innerHTML = '<span class="arb-dot live"></span>Live \u00b7 ' + countText +
+                    (agoText ? ' \u00b7 Updated ' + agoText : '');
+            }
         }
 
         el.innerHTML = allOpps.length

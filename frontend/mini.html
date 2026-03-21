@@ -1700,26 +1700,118 @@
         // ARBITRAGE TAB
         // ============================================
         let arbRefreshTimer = null;
+
+        function _miniOddpoolToCard(op) {
+            const venue2 = op.venue2 || 'kalshi';
+            const kalshiSide = op.kalshi_side || 'YES';
+            const polyPrice = op.poly_yes_ask || 0;
+            const otherPrice = op.kalshi_yes_ask || 0;
+            const title = op.poly_title || op.kalshi_title || op.pair_id || 'Unknown';
+            const edgePct = op.gross_edge_pct || 0;
+            const kalshiTicker = op.kalshi_ticker || '';
+            const polyUrl = title ? 'https://polymarket.com/markets?_q=' + encodeURIComponent(title) : '';
+            let otherUrl = '';
+            if (venue2 === 'opinion') {
+                otherUrl = 'https://www.opinlabs.com/markets/' + (op.opinion_slug || op.opinion_market_id || '');
+            } else if (kalshiTicker) {
+                otherUrl = 'https://kalshi.com/markets/' + kalshiTicker.split('-')[0].toLowerCase() + '#' + kalshiTicker.toLowerCase();
+            }
+            return {
+                pairId: op.pair_id || '',
+                title,
+                edge: edgePct / 100,
+                roi: edgePct,
+                expiryTs: op.expiry_ts || 0,
+                legs: [
+                    { venue: 'polymarket', price: polyPrice, side: 'YES' },
+                    { venue: venue2, price: otherPrice, side: kalshiSide },
+                ],
+                polyUrl,
+                kalshiUrl: venue2 === 'kalshi' ? otherUrl : '',
+                opinionUrl: venue2 === 'opinion' ? otherUrl : '',
+                source: 'oddpool',
+                _type: 'opportunity',
+            };
+        }
         
         async function loadArbData() {
             if (arbRefreshTimer) { clearTimeout(arbRefreshTimer); arbRefreshTimer = null; }
-            const url = '/api/arbs?sort=edge&limit=50';
+            const dot = document.querySelector('.arb-dot');
+            const statusText = document.getElementById('arbStatusText');
             try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error('Status ' + res.status);
-                const data = await res.json();
-                renderArbData(data);
-                const refreshMs = data.refreshInMs || 60000;
+                const [oddRes, legacyRes] = await Promise.allSettled([
+                    fetch('/api/arb-vault/opportunities?limit=200'),
+                    fetch('/api/arbs?sort=edge&limit=50'),
+                ]);
+
+                let allOpps = [];
+                let updatedAt = 0;
+                let scannerError = null;
+
+                if (oddRes.status === 'fulfilled') {
+                    if (!oddRes.value.ok) {
+                        scannerError = 'Scanner offline (' + oddRes.value.status + ')';
+                    } else {
+                        const d = await oddRes.value.json();
+                        if (d.error) {
+                            scannerError = d.error;
+                        } else {
+                            allOpps = (d.opportunities || []).map(op => _miniOddpoolToCard(op));
+                            updatedAt = d.updated_at || 0;
+                        }
+                    }
+                } else {
+                    scannerError = 'Scanner offline';
+                }
+
+                const seenIds = new Set(allOpps.map(o => o.pairId));
+                if (legacyRes.status === 'fulfilled' && legacyRes.value.ok) {
+                    const d2 = await legacyRes.value.json();
+                    if (!d2.error) {
+                        const legacyOpps = (d2.opportunities || []).map(o => ({ ...o, _type: 'opportunity' }));
+                        const legacyWatch = (d2.watchlist || []).map(o => ({ ...o, _type: 'watchlist' }));
+                        for (const o of [...legacyOpps, ...legacyWatch]) {
+                            if (!seenIds.has(o.pairId)) { allOpps.push(o); seenIds.add(o.pairId); }
+                        }
+                        if (!updatedAt && d2.asOf) updatedAt = d2.asOf;
+                        if (scannerError && allOpps.length > 0) scannerError = null;
+                    }
+                }
+
+                allOpps.sort((a, b) => (a.expiryTs || 0) - (b.expiryTs || 0));
+
+                if (scannerError && allOpps.length === 0) {
+                    if (dot) dot.className = 'arb-dot error';
+                    if (statusText) statusText.textContent = '\u26a0\ufe0f ' + scannerError;
+                    document.getElementById('arbOpportunities').innerHTML = '<div class="arb-empty">Scanner offline — check back shortly.</div>';
+                    document.getElementById('arbWatchlist').innerHTML = '';
+                } else {
+                    if (dot) dot.className = 'arb-dot live';
+                    const ago = updatedAt ? Math.round(Date.now() / 1000 - updatedAt) : null;
+                    const agoText = ago !== null ? (ago < 60 ? ago + 's ago' : Math.round(ago / 60) + 'm ago') : '';
+                    const countText = allOpps.length + ' opportunit' + (allOpps.length === 1 ? 'y' : 'ies');
+                    if (statusText) statusText.textContent = 'Live \u00b7 ' + countText + (agoText ? ' \u00b7 ' + agoText : '');
+
+                    const opContainer = document.getElementById('arbOpportunities');
+                    const opps = allOpps.filter(o => o._type !== 'watchlist');
+                    const watch = allOpps.filter(o => o._type === 'watchlist');
+                    opContainer.innerHTML = opps.length
+                        ? opps.map(o => renderArbCard(o, 'opportunity')).join('')
+                        : '<div class="arb-empty">No arbitrage opportunities right now.<br>Scanner checks every 60s.</div>';
+                    const wContainer = document.getElementById('arbWatchlist');
+                    wContainer.innerHTML = watch.map(o => renderArbCard(o, 'watchlist')).join('');
+                }
+
+                const refreshMs = 30000;
                 arbRefreshTimer = setTimeout(() => {
                     const arbTab = document.getElementById('tabArbitrage');
                     if (arbTab && arbTab.classList.contains('active')) loadArbData();
                 }, refreshMs);
             } catch (e) {
                 console.error('[Arb] fetch error:', e);
-                document.getElementById('arbStatusText').textContent = 'Scanner unavailable';
+                if (statusText) statusText.textContent = 'Scanner unavailable';
                 document.getElementById('arbOpportunities').innerHTML = '<div class="arb-empty">Could not reach arb scanner</div>';
                 document.getElementById('arbWatchlist').innerHTML = '';
-                const dot = document.querySelector('.arb-dot');
                 if (dot) { dot.className = 'arb-dot error'; }
                 arbRefreshTimer = setTimeout(() => {
                     const arbTab = document.getElementById('tabArbitrage');
@@ -1770,18 +1862,19 @@
             const edgePct = ((item.edge || 0) * 100).toFixed(1);
             const roiPct = (item.roi || 0).toFixed(1);
             const legs = item.legs || [];
-            const isOddScreeners = item.source === 'oddscreeners';
             let polyLeg = legs.find(l => l.venue === 'polymarket');
-            let otherLeg = legs.find(l => l.venue === 'kalshi') || legs.find(l => l.venue === 'opinion');
+            let opinionLeg = legs.find(l => l.venue === 'opinion');
+            let kalshiLeg = legs.find(l => l.venue === 'kalshi');
+            let otherLeg = kalshiLeg || opinionLeg;
             const polyPrice = polyLeg ? (polyLeg.price * 100).toFixed(0) : '?';
             const otherPrice = otherLeg ? (otherLeg.price * 100).toFixed(0) : '?';
             const polySide = polyLeg ? polyLeg.side : '';
             const otherSide = otherLeg ? otherLeg.side : '';
-            const otherVenue = isOddScreeners ? 'OPINION' : 'KALSHI';
+            const otherVenue = opinionLeg ? 'OPINION' : 'KALSHI';
             const expiry = item.expiryTs ? new Date(item.expiryTs * 1000).toLocaleDateString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
 
             var polyUrl = item.polyUrl || '';
-            var otherUrl = isOddScreeners ? (item.opinionUrl || '') : (item.kalshiUrl || '');
+            var otherUrl = opinionLeg ? (item.opinionUrl || '') : (item.kalshiUrl || '');
             if (!polyUrl && item.title) {
                 polyUrl = 'https://polymarket.com/markets?_q=' + encodeURIComponent(item.title);
             }

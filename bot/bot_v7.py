@@ -4326,6 +4326,31 @@ def api_arb_vault_opportunities():
         return jsonify({"error": str(e)}), 500
 
 
+@flask_app.route('/api/arb-vault/raw', methods=['GET'])
+def api_arb_vault_raw():
+    """Return raw Oddpool /arb-current response for field-mapping debug.
+
+    Returns first N entries (default 5) with no normalization so callers can
+    inspect real field names returned by the Oddpool API.
+    """
+    try:
+        from arb_monitor.adapters.oddpool import fetch_arb_current
+        limit = int(flask_request.args.get("limit", "5"))
+        raw = fetch_arb_current()
+        print(f"🔍 [ArbVault] /api/arb-vault/raw fetched {len(raw)} raw entries, returning first {min(limit, len(raw))}")
+        sample = raw[:limit]
+        keys = sorted(set(k for entry in sample for k in entry.keys())) if sample else []
+        return jsonify({
+            "total_fetched": len(raw),
+            "sample_count": len(sample),
+            "all_keys_seen": keys,
+            "entries": sample,
+        })
+    except Exception as e:
+        print(f"❌ [ArbVault] /api/arb-vault/raw error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @flask_app.route('/api/arb-vault/nav', methods=['GET'])
 def api_arb_vault_nav():
     """Compute and return signed pARB vault NAV.
