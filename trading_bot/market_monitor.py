@@ -736,9 +736,18 @@ def format_tags_as_hashtags(tags: List) -> str:
     return " ".join(hashtags[:5])
 
 
+def is_valid_slug(slug: str) -> bool:
+    """Return True only for human-readable slugs. Purely numeric strings are
+    raw condition IDs that produce 404s on polymarket.com/event/{id}."""
+    return bool(slug) and not slug.strip().lstrip("-").isdigit()
+
+
 def post_event_to_telegram(event: Dict) -> bool:
     """Post a single Telegram message for an event"""
     event_slug = event.get("slug", "")
+    if not is_valid_slug(event_slug):
+        log(f"⚠️  Telegram skip — invalid slug (numeric condition ID?): {event_slug[:40]}")
+        return False
     title = event.get("title", "New Market")
     tags = event.get("tags", [])
     
@@ -880,7 +889,9 @@ def main():
     
     for event in events:
         event_slug = event.get("slug", "")
-        if not event_slug:
+        if not event_slug or not is_valid_slug(event_slug):
+            if event_slug and not is_valid_slug(event_slug):
+                log(f"⚠️  Skipping event with numeric slug (condition ID): {event_slug[:40]}")
             continue
         
         title = event.get("title", "")[:50]

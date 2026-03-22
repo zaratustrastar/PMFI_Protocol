@@ -1068,6 +1068,7 @@ async function handleArbDeposit() {
     const btn = document.getElementById('arbDepositBtn');
     const amountStr = amountEl?.value;
     if (!amountStr || Number(amountStr) <= 0) { showStatus(statusEl, 'Enter a valid amount', 'error'); return; }
+    if (Number(amountStr) < 10) { showStatus(statusEl, 'Minimum deposit is $10 USDC', 'error'); return; }
     if (!signer || !userAddress) { showStatus(statusEl, 'Connect your wallet first', 'error'); return; }
     if (!ARB_VAULT_ADDRESS) { showStatus(statusEl, 'pARB vault not configured', 'error'); return; }
     const isCorrectNetwork = await checkNetwork();

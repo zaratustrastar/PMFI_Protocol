@@ -71,21 +71,42 @@ export const fetchPolymarketMarkets = createTool({
         count: events?.length || 0,
       });
 
+      // Returns true only for human-readable slugs (e.g. "will-bitcoin-hit-100k").
+      // Purely numeric strings are raw condition IDs that Polymarket's frontend
+      // does not serve at /event/{id} — they produce 404s.
+      const isValidSlug = (s: string | undefined): boolean =>
+        !!s && s.length > 0 && !/^\d+$/.test(s);
+
       // Extract markets from events
       const markets = [];
       for (const event of events || []) {
         if (event.markets && Array.isArray(event.markets)) {
           for (const market of event.markets) {
+            const slug =
+              isValidSlug(event.slug)
+                ? event.slug
+                : isValidSlug(market.slug)
+                ? market.slug
+                : "";
+
+            if (!slug) {
+              logger?.warn(
+                "⚠️ [fetchPolymarketMarkets] Skipping market with no valid slug",
+                { eventId: event.id, question: (market.question || event.title || "").slice(0, 60) }
+              );
+              continue;
+            }
+
             markets.push({
-              id: market.id || market.conditionId || "",
+              id: String(market.id || market.conditionId || ""),
               question: market.question || event.title || "",
-              slug: market.slug || event.slug || "",
+              slug,
               description: market.description || event.description || "",
               active: market.active !== false,
               closed: market.closed === true,
               createdAt: market.createdAt || event.createdAt,
               closedTime: market.closedTime || event.closedTime,
-              url: `https://polymarket.com/event/${event.slug || market.slug}`,
+              url: `https://polymarket.com/event/${slug}`,
             });
           }
         }
