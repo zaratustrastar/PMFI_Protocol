@@ -1018,7 +1018,6 @@ async function getArbSignedNav() {
 
 function parseArbNavData(nav) {
     const to6 = v => BigInt(Math.round((v || 0) * 1_000_000));
-    const DOMAIN_SALT = ethers.keccak256(ethers.toUtf8Bytes('PMFIArbVaultV1.v1'));
     return {
         totalAssets: to6(nav.total_assets_usdc),
         polyCash: to6(nav.poly_cash),
@@ -1028,9 +1027,6 @@ function parseArbNavData(nav) {
         timestamp: BigInt(nav.timestamp),
         deadline: BigInt(nav.deadline),
         roundId: BigInt(nav.round_id),
-        vault: ARB_VAULT_ADDRESS,
-        chainId: 8453n,
-        domainSalt: DOMAIN_SALT,
     };
 }
 

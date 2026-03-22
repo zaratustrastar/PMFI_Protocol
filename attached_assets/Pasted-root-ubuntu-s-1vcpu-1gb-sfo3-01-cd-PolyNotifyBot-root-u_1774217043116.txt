@@ -1,0 +1,39 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl https://app.pmfi.cc/api/arb-vault/nav
+{"computed_in_ms":2052,"deadline":1774217044,"domain_salt":"PMFIArbVaultV1.v1","kalshi_cash":0.0,"open_positions":[],"open_positions_value":0.0,"opinion_cash":0.0,"poly_cash":0.0,"poly_cash_polymarket_only":0.0,"round_id":8,"settled_pnl":0.0,"signature":"0x0a0c765742b7c9068d4f040e07f0974fe0196faa66200982e4240912ee593f05015cbe1096229af37ff15810f34d23f616f655a41758ce7c4ffe41e2d7f3a5251b","timestamp":1774217014,"total_assets_usdc":0.0}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# # On VPS — prints the address derived from your signing key
+python3 -c "
+from eth_account import Account
+import os
+key = os.environ.get('ARB_NAV_SIGNER_PRIVATE_KEY','')
+print(Account.from_key(key).address)
+"
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/eth_account/account.py", line 897, in _parse_private_key
+    return self._keys.PrivateKey(hb_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_keys/datatypes.py", line 244, in __init__
+    validate_private_key_bytes(private_key_bytes)
+  File "/usr/local/lib/python3.12/dist-packages/eth_keys/validation.py", line 81, in validate_private_key_bytes
+    validate_bytes_length(value, 32, "private key")
+  File "/usr/local/lib/python3.12/dist-packages/eth_keys/validation.py", line 52, in validate_bytes_length
+    raise ValidationError(
+eth_utils.exceptions.ValidationError: Unexpected private key length: Expected 32, but got 0 bytes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "/usr/local/lib/python3.12/dist-packages/eth_utils/decorators.py", line 31, in _wrapper
+    return self.method(objtype, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_account/account.py", line 310, in from_key
+    key = self._parse_private_key(private_key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_utils/decorators.py", line 31, in _wrapper
+    return self.method(objtype, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/eth_account/account.py", line 899, in _parse_private_key
+    raise ValueError(
+ValueError: The private key must be exactly 32 bytes long, instead of 0 bytes.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
