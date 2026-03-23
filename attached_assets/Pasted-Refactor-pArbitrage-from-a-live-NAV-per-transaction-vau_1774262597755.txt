@@ -1,0 +1,170 @@
+Refactor pArbitrage from a live-NAV-per-transaction vault into an async report-based vault with Yearn-style “tend() vs report()” accounting and ERC-7540-style request flows.
+
+Goal:
+- Keep pARB as vault shares.
+- Remove the requirement that every deposit/withdraw uses a fresh signed NAV payload.
+- Make withdrawals request-based and paid from idle USDC first.
+- Realize PnL only during report(), not continuously on every user action.
+- Avoid manual admin workflows wherever possible.
+- Keep the existing off-chain arb bot and venue execution, but change the vault accounting and liquidity model.
+
+Target architecture:
+
+1) Core accounting model
+- tend() = maintenance only. It may move capital, rebalance venue cash, collect settled proceeds, refill idle buffer, or unwind positions if needed.
+- tend() MUST NOT change share price, mint/burn shares for pending requests, charge fees, or finalize user withdrawals.
+- report() = official accounting checkpoint.
+- report() computes reportedAssets, realizes gains/losses since last report, updates share price, processes pending deposit requests into shares, and makes redeem requests claimable up to available liquidity.
+- Only report() changes the official accounting NAV / PPS.
+- Keep a separate estimated/live NAV for frontend monitoring, but do not use it for minting/burning on user tx paths.
+
+2) User flow
+Replace:
+- deposit(navData, amount)
+- requestWithdraw(navData, shares)
+
+With:
+- requestDeposit(uint256 assets, address receiver)
+  - transfer USDC into vault
+  - record pending deposit request
+  - do NOT mint shares immediately
+- claimDeposit(uint256 requestId, address receiver)
+  - after report() has processed the request, mint the exact shares allocated to that request
+- requestRedeem(uint256 shares, address receiver)
+  - transfer/burn/lock shares into vault
+  - record pending redeem request
+  - do NOT lock a USDC amount at request time using live NAV
+- claimRedeem(uint256 requestId, address receiver)
+  - after report() has processed the request and assets are claimable, transfer USDC out
+
+Use ERC-7540 request semantics conceptually:
+pending -> claimable -> claimed.
+Do not short-circuit claims.
+
+3) Idle liquidity / withdrawal buffer
+- Vault must keep an idle USDC reserve on Base.
+- Do NOT forward 100% of deposits to arbServicerWallet anymore.
+- Add configurable targetIdleBps and minimumIdleAmount.
+- report() and/or tend() should prioritize restoring idle liquidity before deploying new capital.
+- Withdrawals should be paid from:
+  1. vault idle USDC
+  2. newly returned venue cash / settled proceeds
+  3. optional controlled unwinds if policy allows
+- Unresolved positions must not automatically be treated as instantly withdrawable.
+
+4) Asset valuation
+Split valuation into two numbers:
+- estimatedAssets: for dashboard / monitoring / risk / strategy logic
+- reportedAssets: for official accounting in report()
+
+reportedAssets should be conservative and should include:
+- vault idle USDC
+- servicer wallet free USDC that is sweepable back
+- venue cash balances that are actually withdrawable / owned
+- settled and claimable proceeds
+- realized PnL
+minus:
+- known fees
+- bridge fees / unsettled liabilities
+- optional conservative haircuts
+
+Do NOT let open_positions_liquid_value directly decide user deposit minting or withdrawal pricing on each user transaction.
+Open positions may inform estimatedAssets, but reportedAssets should be conservative.
+
+5) Position accounting
+Introduce lot-based accounting for arb positions:
+Each opened arbitrage package should create a lot with fields like:
+- lotId
+- venue legs
+- entry timestamp
+- expiry / latest settlement timestamp
+- capital committed
+- status: open / partially unwound / settled / claimed / bad debt
+- realized proceeds
+- realized pnl
+- estimated liquidation value (optional, non-accounting)
+- user exposure accounting should remain pooled at vault level, but lots drive settlement visibility and report() realization
+
+6) Servicer / venue capital control
+- Replace current “forward all funds to arbServicerWallet” model with debt-style allocation.
+- Vault tracks max deployable capital and outstanding debt to servicer/venue adapters.
+- Funder can only move capital that has been explicitly made deployable.
+- Add per-venue caps and total outstanding cap.
+- Prefer adapters or dedicated controlled wallets per venue over a single omnibus hot wallet where possible.
+
+7) Permissioning / avoiding admin dependence
+Avoid a trusted admin for routine operations.
+Implement:
+- anyone-can-call tend() when cooldown elapsed
+- anyone-can-call report() when cooldown elapsed or when enough new settled PnL / returned cash exists
+- optional keeper reward paid from protocol fees or a small fixed reward
+- role-based emergency controls only for pause/shutdown, not for day-to-day accounting
+- report() must be deterministic from supplied data and bounded inputs
+- if off-chain signed balance data is still required, only report() should consume it, not user deposit/withdraw txs
+- signatures should have nonce, domain separation, expiry, and source-specific bounds
+
+8) Processing policy
+- Deposits requested after a report belong to the next processing batch.
+- Redeems requested after a report belong to the next processing batch.
+- report() stores per-request or per-batch conversion rates so late claimers still receive the exact processed amount for their request.
+- Do not allow unsettled requests to float on a changing future PPS.
+
+9) Fees
+- Performance fee only on realized profit recognized in report()
+- No fee on unrealized marked profit
+- Optional withdrawal fee only if needed for unwind costs
+- Keep fee accounting per report/batch, not continuously
+
+10) Safety constraints
+Add:
+- slippage-protected user functions if any synchronous mint/redeem path remains
+- reentrancy guards
+- max staleness on off-chain signed data
+- max report interval
+- circuit breaker if estimatedAssets deviates too far from reportedAssets
+- emergency shutdown that stops new deployment but still allows claims / reports / unwinds
+- request cancel flow where feasible for pending unprocessed requests
+- bootstrap/seed protections to avoid bad initial share pricing
+- precise accounting for claimableDeposits, claimableRedeems, pendingDeposits, pendingRedeems
+- no admin ability to arbitrarily set PPS
+
+11) What to change in the existing code
+Refactor PMFIArbVaultV1 so that:
+- deposit() no longer mints immediately at current NAV
+- requestWithdraw() no longer locks a USDC amount immediately at current NAV
+- ArbNavDataV1 is removed from the direct user path
+- arb_nav.py becomes a reporting input generator, not a per-user transaction dependency
+- arb_funder.py only deploys excess capital above idle reserve / pending liquidity needs
+- arb_execution_loop.py remains strategy logic
+- add a report processor that snapshots conservative reportedAssets and processes request batches
+- add claimDeposit() and claimRedeem() functions
+- add state vars for idle reserve, pending request queues, batch ids, processed conversion rates, claimable balances
+- add per-lot realized settlement bookkeeping
+
+12) Deliverables
+Produce:
+- updated contract interface
+- storage layout
+- state machine diagram in comments
+- migration notes from old pARB model
+- list of invariants
+- tests for:
+  - pending deposit processed at report()
+  - pending redeem made claimable only when liquidity exists
+  - tend() does not change PPS
+  - report() updates PPS and realizes PnL
+  - idle reserve protects withdrawals
+  - stale signer data rejected
+  - partial liquidity only partially fulfills redeem queue correctly
+  - shutdown mode still allows claim/redeem processing
+  - request cannot be double-claimed
+  - request processed amount remains fixed after report
+
+Important design principles:
+- user actions should not depend on a fresh live NAV signature
+- official accounting should update only at report()
+- withdrawals are request-based, not guaranteed instant
+- idle USDC buffer is mandatory
+- realized PnL is for accounting; estimated PnL is for monitoring
+- minimize admin trust in routine operation
+- keep the product as a vault, but make it honest about async liquidity

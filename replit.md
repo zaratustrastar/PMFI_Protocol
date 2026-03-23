@@ -47,25 +47,43 @@ The vault calculates NAV using **ACTUAL LIQUID VALUE** with **withdrawal exclusi
 
 **Current Contract**: `0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1` (Base Mainnet, V7.5)
 
-## pARB Vault (V1) — Architecture
+## pARB Vault (V2) — Architecture (current)
 
 Cross-venue arb vault trading Polymarket × Kalshi × Opinion Labs via Oddpool API.
+V2 is an async Yearn-style vault: no live NAV required for user flows.
+
+**Contract** (`contracts/PMFIArbVaultV2.sol`):
+- `requestDeposit(assets, receiver)` → queued; `claimDeposit(requestId, receiver)` after `report()`
+- `requestRedeem(shares, receiver)` → queued; `claimRedeem(requestId, receiver)` after report + liquidity
+- `tend()` — permissionless; refills 10% idle buffer from strategy
+- `report(reportData, sig)` — keeper-only; updates `officialPPS`, processes queues, 20% perf fee (dilution), loss carryforward high-water-mark
+- Domain salt: `keccak256("PMFIArbVaultV2.v1")`
+
+**Reporter** (`bot/arb_monitor/core/arb_reporter.py`):
+- Signs `ReportDataV2` with `ARB_NAV_SIGNER_PRIVATE_KEY`
+- Conservative `reportedAssets`: cash only (no position marks), 95% haircut
+- Sweeps servicer USDC to vault when redemptions pending
+- Runs via `run_reporter_tick()` in execution loop each cycle
 
 **NAV Oracle** (`bot/arb_monitor/core/arb_nav.py`):
 - Tracks cash on all 3 platforms: `poly_cash` (`POLY_API_KEY`), `kalshi_cash` (RSA auth), `opinion_cash` (`OPINION_API_KEY`)
 - Open position liquid value from orderbook bids (not cost basis)
 - `totalAssets = poly_cash + kalshi_cash + opinion_cash + open_positions + settled_pnl`
-- Contract struct has no `opinionCash` field → folded into `polyCash` in ABI encoding; `totalAssets` drives pricing
-- Signs `ArbNavDataV1` with `ARB_NAV_SIGNER_PRIVATE_KEY`, domain salt `PMFIArbVaultV1.v1`
 - Separate from pSNIPER oracle (`ORACLE_PRIVATE_KEY`, domain `PredictFiSniperVaultV7.v7`)
 
-**Key env vars** (pARB-specific, separate from pSNIPER):
+**Key env vars** (pARB V2, separate from pSNIPER):
+- `ARB_VAULT_V2_ADDRESS` — deployed V2 contract address on Base (activates V2; unset = silent skip)
 - `POLY_API_KEY` — pARB's Polymarket API key (not `POLYMARKET_API_KEY` which is pSNIPER's)
 - `POLY_PRIVATE_KEY` — pARB trading wallet private key
-- `ARB_NAV_SIGNER_PRIVATE_KEY` — signs NAV payloads for pARB contract
-- `ARB_VAULT_V1_ADDRESS` — deployed pARB contract address on Base
+- `ARB_NAV_SIGNER_PRIVATE_KEY` — signs report payloads for V2 contract
 - `KALSHI_API_KEY_ID` + `KALSHI_PRIVATE_KEY_PATH` — Kalshi RSA auth
 - `OPINION_API_KEY` — Opinion Labs API key
+
+**Frontend** (`frontend/main.js`):
+- Auto-routes to V2 when `ARB_VAULT_V2_ADDRESS` is set in `window.PSNIPER_CONFIG`
+- V1 code retained as fallback if only `ARB_VAULT_ADDRESS` is set
+- New functions: `handleArbClaimDeposit(requestId)`, `handleArbClaimRedeem(requestId)`, `loadArbPendingRequests()`
+- HTML requires `<div id="arbPendingRequests" class="hidden"></div>` in pARB section
 
 **Execution** (`bot/arb_monitor/core/arb_execution_loop.py`):
 - Sorted by `pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)` descending
@@ -74,8 +92,10 @@ Cross-venue arb vault trading Polymarket × Kalshi × Opinion Labs via Oddpool A
 - Per-pair cap (`ARB_MAX_PAIR_USDC`) and total cap (`ARB_MAX_DEPLOYED_USDC`) enforced
 - Live price re-check + slippage guard (50 bps) before every trade
 - Auto-unwind leg 1 if leg 2 fails (Kalshi or Opinion)
+- `run_reporter_tick()` called before `run_funder_tick()` each cycle
 
-**Current Contract**: `ARB_VAULT_V1_ADDRESS` (Base Mainnet, V1) — set in `.env`
+**Current V2 Contract**: `ARB_VAULT_V2_ADDRESS` (Base Mainnet) — set after deploy; see `docs/pmfi/DEPLOY_PARB_V2.md`
+**Legacy V1 Contract**: `0x10f67BA7aB746a0DC8A48f0D74aA3a962328E689` — stays live until all V1 holders redeem
 
 ## Polymarket Trading Bot
 

@@ -7,8 +7,9 @@
 // =============================================================================
 
 // Read from global config (set by HTML template) or use default
-const VAULT_ADDRESS = window.PSNIPER_CONFIG?.VAULT_ADDRESS || "0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1";
-const ARB_VAULT_ADDRESS = window.PSNIPER_CONFIG?.ARB_VAULT_ADDRESS || "";
+const VAULT_ADDRESS         = window.PSNIPER_CONFIG?.VAULT_ADDRESS || "0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1";
+const ARB_VAULT_ADDRESS     = window.PSNIPER_CONFIG?.ARB_VAULT_ADDRESS || "";
+const ARB_VAULT_V2_ADDRESS  = window.PSNIPER_CONFIG?.ARB_VAULT_V2_ADDRESS || "";
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
@@ -26,15 +27,17 @@ const PRICE_REFRESH_INTERVAL = 10000; // 10 seconds for live price updates
 
 let VAULT_ABI = null;
 let USDC_ABI = null;
-let ARB_VAULT_ABI = null;
+let ARB_VAULT_ABI    = null;
+let ARB_VAULT_V2_ABI = null;
 
 async function loadABIs() {
     try {
         const cacheBuster = Date.now();
-        const [vaultResponse, usdcResponse, arbVaultResponse] = await Promise.all([
+        const [vaultResponse, usdcResponse, arbVaultResponse, arbVaultV2Response] = await Promise.all([
             fetch(`abis/vault.json?v=${cacheBuster}`),
             fetch(`abis/usdc.json?v=${cacheBuster}`),
-            fetch(`abis/arb-vault.json?v=${cacheBuster}`)
+            fetch(`abis/arb-vault.json?v=${cacheBuster}`),
+            fetch(`abis/arb-vault-v2.json?v=${cacheBuster}`)
         ]);
         
         if (!vaultResponse.ok || !usdcResponse.ok) {
@@ -43,7 +46,8 @@ async function loadABIs() {
         
         VAULT_ABI = await vaultResponse.json();
         USDC_ABI = await usdcResponse.json();
-        if (arbVaultResponse.ok) ARB_VAULT_ABI = await arbVaultResponse.json();
+        if (arbVaultResponse.ok)   ARB_VAULT_ABI    = await arbVaultResponse.json();
+        if (arbVaultV2Response.ok) ARB_VAULT_V2_ABI = await arbVaultV2Response.json();
         
         console.log("ABIs loaded, VAULT_ABI is array:", Array.isArray(VAULT_ABI));
         return true;
@@ -248,7 +252,8 @@ let provider = null;
 let signer = null;
 let userAddress = null;
 let vaultContract = null;
-let arbVaultContract = null;
+let arbVaultContract   = null;  // V1 (legacy)
+let arbVaultV2Contract = null;  // V2 (current)
 let usdcContract = null;
 let abisLoaded = false;
 let refreshTimer = null;
@@ -671,6 +676,9 @@ async function connectWallet() {
         if (ARB_VAULT_ADDRESS && ARB_VAULT_ABI) {
             arbVaultContract = new ethers.Contract(ARB_VAULT_ADDRESS, ARB_VAULT_ABI, signer);
         }
+        if (ARB_VAULT_V2_ADDRESS && ARB_VAULT_V2_ABI) {
+            arbVaultV2Contract = new ethers.Contract(ARB_VAULT_V2_ADDRESS, ARB_VAULT_V2_ABI, signer);
+        }
 
         isConnected = true;
         connectBtn.textContent = "Disconnect";
@@ -1001,189 +1009,414 @@ async function handleWithdraw() {
 }
 
 // =============================================================================
-// pARBITRAGE VAULT
+// pARBITRAGE VAULT V2 — async request/claim model (no live NAV required)
 // =============================================================================
 
-async function getArbSignedNav() {
-    const response = await fetch(`${PRICE_API_URL}/api/arb-vault/nav`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-    });
-    if (!response.ok) throw new Error(`ARB NAV API error: ${response.status}`);
-    const nav = await response.json();
-    if (nav.error) throw new Error(nav.error);
-    if (!nav.signature) throw new Error('NAV signing unavailable — check ARB_NAV_SIGNER_PRIVATE_KEY on VPS');
-    return nav;
+// Request status enum matches contract: 0=PENDING, 1=CLAIMABLE, 2=CLAIMED, 3=CANCELLED
+const ARB_REQ_STATUS = { 0: 'Pending', 1: 'Claimable', 2: 'Claimed', 3: 'Cancelled' };
+
+function _arbV2Contract(withSigner = false) {
+    const addr = ARB_VAULT_V2_ADDRESS;
+    const abi  = ARB_VAULT_V2_ABI;
+    if (!addr || !abi) return null;
+    if (withSigner && arbVaultV2Contract) return arbVaultV2Contract;
+    return new ethers.Contract(addr, abi, withSigner ? signer : new ethers.JsonRpcProvider(BASE_MAINNET_RPC));
 }
 
-function parseArbNavData(nav) {
-    const to6 = v => BigInt(Math.round((v || 0) * 1_000_000));
-    return {
-        totalAssets: to6(nav.total_assets_usdc),
-        polyCash: to6(nav.poly_cash),
-        kalshiCash: to6(nav.kalshi_cash),
-        openPositionsValue: to6(nav.open_positions_value),
-        settledPnl: to6(nav.settled_pnl),
-        timestamp: BigInt(nav.timestamp),
-        deadline: BigInt(nav.deadline),
-        roundId: BigInt(nav.round_id),
-    };
+function _arbActiveAddress() {
+    return ARB_VAULT_V2_ADDRESS || ARB_VAULT_ADDRESS;
 }
 
 async function refreshArbUserStats() {
-    if (!userAddress || !ARB_VAULT_ADDRESS || !ARB_VAULT_ABI) return;
+    if (!userAddress) return;
+
+    // V2 path
+    if (ARB_VAULT_V2_ADDRESS && ARB_VAULT_V2_ABI) {
+        try {
+            const c = _arbV2Contract();
+            const [shares, vaultState] = await Promise.all([
+                c.balanceOf(userAddress),
+                c.getVaultState(),
+            ]);
+            const arbStats    = document.getElementById('arbUserStats');
+            const arbSharesBal = document.getElementById('arbSharesBalance');
+            const arbPosVal   = document.getElementById('arbPositionValue');
+            if (!arbStats) return;
+
+            const officialPPS = vaultState[0];   // USDC per 1e18 shares
+            const sharesNum   = Number(shares) / 1e18;
+            const posValueUsdc = sharesNum * Number(officialPPS) / 1e6;
+
+            if (shares === 0n) {
+                arbStats.classList.add('hidden');
+            } else {
+                arbStats.classList.remove('hidden');
+                if (arbSharesBal) arbSharesBal.textContent = sharesNum.toFixed(4);
+                if (arbPosVal)    arbPosVal.textContent = '$' + posValueUsdc.toFixed(2);
+            }
+            await loadArbPendingRequests();
+        } catch (e) {
+            console.warn('[pARB V2] refreshArbUserStats error:', e);
+        }
+        return;
+    }
+
+    // V1 fallback
+    if (!ARB_VAULT_ADDRESS || !ARB_VAULT_ABI) return;
     try {
         const contract = arbVaultContract || new ethers.Contract(ARB_VAULT_ADDRESS, ARB_VAULT_ABI, new ethers.JsonRpcProvider(BASE_MAINNET_RPC));
         const shares = await contract.balanceOf(userAddress);
-        const arbStats = document.getElementById('arbUserStats');
+        const arbStats    = document.getElementById('arbUserStats');
         const arbSharesBal = document.getElementById('arbSharesBalance');
-        const arbPosVal = document.getElementById('arbPositionValue');
+        const arbPosVal   = document.getElementById('arbPositionValue');
         if (!arbStats) return;
-        if (shares === 0n) {
-            arbStats.classList.add('hidden');
-            return;
-        }
+        if (shares === 0n) { arbStats.classList.add('hidden'); return; }
         arbStats.classList.remove('hidden');
-        const sharesNum = Number(shares) / 1e18;
-        if (arbSharesBal) arbSharesBal.textContent = sharesNum.toFixed(4);
-        try {
-            const usdc = await contract.convertToAssets(shares);
-            const usdcNum = Number(usdc) / 1e6;
-            if (arbPosVal) arbPosVal.textContent = '$' + usdcNum.toFixed(2);
-        } catch (_) {
-            if (arbPosVal) arbPosVal.textContent = '—';
-        }
+        if (arbSharesBal) arbSharesBal.textContent = (Number(shares) / 1e18).toFixed(4);
+        if (arbPosVal) arbPosVal.textContent = '—';
     } catch (e) {
-        console.warn('[pARB] refreshArbUserStats error:', e);
+        console.warn('[pARB V1] refreshArbUserStats error:', e);
     }
 }
+
+// ── V2 Deposit: requestDeposit → (wait for report) → claimDeposit ──────────
 
 async function handleArbDeposit() {
     const amountEl = document.getElementById('arbDepositAmount');
     const statusEl = document.getElementById('arbDepositStatus');
-    const btn = document.getElementById('arbDepositBtn');
+    const btn      = document.getElementById('arbDepositBtn');
     const amountStr = amountEl?.value;
     if (!amountStr || Number(amountStr) <= 0) { showStatus(statusEl, 'Enter a valid amount', 'error'); return; }
-    if (Number(amountStr) < 10) { showStatus(statusEl, 'Minimum deposit is $10 USDC', 'error'); return; }
-    if (!signer || !userAddress) { showStatus(statusEl, 'Connect your wallet first', 'error'); return; }
-    if (!ARB_VAULT_ADDRESS) { showStatus(statusEl, 'pARB vault not configured', 'error'); return; }
+    if (Number(amountStr) < 10)               { showStatus(statusEl, 'Minimum deposit is $10 USDC', 'error'); return; }
+    if (!signer || !userAddress)              { showStatus(statusEl, 'Connect your wallet first', 'error'); return; }
+    if (!_arbActiveAddress())                 { showStatus(statusEl, 'pARB vault not configured', 'error'); return; }
     const isCorrectNetwork = await checkNetwork();
     if (!isCorrectNetwork) { showStatus(statusEl, 'Switch to Base Mainnet', 'error'); await switchToBase(); return; }
 
     const amount = parseUSDC(amountStr);
+
+    // ── V2 path ──────────────────────────────────────────────────────────────
+    if (ARB_VAULT_V2_ADDRESS && ARB_VAULT_V2_ABI) {
+        try {
+            if (btn) btn.disabled = true;
+            hideStatus(statusEl);
+
+            const signerUsdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
+            showStatus(statusEl, 'Checking allowance...', 'info');
+            const allowance = await signerUsdc.allowance(userAddress, ARB_VAULT_V2_ADDRESS);
+            if (allowance < amount) {
+                showStatus(statusEl, 'Approving USDC...', 'info');
+                const approveTx = await signerUsdc.approve(ARB_VAULT_V2_ADDRESS, amount);
+                showStatus(statusEl, 'Waiting for approval...', 'info');
+                await approveTx.wait();
+            }
+
+            showStatus(statusEl, 'Submitting deposit request...', 'info');
+            const signerArb = _arbV2Contract(true);
+            const tx = await signerArb.requestDeposit(amount, userAddress);
+            showStatus(statusEl, 'Confirming...', 'info');
+            const receipt = await tx.wait();
+
+            // Parse requestId from DepositRequested event
+            let requestId = null;
+            for (const log of receipt.logs) {
+                try {
+                    const parsed = signerArb.interface.parseLog(log);
+                    if (parsed?.name === 'DepositRequested') {
+                        requestId = parsed.args.requestId.toString();
+                    }
+                } catch (_) {}
+            }
+
+            const msg = requestId !== null
+                ? `Deposit request #${requestId} submitted for ${amountStr} USDC. Shares will be issued after the next report (~1 hour).`
+                : `Deposit request submitted for ${amountStr} USDC. Shares will be issued after the next report.`;
+            showStatus(statusEl, msg, 'success');
+            if (amountEl) amountEl.value = '';
+            await refreshArbUserStats();
+            setTimeout(() => {
+                document.getElementById('arbDepositModal')?.classList.add('hidden');
+                hideStatus(statusEl);
+            }, 5000);
+        } catch (e) {
+            console.error('[pARB V2] deposit error:', e);
+            showStatus(statusEl, e.reason || e.message, 'error');
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+        return;
+    }
+
+    // ── V1 fallback (legacy) ─────────────────────────────────────────────────
     try {
         if (btn) btn.disabled = true;
         hideStatus(statusEl);
-
         const signerUsdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
-        showStatus(statusEl, 'Checking allowance...', 'info');
         const allowance = await signerUsdc.allowance(userAddress, ARB_VAULT_ADDRESS);
         if (allowance < amount) {
             showStatus(statusEl, 'Approving USDC...', 'info');
-            const approveTx = await signerUsdc.approve(ARB_VAULT_ADDRESS, amount);
-            showStatus(statusEl, 'Waiting for approval...', 'info');
-            await approveTx.wait();
+            await (await signerUsdc.approve(ARB_VAULT_ADDRESS, amount)).wait();
         }
-
         showStatus(statusEl, 'Getting signed NAV...', 'info');
-        const nav = await getArbSignedNav();
-        const navData = parseArbNavData(nav);
-        const signature = nav.signature;
-
+        const nav = await (await fetch(`${PRICE_API_URL}/api/arb-vault/nav`)).json();
+        const to6 = v => BigInt(Math.round((v || 0) * 1_000_000));
+        const navData = {
+            totalAssets: to6(nav.total_assets_usdc), polyCash: to6(nav.poly_cash),
+            kalshiCash: to6(nav.kalshi_cash), openPositionsValue: to6(nav.open_positions_value),
+            settledPnl: to6(nav.settled_pnl), timestamp: BigInt(nav.timestamp),
+            deadline: BigInt(nav.deadline), roundId: BigInt(nav.round_id),
+        };
         showStatus(statusEl, 'Depositing...', 'info');
         const signerArb = new ethers.Contract(ARB_VAULT_ADDRESS, ARB_VAULT_ABI, signer);
-        const tx = await signerArb.deposit(amount, navData, signature);
-        showStatus(statusEl, 'Confirming...', 'info');
-        await tx.wait();
-
+        await (await signerArb.deposit(amount, navData, nav.signature)).wait();
         showStatus(statusEl, `Deposited ${amountStr} USDC to pARBITRAGE!`, 'success');
         if (amountEl) amountEl.value = '';
         await refreshArbUserStats();
-        setTimeout(() => {
-            document.getElementById('arbDepositModal')?.classList.add('hidden');
-            hideStatus(statusEl);
-        }, 3000);
+        setTimeout(() => { document.getElementById('arbDepositModal')?.classList.add('hidden'); hideStatus(statusEl); }, 3000);
     } catch (e) {
-        console.error('[pARB] deposit error:', e);
+        console.error('[pARB V1] deposit error:', e);
         showStatus(statusEl, e.reason || e.message, 'error');
     } finally {
         if (btn) btn.disabled = false;
     }
 }
 
+// ── V2 Redeem: requestRedeem → (wait for report + liquidity) → claimRedeem ──
+
 async function handleArbWithdrawRequest() {
     const amountEl = document.getElementById('arbWithdrawAmount');
     const statusEl = document.getElementById('arbWithdrawStatus');
-    const btn = document.getElementById('arbWithdrawBtn');
+    const btn      = document.getElementById('arbWithdrawBtn');
     const amountStr = amountEl?.value;
     if (!amountStr || Number(amountStr) <= 0) { showStatus(statusEl, 'Enter a valid share amount', 'error'); return; }
-    if (!signer || !userAddress) { showStatus(statusEl, 'Connect your wallet first', 'error'); return; }
-    if (!ARB_VAULT_ADDRESS) { showStatus(statusEl, 'pARB vault not configured', 'error'); return; }
+    if (!signer || !userAddress)              { showStatus(statusEl, 'Connect your wallet first', 'error'); return; }
+    if (!_arbActiveAddress())                 { showStatus(statusEl, 'pARB vault not configured', 'error'); return; }
     const isCorrectNetwork = await checkNetwork();
     if (!isCorrectNetwork) { showStatus(statusEl, 'Switch to Base Mainnet', 'error'); await switchToBase(); return; }
 
     const shareAmount = ethers.parseUnits(amountStr, 18);
+
+    // ── V2 path ──────────────────────────────────────────────────────────────
+    if (ARB_VAULT_V2_ADDRESS && ARB_VAULT_V2_ABI) {
+        try {
+            if (btn) btn.disabled = true;
+            hideStatus(statusEl);
+            showStatus(statusEl, 'Submitting redeem request...', 'info');
+            const signerArb = _arbV2Contract(true);
+            const tx = await signerArb.requestRedeem(shareAmount, userAddress);
+            showStatus(statusEl, 'Confirming...', 'info');
+            const receipt = await tx.wait();
+
+            let requestId = null;
+            for (const log of receipt.logs) {
+                try {
+                    const parsed = signerArb.interface.parseLog(log);
+                    if (parsed?.name === 'RedeemRequested') requestId = parsed.args.requestId.toString();
+                } catch (_) {}
+            }
+
+            const msg = requestId !== null
+                ? `Redeem request #${requestId} submitted for ${amountStr} pARB. USDC claimable after next report when vault has liquidity.`
+                : `Redeem request submitted. USDC claimable after next report when vault has liquidity.`;
+            showStatus(statusEl, msg, 'success');
+            if (amountEl) amountEl.value = '';
+            await refreshArbUserStats();
+            setTimeout(() => { document.getElementById('arbWithdrawModal')?.classList.add('hidden'); hideStatus(statusEl); }, 5000);
+        } catch (e) {
+            console.error('[pARB V2] redeem error:', e);
+            showStatus(statusEl, e.reason || e.message, 'error');
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+        return;
+    }
+
+    // ── V1 fallback ──────────────────────────────────────────────────────────
     try {
         if (btn) btn.disabled = true;
         hideStatus(statusEl);
-
         showStatus(statusEl, 'Getting signed NAV...', 'info');
-        const nav = await getArbSignedNav();
-        const navData = parseArbNavData(nav);
-        const signature = nav.signature;
-
+        const nav = await (await fetch(`${PRICE_API_URL}/api/arb-vault/nav`)).json();
+        const to6 = v => BigInt(Math.round((v || 0) * 1_000_000));
+        const navData = {
+            totalAssets: to6(nav.total_assets_usdc), polyCash: to6(nav.poly_cash),
+            kalshiCash: to6(nav.kalshi_cash), openPositionsValue: to6(nav.open_positions_value),
+            settledPnl: to6(nav.settled_pnl), timestamp: BigInt(nav.timestamp),
+            deadline: BigInt(nav.deadline), roundId: BigInt(nav.round_id),
+        };
         showStatus(statusEl, 'Requesting withdrawal...', 'info');
         const signerArb = new ethers.Contract(ARB_VAULT_ADDRESS, ARB_VAULT_ABI, signer);
-        const tx = await signerArb.requestWithdraw(shareAmount, navData, signature);
-        showStatus(statusEl, 'Confirming...', 'info');
-        await tx.wait();
-
-        showStatus(statusEl, `Withdrawal requested for ${amountStr} pARB shares. Claim USDC once processed.`, 'success');
+        await (await signerArb.requestWithdraw(shareAmount, navData, nav.signature)).wait();
+        showStatus(statusEl, `Withdrawal requested for ${amountStr} pARB shares.`, 'success');
         if (amountEl) amountEl.value = '';
         await refreshArbUserStats();
-        setTimeout(() => {
-            document.getElementById('arbWithdrawModal')?.classList.add('hidden');
-            hideStatus(statusEl);
-        }, 4000);
+        setTimeout(() => { document.getElementById('arbWithdrawModal')?.classList.add('hidden'); hideStatus(statusEl); }, 4000);
     } catch (e) {
-        console.error('[pARB] withdraw error:', e);
+        console.error('[pARB V1] withdraw error:', e);
         showStatus(statusEl, e.reason || e.message, 'error');
     } finally {
         if (btn) btn.disabled = false;
+    }
+}
+
+// ── V2 Claim deposit (after report() has processed the request) ──────────────
+
+async function handleArbClaimDeposit(requestId) {
+    if (!signer || !userAddress || !ARB_VAULT_V2_ADDRESS) return;
+    const statusEl = document.getElementById(`arbDepReqStatus_${requestId}`);
+    const btn      = document.getElementById(`arbDepReqClaimBtn_${requestId}`);
+    try {
+        if (btn) btn.disabled = true;
+        if (statusEl) statusEl.textContent = 'Claiming shares...';
+        const signerArb = _arbV2Contract(true);
+        const tx = await signerArb.claimDeposit(BigInt(requestId), userAddress);
+        await tx.wait();
+        if (statusEl) statusEl.textContent = 'Shares claimed!';
+        await refreshArbUserStats();
+    } catch (e) {
+        console.error('[pARB V2] claimDeposit error:', e);
+        if (statusEl) statusEl.textContent = e.reason || e.message;
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+// ── V2 Claim redeem (after report() + liquidity available) ──────────────────
+
+async function handleArbClaimRedeem(requestId) {
+    if (!signer || !userAddress || !ARB_VAULT_V2_ADDRESS) return;
+    const statusEl = document.getElementById(`arbRdmReqStatus_${requestId}`);
+    const btn      = document.getElementById(`arbRdmReqClaimBtn_${requestId}`);
+    try {
+        if (btn) btn.disabled = true;
+        if (statusEl) statusEl.textContent = 'Claiming USDC...';
+        const signerArb = _arbV2Contract(true);
+        const tx = await signerArb.claimRedeem(BigInt(requestId), userAddress);
+        await tx.wait();
+        if (statusEl) statusEl.textContent = 'USDC received!';
+        await refreshArbUserStats();
+    } catch (e) {
+        console.error('[pARB V2] claimRedeem error:', e);
+        if (statusEl) statusEl.textContent = e.reason || e.message;
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+// ── V2 Pending request loader ─────────────────────────────────────────────────
+
+async function loadArbPendingRequests() {
+    if (!userAddress || !ARB_VAULT_V2_ADDRESS || !ARB_VAULT_V2_ABI) return;
+    const container = document.getElementById('arbPendingRequests');
+    if (!container) return;
+
+    try {
+        const c = _arbV2Contract();
+        const [depIds, rdmIds] = await Promise.all([
+            c.getUserDepositRequests(userAddress),
+            c.getUserRedeemRequests(userAddress),
+        ]);
+
+        const activeDepIds = depIds.filter(id => true); // fetch all, filter by status below
+        const activeRdmIds = rdmIds.filter(id => true);
+
+        const depRequests = await Promise.all(activeDepIds.map(id => c.getDepositRequest(id)));
+        const rdmRequests = await Promise.all(activeRdmIds.map(id => c.getRedeemRequest(id)));
+
+        // Only show PENDING (0) or CLAIMABLE (1) — hide CLAIMED/CANCELLED
+        const activeDeps = depRequests.map((r, i) => ({ id: activeDepIds[i], ...r }))
+            .filter(r => r.status === 0n || r.status === 1n);
+        const activeRdms = rdmRequests.map((r, i) => ({ id: activeRdmIds[i], ...r }))
+            .filter(r => r.status === 0n || r.status === 1n);
+
+        if (activeDeps.length === 0 && activeRdms.length === 0) {
+            container.innerHTML = '';
+            container.classList.add('hidden');
+            return;
+        }
+
+        container.classList.remove('hidden');
+
+        let html = '<div class="arb-requests-section">';
+        html += '<h4 style="margin-bottom:8px;font-size:13px;color:#9ca3af;">Active Requests</h4>';
+
+        for (const req of activeDeps) {
+            const id     = req.id.toString();
+            const status = Number(req.status);
+            const assets = (Number(req.assets) / 1e6).toFixed(2);
+            const estShares = (Number(req.estimatedShares) / 1e18).toFixed(4);
+            const canClaim = status === 1;
+            html += `
+            <div class="arb-request-row" style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1f2937;">
+                <span style="font-size:12px;">
+                    <span style="color:#6b7280;">Deposit #${id}</span>
+                    <span style="color:${canClaim ? '#10b981' : '#f59e0b'};margin-left:6px;">${ARB_REQ_STATUS[status]}</span>
+                    <span style="color:#9ca3af;margin-left:6px;">$${assets} USDC → ~${estShares} pARB</span>
+                </span>
+                ${canClaim ? `<button id="arbDepReqClaimBtn_${id}" onclick="handleArbClaimDeposit('${id}')" class="btn btn-sm btn-primary" style="padding:3px 10px;font-size:11px;">Claim Shares</button>` : '<span style="color:#6b7280;font-size:11px;">Awaiting report</span>'}
+                <span id="arbDepReqStatus_${id}" style="font-size:11px;color:#9ca3af;margin-left:6px;"></span>
+            </div>`;
+        }
+
+        for (const req of activeRdms) {
+            const id     = req.id.toString();
+            const status = Number(req.status);
+            const shares = (Number(req.shares) / 1e18).toFixed(4);
+            const estUsdc = (Number(req.estimatedAssets) / 1e6).toFixed(2);
+            const canClaim = status === 1;
+            html += `
+            <div class="arb-request-row" style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1f2937;">
+                <span style="font-size:12px;">
+                    <span style="color:#6b7280;">Redeem #${id}</span>
+                    <span style="color:${canClaim ? '#10b981' : '#f59e0b'};margin-left:6px;">${ARB_REQ_STATUS[status]}</span>
+                    <span style="color:#9ca3af;margin-left:6px;">${shares} pARB → ~$${estUsdc}</span>
+                </span>
+                ${canClaim ? `<button id="arbRdmReqClaimBtn_${id}" onclick="handleArbClaimRedeem('${id}')" class="btn btn-sm btn-primary" style="padding:3px 10px;font-size:11px;">Claim USDC</button>` : '<span style="color:#6b7280;font-size:11px;">Awaiting report + liquidity</span>'}
+                <span id="arbRdmReqStatus_${id}" style="font-size:11px;color:#9ca3af;margin-left:6px;"></span>
+            </div>`;
+        }
+
+        html += '</div>';
+        container.innerHTML = html;
+    } catch (e) {
+        console.warn('[pARB V2] loadArbPendingRequests error:', e);
     }
 }
 
 function initArbModals() {
     const depModal = document.getElementById('arbDepositModal');
-    const wdModal = document.getElementById('arbWithdrawModal');
-    const openDep = document.getElementById('openArbDepositBtn');
+    const wdModal  = document.getElementById('arbWithdrawModal');
+    const openDep  = document.getElementById('openArbDepositBtn');
     const closeDep = document.getElementById('closeArbDepositModal');
-    const openWd = document.getElementById('openArbWithdrawBtn');
-    const closeWd = document.getElementById('closeArbWithdrawModal');
-    const depBtn = document.getElementById('arbDepositBtn');
-    const wdBtn = document.getElementById('arbWithdrawBtn');
+    const openWd   = document.getElementById('openArbWithdrawBtn');
+    const closeWd  = document.getElementById('closeArbWithdrawModal');
+    const depBtn   = document.getElementById('arbDepositBtn');
+    const wdBtn    = document.getElementById('arbWithdrawBtn');
     const wdMaxBtn = document.getElementById('arbWithdrawMaxBtn');
 
-    if (openDep) openDep.addEventListener('click', () => { if (depModal) depModal.classList.remove('hidden'); });
-    if (closeDep) closeDep.addEventListener('click', () => { if (depModal) depModal.classList.add('hidden'); });
-    if (depModal) depModal.addEventListener('click', e => { if (e.target === depModal) depModal.classList.add('hidden'); });
+    if (openDep)  openDep.addEventListener('click',  () => depModal?.classList.remove('hidden'));
+    if (closeDep) closeDep.addEventListener('click', () => depModal?.classList.add('hidden'));
+    if (depModal) depModal.addEventListener('click',  e => { if (e.target === depModal) depModal.classList.add('hidden'); });
 
-    if (openWd) openWd.addEventListener('click', () => { if (wdModal) wdModal.classList.remove('hidden'); });
-    if (closeWd) closeWd.addEventListener('click', () => { if (wdModal) wdModal.classList.add('hidden'); });
-    if (wdModal) wdModal.addEventListener('click', e => { if (e.target === wdModal) wdModal.classList.add('hidden'); });
+    if (openWd)  openWd.addEventListener('click',  () => wdModal?.classList.remove('hidden'));
+    if (closeWd) closeWd.addEventListener('click', () => wdModal?.classList.add('hidden'));
+    if (wdModal) wdModal.addEventListener('click',  e => { if (e.target === wdModal) wdModal.classList.add('hidden'); });
 
     if (wdMaxBtn) wdMaxBtn.addEventListener('click', async () => {
         const amountEl = document.getElementById('arbWithdrawAmount');
-        if (!amountEl || !userAddress || !ARB_VAULT_ADDRESS || !ARB_VAULT_ABI) return;
+        if (!amountEl || !userAddress) return;
         try {
-            const contract = arbVaultContract || new ethers.Contract(ARB_VAULT_ADDRESS, ARB_VAULT_ABI, new ethers.JsonRpcProvider(BASE_MAINNET_RPC));
+            const addr = ARB_VAULT_V2_ADDRESS || ARB_VAULT_ADDRESS;
+            const abi  = ARB_VAULT_V2_ABI    || ARB_VAULT_ABI;
+            if (!addr || !abi) return;
+            const contract = new ethers.Contract(addr, abi, new ethers.JsonRpcProvider(BASE_MAINNET_RPC));
             const shares = await contract.balanceOf(userAddress);
             amountEl.value = (Number(shares) / 1e18).toFixed(6);
         } catch (_) {}
     });
 
     if (depBtn) depBtn.addEventListener('click', handleArbDeposit);
-    if (wdBtn) wdBtn.addEventListener('click', handleArbWithdrawRequest);
+    if (wdBtn)  wdBtn.addEventListener('click',  handleArbWithdrawRequest);
 }
 
 // =============================================================================

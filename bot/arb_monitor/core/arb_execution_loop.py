@@ -21,6 +21,7 @@ import os
 from ..adapters.oddpool import fetch_opportunities, ArbOpportunity
 from ..core.arb_executor import execute_arb
 from ..core.arb_funder import run_funder_tick
+from ..core.arb_reporter import run_reporter_tick
 from ..core.arb_positions_db import (
     upsert_position, get_open_positions, get_total_deployed_usdc
 )
@@ -105,6 +106,12 @@ def compute_trade_size(opportunity: ArbOpportunity) -> float:
 def _execution_cycle():
     """Run a single execution cycle: fetch, prioritize, execute eligible opportunities."""
     log("⚡ Starting execution cycle")
+
+    # ── V2 Reporter: sweep servicer cash back if needed, submit report() if cooldown elapsed ──
+    try:
+        run_reporter_tick()
+    except Exception as e:
+        log(f"⚠️ Reporter tick raised unexpectedly (non-fatal): {e}")
 
     # ── Auto-funder: distribute servicer USDC to platforms before trading ──
     try:
