@@ -159,6 +159,7 @@ def main():
     print(f"RPC:              {BASE_RPC}")
     print(f"Mode:             {'EXECUTE' if EXECUTE else 'DRY-RUN'}")
 
+    current = "unknown"
     try:
         current = verify_current_servicer(vault_addr)
         print(f"\nCurrent arbServicerWallet: {current}")
@@ -176,6 +177,31 @@ def main():
         print(f"\nAfter sending, also update .env on the VPS:")
         print(f"  ARB_SERVICER_WALLET={NEW_SERVICER_WALLET}")
         return
+
+    # -----------------------------------------------------------------------
+    # Confirmation prompt — require explicit "YES" before broadcasting
+    # -----------------------------------------------------------------------
+    from eth_account import Account
+    owner_account = Account.from_key(owner_key)
+    print("\n" + "=" * 60)
+    print("CONFIRMATION REQUIRED")
+    print("=" * 60)
+    print(f"  Chain:            Base mainnet (chainId {BASE_CHAIN_ID})")
+    print(f"  RPC:              {BASE_RPC}")
+    print(f"  Vault:            {vault_addr}")
+    print(f"  Owner (sender):   {owner_account.address}")
+    print(f"  Current wallet:   {current}")
+    print(f"  New wallet:       {NEW_SERVICER_WALLET}")
+    print(f"  Action:           setArbServicerWallet({NEW_SERVICER_WALLET})")
+    print("=" * 60)
+    print("\nType YES (all caps) to broadcast, anything else to abort:")
+    try:
+        answer = input("> ").strip()
+    except (EOFError, KeyboardInterrupt):
+        answer = ""
+    if answer != "YES":
+        print("Aborted — no transaction sent.")
+        sys.exit(0)
 
     print("\n⚡ Sending transaction...")
     try:
