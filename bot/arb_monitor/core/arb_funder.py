@@ -369,9 +369,10 @@ def run_funder_tick() -> None:
     """Check servicer wallet balance and distribute USDC to platforms if ready.
 
     Called from the arb execution loop at the top of each cycle.
+    Liquidity-aware: only deploys capital beyond requiredIdle (pending redeems + target buffer).
     All errors are logged and suppressed — never raises.
     """
-    private_key = os.environ.get("POLY_PRIVATE_KEY", "")
+    private_key     = os.environ.get("POLY_PRIVATE_KEY", "")
     servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
 
     if not private_key or not servicer_wallet:
@@ -390,18 +391,58 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
     """Inner implementation — all exceptions propagate to run_funder_tick for logging."""
     ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
-    # ── 1. Check USDC balance ──────────────────────────────────────────────
-    try:
-        usdc_balance = _get_usdc_balance(servicer_wallet)
-    except Exception as e:
-        log(f"⚠️ Could not read servicer USDC balance: {e}")
-        return
+    # ── 1. Liquidity state: compute deployable capital ─────────────────────
+    vault_address = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
+    deploy_amount: float  # resolved below
 
-    log(f"[{ts}] Servicer wallet USDC on Base: {usdc_balance:.4f}")
+    if vault_address:
+        try:
+            from .arb_liquidity import compute_liquidity_state
+            liq = compute_liquidity_state(vault_address, servicer_wallet)
+            if liq.ok:
+                log(
+                    f"[{ts}] Liquidity: idle={liq.idle_available:.2f} "
+                    f"required_idle={liq.required_idle:.2f} "
+                    f"pending_redeem={liq.pending_redeem_value:.2f} "
+                    f"free_cash={liq.free_cash:.2f} "
+                    f"deployable={liq.deployable_capital:.2f} "
+                    f"under_pressure={liq.under_pressure}"
+                )
 
-    if usdc_balance < ARB_MIN_FUND_AMOUNT:
+                if liq.under_pressure and liq.deployable_capital <= 0:
+                    log(
+                        f"🛑 Funder paused: redemption pressure active "
+                        f"(shortfall={liq.shortfall:.2f} USDC) and deployable_capital=0 — "
+                        f"all servicer cash reserved for pending redeems"
+                    )
+                    return
+
+                deploy_amount = liq.deployable_capital
+                if deploy_amount < ARB_MIN_FUND_AMOUNT:
+                    log(
+                        f"ℹ️ Deployable capital {deploy_amount:.4f} USDC < "
+                        f"min threshold {ARB_MIN_FUND_AMOUNT:.2f} — nothing to distribute"
+                    )
+                    return
+            else:
+                log("⚠️ Liquidity state unavailable — falling back to raw balance check")
+                deploy_amount = _get_usdc_balance(servicer_wallet)
+        except Exception as e:
+            log(f"⚠️ Liquidity check failed ({e}) — falling back to raw balance")
+            deploy_amount = _get_usdc_balance(servicer_wallet)
+    else:
+        # V2 not deployed — use raw balance (legacy / pre-deploy mode)
+        try:
+            deploy_amount = _get_usdc_balance(servicer_wallet)
+        except Exception as e:
+            log(f"⚠️ Could not read servicer USDC balance: {e}")
+            return
+
+    log(f"[{ts}] Servicer wallet USDC on Base: {deploy_amount:.4f} (deployable)")
+
+    if deploy_amount < ARB_MIN_FUND_AMOUNT:
         log(
-            f"ℹ️ Balance {usdc_balance:.4f} < threshold {ARB_MIN_FUND_AMOUNT:.2f} USDC — "
+            f"ℹ️ Deployable {deploy_amount:.4f} < threshold {ARB_MIN_FUND_AMOUNT:.2f} USDC — "
             "nothing to distribute"
         )
         return
@@ -420,21 +461,22 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
     except Exception as e:
         log(f"⚠️ Could not read ETH balance — proceeding cautiously: {e}")
 
-    # ── 3. Calculate proportional split ───────────────────────────────────
+    # ── 3. Calculate proportional split of deployable capital ─────────────
+    usdc_balance = deploy_amount   # rename for clarity in distribution logic below
     total_pct = ARB_FUND_POLY_PCT + ARB_FUND_KALSHI_PCT + ARB_FUND_OPINION_PCT
     if total_pct <= 0:
         log("⚠️ All fund percentages are 0 — nothing to distribute")
         return
 
-    poly_amt = round(usdc_balance * ARB_FUND_POLY_PCT / total_pct, 6)
+    poly_amt   = round(usdc_balance * ARB_FUND_POLY_PCT   / total_pct, 6)
     kalshi_amt = round(usdc_balance * ARB_FUND_KALSHI_PCT / total_pct, 6)
     opinion_amt = round(usdc_balance - poly_amt - kalshi_amt, 6)  # remainder avoids drift
 
     log(
-        f"📊 Split: poly={poly_amt:.4f} ({ARB_FUND_POLY_PCT}%) "
+        f"📊 Split (of {usdc_balance:.4f} deployable): "
+        f"poly={poly_amt:.4f} ({ARB_FUND_POLY_PCT}%) "
         f"kalshi={kalshi_amt:.4f} ({ARB_FUND_KALSHI_PCT}%) "
-        f"opinion={opinion_amt:.4f} ({ARB_FUND_OPINION_PCT}%) "
-        f"total={usdc_balance:.4f} USDC"
+        f"opinion={opinion_amt:.4f} ({ARB_FUND_OPINION_PCT}%)"
     )
 
     # ── 4. Initialise nonce tracker (pending nonce, single sender) ─────────

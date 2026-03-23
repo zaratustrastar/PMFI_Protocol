@@ -103,17 +103,65 @@ def compute_trade_size(opportunity: ArbOpportunity) -> float:
         return 0.0
 
 
+def _get_liquidity_state():
+    """Read liquidity state for the current cycle. Returns None if V2 not configured."""
+    vault_address   = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
+    servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
+    if not vault_address or not servicer_wallet:
+        return None
+    try:
+        from .arb_liquidity import compute_liquidity_state
+        return compute_liquidity_state(vault_address, servicer_wallet)
+    except Exception as e:
+        log(f"⚠️ Liquidity state error (non-fatal): {e}")
+        return None
+
+
 def _execution_cycle():
     """Run a single execution cycle: fetch, prioritize, execute eligible opportunities."""
     log("⚡ Starting execution cycle")
 
-    # ── V2 Reporter: sweep servicer cash back if needed, submit report() if cooldown elapsed ──
+    # ── V2 Reporter: waterfall sweep + report() if cooldown/early-trigger ─────
     try:
         run_reporter_tick()
     except Exception as e:
         log(f"⚠️ Reporter tick raised unexpectedly (non-fatal): {e}")
 
-    # ── Auto-funder: distribute servicer USDC to platforms before trading ──
+    # ── Liquidity state: gate trading decisions this cycle ────────────────────
+    liq = _get_liquidity_state()
+    if liq and liq.ok:
+        log(
+            f"📊 Cycle liquidity: idle={liq.idle_available:.2f} "
+            f"required={liq.required_idle:.2f} "
+            f"pending_redeem={liq.pending_redeem_value:.2f} "
+            f"deployable={liq.deployable_capital:.2f} "
+            f"under_pressure={liq.under_pressure} "
+            f"unwind_needed={liq.unwind_needed}"
+        )
+
+        if liq.unwind_needed:
+            log(
+                f"🛑 TRADE DEPLOYMENT BLOCKED: unwind_needed=True "
+                f"(shortfall={liq.shortfall:.2f} USDC exceeds free_cash={liq.free_cash:.2f} "
+                f"+ settled={liq.settled_proceeds:.2f}). "
+                f"No new positions until redemption shortfall is resolved."
+            )
+            # Still run the funder (it will also see under_pressure and reserve cash)
+            try:
+                run_funder_tick()
+            except Exception as e:
+                log(f"⚠️ Funder tick raised unexpectedly (non-fatal): {e}")
+            return
+
+        if liq.under_pressure:
+            log(
+                f"⚠️ Redemption pressure active (shortfall={liq.shortfall:.2f} USDC) — "
+                f"new trade deployment throttled to deployable_capital={liq.deployable_capital:.2f} USDC"
+            )
+    else:
+        liq = None  # treat as unknown; allow trading but log
+
+    # ── Auto-funder: distribute deployable USDC to platforms ─────────────────
     try:
         run_funder_tick()
     except Exception as e:
@@ -143,8 +191,22 @@ def _execution_cycle():
     depth_insufficient = 0   # aborted: depth-capped size < 1 contract at profitable price
     depth_unavailable = 0    # aborted: could not fetch orderbook to verify depth
 
+    # ── Liquidity budget: caps total new deployment this cycle ────────────────
+    # If under_pressure, deployable_capital bounds how much USDC we can commit to
+    # new positions this cycle. Decremented with each trade so the cap is cycle-wide.
+    liq_budget_remaining: float | None = liq.deployable_capital if (liq and liq.ok and liq.under_pressure) else None
+
     for opp in opportunities:
         if not _loop_running:
+            break
+
+        # ── Liquidity budget check (under redemption pressure only) ───────
+        if liq_budget_remaining is not None and liq_budget_remaining <= 0:
+            log(
+                f"🛑 Stopping deployment: liquidity budget exhausted "
+                f"(deployed all available deployable_capital this cycle)"
+            )
+            skipped_caps += len(opportunities) - executed - skipped_thin - skipped_expiry - skipped_display
             break
 
         # ── Display-only guard: skip markets whose Poly token ID is not yet resolved ──
@@ -186,6 +248,16 @@ def _execution_cycle():
             continue
 
         size_usdc = compute_trade_size(opp)
+
+        # ── Liquidity-aware size cap (applies only under redemption pressure) ─
+        if liq_budget_remaining is not None:
+            size_usdc = min(size_usdc, liq_budget_remaining)
+            if size_usdc > 0:
+                log(
+                    f"💧 {opp.pair_id}: size capped to {size_usdc:.2f} USDC "
+                    f"by liquidity budget (remaining={liq_budget_remaining:.2f})"
+                )
+
         if size_usdc <= 0:
             log(f"⏭ Skipping {opp.pair_id}: no budget remaining")
             skipped_caps += 1
@@ -213,6 +285,14 @@ def _execution_cycle():
                 depth_unavailable += 1
 
         if result.success:
+            # Decrement liquidity budget by actual cost deployed
+            if liq_budget_remaining is not None:
+                cost_deployed = getattr(result, "total_cost_usdc", size_usdc)
+                liq_budget_remaining -= cost_deployed
+                log(
+                    f"💧 Liquidity budget after {opp.pair_id}: "
+                    f"deployed={cost_deployed:.2f} remaining={liq_budget_remaining:.2f}"
+                )
             log(f"✅ Execution succeeded for {opp.pair_id}")
             try:
                 # Use actual fill data from executor, not quoted/estimated values

@@ -1,0 +1,61 @@
+Refactor the vault into liquidity-aware vault management with separate tend() and report() flows.
+
+Goals:
+1. Preserve enough idle USDC for withdrawals at all times.
+2. Deploy only surplus capital.
+3. Add a real withdrawal funding waterfall.
+4. Allow early tending/reporting under redemption pressure.
+5. Keep fee realization only in report() on realized net profits.
+
+Required behavior:
+
+A) Idle target / deployable capital
+- Track required idle as:
+  requiredIdle = max(idleTargetBps * totalAssets, pendingRedeemValue + safetyBuffer)
+- idleTargetBps should default to 10%.
+- Funder must only deploy:
+  deployable = max(0, availableServicerUSDC - requiredIdle)
+- Never deploy funds reserved for pending redemptions.
+
+B) Withdrawal funding waterfall
+When pending redeems exceed vault idle, satisfy shortfall in this order:
+1. Vault idle cash
+2. Free/unallocated servicer cash
+3. Settled or claimable proceeds on venues
+4. Unwind lowest-cost / nearest-expiry positions
+5. Broader unwind only if still needed
+
+C) Redemption pressure response
+- Add tend() or equivalent maintenance path callable frequently.
+- tend() should:
+  - recompute required idle
+  - pause/throttle new deployments if idle is below target
+  - sweep cash back from servicer / venues
+  - fund withdrawal shortfalls
+  - optionally unwind positions if needed
+
+D) Early trigger logic
+- Do not rely only on fixed report cooldown.
+- If a large redemption arrives or pendingRedeemValue > idleAvailable, trigger tend() immediately.
+- If needed, allow early report when accounting/NAV refresh is required for redemption processing.
+
+E) report() responsibilities
+- report() handles accounting only:
+  - realized PnL
+  - NAV update
+  - share price update
+  - fee accrual/minting
+- Apply 20% fee only on realized net profits, after offsetting realized losses.
+- Do not use report() for routine liquidity shuffling unless strictly necessary.
+
+F) Safety guards
+- No admin-only manual liquidity dependency for normal withdrawals.
+- New trade deployment must be blocked or reduced while redemption pressure is active.
+- Add explicit state/metrics for:
+  idleAvailable
+  requiredIdle
+  pendingRedeemValue
+  deployableCapital
+  freeCash
+  settledProceeds
+  unwindNeeded

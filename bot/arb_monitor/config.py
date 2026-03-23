@@ -113,6 +113,27 @@ for kw_list in SPORTS_KEYWORDS.values():
     ALL_SPORT_KEYWORDS.extend(kw_list)
 
 # ---------------------------------------------------------------------------
+# pARB V2 Liquidity Management
+# ---------------------------------------------------------------------------
+
+# Target idle USDC in vault as basis points of total assets. Default 10%.
+ARB_IDLE_TARGET_BPS = int(os.environ.get("ARB_IDLE_TARGET_BPS", "1000"))
+
+# Fixed safety buffer (USDC) always reserved on top of pending redeem value.
+ARB_SAFETY_BUFFER_USDC = float(os.environ.get("ARB_SAFETY_BUFFER_USDC", "50"))
+
+# Minimum shortfall (USDC) before the waterfall sweeper activates.
+ARB_WATERFALL_MIN_SHORTFALL = float(os.environ.get("ARB_WATERFALL_MIN_SHORTFALL", "10"))
+
+# Early report: trigger ahead of cooldown when pending_redeem_value exceeds
+# this multiple of idle_available. Default 0.8 (80% of idle spoken for).
+ARB_EARLY_REPORT_PRESSURE_RATIO = float(os.environ.get("ARB_EARLY_REPORT_PRESSURE_RATIO", "0.8"))
+
+# Minimum seconds elapsed since last report before an early report fires.
+# Prevents rapid-fire reports when a wave of small redeems arrives.
+ARB_EARLY_REPORT_MIN_ELAPSED = int(os.environ.get("ARB_EARLY_REPORT_MIN_ELAPSED", "300"))
+
+# ---------------------------------------------------------------------------
 # pARB Auto-Funder (USDC distributor to trading platforms)
 # ---------------------------------------------------------------------------
 

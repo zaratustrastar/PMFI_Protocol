@@ -1,12 +1,17 @@
-"""arb_reporter.py — V2 report signer and submitter for PMFIArbVaultV2.
+"""arb_reporter.py — V2 report signer, waterfall sweeper, and early trigger.
 
 Responsibilities:
   1. Compute conservative reportedAssets (cash + settled proceeds; NO open position marks)
   2. Sign a ReportDataV2 payload for the contract's report() function
-  3. Submit the report() transaction to Base mainnet when cooldown allows
-  4. Optionally sweep servicer cash back to vault when redemption demand exists
+  3. Submit the report() transaction to Base mainnet when cooldown OR early trigger fires
+  4. Run the withdrawal funding waterfall when redemption shortfall exists:
+       Step 1 — vault idle cash (already there, just counted)
+       Step 2 — sweep free servicer cash back via refillBuffer()
+       Step 3 — settled/claimable proceeds (included in servicer cash or logged)
+       Step 4 — log unwind recommendation (position unwind handled by trading bot)
+       Step 5 — broader unwind alert if still undershooting
 
-reportedAssets formula (conservative — only what is clearly owned and withdrawable):
+reportedAssets formula (conservative — only clearly owned and withdrawable):
     vault_idle_usdc + servicer_on_base + poly_cash + kalshi_cash + opinion_cash + settled_pnl
 
 Intentionally excluded:
@@ -14,10 +19,14 @@ Intentionally excluded:
 
 Domain salt: "PMFIArbVaultV2.v1"  (isolated from V1 sigs and pSNIPER sigs)
 
-Env vars required:
-    ARB_VAULT_V2_ADDRESS       — deployed PMFIArbVaultV2 address
-    ARB_NAV_SIGNER_PRIVATE_KEY — private key of the reportSigner address
-    BASE_RPC_URL               — (optional) Base RPC, defaults to mainnet.base.org
+Env vars:
+    ARB_VAULT_V2_ADDRESS            — deployed PMFIArbVaultV2 address
+    ARB_NAV_SIGNER_PRIVATE_KEY      — private key of the reportSigner address
+    ARB_SERVICER_WALLET             — servicer wallet address (derived from POLY_PRIVATE_KEY)
+    BASE_RPC_URL                    — (optional) Base RPC, defaults to mainnet.base.org
+    ARB_EARLY_REPORT_PRESSURE_RATIO — early report fires when pending_redeems/idle >= this
+    ARB_EARLY_REPORT_MIN_ELAPSED    — min seconds since last report before early trigger
+    ARB_WATERFALL_MIN_SHORTFALL     — min USDC shortfall to activate waterfall sweep
 """
 
 import os
@@ -296,10 +305,18 @@ def compute_reported_assets(vault_address: str) -> dict:
 # Report payload builder
 # ─────────────────────────────────────────────────────────────────────────────
 
-def build_report_payload(vault_address: str, signer_key: str) -> dict | None:
+def build_report_payload(vault_address: str, signer_key: str, force: bool = False) -> dict | None:
     """Build and sign a ReportDataV2 payload for the contract's report() function.
 
-    Returns the payload dict or None if cooldown hasn't elapsed or key/vault missing.
+    Args:
+        vault_address: deployed V2 vault address
+        signer_key:    ARB_NAV_SIGNER_PRIVATE_KEY
+        force:         if True, bypasses the internal cooldown check. Use when
+                       run_reporter_tick has already decided to fire early due to
+                       redemption pressure. The contract-level cooldown is still
+                       enforced on-chain — this only skips the local guard.
+
+    Returns the payload dict or None if vault/key missing or cooldown not elapsed.
     """
     if not vault_address:
         log("⚠️ ARB_VAULT_V2_ADDRESS not set — cannot build report")
@@ -308,7 +325,7 @@ def build_report_payload(vault_address: str, signer_key: str) -> dict | None:
         log("⚠️ ARB_NAV_SIGNER_PRIVATE_KEY not set — cannot sign report")
         return None
 
-    # Check cooldown
+    # Read vault state (needed for nonce regardless of cooldown check)
     vault_state = _read_vault_state(vault_address)
     if not vault_state["ok"]:
         log("⚠️ Could not read vault state — skipping report")
@@ -318,12 +335,13 @@ def build_report_payload(vault_address: str, signer_key: str) -> dict | None:
     cooldown = vault_state["report_cooldown"]
     now      = int(time.time())
 
-    if last_ts > 0 and (now - last_ts) < cooldown:
+    if not force and last_ts > 0 and (now - last_ts) < cooldown:
         remaining = cooldown - (now - last_ts)
         log(f"⏳ Report cooldown: {remaining}s remaining — skip")
         return None
 
-    log(f"✅ Report cooldown elapsed (last={last_ts}, cooldown={cooldown}s) — proceeding")
+    reason = "forced (early trigger)" if force else "cooldown elapsed"
+    log(f"✅ Building report — reason: {reason} (last={last_ts}, cooldown={cooldown}s)")
 
     # Compute conservative assets
     assets_data = compute_reported_assets(vault_address)
@@ -511,100 +529,206 @@ def _save_report_snapshot(payload: dict, tx_hash: str):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Vault buffer sweeper
+# Withdrawal funding waterfall
 # ─────────────────────────────────────────────────────────────────────────────
 
-def sweep_servicer_to_vault(vault_address: str, servicer_key: str, min_sweep_usdc: float = 10.0) -> str | None:
-    """Call refillBuffer() on the vault to return servicer cash when redemptions are pending.
+def _refill_buffer_tx(
+    vault_address: str,
+    account,                # eth_account.Account instance
+    sweep_amount_usdc: float,
+    gas_price: int,
+    nonce: int,
+) -> str:
+    """Send approve + refillBuffer(amount) to move USDC from servicer → vault.
 
-    The vault's tend() moves capital OUT to the servicer.
-    This function moves capital BACK IN when needed to satisfy pending redemptions.
-    Anyone can call refillBuffer() — it only adds USDC to the vault.
-
-    Returns tx hash or None.
+    Returns the refillBuffer tx hash.
     """
-    from eth_account import Account
-
-    if not vault_address or not servicer_key:
-        return None
-
-    vault_state = _read_vault_state(vault_address)
-    if not vault_state["ok"]:
-        return None
-
-    pending_redeem_shares = vault_state["pending_redeem_shares"]
-    official_pps = vault_state["official_pps"]
-    idle_balance  = vault_state["idle_balance_usdc"]
-
-    if pending_redeem_shares == 0:
-        log("No pending redemptions — sweep not needed")
-        return None
-
-    # Estimate USDC needed for pending redemptions
-    needed_usdc = (pending_redeem_shares * official_pps) / 1e18 / 1e6
-    shortfall    = max(0.0, needed_usdc - idle_balance)
-
-    if shortfall < min_sweep_usdc:
-        log(f"Redemption shortfall {shortfall:.4f} USDC < min_sweep={min_sweep_usdc:.2f} — skip")
-        return None
-
-    # Read servicer USDC on Base
-    account = Account.from_key(servicer_key)
-    servicer_balance = _read_usdc_balance(account.address)
-    sweep_amount     = min(shortfall, servicer_balance * 0.9)  # keep 10% for gas reserve
-
-    if sweep_amount < min_sweep_usdc:
-        log(f"Servicer balance {servicer_balance:.4f} too low to sweep {sweep_amount:.4f} — skip")
-        return None
-
-    log(
-        f"💧 Sweeping {sweep_amount:.4f} USDC → vault to cover "
-        f"{needed_usdc:.4f} USDC in pending redemptions (idle={idle_balance:.4f})"
-    )
-
-    sweep_wei = int(sweep_amount * 1e6)
-
-    # 1. Approve USDC for vault
+    sweep_wei  = int(sweep_amount_usdc * 1e6)
+    amount_hex = sweep_wei.to_bytes(32, "big").hex()
     padded_vault = "000000000000000000000000" + vault_address.lower().replace("0x", "")
-    amount_hex   = sweep_wei.to_bytes(32, "big").hex()
+
+    # Step A: approve USDC for vault
     approve_data = "0x095ea7b3" + padded_vault + amount_hex
-
-    gas_price = _get_gas_price()
-    gas_price = int(gas_price * 1.2)
-    nonce     = _get_nonce(account.address)
-
     approve_tx = {
-        "to":       USDC_BASE,
-        "data":     approve_data,
-        "gas":      80_000,
-        "gasPrice": gas_price,
-        "nonce":    nonce,
-        "chainId":  BASE_CHAIN_ID,
-        "value":    0,
+        "to": USDC_BASE, "data": approve_data,
+        "gas": 80_000, "gasPrice": gas_price,
+        "nonce": nonce, "chainId": BASE_CHAIN_ID, "value": 0,
     }
-    signed_approve = account.sign_transaction(approve_tx)
-    _rpc("eth_sendRawTransaction", ["0x" + signed_approve.rawTransaction.hex()])
+    _rpc("eth_sendRawTransaction",
+         ["0x" + account.sign_transaction(approve_tx).rawTransaction.hex()])
 
-    nonce += 1
-
-    # 2. Call refillBuffer(uint256 amount)
-    #    selector: keccak256("refillBuffer(uint256)")[:4]
+    # Step B: refillBuffer(amount)
     REFILL_SELECTOR = _keccak256_text("refillBuffer(uint256)")[:4].hex()
     refill_data = "0x" + REFILL_SELECTOR + amount_hex
-
     refill_tx = {
-        "to":       vault_address,
-        "data":     refill_data,
-        "gas":      150_000,
-        "gasPrice": gas_price,
-        "nonce":    nonce,
-        "chainId":  BASE_CHAIN_ID,
-        "value":    0,
+        "to": vault_address, "data": refill_data,
+        "gas": 150_000, "gasPrice": gas_price,
+        "nonce": nonce + 1, "chainId": BASE_CHAIN_ID, "value": 0,
     }
-    signed_refill = account.sign_transaction(refill_tx)
-    tx_hash = _rpc("eth_sendRawTransaction", ["0x" + signed_refill.rawTransaction.hex()])
-    log(f"✅ refillBuffer({sweep_amount:.4f} USDC) → vault: {tx_hash}")
+    tx_hash = _rpc("eth_sendRawTransaction",
+                   ["0x" + account.sign_transaction(refill_tx).rawTransaction.hex()])
     return tx_hash
+
+
+def run_withdrawal_waterfall(vault_address: str, servicer_key: str) -> None:
+    """Satisfy pending redemption shortfall via ordered funding layers.
+
+    Waterfall:
+      1. Vault idle cash                — already there; counted, no action needed
+      2. Free servicer cash on Base     — swept in via refillBuffer()
+      3. Settled proceeds               — folded into servicer cash (same wallet); no extra tx
+      4. Unwind cheapest/nearest positions — LOGGED and flagged; execution left to trade bot
+      5. Broader unwind                 — ALERTED if step 4 still insufficient
+
+    This function only executes steps 1-3 automatically.
+    Steps 4-5 produce log warnings that the execution loop uses to block new trades.
+    """
+    from ..config import ARB_WATERFALL_MIN_SHORTFALL
+
+    if not vault_address or not servicer_key:
+        return
+
+    # Read current vault state fresh
+    vault_state = _read_vault_state(vault_address)
+    if not vault_state["ok"]:
+        log("⚠️ Waterfall: cannot read vault state — skip")
+        return
+
+    official_pps          = vault_state["official_pps"]
+    idle_balance          = vault_state["idle_balance_usdc"]
+    pending_redeem_shares = vault_state["pending_redeem_shares"]
+
+    # ── Step 1: Vault idle covers redemptions ─────────────────────────────────
+    if pending_redeem_shares == 0:
+        log("✅ Waterfall: no pending redemptions")
+        return
+
+    pending_redeem_value = (pending_redeem_shares * official_pps) / 1e18 / 1e6
+    shortfall = max(0.0, pending_redeem_value - idle_balance)
+
+    log(
+        f"📊 Waterfall: pending_redeem={pending_redeem_value:.4f} "
+        f"idle={idle_balance:.4f} shortfall={shortfall:.4f}"
+    )
+
+    if shortfall < ARB_WATERFALL_MIN_SHORTFALL:
+        log(f"✅ Waterfall: shortfall {shortfall:.4f} < min {ARB_WATERFALL_MIN_SHORTFALL:.2f} — idle covers")
+        return
+
+    # ── Step 2 + 3: Sweep free servicer cash (includes settled proceeds) ──────
+    from eth_account import Account
+    account = Account.from_key(servicer_key)
+    servicer_balance = _read_usdc_balance(account.address)
+
+    # Keep 10% of servicer cash as gas reserve (not swept)
+    available_to_sweep = servicer_balance * 0.9
+    sweep_amount = min(shortfall, available_to_sweep)
+
+    if sweep_amount >= ARB_WATERFALL_MIN_SHORTFALL:
+        log(
+            f"💧 Waterfall Step 2/3: sweeping {sweep_amount:.4f} USDC "
+            f"(servicer={servicer_balance:.4f}) → vault (shortfall={shortfall:.4f})"
+        )
+        try:
+            gas_price = int(_get_gas_price() * 1.2)
+            nonce     = _get_nonce(account.address)
+            tx_hash   = _refill_buffer_tx(vault_address, account, sweep_amount, gas_price, nonce)
+            log(f"✅ Waterfall Step 2/3: refillBuffer tx={tx_hash}")
+            shortfall -= sweep_amount
+        except Exception as e:
+            log(f"❌ Waterfall Step 2/3 sweep failed: {e}")
+    else:
+        log(
+            f"⚠️ Waterfall Step 2/3: servicer has only {servicer_balance:.4f} USDC "
+            f"(available={available_to_sweep:.4f}) — cannot cover {shortfall:.4f} shortfall"
+        )
+
+    # ── Step 4: Unwind cheapest/nearest-expiry positions ─────────────────────
+    if shortfall >= ARB_WATERFALL_MIN_SHORTFALL:
+        try:
+            from .arb_positions_db import get_open_positions
+            open_positions = get_open_positions()
+            # Sort by (expiry_ts asc, cost_basis asc) to unwind nearest-expiry / cheapest first
+            candidates = sorted(
+                [p for p in open_positions if p.get("status") == "open"],
+                key=lambda p: (p.get("expiry_ts", 0), p.get("cost_basis_usdc", 0))
+            )
+            if candidates:
+                log(
+                    f"⚠️ Waterfall Step 4: remaining shortfall={shortfall:.4f} USDC. "
+                    f"Recommend unwinding {len(candidates)} open position(s) starting with "
+                    f"pair_id={candidates[0].get('pair_id')} "
+                    f"(cost={candidates[0].get('cost_basis_usdc', 0):.4f} USDC, "
+                    f"expiry={candidates[0].get('expiry_ts', 0)}). "
+                    f"Execution loop will throttle new deployments."
+                )
+            else:
+                log(f"⚠️ Waterfall Step 4: shortfall={shortfall:.4f} but no open positions to unwind")
+        except Exception as e:
+            log(f"⚠️ Waterfall Step 4 lookup failed: {e}")
+
+    # ── Step 5: Broader unwind alert ─────────────────────────────────────────
+    if shortfall > pending_redeem_value * 0.5:
+        log(
+            f"🚨 Waterfall Step 5: CRITICAL — shortfall={shortfall:.4f} USDC covers "
+            f">{shortfall/pending_redeem_value:.0%} of pending redeems. "
+            f"Manual intervention may be required if position unwind is insufficient."
+        )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Early report trigger
+# ─────────────────────────────────────────────────────────────────────────────
+
+def should_report_early(vault_state: dict) -> bool:
+    """Return True if redemption pressure warrants an early report.
+
+    Conditions (all must hold):
+      1. pending_redeem_value / idle_available >= ARB_EARLY_REPORT_PRESSURE_RATIO
+      2. At least ARB_EARLY_REPORT_MIN_ELAPSED seconds since last report
+      3. There are actually pending redemptions (> 0 shares)
+    """
+    from ..config import ARB_EARLY_REPORT_PRESSURE_RATIO, ARB_EARLY_REPORT_MIN_ELAPSED
+
+    pending_redeem_shares = vault_state.get("pending_redeem_shares", 0)
+    if pending_redeem_shares == 0:
+        return False
+
+    official_pps = vault_state.get("official_pps", 0)
+    idle_balance = vault_state.get("idle_balance_usdc", 0.0)
+    last_ts      = vault_state.get("last_report_timestamp", 0)
+    now          = int(time.time())
+
+    pending_redeem_value = (pending_redeem_shares * official_pps) / 1e18 / 1e6
+
+    # Must have enough time elapsed since last report
+    elapsed = now - last_ts if last_ts > 0 else ARB_EARLY_REPORT_MIN_ELAPSED + 1
+    if elapsed < ARB_EARLY_REPORT_MIN_ELAPSED:
+        log(
+            f"⏳ Early report check: {elapsed}s elapsed < min {ARB_EARLY_REPORT_MIN_ELAPSED}s — skip"
+        )
+        return False
+
+    # Pressure ratio check
+    if idle_balance <= 0:
+        # Any pending redeems with zero idle is full pressure
+        log(f"🚨 Early report: idle=0, pending_redeem={pending_redeem_value:.4f} — TRIGGER")
+        return True
+
+    pressure_ratio = pending_redeem_value / idle_balance
+    if pressure_ratio >= ARB_EARLY_REPORT_PRESSURE_RATIO:
+        log(
+            f"🚨 Early report triggered: pressure_ratio={pressure_ratio:.2f} "
+            f">= threshold={ARB_EARLY_REPORT_PRESSURE_RATIO:.2f} "
+            f"(pending={pending_redeem_value:.4f} idle={idle_balance:.4f} elapsed={elapsed}s)"
+        )
+        return True
+
+    log(
+        f"ℹ️ Early report check: pressure_ratio={pressure_ratio:.2f} "
+        f"< {ARB_EARLY_REPORT_PRESSURE_RATIO:.2f} — no early trigger"
+    )
+    return False
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -612,10 +736,15 @@ def sweep_servicer_to_vault(vault_address: str, servicer_key: str, min_sweep_usd
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_reporter_tick():
-    """Called once per execution cycle. Tries to report and sweep if needed.
+    """Called once per execution cycle.
 
-    Silently no-ops if cooldown hasn't elapsed or env vars missing.
-    Errors are caught so a reporter failure never crashes the arb loop.
+    Order of operations:
+      1. Run withdrawal funding waterfall (sweep servicer cash → vault if shortfall exists)
+      2. Check for early report trigger (redemption pressure bypasses cooldown)
+      3. Build and submit report() if cooldown elapsed OR early trigger fired
+      4. Silently no-ops if ARB_VAULT_V2_ADDRESS not set
+
+    All errors are caught so a reporter failure never crashes the arb loop.
     """
     vault_address = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
     signer_key    = os.environ.get("ARB_NAV_SIGNER_PRIVATE_KEY", "")
@@ -624,15 +753,37 @@ def run_reporter_tick():
     if not vault_address:
         return  # V2 not deployed yet — silent skip
 
+    # ── 1. Withdrawal funding waterfall ───────────────────────────────────────
     try:
-        # 1. Sweep servicer cash back to vault if redemptions are pending
-        sweep_servicer_to_vault(vault_address, servicer_key)
+        run_withdrawal_waterfall(vault_address, servicer_key)
     except Exception as e:
-        log(f"⚠️ Sweep error (non-fatal): {e}")
+        log(f"⚠️ Waterfall error (non-fatal): {e}")
 
+    # ── 2 + 3. Report: cooldown OR early trigger ───────────────────────────────
     try:
-        # 2. Build and submit report if cooldown has elapsed
-        payload = build_report_payload(vault_address, signer_key)
+        vault_state = _read_vault_state(vault_address)
+        if not vault_state["ok"]:
+            log("⚠️ Cannot read vault state for report check — skip")
+            return
+
+        last_ts   = vault_state["last_report_timestamp"]
+        cooldown  = vault_state["report_cooldown"]
+        now       = int(time.time())
+        elapsed   = now - last_ts if last_ts > 0 else cooldown + 1
+
+        cooldown_elapsed = elapsed >= cooldown
+        early_trigger    = (not cooldown_elapsed) and should_report_early(vault_state)
+
+        if not cooldown_elapsed and not early_trigger:
+            remaining = cooldown - elapsed
+            log(f"⏳ Report: cooldown {remaining}s remaining, no early trigger — skip")
+            return
+
+        reason = "cooldown elapsed" if cooldown_elapsed else "early trigger (redemption pressure)"
+        log(f"📋 Report firing — reason: {reason}")
+
+        # force=True skips internal cooldown re-check when early trigger decided above
+        payload = build_report_payload(vault_address, signer_key, force=early_trigger)
         if payload:
             submit_report(payload, signer_key)
     except Exception as e:
