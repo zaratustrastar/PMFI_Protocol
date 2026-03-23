@@ -342,6 +342,29 @@ def _bridge_usdc_base_to_bsc(
 # Main funder tick
 # ---------------------------------------------------------------------------
 
+def _verify_wallet_key_match(private_key: str, servicer_wallet: str) -> bool:
+    """Warn if ARB_SERVICER_WALLET doesn't match the address derived from POLY_PRIVATE_KEY.
+
+    This catches the common operator misconfiguration where the private key and the
+    declared wallet address are out of sync (e.g. copied the wrong key). Returns True
+    if they match (or if verification fails due to missing eth_account).
+    """
+    try:
+        from eth_account import Account
+        derived = Account.from_key(private_key).address
+        if derived.lower() != servicer_wallet.lower():
+            log(
+                f"⚠️ WALLET MISMATCH: ARB_SERVICER_WALLET={servicer_wallet} but "
+                f"POLY_PRIVATE_KEY derives {derived}. Funder will sign from {derived}, "
+                "not from the declared servicer wallet. Check your env config!"
+            )
+            return False
+        return True
+    except Exception as e:
+        log(f"⚠️ Could not verify wallet/key match: {e}")
+        return True  # soft failure — don't block if eth_account unavailable
+
+
 def run_funder_tick() -> None:
     """Check servicer wallet balance and distribute USDC to platforms if ready.
 
@@ -354,6 +377,8 @@ def run_funder_tick() -> None:
     if not private_key or not servicer_wallet:
         log("ℹ️ POLY_PRIVATE_KEY or ARB_SERVICER_WALLET not set — funder skipped")
         return
+
+    _verify_wallet_key_match(private_key, servicer_wallet)
 
     try:
         _run_funder_tick_inner(private_key, servicer_wallet)
@@ -437,7 +462,11 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
         except Exception as e:
             log(f"❌ Polymarket transfer failed ({poly_amt:.4f} USDC): {e}")
     elif not POLY_BASE_DEPOSIT_ADDR:
-        log(f"⚠️ POLY_BASE_DEPOSIT_ADDR not set — skipping Polymarket share ({poly_amt:.4f} USDC)")
+        log(
+            f"⚠️ POLY_BASE_DEPOSIT_ADDR not set — skipping Polymarket share "
+            f"({poly_amt:.4f} USDC stays in servicer wallet; will be redistributed "
+            "per configured split on next funded tick)"
+        )
 
     # ── 6. Send Kalshi share ───────────────────────────────────────────────
     if kalshi_amt > 0 and KALSHI_BASE_DEPOSIT_ADDR:
@@ -455,7 +484,11 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
         except Exception as e:
             log(f"❌ Kalshi transfer failed ({kalshi_amt:.4f} USDC): {e}")
     elif not KALSHI_BASE_DEPOSIT_ADDR:
-        log(f"⚠️ KALSHI_BASE_DEPOSIT_ADDR not set — skipping Kalshi share ({kalshi_amt:.4f} USDC)")
+        log(
+            f"⚠️ KALSHI_BASE_DEPOSIT_ADDR not set — skipping Kalshi share "
+            f"({kalshi_amt:.4f} USDC stays in servicer wallet; will be redistributed "
+            "per configured split on next funded tick)"
+        )
 
     # ── 7. Bridge Opinion share (Base → BSC via LI.FI) ────────────────────
     if opinion_amt > 0 and OPINION_BSC_DEPOSIT_ADDR:
@@ -474,4 +507,8 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
         except Exception as e:
             log(f"❌ Opinion bridge failed ({opinion_amt:.4f} USDC): {e}")
     elif not OPINION_BSC_DEPOSIT_ADDR:
-        log(f"⚠️ OPINION_BSC_DEPOSIT_ADDR not set — skipping Opinion share ({opinion_amt:.4f} USDC)")
+        log(
+            f"⚠️ OPINION_BSC_DEPOSIT_ADDR not set — skipping Opinion bridge "
+            f"({opinion_amt:.4f} USDC stays in servicer wallet; will be redistributed "
+            "per configured split on next funded tick)"
+        )
