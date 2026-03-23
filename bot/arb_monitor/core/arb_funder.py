@@ -10,6 +10,12 @@ On each tick:
 
 All amounts are in USDC (6-decimal precision on-chain).
 Transactions are signed with POLY_PRIVATE_KEY (= servicer wallet private key).
+
+Nonce management: a _NonceTracker is initialised once per tick from the pending
+nonce (eth_getTransactionCount + "pending"), then incremented client-side for each
+subsequent transaction in the same tick. This prevents nonce collisions when
+multiple transfers are sent back-to-back before any confirms.
+
 Errors are logged and suppressed so a funder failure never crashes the arb loop.
 """
 
@@ -93,6 +99,32 @@ def _get_allowance(owner: str, spender: str, token: str = USDC_BASE, rpc_url: st
 
 
 # ---------------------------------------------------------------------------
+# Nonce tracker — prevents collisions across back-to-back txs in one tick
+# ---------------------------------------------------------------------------
+
+class _NonceTracker:
+    """Per-tick nonce tracker initialised from the pending nonce.
+
+    eth_getTransactionCount with "pending" returns the next nonce including
+    already-queued-but-unconfirmed transactions. After that, each tx in the
+    same tick increments the cursor client-side so later txs never reuse a
+    nonce that a prior tx in the same tick is already occupying.
+    """
+
+    def __init__(self, sender: str, rpc_url: str = BASE_RPC):
+        raw = _rpc("eth_getTransactionCount", [sender, "pending"], rpc_url)
+        self._next = int(raw, 16)
+        self.sender = sender
+        log(f"🔢 NonceTracker: sender={sender} pending_nonce={self._next}")
+
+    def consume(self) -> int:
+        """Return the next nonce and advance the cursor."""
+        nonce = self._next
+        self._next += 1
+        return nonce
+
+
+# ---------------------------------------------------------------------------
 # Transaction builder/signer
 # ---------------------------------------------------------------------------
 
@@ -100,20 +132,23 @@ def _build_and_send_tx(
     private_key: str,
     to: str,
     data: str,
+    nonce_tracker: _NonceTracker,
     value_wei: int = 0,
     chain_id: int = BASE_CHAIN_ID,
     rpc_url: str = BASE_RPC,
     gas_override: int | None = None,
 ) -> str:
-    """Build, sign and broadcast a raw transaction. Returns tx hash string."""
+    """Build, sign and broadcast a raw transaction. Returns tx hash string.
+
+    Uses nonce_tracker.consume() to get the next nonce — caller must pass the
+    same tracker for all txs in one tick to guarantee nonce ordering.
+    """
     from eth_account import Account
 
     account = Account.from_key(private_key)
-    sender = account.address
     to_cs = _checksum(to)
 
-    nonce_hex = _rpc("eth_getTransactionCount", [sender, "latest"], rpc_url)
-    nonce = int(nonce_hex, 16)
+    nonce = nonce_tracker.consume()
 
     gas_price_hex = _rpc("eth_gasPrice", [], rpc_url)
     gas_price = int(int(gas_price_hex, 16) * 1.2)
@@ -123,7 +158,7 @@ def _build_and_send_tx(
     else:
         try:
             gas_est_hex = _rpc("eth_estimateGas", [{
-                "from": sender, "to": to_cs,
+                "from": account.address, "to": to_cs,
                 "data": data, "value": hex(value_wei)
             }], rpc_url)
             gas_limit = int(int(gas_est_hex, 16) * 1.35)
@@ -144,6 +179,7 @@ def _build_and_send_tx(
     signed = account.sign_transaction(tx)
     raw = signed.raw_transaction if hasattr(signed, "raw_transaction") else signed.rawTransaction
     tx_hash = _rpc("eth_sendRawTransaction", ["0x" + raw.hex()], rpc_url)
+    log(f"📤 TX nonce={nonce} → {tx_hash}")
     return tx_hash
 
 
@@ -155,6 +191,7 @@ def _send_erc20_transfer(
     private_key: str,
     to_addr: str,
     amount_usdc: float,
+    nonce_tracker: _NonceTracker,
     token: str = USDC_BASE,
     chain_id: int = BASE_CHAIN_ID,
     rpc_url: str = BASE_RPC,
@@ -169,6 +206,7 @@ def _send_erc20_transfer(
         private_key=private_key,
         to=token,
         data=data,
+        nonce_tracker=nonce_tracker,
         value_wei=0,
         chain_id=chain_id,
         rpc_url=rpc_url,
@@ -183,6 +221,7 @@ def _send_erc20_approve(
     private_key: str,
     spender: str,
     amount_usdc: float,
+    nonce_tracker: _NonceTracker,
     token: str = USDC_BASE,
     chain_id: int = BASE_CHAIN_ID,
     rpc_url: str = BASE_RPC,
@@ -197,6 +236,7 @@ def _send_erc20_approve(
         private_key=private_key,
         to=token,
         data=data,
+        nonce_tracker=nonce_tracker,
         value_wei=0,
         chain_id=chain_id,
         rpc_url=rpc_url,
@@ -213,13 +253,15 @@ def _bridge_usdc_base_to_bsc(
     from_addr: str,
     amount_usdc: float,
     to_bsc_addr: str,
+    nonce_tracker: _NonceTracker,
 ) -> str:
     """Bridge `amount_usdc` USDC from Base to BSC via LI.FI.
 
     Flow:
       1. GET /v1/quote for the route
-      2. Approve the LI.FI spender if needed
-      3. Submit the transactionRequest on Base
+      2. Approve the LI.FI spender if needed (uses nonce_tracker for sequencing)
+      3. Submit the transactionRequest on Base (uses nonce_tracker for sequencing)
+
     Returns the Base bridge tx hash (fire-and-forget — does not wait for BSC receipt).
     """
     import requests as _req
@@ -252,7 +294,9 @@ def _bridge_usdc_base_to_bsc(
     if not lifi_router:
         raise RuntimeError("LI.FI transactionRequest missing 'to' field")
 
-    # Check and grant USDC allowance to LI.FI router
+    # Check and grant USDC allowance to LI.FI router.
+    # The approval tx is sent with the current nonce_tracker cursor, then the
+    # bridge tx with the next cursor — guaranteeing ordered execution.
     try:
         current_allowance = _get_allowance(from_addr, lifi_router)
         if current_allowance < amount_usdc:
@@ -261,21 +305,21 @@ def _bridge_usdc_base_to_bsc(
                 private_key=private_key,
                 spender=lifi_router,
                 amount_usdc=amount_usdc,
+                nonce_tracker=nonce_tracker,
             )
             log(f"✅ Approval tx: {approve_hash}")
-            # Brief pause to let approval confirm before the bridge tx
-            time.sleep(6)
         else:
             log(f"ℹ️ LI.FI allowance already sufficient ({current_allowance:.4f} USDC)")
     except Exception as e:
         raise RuntimeError(f"LI.FI approval step failed: {e}")
 
-    # Submit the bridge transaction
+    # Submit the bridge transaction (nonce is automatically next after approval)
     tx_data = tx_req.get("data", "0x")
     tx_value = int(tx_req.get("value", "0x0"), 16) if tx_req.get("value") else 0
-    tx_gas = int(tx_req.get("gasLimit", "0"), 16) if tx_req.get("gasLimit") else None
+    tx_gas_raw = tx_req.get("gasLimit", "")
+    tx_gas = int(tx_gas_raw, 16) if tx_gas_raw else None
     if tx_gas:
-        tx_gas = int(tx_gas * 1.2)  # add 20% buffer to LI.FI's estimate
+        tx_gas = int(tx_gas * 1.2)  # 20% buffer over LI.FI's estimate
 
     log(f"📤 Submitting LI.FI bridge tx to {lifi_router} (value={tx_value} wei, gas={tx_gas})")
 
@@ -283,6 +327,7 @@ def _bridge_usdc_base_to_bsc(
         private_key=private_key,
         to=lifi_router,
         data=tx_data,
+        nonce_tracker=nonce_tracker,
         value_wei=tx_value,
         chain_id=BASE_CHAIN_ID,
         rpc_url=BASE_RPC,
@@ -358,7 +403,7 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
 
     poly_amt = round(usdc_balance * ARB_FUND_POLY_PCT / total_pct, 6)
     kalshi_amt = round(usdc_balance * ARB_FUND_KALSHI_PCT / total_pct, 6)
-    opinion_amt = round(usdc_balance - poly_amt - kalshi_amt, 6)  # remainder to avoid rounding drift
+    opinion_amt = round(usdc_balance - poly_amt - kalshi_amt, 6)  # remainder avoids drift
 
     log(
         f"📊 Split: poly={poly_amt:.4f} ({ARB_FUND_POLY_PCT}%) "
@@ -367,13 +412,23 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
         f"total={usdc_balance:.4f} USDC"
     )
 
-    # ── 4. Send Polymarket share ───────────────────────────────────────────
+    # ── 4. Initialise nonce tracker (pending nonce, single sender) ─────────
+    # All txs in this tick share one tracker so each subsequent tx automatically
+    # gets the next sequential nonce, preventing RPC-pending-state race conditions.
+    try:
+        nonce_tracker = _NonceTracker(servicer_wallet)
+    except Exception as e:
+        log(f"❌ Could not initialise nonce tracker: {e}")
+        return
+
+    # ── 5. Send Polymarket share ───────────────────────────────────────────
     if poly_amt > 0 and POLY_BASE_DEPOSIT_ADDR:
         try:
             tx = _send_erc20_transfer(
                 private_key=private_key,
                 to_addr=POLY_BASE_DEPOSIT_ADDR,
                 amount_usdc=poly_amt,
+                nonce_tracker=nonce_tracker,
             )
             log(
                 f"✅ [{ts}] Polymarket: sent {poly_amt:.4f} USDC → "
@@ -384,13 +439,14 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
     elif not POLY_BASE_DEPOSIT_ADDR:
         log(f"⚠️ POLY_BASE_DEPOSIT_ADDR not set — skipping Polymarket share ({poly_amt:.4f} USDC)")
 
-    # ── 5. Send Kalshi share ───────────────────────────────────────────────
+    # ── 6. Send Kalshi share ───────────────────────────────────────────────
     if kalshi_amt > 0 and KALSHI_BASE_DEPOSIT_ADDR:
         try:
             tx = _send_erc20_transfer(
                 private_key=private_key,
                 to_addr=KALSHI_BASE_DEPOSIT_ADDR,
                 amount_usdc=kalshi_amt,
+                nonce_tracker=nonce_tracker,
             )
             log(
                 f"✅ [{ts}] Kalshi: sent {kalshi_amt:.4f} USDC → "
@@ -401,7 +457,7 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
     elif not KALSHI_BASE_DEPOSIT_ADDR:
         log(f"⚠️ KALSHI_BASE_DEPOSIT_ADDR not set — skipping Kalshi share ({kalshi_amt:.4f} USDC)")
 
-    # ── 6. Bridge Opinion share (Base → BSC via LI.FI) ────────────────────
+    # ── 7. Bridge Opinion share (Base → BSC via LI.FI) ────────────────────
     if opinion_amt > 0 and OPINION_BSC_DEPOSIT_ADDR:
         try:
             tx = _bridge_usdc_base_to_bsc(
@@ -409,6 +465,7 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
                 from_addr=servicer_wallet,
                 amount_usdc=opinion_amt,
                 to_bsc_addr=OPINION_BSC_DEPOSIT_ADDR,
+                nonce_tracker=nonce_tracker,
             )
             log(
                 f"✅ [{ts}] Opinion (bridge): {opinion_amt:.4f} USDC "
