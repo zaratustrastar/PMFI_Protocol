@@ -1,6 +1,11 @@
 """Arb NAV Tracker - computes liquid NAV for pArbitrage vault positions.
 
-NAV = servicer_poly_cash + servicer_kalshi_cash + sum(open_positions_liquid_value) + sum(settled_pnl)
+NAV = poly_cash + kalshi_cash + opinion_cash + servicer_on_base
+      + sum(open_positions_liquid_value) + sum(settled_pnl)
+
+servicer_on_base = USDC held by ARB_SERVICER_WALLET on Base, awaiting distribution
+to trading platforms. Folded into polyCash in the signed struct (no separate slot
+in the contract). Prevents NAV dip between deposit and platform distribution.
 
 Liquid value per position uses orderbook BIDS (not asks, not cost basis) to reflect
 real liquidation value: liquid_value = poly_yes_bid + kalshi_yes_bid per share.
@@ -196,6 +201,47 @@ def _get_opinion_cash() -> float:
             log(f"⚠️ Opinion balance error at {url}: {e}")
 
     log("⚠️ Opinion cash could not be fetched from any endpoint — opinion_cash = 0")
+    return 0.0
+
+
+def _get_servicer_wallet_usdc_on_base() -> float:
+    """Get USDC balance of the servicer wallet sitting on Base mainnet.
+
+    This captures USDC that has been forwarded from the vault but not yet
+    distributed to any trading platform. Without this, fresh deposits cause
+    a temporary NAV dip until funds reach Polymarket/Kalshi/Opinion.
+
+    Uses a direct eth_call (no web3 dependency — requests only).
+    Returns balance in USDC (float, 6-decimal normalised). Returns 0.0 on error.
+    """
+    servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
+    if not servicer_wallet:
+        log("ℹ️ ARB_SERVICER_WALLET not set — servicer_on_base = 0")
+        return 0.0
+
+    rpc_url = os.environ.get("BASE_RPC_URL", "https://mainnet.base.org")
+    usdc_address = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+
+    try:
+        import requests as _req
+        padded = "000000000000000000000000" + servicer_wallet.lower().replace("0x", "")
+        data = "0x70a08231" + padded
+        resp = _req.post(rpc_url, json={
+            "jsonrpc": "2.0",
+            "method": "eth_call",
+            "params": [{"to": usdc_address, "data": data}, "latest"],
+            "id": 1,
+        }, timeout=10)
+        if resp.status_code == 200:
+            raw = resp.json().get("result", "0x0")
+            balance_raw = int(raw, 16) if raw and raw != "0x" else 0
+            balance_usdc = balance_raw / 1_000_000
+            log(f"Servicer wallet USDC on Base: {balance_usdc:.4f} USDC ({servicer_wallet})")
+            return balance_usdc
+        else:
+            log(f"⚠️ Servicer Base balance HTTP {resp.status_code} — servicer_on_base = 0")
+    except Exception as e:
+        log(f"⚠️ Error fetching servicer wallet balance on Base: {e}")
     return 0.0
 
 
@@ -472,6 +518,10 @@ def compute_nav() -> dict:
 
     poly_cash, kalshi_cash, opinion_cash = _get_servicer_balances()
 
+    # USDC in servicer wallet on Base, awaiting distribution to platforms.
+    # Folded into poly_cash so it's visible in NAV immediately after deposit.
+    servicer_on_base = _get_servicer_wallet_usdc_on_base()
+
     positions = _load_open_positions()
     position_values = []
     total_liquid = 0.0
@@ -483,22 +533,26 @@ def compute_nav() -> dict:
 
     settled_pnl = _get_settled_pnl()
 
-    total_assets = poly_cash + kalshi_cash + opinion_cash + total_liquid + settled_pnl
+    total_assets = (
+        poly_cash + kalshi_cash + opinion_cash
+        + servicer_on_base + total_liquid + settled_pnl
+    )
 
     log(
         f"NAV breakdown: poly_cash={poly_cash:.4f}, kalshi_cash={kalshi_cash:.4f}, "
-        f"opinion_cash={opinion_cash:.4f}, open_positions={total_liquid:.4f}, "
-        f"settled_pnl={settled_pnl:.4f}, TOTAL={total_assets:.4f} USDC"
+        f"opinion_cash={opinion_cash:.4f}, servicer_on_base={servicer_on_base:.4f}, "
+        f"open_positions={total_liquid:.4f}, settled_pnl={settled_pnl:.4f}, "
+        f"TOTAL={total_assets:.4f} USDC"
     )
 
     timestamp = int(time.time())
     round_id = _get_next_round_id()
     deadline = timestamp + NAV_VALIDITY_WINDOW
 
-    # The contract struct has no opinionCash field — fold it into polyCash for the
-    # ABI encoding. The on-chain breakdown fields are informational only; totalAssets
-    # is what drives the share price math.
-    poly_cash_for_struct = poly_cash + opinion_cash
+    # The contract struct has no opinionCash field — fold opinion_cash and
+    # servicer_on_base into polyCash for ABI encoding. These are informational
+    # only on-chain; totalAssets is what drives the share price math.
+    poly_cash_for_struct = poly_cash + opinion_cash + servicer_on_base
 
     signature = _sign_nav_abi_encoded(
         total_assets_usdc=total_assets,
@@ -525,10 +579,12 @@ def compute_nav() -> dict:
 
     payload = {
         "total_assets_usdc": round(total_assets, 6),
-        # poly_cash in the signed struct = poly_cash + opinion_cash (no opinionCash slot in contract).
-        # The frontend passes this directly into the ABI struct, so it must match the signature.
+        # poly_cash in the signed struct = poly_cash + opinion_cash + servicer_on_base
+        # (no separate slots in the contract for those). The frontend passes this
+        # directly into the ABI struct, so it must match the signature.
         "poly_cash": round(poly_cash_for_struct, 6),
-        "poly_cash_polymarket_only": round(poly_cash, 6),   # for display breakdown only
+        "poly_cash_polymarket_only": round(poly_cash, 6),      # display breakdown only
+        "servicer_on_base": round(servicer_on_base, 6),        # display breakdown only
         "kalshi_cash": round(kalshi_cash, 6),
         "opinion_cash": round(opinion_cash, 6),
         "open_positions_value": round(total_liquid, 6),
