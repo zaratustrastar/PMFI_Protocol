@@ -76,7 +76,7 @@ Add / update these lines:
 ```bash
 ARB_VAULT_V1_ADDRESS=0xYOUR_DEPLOYED_CONTRACT
 ARB_NAV_SIGNER_PRIVATE_KEY=0xNAV_SIGNER_PRIVATE_KEY
-ARB_SERVICER_WALLET=0xSERVICER_WALLET
+ARB_SERVICER_WALLET=0xSERVICER_WALLET   # trading EOA — derived from POLY_PRIVATE_KEY
 ARB_MAX_PAIR_USDC=500
 ARB_MAX_DEPLOYED_USDC=5000
 ODDPOOL_API_KEY=your_oddpool_key
@@ -93,6 +93,31 @@ POLY_PRIVATE_KEY=0xPOLY_TRADING_WALLET_KEY
 POLY_API_KEY=your_parb_polymarket_api_key
 
 OPINION_API_KEY=your_opinion_key
+
+# ── Auto-Funder (USDC distributor) ─────────────────────────────────────────
+# Platform deposit addresses — where the funder sends USDC each cycle.
+# Polymarket and Kalshi both accept USDC deposits on Base.
+# Opinion Trade requires USDC on BSC (bridged automatically via LI.FI).
+POLY_BASE_DEPOSIT_ADDR=0xPOLYMARKET_BASE_DEPOSIT_ADDRESS
+KALSHI_BASE_DEPOSIT_ADDR=0xKALSHI_BASE_DEPOSIT_ADDRESS
+OPINION_BSC_DEPOSIT_ADDR=0xOPINION_BSC_DEPOSIT_ADDRESS
+
+# Trigger: only distribute when servicer wallet holds at least this much USDC.
+# Default: $20. Lower values increase gas overhead relative to funds moved.
+ARB_MIN_FUND_AMOUNT=20
+
+# Platform split percentages (must be positive; remainder logic handles rounding).
+# Default: 40% Polymarket / 40% Kalshi / 20% Opinion.
+ARB_FUND_POLY_PCT=40
+ARB_FUND_KALSHI_PCT=40
+ARB_FUND_OPINION_PCT=20
+
+# Minimum ETH balance to keep in servicer wallet for gas.
+# Distribution is skipped entirely if ETH balance falls below this threshold.
+ARB_SERVICER_GAS_RESERVE_ETH=0.01
+
+# Optional: override the Base RPC URL (defaults to https://mainnet.base.org)
+# BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/YOUR_KEY
 ```
 
 > **Note**: `POLY_API_KEY` must be from the **pARB Polymarket account**, not pSNIPER's.

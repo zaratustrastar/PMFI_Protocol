@@ -111,3 +111,28 @@ SPORTS_KEYWORDS = {
 ALL_SPORT_KEYWORDS = []
 for kw_list in SPORTS_KEYWORDS.values():
     ALL_SPORT_KEYWORDS.extend(kw_list)
+
+# ---------------------------------------------------------------------------
+# pARB Auto-Funder (USDC distributor to trading platforms)
+# ---------------------------------------------------------------------------
+
+# Minimum USDC balance in the servicer wallet before distribution is triggered.
+# Set to 0 to distribute every cycle (not recommended due to gas costs).
+ARB_MIN_FUND_AMOUNT = float(os.environ.get("ARB_MIN_FUND_AMOUNT", "20"))
+
+# Proportional allocation of servicer USDC across the three platforms.
+# Must sum to 100 (enforced proportionally if they don't — remainder goes to Opinion).
+ARB_FUND_POLY_PCT = float(os.environ.get("ARB_FUND_POLY_PCT", "40"))
+ARB_FUND_KALSHI_PCT = float(os.environ.get("ARB_FUND_KALSHI_PCT", "40"))
+ARB_FUND_OPINION_PCT = float(os.environ.get("ARB_FUND_OPINION_PCT", "20"))
+
+# Minimum ETH kept in the servicer wallet for gas. Distribution is skipped if
+# the ETH balance falls below this threshold.
+ARB_SERVICER_GAS_RESERVE_ETH = float(os.environ.get("ARB_SERVICER_GAS_RESERVE_ETH", "0.01"))
+
+# Platform deposit addresses for auto-funder.
+# Polymarket and Kalshi accept USDC directly on Base.
+# Opinion Trade requires USDC on BSC (bridged via LI.FI).
+POLY_BASE_DEPOSIT_ADDR = os.environ.get("POLY_BASE_DEPOSIT_ADDR", "")
+KALSHI_BASE_DEPOSIT_ADDR = os.environ.get("KALSHI_BASE_DEPOSIT_ADDR", "")
+OPINION_BSC_DEPOSIT_ADDR = os.environ.get("OPINION_BSC_DEPOSIT_ADDR", "")

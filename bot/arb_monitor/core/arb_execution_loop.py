@@ -20,6 +20,7 @@ import threading
 import os
 from ..adapters.oddpool import fetch_opportunities, ArbOpportunity
 from ..core.arb_executor import execute_arb
+from ..core.arb_funder import run_funder_tick
 from ..core.arb_positions_db import (
     upsert_position, get_open_positions, get_total_deployed_usdc
 )
@@ -104,6 +105,12 @@ def compute_trade_size(opportunity: ArbOpportunity) -> float:
 def _execution_cycle():
     """Run a single execution cycle: fetch, prioritize, execute eligible opportunities."""
     log("⚡ Starting execution cycle")
+
+    # ── Auto-funder: distribute servicer USDC to platforms before trading ──
+    try:
+        run_funder_tick()
+    except Exception as e:
+        log(f"⚠️ Funder tick raised unexpectedly (non-fatal): {e}")
 
     if not ARB_USE_ODDPOOL_ONLY:
         log("ℹ️ ARB_USE_ODDPOOL_ONLY=false — execution loop skipped (legacy mode)")
