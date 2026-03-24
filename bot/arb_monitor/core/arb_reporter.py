@@ -643,6 +643,41 @@ def run_withdrawal_waterfall(vault_address: str, servicer_key: str) -> None:
             f"(available={available_to_sweep:.4f}) — cannot cover {shortfall:.4f} shortfall"
         )
 
+    # ── Step 3.5: Pull cash from trading platforms if servicer sweep insufficient ─
+    if shortfall >= ARB_WATERFALL_MIN_SHORTFALL:
+        log(
+            f"🔄 Waterfall Step 3.5: shortfall {shortfall:.4f} remains after servicer sweep — "
+            f"pulling from trading platforms"
+        )
+        try:
+            from .arb_nav import _get_servicer_balances
+            from .arb_withdrawals import withdraw_from_platforms
+
+            poly_cash, kalshi_cash, opinion_cash = _get_servicer_balances()
+            total_platform_cash = poly_cash + kalshi_cash + opinion_cash
+            log(
+                f"💧 Platform cash: poly={poly_cash:.4f} kalshi={kalshi_cash:.4f} "
+                f"opinion={opinion_cash:.4f} total={total_platform_cash:.4f} USDC"
+            )
+
+            initiated = withdraw_from_platforms(
+                shortfall_usdc=shortfall,
+                poly_cash=poly_cash,
+                kalshi_cash=kalshi_cash,
+                opinion_cash=opinion_cash,
+                servicer_wallet=account.address,
+            )
+            log(
+                f"✅ Waterfall Step 3.5: initiated {initiated:.4f} USDC of platform withdrawals "
+                f"(funds in transit — will arrive in 5–30 min depending on platform)"
+            )
+            # We don't immediately reduce the shortfall (funds haven't arrived yet),
+            # but we log the expectation so Step 4 can be informational rather than critical
+            if initiated >= shortfall * 0.9:
+                log(f"ℹ️ Step 3.5 expected to cover shortfall — Step 4 unwind deferred")
+        except Exception as e:
+            log(f"⚠️ Waterfall Step 3.5 platform withdrawals error: {e}")
+
     # ── Step 4: Unwind cheapest/nearest-expiry positions ─────────────────────
     if shortfall >= ARB_WATERFALL_MIN_SHORTFALL:
         try:

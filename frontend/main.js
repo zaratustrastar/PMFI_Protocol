@@ -612,12 +612,42 @@ async function refreshUserStats() {
     }
 }
 
+async function loadArbVaultStats() {
+    if (!ARB_VAULT_V2_ADDRESS || !ARB_VAULT_V2_ABI) return;
+    try {
+        const provider = new ethers.JsonRpcProvider(BASE_MAINNET_RPC);
+        const c = new ethers.Contract(ARB_VAULT_V2_ADDRESS, ARB_VAULT_V2_ABI, provider);
+        const vs = await c.getVaultState();
+        // vs[0]=officialPPS, vs[1]=totalSupply, vs[2]=idleBalance,
+        // vs[3]=lastReportedBacking, vs[4]=lossCarryforward,
+        // vs[5]=pendingDepositAssets, vs[6]=claimableRedeemAssets,
+        // vs[7]=pendingRedeemShares
+        const pps          = Number(vs[0]) / 1e6;
+        const tvl          = (Number(vs[3]) + Number(vs[2])) / 1e6;
+        const pendingIn    = Number(vs[5]) / 1e6;
+        const pendingOut   = (Number(vs[7]) / 1e18) * pps;
+
+        const elPPS        = document.getElementById('arbStatPPS');
+        const elTVL        = document.getElementById('arbStatTVL');
+        const elPendingIn  = document.getElementById('arbStatPendingIn');
+        const elPendingOut = document.getElementById('arbStatPendingOut');
+
+        if (elPPS)        elPPS.textContent        = '$' + pps.toFixed(4);
+        if (elTVL)        elTVL.textContent        = '$' + tvl.toLocaleString('en-US', { maximumFractionDigits: 0 });
+        if (elPendingIn)  elPendingIn.textContent  = pendingIn  > 0 ? '$' + pendingIn.toFixed(2)  : '—';
+        if (elPendingOut) elPendingOut.textContent = pendingOut > 0 ? '$' + pendingOut.toFixed(2) : '—';
+    } catch (e) {
+        console.warn('[pARB V2] loadArbVaultStats error:', e);
+    }
+}
+
 async function refreshAll() {
     await Promise.all([
         refreshVaultStats(),
         refreshUserStats(),
         loadPendingWithdrawals(),
         refreshArbUserStats(),
+        loadArbVaultStats(),
     ]);
 }
 
@@ -2273,6 +2303,9 @@ function webCopyCode(code, idx) {
         abisLoaded = true;
         
         await initReadOnlyProvider();
+
+        // Load pARB vault stats immediately (no wallet needed — read-only)
+        loadArbVaultStats();
         
         // Start price auto-refresh from VPS (if configured)
         startPriceAutoRefresh();
