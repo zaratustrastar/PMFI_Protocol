@@ -365,6 +365,63 @@ def _verify_wallet_key_match(private_key: str, servicer_wallet: str) -> bool:
         return True  # soft failure — don't block if eth_account unavailable
 
 
+def _call_tend_if_ready(vault_address: str, private_key: str, servicer_wallet: str) -> None:
+    """Call tend() on the vault contract if the cooldown has elapsed.
+
+    This is the production mechanism by which excess vault idle USDC flows to the
+    servicer wallet for off-chain deployment to trading platforms.
+
+    tend() is permissionless — anyone can call it. The bot calls it proactively so
+    the production flow is:
+        deposit processed by report() → idle accumulates in vault
+        → _call_tend_if_ready() sends tend() tx → idle moves to servicer wallet
+        → run_funder_tick distributes deployable_capital to platforms
+
+    tend() invariants (enforced on-chain):
+        • Does NOT change officialPPS
+        • Does NOT touch USDC reserved for pending redemptions
+        • Does NOT process deposit/redeem queues
+    """
+    from eth_hash.auto import keccak
+    from eth_account import Account
+
+    def _sel(sig: str) -> str:
+        return keccak(sig.encode())[:4].hex()
+
+    def _read_uint256(fn_sig: str) -> int:
+        sel = _sel(fn_sig)
+        raw = _rpc("eth_call", [{"to": vault_address, "data": "0x" + sel}, "latest"])
+        if not raw or raw == "0x":
+            return 0
+        return int(raw, 16)
+
+    try:
+        last_tend_ts  = _read_uint256("lastTendTimestamp()")
+        tend_cooldown = _read_uint256("tendCooldown()")
+        now = int(time.time())
+
+        if now < last_tend_ts + tend_cooldown:
+            remaining = (last_tend_ts + tend_cooldown) - now
+            log(f"⏳ tend() cooldown: {remaining}s remaining — skip")
+            return
+
+        log(f"🔄 tend() cooldown elapsed (last={last_tend_ts}, cooldown={tend_cooldown}s) — calling")
+
+        tend_data    = "0x" + _sel("tend()")
+        nonce_tracker = _NonceTracker(servicer_wallet)
+        tx_hash = _build_and_send_tx(
+            private_key=private_key,
+            to=vault_address,
+            data=tend_data,
+            nonce_tracker=nonce_tracker,
+            gas_override=120_000,
+        )
+        log(f"✅ tend() sent: tx={tx_hash}")
+
+    except Exception as e:
+        log(f"⚠️ _call_tend_if_ready error (non-fatal): {e}")
+
+
 def run_funder_tick() -> None:
     """Check servicer wallet balance and distribute USDC to platforms if ready.
 
@@ -390,6 +447,14 @@ def run_funder_tick() -> None:
 def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
     """Inner implementation — all exceptions propagate to run_funder_tick for logging."""
     ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+    # ── 0. Call tend() on-chain if cooldown elapsed ────────────────────────
+    # This is the mechanism that moves excess vault idle USDC → servicer wallet.
+    # tend() respects pending-redeem reservations and the idle target buffer on-chain.
+    # Must run BEFORE liquidity state so the state reflects the post-tend balance.
+    vault_address = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
+    if vault_address:
+        _call_tend_if_ready(vault_address, private_key, servicer_wallet)
 
     # ── 1. Liquidity state: compute deployable capital ─────────────────────
     vault_address = os.environ.get("ARB_VAULT_V2_ADDRESS", "")

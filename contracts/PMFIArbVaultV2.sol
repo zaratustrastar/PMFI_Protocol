@@ -105,6 +105,14 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
     uint256 public constant MAX_REPORT_INTERVAL  = 7 days;  // circuit breaker: pause if exceeded
     uint256 public constant MAX_REQUESTS_PER_REPORT = 100;  // gas cap per report()
 
+    /// @dev Bootstrap shares permanently locked at dead address on deployment.
+    ///      Ensures totalSupply() > 0 at all times, preventing share-price inflation attacks
+    ///      where a first depositor manipulates PPS by donating USDC before any shares exist.
+    ///      Value: 1000 shares (1000e18 raw). Cost to attacker to grief with dead-share dilution
+    ///      equals the dead-share fraction of reported assets — negligible in practice.
+    uint256 public constant BOOTSTRAP_SHARES = 1000e18;
+    address public constant DEAD_ADDRESS = 0x000000000000000000000000000000000000dEaD;
+
     // ═══════════════════════════════════════════
     // Immutables
     // ═══════════════════════════════════════════
@@ -245,6 +253,11 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
         minimumIdleAmount   = 100e6;   // $100
         tendCooldown        = 60;      // 1 minute
         reportCooldown      = 3600;    // 1 hour
+
+        // Bootstrap: mint permanent dead shares so totalSupply() is never 0.
+        // Prevents first-depositor share-price inflation attacks.
+        // These shares are unclaimable and will never dilute practical holders meaningfully.
+        _mint(DEAD_ADDRESS, BOOTSTRAP_SHARES);
     }
 
     // ═══════════════════════════════════════════
@@ -441,11 +454,19 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
 
     /**
      * @notice Maintenance tick: transfer deployable idle capital to servicer wallet.
-     *         Anyone can call after tendCooldown seconds. MUST NOT change officialPPS.
+     *         Anyone can call after tendCooldown seconds.
      *
-     *  deployable = max(0, idleBalance − max(targetIdle, minimumIdleAmount) − expectedRedemptions)
+     *  INVARIANTS (never violated):
+     *    1. tend() NEVER changes officialPPS. report() is the only accounting checkpoint.
+     *    2. tend() NEVER processes deposit or redeem requests. Only report() does.
+     *    3. tend() NEVER moves USDC reserved for pending redemptions.
      *
-     *  Withdrawal liquidity priority (handled by bot after tend()):
+     *  Idle reservation order (strict priority):
+     *    a. Pending redeem USDC  — (totalPendingRedeemShares × officialPPS) — first priority
+     *    b. Target idle buffer   — max(totalAssets × targetIdleBps, minimumIdleAmount)
+     *    c. Deployable excess    — everything above (a + b) flows to servicer wallet
+     *
+     *  Off-chain withdrawal waterfall (bot runs after tend()):
      *    1. vault idle USDC  (here)
      *    2. servicer free USDC swept back via refillBuffer()
      *    3. settled venue proceeds
@@ -458,11 +479,14 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
         uint256 idle = _idleBalance();
         uint256 targetIdle = _targetIdleAmount();
 
-        // Reserve estimated USDC needed for pending redemptions
-        uint256 redemptionNeeds = (totalPendingRedeemShares * officialPPS) / NAV_PRECISION;
-        uint256 reserveNeeded = targetIdle + redemptionNeeds;
+        // PRIORITY 1: reserve USDC for all outstanding pending redemptions (at officialPPS)
+        uint256 redemptionReserve = (totalPendingRedeemShares * officialPPS) / NAV_PRECISION;
 
-        uint256 deployable = idle > reserveNeeded ? idle - reserveNeeded : 0;
+        // PRIORITY 2: reserve target idle buffer on top of redemption reserve
+        uint256 totalReserve = redemptionReserve + targetIdle;
+
+        // Only transfer the true excess above both reserves
+        uint256 deployable = idle > totalReserve ? idle - totalReserve : 0;
 
         if (deployable > 0 && arbServicerWallet != address(0)) {
             usdc.safeTransfer(arbServicerWallet, deployable);
