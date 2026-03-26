@@ -1,0 +1,46 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && git pull
+remote: Enumerating objects: 19, done.
+remote: Counting objects: 100% (19/19), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 11 (delta 8), reused 11 (delta 8), pack-reused 0 (from 0)
+Unpacking objects: 100% (11/11), 6.34 KiB | 590.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   f23a1f3..1126cd1  main       -> origin/main
+Updating f23a1f3..1126cd1
+Fast-forward
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cd-PolyNo_1774543378282.txt | 299 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cd-PolyNo_1774543855799.txt |  35 +++++++
+ bot/arb_monitor/core/arb_reporter.py                                                             |  26 +++--
+ scripts/seed-arb-vault-v2-report.ts                                                              |  11 ++-
+ 4 files changed, 357 insertions(+), 14 deletions(-)
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cd-PolyNo_1774543378282.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cd-PolyNo_1774543855799.txt
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# npx tsx scripts/seed-arb-vault-v2-report.ts
+[dotenv@17.2.1] injecting env (37) from .env -- tip: 📡 auto-backup env with Radar: https://dotenvx.com/radar
+
+🌱 pARB Vault V2 — Seed Report
+   Vault:      0x1182054b82f96c110698eAe6Af73FdA013599F9d
+   Signer:     0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+   Chain:      Base (8453)
+   RPC:        https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+
+📊 Current vault state:
+   officialPPS:               1.000000 USDC/share
+   lastReportNonce:           0
+   lastReportedBackingAssets: 0.000000 USDC
+   totalPendingDepositAssets: 11.000000 USDC
+   totalPendingRedeemShares:  0.000000 shares
+   reportSigner:              0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+
+📝 Seed report params:
+   nonce:          1
+   reportedAssets: 0.000000 USDC
+
+🔐 Signing report data…
+   structHash: 0x55212f3f7cd0aea3c991320115bf35850c8d708a38b1627c567016c083fe723b
+   signature:  0x6a804630ecce717e0e…
+
+🔍 Dry-run (static call)…
+
+❌ Seed failed: Static call failed — DO NOT send tx. Error: missing revert data (action="call", data=null, reason=null, transaction={ "data": "0xf4d9d28800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000069c567710000000000000000000000000000000000000000000000000000000069c5758100000000000000000000000000000000000000000000000000000000000000010000000000000000000000001182054b82f96c110698eae6af73fda013599f9d0000000000000000000000000000000000000000000000000000000000002105aba308d20107d6473efadab2aa6492f2741378b5556b085dbcbf54234e8babfd00000000000000000000000000000000000000000000000000000000000001400000000000000000000000000000000000000000000000000000000000000064000000000000000000000000000000000000000000000000000000000000006400000000000000000000000000000000000000000000000000000000000000416a804630ecce717e0ee3aeac46d5204ebb648c08453e460329fe671244d898964ede589ac8167c5d61ca335e129bb488023beea342a77db980401ab5e94bdc391c00000000000000000000000000000000000000000000000000000000000000", "from": "0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0", "to": "0x1182054b82f96c110698eAe6Af73FdA013599F9d" }, invocation=null, revert=null, code=CALL_EXCEPTION, version=6.16.0)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

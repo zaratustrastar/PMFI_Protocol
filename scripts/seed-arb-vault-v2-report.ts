@@ -196,26 +196,25 @@ async function main() {
   console.log(`   structHash: ${structHash}`);
   console.log(`   signature:  ${signature.slice(0, 20)}…`);
 
-  // ── Dry-run: static call to verify sig before sending tx ─────────────
-  console.log(`\n🔍 Dry-run (static call)…`);
+  // NOTE: report() has nonReentrant modifier — staticCall always fails because
+  // the modifier writes storage. Use estimateGas (full simulation) instead.
   const MAX_DEPOSITS = 100n;
   const MAX_REDEEMS  = 100n;
 
+  console.log(`\n🔍 Dry-run (estimateGas simulation)…`);
+  let gasEstimate: bigint;
   try {
-    await vault.report.staticCall(data, signature, MAX_DEPOSITS, MAX_REDEEMS);
-    console.log(`   ✅ Static call passed — signature valid`);
+    gasEstimate = await vault.report.estimateGas(data, signature, MAX_DEPOSITS, MAX_REDEEMS);
+    console.log(`   ✅ Gas estimation passed — tx should succeed`);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`Static call failed — DO NOT send tx. Error: ${msg}`);
+    throw new Error(`Gas estimation failed — DO NOT send tx. Error: ${msg}`);
   }
 
-  // ── Estimate gas ─────────────────────────────────────────────────────
-  const gasEstimate = await vault.report.estimateGas(data, signature, MAX_DEPOSITS, MAX_REDEEMS);
-  const gasLimit    = (gasEstimate * 130n) / 100n; // 30% buffer
-  const feeData     = await provider.getFeeData();
-  const gasPrice    = feeData.gasPrice ?? 1_000_000n;
-
-  const gasCostEth  = Number(gasLimit * gasPrice) / 1e18;
+  const gasLimit   = (gasEstimate * 130n) / 100n; // 30% buffer
+  const feeData    = await provider.getFeeData();
+  const gasPrice   = feeData.gasPrice ?? 1_000_000n;
+  const gasCostEth = Number(gasLimit * gasPrice) / 1e18;
   console.log(`\n⛽ Gas estimate: ${gasEstimate} (limit: ${gasLimit}, ~${gasCostEth.toFixed(6)} ETH)`);
 
   // ── Send transaction ──────────────────────────────────────────────────
