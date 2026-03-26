@@ -8,7 +8,6 @@
 
 // Read from global config (set by HTML template) or use default
 const VAULT_ADDRESS         = window.PSNIPER_CONFIG?.VAULT_ADDRESS || "0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1";
-const ARB_VAULT_ADDRESS     = window.PSNIPER_CONFIG?.ARB_VAULT_ADDRESS || "";
 const ARB_VAULT_V2_ADDRESS  = window.PSNIPER_CONFIG?.ARB_VAULT_V2_ADDRESS || "";
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
@@ -27,16 +26,14 @@ const PRICE_REFRESH_INTERVAL = 10000; // 10 seconds for live price updates
 
 let VAULT_ABI = null;
 let USDC_ABI = null;
-let ARB_VAULT_ABI    = null;
 let ARB_VAULT_V2_ABI = null;
 
 async function loadABIs() {
     try {
         const cacheBuster = Date.now();
-        const [vaultResponse, usdcResponse, arbVaultResponse, arbVaultV2Response] = await Promise.all([
+        const [vaultResponse, usdcResponse, arbVaultV2Response] = await Promise.all([
             fetch(`abis/vault.json?v=${cacheBuster}`),
             fetch(`abis/usdc.json?v=${cacheBuster}`),
-            fetch(`abis/arb-vault.json?v=${cacheBuster}`),
             fetch(`abis/arb-vault-v2.json?v=${cacheBuster}`)
         ]);
         
@@ -46,7 +43,6 @@ async function loadABIs() {
         
         VAULT_ABI = await vaultResponse.json();
         USDC_ABI = await usdcResponse.json();
-        if (arbVaultResponse.ok)   ARB_VAULT_ABI    = await arbVaultResponse.json();
         if (arbVaultV2Response.ok) ARB_VAULT_V2_ABI = await arbVaultV2Response.json();
         
         console.log("ABIs loaded, VAULT_ABI is array:", Array.isArray(VAULT_ABI));
@@ -252,8 +248,7 @@ let provider = null;
 let signer = null;
 let userAddress = null;
 let vaultContract = null;
-let arbVaultContract   = null;  // V1 (legacy)
-let arbVaultV2Contract = null;  // V2 (current)
+let arbVaultV2Contract = null;
 let usdcContract = null;
 let abisLoaded = false;
 let refreshTimer = null;
@@ -703,9 +698,6 @@ async function connectWallet() {
 
         vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
         usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
-        if (ARB_VAULT_ADDRESS && ARB_VAULT_ABI) {
-            arbVaultContract = new ethers.Contract(ARB_VAULT_ADDRESS, ARB_VAULT_ABI, signer);
-        }
         if (ARB_VAULT_V2_ADDRESS && ARB_VAULT_V2_ABI) {
             arbVaultV2Contract = new ethers.Contract(ARB_VAULT_V2_ADDRESS, ARB_VAULT_V2_ABI, signer);
         }
@@ -717,7 +709,7 @@ async function connectWallet() {
 
         openDepositBtn.disabled = false;
         const _arbDepBtn = document.getElementById('openArbDepositBtn');
-        if (_arbDepBtn && ARB_VAULT_ADDRESS) _arbDepBtn.disabled = false;
+        if (_arbDepBtn && ARB_VAULT_V2_ADDRESS) _arbDepBtn.disabled = false;
 
         await refreshAll();
         startAutoRefresh();
@@ -741,8 +733,8 @@ function disconnectWallet() {
     isConnected = false;
     userAddress = null;
     signer = null;
-    arbVaultContract = null;
-    
+    arbVaultV2Contract = null;
+
     connectBtn.textContent = "Connect Wallet";
     connectBtn.classList.remove("connected");
     
@@ -1054,7 +1046,7 @@ function _arbV2Contract(withSigner = false) {
 }
 
 function _arbActiveAddress() {
-    return ARB_VAULT_V2_ADDRESS || ARB_VAULT_ADDRESS;
+    return ARB_VAULT_V2_ADDRESS;
 }
 
 async function refreshArbUserStats() {
@@ -1089,23 +1081,6 @@ async function refreshArbUserStats() {
             console.warn('[pARB V2] refreshArbUserStats error:', e);
         }
         return;
-    }
-
-    // V1 fallback
-    if (!ARB_VAULT_ADDRESS || !ARB_VAULT_ABI) return;
-    try {
-        const contract = arbVaultContract || new ethers.Contract(ARB_VAULT_ADDRESS, ARB_VAULT_ABI, new ethers.JsonRpcProvider(BASE_MAINNET_RPC));
-        const shares = await contract.balanceOf(userAddress);
-        const arbStats    = document.getElementById('arbUserStats');
-        const arbSharesBal = document.getElementById('arbSharesBalance');
-        const arbPosVal   = document.getElementById('arbPositionValue');
-        if (!arbStats) return;
-        if (shares === 0n) { arbStats.classList.add('hidden'); return; }
-        arbStats.classList.remove('hidden');
-        if (arbSharesBal) arbSharesBal.textContent = (Number(shares) / 1e18).toFixed(4);
-        if (arbPosVal) arbPosVal.textContent = '—';
-    } catch (e) {
-        console.warn('[pARB V1] refreshArbUserStats error:', e);
     }
 }
 
@@ -1176,39 +1151,6 @@ async function handleArbDeposit() {
         }
         return;
     }
-
-    // ── V1 fallback (legacy) ─────────────────────────────────────────────────
-    try {
-        if (btn) btn.disabled = true;
-        hideStatus(statusEl);
-        const signerUsdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
-        const allowance = await signerUsdc.allowance(userAddress, ARB_VAULT_ADDRESS);
-        if (allowance < amount) {
-            showStatus(statusEl, 'Approving USDC...', 'info');
-            await (await signerUsdc.approve(ARB_VAULT_ADDRESS, amount)).wait();
-        }
-        showStatus(statusEl, 'Getting signed NAV...', 'info');
-        const nav = await (await fetch(`${PRICE_API_URL}/api/arb-vault/nav`)).json();
-        const to6 = v => BigInt(Math.round((v || 0) * 1_000_000));
-        const navData = {
-            totalAssets: to6(nav.total_assets_usdc), polyCash: to6(nav.poly_cash),
-            kalshiCash: to6(nav.kalshi_cash), openPositionsValue: to6(nav.open_positions_value),
-            settledPnl: to6(nav.settled_pnl), timestamp: BigInt(nav.timestamp),
-            deadline: BigInt(nav.deadline), roundId: BigInt(nav.round_id),
-        };
-        showStatus(statusEl, 'Depositing...', 'info');
-        const signerArb = new ethers.Contract(ARB_VAULT_ADDRESS, ARB_VAULT_ABI, signer);
-        await (await signerArb.deposit(amount, navData, nav.signature)).wait();
-        showStatus(statusEl, `Deposited ${amountStr} USDC to pARBITRAGE!`, 'success');
-        if (amountEl) amountEl.value = '';
-        await refreshArbUserStats();
-        setTimeout(() => { document.getElementById('arbDepositModal')?.classList.add('hidden'); hideStatus(statusEl); }, 3000);
-    } catch (e) {
-        console.error('[pARB V1] deposit error:', e);
-        showStatus(statusEl, e.reason || e.message, 'error');
-    } finally {
-        if (btn) btn.disabled = false;
-    }
 }
 
 // ── V2 Redeem: requestRedeem → (wait for report + liquidity) → claimRedeem ──
@@ -1259,33 +1201,6 @@ async function handleArbWithdrawRequest() {
             if (btn) btn.disabled = false;
         }
         return;
-    }
-
-    // ── V1 fallback ──────────────────────────────────────────────────────────
-    try {
-        if (btn) btn.disabled = true;
-        hideStatus(statusEl);
-        showStatus(statusEl, 'Getting signed NAV...', 'info');
-        const nav = await (await fetch(`${PRICE_API_URL}/api/arb-vault/nav`)).json();
-        const to6 = v => BigInt(Math.round((v || 0) * 1_000_000));
-        const navData = {
-            totalAssets: to6(nav.total_assets_usdc), polyCash: to6(nav.poly_cash),
-            kalshiCash: to6(nav.kalshi_cash), openPositionsValue: to6(nav.open_positions_value),
-            settledPnl: to6(nav.settled_pnl), timestamp: BigInt(nav.timestamp),
-            deadline: BigInt(nav.deadline), roundId: BigInt(nav.round_id),
-        };
-        showStatus(statusEl, 'Requesting withdrawal...', 'info');
-        const signerArb = new ethers.Contract(ARB_VAULT_ADDRESS, ARB_VAULT_ABI, signer);
-        await (await signerArb.requestWithdraw(shareAmount, navData, nav.signature)).wait();
-        showStatus(statusEl, `Withdrawal requested for ${amountStr} pARB shares.`, 'success');
-        if (amountEl) amountEl.value = '';
-        await refreshArbUserStats();
-        setTimeout(() => { document.getElementById('arbWithdrawModal')?.classList.add('hidden'); hideStatus(statusEl); }, 4000);
-    } catch (e) {
-        console.error('[pARB V1] withdraw error:', e);
-        showStatus(statusEl, e.reason || e.message, 'error');
-    } finally {
-        if (btn) btn.disabled = false;
     }
 }
 
@@ -1436,8 +1351,8 @@ function initArbModals() {
         const amountEl = document.getElementById('arbWithdrawAmount');
         if (!amountEl || !userAddress) return;
         try {
-            const addr = ARB_VAULT_V2_ADDRESS || ARB_VAULT_ADDRESS;
-            const abi  = ARB_VAULT_V2_ABI    || ARB_VAULT_ABI;
+            const addr = ARB_VAULT_V2_ADDRESS;
+            const abi  = ARB_VAULT_V2_ABI;
             if (!addr || !abi) return;
             const contract = new ethers.Contract(addr, abi, new ethers.JsonRpcProvider(BASE_MAINNET_RPC));
             const shares = await contract.balanceOf(userAddress);
