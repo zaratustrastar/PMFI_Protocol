@@ -785,7 +785,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
     function getVaultState() external view returns (
         uint256 _officialPPS,
         uint256 _totalSupply,
-        uint256 _idleBalance,
+        uint256 _idleBal,
         uint256 _lastReportedBacking,
         uint256 _lossCarryforward,
         uint256 _pendingDepositAssets,
