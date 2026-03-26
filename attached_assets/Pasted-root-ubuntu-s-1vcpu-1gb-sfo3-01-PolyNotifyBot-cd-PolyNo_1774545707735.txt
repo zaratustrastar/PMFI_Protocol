@@ -1,0 +1,46 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && git pull && npx tsx scripts/seed-arb-vault-v2-report.ts
+remote: Enumerating objects: 10, done.
+remote: Counting objects: 100% (10/10), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 6 (delta 4), reused 6 (delta 4), pack-reused 0 (from 0)
+Unpacking objects: 100% (6/6), 2.33 KiB | 297.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   d54263f..7ac64e1  main       -> origin/main
+Updating d54263f..7ac64e1
+Fast-forward
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-cd-PolyNotifyBot-git-pu_1774545152241.txt | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ scripts/seed-arb-vault-v2-report.ts                                                              | 24 +++++++-----------------
+ 2 files changed, 52 insertions(+), 17 deletions(-)
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-cd-PolyNotifyBot-git-pu_1774545152241.txt
+[dotenv@17.2.1] injecting env (37) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+🌱 pARB Vault V2 — Seed Report
+   Vault:      0x1182054b82f96c110698eAe6Af73FdA013599F9d
+   Signer:     0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+   Chain:      Base (8453)
+   RPC:        https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+
+📊 Current vault state:
+   officialPPS:               1.000000 USDC/share
+   lastReportNonce:           0
+   lastReportedBackingAssets: 0.000000 USDC
+   totalPendingDepositAssets: 11.000000 USDC
+   totalPendingRedeemShares:  0.000000 shares
+   reportSigner:              0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+
+📝 Seed report params:
+   nonce:          1
+   reportedAssets: 0.000000 USDC
+
+🔐 Signing report data…
+   structHash: 0x6ca7e6ab73368447d1a4c58787800350b85a6345f35e1f1bfe6ae4dbca55c6b9
+   signature:  0x7de310de300352ddc9…
+
+⛽ Using fixed gas limit: 600000
+
+📤 Sending report() transaction…
+   tx hash: 0xbd73fe91784b4989315b2b3d8c74611c5d7be242f749b3cd99c7153f2be67f04
+   Waiting for confirmation…
+
+❌ Seed failed: transaction execution reverted (action="sendTransaction", data=null, reason=null, invocation=null, revert=null, transaction={ "data": "", "from": "0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0", "to": "0x1182054b82f96c110698eAe6Af73FdA013599F9d" }, receipt={ "_type": "TransactionReceipt", "blobGasPrice": null, "blobGasUsed": "30340", "blockHash": "0xce3ab0a47041fee8b761d0e32a3fc6a78de15aff65e865eb269536eb32f186e0", "blockNumber": 43878105, "contractAddress": null, "cumulativeGasUsed": "19183280", "from": "0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0", "gasPrice": "6000000", "gasUsed": "29630", "hash": "0xbd73fe91784b4989315b2b3d8c74611c5d7be242f749b3cd99c7153f2be67f04", "index": 92, "logs": [  ], "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "root": null, "status": 0, "to": "0x1182054b82f96c110698eAe6Af73FdA013599F9d" }, code=CALL_EXCEPTION, version=6.16.0)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

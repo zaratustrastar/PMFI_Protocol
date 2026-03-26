@@ -213,9 +213,45 @@ async function main() {
   console.log(`   tx hash: ${tx.hash}`);
   console.log(`   Waiting for confirmation…`);
 
-  const receipt = await tx.wait(1);
+  // Wait for the tx — ethers v6 throws on revert; Alchemy strips revert data
+  // from receipts, so we replay via eth_call at the mined block to get the reason.
+  let receipt: Awaited<ReturnType<typeof tx.wait>>;
+  try {
+    receipt = await tx.wait(1);
+  } catch (waitErr: unknown) {
+    // Try to get the block number from the error's embedded receipt
+    const errAny = waitErr as Record<string, unknown>;
+    const blockNum: number | undefined =
+      (errAny.receipt as Record<string, unknown>)?.blockNumber as number | undefined;
+
+    console.error(`\n💥 Tx reverted on-chain: ${tx.hash}`);
+    if (blockNum) {
+      console.log(`   Replaying at block ${blockNum} to decode revert reason…`);
+      try {
+        await provider.call(
+          {
+            to:   VAULT_ADDRESS,
+            from: signerWallet.address,
+            data: tx.data,
+          },
+          blockNum,
+        );
+        console.log(`   (replay did not revert — revert may be block-sensitive)`);
+      } catch (replayErr: unknown) {
+        const re = replayErr as Record<string, unknown>;
+        const reason = re.reason ?? re.shortMessage ?? re.message ?? String(replayErr);
+        const data   = re.data ?? "(no data)";
+        console.error(`   Revert reason: ${reason}`);
+        console.error(`   Revert data:   ${data}`);
+      }
+    } else {
+      console.log(`   (no block number in error — check tx on Basescan: https://basescan.org/tx/${tx.hash})`);
+    }
+    throw new Error(`Transaction reverted — see revert reason above`);
+  }
+
   if (!receipt || receipt.status === 0) {
-    throw new Error(`Transaction reverted: ${tx.hash}`);
+    throw new Error(`Transaction status=0 (unexpected path): ${tx.hash}`);
   }
 
   console.log(`\n✅ Seed report confirmed!`);
