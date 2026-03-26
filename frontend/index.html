@@ -1222,7 +1222,7 @@
         // Config injected from server .env via Jinja
         window.PSNIPER_CONFIG = {
             VAULT_ADDRESS: '{{ vault_address | default("0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1") }}',
-            ARB_VAULT_ADDRESS: '{{ arb_vault_address | default("") }}'
+            ARB_VAULT_V2_ADDRESS: '{{ arb_vault_v2_address | default("") }}'
         };
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>

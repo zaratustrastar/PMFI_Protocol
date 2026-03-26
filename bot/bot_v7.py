@@ -926,16 +926,16 @@ flask_app = Flask(__name__, template_folder=str(FRONTEND_DIR))
 CORS(flask_app)
 
 VAULT_ADDRESS_CONFIG = os.getenv('VAULT_V7_ADDRESS', '0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1')
-ARB_VAULT_ADDRESS_CONFIG = os.getenv('ARB_VAULT_V1_ADDRESS', '')
+ARB_VAULT_V2_ADDRESS_CONFIG = os.getenv('ARB_VAULT_V2_ADDRESS', '')
 
 @flask_app.route('/')
 def serve_index():
     user_agent = flask_request.headers.get('User-Agent', '').lower()
     fc_frame = flask_request.headers.get('Sec-Fetch-Dest', '')
-    
+
     if 'farcaster' in user_agent or 'warpcast' in user_agent or fc_frame == 'iframe':
-        return render_template('mini.html', vault_address=VAULT_ADDRESS_CONFIG, arb_vault_address=ARB_VAULT_ADDRESS_CONFIG or '')
-    return render_template('index.html', vault_address=VAULT_ADDRESS_CONFIG, arb_vault_address=ARB_VAULT_ADDRESS_CONFIG or '')
+        return render_template('mini.html', vault_address=VAULT_ADDRESS_CONFIG, arb_vault_v2_address=ARB_VAULT_V2_ADDRESS_CONFIG)
+    return render_template('index.html', vault_address=VAULT_ADDRESS_CONFIG, arb_vault_v2_address=ARB_VAULT_V2_ADDRESS_CONFIG)
 
 @flask_app.route('/mini')
 def serve_mini():
