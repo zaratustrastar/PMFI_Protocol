@@ -1,0 +1,299 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+# See the deposit queue in the DB
+psql $DATABASE_URL -c "SELECT * FROM arb_executions ORDER BY created_at DESC LIMIT 10;"
+
+# Check if the reporter has run (it processes deposits)
+sudo journalctl -u psniper-bot -n 100 | grep -i "arb\|report\|deposit"
+psql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "root" does not exist
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_charlotte_hornets: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=megaquake-by-march-31-2026_megaquake_by_march_31 venue2=opinion | score=5.5 AR=0.97× net_edge=0.80% conf=0.57 | days=4.30d size=$10.00
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair megaquake-by-march-31-2026_megaquake_by_march_31 (venue2=opinion)
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=3338785519635623... venue2=opinion opinion=3356
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 3356: errno=500 msg=
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for megaquake-by-march-31-2026_megaquake_by_march_31: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-playoffs-teams_toronto_raptors venue2=opinion | score=4.9 AR=0.91× net_edge=3.10% conf=0.54 | days=17.18d size=$10.00
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-playoffs-teams_toronto_raptors (venue2=opinion)
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=8964377736011796... venue2=opinion opinion=371
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 371: errno=500 msg=
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_toronto_raptors: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=english-premier-league-winner-2026_man_united venue2=opinion | score=2.1 AR=0.02× net_edge=0.40% conf=0.34 | days=61.30d size=$256.46
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair english-premier-league-winner-2026_man_united (venue2=opinion)
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4296514625992960... venue2=opinion opinion=80
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 4296514625992960...
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 80: errno=500 msg=
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ poly_orderbook_missing: could not fetch live Polymarket ask
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_man_united: poly_orderbook_missing: could not fetch live Polymarket ask unwound=False
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=trump-visit-china_date_apr_30_2026 venue2=opinion | score=1.9 AR=0.01× net_edge=0.10% conf=0.45 | days=34.30d size=$406.57
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair trump-visit-china_date_apr_30_2026 (venue2=opinion)
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4560139455449709... venue2=opinion opinion=142
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 4560139455449709...
+Mar 26 16:41:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 142: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ poly_orderbook_missing: could not fetch live Polymarket ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-visit-china_date_apr_30_2026: poly_orderbook_missing: could not fetch live Polymarket ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=btc-max-2026_value_above_120k venue2=opinion | score=0.9 AR=0.11× net_edge=8.40% conf=0.86 | days=280.51d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair btc-max-2026_value_above_120k (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=6136894312825528... venue2=opinion opinion=340
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 340: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_above_120k: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=hottest-years-2026_number_1 venue2=opinion | score=0.7 AR=0.08× net_edge=6.10% conf=0.88 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair hottest-years-2026_number_1 (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2355642931742902... venue2=opinion opinion=378
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 378: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for hottest-years-2026_number_1: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=stanley-cup-2026_colorado_avalanche venue2=opinion | score=0.6 AR=0.08× net_edge=2.10% conf=0.72 | days=95.10d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair stanley-cup-2026_colorado_avalanche (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=7939700343446871... venue2=opinion opinion=345
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 345: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_colorado_avalanche: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fomc-2026-06-17_cut_50bps venue2=opinion | score=0.5 AR=0.07× net_edge=1.60% conf=0.75 | days=82.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair fomc-2026-06-17_cut_50bps (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=6519323466662829... venue2=opinion opinion=319
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 319: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for fomc-2026-06-17_cut_50bps: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=acquisitions-before-2027_nebius_group venue2=opinion | score=0.5 AR=0.02× net_edge=1.20% conf=0.22 | days=279.30d size=$144.47
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair acquisitions-before-2027_nebius_group (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1218228621163792... venue2=opinion opinion=337
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 1218228621163792...
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 337: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ poly_orderbook_missing: could not fetch live Polymarket ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for acquisitions-before-2027_nebius_group: poly_orderbook_missing: could not fetch live Polymarket ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=trump-admin-departures-2026_pete_hegseth venue2=kalshi | score=0.5 AR=0.07× net_edge=5.40% conf=0.70 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair trump-admin-departures-2026_pete_hegseth (venue2=kalshi)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=5487333039536143... venue2=kalshi kalshi=KXTRUMPADMINLEAVE-26DEC31
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-admin-departures-2026_pete_hegseth: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_sas venue2=opinion | score=0.4 AR=0.04× net_edge=1.10% conf=0.84 | days=96.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-champion-2026_sas (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4950029985683103... venue2=opinion opinion=103
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 103: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_sas: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_edmundo_gonzalez venue2=kalshi | score=0.4 AR=0.04× net_edge=2.90% conf=0.93 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair venezuela-leader-2026_edmundo_gonzalez (venue2=kalshi)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1112060236529252... venue2=kalshi kalshi=KXVENEZUELALEADER-26DEC31
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_edmundo_gonzalez: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fed-rate-cuts-2026_cuts_6 venue2=opinion | score=0.3 AR=0.04× net_edge=3.20% conf=0.81 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair fed-rate-cuts-2026_cuts_6 (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1240360292003926... venue2=opinion opinion=78
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 78: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_hou venue2=opinion | score=0.3 AR=0.03× net_edge=0.90% conf=0.96 | days=96.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-champion-2026_hou (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4950029985683103... venue2=opinion opinion=103
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 103: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_hou: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=israel-pm-2045_naftali_bennett venue2=kalshi | score=0.3 AR=0.06× net_edge=4.40% conf=0.54 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair israel-pm-2045_naftali_bennett (venue2=kalshi)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2000673276567485... venue2=kalshi kalshi=KXNEXTISRAELPM-45JAN01
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for israel-pm-2045_naftali_bennett: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_nicolas_maduro venue2=kalshi | score=0.3 AR=0.03× net_edge=2.50% conf=0.91 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair venezuela-leader-2026_nicolas_maduro (venue2=kalshi)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# psql $DATABASE_URL -c "SELECT * FROM arb_executions ORDER BY created_at DESC LIMIT 5;"
+sudo journalctl -u psniper-bot -n 200 | grep -i "oddpool\|arb\|trade\|execute"
+psql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "root" does not exist
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair stanley-cup-2026_colorado_avalanche (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=7939700343446871... venue2=opinion opinion=345
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 345: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_colorado_avalanche: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fomc-2026-06-17_cut_50bps venue2=opinion | score=0.5 AR=0.07× net_edge=1.60% conf=0.75 | days=82.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair fomc-2026-06-17_cut_50bps (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=6519323466662829... venue2=opinion opinion=319
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 319: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for fomc-2026-06-17_cut_50bps: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=acquisitions-before-2027_nebius_group venue2=opinion | score=0.5 AR=0.02× net_edge=1.20% conf=0.22 | days=279.30d size=$144.47
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair acquisitions-before-2027_nebius_group (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1218228621163792... venue2=opinion opinion=337
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 1218228621163792...
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 337: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ poly_orderbook_missing: could not fetch live Polymarket ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for acquisitions-before-2027_nebius_group: poly_orderbook_missing: could not fetch live Polymarket ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=trump-admin-departures-2026_pete_hegseth venue2=kalshi | score=0.5 AR=0.07× net_edge=5.40% conf=0.70 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair trump-admin-departures-2026_pete_hegseth (venue2=kalshi)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=5487333039536143... venue2=kalshi kalshi=KXTRUMPADMINLEAVE-26DEC31
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXTRUMPADMINLEAVE-26DEC31
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-admin-departures-2026_pete_hegseth: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_sas venue2=opinion | score=0.4 AR=0.04× net_edge=1.10% conf=0.84 | days=96.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-champion-2026_sas (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4950029985683103... venue2=opinion opinion=103
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 103: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_sas: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_edmundo_gonzalez venue2=kalshi | score=0.4 AR=0.04× net_edge=2.90% conf=0.93 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair venezuela-leader-2026_edmundo_gonzalez (venue2=kalshi)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1112060236529252... venue2=kalshi kalshi=KXVENEZUELALEADER-26DEC31
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXVENEZUELALEADER-26DEC31
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_edmundo_gonzalez: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fed-rate-cuts-2026_cuts_6 venue2=opinion | score=0.3 AR=0.04× net_edge=3.20% conf=0.81 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair fed-rate-cuts-2026_cuts_6 (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1240360292003926... venue2=opinion opinion=78
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 78: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_hou venue2=opinion | score=0.3 AR=0.03× net_edge=0.90% conf=0.96 | days=96.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-champion-2026_hou (venue2=opinion)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4950029985683103... venue2=opinion opinion=103
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 103: errno=500 msg=
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_hou: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=israel-pm-2045_naftali_bennett venue2=kalshi | score=0.3 AR=0.06× net_edge=4.40% conf=0.54 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair israel-pm-2045_naftali_bennett (venue2=kalshi)
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2000673276567485... venue2=kalshi kalshi=KXNEXTISRAELPM-45JAN01
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXNEXTISRAELPM-45JAN01
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for israel-pm-2045_naftali_bennett: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_nicolas_maduro venue2=kalshi | score=0.3 AR=0.03× net_edge=2.50% conf=0.91 | days=279.30d size=$10.00
+Mar 26 16:41:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair venezuela-leader-2026_nicolas_maduro (venue2=kalshi)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1112060236529252... venue2=kalshi kalshi=KXVENEZUELALEADER-26DEC31
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXVENEZUELALEADER-26DEC31
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_nicolas_maduro: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=trump-putin-next-meeting-location-2029_russia venue2=kalshi | score=0.3 AR=0.10× net_edge=2.50% conf=0.30 | days=95.30d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair trump-putin-next-meeting-location-2029_russia (venue2=kalshi)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4734090743574597... venue2=kalshi kalshi=KXPUTINDJTLOCATION-29
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXPUTINDJTLOCATION-29
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-putin-next-meeting-location-2029_russia: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=seoul-mayor-election-winner-2026_na_kyung_won venue2=opinion | score=0.3 AR=0.03× net_edge=0.60% conf=0.90 | days=68.30d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair seoul-mayor-election-winner-2026_na_kyung_won (venue2=opinion)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2272214032589525... venue2=opinion opinion=131
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 131: errno=500 msg=
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for seoul-mayor-election-winner-2026_na_kyung_won: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_diosdado_cabello venue2=kalshi | score=0.3 AR=0.03× net_edge=2.50% conf=0.84 | days=279.30d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair venezuela-leader-2026_diosdado_cabello (venue2=kalshi)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1112060236529252... venue2=kalshi kalshi=KXVENEZUELALEADER-26DEC31
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXVENEZUELALEADER-26DEC31
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_diosdado_cabello: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fed-rate-cuts-2026_cuts_5 venue2=opinion | score=0.3 AR=0.03× net_edge=2.20% conf=0.94 | days=279.30d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair fed-rate-cuts-2026_cuts_5 (venue2=opinion)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1240360292003926... venue2=opinion opinion=78
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 78: errno=500 msg=
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_5: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=ny17-dem-primary-winner-2026_cait_conley venue2=kalshi | score=0.3 AR=0.10× net_edge=2.40% conf=0.26 | days=88.30d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair ny17-dem-primary-winner-2026_cait_conley (venue2=kalshi)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2337542317949850... venue2=kalshi kalshi=KXNY17D-26
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXNY17D-26
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for ny17-dem-primary-winner-2026_cait_conley: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=california-governor-2026_chad_bianco venue2=kalshi | score=0.3 AR=0.03× net_edge=1.80% conf=0.87 | days=221.10d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair california-governor-2026_chad_bianco (venue2=kalshi)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=9707988095511727... venue2=kalshi kalshi=KXGOVCA-26
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXGOVCA-26
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for california-governor-2026_chad_bianco: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_cle venue2=opinion | score=0.2 AR=0.02× net_edge=0.60% conf=0.98 | days=96.30d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-champion-2026_cle (venue2=opinion)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4950029985683103... venue2=opinion opinion=103
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 103: errno=500 msg=
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_cle: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fed-rate-cuts-2026_cuts_6 venue2=opinion | score=0.2 AR=0.03× net_edge=2.10% conf=0.81 | days=279.30d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair fed-rate-cuts-2026_cuts_6 (venue2=opinion)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1240360292003926... venue2=opinion opinion=78
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 78: errno=500 msg=
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=seoul-mayor-election-winner-2026_oh_se_hoon venue2=opinion | score=0.2 AR=0.03× net_edge=0.50% conf=0.82 | days=68.30d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair seoul-mayor-election-winner-2026_oh_se_hoon (venue2=opinion)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2272214032589525... venue2=opinion opinion=131
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 131: errno=500 msg=
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for seoul-mayor-election-winner-2026_oh_se_hoon: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=brazil-presidential-election-2026_renan_santos venue2=kalshi | score=0.2 AR=0.02× net_edge=1.20% conf=0.94 | days=191.30d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair brazil-presidential-election-2026_renan_santos (venue2=kalshi)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=5263461606852338... venue2=kalshi kalshi=KXBRPRES-26
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXBRPRES-26
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for brazil-presidential-election-2026_renan_santos: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=jerome-powell-out-fed-chair_may_14 venue2=opinion | score=0.2 AR=0.02× net_edge=0.30% conf=0.88 | days=48.30d size=$10.00
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair jerome-powell-out-fed-chair_may_14 (venue2=opinion)
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1569944067424179... venue2=opinion opinion=300
+Mar 26 16:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 300: errno=500 msg=
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for jerome-powell-out-fed-chair_may_14: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=israel-pm-2045_yariv_levin venue2=kalshi | score=0.2 AR=0.06× net_edge=4.80% conf=0.30 | days=279.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair israel-pm-2045_yariv_levin (venue2=kalshi)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2000673276567485... venue2=kalshi kalshi=KXNEXTISRAELPM-45JAN01
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXNEXTISRAELPM-45JAN01
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for israel-pm-2045_yariv_levin: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=openai-ipo-closing-market-cap_ipo_1t_125t venue2=opinion | score=0.2 AR=0.02× net_edge=0.60% conf=0.81 | days=95.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair openai-ipo-closing-market-cap_ipo_1t_125t (venue2=opinion)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=6122912536415539... venue2=opinion opinion=152
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 152: errno=500 msg=
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_1t_125t: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=trump-out-president-before-2027_trump_out_before_2027 venue2=opinion | score=0.2 AR=0.03× net_edge=2.10% conf=0.67 | days=279.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair trump-out-president-before-2027_trump_out_before_2027 (venue2=opinion)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=5925251573565267... venue2=opinion opinion=3062
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 3062: errno=500 msg=
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-out-president-before-2027_trump_out_before_2027: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=discord-ipo-closing-market-cap_ipo_under_15b venue2=opinion | score=0.2 AR=0.08× net_edge=2.10% conf=0.22 | days=95.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair discord-ipo-closing-market-cap_ipo_under_15b (venue2=opinion)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1116156949225894... venue2=opinion opinion=190
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 190: errno=500 msg=
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for discord-ipo-closing-market-cap_ipo_under_15b: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=lol-lck-2026-winner_dplus venue2=opinion | score=0.2 AR=0.04× net_edge=2.70% conf=0.51 | days=279.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair lol-lck-2026-winner_dplus (venue2=opinion)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2629647499119112... venue2=opinion opinion=213
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 213: errno=500 msg=
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_dplus: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=ecb-interest-rates-april-2026_cut_50bps venue2=opinion | score=0.2 AR=0.02× net_edge=0.20% conf=0.81 | days=34.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair ecb-interest-rates-april-2026_cut_50bps (venue2=opinion)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1151393742329067... venue2=opinion opinion=418
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 418: errno=500 msg=
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for ecb-interest-rates-april-2026_cut_50bps: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=israel-pm-2045_yair_lapid venue2=kalshi | score=0.2 AR=0.07× net_edge=5.20% conf=0.25 | days=279.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair israel-pm-2045_yair_lapid (venue2=kalshi)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2000673276567485... venue2=kalshi kalshi=KXNEXTISRAELPM-45JAN01
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXNEXTISRAELPM-45JAN01
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for israel-pm-2045_yair_lapid: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fed-rate-cuts-2026_cuts_5 venue2=opinion | score=0.2 AR=0.02× net_edge=1.40% conf=0.94 | days=279.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair fed-rate-cuts-2026_cuts_5 (venue2=opinion)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1240360292003926... venue2=opinion opinion=78
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 78: errno=500 msg=
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_5: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_maria_corina_machado venue2=kalshi | score=0.2 AR=0.02× net_edge=1.40% conf=0.94 | days=279.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair venezuela-leader-2026_maria_corina_machado (venue2=kalshi)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1112060236529252... venue2=kalshi kalshi=KXVENEZUELALEADER-26DEC31
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXVENEZUELALEADER-26DEC31
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_maria_corina_machado: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=lol-lck-2026-winner_geng_esports venue2=opinion | score=0.2 AR=0.03× net_edge=2.60% conf=0.50 | days=279.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair lol-lck-2026-winner_geng_esports (venue2=opinion)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2629647499119112... venue2=opinion opinion=213
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 213: errno=500 msg=
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_geng_esports: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_gretchen_whitmer venue2=opinion | score=0.2 AR=0.03× net_edge=7.80% conf=0.56 | days=956.10d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair dem-nominee-2028_gretchen_whitmer (venue2=opinion)
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=6059004548934712... venue2=opinion opinion=380
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 380: errno=500 msg=
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gretchen_whitmer: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nhl-james-norris-memorial-trophy-2026_zach_werenski venue2=kalshi | score=0.2 AR=0.02× net_edge=0.60% conf=0.70 | days=95.30d size=$10.00
+Mar 26 16:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nhl-james-norris-memorial-trophy-2026_zach_werenski (venue2=kalshi)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

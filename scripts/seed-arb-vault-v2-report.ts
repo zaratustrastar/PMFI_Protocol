@@ -57,7 +57,7 @@ const VAULT_ABI = [
   "function REPORT_TYPEHASH() view returns (bytes32)",
   "function DOMAIN_SALT() view returns (bytes32)",
   // report()
-  "function report(tuple(uint256 reportedAssets, uint256 timestamp, uint256 deadline, uint256 nonce, address vault, uint256 chainId, bytes32 domainSalt) data, bytes signature) returns (bool)",
+  "function report(tuple(uint256 reportedAssets, uint256 timestamp, uint256 deadline, uint256 nonce, address vault, uint256 chainId, bytes32 domainSalt) data, bytes signature, uint256 maxDeposits, uint256 maxRedeems)",
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -198,8 +198,11 @@ async function main() {
 
   // ── Dry-run: static call to verify sig before sending tx ─────────────
   console.log(`\n🔍 Dry-run (static call)…`);
+  const MAX_DEPOSITS = 100n;
+  const MAX_REDEEMS  = 100n;
+
   try {
-    await vault.report.staticCall(data, signature);
+    await vault.report.staticCall(data, signature, MAX_DEPOSITS, MAX_REDEEMS);
     console.log(`   ✅ Static call passed — signature valid`);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -207,7 +210,7 @@ async function main() {
   }
 
   // ── Estimate gas ─────────────────────────────────────────────────────
-  const gasEstimate = await vault.report.estimateGas(data, signature);
+  const gasEstimate = await vault.report.estimateGas(data, signature, MAX_DEPOSITS, MAX_REDEEMS);
   const gasLimit    = (gasEstimate * 130n) / 100n; // 30% buffer
   const feeData     = await provider.getFeeData();
   const gasPrice    = feeData.gasPrice ?? 1_000_000n;
@@ -217,7 +220,7 @@ async function main() {
 
   // ── Send transaction ──────────────────────────────────────────────────
   console.log(`\n📤 Sending report() transaction…`);
-  const tx = await vault.report(data, signature, { gasLimit });
+  const tx = await vault.report(data, signature, MAX_DEPOSITS, MAX_REDEEMS, { gasLimit });
   console.log(`   tx hash: ${tx.hash}`);
   console.log(`   Waiting for confirmation…`);
 

@@ -38,8 +38,8 @@ BASE_CHAIN_ID = 8453
 BASE_RPC = os.environ.get("BASE_RPC_URL", "https://mainnet.base.org")
 USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 
-# report() signature: report((uint256,uint256,uint256,uint256),bytes,uint256,uint256)
-REPORT_SELECTOR = "report((uint256,uint256,uint256,uint256),bytes,uint256,uint256)"
+# report() signature — all 7 struct fields must match the Solidity ABI exactly
+REPORT_SELECTOR = "report((uint256,uint256,uint256,uint256,address,uint256,bytes32),bytes,uint256,uint256)"
 
 # Conservative haircut applied to vault cash balances (95%) to account for
 # gas costs, bridge fees, and minor API latency errors.
@@ -182,12 +182,12 @@ def _call_view_uint(to: str, selector_hex: str) -> int:
 # idleBalance()
 # totalPendingRedeemShares()
 
-SEL_LAST_REPORT_NONCE      = "6e8d8fb5"
-SEL_LAST_REPORT_TIMESTAMP  = "e44f62e3"
-SEL_REPORT_COOLDOWN        = "1b6a4e72"
-SEL_OFFICIAL_PPS           = "90f89f65"
-SEL_IDLE_BALANCE           = "1be05289"
-SEL_PENDING_REDEEM_SHARES  = "3a1c4fe3"
+SEL_LAST_REPORT_NONCE      = "247afd64"   # keccak256("lastReportNonce()")[:4]
+SEL_LAST_REPORT_TIMESTAMP  = "57db845a"   # keccak256("lastReportTimestamp()")[:4]
+SEL_REPORT_COOLDOWN        = "54b81a71"   # keccak256("reportCooldown()")[:4]
+SEL_OFFICIAL_PPS           = "bc0a7f5d"   # keccak256("officialPPS()")[:4]
+SEL_IDLE_BALANCE           = "b1bbb310"   # keccak256("idleBalance()")[:4]
+SEL_PENDING_REDEEM_SHARES  = "8eff0106"   # keccak256("totalPendingRedeemShares()")[:4]
 
 
 def _read_vault_state(vault_address: str) -> dict:
@@ -408,16 +408,22 @@ def _abi_encode_report_call(payload: dict, max_deposits: int, max_redeems: int) 
     sig_bytes = bytes.fromhex(payload["signature"].replace("0x", ""))
     reported_assets_wei = int(payload["reported_assets_usdc"] * 1e6)
 
-    # Tuple: (reportedAssets, timestamp, deadline, nonce)
+    # domain_salt stored as plain text in payload; must be keccak256'd to bytes32
+    domain_salt_bytes = _keccak256_text(payload["domain_salt"])
+
+    # Tuple: all 7 struct fields matching ReportDataV2 exactly
     report_tuple = (
         reported_assets_wei,
         payload["timestamp"],
         payload["deadline"],
         payload["nonce"],
+        payload["vault_address"],
+        payload["chain_id"],
+        domain_salt_bytes,
     )
 
     encoded_args = abi_encode(
-        ["(uint256,uint256,uint256,uint256)", "bytes", "uint256", "uint256"],
+        ["(uint256,uint256,uint256,uint256,address,uint256,bytes32)", "bytes", "uint256", "uint256"],
         [report_tuple, sig_bytes, max_deposits, max_redeems],
     )
 
