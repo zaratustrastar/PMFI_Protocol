@@ -1,0 +1,51 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && git pull && npx tsx scripts/seed-arb-vault-v2-report.ts
+remote: Enumerating objects: 10, done.
+remote: Counting objects: 100% (10/10), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 6 (delta 4), reused 6 (delta 4), pack-reused 0 (from 0)
+Unpacking objects: 100% (6/6), 2.85 KiB | 485.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   7ac64e1..81a0c40  main       -> origin/main
+Updating 7ac64e1..81a0c40
+Fast-forward
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cd-PolyNo_1774545707735.txt | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+ scripts/seed-arb-vault-v2-report.ts                                                              | 40 ++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 84 insertions(+), 2 deletions(-)
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cd-PolyNo_1774545707735.txt
+[dotenv@17.2.1] injecting env (37) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+🌱 pARB Vault V2 — Seed Report
+   Vault:      0x1182054b82f96c110698eAe6Af73FdA013599F9d
+   Signer:     0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+   Chain:      Base (8453)
+   RPC:        https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+
+📊 Current vault state:
+   officialPPS:               1.000000 USDC/share
+   lastReportNonce:           0
+   lastReportedBackingAssets: 0.000000 USDC
+   totalPendingDepositAssets: 11.000000 USDC
+   totalPendingRedeemShares:  0.000000 shares
+   reportSigner:              0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+
+📝 Seed report params:
+   nonce:          1
+   reportedAssets: 0.000000 USDC
+
+🔐 Signing report data…
+   structHash: 0xedafbe801763c11bec8f6430f88201b437ef5b08e272a7685a3c0babb15387f0
+   signature:  0xc1c5ea8634ed9b08ca…
+
+⛽ Using fixed gas limit: 600000
+
+📤 Sending report() transaction…
+   tx hash: 0x40c6a6d928ed97f86c85a8b77cbc556f072ab82a2c42fcee6db9f886ec3afd43
+   Waiting for confirmation…
+
+💥 Tx reverted on-chain: 0x40c6a6d928ed97f86c85a8b77cbc556f072ab82a2c42fcee6db9f886ec3afd43
+   Replaying at block 43878349 to decode revert reason…
+   Revert reason: missing revert data
+   Revert data:   (no data)
+
+❌ Seed failed: Transaction reverted — see revert reason above
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

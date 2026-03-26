@@ -56,8 +56,14 @@ const VAULT_ABI = [
   "function totalPendingRedeemShares() view returns (uint256)",
   "function REPORT_TYPEHASH() view returns (bytes32)",
   "function DOMAIN_SALT() view returns (bytes32)",
-  // report()
+  "function paused() view returns (bool)",
+  "function shutdown() view returns (bool)",
+  "function reportCooldown() view returns (uint256)",
+  "function lastReportTimestamp() view returns (uint256)",
+  // report() — 4-param version (maxDeposits + maxRedeems added post-deploy)
   "function report(tuple(uint256 reportedAssets, uint256 timestamp, uint256 deadline, uint256 nonce, address vault, uint256 chainId, bytes32 domainSalt) data, bytes signature, uint256 maxDeposits, uint256 maxRedeems)",
+  // report() — 2-param version (original, in case deployed before maxDeposits was added)
+  "function report(tuple(uint256 reportedAssets, uint256 timestamp, uint256 deadline, uint256 nonce, address vault, uint256 chainId, bytes32 domainSalt) data, bytes signature)",
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -138,6 +144,10 @@ async function main() {
     pendingRedeemShares,
     reportTypehash,
     domainSalt,
+    isPaused,
+    isShutdown,
+    reportCooldown,
+    lastReportTimestamp,
   ] = await Promise.all([
     vault.reportSigner(),
     vault.officialPPS(),
@@ -147,7 +157,14 @@ async function main() {
     vault.totalPendingRedeemShares(),
     vault.REPORT_TYPEHASH(),
     vault.DOMAIN_SALT(),
+    vault.paused(),
+    vault.shutdown(),
+    vault.reportCooldown(),
+    vault.lastReportTimestamp(),
   ]);
+
+  const now = BigInt(Math.floor(Date.now() / 1000));
+  const cooldownReady = now >= lastReportTimestamp + reportCooldown;
 
   console.log(`📊 Current vault state:`);
   console.log(`   officialPPS:               ${fmt6(currentPPS)} USDC/share`);
@@ -156,6 +173,13 @@ async function main() {
   console.log(`   totalPendingDepositAssets: ${fmt6(pendingDepositAssets)} USDC`);
   console.log(`   totalPendingRedeemShares:  ${fmt18(pendingRedeemShares)} shares`);
   console.log(`   reportSigner:              ${reportSignerAddr}`);
+  console.log(`   paused:                    ${isPaused}`);
+  console.log(`   shutdown:                  ${isShutdown}`);
+  console.log(`   reportCooldown:            ${reportCooldown}s  lastReportTimestamp: ${lastReportTimestamp}`);
+  console.log(`   cooldown ready:            ${cooldownReady} (now=${now})`);
+
+  if (isPaused)   throw new Error("Vault is paused — call setPaused(false) from owner first");
+  if (isShutdown) throw new Error("Vault is shut down — cannot call report() on a shut-down vault");
 
   if (signerWallet.address.toLowerCase() !== reportSignerAddr.toLowerCase()) {
     throw new Error(
@@ -213,39 +237,52 @@ async function main() {
   console.log(`   tx hash: ${tx.hash}`);
   console.log(`   Waiting for confirmation…`);
 
-  // Wait for the tx — ethers v6 throws on revert; Alchemy strips revert data
-  // from receipts, so we replay via eth_call at the mined block to get the reason.
+  // Wait for the tx — ethers v6 throws on revert; Alchemy strips revert data.
+  // On revert we replay via a public Base RPC (not Alchemy) which DOES return
+  // full revert data, then decode the Solidity reason string.
+  const PUBLIC_BASE_RPC = "https://mainnet.base.org";
+
   let receipt: Awaited<ReturnType<typeof tx.wait>>;
   try {
     receipt = await tx.wait(1);
   } catch (waitErr: unknown) {
-    // Try to get the block number from the error's embedded receipt
-    const errAny = waitErr as Record<string, unknown>;
-    const blockNum: number | undefined =
-      (errAny.receipt as Record<string, unknown>)?.blockNumber as number | undefined;
+    const errAny   = waitErr as Record<string, unknown>;
+    const blockNum = (errAny.receipt as Record<string, unknown>)?.blockNumber as number | undefined;
 
     console.error(`\n💥 Tx reverted on-chain: ${tx.hash}`);
+    console.log(`   Basescan: https://basescan.org/tx/${tx.hash}`);
+
     if (blockNum) {
-      console.log(`   Replaying at block ${blockNum} to decode revert reason…`);
-      try {
-        await provider.call(
-          {
-            to:   VAULT_ADDRESS,
-            from: signerWallet.address,
-            data: tx.data,
-          },
-          blockNum,
-        );
-        console.log(`   (replay did not revert — revert may be block-sensitive)`);
-      } catch (replayErr: unknown) {
-        const re = replayErr as Record<string, unknown>;
-        const reason = re.reason ?? re.shortMessage ?? re.message ?? String(replayErr);
-        const data   = re.data ?? "(no data)";
-        console.error(`   Revert reason: ${reason}`);
-        console.error(`   Revert data:   ${data}`);
-      }
+      console.log(`   Replaying at block ${blockNum} via public RPC to decode revert reason…`);
+      // Use public RPC — Alchemy strips revert data even from eth_call
+      const pubProvider = new ethers.JsonRpcProvider(PUBLIC_BASE_RPC);
+      const callData = tx.data;
+
+      const tryReplay = async (label: string, calldata: string) => {
+        try {
+          await pubProvider.call({ to: VAULT_ADDRESS, from: signerWallet.address, data: calldata }, blockNum);
+          console.log(`   ${label}: did not revert (may be block-sensitive)`);
+        } catch (replayErr: unknown) {
+          const re     = replayErr as Record<string, unknown>;
+          const reason = re.reason ?? re.shortMessage ?? re.message ?? String(replayErr);
+          const raw    = re.data   ?? "(no data)";
+          console.error(`   ${label} revert reason: ${reason}`);
+          console.error(`   ${label} revert data:   ${raw}`);
+        }
+      };
+
+      // 1. Replay the 4-param call (what we actually sent)
+      await tryReplay("4-param report()", callData);
+
+      // 2. Also try the 2-param version — in case contract was deployed before maxDeposits was added
+      const iface2 = new ethers.Interface([
+        "function report(tuple(uint256 reportedAssets, uint256 timestamp, uint256 deadline, uint256 nonce, address vault, uint256 chainId, bytes32 domainSalt) data, bytes signature)",
+      ]);
+      const callData2 = iface2.encodeFunctionData("report", [data, signature]);
+      await tryReplay("2-param report() [old ABI test]", callData2);
+
     } else {
-      console.log(`   (no block number in error — check tx on Basescan: https://basescan.org/tx/${tx.hash})`);
+      console.log(`   (no block number available — check Basescan link above)`);
     }
     throw new Error(`Transaction reverted — see revert reason above`);
   }
