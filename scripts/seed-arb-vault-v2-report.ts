@@ -196,26 +196,16 @@ async function main() {
   console.log(`   structHash: ${structHash}`);
   console.log(`   signature:  ${signature.slice(0, 20)}…`);
 
-  // NOTE: report() has nonReentrant modifier — staticCall always fails because
-  // the modifier writes storage. Use estimateGas (full simulation) instead.
   const MAX_DEPOSITS = 100n;
   const MAX_REDEEMS  = 100n;
 
-  console.log(`\n🔍 Dry-run (estimateGas simulation)…`);
-  let gasEstimate: bigint;
-  try {
-    gasEstimate = await vault.report.estimateGas(data, signature, MAX_DEPOSITS, MAX_REDEEMS);
-    console.log(`   ✅ Gas estimation passed — tx should succeed`);
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`Gas estimation failed — DO NOT send tx. Error: ${msg}`);
-  }
-
-  const gasLimit   = (gasEstimate * 130n) / 100n; // 30% buffer
-  const feeData    = await provider.getFeeData();
-  const gasPrice   = feeData.gasPrice ?? 1_000_000n;
-  const gasCostEth = Number(gasLimit * gasPrice) / 1e18;
-  console.log(`\n⛽ Gas estimate: ${gasEstimate} (limit: ${gasLimit}, ~${gasCostEth.toFixed(6)} ETH)`);
+  // Alchemy strips revert data from eth_estimateGas — skip estimation,
+  // send with a fixed gas limit. If the tx reverts on-chain the hash is
+  // printed so the exact reason can be read on Basescan.
+  const gasLimit = 600_000n;
+  const feeData  = await provider.getFeeData();
+  const gasPrice = feeData.gasPrice ?? 1_000_000n;
+  console.log(`\n⛽ Using fixed gas limit: ${gasLimit}`);
 
   // ── Send transaction ──────────────────────────────────────────────────
   console.log(`\n📤 Sending report() transaction…`);
