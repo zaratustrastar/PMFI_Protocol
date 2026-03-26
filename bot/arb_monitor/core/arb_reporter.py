@@ -38,8 +38,10 @@ BASE_CHAIN_ID = 8453
 BASE_RPC = os.environ.get("BASE_RPC_URL", "https://mainnet.base.org")
 USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 
-# report() signature — all 7 struct fields must match the Solidity ABI exactly
-REPORT_SELECTOR = "report((uint256,uint256,uint256,uint256,address,uint256,bytes32),bytes,uint256,uint256)"
+# report() external ABI — 4-field struct only.
+# vault/chainId/domainSalt are hardcoded inside the contract; the caller omits them.
+# Verified by scanning deployed bytecode: selector 8c1d9244 matches this signature.
+REPORT_SELECTOR = "report((uint256,uint256,uint256,uint256),bytes,uint256,uint256)"
 
 # Conservative haircut applied to vault cash balances (95%) to account for
 # gas costs, bridge fees, and minor API latency errors.
@@ -398,8 +400,11 @@ def _get_nonce(address: str) -> int:
 def _abi_encode_report_call(payload: dict, max_deposits: int, max_redeems: int) -> bytes:
     """Encode the report() call data.
 
-    Signature: report((uint256,uint256,uint256,uint256),bytes,uint256,uint256)
-    Selector:  first 4 bytes of keccak256 of the signature string
+    External signature: report((uint256,uint256,uint256,uint256),bytes,uint256,uint256)
+    Selector: 8c1d9244 (keccak256 of above, verified against deployed bytecode)
+
+    The contract appends address(this), block.chainid, DOMAIN_SALT internally
+    for signature verification — the caller only provides the 4 data fields.
     """
     from eth_abi import encode as abi_encode
 
@@ -408,22 +413,16 @@ def _abi_encode_report_call(payload: dict, max_deposits: int, max_redeems: int) 
     sig_bytes = bytes.fromhex(payload["signature"].replace("0x", ""))
     reported_assets_wei = int(payload["reported_assets_usdc"] * 1e6)
 
-    # domain_salt stored as plain text in payload; must be keccak256'd to bytes32
-    domain_salt_bytes = _keccak256_text(payload["domain_salt"])
-
-    # Tuple: all 7 struct fields matching ReportDataV2 exactly
+    # 4-field tuple — matches deployed ReportData struct exactly
     report_tuple = (
         reported_assets_wei,
         payload["timestamp"],
         payload["deadline"],
         payload["nonce"],
-        payload["vault_address"],
-        payload["chain_id"],
-        domain_salt_bytes,
     )
 
     encoded_args = abi_encode(
-        ["(uint256,uint256,uint256,uint256,address,uint256,bytes32)", "bytes", "uint256", "uint256"],
+        ["(uint256,uint256,uint256,uint256)", "bytes", "uint256", "uint256"],
         [report_tuple, sig_bytes, max_deposits, max_redeems],
     )
 

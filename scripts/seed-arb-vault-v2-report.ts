@@ -60,10 +60,8 @@ const VAULT_ABI = [
   "function shutdown() view returns (bool)",
   "function reportCooldown() view returns (uint256)",
   "function lastReportTimestamp() view returns (uint256)",
-  // report() — 4-param version (maxDeposits + maxRedeems added post-deploy)
-  "function report(tuple(uint256 reportedAssets, uint256 timestamp, uint256 deadline, uint256 nonce, address vault, uint256 chainId, bytes32 domainSalt) data, bytes signature, uint256 maxDeposits, uint256 maxRedeems)",
-  // report() — 2-param version (original, in case deployed before maxDeposits was added)
-  "function report(tuple(uint256 reportedAssets, uint256 timestamp, uint256 deadline, uint256 nonce, address vault, uint256 chainId, bytes32 domainSalt) data, bytes signature)",
+  // report() — deployed ABI: 4-field struct (vault/chainId/domainSalt hardcoded inside contract)
+  "function report(tuple(uint256 reportedAssets, uint256 timestamp, uint256 deadline, uint256 nonce) data, bytes signature, uint256 maxDeposits, uint256 maxRedeems)",
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -82,33 +80,34 @@ async function buildAndSignReport(
   nonce: bigint,
   reportTypehash: string,
   domainSalt: string,
-): Promise<{ data: object; signature: string; structHash: string }> {
+): Promise<{ callData: object; signature: string; structHash: string }> {
   const now      = BigInt(Math.floor(Date.now() / 1000));
   const deadline = now + 3600n; // valid for 1 hour
 
-  const data = {
+  // 4-field struct passed to report() — vault/chainId/domainSalt are
+  // added internally by the contract during signature verification
+  const callData = {
     reportedAssets: reportedAssetsUsdc,
     timestamp:      now,
     deadline,
     nonce,
-    vault:          VAULT_ADDRESS,
-    chainId:        CHAIN_ID,
-    domainSalt,
   };
 
-  // structHash = keccak256(abi.encode(TYPEHASH, ...fields))
+  // structHash = keccak256(abi.encode(TYPEHASH, ...7 fields))
+  // The contract's _verifyReportSignature appends address(this), block.chainid,
+  // DOMAIN_SALT to the struct fields before hashing — so we must match exactly.
   const structHash = ethers.keccak256(
     ethers.AbiCoder.defaultAbiCoder().encode(
       ["bytes32", "uint256", "uint256", "uint256", "uint256", "address", "uint256", "bytes32"],
       [
         reportTypehash,
-        data.reportedAssets,
-        data.timestamp,
-        data.deadline,
-        data.nonce,
-        data.vault,
-        data.chainId,
-        data.domainSalt,
+        callData.reportedAssets,
+        callData.timestamp,
+        callData.deadline,
+        callData.nonce,
+        VAULT_ADDRESS,      // address(this) in contract
+        CHAIN_ID,           // block.chainid
+        domainSalt,         // DOMAIN_SALT constant
       ],
     ),
   );
@@ -117,7 +116,7 @@ async function buildAndSignReport(
   // wallet.signMessage(bytes32) applies the EIP-191 prefix automatically
   const signature = await wallet.signMessage(ethers.getBytes(structHash));
 
-  return { data, signature, structHash };
+  return { callData, signature, structHash };
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────
@@ -208,7 +207,7 @@ async function main() {
 
   // ── Build & sign ─────────────────────────────────────────────────────
   console.log(`\n🔐 Signing report data…`);
-  const { data, signature, structHash } = await buildAndSignReport(
+  const { callData, signature, structHash } = await buildAndSignReport(
     signerWallet,
     vault,
     reportedAssetsUsdc,
@@ -233,7 +232,7 @@ async function main() {
 
   // ── Send transaction ──────────────────────────────────────────────────
   console.log(`\n📤 Sending report() transaction…`);
-  const tx = await vault.report(data, signature, MAX_DEPOSITS, MAX_REDEEMS, { gasLimit });
+  const tx = await vault.report(callData, signature, MAX_DEPOSITS, MAX_REDEEMS, { gasLimit });
   console.log(`   tx hash: ${tx.hash}`);
   console.log(`   Waiting for confirmation…`);
 
@@ -256,30 +255,18 @@ async function main() {
       console.log(`   Replaying at block ${blockNum} via public RPC to decode revert reason…`);
       // Use public RPC — Alchemy strips revert data even from eth_call
       const pubProvider = new ethers.JsonRpcProvider(PUBLIC_BASE_RPC);
-      const callData = tx.data;
+      const txCallData = tx.data;
 
-      const tryReplay = async (label: string, calldata: string) => {
-        try {
-          await pubProvider.call({ to: VAULT_ADDRESS, from: signerWallet.address, data: calldata }, blockNum);
-          console.log(`   ${label}: did not revert (may be block-sensitive)`);
-        } catch (replayErr: unknown) {
-          const re     = replayErr as Record<string, unknown>;
-          const reason = re.reason ?? re.shortMessage ?? re.message ?? String(replayErr);
-          const raw    = re.data   ?? "(no data)";
-          console.error(`   ${label} revert reason: ${reason}`);
-          console.error(`   ${label} revert data:   ${raw}`);
-        }
-      };
-
-      // 1. Replay the 4-param call (what we actually sent)
-      await tryReplay("4-param report()", callData);
-
-      // 2. Also try the 2-param version — in case contract was deployed before maxDeposits was added
-      const iface2 = new ethers.Interface([
-        "function report(tuple(uint256 reportedAssets, uint256 timestamp, uint256 deadline, uint256 nonce, address vault, uint256 chainId, bytes32 domainSalt) data, bytes signature)",
-      ]);
-      const callData2 = iface2.encodeFunctionData("report", [data, signature]);
-      await tryReplay("2-param report() [old ABI test]", callData2);
+      try {
+        await pubProvider.call({ to: VAULT_ADDRESS, from: signerWallet.address, data: txCallData }, blockNum);
+        console.log(`   Replay did not revert — may be block-sensitive`);
+      } catch (replayErr: unknown) {
+        const re     = replayErr as Record<string, unknown>;
+        const reason = re.reason ?? re.shortMessage ?? re.message ?? String(replayErr);
+        const raw    = re.data   ?? "(no data)";
+        console.error(`   Revert reason: ${reason}`);
+        console.error(`   Revert data:   ${raw}`);
+      }
 
     } else {
       console.log(`   (no block number available — check Basescan link above)`);
