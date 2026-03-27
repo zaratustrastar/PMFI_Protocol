@@ -137,9 +137,12 @@ ARB_EARLY_REPORT_MIN_ELAPSED = int(os.environ.get("ARB_EARLY_REPORT_MIN_ELAPSED"
 # pARB Auto-Funder (USDC distributor to trading platforms)
 # ---------------------------------------------------------------------------
 
-# Minimum USDC balance in the servicer wallet before distribution is triggered.
+# Minimum servicer wallet USDC balance that triggers a distribution cycle.
+# The funder skips distribution if the deployable capital is below this threshold
+# to avoid sending dust transactions that cost more in gas than they're worth.
+# Lowered from 20 → 5 USDC so small initial post-tend balances are not silently skipped.
 # Set to 0 to distribute every cycle (not recommended due to gas costs).
-ARB_MIN_FUND_AMOUNT = float(os.environ.get("ARB_MIN_FUND_AMOUNT", "20"))
+ARB_MIN_FUND_AMOUNT = float(os.environ.get("ARB_MIN_FUND_AMOUNT", "5"))
 
 # Proportional allocation of servicer USDC across the three platforms.
 # Must sum to 100 (enforced proportionally if they don't — remainder goes to Opinion).

@@ -429,12 +429,39 @@ def run_funder_tick() -> None:
     Liquidity-aware: only deploys capital beyond requiredIdle (pending redeems + target buffer).
     All errors are logged and suppressed — never raises.
     """
+    # ── Heartbeat: always log at the very top so we can confirm the funder is
+    # being called even if it exits early due to missing env vars or guards.
+    ts_hb = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    log(f"💓 [funder tick] starting — {ts_hb}")
+
+    # ── Env-var check: log each missing variable explicitly so the operator knows
+    # exactly what to add to .env rather than getting a generic "skipped" message.
     private_key     = os.environ.get("POLY_PRIVATE_KEY", "")
     servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
+    vault_address   = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
 
-    if not private_key or not servicer_wallet:
-        log("ℹ️ POLY_PRIVATE_KEY or ARB_SERVICER_WALLET not set — funder skipped")
+    missing_vars = []
+    if not private_key:
+        missing_vars.append("POLY_PRIVATE_KEY (servicer wallet signing key)")
+    if not servicer_wallet:
+        missing_vars.append("ARB_SERVICER_WALLET (servicer wallet address, e.g. 0xba32aa4c...)")
+
+    if missing_vars:
+        for var in missing_vars:
+            log(f"❌ Missing required env var: {var}")
+        log(
+            "⛔ Funder cannot run without the above variables. "
+            "Add them to .env and restart the bot."
+        )
         return
+
+    if not vault_address:
+        log(
+            "⚠️ ARB_VAULT_V2_ADDRESS not set — tend() will NOT be called. "
+            "Set ARB_VAULT_V2_ADDRESS=0x1182054b82f96c110698eAe6Af73FdA013599F9d to enable "
+            "the vault→servicer USDC flow. The funder will still distribute any "
+            "USDC already in the servicer wallet."
+        )
 
     _verify_wallet_key_match(private_key, servicer_wallet)
 
@@ -454,7 +481,39 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
     # Must run BEFORE liquidity state so the state reflects the post-tend balance.
     vault_address = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
     if vault_address:
+        log(
+            f"🔄 tend() check — vault={vault_address} servicer={servicer_wallet}"
+        )
         _call_tend_if_ready(vault_address, private_key, servicer_wallet)
+    else:
+        log(
+            f"ℹ️ ARB_VAULT_V2_ADDRESS not set — skipping tend() "
+            f"(servicer wallet: {servicer_wallet})"
+        )
+
+    # ── 0b. Servicer wallet status: USDC + ETH + threshold ─────────────────
+    # Logged immediately after tend() so the operator can see the wallet state
+    # before any liquidity-state computation.
+    try:
+        raw_usdc = _get_usdc_balance(servicer_wallet)
+        raw_eth  = _get_eth_balance(servicer_wallet)
+        log(
+            f"💼 Servicer status [{ts}]: "
+            f"address={servicer_wallet} "
+            f"USDC={raw_usdc:.4f} "
+            f"ETH={raw_eth:.6f} "
+            f"min_fund_threshold={ARB_MIN_FUND_AMOUNT:.2f} USDC "
+            f"gas_reserve={ARB_SERVICER_GAS_RESERVE_ETH:.4f} ETH"
+        )
+        if raw_eth < ARB_SERVICER_GAS_RESERVE_ETH:
+            log(
+                f"❌ Servicer ETH too low: {raw_eth:.6f} ETH < gas_reserve "
+                f"{ARB_SERVICER_GAS_RESERVE_ETH:.4f} ETH. "
+                f"Send at least {ARB_SERVICER_GAS_RESERVE_ETH - raw_eth:.6f} ETH to "
+                f"{servicer_wallet} on Base to restore gas capacity."
+            )
+    except Exception as _be:
+        log(f"⚠️ Could not read servicer wallet balances: {_be}")
 
     # ── 1. Liquidity state: compute deployable capital ─────────────────────
     vault_address = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
