@@ -391,6 +391,12 @@ def get_best_prices(ticker: str, debug: bool = False) -> dict:
     Does NOT use open_interest as bid/ask size — sizes are set to None
     since the single-market endpoint doesn't provide top-of-book sizes.
 
+    Auth: RSA credentials are used when configured (same as fetch_orderbook_depth).
+    Kalshi's API sits behind Cloudflare which blocks datacenter IPs; RSA auth
+    headers are sent so Kalshi's WAF can whitelist authenticated requests even
+    from non-residential IPs.  If Cloudflare still blocks (returns HTML), a
+    clear log message is emitted so the operator knows to set PROXY_URL.
+
     Args:
         ticker: Kalshi market ticker (e.g. "KXBTC-25FEB21-T100500")
         debug: If True, include raw (unconverted) values for diagnostics
@@ -405,8 +411,39 @@ def get_best_prices(ticker: str, debug: bool = False) -> dict:
     }
 
     url = f"{KALSHI_BASE_URL}/markets/{ticker}"
-    resp = http_client.get(url, venue="kalshi", headers=_headers(), timeout=10)
-    if resp is None or resp.status_code != 200:
+
+    # Use RSA auth when credentials are available — mirrors fetch_orderbook_depth.
+    # Kalshi's Cloudflare WAF may whitelist authenticated API traffic even from
+    # datacenter IPs; without auth the request is more likely to be blocked.
+    try:
+        from ..core.kalshi_auth import get_kalshi_headers, kalshi_auth_available
+        if kalshi_auth_available():
+            auth_hdrs = get_kalshi_headers("GET", url)
+            req_headers = {**_headers(), **(auth_hdrs or {})}
+        else:
+            req_headers = _headers()
+            log(f"⚠️ Kalshi RSA credentials not configured — price call is unauthenticated (may be Cloudflare-blocked)")
+    except Exception:
+        req_headers = _headers()
+
+    resp = http_client.get(url, venue="kalshi", headers=req_headers, timeout=10)
+    if resp is None:
+        # http_client.get() returns None for:
+        #   - Cloudflare HTML block (403 with challenge page) → logged by http_client as 🛡️
+        #   - Network errors / exhausted retries
+        # Check if there's a proxy configured; if not, give the operator a hint.
+        import os as _os
+        if not _os.environ.get("PROXY_URL") and not _os.environ.get("HTTP_PROXY"):
+            log(
+                f"❌ Kalshi price fetch failed for {ticker!r} (no proxy configured). "
+                f"If Cloudflare is blocking the VPS IP, set PROXY_URL=socks5://user:pass@host:port "
+                f"in .env and restart."
+            )
+        else:
+            log(f"❌ Kalshi price fetch failed for {ticker!r} (proxy is set — check proxy health)")
+        return empty
+    if resp.status_code != 200:
+        log(f"❌ Kalshi price HTTP {resp.status_code} for {ticker!r}")
         return empty
     try:
         data = resp.json()
@@ -445,6 +482,7 @@ def get_best_prices(ticker: str, debug: bool = False) -> dict:
                 "no_ask": raw_no_ask,
             }
 
+        log(f"✅ Kalshi prices for {ticker!r}: yes_ask={yes_best_ask} no_ask={no_best_ask}")
         return result
     except Exception as e:
         log(f"Price fetch error for {ticker}: {e}")

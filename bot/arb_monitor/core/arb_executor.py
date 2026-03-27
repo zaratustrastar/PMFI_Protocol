@@ -550,15 +550,64 @@ def execute_arb(
     result.live_poly_ask = live_poly_ask
     result.live_kalshi_ask = live_kalshi_ask
 
-    if live_poly_ask is None:
+    # ── Primary edge gate: trust Oddpool's net_edge_pct ──────────────────────
+    # Oddpool's net_cents already deducts platform fees, slippage allowance, and
+    # risk buffer. It is the authoritative source for whether an opportunity is
+    # profitable — recalculating edge from raw live prices is WRONG because Poly
+    # and venue2 (Kalshi/Opinion) often have dramatically different probability
+    # views on the same outcome (e.g. Poly says Maduro wins 0.1%, Kalshi says 92%).
+    # Using (1 - poly_ask - venue2_ask) in those cases produces a deeply negative
+    # number even when the arb is genuine — Oddpool prices the opportunity based
+    # on the COMPLEMENTARY relationship (buy YES on one venue, NO on the other).
+    #
+    # The correct guard is:
+    #   1. Primary: Oddpool's net_edge_pct (guaranteed-profit signal)
+    #   2. Slippage check: live price must not be WORSE than Oddpool's quoted price
+    #      by more than ARB_SLIPPAGE_GUARD_BPS — this catches cases where the
+    #      market moved after Oddpool priced the opportunity.
+    opp_net_edge = getattr(opportunity, "net_edge_pct", 0.0)
+    log(
+        f"📊 Oddpool net_edge={opp_net_edge:.2f}% | min_edge={min_edge_pct * 100:.2f}% | "
+        f"live poly_ask={live_poly_ask} {leg2_venue_label}_ask={live_kalshi_ask}"
+    )
+
+    if opp_net_edge < min_edge_pct * 100:
+        result.error = (
+            f"oddpool_edge_too_thin: net_edge={opp_net_edge:.2f}% < "
+            f"min_edge={min_edge_pct * 100:.2f}%. Oddpool says not profitable after fees."
+        )
+        log(f"❌ {result.error}")
+        return result
+
+    # ── Slippage check against Oddpool quoted prices ──────────────────────────
+    # If live prices are available, verify neither leg has moved adversely since
+    # Oddpool priced this opportunity. We only reject on ADVERSE slippage (price
+    # rose beyond the Oddpool quote) — if the price improved (cheaper than quoted)
+    # we proceed; that's strictly better for us.
+    slippage_bps = ARB_SLIPPAGE_GUARD_BPS / 10000
+
+    if live_poly_ask is not None:
+        poly_slippage = live_poly_ask - opportunity.poly_yes_ask
+        if poly_slippage > slippage_bps:
+            result.error = (
+                f"poly_slippage_exceeded: live={live_poly_ask:.4f} "
+                f"quote={opportunity.poly_yes_ask:.4f} "
+                f"slippage={poly_slippage:.4f} > {slippage_bps:.4f}"
+            )
+            log(f"❌ {result.error}")
+            return result
+        log(f"✅ Poly slippage OK: live={live_poly_ask:.4f} quote={opportunity.poly_yes_ask:.4f} slippage={poly_slippage:+.4f}")
+    else:
+        # Poly price unavailable — abort. The executor needs at least Poly live
+        # price since that's the leg we control directly.
         result.error = "poly_orderbook_missing: could not fetch live Polymarket ask"
         log(f"❌ {result.error}")
         return result
 
     if live_kalshi_ask is None:
-        # Venue2 orderbook API failed (404/500). Fall back to Oddpool-quoted price with
-        # a freshness guard. Oddpool prices are updated every second; if the opportunity
-        # was fetched within the last 120 seconds the quote is reliable enough to trade.
+        # Venue2 live price unavailable — fall back to Oddpool-quoted price with a
+        # freshness guard. Oddpool updates prices every second; if the opportunity
+        # was fetched within the last 120 seconds the quote is reliable.
         opp_age = time.time() - getattr(opportunity, "fetched_at", 0)
         if opp_age > 120:
             result.error = (
@@ -570,39 +619,25 @@ def execute_arb(
         live_kalshi_ask = opportunity.kalshi_yes_ask
         log(
             f"⚠️ {leg2_venue_label} live orderbook unavailable — using Oddpool "
-            f"quoted price {live_kalshi_ask:.4f} (opp_age={opp_age:.0f}s)"
+            f"quoted price {live_kalshi_ask:.4f} (opp_age={opp_age:.0f}s) — skipping slippage check"
         )
         result.live_kalshi_ask = live_kalshi_ask
+    else:
+        leg2_slippage = live_kalshi_ask - opportunity.kalshi_yes_ask
+        if leg2_slippage > slippage_bps:
+            result.error = (
+                f"{leg2_venue_label}_slippage_exceeded: live={live_kalshi_ask:.4f} "
+                f"quote={opportunity.kalshi_yes_ask:.4f} "
+                f"slippage={leg2_slippage:.4f} > {slippage_bps:.4f}"
+            )
+            log(f"❌ {result.error}")
+            return result
+        log(f"✅ {leg2_venue_label} slippage OK: live={live_kalshi_ask:.4f} quote={opportunity.kalshi_yes_ask:.4f} slippage={leg2_slippage:+.4f}")
 
+    # Store computed live edge for logging/DB (informational only — not used for gating)
     live_edge = 1.0 - live_poly_ask - live_kalshi_ask
     result.live_edge = live_edge
-    log(f"📐 Live edge: {live_edge:.4f} (poly_ask={live_poly_ask}, {leg2_venue_label}_ask={live_kalshi_ask})")
-
-    if live_edge < min_edge_pct:
-        result.error = (
-            f"edge_too_thin: live_edge={live_edge:.4f} < min_edge_pct={min_edge_pct:.4f}. "
-            f"Aborting to protect against fees."
-        )
-        log(f"❌ {result.error}")
-        return result
-
-    slippage_bps = ARB_SLIPPAGE_GUARD_BPS / 10000
-    poly_slippage = live_poly_ask - opportunity.poly_yes_ask
-    leg2_slippage = live_kalshi_ask - opportunity.kalshi_yes_ask
-    if poly_slippage > slippage_bps:
-        result.error = (
-            f"poly_slippage_exceeded: live={live_poly_ask:.4f} quote={opportunity.poly_yes_ask:.4f} "
-            f"slippage={poly_slippage:.4f} > {slippage_bps:.4f}"
-        )
-        log(f"❌ {result.error}")
-        return result
-    if leg2_slippage > slippage_bps:
-        result.error = (
-            f"{leg2_venue_label}_slippage_exceeded: live={live_kalshi_ask:.4f} quote={opportunity.kalshi_yes_ask:.4f} "
-            f"slippage={leg2_slippage:.4f} > {slippage_bps:.4f}"
-        )
-        log(f"❌ {result.error}")
-        return result
+    log(f"📐 Live spread (informational): {live_edge:.4f} | Oddpool net_edge={opp_net_edge:.2f}% — proceeding to size")
 
     # ── Budget sizing (computed before depth check so fallbacks can reference it) ──
     # Use the more expensive leg's ask as the sizing denominator so the integer count
