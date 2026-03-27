@@ -1,0 +1,207 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# source /root/PolyNotifyBot/.env
+python3 -c "
+from web3 import Web3
+w3 = Web3(Web3.HTTPProvider('https://mainnet.base.org'))
+# Check who else holds pARB
+"
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# journalctl -u psniper-bot --since "10 minutes ago" | grep -E "ArbFunder|funder tick|Servicer status|distribute|tend"
+Mar 27 17:41:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]:    Serving frontend from: /root/PolyNotifyBot/frontend
+Mar 27 17:41:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]:    - GET  /             - Frontend UI
+Mar 27 17:41:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-27T17:41:53Z
+Mar 27 17:41:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 27 17:41:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774633197, cooldown=60s) — calling
+Mar 27 17:41:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF pending_nonce=633
+Mar 27 17:41:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 📤 TX nonce=633 → 0x420f876ac7a472a8fd0ab3562eb7190aef0fccebee620790a70c12c27b963959
+Mar 27 17:41:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ✅ tend() sent: tx=0x420f876ac7a472a8fd0ab3562eb7190aef0fccebee620790a70c12c27b963959
+Mar 27 17:41:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💼 Servicer status [2026-03-27T17:41:53Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=24.1588 ETH=0.000486 min_fund_threshold=5.00 USDC gas_reserve=0.0100 ETH
+Mar 27 17:41:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ❌ Servicer ETH too low: 0.000486 ETH < gas_reserve 0.0100 ETH. Send at least 0.009514 ETH to 0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF on Base to restore gas capacity.
+Mar 27 17:41:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] [2026-03-27T17:41:53Z] Liquidity: idle=1.00 required_idle=50.00 pending_redeem=0.00 free_cash=24.16 deployable=0.00 under_pressure=False
+Mar 27 17:41:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ℹ️ Deployable capital 0.0000 USDC < min threshold 5.00 — nothing to distribute
+Mar 27 17:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Jack Antonoff': matched='Jack Antonoff' YES=780504188736... NO=986210702240...
+Mar 27 17:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ Tokens resolved slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Jack Antonoff': YES=7805041887368516... NO=9862107022403022...
+Mar 27 17:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.02× conf=0.16 fill=95 score=0.4 | gross=5.00¢ days=278.3
+Mar 27 17:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=5.00¢ poly=0.79 venue2(kalshi/NO)=0.16 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Selena Gomez': matched='Selena Gomez' YES=312140769131... NO=525531723673...
+Mar 27 17:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ Tokens resolved slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Selena Gomez': YES=3121407691312139... NO=5255317236731849...
+Mar 27 17:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=1.90% AR=0.02× conf=0.26 fill=176 score=1.2 | gross=6.00¢ days=278.3
+Mar 27 17:42:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=6.00¢ poly=0.75 venue2(kalshi/NO)=0.19 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:42:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Blake Lively': matched='Blake Lively' YES=881930746861... NO=107174856378...
+Mar 27 17:42:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ Tokens resolved slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Blake Lively': YES=8819307468610915... NO=1071748563789876...
+Mar 27 17:42:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_blake_lively': net_edge=-1.10% AR=0.00× conf=0.00 fill=141 score=0.0 | gross=3.00¢ days=278.3
+Mar 27 17:42:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_blake_lively' edge=3.00¢ poly=0.64 venue2(kalshi/YES)=0.33 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:43:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_selena_gomez venue2=kalshi | score=1.2 AR=0.02× net_edge=1.90% conf=0.26 | days=278.26d size=$176.41
+Mar 27 17:43:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_selena_gomez (venue2=kalshi)
+Mar 27 17:43:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_selena_gomez: poly_slippage_exceeded: live=0.9900 quote=0.7500 slippage=0.2400 > 0.0200 unwound=False
+Mar 27 17:43:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_jack_antonoff venue2=kalshi | score=0.4 AR=0.02× net_edge=1.90% conf=0.16 | days=278.26d size=$94.60
+Mar 27 17:43:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_jack_antonoff (venue2=kalshi)
+Mar 27 17:43:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_jack_antonoff: poly_slippage_exceeded: live=0.9900 quote=0.7900 slippage=0.2000 > 0.0200 unwound=False
+Mar 27 17:43:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_blake_lively: net_edge=-1.1000% < min_edge=0.0030% (gross=3.0000%)
+Mar 27 17:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-27T17:43:53Z
+Mar 27 17:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 27 17:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774633317, cooldown=60s) — calling
+Mar 27 17:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF pending_nonce=634
+Mar 27 17:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 📤 TX nonce=634 → 0x8780703d5443b80867ea5e8daf61f5e56899b2834c1231c1d534e49d562382ac
+Mar 27 17:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ✅ tend() sent: tx=0x8780703d5443b80867ea5e8daf61f5e56899b2834c1231c1d534e49d562382ac
+Mar 27 17:43:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💼 Servicer status [2026-03-27T17:43:53Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=24.1588 ETH=0.000486 min_fund_threshold=5.00 USDC gas_reserve=0.0100 ETH
+Mar 27 17:43:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ❌ Servicer ETH too low: 0.000486 ETH < gas_reserve 0.0100 ETH. Send at least 0.009514 ETH to 0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF on Base to restore gas capacity.
+Mar 27 17:43:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] [2026-03-27T17:43:53Z] Liquidity: idle=1.00 required_idle=50.00 pending_redeem=0.00 free_cash=24.16 deployable=0.00 under_pressure=False
+Mar 27 17:43:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ℹ️ Deployable capital 0.0000 USDC < min threshold 5.00 — nothing to distribute
+Mar 27 17:43:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.02× conf=0.16 fill=95 score=0.4 | gross=5.00¢ days=278.3
+Mar 27 17:43:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=5.00¢ poly=0.79 venue2(kalshi/NO)=0.16 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:43:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=1.90% AR=0.02× conf=0.26 fill=176 score=1.2 | gross=6.00¢ days=278.3
+Mar 27 17:43:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=6.00¢ poly=0.75 venue2(kalshi/NO)=0.19 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:43:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_blake_lively': net_edge=-1.10% AR=0.00× conf=0.00 fill=141 score=0.0 | gross=3.00¢ days=278.3
+Mar 27 17:43:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_blake_lively' edge=3.00¢ poly=0.64 venue2(kalshi/YES)=0.33 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:44:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_selena_gomez venue2=kalshi | score=1.2 AR=0.02× net_edge=1.90% conf=0.26 | days=278.26d size=$176.41
+Mar 27 17:44:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_selena_gomez (venue2=kalshi)
+Mar 27 17:44:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_selena_gomez: poly_slippage_exceeded: live=0.9900 quote=0.7500 slippage=0.2400 > 0.0200 unwound=False
+Mar 27 17:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_jack_antonoff venue2=kalshi | score=0.4 AR=0.02× net_edge=1.90% conf=0.16 | days=278.26d size=$94.60
+Mar 27 17:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_jack_antonoff (venue2=kalshi)
+Mar 27 17:44:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_jack_antonoff: poly_slippage_exceeded: live=0.9900 quote=0.7900 slippage=0.2000 > 0.0200 unwound=False
+Mar 27 17:44:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_blake_lively: net_edge=-1.1000% < min_edge=0.0030% (gross=3.0000%)
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-27T17:44:53Z
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ⏳ tend() cooldown: 2s remaining — skip
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💼 Servicer status [2026-03-27T17:44:53Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=24.1588 ETH=0.000485 min_fund_threshold=5.00 USDC gas_reserve=0.0100 ETH
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ❌ Servicer ETH too low: 0.000485 ETH < gas_reserve 0.0100 ETH. Send at least 0.009515 ETH to 0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF on Base to restore gas capacity.
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] [2026-03-27T17:44:53Z] Liquidity: idle=1.00 required_idle=50.00 pending_redeem=0.00 free_cash=24.16 deployable=0.00 under_pressure=False
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ℹ️ Deployable capital 0.0000 USDC < min threshold 5.00 — nothing to distribute
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.02× conf=0.16 fill=95 score=0.4 | gross=5.00¢ days=278.3
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=5.00¢ poly=0.79 venue2(kalshi/NO)=0.16 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=1.90% AR=0.02× conf=0.26 fill=176 score=1.2 | gross=6.00¢ days=278.3
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=6.00¢ poly=0.75 venue2(kalshi/NO)=0.19 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_blake_lively': net_edge=-1.10% AR=0.00× conf=0.00 fill=141 score=0.0 | gross=3.00¢ days=278.3
+Mar 27 17:44:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_blake_lively' edge=3.00¢ poly=0.64 venue2(kalshi/YES)=0.33 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:45:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_selena_gomez venue2=kalshi | score=1.2 AR=0.02× net_edge=1.90% conf=0.26 | days=278.26d size=$176.41
+Mar 27 17:45:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_selena_gomez (venue2=kalshi)
+Mar 27 17:45:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_selena_gomez: poly_slippage_exceeded: live=0.9900 quote=0.7500 slippage=0.2400 > 0.0200 unwound=False
+Mar 27 17:45:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_jack_antonoff venue2=kalshi | score=0.4 AR=0.02× net_edge=1.90% conf=0.16 | days=278.26d size=$94.60
+Mar 27 17:45:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_jack_antonoff (venue2=kalshi)
+Mar 27 17:45:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_jack_antonoff: poly_slippage_exceeded: live=0.9900 quote=0.7900 slippage=0.2000 > 0.0200 unwound=False
+Mar 27 17:45:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_blake_lively: net_edge=-1.1000% < min_edge=0.0030% (gross=3.0000%)
+Mar 27 17:46:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-27T17:45:59Z
+Mar 27 17:46:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 27 17:46:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774633435, cooldown=60s) — calling
+Mar 27 17:46:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF pending_nonce=635
+Mar 27 17:46:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 📤 TX nonce=635 → 0x2e82f799a11ec42b8d22d906b209a7a25a13140fc0ede7a92329e228156cc97e
+Mar 27 17:46:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ✅ tend() sent: tx=0x2e82f799a11ec42b8d22d906b209a7a25a13140fc0ede7a92329e228156cc97e
+Mar 27 17:46:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💼 Servicer status [2026-03-27T17:45:59Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=24.1588 ETH=0.000485 min_fund_threshold=5.00 USDC gas_reserve=0.0100 ETH
+Mar 27 17:46:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ❌ Servicer ETH too low: 0.000485 ETH < gas_reserve 0.0100 ETH. Send at least 0.009515 ETH to 0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF on Base to restore gas capacity.
+Mar 27 17:46:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] [2026-03-27T17:45:59Z] Liquidity: idle=1.00 required_idle=50.00 pending_redeem=0.00 free_cash=24.16 deployable=0.00 under_pressure=False
+Mar 27 17:46:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ℹ️ Deployable capital 0.0000 USDC < min threshold 5.00 — nothing to distribute
+Mar 27 17:46:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.02× conf=0.16 fill=95 score=0.4 | gross=5.00¢ days=278.3
+Mar 27 17:46:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=5.00¢ poly=0.79 venue2(kalshi/NO)=0.16 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:46:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=1.90% AR=0.02× conf=0.25 fill=168 score=1.1 | gross=6.00¢ days=278.3
+Mar 27 17:46:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=6.00¢ poly=0.75 venue2(kalshi/NO)=0.19 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:46:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_blake_lively': net_edge=-1.10% AR=0.00× conf=0.00 fill=141 score=0.0 | gross=3.00¢ days=278.3
+Mar 27 17:46:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_blake_lively' edge=3.00¢ poly=0.64 venue2(kalshi/YES)=0.33 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:46:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_selena_gomez venue2=kalshi | score=1.1 AR=0.02× net_edge=1.90% conf=0.25 | days=278.26d size=$168.45
+Mar 27 17:46:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_selena_gomez (venue2=kalshi)
+Mar 27 17:46:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_selena_gomez: poly_slippage_exceeded: live=0.9900 quote=0.7500 slippage=0.2400 > 0.0200 unwound=False
+Mar 27 17:46:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_jack_antonoff venue2=kalshi | score=0.4 AR=0.02× net_edge=1.90% conf=0.16 | days=278.26d size=$94.60
+Mar 27 17:46:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_jack_antonoff (venue2=kalshi)
+Mar 27 17:46:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_jack_antonoff: poly_slippage_exceeded: live=0.9900 quote=0.7900 slippage=0.2000 > 0.0200 unwound=False
+Mar 27 17:46:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_blake_lively: net_edge=-1.1000% < min_edge=0.0030% (gross=3.0000%)
+Mar 27 17:47:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-27T17:47:13Z
+Mar 27 17:47:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 27 17:47:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774633563, cooldown=60s) — calling
+Mar 27 17:47:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF pending_nonce=636
+Mar 27 17:47:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 📤 TX nonce=636 → 0xa6c11fc61f978bf8b17bd0ba78bf40d129388aea1f8d65436120fa049a6bf507
+Mar 27 17:47:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ✅ tend() sent: tx=0xa6c11fc61f978bf8b17bd0ba78bf40d129388aea1f8d65436120fa049a6bf507
+Mar 27 17:47:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💼 Servicer status [2026-03-27T17:47:13Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=24.1588 ETH=0.000485 min_fund_threshold=5.00 USDC gas_reserve=0.0100 ETH
+Mar 27 17:47:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ❌ Servicer ETH too low: 0.000485 ETH < gas_reserve 0.0100 ETH. Send at least 0.009515 ETH to 0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF on Base to restore gas capacity.
+Mar 27 17:47:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] [2026-03-27T17:47:13Z] Liquidity: idle=1.00 required_idle=50.00 pending_redeem=0.00 free_cash=24.16 deployable=0.00 under_pressure=False
+Mar 27 17:47:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ℹ️ Deployable capital 0.0000 USDC < min threshold 5.00 — nothing to distribute
+Mar 27 17:47:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.02× conf=0.16 fill=95 score=0.4 | gross=5.00¢ days=278.3
+Mar 27 17:47:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=5.00¢ poly=0.79 venue2(kalshi/NO)=0.16 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:47:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=1.90% AR=0.02× conf=0.25 fill=168 score=1.1 | gross=6.00¢ days=278.3
+Mar 27 17:47:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=6.00¢ poly=0.75 venue2(kalshi/NO)=0.19 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:47:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_blake_lively': net_edge=-1.10% AR=0.00× conf=0.00 fill=141 score=0.0 | gross=3.00¢ days=278.3
+Mar 27 17:47:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_blake_lively' edge=3.00¢ poly=0.64 venue2(kalshi/YES)=0.33 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:47:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_selena_gomez venue2=kalshi | score=1.1 AR=0.02× net_edge=1.90% conf=0.25 | days=278.26d size=$168.45
+Mar 27 17:47:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_selena_gomez (venue2=kalshi)
+Mar 27 17:47:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_selena_gomez: poly_slippage_exceeded: live=0.9900 quote=0.7500 slippage=0.2400 > 0.0200 unwound=False
+Mar 27 17:47:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_jack_antonoff venue2=kalshi | score=0.4 AR=0.02× net_edge=1.90% conf=0.16 | days=278.26d size=$94.60
+Mar 27 17:47:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_jack_antonoff (venue2=kalshi)
+Mar 27 17:47:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_jack_antonoff: poly_slippage_exceeded: live=0.9900 quote=0.7900 slippage=0.2000 > 0.0200 unwound=False
+Mar 27 17:47:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_blake_lively: net_edge=-1.1000% < min_edge=0.0030% (gross=3.0000%)
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-27T17:48:18Z
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774633635, cooldown=60s) — calling
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF pending_nonce=637
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 📤 TX nonce=637 → 0x505155cc7ee7e14ce7e8c68b7e423fb858bcd8df5e852de1857423817485859f
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ✅ tend() sent: tx=0x505155cc7ee7e14ce7e8c68b7e423fb858bcd8df5e852de1857423817485859f
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💼 Servicer status [2026-03-27T17:48:18Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=24.1588 ETH=0.000484 min_fund_threshold=5.00 USDC gas_reserve=0.0100 ETH
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ❌ Servicer ETH too low: 0.000484 ETH < gas_reserve 0.0100 ETH. Send at least 0.009516 ETH to 0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF on Base to restore gas capacity.
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] [2026-03-27T17:48:18Z] Liquidity: idle=1.00 required_idle=50.00 pending_redeem=0.00 free_cash=24.16 deployable=0.00 under_pressure=False
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ℹ️ Deployable capital 0.0000 USDC < min threshold 5.00 — nothing to distribute
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.02× conf=0.16 fill=95 score=0.4 | gross=5.00¢ days=278.3
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=5.00¢ poly=0.79 venue2(kalshi/NO)=0.16 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=1.90% AR=0.02× conf=0.25 fill=168 score=1.1 | gross=6.00¢ days=278.3
+Mar 27 17:48:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=6.00¢ poly=0.75 venue2(kalshi/NO)=0.19 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:48:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_blake_lively': net_edge=-1.10% AR=0.00× conf=0.00 fill=141 score=0.0 | gross=3.00¢ days=278.3
+Mar 27 17:48:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_blake_lively' edge=3.00¢ poly=0.64 venue2(kalshi/YES)=0.33 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:48:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_selena_gomez venue2=kalshi | score=1.1 AR=0.02× net_edge=1.90% conf=0.25 | days=278.26d size=$168.45
+Mar 27 17:48:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_selena_gomez (venue2=kalshi)
+Mar 27 17:48:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_selena_gomez: poly_slippage_exceeded: live=0.9900 quote=0.7500 slippage=0.2400 > 0.0200 unwound=False
+Mar 27 17:48:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_jack_antonoff venue2=kalshi | score=0.4 AR=0.02× net_edge=1.90% conf=0.16 | days=278.26d size=$94.60
+Mar 27 17:48:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_jack_antonoff (venue2=kalshi)
+Mar 27 17:48:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_jack_antonoff: poly_slippage_exceeded: live=0.9900 quote=0.7900 slippage=0.2000 > 0.0200 unwound=False
+Mar 27 17:48:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_blake_lively: net_edge=-1.1000% < min_edge=0.0030% (gross=3.0000%)
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-27T17:49:19Z
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ⏳ tend() cooldown: 2s remaining — skip
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💼 Servicer status [2026-03-27T17:49:19Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=24.1588 ETH=0.000483 min_fund_threshold=5.00 USDC gas_reserve=0.0100 ETH
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ❌ Servicer ETH too low: 0.000483 ETH < gas_reserve 0.0100 ETH. Send at least 0.009517 ETH to 0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF on Base to restore gas capacity.
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] [2026-03-27T17:49:19Z] Liquidity: idle=1.00 required_idle=50.00 pending_redeem=0.00 free_cash=24.16 deployable=0.00 under_pressure=False
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ℹ️ Deployable capital 0.0000 USDC < min threshold 5.00 — nothing to distribute
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.02× conf=0.16 fill=95 score=0.4 | gross=5.00¢ days=278.3
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=5.00¢ poly=0.79 venue2(kalshi/NO)=0.16 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=1.90% AR=0.02× conf=0.25 fill=168 score=1.1 | gross=6.00¢ days=278.3
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=6.00¢ poly=0.75 venue2(kalshi/NO)=0.19 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_blake_lively': net_edge=-1.10% AR=0.00× conf=0.00 fill=141 score=0.0 | gross=3.00¢ days=278.3
+Mar 27 17:49:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_blake_lively' edge=3.00¢ poly=0.64 venue2(kalshi/YES)=0.33 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:49:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_selena_gomez venue2=kalshi | score=1.1 AR=0.02× net_edge=1.90% conf=0.25 | days=278.26d size=$168.45
+Mar 27 17:49:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_selena_gomez (venue2=kalshi)
+Mar 27 17:49:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_selena_gomez: poly_slippage_exceeded: live=0.9900 quote=0.7500 slippage=0.2400 > 0.0200 unwound=False
+Mar 27 17:49:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_jack_antonoff venue2=kalshi | score=0.4 AR=0.02× net_edge=1.90% conf=0.16 | days=278.26d size=$94.60
+Mar 27 17:49:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_jack_antonoff (venue2=kalshi)
+Mar 27 17:49:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_jack_antonoff: poly_slippage_exceeded: live=0.9900 quote=0.7900 slippage=0.2000 > 0.0200 unwound=False
+Mar 27 17:49:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_blake_lively: net_edge=-1.1000% < min_edge=0.0030% (gross=3.0000%)
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-27T17:50:22Z
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774633701, cooldown=60s) — calling
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF pending_nonce=638
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 📤 TX nonce=638 → 0x9cbaebaa1072b3569e64c4435b72a612aac99b1b341922fceec5d864d3a9fc3c
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ✅ tend() sent: tx=0x9cbaebaa1072b3569e64c4435b72a612aac99b1b341922fceec5d864d3a9fc3c
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💼 Servicer status [2026-03-27T17:50:22Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=24.1588 ETH=0.000483 min_fund_threshold=5.00 USDC gas_reserve=0.0100 ETH
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ❌ Servicer ETH too low: 0.000483 ETH < gas_reserve 0.0100 ETH. Send at least 0.009517 ETH to 0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF on Base to restore gas capacity.
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] [2026-03-27T17:50:22Z] Liquidity: idle=1.00 required_idle=50.00 pending_redeem=0.00 free_cash=24.16 deployable=0.00 under_pressure=False
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ℹ️ Deployable capital 0.0000 USDC < min threshold 5.00 — nothing to distribute
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.02× conf=0.16 fill=95 score=0.4 | gross=5.00¢ days=278.3
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=5.00¢ poly=0.79 venue2(kalshi/NO)=0.16 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=1.90% AR=0.02× conf=0.25 fill=168 score=1.1 | gross=6.00¢ days=278.3
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=6.00¢ poly=0.75 venue2(kalshi/NO)=0.19 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_blake_lively': net_edge=-1.10% AR=0.00× conf=0.00 fill=141 score=0.0 | gross=3.00¢ days=278.3
+Mar 27 17:50:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_blake_lively' edge=3.00¢ poly=0.64 venue2(kalshi/YES)=0.33 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:50:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_selena_gomez venue2=kalshi | score=1.1 AR=0.02× net_edge=1.90% conf=0.25 | days=278.26d size=$168.45
+Mar 27 17:50:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_selena_gomez (venue2=kalshi)
+Mar 27 17:50:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_selena_gomez: poly_slippage_exceeded: live=0.9900 quote=0.7500 slippage=0.2400 > 0.0200 unwound=False
+Mar 27 17:50:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=taylorswift-wedding-attend-2028_jack_antonoff venue2=kalshi | score=0.4 AR=0.02× net_edge=1.90% conf=0.16 | days=278.26d size=$94.60
+Mar 27 17:50:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: ⚡ [Arb/Executor] 🔍 Starting execution for pair taylorswift-wedding-attend-2028_jack_antonoff (venue2=kalshi)
+Mar 27 17:50:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ❌ Execution failed for taylorswift-wedding-attend-2028_jack_antonoff: poly_slippage_exceeded: live=0.9900 quote=0.7900 slippage=0.2000 > 0.0200 unwound=False
+Mar 27 17:50:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_blake_lively: net_edge=-1.1000% < min_edge=0.0030% (gross=3.0000%)
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-27T17:51:24Z
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ⏳ tend() cooldown: 1s remaining — skip
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] 💼 Servicer status [2026-03-27T17:51:24Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=24.1588 ETH=0.000483 min_fund_threshold=5.00 USDC gas_reserve=0.0100 ETH
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ❌ Servicer ETH too low: 0.000483 ETH < gas_reserve 0.0100 ETH. Send at least 0.009517 ETH to 0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF on Base to restore gas capacity.
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] [2026-03-27T17:51:24Z] Liquidity: idle=1.00 required_idle=50.00 pending_redeem=0.00 free_cash=24.16 deployable=0.00 under_pressure=False
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 💸 [ArbFunder] ℹ️ Deployable capital 0.0000 USDC < min threshold 5.00 — nothing to distribute
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.02× conf=0.16 fill=95 score=0.4 | gross=5.00¢ days=278.3
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=5.00¢ poly=0.79 venue2(kalshi/NO)=0.16 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=1.90% AR=0.02× conf=0.26 fill=174 score=1.1 | gross=6.00¢ days=278.3
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=6.00¢ poly=0.75 venue2(kalshi/NO)=0.19 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_blake_lively': net_edge=-1.10% AR=0.00× conf=0.00 fill=141 score=0.0 | gross=3.00¢ days=278.3
+Mar 27 17:51:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2945293]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_blake_lively' edge=3.00¢ poly=0.64 venue2(kalshi/YES)=0.33 days=278.3 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

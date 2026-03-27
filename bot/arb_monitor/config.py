@@ -123,11 +123,16 @@ for kw_list in SPORTS_KEYWORDS.values():
 # pARB V2 Liquidity Management
 # ---------------------------------------------------------------------------
 
-# Target idle USDC in vault as basis points of total assets. Default 10%.
-ARB_IDLE_TARGET_BPS = int(os.environ.get("ARB_IDLE_TARGET_BPS", "1000"))
+# Target idle USDC in vault as basis points of total assets.
+# Lowered from 1000 (10%) → 500 (5%): 10% is overly conservative for a small
+# vault; 5% provides a reasonable cushion while allowing capital to deploy.
+ARB_IDLE_TARGET_BPS = int(os.environ.get("ARB_IDLE_TARGET_BPS", "500"))
 
 # Fixed safety buffer (USDC) always reserved on top of pending redeem value.
-ARB_SAFETY_BUFFER_USDC = float(os.environ.get("ARB_SAFETY_BUFFER_USDC", "50"))
+# Lowered from 50 → 5: a flat $50 floor blocked ALL capital from deploying
+# when the vault is small (e.g. $25 total assets). $5 provides a safe minimum
+# while allowing the remaining servicer balance to flow to trading platforms.
+ARB_SAFETY_BUFFER_USDC = float(os.environ.get("ARB_SAFETY_BUFFER_USDC", "5"))
 
 # Minimum shortfall (USDC) before the waterfall sweeper activates.
 ARB_WATERFALL_MIN_SHORTFALL = float(os.environ.get("ARB_WATERFALL_MIN_SHORTFALL", "10"))
