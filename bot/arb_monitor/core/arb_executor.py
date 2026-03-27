@@ -456,9 +456,23 @@ def execute_arb(
         return result
 
     if live_kalshi_ask is None:
-        result.error = f"{leg2_venue_label}_orderbook_missing: could not fetch live {leg2_venue_label} ask"
-        log(f"❌ {result.error}")
-        return result
+        # Venue2 orderbook API failed (404/500). Fall back to Oddpool-quoted price with
+        # a freshness guard. Oddpool prices are updated every second; if the opportunity
+        # was fetched within the last 120 seconds the quote is reliable enough to trade.
+        opp_age = time.time() - getattr(opportunity, "fetched_at", 0)
+        if opp_age > 120:
+            result.error = (
+                f"{leg2_venue_label}_orderbook_missing: live fetch failed and "
+                f"Oddpool quote is stale ({opp_age:.0f}s old > 120s limit)"
+            )
+            log(f"❌ {result.error}")
+            return result
+        live_kalshi_ask = opportunity.kalshi_yes_ask
+        log(
+            f"⚠️ {leg2_venue_label} live orderbook unavailable — using Oddpool "
+            f"quoted price {live_kalshi_ask:.4f} (opp_age={opp_age:.0f}s)"
+        )
+        result.live_kalshi_ask = live_kalshi_ask
 
     live_edge = 1.0 - live_poly_ask - live_kalshi_ask
     result.live_edge = live_edge
@@ -540,22 +554,18 @@ def execute_arb(
                 kalshi_book, kalshi_side_for_depth, max_leg2_fill_price
             )
         else:
-            # Design policy: abort on Kalshi depth fetch failure rather than fall
-            # back to uncapped / heuristic sizing.  This is intentionally strict:
-            #   • The orderbook depth cap exists precisely to prevent over-sized fills
-            #     that erode the arb edge; guessing depth defeats that purpose.
-            #   • Transient API failures are expected to be short-lived; the arb
-            #     scanner re-evaluates every cycle so the opportunity is not lost.
-            #   • Proceeding blind risks placing a large order that walks into
-            #     unfavourable price levels and converts the arb into a loss.
-            # If you need a softer policy for high-reliability environments, set a
-            # small fallback cap (e.g. 1-5 contracts) and document the trade-off.
-            result.error = (
-                f"depth_unavailable: Kalshi orderbook fetch failed for {kalshi_ticker}. "
-                f"Cannot verify fillable depth — aborting to protect edge integrity."
+            # Kalshi depth API unavailable (404/500). Use a conservative 10-contract
+            # cap rather than aborting — this limits per-trade exposure to a small
+            # fixed size while still allowing the arb to execute. The Poly-side depth
+            # cap and budget cap remain as additional guards. This avoids blocking 100%
+            # of opportunities when Kalshi's API has transient issues.
+            _fallback_cap = 10
+            leg2_fillable = _fallback_cap
+            leg2_depth_usdc = 0.0
+            log(
+                f"⚠️ Kalshi depth API unavailable for {kalshi_ticker} — "
+                f"using conservative {_fallback_cap}-contract fallback cap"
             )
-            log(f"❌ {result.error}")
-            return result
     else:
         # Opinion Labs: no orderbook depth API; Poly-side depth still applied.
         # leg2_fillable is effectively unconstrained — the Poly depth cap and

@@ -15,8 +15,7 @@ Scoring (profit-maximising):
   net_edge_pct   = net_cents - slippage_guard_pct - risk_buffer_pct
   annualized_return = (1 + net_edge_pct/100)^(365 / max(days_to_expiry, 0.5)) - 1
   confidence     = logistic function of min(poly_liq, venue2_liq); 0 when net_edge <= 0
-  fillable_size  = real_poly_book_depth_usdc @ poly_ask  (when token resolved & book available)
-                   fallback: ARB_FILLABLE_FRACTION × min(poly_liq, venue2_liq)  (heuristic)
+  fillable_size  = ARB_FILLABLE_FRACTION × min(poly_liq, venue2_liq)  (heuristic from Oddpool data)
   score          = annualized_return × confidence × fillable_size
 
 Opportunities are sorted by score descending. Deployment caps (ARB_MAX_PAIR_USDC etc.)
@@ -36,15 +35,6 @@ from ..config import (
     ODDPOOL_API_KEY, ODDPOOL_BASE_URL,
     ARB_SLIPPAGE_GUARD_BPS, ARB_RISK_BUFFER_PCT, ARB_FILLABLE_FRACTION,
 )
-
-# ── Polymarket orderbook scorer cache ────────────────────────────────────────
-# Keyed by (token_id, ask_price_cents) where ask_price_cents = round(ask * 100).
-# Including the fill price in the key prevents cross-price cache contamination:
-# the same token may appear in multiple opportunities at slightly different ask
-# prices, and fillable depth at 0.48 differs from depth at 0.52.
-# Value: (poly_fillable_contracts, cached_at). TTL: 5 minutes.
-_BOOK_CACHE: dict[tuple[str, int], tuple[int, float]] = {}
-_BOOK_CACHE_TTL = 300  # seconds
 
 def log(msg: str):
     print(f"🔀 [Arb/Oddpool] {msg}")
@@ -130,6 +120,9 @@ class ArbOpportunity:
     # Execution code must check this flag before attempting to place orders.
     is_display_only: bool = True
     raw: dict = field(default_factory=dict)
+    # Unix timestamp when this opportunity was fetched from Oddpool. Used by the
+    # executor to enforce a freshness guard when falling back to Oddpool prices.
+    fetched_at: float = 0.0
 
     def to_dict(self) -> dict:
         return {
@@ -387,62 +380,18 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             # k = 5000 → half-confidence at $5k liquidity; tuned for prediction markets
             confidence = max(0.05, min(1.0, bottleneck_liq / (bottleneck_liq + 5000.0)))
 
-        # Step 4: fillable size — use real Polymarket ask-ladder depth when the YES
-        #   token has been resolved; fall back to the heuristic fraction of reported
-        #   liquidity otherwise (e.g., display-only markets whose tokens are pending).
-        #
-        #   Real depth walk: walk book asks at prices <= our_poly_ask to count contracts
-        #   immediately available at the quoted spread.  Result is cached 5 min per token
-        #   to avoid hammering the CLOB for every opportunity in the same cycle.
-        #
-        #   Heuristic fallback: ARB_FILLABLE_FRACTION × bottleneck_liq (same as before).
+        # Step 4: fillable size — use Oddpool's reported liquidity data directly.
+        #   ARB_FILLABLE_FRACTION × bottleneck_liq gives a conservative estimate of
+        #   deployable capital without making additional API calls per opportunity.
         #   Floor at $10 so tiny-but-valid markets still receive a non-zero score.
-        fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)  # default heuristic
-
-        # Determine the correct Poly token to walk based on which side we buy on Poly.
-        #   buy_yes_market == "polymarket" → we buy YES on Poly → use the YES token.
-        #   Otherwise                     → we buy NO  on Poly → use the NO token.
-        # The NO token is stored as the second element of the slug cache entry.
-        if buy_yes_market == "polymarket":
-            scorer_token = resolved_token  # YES token (already resolved above)
-        else:
-            cached_slug = _SLUG_CACHE.get(polymarket_slug)
-            scorer_token = cached_slug[1] if cached_slug and cached_slug[1] else resolved_token
-
-        if scorer_token and our_poly_ask > 0:
-            now_book = time.time()
-            # Cache key includes quantised ask price (nearest cent) so opportunities
-            # for the same token at different ask prices get independent depth results.
-            ask_cents = round(our_poly_ask * 100)
-            cache_key = (scorer_token, ask_cents)
-            cached_book = _BOOK_CACHE.get(cache_key)
-            if cached_book is not None and (now_book - cached_book[1]) < _BOOK_CACHE_TTL:
-                poly_contracts_fillable = cached_book[0]
-            else:
-                try:
-                    from .polymarket import fetch_orderbook, compute_fillable_contracts
-                    book = fetch_orderbook(scorer_token)
-                    if book:
-                        # max fill price = our quoted ask (depth at the spread)
-                        poly_contracts_fillable, _ = compute_fillable_contracts(book, our_poly_ask)
-                        _BOOK_CACHE[cache_key] = (poly_contracts_fillable, now_book)
-                    else:
-                        poly_contracts_fillable = -1  # signal: book unavailable
-                except Exception as _e:
-                    log(f"⚠️ Book depth fetch error for scorer (token={scorer_token[:16]}): {_e}")
-                    poly_contracts_fillable = -1
-
-            if poly_contracts_fillable >= 0:
-                # Convert contracts → USDC at the quoted poly ask price and use
-                # this as the primary estimate; heuristic is the fallback only.
-                poly_fillable_usdc = poly_contracts_fillable * our_poly_ask
-                fillable_size_usdc = max(10.0, poly_fillable_usdc)
-                log(
-                    f"📏 [Scorer] real poly depth ({buy_yes_market}/{scorer_token[:12]}): "
-                    f"{poly_contracts_fillable} contracts "
-                    f"= ${poly_fillable_usdc:.0f} USDC → fillable_size=${fillable_size_usdc:.0f}"
-                )
-            # else: book unavailable — keep heuristic computed above
+        #
+        #   Note: we previously walked the Polymarket CLOB orderbook here to get a
+        #   "real" depth number, but CLOB calls for every opportunity added significant
+        #   per-cycle latency and returned 0 contracts most of the time due to token ID
+        #   format mismatches. Oddpool's own liquidity figures are fresh (updated every
+        #   second) and are a better signal at this stage. Actual depth is rechecked
+        #   at execution time before any order is placed.
+        fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
 
         # Step 5: composite score — natural language: "expected annualised dollar edge"
         #   Ties together quality (annualized_return), reliability (confidence), and
@@ -493,6 +442,7 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             opinion_slug=opinion_market_id,
             is_display_only=is_display_only,  # False = real token resolved, execution allowed
             raw=entry,
+            fetched_at=time.time(),
         )
     except Exception as e:
         log(f"❌ normalize_opportunity error: {e}, entry keys={list(entry.keys())}")
