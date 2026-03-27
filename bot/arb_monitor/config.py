@@ -149,18 +149,17 @@ ARB_EARLY_REPORT_MIN_ELAPSED = int(os.environ.get("ARB_EARLY_REPORT_MIN_ELAPSED"
 # pARB Auto-Funder (USDC distributor to trading platforms)
 # ---------------------------------------------------------------------------
 
-# Minimum servicer wallet USDC balance that triggers a distribution cycle.
-# The funder skips distribution if the deployable capital is below this threshold
-# to avoid sending dust transactions that cost more in gas than they're worth.
-# Lowered from 20 → 5 USDC so small initial post-tend balances are not silently skipped.
-# Set to 0 to distribute every cycle (not recommended due to gas costs).
-ARB_MIN_FUND_AMOUNT = float(os.environ.get("ARB_MIN_FUND_AMOUNT", "5"))
+# Minimum standing USDC float to keep on each platform.
+# The funder maintains this baseline each tick so the executor always has a
+# small reserve immediately available for tiny trades without waiting for a
+# deposit. Larger trades are funded on-demand by the executor just before
+# placing — so this value only needs to cover the smallest possible order.
+ARB_MIN_FLOAT_POLY   = float(os.environ.get("ARB_MIN_FLOAT_POLY",   "3"))
+ARB_MIN_FLOAT_KALSHI = float(os.environ.get("ARB_MIN_FLOAT_KALSHI", "3"))
 
-# Proportional allocation of servicer USDC across the three platforms.
-# Must sum to 100 (enforced proportionally if they don't — remainder goes to Opinion).
-ARB_FUND_POLY_PCT = float(os.environ.get("ARB_FUND_POLY_PCT", "40"))
-ARB_FUND_KALSHI_PCT = float(os.environ.get("ARB_FUND_KALSHI_PCT", "40"))
-ARB_FUND_OPINION_PCT = float(os.environ.get("ARB_FUND_OPINION_PCT", "20"))
+# Seconds to wait after transferring USDC to a platform before placing orders.
+# Base settles in ~2s; 8s gives comfortable headroom for platform indexing.
+ARB_DEPOSIT_WAIT_SECS = int(os.environ.get("ARB_DEPOSIT_WAIT_SECS", "8"))
 
 # Minimum ETH kept in the servicer wallet for gas. Distribution is skipped if
 # the ETH balance falls below this threshold.

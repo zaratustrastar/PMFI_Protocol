@@ -767,6 +767,54 @@ def execute_arb(
         f"total_cost={leg1_usdc + leg2_usdc:.4f}"
     )
 
+    # ── On-demand funding: deposit exactly what this trade needs ──────────
+    # Capital stays in the servicer wallet until a real opportunity is confirmed.
+    # This replaces fixed-ratio pre-allocation — each leg is funded for its exact
+    # cost (contracts × live_ask), so no capital is stranded on inactive platforms.
+    _servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
+    _servicer_key    = os.environ.get("POLY_PRIVATE_KEY", "")
+    if _servicer_wallet and _servicer_key:
+        try:
+            from .arb_funder import ensure_funded_for_trade
+            log(
+                f"💰 On-demand funding check: "
+                f"poly={leg1_usdc:.4f} USDC  {venue2}={leg2_usdc:.4f} USDC"
+            )
+            # Fund Poly leg
+            poly_funded = ensure_funded_for_trade(
+                venue="polymarket",
+                needed_usdc=leg1_usdc,
+                servicer_wallet=_servicer_wallet,
+                private_key=_servicer_key,
+            )
+            if not poly_funded:
+                result.error = (
+                    f"funding_failed: servicer cannot cover Poly leg "
+                    f"({leg1_usdc:.4f} USDC needed)"
+                )
+                log(f"❌ {result.error}")
+                return result
+
+            # Fund venue-2 leg (Kalshi only; Opinion is pre-funded via BSC bridge)
+            if venue2 == "kalshi":
+                kalshi_funded = ensure_funded_for_trade(
+                    venue="kalshi",
+                    needed_usdc=leg2_usdc,
+                    servicer_wallet=_servicer_wallet,
+                    private_key=_servicer_key,
+                )
+                if not kalshi_funded:
+                    result.error = (
+                        f"funding_failed: servicer cannot cover Kalshi leg "
+                        f"({leg2_usdc:.4f} USDC needed)"
+                    )
+                    log(f"❌ {result.error}")
+                    return result
+        except Exception as _fe:
+            log(f"⚠️ On-demand funding check failed ({_fe}) — attempting trade with existing platform balance")
+    else:
+        log("⚠️ ARB_SERVICER_WALLET/POLY_PRIVATE_KEY not set — skipping on-demand funding (using existing platform balance)")
+
     poly_order_side_label = "NO_BUY" if buying_poly_no else "YES_BUY"
     log(
         f"📤 Placing LEG 1: Polymarket {('NO' if buying_poly_no else 'YES')} buy "
