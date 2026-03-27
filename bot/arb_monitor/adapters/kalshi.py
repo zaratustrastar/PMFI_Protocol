@@ -428,22 +428,50 @@ def get_best_prices(ticker: str, debug: bool = False) -> dict:
 
     resp = http_client.get(url, venue="kalshi", headers=req_headers, timeout=10)
     if resp is None:
-        # http_client.get() returns None for:
-        #   - Cloudflare HTML block (403 with challenge page) → logged by http_client as 🛡️
-        #   - Network errors / exhausted retries
-        # Check if there's a proxy configured; if not, give the operator a hint.
+        # http_client.get() returns None when all retries are exhausted
+        # (network error, connection refused, or Cloudflare completely blocked the TCP).
         import os as _os
         if not _os.environ.get("PROXY_URL") and not _os.environ.get("HTTP_PROXY"):
             log(
-                f"❌ Kalshi price fetch failed for {ticker!r} (no proxy configured). "
-                f"If Cloudflare is blocking the VPS IP, set PROXY_URL=socks5://user:pass@host:port "
-                f"in .env and restart."
+                f"❌ [cloudflare_block_or_network] Kalshi price fetch for {ticker!r} returned None "
+                f"— all retries failed. Likely Cloudflare blocking this datacenter IP (no proxy configured). "
+                f"Set PROXY_URL=socks5://user:pass@host:port in .env and restart to route through a residential IP."
             )
         else:
-            log(f"❌ Kalshi price fetch failed for {ticker!r} (proxy is set — check proxy health)")
+            log(
+                f"❌ [network_error] Kalshi price fetch for {ticker!r} returned None "
+                f"— proxy is configured, check proxy health / connectivity."
+            )
         return empty
+
+    # Inspect the response to classify the failure type precisely.
     if resp.status_code != 200:
-        log(f"❌ Kalshi price HTTP {resp.status_code} for {ticker!r}")
+        body_preview = resp.text[:400] if resp.text else ""
+        is_html = body_preview.lstrip().startswith("<!") or "<html" in body_preview.lower()
+        if resp.status_code in (403, 503) and is_html:
+            import os as _os
+            proxy_hint = (
+                "Set PROXY_URL=socks5://user:pass@host:port in .env and restart."
+                if not _os.environ.get("PROXY_URL") and not _os.environ.get("HTTP_PROXY")
+                else "Proxy is configured — it may also be getting blocked; try a residential proxy."
+            )
+            log(
+                f"❌ [cloudflare_block] Kalshi GET /markets/{ticker} returned HTTP {resp.status_code} "
+                f"with HTML body (Cloudflare challenge page). {proxy_hint}"
+            )
+        elif resp.status_code in (401, 403):
+            try:
+                err_body = resp.json()
+            except Exception:
+                err_body = body_preview
+            log(
+                f"❌ [auth_error] Kalshi GET /markets/{ticker} returned HTTP {resp.status_code} "
+                f"(JSON body, RSA credentials rejected or API key revoked). body={err_body!r}"
+            )
+        elif resp.status_code == 404:
+            log(f"❌ [ticker_not_found] Kalshi GET /markets/{ticker} returned HTTP 404 — ticker may be expired/invalid")
+        else:
+            log(f"❌ [http_error] Kalshi GET /markets/{ticker} returned HTTP {resp.status_code}: {body_preview!r}")
         return empty
     try:
         data = resp.json()

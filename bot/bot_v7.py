@@ -5006,6 +5006,43 @@ def main():
         except Exception as e:
             print(f"⚠️ pArb vault DB init failed: {e}")
 
+    # Pre-warm Opinion Labs token cache BEFORE starting the execution loop.
+    # This prevents a startup race where the executor tries to look up tokens before
+    # the cache is populated.  Runs regardless of ARB_USE_ODDPOOL_ONLY — the scanner
+    # is disabled in Oddpool mode but the executor still needs token IDs for Opinion arbs.
+    if ARB_MONITOR_AVAILABLE:
+        try:
+            from arb_monitor.adapters.opinion import fetch_all_active_markets as _warm_opinion
+            print("🔄 [OpinionCache] Pre-warming Opinion token cache (synchronous)...")
+            _warm_result = _warm_opinion()
+            # Returns (list_of_markets, stats_dict)
+            _warm_count = len(_warm_result[0]) if isinstance(_warm_result, tuple) and _warm_result else 0
+            print(f"✅ [OpinionCache] Initial warm-up complete: {_warm_count} Opinion markets indexed")
+        except Exception as _e:
+            print(f"⚠️ [OpinionCache] Pre-warm failed (non-fatal): {_e}")
+
+        def _opinion_cache_worker():
+            import time as _time
+            REFRESH_INTERVAL = 30 * 60  # 30 minutes
+            _time.sleep(REFRESH_INTERVAL)  # first refresh after 30 min (already warmed above)
+            while True:
+                try:
+                    from arb_monitor.adapters.opinion import fetch_all_active_markets as _refresh_opinion
+                    print("🔄 [OpinionCache] Refreshing Opinion token cache (scheduled)...")
+                    _r = _refresh_opinion()
+                    # Returns (list_of_markets, stats_dict)
+                    _cnt = len(_r[0]) if isinstance(_r, tuple) and _r else 0
+                    print(f"✅ [OpinionCache] Cache refreshed: {_cnt} Opinion markets indexed")
+                except Exception as _e:
+                    print(f"⚠️ [OpinionCache] Refresh error: {_e}")
+                _time.sleep(REFRESH_INTERVAL)
+
+        _opinion_cache_thread = threading.Thread(
+            target=_opinion_cache_worker, daemon=True, name="opinion-cache-refresh"
+        )
+        _opinion_cache_thread.start()
+        print("🔄 Opinion token cache background refresh thread started (every 30 min)")
+
     # Start pArb execution loop (Oddpool-powered capital deployment)
     if ARB_MONITOR_AVAILABLE:
         try:
@@ -5018,34 +5055,6 @@ def main():
                 print("ℹ️ ARB_USE_ODDPOOL_ONLY=false — pArb execution loop skipped")
         except Exception as e:
             print(f"⚠️ pArb execution loop failed to start: {e}")
-
-    # Warm up Opinion Labs token cache (needed for execution-time token resolution).
-    # Runs regardless of ARB_USE_ODDPOOL_ONLY — the scanner is disabled in Oddpool mode
-    # but the executor still needs token IDs to check Opinion orderbooks.
-    # A background thread refreshes the cache every 30 minutes.
-    if ARB_MONITOR_AVAILABLE:
-        def _opinion_cache_worker():
-            import time as _time
-            REFRESH_INTERVAL = 30 * 60  # 30 minutes
-            try:
-                from arb_monitor.adapters.opinion import fetch_all_active_markets
-                while True:
-                    try:
-                        print("🔄 [OpinionCache] Refreshing Opinion token cache...")
-                        result = fetch_all_active_markets()
-                        count = len(result) if isinstance(result, list) else 0
-                        print(f"✅ [OpinionCache] Cache refreshed: {count} Opinion markets indexed")
-                    except Exception as _e:
-                        print(f"⚠️ [OpinionCache] Refresh error: {_e}")
-                    _time.sleep(REFRESH_INTERVAL)
-            except ImportError:
-                print("⚠️ [OpinionCache] opinion adapter not available — skipping cache warm-up")
-
-        _opinion_cache_thread = threading.Thread(
-            target=_opinion_cache_worker, daemon=True, name="opinion-cache-refresh"
-        )
-        _opinion_cache_thread.start()
-        print("🔄 Opinion token cache warm-up thread started (refreshes every 30 min)")
 
     # Start arb monitor scanner
     if ARB_MONITOR_AVAILABLE:

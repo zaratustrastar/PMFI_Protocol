@@ -289,9 +289,19 @@ def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
        Covers all Oddpool-supplied IDs since discovery runs before execution.
     2. Try the single-market endpoint /market/{market_id}.
     3. Fall back to filtered list /market?marketId={market_id}.
+
+    All API paths include verbose debug logging of raw responses so ID-format
+    mismatches between Oddpool-supplied IDs and Opinion's actual IDs are
+    immediately visible in logs.
     """
     if not market_id or not OPINION_API_KEY:
+        log(f"⚠️ lookup_token_ids_by_market_id: marketId={market_id!r} skipped — "
+            f"{'OPINION_API_KEY not set' if not OPINION_API_KEY else 'empty market_id'}")
         return None
+
+    cache_size = len(_MARKET_TOKEN_CACHE)
+    log(f"🔍 Token lookup for marketId={market_id!r} | cache_size={cache_size} | "
+        f"cache_keys_sample={list(_MARKET_TOKEN_CACHE.keys())[:8]!r}")
 
     # 1. Check discovery cache first — fastest, no API call needed.
     cached = _MARKET_TOKEN_CACHE.get(str(market_id))
@@ -300,43 +310,82 @@ def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
         log(f"✅ Token lookup (cache hit) marketId={market_id!r}: YES={yes[:12]}... NO={no[:12]}...")
         return cached
 
+    log(f"⚠️ marketId={market_id!r} not in cache — falling back to live API (cache may be empty or ID format mismatch)")
+
     try:
+        # Path 2: single-market endpoint
+        url1 = f"{OPINION_BASE_URL}/market/{market_id}"
+        log(f"📡 Token lookup path 2: GET {url1}")
         resp = http_client.get(
-            f"{OPINION_BASE_URL}/market/{market_id}",
+            url1,
             venue="opinion",
             headers=_headers(),
             timeout=10,
         )
-        if resp and resp.status_code == 200:
-            data = resp.json()
-            result = data.get("result", data)
-            if isinstance(result, dict):
-                yes = result.get("yesTokenId", "")
-                no = result.get("noTokenId", "")
-                if yes and no:
-                    log(f"✅ Token lookup for marketId={market_id!r}: YES={yes[:12]}... NO={no[:12]}...")
-                    return (yes, no)
+        if resp is not None:
+            log(f"📡 Token lookup path 2 status={resp.status_code}")
+            if resp.status_code == 200:
+                try:
+                    data = resp.json()
+                    result = data.get("result", data)
+                    log(f"📡 Token lookup path 2 raw keys={list(result.keys()) if isinstance(result, dict) else type(result).__name__!r}")
+                    if isinstance(result, dict):
+                        yes = result.get("yesTokenId", "")
+                        no = result.get("noTokenId", "")
+                        log(f"📡 Token lookup path 2: yesTokenId={yes!r} noTokenId={no!r}")
+                        if yes and no:
+                            _MARKET_TOKEN_CACHE[str(market_id)] = (yes, no)
+                            log(f"✅ Token lookup (live /market/{{id}}) marketId={market_id!r}: YES={yes[:12]}... NO={no[:12]}...")
+                            return (yes, no)
+                except Exception as _je:
+                    log(f"⚠️ Token lookup path 2 JSON parse error: {_je} | raw={resp.text[:200]!r}")
+            else:
+                log(f"⚠️ Token lookup path 2 unexpected status {resp.status_code}: {resp.text[:200]!r}")
+        else:
+            log(f"⚠️ Token lookup path 2: http_client returned None (connection error)")
+
+        # Path 3: filtered list endpoint
+        url3 = f"{OPINION_BASE_URL}/market"
+        log(f"📡 Token lookup path 3: GET {url3}?marketId={market_id}&limit=5")
         resp2 = http_client.get(
-            f"{OPINION_BASE_URL}/market",
+            url3,
             venue="opinion",
             params={"marketId": market_id, "limit": 5},
             headers=_headers(),
             timeout=10,
         )
-        if resp2 and resp2.status_code == 200:
-            data = resp2.json()
-            result = data.get("result", {})
-            markets = result.get("list", []) if isinstance(result, dict) else []
-            for m in markets:
-                if str(m.get("marketId", "")) == str(market_id):
-                    yes = m.get("yesTokenId", "")
-                    no = m.get("noTokenId", "")
-                    if yes and no:
-                        log(f"✅ Token lookup (list fallback) marketId={market_id!r}: YES={yes[:12]}...")
-                        return (yes, no)
+        if resp2 is not None:
+            log(f"📡 Token lookup path 3 status={resp2.status_code}")
+            if resp2.status_code == 200:
+                try:
+                    data = resp2.json()
+                    result = data.get("result", {})
+                    log(f"📡 Token lookup path 3 result type={type(result).__name__!r} keys={list(result.keys()) if isinstance(result, dict) else '?'!r}")
+                    markets = result.get("list", []) if isinstance(result, dict) else []
+                    log(f"📡 Token lookup path 3: {len(markets)} markets returned | "
+                        f"marketIds={[m.get('marketId') for m in markets]!r}")
+                    for m in markets:
+                        mid_str = str(m.get("marketId", ""))
+                        yes = m.get("yesTokenId", "")
+                        no = m.get("noTokenId", "")
+                        log(f"📡   market marketId={mid_str!r} yesTokenId={yes!r} noTokenId={no!r}")
+                        if mid_str == str(market_id):
+                            if yes and no:
+                                _MARKET_TOKEN_CACHE[str(market_id)] = (yes, no)
+                                log(f"✅ Token lookup (list fallback) marketId={market_id!r}: YES={yes[:12]}...")
+                                return (yes, no)
+                except Exception as _je:
+                    log(f"⚠️ Token lookup path 3 JSON parse error: {_je} | raw={resp2.text[:200]!r}")
+            else:
+                log(f"⚠️ Token lookup path 3 unexpected status {resp2.status_code}: {resp2.text[:200]!r}")
+        else:
+            log(f"⚠️ Token lookup path 3: http_client returned None (connection error)")
+
     except Exception as e:
-        log(f"⚠️ lookup_token_ids_by_market_id({market_id!r}): {e}")
-    log(f"⚠️ lookup_token_ids_by_market_id: no tokens found for marketId={market_id!r}")
+        log(f"⚠️ lookup_token_ids_by_market_id({market_id!r}) exception: {e}")
+
+    log(f"❌ lookup_token_ids_by_market_id: no tokens found for marketId={market_id!r} "
+        f"(cache_size={len(_MARKET_TOKEN_CACHE)}, checked both /market/{{id}} and /market?marketId={{id}})")
     return None
 
 
