@@ -971,39 +971,34 @@ def _send_claim_batch_with_retry(
     return next_nonce
 
 
-def auto_claim_after_report(vault_address: str, signer_key: str, report_tx_hash: str) -> None:
-    """After report() is confirmed on-chain, sweep all CLAIMABLE requests.
+def sweep_claimable_requests(vault_address: str, signer_key: str) -> None:
+    """Scan ALL deposit and redeem requests and auto-claim any in CLAIMABLE state.
 
-    Flow:
-      1. Wait for report() tx receipt (up to 90s)
-      2. Read all deposit + redeem request counts
-      3. Scan each for CLAIMABLE (status=1) — collect id + detail
-      4. Process in batches of MAX_CLAIMS_PER_TX (25) to avoid gas limit issues
-      5. Each batch: broadcast → wait for receipt → log confirmed per-claim outcomes
-      6. Failed batch: split in half + retry once (each half); log any remaining failures
-      7. Nonces are managed sequentially to allow pipelined batches
+    This is the core claiming engine. It is called:
+      a) by auto_claim_after_report() immediately after a report() tx confirms, AND
+      b) at the start of every run_reporter_tick() as a catch-up sweep to handle
+         requests that went CLAIMABLE but were missed (e.g. report tx timed-out
+         last cycle, or a previous sweep batch partially failed).
 
-    The contract's autoClaimDeposits / autoClaimRedeems always deliver to the
-    receiver address locked in at request submission time — no redirect possible.
-    All errors are swallowed; this never crashes the reporter loop.
+    Safe to call when there are zero CLAIMABLE requests — it no-ops silently.
+    All errors are swallowed; never crashes the reporter loop.
     """
-    log("⏳ [AutoClaim] Waiting for report tx to confirm before auto-claiming…")
-    if not _wait_for_tx_confirm(report_tx_hash, timeout=90):
-        log("⚠️ [AutoClaim] Report tx unconfirmed after 90s — skipping auto-claim sweep")
+    log("🔄 [AutoClaim] Scanning all requests for CLAIMABLE status…")
+
+    try:
+        from eth_account import Account
+        account   = Account.from_key(signer_key)
+        nonce     = _get_nonce(account.address)
+        gas_price = int(_get_gas_price() * 1.2)
+    except Exception as e:
+        log(f"⚠️ [AutoClaim] Cannot initialise signer for sweep: {e}")
         return
-
-    log("🔄 [AutoClaim] Report confirmed — scanning all requests…")
-
-    from eth_account import Account
-    account   = Account.from_key(signer_key)
-    nonce     = _get_nonce(account.address)
-    gas_price = int(_get_gas_price() * 1.2)
 
     # ── Deposit requests ──────────────────────────────────────────────────────
     try:
         dep_count = _get_request_count(vault_address, is_deposit=True)
-        log(f"📋 [AutoClaim] Scanning {dep_count} deposit request(s)…")
-        dep_claimable = []      # list of {"id": int, "receiver": str, "assets": int, "processed_pps": int}
+        log(f"📋 [AutoClaim] Total deposit requests: {dep_count}")
+        dep_claimable = []      # {"id", "receiver", "assets", "processed_pps"}
         for i in range(dep_count):
             try:
                 req = _get_deposit_request(vault_address, i)
@@ -1022,7 +1017,10 @@ def auto_claim_after_report(vault_address: str, signer_key: str, report_tx_hash:
                 log(f"  ⚠️ Could not read deposit #{i}: {e}")
 
         if dep_claimable:
-            log(f"🏦 [AutoClaim] {len(dep_claimable)} claimable deposit(s) — processing in batches of {MAX_CLAIMS_PER_TX}")
+            log(
+                f"🏦 [AutoClaim] {len(dep_claimable)} claimable deposit(s)"
+                f" — batching in chunks of {MAX_CLAIMS_PER_TX}"
+            )
             ids = [d["id"] for d in dep_claimable]
             for chunk_start in range(0, len(ids), MAX_CLAIMS_PER_TX):
                 chunk_ids     = ids[chunk_start : chunk_start + MAX_CLAIMS_PER_TX]
@@ -1039,8 +1037,8 @@ def auto_claim_after_report(vault_address: str, signer_key: str, report_tx_hash:
     # ── Redeem requests ───────────────────────────────────────────────────────
     try:
         rdm_count = _get_request_count(vault_address, is_deposit=False)
-        log(f"📋 [AutoClaim] Scanning {rdm_count} redeem request(s)…")
-        rdm_claimable = []      # list of {"id": int, "receiver": str, "claimable_assets": int}
+        log(f"📋 [AutoClaim] Total redeem requests: {rdm_count}")
+        rdm_claimable = []      # {"id", "receiver", "claimable_assets"}
         for i in range(rdm_count):
             try:
                 req = _get_redeem_request(vault_address, i)
@@ -1058,7 +1056,10 @@ def auto_claim_after_report(vault_address: str, signer_key: str, report_tx_hash:
                 log(f"  ⚠️ Could not read redeem #{i}: {e}")
 
         if rdm_claimable:
-            log(f"💸 [AutoClaim] {len(rdm_claimable)} claimable redeem(s) — processing in batches of {MAX_CLAIMS_PER_TX}")
+            log(
+                f"💸 [AutoClaim] {len(rdm_claimable)} claimable redeem(s)"
+                f" — batching in chunks of {MAX_CLAIMS_PER_TX}"
+            )
             ids = [r["id"] for r in rdm_claimable]
             for chunk_start in range(0, len(ids), MAX_CLAIMS_PER_TX):
                 chunk_ids     = ids[chunk_start : chunk_start + MAX_CLAIMS_PER_TX]
@@ -1073,16 +1074,48 @@ def auto_claim_after_report(vault_address: str, signer_key: str, report_tx_hash:
         log(f"⚠️ [AutoClaim] Redeem sweep error (non-fatal): {e}")
 
 
+def auto_claim_after_report(vault_address: str, signer_key: str, report_tx_hash: str) -> None:
+    """Trigger an auto-claim sweep after a report() tx is submitted.
+
+    Waits up to 90s for the report tx to confirm before sweeping (requests only
+    become CLAIMABLE once the report mines).  If the tx is not confirmed within
+    90s, a best-effort sweep runs anyway — this is a no-op if the tx hasn't
+    mined yet, but guarantees that already-CLAIMABLE requests (from a previous
+    report cycle that timed out) are claimed without further delay.
+
+    The definitive catch-up path for missed claims is the sweep that runs at
+    the start of every run_reporter_tick() call.
+
+    All errors are swallowed; never crashes the reporter loop.
+    """
+    log("⏳ [AutoClaim] Waiting for report tx to confirm before sweeping…")
+    confirmed = _wait_for_tx_confirm(report_tx_hash, timeout=90)
+    if confirmed:
+        log("✅ [AutoClaim] Report tx confirmed — running claim sweep")
+    else:
+        log(
+            "⚠️ [AutoClaim] Report tx not confirmed within 90s"
+            " — running best-effort sweep (may find 0 claimable if tx still pending)"
+        )
+
+    # Always run the sweep, whether the report tx confirmed or timed out.
+    # If the tx is still pending, this will find 0 CLAIMABLE and no-op.
+    # If it just barely mined after the 90s poll, this will catch those claims.
+    # Either way, the next run_reporter_tick() catch-up sweep is the safety net.
+    sweep_claimable_requests(vault_address, signer_key)
+
+
 def run_reporter_tick():
     """Called once per execution cycle.
 
     Order of operations:
-      1. Run withdrawal funding waterfall (sweep servicer cash → vault if shortfall exists)
-      2. Check for early report trigger (redemption pressure bypasses cooldown)
-      3. Build and submit report() if cooldown elapsed OR early trigger fired
-      4. Auto-claim all CLAIMABLE requests once report() confirms on-chain
-         (calls autoClaimDeposits / autoClaimRedeems on the vault contract)
-      5. Silently no-ops if ARB_VAULT_V2_ADDRESS not set
+      1.  Waterfall: sweep servicer cash → vault if redemption shortfall exists
+      1b. Catch-up claim sweep: auto-claim any CLAIMABLE requests (runs every tick
+          to handle missed claims from previous timed-out cycles)
+      2.  Check for early report trigger (redemption pressure bypasses cooldown)
+      3.  Build and submit report() if cooldown elapsed OR early trigger fired
+      4.  Auto-claim sweep immediately after report() confirms on-chain
+      5.  Silently no-ops if ARB_VAULT_V2_ADDRESS not set
 
     All errors are caught so a reporter failure never crashes the arb loop.
     """
@@ -1098,6 +1131,18 @@ def run_reporter_tick():
         run_withdrawal_waterfall(vault_address, servicer_key)
     except Exception as e:
         log(f"⚠️ Waterfall error (non-fatal): {e}")
+
+    # ── 1b. Catch-up claim sweep ───────────────────────────────────────────────
+    # Always sweep for CLAIMABLE requests on every tick.  This handles:
+    #   - Requests that became CLAIMABLE in a previous cycle but weren't claimed
+    #     because auto_claim_after_report timed out (90s) or partially failed.
+    #   - Reports processed before this bot version was deployed (legacy backlog).
+    # Safe no-op when no CLAIMABLE requests exist.
+    if signer_key:
+        try:
+            sweep_claimable_requests(vault_address, signer_key)
+        except Exception as e:
+            log(f"⚠️ Catch-up sweep error (non-fatal): {e}")
 
     # ── 2 + 3. Report: cooldown OR early trigger ───────────────────────────────
     try:
