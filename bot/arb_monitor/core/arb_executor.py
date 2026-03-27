@@ -464,10 +464,40 @@ def execute_arb(
     log(f"🔍 Starting execution for pair {pair_id} (venue2={venue2})")
 
     poly_yes_token = opportunity.poly_yes_token
+    poly_no_token = getattr(opportunity, "poly_no_token", "") or ""
+    kalshi_side = getattr(opportunity, "kalshi_side", "NO")
     kalshi_event_ticker = opportunity.kalshi_ticker  # may be event-level (e.g. "KXBTC-25FEB21")
     opinion_market_id = getattr(opportunity, "opinion_market_id", "")
-    opinion_side = getattr(opportunity, "kalshi_side", "NO")  # reuse kalshi_side for opinion side
+    opinion_side = kalshi_side  # reuse kalshi_side for opinion side
     outcome_key = getattr(opportunity, "outcome_key", "yes")
+
+    # Determine which Polymarket token to price.
+    # When kalshi_side=="YES" the executor is buying YES on venue2 and NO on Polymarket.
+    # → Must fetch the NO token's ask (not the YES token's ask).
+    # When kalshi_side=="NO" the executor is buying YES on Polymarket.
+    # → Use the YES token's ask as normal.
+    buying_poly_no = (kalshi_side == "YES")
+    if buying_poly_no:
+        if poly_no_token:
+            poly_token_for_price = poly_no_token
+            log(
+                f"↔️ kalshi_side=YES → buying NO on Poly. "
+                f"Using NO token {poly_no_token[:16]}... for price check"
+            )
+        else:
+            # NO token not resolved yet — cannot price the correct leg; abort.
+            result.error = (
+                "poly_no_token_missing: buying NO on Polymarket but NO token ID not resolved. "
+                "Will retry on next Oddpool cycle after token cache is populated."
+            )
+            log(f"❌ {result.error}")
+            return result
+    else:
+        poly_token_for_price = poly_yes_token
+        log(
+            f"↔️ kalshi_side=NO → buying YES on Poly. "
+            f"Using YES token {poly_yes_token[:16]}... for price check"
+        )
 
     # Resolve event-level Kalshi ticker → market-level ticker (e.g. "KXBTC-25FEB21-T100500").
     # Oddpool supplies event tickers; Kalshi's price/orderbook APIs need market tickers.
@@ -484,11 +514,12 @@ def execute_arb(
         kalshi_ticker = kalshi_event_ticker
 
     log(
-        f"📊 Re-checking live prices for poly={poly_yes_token[:16]}... "
+        f"📊 Re-checking live prices for poly={poly_token_for_price[:16]}... "
+        f"(side={'NO' if buying_poly_no else 'YES'}) "
         f"venue2={venue2} "
         f"{'kalshi=' + kalshi_ticker if venue2 != 'opinion' else 'opinion=' + opinion_market_id}"
     )
-    poly_prices = poly_get_best_prices(poly_yes_token)
+    poly_prices = poly_get_best_prices(poly_token_for_price)
     live_poly_ask = poly_prices.get("best_ask")
 
     # Fetch live leg-2 ask based on venue
@@ -590,7 +621,7 @@ def execute_arb(
     # This is an explicit asymmetry vs Kalshi (which FAIL-CLOSEs on depth unavailability).
     # If your risk tolerance requires strict full-ladder verification on both legs,
     # change the else branch to: `result.error = "poly_depth_unavailable: ..."; return result`.
-    poly_book = poly_fetch_orderbook(poly_yes_token)
+    poly_book = poly_fetch_orderbook(poly_token_for_price)
     if poly_book:
         poly_fillable, poly_depth_usdc = poly_compute_fillable(poly_book, max_poly_fill_price)
     else:
@@ -670,16 +701,21 @@ def execute_arb(
         f"total_cost={leg1_usdc + leg2_usdc:.4f}"
     )
 
-    log(f"📤 Placing LEG 1: Polymarket YES buy {contract_count} contracts @ {live_poly_ask}")
+    poly_order_side_label = "NO_BUY" if buying_poly_no else "YES_BUY"
+    log(
+        f"📤 Placing LEG 1: Polymarket {('NO' if buying_poly_no else 'YES')} buy "
+        f"{contract_count} contracts @ {live_poly_ask} "
+        f"(token={poly_token_for_price[:16]}...)"
+    )
     leg1_ok, leg1_order_id, leg1_err = _place_poly_order(
-        token_id=poly_yes_token,
+        token_id=poly_token_for_price,
         side="BUY",
         price=live_poly_ask,
         size_usdc=leg1_usdc,
     )
     result.leg1_order_id = leg1_order_id
     log_execution_to_db(
-        pair_id=pair_id, leg=1, venue="polymarket", side="YES_BUY",
+        pair_id=pair_id, leg=1, venue="polymarket", side=poly_order_side_label,
         price=live_poly_ask, size=float(contract_count),
         success=leg1_ok, error=leg1_err, order_id=leg1_order_id,
     )
@@ -690,8 +726,6 @@ def execute_arb(
         return result
 
     log(f"✅ Leg 1 placed: {contract_count} contracts orderId={leg1_order_id}")
-
-    kalshi_side = opportunity.kalshi_side if hasattr(opportunity, "kalshi_side") else "YES"
 
     # ── Place Leg 2: Kalshi or Opinion Labs ───────────────────────────────
     if venue2 == "opinion":
@@ -731,7 +765,7 @@ def execute_arb(
         log(f"❌ Leg 2 failed: {leg2_err} — initiating AUTO-UNWIND of leg 1")
         unwind_ok = _unwind_poly_leg(
             order_id=leg1_order_id,
-            token_id=poly_yes_token,
+            token_id=poly_token_for_price,   # must match the token we actually bought
             filled_size_usdc=leg1_usdc,
             filled_price=live_poly_ask,
         )

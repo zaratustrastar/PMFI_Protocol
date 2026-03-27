@@ -1,0 +1,58 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "⚠️.*Oddpool quoted|📐 Live edge|❌ edge_too_thin|✅.*ArbExec|Executing pair|fallback cap"
+Mar 27 00:52:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.0620 (opp_age=5s)
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.0520 (poly_ask=0.99, opinion_ask=0.062)
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.0520 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=megaquake-by-march-31-2026_megaquake_by_march_31 venue2=opinion | score=665.5 AR=1.50× net_edge=1.00% conf=0.60 | days=3.96d size=$742.43
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.0090 (opp_age=6s)
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.0080 (poly_ask=0.999, opinion_ask=0.009)
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.0080 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_cle venue2=opinion | score=561.7 AR=0.02× net_edge=0.60% conf=0.98 | days=95.96d size=$24895.83
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.9390 (opp_age=7s)
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.9290 (poly_ask=0.99, opinion_ask=0.939)
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.9290 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_hou venue2=opinion | score=411.4 AR=0.03× net_edge=0.90% conf=0.96 | days=95.96d size=$12347.45
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.9690 (opp_age=8s)
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.9590 (poly_ask=0.99, opinion_ask=0.969)
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.9590 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fed-rate-cuts-2026_cuts_5 venue2=opinion | score=341.3 AR=0.04× net_edge=3.10% conf=0.95 | days=278.96d size=$8848.81
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.9430 (opp_age=9s)
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.9420 (poly_ask=0.999, opinion_ask=0.943)
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.9420 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=btc-max-2026_value_above_120k venue2=opinion | score=312.7 AR=0.12× net_edge=9.40% conf=0.85 | days=280.17d size=$2946.12
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.7000 (opp_age=9s)
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.6990 (poly_ask=0.999, opinion_ask=0.7)
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.6990 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=gop-nominee-2028_marco_rubio venue2=kalshi | score=305.8 AR=0.01× net_edge=2.60% conf=0.98 | days=955.76d size=$31532.78
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.7300 (opp_age=10s)
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.7290 (poly_ask=0.999, kalshi_ask=0.73)
+Mar 27 00:52:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.7290 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=sp500-add-q1-2026_microstrategy venue2=opinion | score=300.1 AR=0.44× net_edge=0.40% conf=0.67 | days=3.96d size=$1009.95
+Mar 27 00:52:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=hottest-years-2026_number_1 venue2=opinion | score=209.4 AR=0.08× net_edge=6.10% conf=0.86 | days=278.96d size=$3029.03
+Mar 27 00:52:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.1630 (opp_age=12s)
+Mar 27 00:52:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.1530 (poly_ask=0.99, opinion_ask=0.163)
+Mar 27 00:52:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.1530 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=stanley-cup-2026_tampa_bay_lightning venue2=opinion | score=180.9 AR=0.04× net_edge=1.00% conf=0.91 | days=94.76d size=$5086.16
+Mar 27 00:52:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.8410 (opp_age=13s)
+Mar 27 00:52:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.8310 (poly_ask=0.99, opinion_ask=0.841)
+Mar 27 00:52:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.8310 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_edmundo_gonzalez venue2=kalshi | score=161.5 AR=0.03× net_edge=2.20% conf=0.92 | days=278.96d size=$6054.93
+Mar 27 00:52:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.9500 (opp_age=14s)
+Mar 27 00:52:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.9400 (poly_ask=0.99, kalshi_ask=0.95)
+Mar 27 00:52:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.9400 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_lal venue2=opinion | score=155.8 AR=0.01× net_edge=0.20% conf=0.98 | days=95.96d size=$20910.03
+Mar 27 00:52:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.0330 (opp_age=15s)
+Mar 27 00:52:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.0230 (poly_ask=0.99, opinion_ask=0.033)
+Mar 27 00:52:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.0230 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fed-rate-cuts-2026_cuts_5 venue2=opinion | score=153.8 AR=0.02× net_edge=1.40% conf=0.95 | days=278.96d size=$8848.81
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.0690 (opp_age=16s)
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.0680 (poly_ask=0.999, opinion_ask=0.069)
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.0680 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_gavin_newsom venue2=kalshi | score=143.4 AR=0.00× net_edge=0.50% conf=0.99 | days=955.76d size=$75717.42
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.7270 (opp_age=16s)
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.7260 (poly_ask=0.999, kalshi_ask=0.727)
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.7260 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-playoffs-teams_charlotte_hornets venue2=opinion | score=142.3 AR=1.06× net_edge=3.40% conf=0.40 | days=16.84d size=$333.95
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.3300 (opp_age=17s)
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] 📐 Live edge: -0.3200 (poly_ask=0.99, opinion_ask=0.33)
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.3200 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 00:52:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2707756]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_maria_corina_machado venue2=kalshi | score=134.8 AR=0.02× net_edge=1.40% conf=0.94 | days=278.96d size=$7813.26

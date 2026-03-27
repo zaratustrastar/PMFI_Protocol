@@ -41,46 +41,59 @@ def log(msg: str):
 
 
 # ── Polymarket slug → CLOB token ID cache ────────────────────────────────────
-# Keyed by slug string. Value: (yes_token, no_token, cached_at) or (None, None, t).
+# Keyed by (slug, label_normalized). Value: (yes_token, no_token, cached_at).
+# Using a (slug, label) composite key so different outcomes of a multi-outcome event
+# (e.g. NBA Champion 2026 → Houston, Lakers) each resolve to their own token pair.
 # TTL: 60 minutes so token IDs are re-validated occasionally without hammering Gamma.
-_SLUG_CACHE: dict[str, tuple[Optional[str], Optional[str], float]] = {}
+_SLUG_CACHE: dict[tuple[str, str], tuple[Optional[str], Optional[str], float]] = {}
 _SLUG_CACHE_TTL = 3600  # seconds
 
 
-def _resolve_poly_token(slug: str) -> Optional[str]:
-    """Resolve a Polymarket event slug to a CLOB YES token ID.
+def _slug_cache_key(slug: str, label: str) -> tuple[str, str]:
+    """Normalise cache key from slug + label."""
+    return (slug, label.lower().replace("_", " ").replace("-", " ").strip())
 
-    Uses a 60-minute in-memory cache. Returns None when the slug cannot be resolved
-    (network error, not found, etc.). Failure is cached briefly (5 min) to avoid
-    hammering Gamma on every cycle for a permanently missing market.
+
+def _resolve_poly_tokens(slug: str, label: str = "") -> tuple[Optional[str], Optional[str]]:
+    """Resolve a Polymarket event slug to a (YES token, NO token) pair.
+
+    Uses the label to pick the right market within multi-outcome events (e.g. NBA
+    Champion — Houston vs. LA Lakers). Cache key is (slug, normalised_label) so each
+    team/candidate gets its own entry.
+
+    Returns (None, None) on failure (display-only, retry on next cycle).
     """
     if not slug:
-        return None
+        return (None, None)
 
+    key = _slug_cache_key(slug, label)
     now = time.time()
-    cached = _SLUG_CACHE.get(slug)
+    cached = _SLUG_CACHE.get(key)
     if cached is not None:
-        yes_tok, _no_tok, cached_at = cached
-        ttl = 300 if yes_tok is None else _SLUG_CACHE_TTL  # short TTL for failures
+        yes_tok, no_tok, cached_at = cached
+        ttl = 300 if yes_tok is None else _SLUG_CACHE_TTL
         if now - cached_at < ttl:
-            return yes_tok  # None = previously failed (display-only until TTL expires)
+            return (yes_tok, no_tok)
 
     try:
         from .polymarket import lookup_token_ids_by_slug
-        result = lookup_token_ids_by_slug(slug)
+        result = lookup_token_ids_by_slug(slug, label=label)
         if result:
             yes_tok, no_tok = result
-            _SLUG_CACHE[slug] = (yes_tok, no_tok, now)
-            log(f"✅ Token resolved for slug={slug!r}: {yes_tok[:16]}...")
-            return yes_tok
+            _SLUG_CACHE[key] = (yes_tok, no_tok, now)
+            log(
+                f"✅ Tokens resolved slug={slug!r} label={label!r}: "
+                f"YES={yes_tok[:16]}... NO={no_tok[:16]}..."
+            )
+            return (yes_tok, no_tok)
         else:
-            _SLUG_CACHE[slug] = (None, None, now)
-            log(f"⚠️ Could not resolve token for slug={slug!r} — display-only until retry")
-            return None
+            _SLUG_CACHE[key] = (None, None, now)
+            log(f"⚠️ Could not resolve tokens for slug={slug!r} label={label!r} — display-only")
+            return (None, None)
     except Exception as e:
-        _SLUG_CACHE[slug] = (None, None, now)
-        log(f"⚠️ Token resolution error for slug={slug!r}: {e}")
-        return None
+        _SLUG_CACHE[key] = (None, None, now)
+        log(f"⚠️ Token resolution error for slug={slug!r} label={label!r}: {e}")
+        return (None, None)
 
 
 @dataclass
@@ -341,9 +354,13 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         days_to_expiry = max(0.0, (expiry_ts - now) / 86400) if expiry_ts > now else 0.0
         pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)
 
-        # Resolve token early so the scorer (Step 4) can use it for real book depth.
-        # Cached for 60 min; failures cached 5 min to avoid Gamma hammering.
-        resolved_token = _resolve_poly_token(polymarket_slug)
+        # Resolve both YES and NO token IDs early so the scorer (Step 4) can use them
+        # for real book depth. Uses label (e.g. "Houston Rockets") or outcome_key (e.g. "hou")
+        # to pick the right market within multi-outcome events (NBA Champion, elections, etc.).
+        # Prefers label; falls back to outcome_key when label is empty.
+        # Cached 60 min; failures 5 min to avoid hammering Gamma.
+        match_hint = label or outcome_key
+        resolved_yes_token, resolved_no_token = _resolve_poly_tokens(polymarket_slug, match_hint)
 
         # ── Profit-maximising scorer ──────────────────────────────────────────
         # Step 1: net edge — subtract expected slippage and execution risk buffer.
@@ -411,21 +428,23 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         )
         # ─────────────────────────────────────────────────────────────────────
 
-        # resolved_token was set earlier (before scorer) — reuse it here.
-        poly_yes_token = resolved_token if resolved_token else polymarket_slug
-        is_display_only = resolved_token is None  # False when we have a real token ID
+        # resolved_yes_token / resolved_no_token were set earlier (before scorer).
+        poly_yes_token = resolved_yes_token if resolved_yes_token else polymarket_slug
+        poly_no_token = resolved_no_token or ""
+        is_display_only = resolved_yes_token is None  # False when we have real token IDs
 
         log(
             f"{'✅' if not is_display_only else '👁'} pair={pair_id!r} edge={gross_edge_pct:.2f}¢ "
             f"poly={our_poly_ask:.2f} venue2({venue2}/{kalshi_side})={our_venue2_ask:.2f} "
             f"days={days_to_expiry:.1f} token={'resolved' if not is_display_only else 'slug-only'} "
+            f"no_token={'set' if poly_no_token else 'missing'} "
             f"title={event_title[:40]!r}"
         )
 
         return ArbOpportunity(
             pair_id=pair_id,
-            poly_yes_token=poly_yes_token,    # real CLOB token ID when resolved, slug otherwise
-            poly_no_token="",
+            poly_yes_token=poly_yes_token,    # real CLOB YES token ID when resolved, slug otherwise
+            poly_no_token=poly_no_token,       # real CLOB NO token ID (empty if not resolved)
             kalshi_ticker=kalshi_ticker,
             poly_yes_ask=our_poly_ask,
             kalshi_yes_ask=our_venue2_ask,

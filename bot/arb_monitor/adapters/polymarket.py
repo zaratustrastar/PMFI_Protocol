@@ -243,9 +243,57 @@ def get_polymarket_markets() -> list[NormalizedMarket]:
     return normalized
 
 
-def lookup_token_ids_by_slug(slug: str) -> Optional[tuple[str, str]]:
+def _label_match_score(label: str, market: dict) -> float:
+    """Score how well a Gamma market matches an Oddpool label.
+
+    Returns 0.0–1.0. Used to pick the right market within a multi-outcome
+    event (e.g. "hou" matching "Houston Rockets" within NBA Champion 2026).
+    """
+    if not label:
+        return 0.0
+    label_n = label.lower().replace("_", " ").replace("-", " ").strip()
+    label_parts = set(label_n.split())
+
+    candidates = [
+        (market.get("groupItemTitle") or ""),
+        (market.get("question") or ""),
+        (market.get("description") or ""),
+        (market.get("title") or ""),
+    ]
+    best = 0.0
+    for candidate in candidates:
+        if not candidate:
+            continue
+        c = candidate.lower()
+        # Exact substring
+        if label_n in c:
+            best = max(best, 1.0)
+            continue
+        # Word overlap score
+        c_parts = set(c.replace("-", " ").replace("_", " ").split())
+        overlap = label_parts & c_parts
+        if overlap:
+            score = len(overlap) / max(len(label_parts), 1)
+            # Partial token match: "hou" inside "houston"
+            for lp in label_parts:
+                if len(lp) >= 3:
+                    for cp in c_parts:
+                        if lp in cp or cp in lp:
+                            score = max(score, 0.5)
+            best = max(best, score)
+    return best
+
+
+def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, str]]:
     """Fetch YES/NO CLOB token IDs for a Polymarket event by its URL slug.
+
     Returns (yes_token_id, no_token_id) or None on failure.
+
+    For multi-outcome events (NBA Champion, election candidates, etc.) the event
+    contains many markets — one per outcome. The optional `label` parameter (from
+    Oddpool's entry["label"]) is used to score and pick the correct market rather
+    than blindly returning the first one. Without label, falls back to first market.
+
     Tries the /events endpoint first (event slug → markets), then /markets with slug filter.
     """
     if not slug:
@@ -260,31 +308,70 @@ def lookup_token_ids_by_slug(slug: str) -> Optional[tuple[str, str]]:
         if resp and resp.status_code == 200:
             payload = resp.json()
             events = payload if isinstance(payload, list) else payload.get("events", [payload])
+            # Collect all markets from all matching events
+            all_markets = []
             for event in events:
                 for m in event.get("markets", []):
                     clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
                     if len(clob_ids) >= 2:
-                        log(f"✅ Token lookup for slug={slug!r}: YES={clob_ids[0][:12]}... NO={clob_ids[1][:12]}...")
-                        return (clob_ids[0], clob_ids[1])
+                        all_markets.append((clob_ids, m))
+            if all_markets:
+                chosen_ids, chosen_m = _pick_best_market(all_markets, label)
+                log(
+                    f"✅ Token lookup for slug={slug!r} label={label!r}: "
+                    f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
+                    f"YES={chosen_ids[0][:12]}... NO={chosen_ids[1][:12]}..."
+                )
+                return (chosen_ids[0], chosen_ids[1])
+
         resp2 = http_client.get(
             f"{POLY_GAMMA_URL}/markets",
             venue="polymarket",
-            params={"slug": slug, "limit": 3},
+            params={"slug": slug, "limit": 10},
             timeout=10,
         )
         if resp2 and resp2.status_code == 200:
             markets = resp2.json()
             if isinstance(markets, dict):
                 markets = markets.get("markets", [markets])
+            all_markets = []
             for m in (markets if isinstance(markets, list) else []):
                 clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
                 if len(clob_ids) >= 2:
-                    log(f"✅ Token lookup (markets fallback) slug={slug!r}: YES={clob_ids[0][:12]}...")
-                    return (clob_ids[0], clob_ids[1])
+                    all_markets.append((clob_ids, m))
+            if all_markets:
+                chosen_ids, chosen_m = _pick_best_market(all_markets, label)
+                log(
+                    f"✅ Token lookup (markets fallback) slug={slug!r} label={label!r}: "
+                    f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
+                    f"YES={chosen_ids[0][:12]}..."
+                )
+                return (chosen_ids[0], chosen_ids[1])
     except Exception as e:
         log(f"⚠️ lookup_token_ids_by_slug({slug!r}): {e}")
-    log(f"⚠️ lookup_token_ids_by_slug: no tokens found for slug={slug!r}")
+    log(f"⚠️ lookup_token_ids_by_slug: no tokens found for slug={slug!r} label={label!r}")
     return None
+
+
+def _pick_best_market(
+    candidates: list[tuple[list[str], dict]],
+    label: str,
+) -> tuple[list[str], dict]:
+    """Pick the best-matching market from a list of (clob_ids, market_dict) pairs.
+
+    If label is provided, scores each market against the label and returns the
+    highest-scoring one. Falls back to the first candidate when all scores are 0.
+    """
+    if not label or len(candidates) == 1:
+        return candidates[0]
+    best_score = -1.0
+    best = candidates[0]
+    for clob_ids, m in candidates:
+        score = _label_match_score(label, m)
+        if score > best_score:
+            best_score = score
+            best = (clob_ids, m)
+    return best
 
 
 def fetch_orderbook(token_id: str) -> Optional[dict]:
