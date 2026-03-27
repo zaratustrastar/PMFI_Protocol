@@ -44,6 +44,21 @@ Key concepts:
 - V2 is additive: set `ARB_VAULT_V2_ADDRESS` to enable; leave unset to silently skip
 - Frontend auto-routes to V2 when `ARB_VAULT_V2_ADDRESS` is set; V1 functions remain as fallback
 
+## Auto-Claim (reporter post-report sweep)
+
+After each successful `report()` call the reporter automatically sweeps all CLAIMABLE requests using two new permissionless contract functions:
+
+- `autoClaimDeposits(uint256[] requestIds)` — mints pARB shares → stored receiver
+- `autoClaimRedeems(uint256[] requestIds)` — transfers USDC → stored receiver
+
+Users never need to click "Claim Shares" manually. The reporter:
+1. Waits for the report() tx to confirm on-chain (polls up to 90s)
+2. Reads `depositRequestCount()` / `redeemRequestCount()` to get total request counts
+3. Reads each request struct to find CLAIMABLE (status=1) ones
+4. Broadcasts `autoClaimDeposits` and/or `autoClaimRedeems` in a single batch tx each
+
+> **Requires contract redeploy**: The live V2 contract must be replaced with the updated `PMFIArbVaultV2.sol` that includes `autoClaimDeposits`, `autoClaimRedeems`, `depositRequestCount`, and `redeemRequestCount`. See Deploy Steps below.
+
 ## Reporter (arb_reporter.py)
 
 The reporter signs `ReportDataV2` and calls `report()`. It runs on each execution loop tick if `ARB_VAULT_V2_ADDRESS` is set.

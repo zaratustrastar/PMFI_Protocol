@@ -411,6 +411,55 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
     }
 
     // ═══════════════════════════════════════════
+    // Keeper Auto-Claim Flow
+    // ═══════════════════════════════════════════
+
+    /**
+     * @notice Keeper-triggered auto-claim for deposit requests.
+     *         Permissionless — shares always go to the receiver stored at requestDeposit time.
+     *         Silently skips requests that are not CLAIMABLE or have invalid IDs.
+     *         Enables the off-chain bot to push shares to users immediately after report().
+     */
+    function autoClaimDeposits(uint256[] calldata requestIds) external nonReentrant {
+        for (uint256 i = 0; i < requestIds.length; i++) {
+            uint256 rid = requestIds[i];
+            if (rid >= depositRequests.length) continue;
+            DepositRequest storage req = depositRequests[rid];
+            if (req.status != RequestStatus.CLAIMABLE) continue;
+
+            uint256 shares = (req.assets * NAV_PRECISION) / req.processedPPS;
+            if (shares == 0) continue;
+
+            req.status = RequestStatus.CLAIMED;
+            _mint(req.receiver, shares);
+            emit DepositClaimed(rid, req.receiver, shares, req.processedPPS);
+        }
+    }
+
+    /**
+     * @notice Keeper-triggered auto-claim for redeem requests.
+     *         Permissionless — USDC always goes to the receiver stored at requestRedeem time.
+     *         Silently skips requests that are not CLAIMABLE or have invalid IDs.
+     *         Enables the off-chain bot to push USDC to users immediately after report().
+     */
+    function autoClaimRedeems(uint256[] calldata requestIds) external nonReentrant {
+        for (uint256 i = 0; i < requestIds.length; i++) {
+            uint256 rid = requestIds[i];
+            if (rid >= redeemRequests.length) continue;
+            RedeemRequest storage req = redeemRequests[rid];
+            if (req.status != RequestStatus.CLAIMABLE) continue;
+
+            uint256 assets = req.claimableAssets;
+            if (assets == 0) continue;
+
+            req.status = RequestStatus.CLAIMED;
+            totalClaimableRedeemAssets -= assets;
+            usdc.safeTransfer(req.receiver, assets);
+            emit RedeemClaimed(rid, req.receiver, assets);
+        }
+    }
+
+    // ═══════════════════════════════════════════
     // Cancel Flow
     // ═══════════════════════════════════════════
 
@@ -720,6 +769,16 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
     /// @notice Vault idle USDC (excludes pending deposits and reserved redeems)
     function idleBalance() external view returns (uint256) {
         return _idleBalance();
+    }
+
+    /// @notice Total number of deposit requests ever submitted (all statuses)
+    function depositRequestCount() external view returns (uint256) {
+        return depositRequests.length;
+    }
+
+    /// @notice Total number of redeem requests ever submitted (all statuses)
+    function redeemRequestCount() external view returns (uint256) {
+        return redeemRequests.length;
     }
 
     /// @notice Estimated USDC a depositor will receive on claimDeposit()

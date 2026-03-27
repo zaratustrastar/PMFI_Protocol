@@ -772,8 +772,198 @@ def should_report_early(vault_state: dict) -> bool:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Public entry point (called by arb_execution_loop.py)
+# Auto-claim: push shares/USDC to users after report() confirms
 # ─────────────────────────────────────────────────────────────────────────────
+
+def _wait_for_tx_confirm(tx_hash: str, timeout: int = 90, poll_interval: int = 6) -> bool:
+    """Poll eth_getTransactionReceipt until mined or timeout.
+    Returns True if tx was mined with status=1 (success)."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            receipt = _rpc("eth_getTransactionReceipt", [tx_hash])
+            if receipt is not None:
+                status = int(receipt.get("status", "0x0"), 16)
+                confirmed = status == 1
+                log(f"📦 Tx {tx_hash[:18]}... mined — status={'✅ success' if confirmed else '❌ reverted'}")
+                return confirmed
+        except Exception as e:
+            log(f"⚠️ Receipt poll error: {e}")
+        time.sleep(poll_interval)
+    log(f"⏰ Tx {tx_hash[:18]}... not mined within {timeout}s timeout")
+    return False
+
+
+def _get_request_count(vault_address: str, is_deposit: bool) -> int:
+    """Return total number of deposit or redeem requests (all statuses combined)."""
+    fn_sig = "depositRequestCount()" if is_deposit else "redeemRequestCount()"
+    selector = _keccak256_text(fn_sig)[:4]
+    raw = _rpc("eth_call", [{"to": vault_address, "data": "0x" + selector.hex()}, "latest"])
+    return int(raw, 16)
+
+
+def _get_deposit_request(vault_address: str, idx: int) -> dict:
+    """Read one deposit request struct from the public array getter."""
+    from eth_abi import encode as abi_encode, decode as abi_decode
+    selector = _keccak256_text("depositRequests(uint256)")[:4]
+    encoded  = abi_encode(["uint256"], [idx])
+    raw = _rpc("eth_call", [
+        {"to": vault_address, "data": "0x" + (selector + encoded).hex()},
+        "latest",
+    ])
+    result_bytes = bytes.fromhex(raw[2:])
+    owner, receiver, assets, submitted_at, status, processed_pps = abi_decode(
+        ["address", "address", "uint256", "uint256", "uint8", "uint256"],
+        result_bytes,
+    )
+    return {
+        "owner": owner, "receiver": receiver, "assets": assets,
+        "submitted_at": submitted_at, "status": status, "processed_pps": processed_pps,
+    }
+
+
+def _get_redeem_request(vault_address: str, idx: int) -> dict:
+    """Read one redeem request struct from the public array getter."""
+    from eth_abi import encode as abi_encode, decode as abi_decode
+    selector = _keccak256_text("redeemRequests(uint256)")[:4]
+    encoded  = abi_encode(["uint256"], [idx])
+    raw = _rpc("eth_call", [
+        {"to": vault_address, "data": "0x" + (selector + encoded).hex()},
+        "latest",
+    ])
+    result_bytes = bytes.fromhex(raw[2:])
+    owner, receiver, shares, submitted_at, status, claimable_assets = abi_decode(
+        ["address", "address", "uint256", "uint256", "uint8", "uint256"],
+        result_bytes,
+    )
+    return {
+        "owner": owner, "receiver": receiver, "shares": shares,
+        "submitted_at": submitted_at, "status": status, "claimable_assets": claimable_assets,
+    }
+
+
+def _send_auto_claim_tx(
+    vault_address: str,
+    signer_key: str,
+    is_deposit: bool,
+    request_ids: list,
+) -> str | None:
+    """Encode and broadcast autoClaimDeposits or autoClaimRedeems.
+    Uses the same keeper wallet (ARB_NAV_SIGNER_PRIVATE_KEY) that submits report().
+    Gas budget: 100k base + 80k per request (mint/transfer is heavier than simple state writes).
+    Returns tx hash or None on error.
+    """
+    from eth_abi import encode as abi_encode
+    from eth_account import Account
+
+    fn_sig  = "autoClaimDeposits(uint256[])" if is_deposit else "autoClaimRedeems(uint256[])"
+    label   = "autoClaimDeposits" if is_deposit else "autoClaimRedeems"
+    selector = _keccak256_text(fn_sig)[:4]
+    encoded_args = abi_encode(["uint256[]"], [request_ids])
+    call_data    = "0x" + (selector + encoded_args).hex()
+
+    account   = Account.from_key(signer_key)
+    gas_price = int(_get_gas_price() * 1.2)
+    nonce     = _get_nonce(account.address)
+    gas_limit = 100_000 + len(request_ids) * 80_000
+
+    tx = {
+        "to":       vault_address,
+        "data":     call_data,
+        "gas":      gas_limit,
+        "gasPrice": gas_price,
+        "nonce":    nonce,
+        "chainId":  BASE_CHAIN_ID,
+        "value":    0,
+    }
+
+    log(f"🔧 [{label}] Building tx — {len(request_ids)} id(s), gas={gas_limit:,}, nonce={nonce}")
+    signed  = account.sign_transaction(tx)
+    raw_hex = "0x" + signed.rawTransaction.hex()
+
+    try:
+        tx_hash = _rpc("eth_sendRawTransaction", [raw_hex])
+        log(f"✅ [{label}] tx submitted: {tx_hash}")
+        return tx_hash
+    except Exception as e:
+        log(f"❌ [{label}] tx broadcast failed: {e}")
+        return None
+
+
+def auto_claim_after_report(vault_address: str, signer_key: str, report_tx_hash: str) -> None:
+    """After report() is confirmed on-chain, sweep all CLAIMABLE requests.
+
+    - Deposit requests: mints shares → stored receiver (permissionless, safe)
+    - Redeem requests:  transfers USDC → stored receiver (permissionless, safe)
+
+    The contract's autoClaimDeposits / autoClaimRedeems functions always deliver
+    funds to the receiver address locked in at request-submission time, so there
+    is no risk of fund redirection.
+
+    All errors are logged and swallowed — never crashes the reporter loop.
+    """
+    log(f"⏳ [AutoClaim] Waiting for report tx to confirm before auto-claiming…")
+    confirmed = _wait_for_tx_confirm(report_tx_hash, timeout=90)
+    if not confirmed:
+        log("⚠️ [AutoClaim] Report tx unconfirmed after 90s — skipping auto-claim sweep")
+        return
+
+    log("🔄 [AutoClaim] Report confirmed — scanning requests…")
+
+    # ── Deposit requests ──────────────────────────────────────────────────────
+    try:
+        dep_count = _get_request_count(vault_address, is_deposit=True)
+        log(f"📋 [AutoClaim] Deposit requests total: {dep_count}")
+        claimable_dep_ids = []
+        for i in range(dep_count):
+            try:
+                req = _get_deposit_request(vault_address, i)
+                if req["status"] == 1:  # CLAIMABLE
+                    usdc_amt = req["assets"] / 1e6
+                    log(f"  ✅ Deposit #{i}: ${usdc_amt:.4f} USDC claimable → {req['receiver']}")
+                    claimable_dep_ids.append(i)
+            except Exception as e:
+                log(f"  ⚠️ Could not read deposit #{i}: {e}")
+
+        if claimable_dep_ids:
+            log(f"🏦 [AutoClaim] Auto-claiming {len(claimable_dep_ids)} deposit(s): ids={claimable_dep_ids}")
+            tx_hash = _send_auto_claim_tx(vault_address, signer_key, is_deposit=True, request_ids=claimable_dep_ids)
+            if tx_hash:
+                log(f"✅ [AutoClaim] Deposits claimed — tx: {tx_hash}")
+            else:
+                log("❌ [AutoClaim] Deposit auto-claim tx failed (logged above)")
+        else:
+            log("ℹ️ [AutoClaim] No claimable deposit requests")
+    except Exception as e:
+        log(f"⚠️ [AutoClaim] Deposit sweep error (non-fatal): {e}")
+
+    # ── Redeem requests ───────────────────────────────────────────────────────
+    try:
+        rdm_count = _get_request_count(vault_address, is_deposit=False)
+        log(f"📋 [AutoClaim] Redeem requests total: {rdm_count}")
+        claimable_rdm_ids = []
+        for i in range(rdm_count):
+            try:
+                req = _get_redeem_request(vault_address, i)
+                if req["status"] == 1:  # CLAIMABLE
+                    usdc_amt = req["claimable_assets"] / 1e6
+                    log(f"  ✅ Redeem #{i}: ${usdc_amt:.4f} USDC claimable → {req['receiver']}")
+                    claimable_rdm_ids.append(i)
+            except Exception as e:
+                log(f"  ⚠️ Could not read redeem #{i}: {e}")
+
+        if claimable_rdm_ids:
+            log(f"💸 [AutoClaim] Auto-claiming {len(claimable_rdm_ids)} redeem(s): ids={claimable_rdm_ids}")
+            tx_hash = _send_auto_claim_tx(vault_address, signer_key, is_deposit=False, request_ids=claimable_rdm_ids)
+            if tx_hash:
+                log(f"✅ [AutoClaim] Redeems claimed — tx: {tx_hash}")
+            else:
+                log("❌ [AutoClaim] Redeem auto-claim tx failed (logged above)")
+        else:
+            log("ℹ️ [AutoClaim] No claimable redeem requests")
+    except Exception as e:
+        log(f"⚠️ [AutoClaim] Redeem sweep error (non-fatal): {e}")
+
 
 def run_reporter_tick():
     """Called once per execution cycle.
@@ -782,7 +972,9 @@ def run_reporter_tick():
       1. Run withdrawal funding waterfall (sweep servicer cash → vault if shortfall exists)
       2. Check for early report trigger (redemption pressure bypasses cooldown)
       3. Build and submit report() if cooldown elapsed OR early trigger fired
-      4. Silently no-ops if ARB_VAULT_V2_ADDRESS not set
+      4. Auto-claim all CLAIMABLE requests once report() confirms on-chain
+         (calls autoClaimDeposits / autoClaimRedeems on the vault contract)
+      5. Silently no-ops if ARB_VAULT_V2_ADDRESS not set
 
     All errors are caught so a reporter failure never crashes the arb loop.
     """
@@ -825,6 +1017,12 @@ def run_reporter_tick():
         # force=True skips internal cooldown re-check when early trigger decided above
         payload = build_report_payload(vault_address, signer_key, force=early_trigger)
         if payload:
-            submit_report(payload, signer_key)
+            report_tx = submit_report(payload, signer_key)
+            if report_tx:
+                # ── 4. Auto-claim all CLAIMABLE requests once report confirms ──────
+                try:
+                    auto_claim_after_report(vault_address, signer_key, report_tx)
+                except Exception as claim_err:
+                    log(f"⚠️ Auto-claim error (non-fatal): {claim_err}")
     except Exception as e:
         log(f"⚠️ Report error (non-fatal): {e}")
