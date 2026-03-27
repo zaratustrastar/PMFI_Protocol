@@ -20,6 +20,7 @@ from ..adapters.kalshi import (
     get_best_prices as kalshi_get_best_prices,
     fetch_orderbook_depth as kalshi_fetch_orderbook_depth,
     compute_kalshi_fillable_contracts,
+    resolve_market_ticker as kalshi_resolve_market_ticker,
 )
 from ..adapters.oddpool import ArbOpportunity
 from ..config import (
@@ -372,27 +373,64 @@ def _place_opinion_order(
         return False, "", err
 
 
+# ── Opinion market_id → token_id resolution cache ────────────────────────────
+# Opinion's /token/orderbook endpoint needs a token ID, not a market ID.
+# Cache the lookup for 30 minutes to avoid per-execution round-trips.
+_OPINION_TOKEN_CACHE: dict[str, tuple[tuple[str, str], float]] = {}
+_OPINION_TOKEN_CACHE_TTL = 1800  # 30 minutes
+
+
+def _opinion_resolve_tokens(market_id: str) -> Optional[tuple[str, str]]:
+    """Return (yes_token_id, no_token_id) for an Opinion market, with caching."""
+    from ..adapters.opinion import lookup_token_ids_by_market_id
+    now = time.time()
+    cached = _OPINION_TOKEN_CACHE.get(market_id)
+    if cached is not None:
+        token_pair, cached_at = cached
+        if now - cached_at < _OPINION_TOKEN_CACHE_TTL:
+            return token_pair
+    token_pair = lookup_token_ids_by_market_id(market_id)
+    if token_pair:
+        _OPINION_TOKEN_CACHE[market_id] = (token_pair, now)
+    return token_pair
+
+
 def _opinion_get_best_ask(market_id: str) -> Optional[float]:
-    """Fetch best ask for a given Opinion Labs market.
+    """Fetch best YES ask for a given Opinion Labs market.
+
+    Resolves market_id → YES token_id via lookup_token_ids_by_market_id (cached 30 min),
+    then fetches the YES-side orderbook at /token/orderbook?token_id=...
 
     Returns the YES best ask price (0.0–1.0) or None if unavailable.
     """
     from ..adapters.opinion import fetch_orderbook
+    if not market_id:
+        return None
     try:
-        book = fetch_orderbook(market_id)
+        token_pair = _opinion_resolve_tokens(market_id)
+        if not token_pair:
+            log(f"⚠️ [OPINION] could not resolve token IDs for marketId={market_id!r}")
+            return None
+        yes_token_id, _ = token_pair
+        log(f"🔍 [OPINION] fetching orderbook for marketId={market_id!r} YES token={yes_token_id[:16]}...")
+        book = fetch_orderbook(yes_token_id)
         if not book:
+            log(f"⚠️ [OPINION] empty orderbook for token={yes_token_id[:16]}...")
             return None
         asks = book.get("asks") or []
         if not asks:
+            log(f"⚠️ [OPINION] no asks in orderbook for token={yes_token_id[:16]}...")
             return None
         # asks sorted best-first (lowest ask at index 0)
         best = asks[0]
         price = best.get("price") or best.get("yes_price")
         if price is None:
             return None
-        return float(price) / 100.0 if float(price) > 1 else float(price)
+        result = float(price) / 100.0 if float(price) > 1 else float(price)
+        log(f"✅ [OPINION] live YES ask={result:.4f} for marketId={market_id!r}")
+        return result
     except Exception as e:
-        log(f"⚠️ [OPINION] fetch best ask error: {e}")
+        log(f"⚠️ [OPINION] fetch best ask error for {market_id!r}: {e}")
         return None
 
 
@@ -426,9 +464,24 @@ def execute_arb(
     log(f"🔍 Starting execution for pair {pair_id} (venue2={venue2})")
 
     poly_yes_token = opportunity.poly_yes_token
-    kalshi_ticker = opportunity.kalshi_ticker
+    kalshi_event_ticker = opportunity.kalshi_ticker  # may be event-level (e.g. "KXBTC-25FEB21")
     opinion_market_id = getattr(opportunity, "opinion_market_id", "")
     opinion_side = getattr(opportunity, "kalshi_side", "NO")  # reuse kalshi_side for opinion side
+    outcome_key = getattr(opportunity, "outcome_key", "yes")
+
+    # Resolve event-level Kalshi ticker → market-level ticker (e.g. "KXBTC-25FEB21-T100500").
+    # Oddpool supplies event tickers; Kalshi's price/orderbook APIs need market tickers.
+    # Falls back to the original event ticker on failure (will hit Oddpool fallback path).
+    if venue2 != "opinion" and kalshi_event_ticker:
+        resolved_market_ticker = kalshi_resolve_market_ticker(kalshi_event_ticker, outcome_key)
+        if resolved_market_ticker:
+            kalshi_ticker = resolved_market_ticker
+            log(f"🎯 Kalshi event→market: {kalshi_event_ticker!r} → {kalshi_ticker!r}")
+        else:
+            kalshi_ticker = kalshi_event_ticker
+            log(f"⚠️ Kalshi event→market resolution failed for {kalshi_event_ticker!r} — will use event ticker (likely 404)")
+    else:
+        kalshi_ticker = kalshi_event_ticker
 
     log(
         f"📊 Re-checking live prices for poly={poly_yes_token[:16]}... "

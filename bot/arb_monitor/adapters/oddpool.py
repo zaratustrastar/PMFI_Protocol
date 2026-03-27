@@ -115,6 +115,9 @@ class ArbOpportunity:
     venue2: str = "kalshi"     # "kalshi" or "opinion"
     opinion_market_id: str = ""
     opinion_slug: str = ""
+    # outcome_key: "yes" or "no" from Oddpool — which outcome this arb pair covers.
+    # Stored here so the executor can pass it to the Kalshi event→market resolver.
+    outcome_key: str = "yes"
     # True when poly_yes_token is a slug (not a real Polymarket token address).
     # Oddpool /arbitrage/current does not return token IDs — only event slugs.
     # Execution code must check this flag before attempting to place orders.
@@ -150,6 +153,7 @@ class ArbOpportunity:
             "venue2": self.venue2,
             "opinion_market_id": self.opinion_market_id,
             "opinion_slug": self.opinion_slug,
+            "outcome_key": self.outcome_key,
             "is_display_only": self.is_display_only,
         }
 
@@ -440,6 +444,7 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             venue2=venue2,
             opinion_market_id=opinion_market_id,
             opinion_slug=opinion_market_id,
+            outcome_key=outcome_key,
             is_display_only=is_display_only,  # False = real token resolved, execution allowed
             raw=entry,
             fetched_at=time.time(),

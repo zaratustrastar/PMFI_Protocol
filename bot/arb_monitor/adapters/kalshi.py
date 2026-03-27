@@ -268,6 +268,120 @@ def normalize_market(market: dict) -> NormalizedMarket:
     )
 
 
+# ── Event → Market ticker resolver cache ─────────────────────────────────────
+# Keyed by event_ticker (e.g. "KXBTC-25FEB21").
+# Value: (market_ticker: str, cached_at: float). TTL: 10 minutes.
+# This cache prevents a redundant API call on every execution attempt for the
+# same event (Oddpool supplies event-level tickers; Kalshi APIs need market-level).
+_MARKET_TICKER_CACHE: dict[str, tuple[str, float]] = {}
+_MARKET_TICKER_CACHE_TTL = 600  # seconds
+
+
+def resolve_market_ticker(event_ticker: str, outcome_key: str = "yes") -> Optional[str]:
+    """Resolve a Kalshi event ticker to a specific market-level ticker.
+
+    Oddpool provides event-level tickers (e.g. "KXBTC-25FEB21") but Kalshi's
+    price/orderbook endpoints require market-level tickers (e.g. "KXBTC-25FEB21-T100500").
+    This function queries GET /markets?event_ticker=... and returns the best matching
+    market ticker, with a 10-minute cache to avoid per-execution API overhead.
+
+    Args:
+        event_ticker: Kalshi event ticker from Oddpool (e.g. "KXBTC-25FEB21")
+        outcome_key:  "yes" or "no" — used as a tie-breaker when multiple markets exist
+
+    Returns:
+        A market-level ticker string (e.g. "KXBTC-25FEB21-T100500"), or None on failure.
+        If the event_ticker already IS a market-level ticker (contains more than one hyphen
+        segment past the date component), it is returned as-is.
+    """
+    if not event_ticker:
+        return None
+
+    # Fast path: if the caller already has a market-level ticker it may pass directly.
+    # Market tickers have the form EVENT_TICKER + "-" + STRIKE (e.g. "-T100500").
+    # We detect this by checking whether the last segment looks like a strike suffix.
+    parts = event_ticker.split("-")
+    # Example event: "KXBTC-25FEB21"  → 2 parts after splitting on "-"
+    # Example market: "KXBTC-25FEB21-T100500" → 3 parts
+    # More complex events: "KXETHD-25FEB21" → still 2 parts (two-component prefix)
+    # Simple heuristic: if the last segment starts with T or B and has digits, it's a market.
+    if len(parts) >= 3 and parts[-1] and parts[-1][0] in "TBtb" and any(c.isdigit() for c in parts[-1]):
+        log(f"✅ resolve_market_ticker: {event_ticker!r} looks like market ticker — using as-is")
+        return event_ticker
+
+    # Cache lookup
+    now = time.time()
+    cached = _MARKET_TICKER_CACHE.get(event_ticker)
+    if cached is not None:
+        ticker_val, cached_at = cached
+        if now - cached_at < _MARKET_TICKER_CACHE_TTL:
+            log(f"✅ resolve_market_ticker: cache hit {event_ticker!r} → {ticker_val!r}")
+            return ticker_val
+        else:
+            log(f"♻️ resolve_market_ticker: cache expired for {event_ticker!r}, re-fetching")
+
+    url = f"{KALSHI_BASE_URL}/markets"
+    params = {"event_ticker": event_ticker, "status": "open", "limit": 20}
+    log(f"🔍 resolve_market_ticker: fetching markets for event {event_ticker!r}")
+    resp = http_client.get(url, venue="kalshi", headers=_headers(), params=params, timeout=10)
+    if resp is None or resp.status_code != 200:
+        log(f"⚠️ resolve_market_ticker: HTTP {resp.status_code if resp else 'None'} for {event_ticker!r}")
+        return None
+
+    try:
+        data = resp.json()
+        markets = data.get("markets", [])
+    except Exception as e:
+        log(f"⚠️ resolve_market_ticker: parse error for {event_ticker!r}: {e}")
+        return None
+
+    if not markets:
+        log(f"⚠️ resolve_market_ticker: no open markets found for event {event_ticker!r}")
+        return None
+
+    # Single market — the common case for binary prediction events
+    if len(markets) == 1:
+        ticker = markets[0].get("ticker", "")
+        if ticker:
+            log(f"✅ resolve_market_ticker: {event_ticker!r} → {ticker!r} (only market)")
+            _MARKET_TICKER_CACHE[event_ticker] = (ticker, now)
+            return ticker
+
+    # Multiple markets under the event — try to pick the one aligned with outcome_key.
+    # Kalshi markets have a "subtitle" or "title" that describes the specific outcome.
+    # outcome_key is "yes"/"no"; on multi-market events we look for keywords.
+    # Fallback: return the first open market with a live price.
+    outcome_lower = (outcome_key or "yes").lower()
+    best_ticker = None
+    fallback_ticker = None
+    for m in markets:
+        t = m.get("ticker", "")
+        if not t:
+            continue
+        status = m.get("status", "")
+        if status and status.lower() not in ("open", "active"):
+            continue
+        if fallback_ticker is None:
+            fallback_ticker = t
+        subtitle = ((m.get("subtitle") or m.get("title") or "")).lower()
+        if outcome_lower in subtitle:
+            best_ticker = t
+            break
+
+    chosen = best_ticker or fallback_ticker
+    if chosen:
+        log(
+            f"✅ resolve_market_ticker: {event_ticker!r} → {chosen!r} "
+            f"(from {len(markets)} markets, outcome_key={outcome_key!r}, "
+            f"{'matched subtitle' if best_ticker else 'fallback to first'})"
+        )
+        _MARKET_TICKER_CACHE[event_ticker] = (chosen, now)
+        return chosen
+
+    log(f"⚠️ resolve_market_ticker: could not pick market for {event_ticker!r} from {len(markets)} markets")
+    return None
+
+
 def get_best_prices(ticker: str, debug: bool = False) -> dict:
     """Fetch best prices for a Kalshi market ticker.
 
