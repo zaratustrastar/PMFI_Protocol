@@ -567,14 +567,14 @@ def execute_arb(
     #      market moved after Oddpool priced the opportunity.
     opp_net_edge = getattr(opportunity, "net_edge_pct", 0.0)
     log(
-        f"📊 Oddpool net_edge={opp_net_edge:.2f}% | min_edge={min_edge_pct * 100:.2f}% | "
+        f"📊 Oddpool net_edge={opp_net_edge:.4f} | min_edge={min_edge_pct:.4f} | "
         f"live poly_ask={live_poly_ask} {leg2_venue_label}_ask={live_kalshi_ask}"
     )
 
-    if opp_net_edge < min_edge_pct * 100:
+    if opp_net_edge < min_edge_pct:
         result.error = (
-            f"oddpool_edge_too_thin: net_edge={opp_net_edge:.2f}% < "
-            f"min_edge={min_edge_pct * 100:.2f}%. Oddpool says not profitable after fees."
+            f"oddpool_edge_too_thin: net_edge={opp_net_edge:.4f} < "
+            f"min_edge={min_edge_pct:.4f}. Oddpool says not profitable after fees."
         )
         log(f"❌ {result.error}")
         return result
