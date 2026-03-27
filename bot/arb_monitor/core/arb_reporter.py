@@ -775,6 +775,12 @@ def should_report_early(vault_state: dict) -> bool:
 # Auto-claim: push shares/USDC to users after report() confirms
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Safe upper-bound per auto-claim batch: 100k base + 25 * 80k ≈ 2.1 M gas.
+# This stays well under the ~30 M Base block gas limit and leaves room for
+# other activity.  Larger backlogs are processed over multiple sequential txs.
+MAX_CLAIMS_PER_TX = 25
+
+
 def _wait_for_tx_confirm(tx_hash: str, timeout: int = 90, poll_interval: int = 6) -> bool:
     """Poll eth_getTransactionReceipt until mined or timeout.
     Returns True if tx was mined with status=1 (success)."""
@@ -785,12 +791,12 @@ def _wait_for_tx_confirm(tx_hash: str, timeout: int = 90, poll_interval: int = 6
             if receipt is not None:
                 status = int(receipt.get("status", "0x0"), 16)
                 confirmed = status == 1
-                log(f"📦 Tx {tx_hash[:18]}... mined — status={'✅ success' if confirmed else '❌ reverted'}")
+                log(f"📦 Tx {tx_hash[:18]}… mined — status={'✅ success' if confirmed else '❌ reverted'}")
                 return confirmed
         except Exception as e:
             log(f"⚠️ Receipt poll error: {e}")
         time.sleep(poll_interval)
-    log(f"⏰ Tx {tx_hash[:18]}... not mined within {timeout}s timeout")
+    log(f"⏰ Tx {tx_hash[:18]}… not mined within {timeout}s timeout")
     return False
 
 
@@ -842,30 +848,29 @@ def _get_redeem_request(vault_address: str, idx: int) -> dict:
     }
 
 
-def _send_auto_claim_tx(
+def _broadcast_claim_tx(
     vault_address: str,
     signer_key: str,
     is_deposit: bool,
-    request_ids: list,
+    batch_ids: list,
+    nonce: int,
+    gas_price: int,
 ) -> str | None:
-    """Encode and broadcast autoClaimDeposits or autoClaimRedeems.
-    Uses the same keeper wallet (ARB_NAV_SIGNER_PRIVATE_KEY) that submits report().
-    Gas budget: 100k base + 80k per request (mint/transfer is heavier than simple state writes).
-    Returns tx hash or None on error.
+    """Encode and broadcast one auto-claim batch. Returns tx hash or None on error.
+
+    Caller must supply `nonce` and `gas_price` to enable sequential batching
+    without extra RPC round-trips.  Gas budget: 100k base + 80k per request.
     """
     from eth_abi import encode as abi_encode
     from eth_account import Account
 
-    fn_sig  = "autoClaimDeposits(uint256[])" if is_deposit else "autoClaimRedeems(uint256[])"
-    label   = "autoClaimDeposits" if is_deposit else "autoClaimRedeems"
+    fn_sig   = "autoClaimDeposits(uint256[])" if is_deposit else "autoClaimRedeems(uint256[])"
+    label    = "autoClaimDeposits" if is_deposit else "autoClaimRedeems"
     selector = _keccak256_text(fn_sig)[:4]
-    encoded_args = abi_encode(["uint256[]"], [request_ids])
-    call_data    = "0x" + (selector + encoded_args).hex()
+    call_data = "0x" + (selector + abi_encode(["uint256[]"], [batch_ids])).hex()
 
+    gas_limit = 100_000 + len(batch_ids) * 80_000
     account   = Account.from_key(signer_key)
-    gas_price = int(_get_gas_price() * 1.2)
-    nonce     = _get_nonce(account.address)
-    gas_limit = 100_000 + len(request_ids) * 80_000
 
     tx = {
         "to":       vault_address,
@@ -876,62 +881,156 @@ def _send_auto_claim_tx(
         "chainId":  BASE_CHAIN_ID,
         "value":    0,
     }
-
-    log(f"🔧 [{label}] Building tx — {len(request_ids)} id(s), gas={gas_limit:,}, nonce={nonce}")
+    log(f"🔧 [{label}] batch ids={batch_ids} gas={gas_limit:,} nonce={nonce}")
     signed  = account.sign_transaction(tx)
     raw_hex = "0x" + signed.rawTransaction.hex()
-
     try:
         tx_hash = _rpc("eth_sendRawTransaction", [raw_hex])
-        log(f"✅ [{label}] tx submitted: {tx_hash}")
+        log(f"📤 [{label}] tx broadcast: {tx_hash}")
         return tx_hash
     except Exception as e:
-        log(f"❌ [{label}] tx broadcast failed: {e}")
+        log(f"❌ [{label}] broadcast failed: {e}")
         return None
+
+
+def _send_claim_batch_with_retry(
+    vault_address: str,
+    signer_key: str,
+    is_deposit: bool,
+    batch_ids: list,
+    batch_details: list,
+    nonce: int,
+    gas_price: int,
+) -> int:
+    """Send one chunk, wait for confirmation, retry with half-size on failure.
+
+    On success: emits confirmed per-claim log lines (receiver + amount).
+    On final failure after halving once: logs each failed ID and moves on.
+    Returns the next nonce to use (nonce + 1 on success, unchanged on failure).
+    """
+    label = "Deposit" if is_deposit else "Redeem"
+
+    def attempt(ids: list, n: int) -> tuple:
+        """Returns (success: bool, nonce_consumed: bool).
+
+        nonce_consumed is True whenever the tx was broadcast (even if it reverted on-chain),
+        because on EVM a reverted tx still uses up the sender's nonce.
+        """
+        tx_hash = _broadcast_claim_tx(vault_address, signer_key, is_deposit, ids, n, gas_price)
+        if tx_hash is None:
+            return False, False   # broadcast rejected entirely — nonce not consumed
+        confirmed = _wait_for_tx_confirm(tx_hash, timeout=90)
+        if confirmed:
+            ids_in_batch = set(ids)
+            for rid, detail in zip(ids, [d for d in batch_details if d["id"] in ids_in_batch]):
+                if is_deposit:
+                    pps          = detail.get("processed_pps", 1) or 1
+                    shares_est   = detail["assets"] * (10**18) // pps if pps else 0
+                    shares_human = shares_est / 1e18
+                    log(
+                        f"  ✅ Auto-claimed deposit #{rid} → {detail['receiver']}"
+                        f" ({detail['assets']/1e6:.4f} USDC → ~{shares_human:.4f} pARB)"
+                        f" tx={tx_hash[:18]}…"
+                    )
+                else:
+                    log(
+                        f"  ✅ Auto-claimed redeem  #{rid} → {detail['receiver']}"
+                        f" (~${detail['claimable_assets']/1e6:.4f} USDC)"
+                        f" tx={tx_hash[:18]}…"
+                    )
+        return confirmed, True    # tx was mined (success or revert) — nonce IS consumed
+
+    # ── Primary attempt with full batch ──────────────────────────────────────
+    success, consumed = attempt(batch_ids, nonce)
+    if success:
+        return nonce + 1
+
+    # ── One retry: split in half, accounting for nonce consumption ────────────
+    log(f"⚠️ [{label}] batch failed — retrying in two halves")
+    mid        = max(1, len(batch_ids) // 2)
+    left       = batch_ids[:mid]
+    right      = batch_ids[mid:]
+    next_nonce = nonce + (1 if consumed else 0)
+
+    if left:
+        ok, cons = attempt(left, next_nonce)
+        if ok:
+            next_nonce += 1
+        else:
+            next_nonce += 1 if cons else 0
+            log(f"❌ [{label}] left-half retry failed — ids={left} not claimed")
+
+    if right:
+        ok, cons = attempt(right, next_nonce)
+        if ok:
+            next_nonce += 1
+        else:
+            next_nonce += 1 if cons else 0
+            log(f"❌ [{label}] right-half retry failed — ids={right} not claimed")
+
+    return next_nonce
 
 
 def auto_claim_after_report(vault_address: str, signer_key: str, report_tx_hash: str) -> None:
     """After report() is confirmed on-chain, sweep all CLAIMABLE requests.
 
-    - Deposit requests: mints shares → stored receiver (permissionless, safe)
-    - Redeem requests:  transfers USDC → stored receiver (permissionless, safe)
+    Flow:
+      1. Wait for report() tx receipt (up to 90s)
+      2. Read all deposit + redeem request counts
+      3. Scan each for CLAIMABLE (status=1) — collect id + detail
+      4. Process in batches of MAX_CLAIMS_PER_TX (25) to avoid gas limit issues
+      5. Each batch: broadcast → wait for receipt → log confirmed per-claim outcomes
+      6. Failed batch: split in half + retry once (each half); log any remaining failures
+      7. Nonces are managed sequentially to allow pipelined batches
 
-    The contract's autoClaimDeposits / autoClaimRedeems functions always deliver
-    funds to the receiver address locked in at request-submission time, so there
-    is no risk of fund redirection.
-
-    All errors are logged and swallowed — never crashes the reporter loop.
+    The contract's autoClaimDeposits / autoClaimRedeems always deliver to the
+    receiver address locked in at request submission time — no redirect possible.
+    All errors are swallowed; this never crashes the reporter loop.
     """
-    log(f"⏳ [AutoClaim] Waiting for report tx to confirm before auto-claiming…")
-    confirmed = _wait_for_tx_confirm(report_tx_hash, timeout=90)
-    if not confirmed:
+    log("⏳ [AutoClaim] Waiting for report tx to confirm before auto-claiming…")
+    if not _wait_for_tx_confirm(report_tx_hash, timeout=90):
         log("⚠️ [AutoClaim] Report tx unconfirmed after 90s — skipping auto-claim sweep")
         return
 
-    log("🔄 [AutoClaim] Report confirmed — scanning requests…")
+    log("🔄 [AutoClaim] Report confirmed — scanning all requests…")
+
+    from eth_account import Account
+    account   = Account.from_key(signer_key)
+    nonce     = _get_nonce(account.address)
+    gas_price = int(_get_gas_price() * 1.2)
 
     # ── Deposit requests ──────────────────────────────────────────────────────
     try:
         dep_count = _get_request_count(vault_address, is_deposit=True)
-        log(f"📋 [AutoClaim] Deposit requests total: {dep_count}")
-        claimable_dep_ids = []
+        log(f"📋 [AutoClaim] Scanning {dep_count} deposit request(s)…")
+        dep_claimable = []      # list of {"id": int, "receiver": str, "assets": int, "processed_pps": int}
         for i in range(dep_count):
             try:
                 req = _get_deposit_request(vault_address, i)
                 if req["status"] == 1:  # CLAIMABLE
-                    usdc_amt = req["assets"] / 1e6
-                    log(f"  ✅ Deposit #{i}: ${usdc_amt:.4f} USDC claimable → {req['receiver']}")
-                    claimable_dep_ids.append(i)
+                    dep_claimable.append({
+                        "id":            i,
+                        "receiver":      req["receiver"],
+                        "assets":        req["assets"],
+                        "processed_pps": req["processed_pps"],
+                    })
+                    log(
+                        f"  🔍 Deposit #{i}: ${req['assets']/1e6:.4f} USDC claimable"
+                        f" → {req['receiver']}"
+                    )
             except Exception as e:
                 log(f"  ⚠️ Could not read deposit #{i}: {e}")
 
-        if claimable_dep_ids:
-            log(f"🏦 [AutoClaim] Auto-claiming {len(claimable_dep_ids)} deposit(s): ids={claimable_dep_ids}")
-            tx_hash = _send_auto_claim_tx(vault_address, signer_key, is_deposit=True, request_ids=claimable_dep_ids)
-            if tx_hash:
-                log(f"✅ [AutoClaim] Deposits claimed — tx: {tx_hash}")
-            else:
-                log("❌ [AutoClaim] Deposit auto-claim tx failed (logged above)")
+        if dep_claimable:
+            log(f"🏦 [AutoClaim] {len(dep_claimable)} claimable deposit(s) — processing in batches of {MAX_CLAIMS_PER_TX}")
+            ids = [d["id"] for d in dep_claimable]
+            for chunk_start in range(0, len(ids), MAX_CLAIMS_PER_TX):
+                chunk_ids     = ids[chunk_start : chunk_start + MAX_CLAIMS_PER_TX]
+                chunk_details = dep_claimable[chunk_start : chunk_start + MAX_CLAIMS_PER_TX]
+                log(f"  📦 Deposit batch [{chunk_start}–{chunk_start+len(chunk_ids)-1}] ids={chunk_ids}")
+                nonce = _send_claim_batch_with_retry(
+                    vault_address, signer_key, True, chunk_ids, chunk_details, nonce, gas_price
+                )
         else:
             log("ℹ️ [AutoClaim] No claimable deposit requests")
     except Exception as e:
@@ -940,25 +1039,34 @@ def auto_claim_after_report(vault_address: str, signer_key: str, report_tx_hash:
     # ── Redeem requests ───────────────────────────────────────────────────────
     try:
         rdm_count = _get_request_count(vault_address, is_deposit=False)
-        log(f"📋 [AutoClaim] Redeem requests total: {rdm_count}")
-        claimable_rdm_ids = []
+        log(f"📋 [AutoClaim] Scanning {rdm_count} redeem request(s)…")
+        rdm_claimable = []      # list of {"id": int, "receiver": str, "claimable_assets": int}
         for i in range(rdm_count):
             try:
                 req = _get_redeem_request(vault_address, i)
                 if req["status"] == 1:  # CLAIMABLE
-                    usdc_amt = req["claimable_assets"] / 1e6
-                    log(f"  ✅ Redeem #{i}: ${usdc_amt:.4f} USDC claimable → {req['receiver']}")
-                    claimable_rdm_ids.append(i)
+                    rdm_claimable.append({
+                        "id":               i,
+                        "receiver":         req["receiver"],
+                        "claimable_assets": req["claimable_assets"],
+                    })
+                    log(
+                        f"  🔍 Redeem  #{i}: ${req['claimable_assets']/1e6:.4f} USDC claimable"
+                        f" → {req['receiver']}"
+                    )
             except Exception as e:
                 log(f"  ⚠️ Could not read redeem #{i}: {e}")
 
-        if claimable_rdm_ids:
-            log(f"💸 [AutoClaim] Auto-claiming {len(claimable_rdm_ids)} redeem(s): ids={claimable_rdm_ids}")
-            tx_hash = _send_auto_claim_tx(vault_address, signer_key, is_deposit=False, request_ids=claimable_rdm_ids)
-            if tx_hash:
-                log(f"✅ [AutoClaim] Redeems claimed — tx: {tx_hash}")
-            else:
-                log("❌ [AutoClaim] Redeem auto-claim tx failed (logged above)")
+        if rdm_claimable:
+            log(f"💸 [AutoClaim] {len(rdm_claimable)} claimable redeem(s) — processing in batches of {MAX_CLAIMS_PER_TX}")
+            ids = [r["id"] for r in rdm_claimable]
+            for chunk_start in range(0, len(ids), MAX_CLAIMS_PER_TX):
+                chunk_ids     = ids[chunk_start : chunk_start + MAX_CLAIMS_PER_TX]
+                chunk_details = rdm_claimable[chunk_start : chunk_start + MAX_CLAIMS_PER_TX]
+                log(f"  📦 Redeem batch [{chunk_start}–{chunk_start+len(chunk_ids)-1}] ids={chunk_ids}")
+                nonce = _send_claim_batch_with_retry(
+                    vault_address, signer_key, False, chunk_ids, chunk_details, nonce, gas_price
+                )
         else:
             log("ℹ️ [AutoClaim] No claimable redeem requests")
     except Exception as e:
