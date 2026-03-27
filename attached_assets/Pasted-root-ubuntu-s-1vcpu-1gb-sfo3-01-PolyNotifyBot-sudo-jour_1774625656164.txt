@@ -1,0 +1,149 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f
+Mar 27 15:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]:    •   Effective supply:       402.029137
+Mar 27 15:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]:    •   Total supply (raw):     402.029137
+Mar 27 15:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ✅ Signed NAV: $0.0200/share (round 16) [warning]
+Mar 27 15:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ✅ NAV cache updated, sleeping 45s
+Mar 27 15:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 15:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.9200 (opp_age=14s)
+Mar 27 15:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.9190 (poly_ask=0.999, kalshi_ask=0.92)
+Mar 27 15:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.9190 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_buffalo_sabres: edge_too_thin: live_edge=-0.9190 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_nicolas_maduro venue2=kalshi | score=230.5 AR=0.05× net_edge=3.80% conf=0.91 | days=278.35d size=$5054.71
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair venezuela-leader-2026_nicolas_maduro (venue2=kalshi)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 2152744600516272... for price check
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: cache hit 'KXVENEZUELALEADER-26DEC31'[nicolas_maduro] → 'KXVENEZUELALEADER-26DEC31-JGUA'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXVENEZUELALEADER-26DEC31' → 'KXVENEZUELALEADER-26DEC31-JGUA'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2152744600516272... (side=NO) venue2=kalshi kalshi=KXVENEZUELALEADER-26DEC31-JGUA
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using YES ask=None
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.1000 (opp_age=15s)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.0990 (poly_ask=0.999, kalshi_ask=0.1)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.0990 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_nicolas_maduro: edge_too_thin: live_edge=-0.0990 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=megaquake-by-march-31-2026_megaquake_by_march_31 venue2=opinion | score=225.6 AR=0.72× net_edge=0.50% conf=0.54 | days=3.35d size=$581.70
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair megaquake-by-march-31-2026_megaquake_by_march_31 (venue2=opinion)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 3540085357244768... for price check
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=3540085357244768... (side=NO) venue2=opinion opinion=3356
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 💬 [Arb/Opinion] ⚠️ lookup_token_ids_by_market_id: no tokens found for marketId='3356'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='3356'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.0090 (opp_age=15s)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.0080 (poly_ask=0.999, opinion_ask=0.009)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.0080 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for megaquake-by-march-31-2026_megaquake_by_march_31: edge_too_thin: live_edge=-0.0080 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=openai-ipo-closing-market-cap_ipo_1t_125t venue2=opinion | score=166.5 AR=0.09× net_edge=2.20% conf=0.82 | days=94.35d size=$2306.72
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair openai-ipo-closing-market-cap_ipo_1t_125t (venue2=opinion)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 1839956575106867... for price check
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1839956575106867... (side=NO) venue2=opinion opinion=152
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 💬 [Arb/Opinion] ⚠️ lookup_token_ids_by_market_id: no tokens found for marketId='152'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='152'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.0600 (opp_age=17s)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.0590 (poly_ask=0.999, opinion_ask=0.06)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.0590 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_1t_125t: edge_too_thin: live_edge=-0.0590 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_josh_shapiro venue2=kalshi | score=144.9 AR=0.00× net_edge=0.70% conf=0.99 | days=955.14d size=$54763.43
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair dem-nominee-2028_josh_shapiro (venue2=kalshi)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 7116983949742059... for price check
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: cache hit 'KXPRESNOMD-28'[josh_shapiro] → 'KXPRESNOMD-28-BORO'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXPRESNOMD-28' → 'KXPRESNOMD-28-BORO'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=7116983949742059... (side=YES) venue2=kalshi kalshi=KXPRESNOMD-28-BORO
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.9390 (opp_age=17s)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.9380 (poly_ask=0.999, kalshi_ask=0.939)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.9380 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_josh_shapiro: edge_too_thin: live_edge=-0.9380 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_edmundo_gonzalez venue2=kalshi | score=124.8 AR=0.02× net_edge=1.70% conf=0.92 | days=278.35d size=$6046.59
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair venezuela-leader-2026_edmundo_gonzalez (venue2=kalshi)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 8548278993674426... for price check
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: cache hit 'KXVENEZUELALEADER-26DEC31'[edmundo_gonzalez] → 'KXVENEZUELALEADER-26DEC31-JGUA'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXVENEZUELALEADER-26DEC31' → 'KXVENEZUELALEADER-26DEC31-JGUA'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=8548278993674426... (side=YES) venue2=kalshi kalshi=KXVENEZUELALEADER-26DEC31-JGUA
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.9500 (opp_age=18s)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.9490 (poly_ask=0.999, kalshi_ask=0.95)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.9490 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_edmundo_gonzalez: edge_too_thin: live_edge=-0.9490 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fomc-2026-06-17_hike_50bps venue2=opinion | score=123.3 AR=0.02× net_edge=0.40% conf=0.94 | days=81.35d size=$7288.31
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair fomc-2026-06-17_hike_50bps (venue2=opinion)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 2829029314001810... for price check
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2829029314001810... (side=NO) venue2=opinion opinion=319
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 💬 [Arb/Opinion] ⚠️ lookup_token_ids_by_market_id: no tokens found for marketId='319'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='319'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.0560 (opp_age=19s)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.0460 (poly_ask=0.99, opinion_ask=0.056)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.0460 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for fomc-2026-06-17_hike_50bps: edge_too_thin: live_edge=-0.0460 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_sas venue2=opinion | score=121.8 AR=0.05× net_edge=1.40% conf=0.84 | days=95.35d size=$2649.14
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-champion-2026_sas (venue2=opinion)
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 1263603507056582... for price check
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1263603507056582... (side=NO) venue2=opinion opinion=103
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 💬 [Arb/Opinion] ⚠️ lookup_token_ids_by_market_id: no tokens found for marketId='103'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='103'
+Mar 27 15:33:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.1400 (opp_age=20s)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.1390 (poly_ask=0.999, opinion_ask=0.14)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.1390 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_sas: edge_too_thin: live_edge=-0.1390 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=seoul-mayor-election-winner-2026_na_kyung_won venue2=opinion | score=118.9 AR=0.03× net_edge=0.60% conf=0.89 | days=67.35d size=$4053.56
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair seoul-mayor-election-winner-2026_na_kyung_won (venue2=opinion)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 4172545524355528... for price check
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4172545524355528... (side=YES) venue2=opinion opinion=131
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 💬 [Arb/Opinion] ⚠️ lookup_token_ids_by_market_id: no tokens found for marketId='131'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='131'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.9860 (opp_age=21s)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.9850 (poly_ask=0.999, opinion_ask=0.986)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.9850 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for seoul-mayor-election-winner-2026_na_kyung_won: edge_too_thin: live_edge=-0.9850 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=english-premier-league-winner-2026_man_city venue2=opinion | score=110.7 AR=0.07× net_edge=1.20% conf=0.79 | days=60.35d size=$1875.18
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair english-premier-league-winner-2026_man_city (venue2=opinion)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 3555750546894242... for price check
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=3555750546894242... (side=NO) venue2=opinion opinion=80
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 💬 [Arb/Opinion] ⚠️ lookup_token_ids_by_market_id: no tokens found for marketId='80'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='80'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.0920 (opp_age=22s)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.0820 (poly_ask=0.99, opinion_ask=0.092)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.0820 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_man_city: edge_too_thin: live_edge=-0.0820 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-mvp-2026_shai_gilgeous_alexander venue2=opinion | score=106.4 AR=0.12× net_edge=2.40% conf=0.71 | days=74.35d size=$1215.96
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-mvp-2026_shai_gilgeous_alexander (venue2=opinion)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 2904836002255602... for price check
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2904836002255602... (side=YES) venue2=opinion opinion=115
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 💬 [Arb/Opinion] ⚠️ lookup_token_ids_by_market_id: no tokens found for marketId='115'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='115'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.1900 (opp_age=23s)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.1800 (poly_ask=0.99, opinion_ask=0.19)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.1800 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-mvp-2026_shai_gilgeous_alexander: edge_too_thin: live_edge=-0.1800 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=michigan-democratic-senate-primary-winner-2026_mallory_mcmorrow venue2=kalshi | score=101.4 AR=0.13× net_edge=4.40% conf=0.69 | days=129.35d size=$1131.46
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair michigan-democratic-senate-primary-winner-2026_mallory_mcmorrow (venue2=kalshi)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 2822783836009607... for price check
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: cache hit 'KXSENATEMID-26'[mallory_mcmorrow] → 'KXSENATEMID-26-RTLA'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXSENATEMID-26' → 'KXSENATEMID-26-RTLA'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2822783836009607... (side=YES) venue2=kalshi kalshi=KXSENATEMID-26-RTLA
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.3800 (opp_age=24s)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.3700 (poly_ask=0.99, kalshi_ask=0.38)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.3700 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for michigan-democratic-senate-primary-winner-2026_mallory_mcmorrow: edge_too_thin: live_edge=-0.3700 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=balance-of-power-2026-midterms_other venue2=opinion | score=84.1 AR=0.01× net_edge=0.90% conf=0.92 | days=220.35d size=$6087.98
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair balance-of-power-2026-midterms_other (venue2=opinion)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 3472241060806285... for price check
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=3472241060806285... (side=YES) venue2=opinion opinion=390
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 💬 [Arb/Opinion] ⚠️ lookup_token_ids_by_market_id: no tokens found for marketId='390'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='390'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ opinion live orderbook unavailable — using Oddpool quoted price 0.9790 (opp_age=24s)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.9690 (poly_ask=0.99, opinion_ask=0.979)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.9690 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for balance-of-power-2026-midterms_other: edge_too_thin: live_edge=-0.9690 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_gavin_newsom venue2=kalshi | score=83.4 AR=0.00× net_edge=0.30% conf=0.99 | days=955.14d size=$73289.32
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair dem-nominee-2028_gavin_newsom (venue2=kalshi)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 5453304381994659... for price check
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: cache hit 'KXPRESNOMD-28'[gavin_newsom] → 'KXPRESNOMD-28-BORO'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXPRESNOMD-28' → 'KXPRESNOMD-28-BORO'
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=5453304381994659... (side=YES) venue2=kalshi kalshi=KXPRESNOMD-28-BORO
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.7270 (opp_age=25s)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 📐 Live edge: -0.7260 (poly_ask=0.999, kalshi_ask=0.727)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ❌ edge_too_thin: live_edge=-0.7260 < min_edge_pct=0.0030. Aborting to protect against fees.
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gavin_newsom: edge_too_thin: live_edge=-0.7260 < min_edge_pct=0.0030. Aborting to protect against fees. unwound=False
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_lal venue2=opinion | score=75.6 AR=0.00× net_edge=0.10% conf=0.98 | days=95.35d size=$20213.18
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-champion-2026_lal (venue2=opinion)
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 7079975818972526... for price check
+Mar 27 15:33:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2879928]: 127.0.0.1 - - [27/Mar/2026 15:33:30] "GET /sign-nav HTTP/1.1" 200 -
