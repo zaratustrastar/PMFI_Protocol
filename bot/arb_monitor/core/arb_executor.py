@@ -395,13 +395,17 @@ def _opinion_resolve_tokens(market_id: str) -> Optional[tuple[str, str]]:
     return token_pair
 
 
-def _opinion_get_best_ask(market_id: str) -> Optional[float]:
-    """Fetch best YES ask for a given Opinion Labs market.
+def _opinion_get_best_ask(market_id: str, side: str = "YES") -> Optional[float]:
+    """Fetch the best ask for the given side of an Opinion Labs market.
 
-    Resolves market_id → YES token_id via lookup_token_ids_by_market_id (cached 30 min),
-    then fetches the YES-side orderbook at /token/orderbook?token_id=...
+    Resolves market_id → (yes_token_id, no_token_id) via lookup_token_ids_by_market_id
+    (checks discovery cache first, then API), then fetches the correct side's orderbook.
 
-    Returns the YES best ask price (0.0–1.0) or None if unavailable.
+    Args:
+        market_id: Opinion Labs market ID (numeric string, e.g. "403").
+        side: "YES" or "NO" — which side we are buying and need the ask for.
+
+    Returns the best ask price (0.0–1.0) or None if unavailable.
     """
     from ..adapters.opinion import fetch_orderbook
     if not market_id:
@@ -411,15 +415,16 @@ def _opinion_get_best_ask(market_id: str) -> Optional[float]:
         if not token_pair:
             log(f"⚠️ [OPINION] could not resolve token IDs for marketId={market_id!r}")
             return None
-        yes_token_id, _ = token_pair
-        log(f"🔍 [OPINION] fetching orderbook for marketId={market_id!r} YES token={yes_token_id[:16]}...")
-        book = fetch_orderbook(yes_token_id)
+        yes_token_id, no_token_id = token_pair
+        token_id = yes_token_id if side == "YES" else no_token_id
+        log(f"🔍 [OPINION] fetching {side} orderbook for marketId={market_id!r} token={token_id[:16]}...")
+        book = fetch_orderbook(token_id)
         if not book:
-            log(f"⚠️ [OPINION] empty orderbook for token={yes_token_id[:16]}...")
+            log(f"⚠️ [OPINION] empty orderbook for {side} token={token_id[:16]}...")
             return None
         asks = book.get("asks") or []
         if not asks:
-            log(f"⚠️ [OPINION] no asks in orderbook for token={yes_token_id[:16]}...")
+            log(f"⚠️ [OPINION] no asks in {side} orderbook for token={token_id[:16]}...")
             return None
         # asks sorted best-first (lowest ask at index 0)
         best = asks[0]
@@ -427,10 +432,10 @@ def _opinion_get_best_ask(market_id: str) -> Optional[float]:
         if price is None:
             return None
         result = float(price) / 100.0 if float(price) > 1 else float(price)
-        log(f"✅ [OPINION] live YES ask={result:.4f} for marketId={market_id!r}")
+        log(f"✅ [OPINION] live {side} ask={result:.4f} for marketId={market_id!r}")
         return result
     except Exception as e:
-        log(f"⚠️ [OPINION] fetch best ask error for {market_id!r}: {e}")
+        log(f"⚠️ [OPINION] fetch best ask error for {market_id!r} side={side}: {e}")
         return None
 
 
@@ -522,14 +527,25 @@ def execute_arb(
     poly_prices = poly_get_best_prices(poly_token_for_price)
     live_poly_ask = poly_prices.get("best_ask")
 
-    # Fetch live leg-2 ask based on venue
+    # Fetch live leg-2 ask based on venue.
+    # Use the correct side's ask price:
+    #   kalshi_side=="YES" → buying YES on venue2 → use yes_best_ask
+    #   kalshi_side=="NO"  → buying NO  on venue2 → use no_best_ask
     if venue2 == "opinion":
-        live_kalshi_ask = _opinion_get_best_ask(opinion_market_id)
+        live_kalshi_ask = _opinion_get_best_ask(opinion_market_id, side=opinion_side)
         leg2_venue_label = "opinion"
     else:
         kalshi_prices = kalshi_get_best_prices(kalshi_ticker)
-        live_kalshi_ask = kalshi_prices.get("yes_best_ask")
+        if kalshi_side == "YES":
+            live_kalshi_ask = kalshi_prices.get("yes_best_ask")
+        else:
+            live_kalshi_ask = kalshi_prices.get("no_best_ask")
         leg2_venue_label = "kalshi"
+        log(
+            f"📊 Kalshi prices: yes_ask={kalshi_prices.get('yes_best_ask')} "
+            f"no_ask={kalshi_prices.get('no_best_ask')} "
+            f"→ using {'YES' if kalshi_side == 'YES' else 'NO'} ask={live_kalshi_ask}"
+        )
 
     result.live_poly_ask = live_poly_ask
     result.live_kalshi_ask = live_kalshi_ask

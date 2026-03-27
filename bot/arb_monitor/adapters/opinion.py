@@ -20,6 +20,11 @@ from ..models import NormalizedMarket, extract_team_key
 
 _last_opinion_stats: dict = {}
 
+# Module-level cache: marketId (str) → (yes_token_id, no_token_id)
+# Populated during fetch_all_active_markets so executor can look up tokens
+# without a live API call. Oddpool-supplied market IDs match these keys.
+_MARKET_TOKEN_CACHE: dict[str, tuple[str, str]] = {}
+
 
 def log(msg: str):
     print(f"💬 [Arb/Opinion] {msg}")
@@ -190,6 +195,9 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
             m["_parsed_expiry"] = expiry_ts
             accepted.append(m)
             page_new += 1
+            # Populate token cache so executor can resolve these IDs without
+            # making additional API calls during execution.
+            _MARKET_TOKEN_CACHE[str(mid)] = (yes_token, no_token)
 
         log(f"Page {page + 1}: {len(markets)} fetched, {page_new} new accepted, {page_dupes} dupes")
 
@@ -275,10 +283,23 @@ def get_opinion_markets() -> list[NormalizedMarket]:
 def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
     """Fetch YES/NO token IDs for an Opinion market by its marketId.
     Returns (yes_token_id, no_token_id) or None on failure.
-    Tries the single-market endpoint first, then falls back to filtered list.
+
+    Strategy:
+    1. Check in-memory discovery cache (populated during fetch_all_active_markets).
+       Covers all Oddpool-supplied IDs since discovery runs before execution.
+    2. Try the single-market endpoint /market/{market_id}.
+    3. Fall back to filtered list /market?marketId={market_id}.
     """
     if not market_id or not OPINION_API_KEY:
         return None
+
+    # 1. Check discovery cache first — fastest, no API call needed.
+    cached = _MARKET_TOKEN_CACHE.get(str(market_id))
+    if cached:
+        yes, no = cached
+        log(f"✅ Token lookup (cache hit) marketId={market_id!r}: YES={yes[:12]}... NO={no[:12]}...")
+        return cached
+
     try:
         resp = http_client.get(
             f"{OPINION_BASE_URL}/market/{market_id}",
