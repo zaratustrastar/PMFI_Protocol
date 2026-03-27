@@ -1,0 +1,51 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# # What servicer address is stored IN the contract?
+cast call 0x1182054b82f96c110698eAe6Af73FdA013599F9d \
+  "servicerWallet()(address)" \
+  --rpc-url https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+
+# What does the vault see as deployable idle?
+cast call 0x1182054b82f96c110698eAe6Af73FdA013599F9d \
+  "idleBalance()(uint256)" \
+  --rpc-url https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+
+# When was tend() last called on-chain?
+cast call 0x1182054b82f96c110698eAe6Af73FdA013599F9d \
+  "lastTendTimestamp()(uint256)" \
+  --rpc-url https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+Command 'cast' not found, did you mean:
+  command 'cass' from snap cass (0.17.2)
+  command 'fast' from snap fast (0.0.4)
+  command 'casw' from deb epics-base (7.0.7+dfsg1-5)
+  command 'last' from deb util-linux (2.39.3-9ubuntu6.5)
+  command 'cas' from deb amule-utils (1:2.3.3-3build1)
+  command 'nast' from deb nast (0.2.0-10)
+  command 'cat' from deb coreutils (9.4-3ubuntu6.2)
+  command 'ast' from deb jruby (9.3.9.0+ds-1)
+  command 'cst' from deb imx-code-signing-tool (3.3.2+dfsg-1)
+  command 'cmst' from deb cmst (2023.03.14-1)
+See 'snap info <snapname>' for additional versions.
+Command 'cast' not found, did you mean:
+  command 'cass' from snap cass (0.17.2)
+  command 'fast' from snap fast (0.0.4)
+  command 'cmst' from deb cmst (2023.03.14-1)
+  command 'cat' from deb coreutils (9.4-3ubuntu6.2)
+  command 'casw' from deb epics-base (7.0.7+dfsg1-5)
+  command 'nast' from deb nast (0.2.0-10)
+  command 'cas' from deb amule-utils (1:2.3.3-3build1)
+  command 'cst' from deb imx-code-signing-tool (3.3.2+dfsg-1)
+  command 'last' from deb util-linux (2.39.3-9ubuntu6.5)
+  command 'ast' from deb jruby (9.3.9.0+ds-1)
+See 'snap info <snapname>' for additional versions.
+Command 'cast' not found, did you mean:
+  command 'fast' from snap fast (0.0.4)
+  command 'cass' from snap cass (0.17.2)
+  command 'last' from deb util-linux (2.39.3-9ubuntu6.5)
+  command 'cst' from deb imx-code-signing-tool (3.3.2+dfsg-1)
+  command 'nast' from deb nast (0.2.0-10)
+  command 'cas' from deb amule-utils (1:2.3.3-3build1)
+  command 'casw' from deb epics-base (7.0.7+dfsg1-5)
+  command 'ast' from deb jruby (9.3.9.0+ds-1)
+  command 'cmst' from deb cmst (2023.03.14-1)
+  command 'cat' from deb coreutils (9.4-3ubuntu6.2)
+See 'snap info <snapname>' for additional versions.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

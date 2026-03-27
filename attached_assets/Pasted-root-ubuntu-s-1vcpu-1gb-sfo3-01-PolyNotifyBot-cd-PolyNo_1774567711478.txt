@@ -1,0 +1,106 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && python3 -c "
+import requests, os
+from dotenv import load_dotenv
+from eth_account import Account
+from eth_hash.auto import keccak
+load_dotenv()
+
+rpc      = os.getenv('BASE_RPC_URL', 'https://mainnet.base.org')
+vault    = '0x1182054b82f96c110698eAe6Af73FdA013599F9d'
+servicer = '0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF'
+owner_key = os.getenv('ARB_NAV_SIGNER_PRIVATE_KEY')
+
+acct = Account.from_key(owner_key)
+print(f'Owner: {acct.address}')
+
+def rpc_call(method, params):
+    r = requests.post(rpc, json={'jsonrpc':'2.0','id':1,'method':method,'params':params}, timeout=10)
+    return r.json()['result']
+
+sel      = keccak(b'setArbServicerWallet(address)')[:4].hex()
+padded   = '000000000000000000000000' + servicer.lower().replace('0x','')
+data     = '0x' + sel + padded
+gas_price= int(int(rpc_call('eth_gasPrice',[]),16) * 1.2)
+nonce    = int(rpc_call('eth_getTransactionCount',[acct.address,'pending']),16)
+
+tx = {'to':vault,'data':data,'gas':80000,'gasPrice':gas_price,'nonce':nonce,'chainId':8453,'value':0}
+signed = acct.sign_transaction(tx)
+tx_hash = rpc_call('eth_sendRawTransaction',['0x'+signed.rawTransaction.hex()])
+print(f'tx: {tx_hash}')
+print(f'https://basescan.org/tx/{tx_hash}')
+"
+Owner: 0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+Traceback (most recent call last):
+  File "<string>", line 28, in <module>
+AttributeError: 'SignedTransaction' object has no attribute 'rawTransaction'. Did you mean: 'raw_transaction'?
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && python3 -c "
+import requests, os
+from dotenv import load_dotenv
+from eth_account import Account
+from eth_hash.auto import keccak
+load_dotenv()
+
+rpc      = os.getenv('BASE_RPC_URL', 'https://mainnet.base.org')
+vault    = '0x1182054b82f96c110698eAe6Af73FdA013599F9d'
+servicer = '0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF'
+owner_key = os.getenv('ARB_NAV_SIGNER_PRIVATE_KEY')
+
+acct = Account.from_key(owner_key)
+print(f'Owner: {acct.address}')
+
+def rpc_call(method, params):
+    r = requests.post(rpc, json={'jsonrpc':'2.0','id':1,'method':method,'params':params}, timeout=10)
+    return r.json()['result']
+
+sel      = keccak(b'setArbServicerWallet(address)')[:4].hex()
+padded   = '000000000000000000000000' + servicer.lower().replace('0x','')
+data     = '0x' + sel + padded
+gas_price= int(int(rpc_call('eth_gasPrice',[]),16) * 1.2)
+nonce    = int(rpc_call('eth_getTransactionCount',[acct.address,'pending']),16)
+
+tx = {'to':vault,'data':data,'gas':80000,'gasPrice':gas_price,'nonce':nonce,'chainId':8453,'value':0}
+signed = acct.sign_transaction(tx)
+tx_hash = rpc_call('eth_sendRawTransaction',['0x'+signed.raw_transaction.hex()])
+print(f'tx: {tx_hash}')
+print(f'https://basescan.org/tx/{tx_hash}')
+"
+Owner: 0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+tx: 0xb9d6e19512b27cef6abbd50ef98417cc115399fd6cb50976954b1eee9eb3e5c2
+https://basescan.org/tx/0xb9d6e19512b27cef6abbd50ef98417cc115399fd6cb50976954b1eee9eb3e5c2
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && python3 -c "
+import requests, os
+from dotenv import load_dotenv
+from eth_hash.auto import keccak
+load_dotenv()
+
+rpc   = os.getenv('BASE_RPC_URL', 'https://mainnet.base.org')
+vault = '0x1182054b82f96c110698eAe6Af73FdA013599F9d'
+tx    = '0xb9d6e19512b27cef6abbd50ef98417cc115399fd6cb50976954b1eee9eb3e5c2'
+
+def rpc_call(method, params):
+    r = requests.post(rpc, json={'jsonrpc':'2.0','id':1,'method':method,'params':params}, timeout=10)
+    return r.json()['result']
+
+def view(sig):
+    sel = keccak(sig.encode())[:4].hex()
+    return rpc_call('eth_call', [{'to': vault, 'data': '0x'+sel}, 'latest'])
+
+receipt = rpc_call('eth_getTransactionReceipt', [tx])
+status  = int(receipt['status'], 16) if receipt else -1
+print(f'setArbServicerWallet tx: {\"SUCCESS\" if status==1 else \"REVERTED\" if status==0 else \"PENDING\"}')
+
+# Correct getter name is arbServicerWallet(), not servicerWallet()
+sw   = '0x' + view('arbServicerWallet()')[-40:]
+idle = int(view('idleBalance()'), 16) / 1e6
+ltt  = int(view('lastTendTimestamp()'), 16)
+
+import time
+print(f'arbServicerWallet: {sw}')
+print(f'idleBalance:       {idle:.6f} USDC')
+print(f'lastTendTimestamp: {ltt}  (tend cooldown 60s)')
+"
+setArbServicerWallet tx: SUCCESS
+arbServicerWallet: 0xba32aa4cf8800b0e57c79900c11b9c839c6baeaf
+idleBalance:       11.000000 USDC
+lastTendTimestamp: 1774567541  (tend cooldown 60s)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

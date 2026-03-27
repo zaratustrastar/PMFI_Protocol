@@ -1,0 +1,85 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# # What servicer address is stored IN the contract?
+cast call 0x1182054b82f96c110698eAe6Af73FdA013599F9d \
+  "servicerWallet()(address)" \
+  --rpc-url https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+
+# What does the vault see as deployable idle?
+cast call 0x1182054b82f96c110698eAe6Af73FdA013599F9d \
+  "idleBalance()(uint256)" \
+  --rpc-url https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+
+# When was tend() last called on-chain?
+cast call 0x1182054b82f96c110698eAe6Af73FdA013599F9d \
+  "lastTendTimestamp()(uint256)" \
+  --rpc-url https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+Command 'cast' not found, did you mean:
+  command 'cass' from snap cass (0.17.2)
+  command 'fast' from snap fast (0.0.4)
+  command 'casw' from deb epics-base (7.0.7+dfsg1-5)
+  command 'last' from deb util-linux (2.39.3-9ubuntu6.5)
+  command 'cas' from deb amule-utils (1:2.3.3-3build1)
+  command 'nast' from deb nast (0.2.0-10)
+  command 'cat' from deb coreutils (9.4-3ubuntu6.2)
+  command 'ast' from deb jruby (9.3.9.0+ds-1)
+  command 'cst' from deb imx-code-signing-tool (3.3.2+dfsg-1)
+  command 'cmst' from deb cmst (2023.03.14-1)
+See 'snap info <snapname>' for additional versions.
+Command 'cast' not found, did you mean:
+  command 'cass' from snap cass (0.17.2)
+  command 'fast' from snap fast (0.0.4)
+  command 'cmst' from deb cmst (2023.03.14-1)
+  command 'cat' from deb coreutils (9.4-3ubuntu6.2)
+  command 'casw' from deb epics-base (7.0.7+dfsg1-5)
+  command 'nast' from deb nast (0.2.0-10)
+  command 'cas' from deb amule-utils (1:2.3.3-3build1)
+  command 'cst' from deb imx-code-signing-tool (3.3.2+dfsg-1)
+  command 'last' from deb util-linux (2.39.3-9ubuntu6.5)
+  command 'ast' from deb jruby (9.3.9.0+ds-1)
+See 'snap info <snapname>' for additional versions.
+Command 'cast' not found, did you mean:
+  command 'fast' from snap fast (0.0.4)
+  command 'cass' from snap cass (0.17.2)
+  command 'last' from deb util-linux (2.39.3-9ubuntu6.5)
+  command 'cst' from deb imx-code-signing-tool (3.3.2+dfsg-1)
+  command 'nast' from deb nast (0.2.0-10)
+  command 'cas' from deb amule-utils (1:2.3.3-3build1)
+  command 'casw' from deb epics-base (7.0.7+dfsg1-5)
+  command 'ast' from deb jruby (9.3.9.0+ds-1)
+  command 'cmst' from deb cmst (2023.03.14-1)
+  command 'cat' from deb coreutils (9.4-3ubuntu6.2)
+See 'snap info <snapname>' for additional versions.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && python3 -c "
+import requests, os
+from dotenv import load_dotenv
+load_dotenv()
+
+rpc = os.getenv('BASE_RPC_URL', 'https://mainnet.base.org')
+vault = '0x1182054b82f96c110698eAe6Af73FdA013599F9d'
+
+def call(sig):
+    from eth_hash.auto import keccak
+    sel = keccak(sig.encode())[:4].hex()
+    r = requests.post(rpc, json={'jsonrpc':'2.0','id':1,'method':'eth_call','params':[{'to':vault,'data':'0x'+sel},'latest']}, timeout=10)
+    return r.json().get('result','0x')
+
+sw  = '0x' + call('servicerWallet()')[-40:]
+idl = int(call('idleBalance()'), 16) / 1e6
+ltt = int(call('lastTendTimestamp()'), 16)
+tc  = int(call('tendCooldown()'), 16)
+lb  = int(call('lastReportedBackingAssets()'), 16) / 1e6
+
+import time; now = int(time.time())
+print(f'servicerWallet:     {sw}')
+print(f'idleBalance:        {idl:.6f} USDC')
+print(f'lastReportedAssets: {lb:.6f} USDC')
+print(f'tendCooldown:       {tc}s')
+print(f'lastTendTimestamp:  {ltt}  (ready in {max(0,(ltt+tc)-now)}s)')
+print(f'ARB_SERVICER_WALLET env: {os.getenv(\"ARB_SERVICER_WALLET\",\"NOT SET\")}')
+"
+servicerWallet:     0x0x
+idleBalance:        11.000000 USDC
+lastReportedAssets: 0.000000 USDC
+tendCooldown:       60s
+lastTendTimestamp:  1774564903  (ready in 22s)
+ARB_SERVICER_WALLET env: 0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

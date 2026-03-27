@@ -1,0 +1,62 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot && git pull && npx tsx scripts/seed-arb-vault-v2-report.ts
+remote: Enumerating objects: 18, done.
+remote: Counting objects: 100% (18/18), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 10 (delta 8), reused 10 (delta 8), pack-reused 0 (from 0)
+Unpacking objects: 100% (10/10), 3.20 KiB | 273.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   5e67374..51bbeb6  main       -> origin/main
+Updating 5e67374..51bbeb6
+Fast-forward
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cd-PolyNo_1774546465532.txt | 58 ++++++++++++++++++++++++++++++++++++++++++++
+ bot/arb_monitor/core/arb_reporter.py                                                             | 23 +++++++++---------
+ scripts/seed-arb-vault-v2-report.ts                                                              | 75 ++++++++++++++++++++++++---------------------------------
+ 3 files changed, 100 insertions(+), 56 deletions(-)
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cd-PolyNo_1774546465532.txt
+[dotenv@17.2.1] injecting env (37) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+🌱 pARB Vault V2 — Seed Report
+   Vault:      0x1182054b82f96c110698eAe6Af73FdA013599F9d
+   Signer:     0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+   Chain:      Base (8453)
+   RPC:        https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+
+📊 Current vault state:
+   officialPPS:               1.000000 USDC/share
+   lastReportNonce:           0
+   lastReportedBackingAssets: 0.000000 USDC
+   totalPendingDepositAssets: 11.000000 USDC
+   totalPendingRedeemShares:  0.000000 shares
+   reportSigner:              0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0
+   paused:                    false
+   shutdown:                  false
+   reportCooldown:            3600s  lastReportTimestamp: 0
+   cooldown ready:            true (now=1774559447)
+
+📝 Seed report params:
+   nonce:          1
+   reportedAssets: 0.000000 USDC
+
+🔐 Signing report data…
+   structHash: 0x3b3b9275812f1df47d6a1ff0fa64361de3a2a84fb70dc4f7e3f9d9f79a6364f2
+   signature:  0xb43e27ea2025ac2c7d…
+
+⛽ Using fixed gas limit: 600000
+
+📤 Sending report() transaction…
+   tx hash: 0xcf98fda61467fcd92f75a819e79697ccdcf6c79c656246c47a197fa3abc8265c
+   Waiting for confirmation…
+
+✅ Seed report confirmed!
+   Block:   43885051
+   Gas used: 184268
+
+📊 New vault state:
+   officialPPS:               1.000000 USDC/share
+   lastReportNonce:           1
+   lastReportedBackingAssets: 0.000000 USDC
+
+🎉 Vault is seeded and ready for user deposits!
+   Users can now requestDeposit() — shares will be minted on next report()
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

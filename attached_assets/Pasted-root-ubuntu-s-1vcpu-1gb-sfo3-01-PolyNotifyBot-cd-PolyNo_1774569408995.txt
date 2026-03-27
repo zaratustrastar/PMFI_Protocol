@@ -1,0 +1,42 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && python3 -c "
+import requests, os; from dotenv import load_dotenv; from eth_hash.auto import keccak; load_dotenv()
+rpc   = os.getenv('BASE_RPC_URL', 'https://mainnet.base.org')
+vault = '0x1182054b82f96c110698eAe6Af73FdA013599F9d'
+svc   = '0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF'
+usdc  = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+
+def rpc_call(m,p):
+    return requests.post(rpc, json={'jsonrpc':'2.0','id':1,'method':m,'params':p}, timeout=10).json()['result']
+def view(sig):
+    sel = keccak(sig.encode())[:4].hex()
+    return rpc_call('eth_call',[{'to':vault,'data':'0x'+sel},'latest'])
+def bal(addr):
+    d = '0x70a08231'+'000000000000000000000000'+addr[2:]
+    return int(rpc_call('eth_call',[{'to':usdc,'data':d},'latest']),16)/1e6
+
+# Get the last tend() tx from the bot — paste it here to check receipt
+last_tend_tx = '0x66b0441990d44b7314be0f0dc32905387d93ae02e9a20e55a6ba90ccc8f59adb'
+receipt = rpc_call('eth_getTransactionReceipt',[last_tend_tx])
+if receipt:
+    print(f'tend() tx status: {\"SUCCESS\" if int(receipt[\"status\"],16)==1 else \"REVERTED\"}')
+else:
+    print('tend() tx: PENDING or not found')
+
+vault_usdc  = bal(vault)
+svc_usdc    = bal(svc)
+idle        = int(view('idleBalance()'),16)/1e6
+pending_dep = int(view('totalPendingDepositAssets()'),16)/1e6
+last_ts     = int(view('lastTendTimestamp()'),16)
+cooldown    = int(view('tendCooldown()'),16)
+print(f'Vault raw USDC:             {vault_usdc:.4f}')
+print(f'idleBalance():              {idle:.4f}')
+print(f'totalPendingDepositAssets:  {pending_dep:.4f}')
+"mport time; print(f'tend() ready in:            {max(0, last_ts+cooldown-int(time.time()))}s')
+tend() tx status: SUCCESS
+Vault raw USDC:             22.0000
+idleBalance():              11.0000
+totalPendingDepositAssets:  11.0000
+Servicer USDC:              3.1588
+lastTendTimestamp:          1774569343  cooldown=60s
+tend() ready in:            19s
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

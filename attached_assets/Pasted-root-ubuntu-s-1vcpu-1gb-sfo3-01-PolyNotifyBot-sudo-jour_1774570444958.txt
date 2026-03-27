@@ -1,0 +1,75 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "10 minutes ago" | grep -E "ArbFunder|ArbExec|trade|order|distribute|Poly|Kalshi|Opinion|USDC|❌|✅" | tail -60
+Mar 27 00:13:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXVENEZUELALEADER-26DEC31
+Mar 27 00:13:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 27 00:13:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_nicolas_maduro: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 27 00:13:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_gretchen_whitmer venue2=opinion | score=0.2 AR=0.03× net_edge=7.80% conf=0.56 | days=955.78d size=$10.00
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 380: errno=500 msg=
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gretchen_whitmer: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=colorado-democratic-senate-primary-winner-2026_julie_gonzales venue2=kalshi | score=0.2 AR=0.04× net_edge=0.90% conf=0.46 | days=94.99d size=$10.00
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Germany: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 69.8 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 69.8 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 69.8 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚠️ [HTTP] kalshi 404 on https://api.elections.kalshi.com/trade-api/v2/markets/KXSENATECOD-26
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ kalshi_orderbook_missing: could not fetch live kalshi ask
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for colorado-democratic-senate-primary-winner-2026_julie_gonzales: kalshi_orderbook_missing: could not fetch live kalshi ask unwound=False
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fed-rate-cuts-2026_cuts_0 venue2=opinion | score=0.2 AR=0.03× net_edge=2.20% conf=0.55 | days=278.99d size=$10.00
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 67.1 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 64.3 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 62.9 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 62.5 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 78: errno=500 msg=
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_0: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=openai-ipo-closing-market-cap_ipo_over_15t venue2=opinion | score=0.2 AR=0.02× net_edge=0.50% conf=0.78 | days=94.99d size=$10.00
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💬 [Arb/Opinion] ⚠️ Orderbook error for 152: errno=500 msg=
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: ⚡ [Arb/Executor] ❌ opinion_orderbook_missing: could not fetch live opinion ask
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_over_15t: opinion_orderbook_missing: could not fetch live opinion ask unwound=False
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=top-chef-season-23-winner-2026_duyen_ha venue2=kalshi | score=0.1 AR=0.05× net_edge=1.70% conf=0.30 | days=125.99d size=$10.00
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Over: 60.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 00:13:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && python3 -c "
+import requests, os; from dotenv import load_dotenv; load_dotenv()
+rpc = os.getenv('BASE_RPC_URL', 'https://mainnet.base.org')
+svc = '0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF'
+usdc = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+
+def bal(addr):
+    d = '0x70a08231'+'000000000000000000000000'+addr[2:]
+    return int(requests.post(rpc, json={'jsonrpc':'2.0','id':1,'method':'eth_call','params':[{'to':usdc,'data':d},'latest']}, timeout=10).json()['result'], 16) / 1e6
+
+print(f'Servicer wallet USDC: {bal(svc):.4f}')
+"
+Servicer wallet USDC: 24.1588
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

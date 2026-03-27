@@ -1,0 +1,200 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "ArbFunder|tend|deploy|USDC"
+Mar 26 23:34:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774567919, cooldown=60s) — calling
+Mar 26 23:34:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF pending_nonce=208
+Mar 26 23:34:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💸 [ArbFunder] 📤 TX nonce=208 → 0x66b0441990d44b7314be0f0dc32905387d93ae02e9a20e55a6ba90ccc8f59adb
+Mar 26 23:34:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💸 [ArbFunder] ✅ tend() sent: tx=0x66b0441990d44b7314be0f0dc32905387d93ae02e9a20e55a6ba90ccc8f59adb
+Mar 26 23:34:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💸 [ArbFunder] ⚠️ Liquidity state unavailable — falling back to raw balance check
+Mar 26 23:34:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💸 [ArbFunder] [2026-03-26T23:34:11Z] Servicer wallet USDC on Base: 4.1588 (deployable)
+Mar 26 23:34:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 💸 [ArbFunder] ℹ️ Deployable 4.1588 < threshold 20.00 USDC — nothing to distribute
+Mar 26 23:34:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/392959742846): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2000 → 0 contracts fillable ($0.00 USDC) across 68 ask levels
+Mar 26 23:34:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/613689431282): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/605900454893): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9850 → 0 contracts fillable ($0.00 USDC) across 10 ask levels
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/760057000270): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.7700 → 0 contracts fillable ($0.00 USDC) across 16 ask levels
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/107531561888): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0400 → 0 contracts fillable ($0.00 USDC) across 72 ask levels
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/124036029200): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0320 → 0 contracts fillable ($0.00 USDC) across 46 ask levels
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/200067327656): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/896437773601): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0160 → 0 contracts fillable ($0.00 USDC) across 46 ask levels
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/200067327656): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2400 → 0 contracts fillable ($0.00 USDC) across 46 ask levels
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/200067327656): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.3000 → 0 contracts fillable ($0.00 USDC) across 15 ask levels
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/484511264716): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0130 → 0 contracts fillable ($0.00 USDC) across 72 ask levels
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/124036029200): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.6300 → 0 contracts fillable ($0.00 USDC) across 16 ask levels
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/896437773601): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/548733303953): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0200 → 0 contracts fillable ($0.00 USDC) across 72 ask levels
+Mar 26 23:34:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/124036029200): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0070 → 0 contracts fillable ($0.00 USDC) across 61 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/984549072749): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0280 → 0 contracts fillable ($0.00 USDC) across 41 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/262964749911): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0050 → 0 contracts fillable ($0.00 USDC) across 61 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/984549072749): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2180 → 0 contracts fillable ($0.00 USDC) across 142 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/303964130995): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0290 → 0 contracts fillable ($0.00 USDC) across 59 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/473409074357): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111206023652): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.6530 → 0 contracts fillable ($0.00 USDC) across 66 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/212945922050): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2500 → 0 contracts fillable ($0.00 USDC) across 66 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/557642122114): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.4700 → 0 contracts fillable ($0.00 USDC) across 21 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/601403911909): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/416656247848): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1000 → 0 contracts fillable ($0.00 USDC) across 41 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/236946106671): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.7600 → 0 contracts fillable ($0.00 USDC) across 7 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/311251432399): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=2.40% AR=0.03× conf=0.19 fill=10 score=0.1 | gross=5.00¢ days=279.0
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=5.00¢ poly=0.76 venue2(kalshi/NO)=0.19 days=279.0 token=resolved title='Who Will Attend Taylor Swift and Travis '
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2100 → 0 contracts fillable ($0.00 USDC) across 37 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/548733303953): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8800 → 0 contracts fillable ($0.00 USDC) across 4 ask levels
+Mar 26 23:34:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/634470511729): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9400 → 0 contracts fillable ($0.00 USDC) across 4 ask levels
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/423921203762): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/984549072749): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/984549072749): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9610 → 0 contracts fillable ($0.00 USDC) across 66 ask levels
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/212945922050): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/212945922050): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111206023652): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111615694922): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0100 → 0 contracts fillable ($0.00 USDC) across 63 ask levels
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/651932346666): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/778093802067): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/793970034344): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/321691341049): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0020 → 0 contracts fillable ($0.00 USDC) across 38 ask levels
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111420057784): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/750533025365): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/514078145571): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/124036029200): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.5900 → 0 contracts fillable ($0.00 USDC) across 0 ask levels
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/967738935125): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9810 → 0 contracts fillable ($0.00 USDC) across 66 ask levels
+Mar 26 23:34:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/212945922050): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/797604919799): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/557642122114): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.4400 → 0 contracts fillable ($0.00 USDC) across 42 ask levels
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/638454057226): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111206023652): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/803394094209): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/605900454893): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9200 → 0 contracts fillable ($0.00 USDC) across 29 ask levels
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/449144656372): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/212945922050): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/694710087823): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/984549072749): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/284982737259): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/969934718544): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0240 → 0 contracts fillable ($0.00 USDC) across 50 ask levels
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/970798809551): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9040 → 0 contracts fillable ($0.00 USDC) across 10 ask levels
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/696124310009): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9750 → 0 contracts fillable ($0.00 USDC) across 17 ask levels
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/354008535724): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/449144656372): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/347224106080): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/487148787424): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9650 → 0 contracts fillable ($0.00 USDC) across 0 ask levels
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/100816942004): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/427011879555): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/495002998568): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2700 → 0 contracts fillable ($0.00 USDC) across 41 ask levels
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/236946106671): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/984549072749): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/670286316565): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111206023652): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111206023652): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111206023652): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/605900454893): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/495002998568): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/484511264716): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/227221403258): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/107505882767): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/605900454893): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9590 → 0 contracts fillable ($0.00 USDC) across 10 ask levels
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/456864412173): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/303964130995): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/109050763670): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/156994406742): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/618651328693): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0450 → 0 contracts fillable ($0.00 USDC) across 49 ask levels
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/612291253641): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/691199401206): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/416656247848): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/793970034344): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/244835632286): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/212945922050): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1900 → 0 contracts fillable ($0.00 USDC) across 50 ask levels
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/109050763670): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/115728410453): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/449144656372): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/502523008983): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/691199401206): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0500 → 0 contracts fillable ($0.00 USDC) across 62 ask levels
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/563982448752): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/103623252288): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0800 → 0 contracts fillable ($0.00 USDC) across 54 ask levels
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/793970034344): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/548733303953): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8900 → 0 contracts fillable ($0.00 USDC) across 6 ask levels
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/692525445809): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/817072510006): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/124036029200): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/262964749911): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111420057784): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/344752532433): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/115139374232): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111206023652): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/129057969397): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/449144656372): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/449144656372): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0530 → 0 contracts fillable ($0.00 USDC) across 54 ask levels
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/793970034344): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/252782005368): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/282902931400): 1319169 contracts = $1307296 USDC → fillable_size=$1307296
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/472716260452): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0640 → 0 contracts fillable ($0.00 USDC) across 54 ask levels
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/793970034344): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/689826048676): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/156994406742): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/711423572293): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/444624118873): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/984549072749): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9770 → 0 contracts fillable ($0.00 USDC) across 17 ask levels
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/376410986265): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/661794933838): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/303964130995): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/605900454893): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/449144656372): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/880393267376): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/605900454893): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.3560 → 0 contracts fillable ($0.00 USDC) across 71 ask levels
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/124036029200): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/976710461130): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/439437288738): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/278289766486): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/473409074357): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (kalshi/760057000270): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/921641824915): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/871137686202): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111206023652): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0260 → 0 contracts fillable ($0.00 USDC) across 86 ask levels
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/605900454893): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/111615694922): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/278289766486): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/778093802067): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/262964749911): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (opinion/317021172932): 0 contracts = $0 USDC → fillable_size=$10
+Mar 26 23:34:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2571525]: 🔀 [Arb/Oddpool] 📏 [Scorer] real poly depth (polymarket/110286929599): 0 contracts = $0 USDC → fillable_size=$10
