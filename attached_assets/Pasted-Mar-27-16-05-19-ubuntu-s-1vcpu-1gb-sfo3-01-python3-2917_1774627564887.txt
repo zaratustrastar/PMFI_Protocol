@@ -1,0 +1,845 @@
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 87808581977574875354...
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='380' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='380'
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=7.0000 | min_edge=0.0030 | live poly_ask=0.999 opinion_ask=None
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.9860 slippage=0.0130 > 0.0050
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gretchen_whitmer: poly_slippage_exceeded: live=0.9990 quote=0.9860 slippage=0.0130 > 0.0050 unwound=False
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 87808581977574875354826250099742515871284917960164726673141527059027835490951
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 25999723538385014010...
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=french-presidential-election-2027_jordan_bardella venue2=kalshi | score=8.9 AR=0.01× net_edge=1.40% conf=0.67 | days=398.33d size=$1030.80
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair french-presidential-election-2027_jordan_bardella (venue2=kalshi)
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 1114938555853162... for price check
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXFRENCHPRES-27'
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 25999723538385014010053820518545750038546699932105208601515071899848058408094
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 59581798983944130222...
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 59581798983944130222118660126413569436140771115420092139006368596172523411817
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 61477597264897807109...
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 61477597264897807109466324799245910130348890446385640751996083875045335156028
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 46224516111239258130...
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: 'KXFRENCHPRES-27' → 'KXFRENCHPRES-27-SKNA' (from 20 markets, outcome_key='jordan_bardella', fallback to first)
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXFRENCHPRES-27' → 'KXFRENCHPRES-27-SKNA'
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1114938555853162... (side=YES) venue2=kalshi kalshi=KXFRENCHPRES-27-SKNA
+Mar 27 16:05:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 46224516111239258130366381044267264309322671363390767060101822223060867246986
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 32397778199103102816...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 32397778199103102816142016084999129279584032380704373118442102865517105712353
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 19779563437427872070...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 19779563437427872070400478126089444944252120270790658097679672491345585496756
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 33082317173199981708...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 330823171731999817086879000594709304192067607428712222774882427003514279182
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 34602486286126974179...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXFRENCHPRES-27-SKNA': yes_ask=None no_ask=None
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.4000 | min_edge=0.0030 | live poly_ask=0.99 kalshi_ask=None
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.2500 slippage=0.7400 > 0.0050
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for french-presidential-election-2027_jordan_bardella: poly_slippage_exceeded: live=0.9900 quote=0.2500 slippage=0.7400 > 0.0050 unwound=False
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 34602486286126974179161829631860053879450290023721786658500878690164464087941
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 99096457576478333815...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=sc-governor-republican-primary-winner-2026_pamela_evette venue2=kalshi | score=8.5 AR=0.02× net_edge=0.40% conf=0.59 | days=73.33d size=$716.11
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair sc-governor-republican-primary-winner-2026_pamela_evette (venue2=kalshi)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 6241975354906055... for price check
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXGOVSCNOMR-26'
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 99096457576478333815903600099795594668845585076933060973520289505768074929219
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 33735989732629024687...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 33735989732629024687477143298222686749847385281976304508851275156143337572673
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 12.4 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 69653047382984724279...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 16 bids, 54 asks
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 12.0 → liq value $0.50
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 15665478647675293452...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: 'KXGOVSCNOMR-26' → 'KXGOVSCNOMR-26-RRED' (from 6 markets, outcome_key='pamela_evette', fallback to first)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXGOVSCNOMR-26' → 'KXGOVSCNOMR-26-RRED'
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=6241975354906055... (side=YES) venue2=kalshi kalshi=KXGOVSCNOMR-26-RRED
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 15665478647675293452420483204922120064082101026430828388931863561901272271372
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.2 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 96624567273329931791...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 96624567273329931791443846907369329278564133915434544281591699627037562287379
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 39260740555478500058...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 39260740555478500058745014451735984450326106565666277849584548416352472276824
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 85021050207667228638...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 85021050207667228638669973151216933245728924039359347539530001874975719889908
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 30623654730009317973...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXGOVSCNOMR-26-RRED': yes_ask=None no_ask=None
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.4000 | min_edge=0.0030 | live poly_ask=0.99 kalshi_ask=None
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.3900 slippage=0.6000 > 0.0050
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for sc-governor-republican-primary-winner-2026_pamela_evette: poly_slippage_exceeded: live=0.9900 quote=0.3900 slippage=0.6000 > 0.0050 unwound=False
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 30623654730009317973455852145933663461117325902080423132004868365311713497477
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 15048256302913385614...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_pete_hegseth venue2=kalshi | score=7.0 AR=0.00× net_edge=0.20% conf=0.86 | days=278.33d size=$3103.80
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair venezuela-leader-2026_pete_hegseth (venue2=kalshi)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 1047698386190913... for price check
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXVENEZUELALEADER-26DEC31'
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 15048256302913385614908848825363140308652066433754197758096255459353001495155
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11542037808556460239...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 115420378085564602397101396392550874023448701785429629756472178141417680852233
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 55570904450882667416...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 55570904450882667416014003898506069518102723590376730779855810010542164585090
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11227701854245749790...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: 'KXVENEZUELALEADER-26DEC31' → 'KXVENEZUELALEADER-26DEC31-JGUA' (from 18 markets, outcome_key='pete_hegseth', fallback to first)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXVENEZUELALEADER-26DEC31' → 'KXVENEZUELALEADER-26DEC31-JGUA'
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1047698386190913... (side=YES) venue2=kalshi kalshi=KXVENEZUELALEADER-26DEC31-JGUA
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 6 bids, 43 asks
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 11.0 → liq value $0.07
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 27601629742292247099...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 27601629742292247099985764392298280810689326969957887260386308647169897830364
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 62896456437855475909...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 62896456437855475909897521856351005427735245533435736039905478363163792645782
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 54454486756746514546...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 54454486756746514546359789501422629947460177645589479099342152700366473060926
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 54045522848982885359...
+Mar 27 16:05:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXVENEZUELALEADER-26DEC31-JGUA': yes_ask=None no_ask=None
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.2000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0020 slippage=0.9970 > 0.0050
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_pete_hegseth: poly_slippage_exceeded: live=0.9990 quote=0.0020 slippage=0.9970 > 0.0050 unwound=False
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 54045522848982885359002635274519946502917459281557442695959586885066639974825
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 98938553146737825985...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=colorado-democratic-senate-primary-winner-2026_julie_gonzales venue2=kalshi | score=6.8 AR=0.04× net_edge=0.90% conf=0.46 | days=94.33d size=$421.48
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair colorado-democratic-senate-primary-winner-2026_julie_gonzales (venue2=kalshi)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 8823992347267314... for price check
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXSENATECOD-26'
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 98938553146737825985878536708985126813063376361432561911494278811015057097024
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 95514325445137992819...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 95514325445137992819511810542904759035143009960444374566313266483310982962579
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 11.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 51794735602374703799...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 26 bids, 65 asks
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 11.0 → liq value $0.41
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 41983313784713061627...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: 'KXSENATECOD-26' → 'KXSENATECOD-26-JGON' (from 4 markets, outcome_key='julie_gonzales', fallback to first)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXSENATECOD-26' → 'KXSENATECOD-26-JGON'
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=8823992347267314... (side=YES) venue2=kalshi kalshi=KXSENATECOD-26-JGON
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 41983313784713061627622480624298322239640495762475124758870111370043826914929
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.4 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11237194634012918496...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 112371946340129184960918173540079350514642743753523559607357730722282148845537
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.3 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 49328773147965671039...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 3 bids, 58 asks
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 10.2 → liq value $0.03
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 85958695614421253863...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 85958695614421253863728329256565664792577151195007259602207025355989380415003
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.1 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 61130397822500027197...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXSENATECOD-26-JGON': yes_ask=None no_ask=None
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.9000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.2750 slippage=0.7240 > 0.0050
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for colorado-democratic-senate-primary-winner-2026_julie_gonzales: poly_slippage_exceeded: live=0.9990 quote=0.2750 slippage=0.7240 > 0.0050 unwound=False
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 61130397822500027197892073657984395126238531814935853775365799703119906077222
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.1 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 35649589538982472613...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=trump-putin-next-meeting-location-2029_russia venue2=kalshi | score=6.5 AR=0.10× net_edge=2.50% conf=0.30 | days=94.33d size=$215.70
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair trump-putin-next-meeting-location-2029_russia (venue2=kalshi)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 1149691170853035... for price check
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXPUTINDJTLOCATION-29'
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 35649589538982472613593540655780891673034506946798205050614639284117698349061
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 81714093214150192070...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 8171409321415019207012167545028269606858590319270047920406157986469107748635
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 96000643511363581713...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 96000643511363581713872438028690772277068213403036156499348379250420037584808
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 96461601879624665122...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: 'KXPUTINDJTLOCATION-29' → 'KXPUTINDJTLOCATION-29-HUN' (from 10 markets, outcome_key='russia', fallback to first)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXPUTINDJTLOCATION-29' → 'KXPUTINDJTLOCATION-29-HUN'
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1149691170853035... (side=YES) venue2=kalshi kalshi=KXPUTINDJTLOCATION-29-HUN
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 72 asks
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 10.0 → liq value $0.01
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 60364199605846140824...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 60364199605846140824360038289326403689953423181170499494127835481869335820844
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 74627600839723988714...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 74627600839723988714744306336847902196293625286970810984032105724524534220701
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 54252925606066284635...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 54252925606066284635722877766389298283571474580668697672607702930262724239114
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Over: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 53081315401174852186...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 53081315401174852186406941080900323885353595408533460368225146967270047598843
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 98836259718105172637...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXPUTINDJTLOCATION-29-HUN': yes_ask=None no_ask=None
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=2.5000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0290 slippage=0.9700 > 0.0050
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-putin-next-meeting-location-2029_russia: poly_slippage_exceeded: live=0.9990 quote=0.0290 slippage=0.9700 > 0.0050 unwound=False
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 98836259718105172637760497559947259001945555659708235236742589207917253786235
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 52052435065260113897...
+Mar 27 16:05:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=acquisitions-before-2027_viking_therapeutics venue2=opinion | score=6.4 AR=0.03× net_edge=2.40% conf=0.46 | days=278.33d size=$434.02
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair acquisitions-before-2027_viking_therapeutics (venue2=opinion)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 9024364352226696... for price check
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=9024364352226696... (side=NO) venue2=opinion opinion=337
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 5205243506526011389717418426463370364820389570584059213807065188030894619082
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Ma: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 79484425942556998404...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 🔍 Token lookup for marketId='337' | cache_size=7 | cache_keys_sample=['10562', '10559', '10558', '10466', '10465', '10464', '10400']
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ⚠️ marketId='337' not in cache — falling back to live API (cache may be empty or ID format mismatch)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2: GET https://proxy.opinion.trade:8443/openapi/market/337
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 794844259425569984045070361385323818466493060737016550118353686845143207096
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 79539630581733869677...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 60 asks
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 10.0 → liq value $0.01
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 62211722280384263882...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 status=200
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 raw keys='NoneType'
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: GET https://proxy.opinion.trade:8443/openapi/market?marketId=337&limit=5
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 62211722280384263882727272336131326235246081968317623658880768713583872772038
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 46212090718411111909...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 46212090718411111909267166769997796899956866184157104622990918389468086792035
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 98380178704812348051...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='337' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='337'
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=2.4000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=None
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.7700 slippage=0.2200 > 0.0050
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for acquisitions-before-2027_viking_therapeutics: poly_slippage_exceeded: live=0.9900 quote=0.7700 slippage=0.2200 > 0.0050 unwound=False
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 98380178704812348051894196526077133151022223502051456373079307561806565075226
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 42787093210562452679...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=lol-lck-2026-winner_fearx venue2=opinion | score=5.9 AR=0.01× net_edge=0.80% conf=0.64 | days=278.33d size=$878.84
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair lol-lck-2026-winner_fearx (venue2=opinion)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 4876333490293392... for price check
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4876333490293392... (side=YES) venue2=opinion opinion=213
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 42787093210562452679715032178534218262571441422809000763107924911559679491401
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 81198543464320767832...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 🔍 Token lookup for marketId='213' | cache_size=7 | cache_keys_sample=['10562', '10559', '10558', '10466', '10465', '10464', '10400']
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ⚠️ marketId='213' not in cache — falling back to live API (cache may be empty or ID format mismatch)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2: GET https://proxy.opinion.trade:8443/openapi/market/213
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 81198543464320767832243926151879146849351187635151340143208220279993733598136
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Under: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 36042755212481796812...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 36042755212481796812646724978704588854281555656447124987723642693738695597652
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 84070421929460296365...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 status=200
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 raw keys='NoneType'
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: GET https://proxy.opinion.trade:8443/openapi/market?marketId=213&limit=5
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 84070421929460296365466546134306293636827031019068387137763210670438649779996
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 84329256090722937426...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 84329256090722937426774323150086710801213424819600359734579206827226673985624
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ SMU Mustangs: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 67561186634175901946...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 2 bids, 60 asks
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 10.0 → liq value $0.02
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 17683310695233553749...
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='213' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='213'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.8000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=None
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.0370 slippage=0.9530 > 0.0050
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_fearx: poly_slippage_exceeded: live=0.9900 quote=0.0370 slippage=0.9530 > 0.0050 unwound=False
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=lol-lpl-2026-season-winner_oh_my_god venue2=opinion | score=5.8 AR=0.01× net_edge=0.90% conf=0.61 | days=278.33d size=$798.26
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair lol-lpl-2026-season-winner_oh_my_god (venue2=opinion)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 4309496333561212... for price check
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=4309496333561212... (side=YES) venue2=opinion opinion=212
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 17683310695233553749184867616179087787605430767974458085579670574404897582463
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 17462789133938720771...
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 17462789133938720771253485166630784761208159726377058417040369032252112905327
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 94664310258501270258...
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 🔍 Token lookup for marketId='212' | cache_size=7 | cache_keys_sample=['10562', '10559', '10558', '10466', '10465', '10464', '10400']
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ⚠️ marketId='212' not in cache — falling back to live API (cache may be empty or ID format mismatch)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2: GET https://proxy.opinion.trade:8443/openapi/market/212
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 9466431025850127025817222522199380281588974706557026790871090383175643708603
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 14628606297165176764...
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 1462860629716517676413764108019710235611456320869790737010052064279159912046
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11375150103804655619...
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 status=200
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 raw keys='NoneType'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: GET https://proxy.opinion.trade:8443/openapi/market?marketId=212&limit=5
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 113751501038046556192015564304934332585460579899699211154872333738065434242518
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 50051058749064052538...
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 50051058749064052538312417763687928837152787780943573911723246884266901268032
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 56428505496940612957...
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='212' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='212'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.9000 | min_edge=0.0030 | live poly_ask=0.86 opinion_ask=None
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.8600 quote=0.0040 slippage=0.8560 > 0.0050
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lpl-2026-season-winner_oh_my_god: poly_slippage_exceeded: live=0.8600 quote=0.0040 slippage=0.8560 > 0.0050 unwound=False
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 0 bids, 52 asks
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11157997231320649779...
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=spacex-ticker-prediction_sex venue2=opinion | score=4.9 AR=0.00× net_edge=0.40% conf=0.84 | days=643.33d size=$2596.65
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair spacex-ticker-prediction_sex (venue2=opinion)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 1016047964191944... for price check
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1016047964191944... (side=YES) venue2=opinion opinion=169
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 111579972313206497791920046840580656772132543990729273933255412413501555994843
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 57425967836337944297...
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 🔍 Token lookup for marketId='169' | cache_size=7 | cache_keys_sample=['10562', '10559', '10558', '10466', '10465', '10464', '10400']
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ⚠️ marketId='169' not in cache — falling back to live API (cache may be empty or ID format mismatch)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2: GET https://proxy.opinion.trade:8443/openapi/market/169
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 57425967836337944297372584404728921172035238123405706370672463660117570336573
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 58313630794050099820...
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 5831363079405009982082429572975972233461309652608583456994500678028172160019
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 65613402696142700123...
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 status=200
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 raw keys='NoneType'
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: GET https://proxy.opinion.trade:8443/openapi/market?marketId=169&limit=5
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 65613402696142700123787652764199414513345097535858417948652122397663558542836
+Mar 27 16:05:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 127.0.0.1 - - [27/Mar/2026 16:05:29] "GET /price HTTP/1.1" 200 -
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11040715500666546118...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 110407155006665461184969829678926324417770998359033853093570667898579468586830
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 66251427117820730328...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 0 bids, 53 asks
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 67078825723002175600...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='169' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='169'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.4000 | min_edge=0.0030 | live poly_ask=0.999 opinion_ask=None
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0190 slippage=0.9800 > 0.0050
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_sex: poly_slippage_exceeded: live=0.9990 quote=0.0190 slippage=0.9800 > 0.0050 unwound=False
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 60 asks
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 10.0 → liq value $0.01
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 25494484599048403671...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=lol-lck-2026-winner_dplus venue2=opinion | score=4.2 AR=0.02× net_edge=1.30% conf=0.50 | days=278.33d size=$497.97
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair lol-lck-2026-winner_dplus (venue2=opinion)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 1075897310396556... for price check
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1075897310396556... (side=YES) venue2=opinion opinion=213
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 25494484599048403671790277579062454208104958276657969680784758346223386944390
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11023991642685640330...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 🔍 Token lookup for marketId='213' | cache_size=7 | cache_keys_sample=['10562', '10559', '10558', '10466', '10465', '10464', '10400']
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ⚠️ marketId='213' not in cache — falling back to live API (cache may be empty or ID format mismatch)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2: GET https://proxy.opinion.trade:8443/openapi/market/213
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 0 bids, 53 asks
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 67952595846904930702...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 67952595846904930702698473581771630426446940445939381819693784988671734207094
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10934986669446664299...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 status=200
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 raw keys='NoneType'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: GET https://proxy.opinion.trade:8443/openapi/market?marketId=213&limit=5
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 109349866694466642993907526031334874700829644936851934719206406069909787907849
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 68154666941714780028...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 0 bids, 53 asks
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10816358866857734320...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='213' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='213'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.3000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=None
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.0410 slippage=0.9490 > 0.0050
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_dplus: poly_slippage_exceeded: live=0.9900 quote=0.0410 slippage=0.9490 > 0.0050 unwound=False
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 108163588668577343209303120256502017010111436557025901787700378503774043191765
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10769750551045154866...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=israel-pm-2045_yariv_levin venue2=kalshi | score=4.1 AR=0.06× net_edge=4.80% conf=0.30 | days=278.33d size=$215.70
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair israel-pm-2045_yariv_levin (venue2=kalshi)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 2815579358561921... for price check
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXNEXTISRAELPM-45JAN01'
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 107697505510451548662950090923001859830636768453798822997043874781379506007376
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 72455625315691243874...
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 72455625315691243874389499799176660109733580389396371383188954796953826826847
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Bondar: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10311052635277765267...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 10311052635277765267281293980289156454809680644432002499106573346476180378036
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 87034408945168790562...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: 'KXNEXTISRAELPM-45JAN01' → 'KXNEXTISRAELPM-45JAN01-YLEV' (from 12 markets, outcome_key='yariv_levin', fallback to first)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXNEXTISRAELPM-45JAN01' → 'KXNEXTISRAELPM-45JAN01-YLEV'
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2815579358561921... (side=YES) venue2=kalshi kalshi=KXNEXTISRAELPM-45JAN01-YLEV
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 62 asks
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 10.0 → liq value $0.01
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10310352282842548907...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 103103522828425489076380501816790825310577188640340630963728663190216647947935
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10161245658070151132...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 61 asks
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 10.0 → liq value $0.01
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 91293308669309995813...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 91293308669309995813333410863865028107965819579610601545970301676371276089969
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10064761569523402135...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 100647615695234021356886091798174787674146366454674029673756205598019186048438
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 24030578345687573290...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXNEXTISRAELPM-45JAN01-YLEV': yes_ask=None no_ask=None
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=4.8000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0160 slippage=0.9830 > 0.0050
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for israel-pm-2045_yariv_levin: poly_slippage_exceeded: live=0.9990 quote=0.0160 slippage=0.9830 > 0.0050 unwound=False
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 24030578345687573290297317228457747680294453914402028128646921013553594905544
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Howard Bison: 10.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 14233945349026613394...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=french-presidential-election-2027_marine_le_pen venue2=kalshi | score=3.8 AR=0.01× net_edge=1.40% conf=0.53 | days=398.33d size=$561.00
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair french-presidential-election-2027_marine_le_pen (venue2=kalshi)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 5576421221146778... for price check
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXFRENCHPRES-27'
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 14233945349026613394383333912629975384804824304691386355236396847537806362751
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 9.1 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 34682726866983256460...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 34682726866983256460641603657093312048630643421757092342515814943261710709570
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ No: 9.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 61773897223396683459...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: 'KXFRENCHPRES-27' → 'KXFRENCHPRES-27-SKNA' (from 20 markets, outcome_key='marine_le_pen', fallback to first)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXFRENCHPRES-27' → 'KXFRENCHPRES-27-SKNA'
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=5576421221146778... (side=YES) venue2=kalshi kalshi=KXFRENCHPRES-27-SKNA
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 61773897223396683459610611056567577408405474004950590594618806252296804767641
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 9.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 12237783198391917733...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 12237783198391917733279983766903180891324577889640727686172342643597005644265
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 8.4 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 82289177017723700761...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 82289177017723700761597017298743387753476221242706646037646931813389900100987
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 7.5 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 34645493028804260900...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 34645493028804260900010671134589978053423771464238669089432407336524831144732
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 7.2 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 39997695693338491973...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 39997695693338491973329167815404058161969276201154917654644276622203348815231
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 7.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 66178260535641969210...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXFRENCHPRES-27-SKNA': yes_ask=None no_ask=None
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.4000 | min_edge=0.0030 | live poly_ask=0.99 kalshi_ask=None
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.0800 slippage=0.9100 > 0.0050
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for french-presidential-election-2027_marine_le_pen: poly_slippage_exceeded: live=0.9900 quote=0.0800 slippage=0.9100 > 0.0050 unwound=False
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=israel-pm-2045_yair_lapid venue2=kalshi | score=3.6 AR=0.08× net_edge=6.20% conf=0.25 | days=278.33d size=$170.70
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair israel-pm-2045_yair_lapid (venue2=kalshi)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 3091285485086630... for price check
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXNEXTISRAELPM-45JAN01'
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 19 asks
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10688507190545122976...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 20 asks
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 65593337933581143027...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 18 asks
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 23889288048463791541...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: 'KXNEXTISRAELPM-45JAN01' → 'KXNEXTISRAELPM-45JAN01-YLEV' (from 12 markets, outcome_key='yair_lapid', fallback to first)
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXNEXTISRAELPM-45JAN01' → 'KXNEXTISRAELPM-45JAN01-YLEV'
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=3091285485086630... (side=YES) venue2=kalshi kalshi=KXNEXTISRAELPM-45JAN01-YLEV
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 18 asks
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 71387334888569786344...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 20 asks
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11755577503404549301...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 18 asks
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 29151100923053143648...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 18 asks
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 56995614254486748171...
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXNEXTISRAELPM-45JAN01-YLEV': yes_ask=None no_ask=None
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=6.2000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 27 16:05:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0320 slippage=0.9670 > 0.0050
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for israel-pm-2045_yair_lapid: poly_slippage_exceeded: live=0.9990 quote=0.0320 slippage=0.9670 > 0.0050 unwound=False
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 2 bids, 18 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.02
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 55880053939213245470...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_jon_ossoff venue2=opinion | score=3.2 AR=0.01× net_edge=1.50% conf=0.64 | days=955.12d size=$884.77
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair dem-nominee-2028_jon_ossoff (venue2=opinion)
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 7007159242013747... for price check
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=7007159242013747... (side=YES) venue2=opinion opinion=380
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 19 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 70304024093533802097...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 🔍 Token lookup for marketId='380' | cache_size=7 | cache_keys_sample=['10562', '10559', '10558', '10466', '10465', '10464', '10400']
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ⚠️ marketId='380' not in cache — falling back to live API (cache may be empty or ID format mismatch)
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2: GET https://proxy.opinion.trade:8443/openapi/market/380
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 19 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 98533395341749983082...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 20 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 74405677891854741300...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 status=200
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 raw keys='NoneType'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: GET https://proxy.opinion.trade:8443/openapi/market?marketId=380&limit=5
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 18 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 54571168105076368235...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 17 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 51755965453913857230...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='380' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='380'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.5000 | min_edge=0.0030 | live poly_ask=0.999 opinion_ask=None
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0590 slippage=0.9400 > 0.0050
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jon_ossoff: poly_slippage_exceeded: live=0.9990 quote=0.0590 slippage=0.9400 > 0.0050 unwound=False
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 17 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 44631538762071823123...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=discord-ipo-closing-market-cap_ipo_under_15b venue2=opinion | score=2.6 AR=0.09× net_edge=2.20% conf=0.22 | days=94.33d size=$137.39
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair discord-ipo-closing-market-cap_ipo_under_15b (venue2=opinion)
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 1116156949225894... for price check
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1116156949225894... (side=YES) venue2=opinion opinion=190
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 18 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 36008217795942428127...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 🔍 Token lookup for marketId='190' | cache_size=7 | cache_keys_sample=['10562', '10559', '10558', '10466', '10465', '10464', '10400']
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ⚠️ marketId='190' not in cache — falling back to live API (cache may be empty or ID format mismatch)
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2: GET https://proxy.opinion.trade:8443/openapi/market/190
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 19 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 21959999181587751714...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 2 bids, 21 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 63088649911768575121...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 21 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 19591330752041847672...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 status=200
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 raw keys='NoneType'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: GET https://proxy.opinion.trade:8443/openapi/market?marketId=190&limit=5
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 1 bids, 16 asks
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 79935592824783552533...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 79935592824783552533835343187685487176254067044607001333782877751613066440162
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.2 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10707010945908685187...
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='190' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='190'
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=2.2000 | min_edge=0.0030 | live poly_ask=0.999 opinion_ask=None
+Mar 27 16:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.1410 slippage=0.8580 > 0.0050
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for discord-ipo-closing-market-cap_ipo_under_15b: poly_slippage_exceeded: live=0.9990 quote=0.1410 slippage=0.8580 > 0.0050 unwound=False
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 107070109459086851877154218512262420498302689004113752581274657924845246867584
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.2 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10865395909263250365...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=spx-close-end-2026_price_7000_7500 venue2=opinion | score=2.2 AR=0.01× net_edge=0.50% conf=0.55 | days=279.21d size=$607.73
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair spx-close-end-2026_price_7000_7500 (venue2=opinion)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 9043520283477319... for price check
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=9043520283477319... (side=YES) venue2=opinion opinion=327
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 108653959092632503657191752670849359606762834629118845578364322121074171929300
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 86874912682589456239...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 🔍 Token lookup for marketId='327' | cache_size=7 | cache_keys_sample=['10562', '10559', '10558', '10466', '10465', '10464', '10400']
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ⚠️ marketId='327' not in cache — falling back to live API (cache may be empty or ID format mismatch)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2: GET https://proxy.opinion.trade:8443/openapi/market/327
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 86874912682589456239936060682555520135938798644123818703803760778197238318858
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11283290973115834613...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 112832909731158346138794820691065646259432318894657686964890844426842814025344
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 23421591920017964809...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 status=200
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 raw keys='NoneType'
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: GET https://proxy.opinion.trade:8443/openapi/market?marketId=327&limit=5
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 23421591920017964809544439864549347313093570651612093699070704113371732963199
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 89880239118931406374...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 89880239118931406374496208495202439850314779095438358976317369750512479110396
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10094280398326895092...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 100942803983268950929764493240791451045319742923777743674330954200077591829763
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 15834144903407103045...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='327' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='327'
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.5000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=None
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.2100 slippage=0.7800 > 0.0050
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for spx-close-end-2026_price_7000_7500: poly_slippage_exceeded: live=0.9900 quote=0.2100 slippage=0.7800 > 0.0050 unwound=False
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=english-premier-league-winner-2026_man_united venue2=opinion | score=2.1 AR=0.02× net_edge=0.40% conf=0.34 | days=60.33d size=$256.46
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair english-premier-league-winner-2026_man_united (venue2=opinion)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 7814045843217439... for price check
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=7814045843217439... (side=YES) venue2=opinion opinion=80
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📊 Got 2 bids, 2 asks
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ✅ Yes: 5.0 → liq value $0.20
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 29111462991701587572...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 29111462991701587572129605728755565321238090471562219533173169912468909252167
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11025535428729639736...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 🔍 Token lookup for marketId='80' | cache_size=7 | cache_keys_sample=['10562', '10559', '10558', '10466', '10465', '10464', '10400']
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ⚠️ marketId='80' not in cache — falling back to live API (cache may be empty or ID format mismatch)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2: GET https://proxy.opinion.trade:8443/openapi/market/80
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 110255354287296397368161152380070853940686651585560755856117565301322370555431
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 83518593082513931471...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 83518593082513931471810642850526055845915295440371646790334239422236303024919
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 77194265453022189123...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 status=200
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 raw keys='NoneType'
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: GET https://proxy.opinion.trade:8443/openapi/market?marketId=80&limit=5
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 77194265453022189123705602529228268226466006515127975429841215397451453455932
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 75941135769679593752...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 75941135769679593752641866018818446893154088969791698090745380306649390919297
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 96351736365735358169...
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 127.0.0.1 - - [27/Mar/2026 16:05:38] "GET /sign-nav HTTP/1.1" 200 -
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='80' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='80'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.4000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=None
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.0020 slippage=0.9880 > 0.0050
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_man_united: poly_slippage_exceeded: live=0.9900 quote=0.0020 slippage=0.9880 > 0.0050 unwound=False
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 96351736365735358169656555851920425592603891801917750489340018920508582900035
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 5.0 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 62573046842272350720...
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=lol-lck-2026-winner_geng_esports venue2=opinion | score=1.9 AR=0.01× net_edge=0.60% conf=0.49 | days=278.33d size=$486.63
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair lol-lck-2026-winner_geng_esports (venue2=opinion)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 2605644305136857... for price check
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2605644305136857... (side=YES) venue2=opinion opinion=213
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 62573046842272350720187509053018028839865336463652044986150172860252417177256
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 3.9 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 11411018820460775215...
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 🔍 Token lookup for marketId='213' | cache_size=7 | cache_keys_sample=['10562', '10559', '10558', '10466', '10465', '10464', '10400']
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ⚠️ marketId='213' not in cache — falling back to live API (cache may be empty or ID format mismatch)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2: GET https://proxy.opinion.trade:8443/openapi/market/213
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 11411018820460775215485586947456487458884787840057836332024516353665436118791
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 3.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 84052091891250542766...
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 84052091891250542766209006317885494734140511635636089058190032788564210314656
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 3.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 10037282275357884760...
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ Returning cached signed NAV (valid until 1774627677)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 status=200
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 2 raw keys='NoneType'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: GET https://proxy.opinion.trade:8443/openapi/market?marketId=213&limit=5
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 100372822753578847609253971512271464722984201752559556142068821588024441069086
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 3.4 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 91720067331278107951...
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 91720067331278107951848323330981065217014062224215096752529490196273319623602
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 40066206279102100932...
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 status=200
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3 result type='dict' keys=['total', 'list']
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡 Token lookup path 3: 5 markets returned | marketIds=[10590, 10589, 10588, 10578, 10562]
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10590' yesTokenId='18534634424870608204820588081380138867373900945880351683714989982269220103844' noTokenId='107290713204514459122803114444223998646179714001636357862423031648654324403580'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10589' yesTokenId='73913969625458087865964228014014900006002715191467865636807165678180752340038' noTokenId='15937726207781188067891651681589564752307273647472173914818398324272181290482'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10588' yesTokenId='59269744427997076168067406429138988881764271429249300451829127421680475499956' noTokenId='63108728822503224818415254152527957247414719600282880956579316546826411924755'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10578' yesTokenId='7930332812425170515535946022954940383860251240756028439758533668141197147357' noTokenId='51929142361590642121513969510224104349067218261522999783090702981625041695460'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] 📡   market marketId='10562' yesTokenId='26345575369729278970849701406946324481217038833433461394197222334362239520874' noTokenId='107820742260617940390134962118625526586916374937048144246627348786504145916228'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 💬 [Arb/Opinion] ❌ lookup_token_ids_by_market_id: no tokens found for marketId='213' (cache_size=7, checked both /market/{id} and /market?marketId={id})
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ⚠️ [OPINION] could not resolve token IDs for marketId='213'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.6000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=None
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.5500 slippage=0.4400 > 0.0050
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_geng_esports: poly_slippage_exceeded: live=0.9900 quote=0.5500 slippage=0.4400 > 0.0050 unwound=False
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 40066206279102100932392064779847383344452281794895732259150343592874423378595
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 55038779482410370558...
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=womens-french-open-winner-2026_coco_gauff venue2=kalshi | score=1.8 AR=0.02× net_edge=0.40% conf=0.34 | days=70.33d size=$253.70
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] 🔍 Starting execution for pair womens-french-open-winner-2026_coco_gauff (venue2=kalshi)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 7483136985335965... for price check
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXFOWOMEN-26'
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 55038779482410370558912259078307771408828673521183141919075336269590776313436
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 99475817819398349510...
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 99475817819398349510380913864206588692477284839559449459646849928120952503218
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    📖 Orderbook via CLOB client: 44885164898997035703...
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:       Full token: 44885164898997035703656873026921045302387578194896178262893423151589765586617
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]:    ❌ Yes: 2.6 - NO BIDS (illiquid, valued at $0)
+Mar 27 16:05:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[2917666]: 127.0.0.1 - - [27/Mar/2026 16:05:39] "GET /price HTTP/1.1" 200 -

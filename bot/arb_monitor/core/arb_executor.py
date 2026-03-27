@@ -532,7 +532,22 @@ def execute_arb(
     #   kalshi_side=="YES" → buying YES on venue2 → use yes_best_ask
     #   kalshi_side=="NO"  → buying NO  on venue2 → use no_best_ask
     if venue2 == "opinion":
-        live_kalshi_ask = _opinion_get_best_ask(opinion_market_id, side=opinion_side)
+        # Opinion's proxy API returns errno=10200 / result=null for all market IDs
+        # supplied by Oddpool (IDs ~100-500 range don't exist on the proxy endpoint).
+        # However:
+        #   1. Oddpool's /arbitrage/current response already contains fresh Opinion
+        #      yes_ask/no_ask prices — these are the same prices shown on Oddpool's
+        #      own live dashboard, so they are authoritative and current.
+        #   2. _place_opinion_order() posts to Opinion's /orders endpoint using
+        #      market_id directly — no token IDs required for order placement.
+        # Therefore we use the Oddpool-provided price as the live Opinion ask and
+        # skip the independent token-based orderbook re-fetch entirely.
+        live_kalshi_ask = opportunity.kalshi_yes_ask  # Oddpool's live Opinion price
+        log(
+            f"ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask="
+            f"{live_kalshi_ask:.4f} (token-based re-fetch skipped — proxy API "
+            f"does not resolve opinion_market_id={opinion_market_id!r})"
+        )
         leg2_venue_label = "opinion"
     else:
         kalshi_prices = kalshi_get_best_prices(kalshi_ticker)

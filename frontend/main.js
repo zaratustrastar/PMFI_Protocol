@@ -618,7 +618,15 @@ async function loadArbVaultStats() {
         // vs[5]=pendingDepositAssets, vs[6]=claimableRedeemAssets,
         // vs[7]=pendingRedeemShares
         const pps          = Number(vs[0]) / 1e6;
-        const tvl          = (Number(vs[3]) + Number(vs[2])) / 1e6;
+        // TVL = officialPPS × totalSupply — this represents the total value of all
+        // outstanding shares at the current price per share, regardless of where the
+        // underlying capital is deployed (vault idle, servicer wallet, or on platforms).
+        // Previous formula used (idleBalance + lastReportedBacking) which drops to ~$1
+        // after tend() moves 90% of vault USDC to the servicer wallet.
+        // Use BigInt arithmetic: avoid float precision loss on large 1e18-unit values.
+        // tvlUsdc6 = pps_1e6 × totalSupply_1e18 / 1e18 → result in USDC×1e6 units.
+        const tvlUsdc6 = BigInt(vs[0]) * BigInt(vs[1]) / 1000000000000000000n;
+        const tvl      = Number(tvlUsdc6) / 1e6;
         const pendingIn    = Number(vs[5]) / 1e6;
         const pendingOut   = (Number(vs[7]) / 1e18) * pps;
 
