@@ -527,6 +527,48 @@ def execute_arb(
     poly_prices = poly_get_best_prices(poly_token_for_price)
     live_poly_ask = poly_prices.get("best_ask")
 
+    # ── Token-swap auto-detection ─────────────────────────────────────────
+    # Gamma's API sometimes returns clobTokenIds in wrong order (NO at [0],
+    # YES at [1]) and the outcomes field is absent, so _extract_yes_no_ordered
+    # falls back to the wrong assignment. We detect this by comparing the live
+    # Poly price to Oddpool's quoted price: if they're on OPPOSITE sides of 0.5
+    # with a gap > 40¢, the token is almost certainly swapped.  We try the
+    # other token and accept it if it's closer to the Oddpool quote.
+    if live_poly_ask is not None:
+        quoted_poly_price = opportunity.poly_yes_ask
+        price_gap = abs(live_poly_ask - quoted_poly_price)
+        is_swap = (
+            price_gap > 0.40
+            and (live_poly_ask > 0.5) != (quoted_poly_price > 0.5)
+        )
+        if is_swap:
+            alt_token = poly_no_token if not buying_poly_no else poly_yes_token
+            alt_buying_no = not buying_poly_no
+            if alt_token:
+                log(
+                    f"🔄 Token-swap detected: live={live_poly_ask:.4f} vs quote={quoted_poly_price:.4f} "
+                    f"(gap={price_gap:.4f}) — trying {'NO' if alt_buying_no else 'YES'} token {alt_token[:16]}..."
+                )
+                alt_prices = poly_get_best_prices(alt_token)
+                alt_ask = alt_prices.get("best_ask")
+                if alt_ask is not None and abs(alt_ask - quoted_poly_price) < price_gap:
+                    log(
+                        f"✅ Token-swap confirmed: alt live={alt_ask:.4f} quote={quoted_poly_price:.4f} "
+                        f"new_gap={abs(alt_ask - quoted_poly_price):.4f} < {price_gap:.4f} — switching token"
+                    )
+                    poly_token_for_price = alt_token
+                    buying_poly_no = alt_buying_no
+                    live_poly_ask = alt_ask
+                else:
+                    log(
+                        f"⚠️ Token-swap alt not better (alt_ask={alt_ask} gap={abs(alt_ask - quoted_poly_price) if alt_ask else 'n/a'}) "
+                        f"— keeping original token"
+                    )
+            else:
+                log(
+                    f"⚠️ Token-swap detected (gap={price_gap:.4f}) but no alt token available — cannot auto-correct"
+                )
+
     # Fetch live leg-2 ask based on venue.
     # Use the correct side's ask price:
     #   kalshi_side=="YES" → buying YES on venue2 → use yes_best_ask
