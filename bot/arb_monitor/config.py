@@ -154,8 +154,9 @@ ARB_EARLY_REPORT_MIN_ELAPSED = int(os.environ.get("ARB_EARLY_REPORT_MIN_ELAPSED"
 # small reserve immediately available for tiny trades without waiting for a
 # deposit. Larger trades are funded on-demand by the executor just before
 # placing — so this value only needs to cover the smallest possible order.
-ARB_MIN_FLOAT_POLY   = float(os.environ.get("ARB_MIN_FLOAT_POLY",   "3"))
-ARB_MIN_FLOAT_KALSHI = float(os.environ.get("ARB_MIN_FLOAT_KALSHI", "3"))
+ARB_MIN_FLOAT_POLY    = float(os.environ.get("ARB_MIN_FLOAT_POLY",    "3"))
+ARB_MIN_FLOAT_KALSHI  = float(os.environ.get("ARB_MIN_FLOAT_KALSHI",  "3"))
+ARB_MIN_FLOAT_OPINION = float(os.environ.get("ARB_MIN_FLOAT_OPINION", "5"))
 
 # Seconds to wait after transferring USDC to a platform before placing orders.
 # Base settles in ~2s; 8s gives comfortable headroom for platform indexing.

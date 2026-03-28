@@ -353,6 +353,40 @@ def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, 
     return None
 
 
+def _extract_yes_no_ordered(clob_ids: list[str], market: dict) -> list[str]:
+    """Return [yes_token, no_token] using the market's 'outcomes' field.
+
+    Polymarket's Gamma API does not guarantee that clobTokenIds[0] is YES.
+    Many markets (especially elections and multi-outcome events) have NO at
+    index 0 and YES at index 1. Using the outcomes array to look up the correct
+    positions prevents YES/NO token swaps that cause large false-slippage rejections.
+
+    Falls back to [ids[0], ids[1]] when outcomes are absent or unrecognised.
+    """
+    outcomes = market.get("outcomes")
+    if isinstance(outcomes, str):
+        try:
+            import json as _json
+            outcomes = _json.loads(outcomes)
+        except Exception:
+            outcomes = None
+    if isinstance(outcomes, list) and len(outcomes) >= 2 and len(clob_ids) >= 2:
+        yes_tok = ""
+        no_tok = ""
+        for i, label_raw in enumerate(outcomes):
+            if i >= len(clob_ids):
+                break
+            upper = str(label_raw).upper().strip()
+            if upper == "YES" and not yes_tok:
+                yes_tok = clob_ids[i]
+            elif upper == "NO" and not no_tok:
+                no_tok = clob_ids[i]
+        if yes_tok and no_tok:
+            return [yes_tok, no_tok]
+    # Fallback: assume original order
+    return list(clob_ids[:2])
+
+
 def _pick_best_market(
     candidates: list[tuple[list[str], dict]],
     label: str,
@@ -363,15 +397,25 @@ def _pick_best_market(
     highest-scoring one. Falls back to the first candidate when all scores are 0.
     """
     if not label or len(candidates) == 1:
-        return candidates[0]
+        chosen_ids, chosen_m = candidates[0]
+        return (_extract_yes_no_ordered(chosen_ids, chosen_m), chosen_m)
     best_score = -1.0
-    best = candidates[0]
+    best_clob: list[str] = []
+    best_m: dict = {}
     for clob_ids, m in candidates:
         score = _label_match_score(label, m)
         if score > best_score:
             best_score = score
-            best = (clob_ids, m)
-    return best
+            best_clob = clob_ids
+            best_m = m
+    ordered = _extract_yes_no_ordered(best_clob, best_m)
+    log(
+        f"🎯 _pick_best_market: label={label!r} score={best_score:.2f} "
+        f"matched={best_m.get('groupItemTitle') or best_m.get('question', '')[:40]!r} "
+        f"outcomes={best_m.get('outcomes')} "
+        f"YES={ordered[0][:12] if ordered else 'n/a'}... NO={ordered[1][:12] if len(ordered) > 1 else 'n/a'}..."
+    )
+    return (ordered, best_m)
 
 
 def fetch_orderbook(token_id: str) -> Optional[dict]:

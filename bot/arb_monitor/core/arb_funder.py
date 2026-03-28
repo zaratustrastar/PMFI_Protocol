@@ -28,6 +28,7 @@ import time
 from ..config import (
     ARB_MIN_FLOAT_POLY,
     ARB_MIN_FLOAT_KALSHI,
+    ARB_MIN_FLOAT_OPINION,
     ARB_DEPOSIT_WAIT_SECS,
     ARB_SERVICER_GAS_RESERVE_ETH,
     ARB_SAFETY_BUFFER_USDC,
@@ -487,6 +488,32 @@ def _get_platform_balance(venue: str) -> float:
             log(f"⚠️ Kalshi balance read error: {e}")
             return 0.0
 
+    elif venue == "opinion":
+        try:
+            from ..config import OPINION_BASE_URL, OPINION_API_KEY
+            if not OPINION_API_KEY:
+                log("⚠️ OPINION_API_KEY not set — Opinion balance unknown (returning 0)")
+                return 0.0
+            import requests
+            headers = {"apikey": OPINION_API_KEY, "Content-Type": "application/json"}
+            for path in ("/account/balance", "/account", "/balance"):
+                try:
+                    resp = requests.get(f"{OPINION_BASE_URL}{path}", headers=headers, timeout=10)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        for field in ("balance", "usdc", "usdcBalance", "availableBalance", "available"):
+                            if field in data:
+                                bal = float(data[field])
+                                log(f"💰 Opinion balance: {bal:.4f} USDC (via {path})")
+                                return bal
+                except Exception:
+                    continue
+            log("⚠️ Opinion balance: all endpoints failed — returning 0")
+            return 0.0
+        except Exception as e:
+            log(f"⚠️ Opinion balance read error: {e}")
+            return 0.0
+
     log(f"⚠️ Unknown venue '{venue}' — balance unknown")
     return 0.0
 
@@ -782,9 +809,41 @@ def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
     else:
         log("ℹ️ KALSHI_BASE_DEPOSIT_ADDR not set — skipping Kalshi float maintenance")
 
-    # Opinion: pre-funded via BSC bridge only when OPINION_BSC_DEPOSIT_ADDR is set.
-    # On-demand bridging is too slow for arb (minutes vs seconds), so Opinion capital
-    # must be positioned in advance. Bridge is triggered here if Opinion float is low.
-    # (Opinion bridge logic retained but only fires when the address is configured.)
+    # ── Opinion float (BSC bridge) ──────────────────────────────────────────
+    # Opinion runs on BSC; capital must be pre-positioned because the LI.FI
+    # bridge takes 3-10 minutes. We trigger a top-up here when the Opinion
+    # balance falls below ARB_MIN_FLOAT_OPINION. The bridge is fire-and-forget
+    # (tx hash logged; we don't wait for BSC receipt).
     if OPINION_BSC_DEPOSIT_ADDR:
-        log(f"ℹ️ Opinion BSC deposit address configured — bridge top-up not yet implemented in float-maintenance mode")
+        try:
+            opinion_bal = _get_platform_balance("opinion")
+            if opinion_bal < ARB_MIN_FLOAT_OPINION:
+                top_up = round(ARB_MIN_FLOAT_OPINION - opinion_bal + 1.0, 6)  # +$1 buffer
+                if servicer_usdc >= top_up + ARB_SAFETY_BUFFER_USDC:
+                    log(
+                        f"🌉 [{ts}] Opinion float low ({opinion_bal:.4f} < {ARB_MIN_FLOAT_OPINION}) — "
+                        f"bridging {top_up:.4f} USDC Base→BSC to {OPINION_BSC_DEPOSIT_ADDR}"
+                    )
+                    try:
+                        bridge_tx = _bridge_usdc_base_to_bsc(
+                            private_key=private_key,
+                            from_addr=servicer_wallet,
+                            amount_usdc=top_up,
+                            to_bsc_addr=OPINION_BSC_DEPOSIT_ADDR,
+                            nonce_tracker=nonce_tracker,
+                        )
+                        log(f"✅ [{ts}] Opinion bridge initiated: {top_up:.4f} USDC → BSC tx={bridge_tx}")
+                        servicer_usdc -= top_up
+                    except Exception as bridge_err:
+                        log(f"⚠️ Opinion bridge failed (non-fatal): {bridge_err}")
+                else:
+                    log(
+                        f"ℹ️ Opinion float low ({opinion_bal:.4f} < {ARB_MIN_FLOAT_OPINION}) "
+                        f"but servicer only has {servicer_usdc:.4f} USDC — skipping bridge"
+                    )
+            else:
+                log(f"✅ Opinion float OK: {opinion_bal:.4f} USDC (min={ARB_MIN_FLOAT_OPINION})")
+        except Exception as e:
+            log(f"⚠️ Opinion float maintenance error: {e}")
+    else:
+        log("ℹ️ OPINION_BSC_DEPOSIT_ADDR not set — skipping Opinion float maintenance")
