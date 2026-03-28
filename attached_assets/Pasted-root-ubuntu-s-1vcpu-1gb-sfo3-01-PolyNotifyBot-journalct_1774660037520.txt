@@ -1,0 +1,65 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# journalctl -u psniper-bot -n 200 | grep -E "Cycle complete|Skipping|is_display_only|skipped_display|depth_|edge="
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# journalctl -u psniper-bot -n 200 | grep -E "slippage|SLIPPAGE|live.*ask|price improvement"
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.1000 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='343')
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.9000 | min_edge=0.0030 | live poly_ask=0.999 opinion_ask=0.1
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.8700 slippage=0.1290 > 0.0200
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for ncaa-tournament-winner-2026_illinois: poly_slippage_exceeded: live=0.9990 quote=0.8700 slippage=0.1290 > 0.0200 unwound=False
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.1030 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='371')
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=3.6000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=0.103
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.8400 slippage=0.1500 > 0.0200
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_toronto_raptors: poly_slippage_exceeded: live=0.9900 quote=0.8400 slippage=0.1500 > 0.0200 unwound=False
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.3300 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='371')
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=5.9000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=0.33
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.5900 slippage=0.4000 > 0.0200
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_charlotte_hornets: poly_slippage_exceeded: live=0.9900 quote=0.5900 slippage=0.4000 > 0.0200 unwound=False
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.7000 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='340')
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=9.9000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=0.7
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.1800 slippage=0.8100 > 0.0200
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_above_120k: poly_slippage_exceeded: live=0.9900 quote=0.1800 slippage=0.8100 > 0.0200 unwound=False
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=3.5000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.8340 slippage=0.1650 > 0.0200
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_nicolas_maduro: poly_slippage_exceeded: live=0.9990 quote=0.8340 slippage=0.1650 > 0.0200 unwound=False
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.1630 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='378')
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=3.6000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=0.163
+Mar 28 01:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.7800 slippage=0.2100 > 0.0200
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for hottest-years-2026_number_1: poly_slippage_exceeded: live=0.9900 quote=0.7800 slippage=0.2100 > 0.0200 unwound=False
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.0000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.2110 slippage=0.7880 > 0.0200
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_marco_rubio: poly_slippage_exceeded: live=0.9990 quote=0.2110 slippage=0.7880 > 0.0200 unwound=False
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.4000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.2430 slippage=0.7560 > 0.0200
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gavin_newsom: poly_slippage_exceeded: live=0.9990 quote=0.2430 slippage=0.7560 > 0.0200 unwound=False
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=6.9000 | min_edge=0.0030 | live poly_ask=0.99 kalshi_ask=None
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.3500 slippage=0.6400 > 0.0200
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-admin-departures-2026_pete_hegseth: poly_slippage_exceeded: live=0.9900 quote=0.3500 slippage=0.6400 > 0.0200 unwound=False
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.0600 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='152')
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.2000 | min_edge=0.0030 | live poly_ask=0.999 opinion_ask=0.06
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.9070 slippage=0.0920 > 0.0200
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_1t_125t: poly_slippage_exceeded: live=0.9990 quote=0.9070 slippage=0.0920 > 0.0200 unwound=False
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.9430 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='78')
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=2.3000 | min_edge=0.0030 | live poly_ask=0.999 opinion_ask=0.943
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0130 slippage=0.9860 > 0.0200
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: poly_slippage_exceeded: live=0.9990 quote=0.0130 slippage=0.9860 > 0.0200 unwound=False
+Mar 28 01:06:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.6000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0130 slippage=0.9860 > 0.0200
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_edmundo_gonzalez: poly_slippage_exceeded: live=0.9990 quote=0.0130 slippage=0.9860 > 0.0200 unwound=False
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.2380 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='340')
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.1000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=0.238
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.7300 slippage=0.2600 > 0.0200
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_below_35k: poly_slippage_exceeded: live=0.9900 quote=0.7300 slippage=0.2600 > 0.0200 unwound=False
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.9000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0100 slippage=0.9890 > 0.0200
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_diosdado_cabello: poly_slippage_exceeded: live=0.9990 quote=0.0100 slippage=0.9890 > 0.0200 unwound=False
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.9000 | min_edge=0.0030 | live poly_ask=0.99 kalshi_ask=None
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.5200 slippage=0.4700 > 0.0200
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for michigan-democratic-senate-primary-winner-2026_mallory_mcmorrow: poly_slippage_exceeded: live=0.9900 quote=0.5200 slippage=0.4700 > 0.0200 unwound=False
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.1380 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='78')
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.7000 | min_edge=0.0030 | live poly_ask=0.999 opinion_ask=0.138
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.9990 quote=0.9880 slippage=+0.0110
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.1380 quote=0.1380 slippage=+0.0000
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.9000 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='380')
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=6.4000 | min_edge=0.0030 | live poly_ask=0.999 opinion_ask=0.9
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0150 slippage=0.9840 > 0.0200
+Mar 28 01:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3035261]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gretchen_whitmer: poly_slippage_exceeded: live=0.9990 quote=0.0150 slippage=0.9840 > 0.0200 unwound=False
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# journalctl -u psniper-bot -n 200 | grep -E "opportunities fetched|No opportunities"
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
