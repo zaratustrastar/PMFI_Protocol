@@ -87,12 +87,19 @@ def _resolve_poly_tokens(
     label: str = "",
     expected_poly_ask: Optional[float] = None,
     buying_poly_no: bool = False,
+    resolution_ts: Optional[int] = None,
 ) -> tuple[Optional[str], Optional[str]]:
     """Resolve a Polymarket event slug to a (YES token, NO token) pair.
 
     Uses the label to pick the right market within multi-outcome events (e.g. NBA
     Champion — Houston vs. LA Lakers). Cache key is (slug, normalised_label) so each
     team/candidate gets its own entry.
+
+    `resolution_ts` (Oddpool's resolution_time as Unix timestamp) is forwarded to
+    lookup_token_ids_by_slug → _pick_best_market to apply temporal scoring: the
+    sub-market whose endDate is closest to resolution_ts wins ties and gets a
+    positive bonus, while sub-markets from prior periods (endDate > 30d earlier)
+    are hard-skipped. This disambiguates recurrent slugs with multiple editions.
 
     When expected_poly_ask is provided, the resolved tokens are price-validated:
     - Fetch best_ask for both YES and NO tokens from the Poly CLOB.
@@ -120,7 +127,7 @@ def _resolve_poly_tokens(
 
     try:
         from .polymarket import lookup_token_ids_by_slug
-        result = lookup_token_ids_by_slug(slug, label=label)
+        result = lookup_token_ids_by_slug(slug, label=label, resolution_ts=resolution_ts)
         if result:
             yes_tok, no_tok = result
 
@@ -471,6 +478,7 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             match_hint,
             expected_poly_ask=our_poly_ask if our_poly_ask > 0 else None,
             buying_poly_no=_buying_poly_no,
+            resolution_ts=expiry_ts if expiry_ts > 0 else None,
         )
 
         # ── Profit-maximising scorer ──────────────────────────────────────────

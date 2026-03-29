@@ -293,6 +293,9 @@ def _is_market_live(m: dict) -> bool:
 
     Checks both boolean flags and their common string representations because
     the Gamma API occasionally returns "true"/"false" strings.
+
+    Also hard-rejects markets whose endDate is more than 2 hours in the past —
+    defence against Gamma's stale active/closed flags (common during resolution).
     """
     def _bool(val) -> bool:
         if isinstance(val, bool):
@@ -307,10 +310,18 @@ def _is_market_live(m: dict) -> bool:
     active_raw = m.get("active")
     if active_raw is not None and not _bool(active_raw):
         return False
+    # Hard endDate check — catch resolved markets Gamma hasn't closed yet
+    end_ts = _parse_expiry(m)
+    if end_ts > 0 and end_ts < (time.time() - 7200):
+        return False
     return True
 
 
-def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, str]]:
+def lookup_token_ids_by_slug(
+    slug: str,
+    label: str = "",
+    resolution_ts: Optional[int] = None,
+) -> Optional[tuple[str, str]]:
     """Fetch YES/NO CLOB token IDs for a Polymarket event by its URL slug.
 
     Returns (yes_token_id, no_token_id) or None on failure.
@@ -320,11 +331,16 @@ def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, 
     Oddpool's entry["label"]) is used to score and pick the correct market rather
     than blindly returning the first one. Without label, falls back to first market.
 
+    `resolution_ts` (from Oddpool's resolution_time) is forwarded to _pick_best_market
+    which uses it as a temporal bonus: candidates whose endDate ≈ resolution_ts are
+    preferred over candidates from prior periods. This disambiguates recurrent events
+    like "aapl-above-in-march-2026" (March 2025 vs March 2026 sub-markets).
+
     Filtering strategy (guards against resolved/old-season markets):
-      1. API-level: pass active=true, closed=false to both endpoints.
-      2. In-memory: skip markets where _is_market_live() returns False.
-      3. Post-resolution sanity gate: if both YES and NO asks are ≥ 0.98 the
-         market is settled — reject and return None.
+      1. API-level: pass active=true, closed=false, archived=false to both endpoints.
+      2. In-memory: _is_market_live() rejects closed/archived/inactive/past-endDate markets.
+      3. _pick_best_market: temporal bonus + score threshold (≥ 0.5); returns None for mismatches.
+      4. Post-resolution sanity gate: if both YES and NO asks ≥ 0.98 → resolved, reject.
 
     Tries the /events endpoint first (event slug → markets), then /markets with slug filter.
     """
@@ -341,7 +357,7 @@ def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, 
         if resp and resp.status_code == 200:
             payload = resp.json()
             events = payload if isinstance(payload, list) else payload.get("events", [payload])
-            # Collect live markets only — skip settled/archived/closed ones.
+            # Collect live markets only — skip settled/archived/closed/expired ones.
             all_markets = []
             skipped = 0
             for event in events:
@@ -353,30 +369,34 @@ def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, 
                     if len(clob_ids) >= 2:
                         all_markets.append((clob_ids, m))
             if skipped:
-                log(f"🚫 /events slug={slug!r}: skipped {skipped} closed/archived/inactive markets")
+                log(f"🚫 /events slug={slug!r}: skipped {skipped} closed/archived/inactive/expired markets")
             if all_markets:
-                chosen_ids, chosen_m = _pick_best_market(all_markets, label)
-                # ── Post-resolution sanity gate ───────────────────────────────
-                # If both YES and NO asks are ≥ 0.98 the market is settled even
-                # though the API said active=true (cache lag or API inconsistency).
-                # Reject before returning to avoid triggering the ask-mismatch
-                # rejection path in _resolve_poly_tokens with a confusing error.
-                yes_ask_raw = get_best_prices(chosen_ids[0]).get("best_ask")
-                no_ask_raw  = get_best_prices(chosen_ids[1]).get("best_ask")
-                if (yes_ask_raw is not None and no_ask_raw is not None
-                        and yes_ask_raw >= 0.98 and no_ask_raw >= 0.98):
+                pick = _pick_best_market(all_markets, label, resolution_ts=resolution_ts)
+                if pick is None:
+                    log(f"⚠️ /events: no market passed label/period filter slug={slug!r} label={label!r}")
+                    # fall through to Path 2
+                else:
+                    chosen_ids, chosen_m = pick
+                    # ── Post-resolution sanity gate ───────────────────────────
+                    # Defence-in-depth: if both YES and NO asks are ≥ 0.98 the
+                    # market is settled (Gamma cache lag). Reject so the caller
+                    # doesn't waste a 5-min display-only cache slot.
+                    yes_ask_raw = get_best_prices(chosen_ids[0]).get("best_ask")
+                    no_ask_raw  = get_best_prices(chosen_ids[1]).get("best_ask")
+                    if (yes_ask_raw is not None and no_ask_raw is not None
+                            and yes_ask_raw >= 0.98 and no_ask_raw >= 0.98):
+                        log(
+                            f"⚠️ Post-resolution settled-market gate: both tokens at "
+                            f"YES={yes_ask_raw:.3f} NO={no_ask_raw:.3f} — rejecting "
+                            f"slug={slug!r} label={label!r}"
+                        )
+                        return None
                     log(
-                        f"⚠️ Post-resolution settled-market gate: both tokens at "
-                        f"YES={yes_ask_raw:.3f} NO={no_ask_raw:.3f} — rejecting "
-                        f"slug={slug!r} label={label!r}"
+                        f"✅ Token lookup for slug={slug!r} label={label!r}: "
+                        f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
+                        f"YES={chosen_ids[0][:12]}... NO={chosen_ids[1][:12]}..."
                     )
-                    return None
-                log(
-                    f"✅ Token lookup for slug={slug!r} label={label!r}: "
-                    f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
-                    f"YES={chosen_ids[0][:12]}... NO={chosen_ids[1][:12]}..."
-                )
-                return (chosen_ids[0], chosen_ids[1])
+                    return (chosen_ids[0], chosen_ids[1])
 
         # ── Path 2: /markets fallback ─────────────────────────────────────────
         resp2 = http_client.get(
@@ -399,26 +419,30 @@ def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, 
                 if len(clob_ids) >= 2:
                     all_markets.append((clob_ids, m))
             if skipped:
-                log(f"🚫 /markets slug={slug!r}: skipped {skipped} closed/archived/inactive markets")
+                log(f"🚫 /markets slug={slug!r}: skipped {skipped} closed/archived/inactive/expired markets")
             if all_markets:
-                chosen_ids, chosen_m = _pick_best_market(all_markets, label)
-                # Post-resolution sanity gate (same as Path 1)
-                yes_ask_raw = get_best_prices(chosen_ids[0]).get("best_ask")
-                no_ask_raw  = get_best_prices(chosen_ids[1]).get("best_ask")
-                if (yes_ask_raw is not None and no_ask_raw is not None
-                        and yes_ask_raw >= 0.98 and no_ask_raw >= 0.98):
+                pick2 = _pick_best_market(all_markets, label, resolution_ts=resolution_ts)
+                if pick2 is None:
+                    log(f"⚠️ /markets: no market passed label/period filter slug={slug!r} label={label!r}")
+                else:
+                    chosen_ids, chosen_m = pick2
+                    # Post-resolution sanity gate (same as Path 1)
+                    yes_ask_raw = get_best_prices(chosen_ids[0]).get("best_ask")
+                    no_ask_raw  = get_best_prices(chosen_ids[1]).get("best_ask")
+                    if (yes_ask_raw is not None and no_ask_raw is not None
+                            and yes_ask_raw >= 0.98 and no_ask_raw >= 0.98):
+                        log(
+                            f"⚠️ Post-resolution settled-market gate (fallback): both tokens at "
+                            f"YES={yes_ask_raw:.3f} NO={no_ask_raw:.3f} — rejecting "
+                            f"slug={slug!r} label={label!r}"
+                        )
+                        return None
                     log(
-                        f"⚠️ Post-resolution settled-market gate (fallback): both tokens at "
-                        f"YES={yes_ask_raw:.3f} NO={no_ask_raw:.3f} — rejecting "
-                        f"slug={slug!r} label={label!r}"
+                        f"✅ Token lookup (markets fallback) slug={slug!r} label={label!r}: "
+                        f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
+                        f"YES={chosen_ids[0][:12]}..."
                     )
-                    return None
-                log(
-                    f"✅ Token lookup (markets fallback) slug={slug!r} label={label!r}: "
-                    f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
-                    f"YES={chosen_ids[0][:12]}..."
-                )
-                return (chosen_ids[0], chosen_ids[1])
+                    return (chosen_ids[0], chosen_ids[1])
     except Exception as e:
         log(f"⚠️ lookup_token_ids_by_slug({slug!r}): {e}")
     log(f"⚠️ lookup_token_ids_by_slug: no tokens found for slug={slug!r} label={label!r}")
@@ -462,30 +486,93 @@ def _extract_yes_no_ordered(clob_ids: list[str], market: dict) -> list[str]:
 def _pick_best_market(
     candidates: list[tuple[list[str], dict]],
     label: str,
-) -> tuple[list[str], dict]:
+    resolution_ts: Optional[int] = None,
+) -> Optional[tuple[list[str], dict]]:
     """Pick the best-matching market from a list of (clob_ids, market_dict) pairs.
 
-    If label is provided, scores each market against the label and returns the
-    highest-scoring one. Falls back to the first candidate when all scores are 0.
+    Scoring combines two signals:
+      label_score   — text similarity between Oddpool's label and the market title
+                      (0.0–1.0 from _label_match_score)
+      temporal_bonus — how close the market's endDate is to Oddpool's resolution_time
+                      (0.0–1.0; 1.0 when delta=0d, 0.0 when delta≥30d)
+
+    Combined score = label_score + temporal_bonus (max 2.0, min score to pass = 0.5).
+
+    Why temporal_bonus matters: for slug `aapl-above-in-march-2026`, Gamma returns
+    sub-markets from March 2025 AND March 2026. Both have identical label scores (the
+    price level text matches equally). The temporal bonus breaks the tie by favouring
+    the sub-market whose endDate is closest to Oddpool's resolution_time — which is
+    always the LIVE one Oddpool quoted.
+
+    Hard skip: if resolution_ts is provided and a candidate's endDate is more than
+    30 days before resolution_ts, it is from a prior period — skip it entirely.
+
+    Returns None when:
+      - no candidate survives the period filter, OR
+      - a label is provided but best combined score < 0.5 (wrong market, reject)
+    The caller treats None as "no match" (display-only).
+
+    Note: the len==1 short-circuit is intentionally removed. A single surviving
+    candidate is often from the wrong period and must still pass label + temporal scoring.
     """
-    if not label or len(candidates) == 1:
+    if not label:
+        # No label hint — return first candidate with no scoring
         chosen_ids, chosen_m = candidates[0]
         return (_extract_yes_no_ordered(chosen_ids, chosen_m), chosen_m)
-    best_score = -1.0
+
+    _MIN_COMBINED = 0.5
+    best_combined = -1.0
     best_clob: list[str] = []
     best_m: dict = {}
+
     for clob_ids, m in candidates:
-        score = _label_match_score(label, m)
-        if score > best_score:
-            best_score = score
+        label_score = _label_match_score(label, m)
+
+        # Temporal bonus: prefer candidate whose endDate ≈ Oddpool's resolution_time
+        temporal_bonus = 0.0
+        if resolution_ts:
+            end_ts = _parse_expiry(m)
+            if end_ts > 0:
+                delta_days = abs(end_ts - resolution_ts) / 86400
+                # Hard skip: market ended > 30 days before the Oddpool opportunity's expiry
+                if end_ts < (resolution_ts - 86400 * 30):
+                    log(
+                        f"⏭ _pick_best_market: skipping market ended {delta_days:.0f}d before "
+                        f"resolution_ts — wrong period "
+                        f"({m.get('groupItemTitle') or m.get('question', '')[:35]!r})"
+                    )
+                    continue
+                # Smooth bonus: 1.0 at delta=0d → 0.0 at delta=30d
+                temporal_bonus = max(0.0, 1.0 - delta_days / 30.0)
+
+        combined = label_score + temporal_bonus
+        if combined > best_combined:
+            best_combined = combined
             best_clob = clob_ids
             best_m = m
+
+    if not best_m:
+        log(
+            f"⚠️ _pick_best_market: no candidates survived period filter "
+            f"for label={label!r} resolution_ts={resolution_ts}"
+        )
+        return None
+
+    if best_combined < _MIN_COMBINED:
+        log(
+            f"⚠️ _pick_best_market: best combined score {best_combined:.2f} < {_MIN_COMBINED} "
+            f"for label={label!r} resolution_ts={resolution_ts} — rejecting "
+            f"({best_m.get('groupItemTitle') or best_m.get('question', '')[:35]!r})"
+        )
+        return None
+
     ordered = _extract_yes_no_ordered(best_clob, best_m)
     log(
-        f"🎯 _pick_best_market: label={label!r} score={best_score:.2f} "
+        f"🎯 _pick_best_market: label={label!r} combined={best_combined:.2f} "
         f"matched={best_m.get('groupItemTitle') or best_m.get('question', '')[:40]!r} "
         f"outcomes={best_m.get('outcomes')} "
-        f"YES={ordered[0][:12] if ordered else 'n/a'}... NO={ordered[1][:12] if len(ordered) > 1 else 'n/a'}..."
+        f"YES={ordered[0][:12] if ordered else 'n/a'}... "
+        f"NO={ordered[1][:12] if len(ordered) > 1 else 'n/a'}..."
     )
     return (ordered, best_m)
 
