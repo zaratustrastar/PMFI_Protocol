@@ -1,0 +1,29 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u psniper-bot -n 200 | grep -E "Token-swap|swap confirmed|swap alt|slippage|Cycle complete|Execution failed|display_only|depth_"
+Mar 29 14:31:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.7800 slippage=0.2100 > 0.0200
+Mar 29 14:31:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for hottest-years-2026_number_1: poly_slippage_exceeded: live=0.9900 quote=0.7800 slippage=0.2100 > 0.0200 unwound=False
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔄 Token-swap detected: live=0.9990 vs quote=0.0140 (gap=0.9850) — trying NO token 8258032945606996...
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ⚠️ Token-swap alt not better (alt_ask=0.999 gap=0.985) — keeping original token
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0140 slippage=0.9850 > 0.0200
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: poly_slippage_exceeded: live=0.9990 quote=0.0140 slippage=0.9850 > 0.0200 unwound=False
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔄 Token-swap detected: live=0.9900 vs quote=0.3800 (gap=0.6100) — trying NO token 4533701667776508...
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ⚠️ Token-swap alt not better (alt_ask=0.99 gap=0.61) — keeping original token
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.3800 slippage=0.6100 > 0.0200
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-admin-departures-2026_pete_hegseth: poly_slippage_exceeded: live=0.9900 quote=0.3800 slippage=0.6100 > 0.0200 unwound=False
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔄 Token-swap detected: live=0.9990 vs quote=0.2070 (gap=0.7920) — trying NO token 7572015600251982...
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ⚠️ Token-swap alt not better (alt_ask=0.999 gap=0.792) — keeping original token
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.2070 slippage=0.7920 > 0.0200
+Mar 29 14:31:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_marco_rubio: poly_slippage_exceeded: live=0.9990 quote=0.2070 slippage=0.7920 > 0.0200 unwound=False
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.7200 slippage=0.2700 > 0.0200
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_below_35k: poly_slippage_exceeded: live=0.9900 quote=0.7200 slippage=0.2700 > 0.0200 unwound=False
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔄 Token-swap detected: live=0.9990 vs quote=0.0110 (gap=0.9880) — trying NO token 7013843913478994...
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ⚠️ Token-swap alt not better (alt_ask=0.999 gap=0.988) — keeping original token
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.0110 slippage=0.9880 > 0.0200
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_edmundo_gonzalez: poly_slippage_exceeded: live=0.9990 quote=0.0110 slippage=0.9880 > 0.0200 unwound=False
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.9990 quote=0.9870 slippage=+0.0120
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.1400 quote=0.1400 slippage=+0.0000
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=0 contracts/$0.00 (max_fill=0.8570) | depth_leg2=2618 contracts/$0.00 (max_fill=0.0000)
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=2618 depth_limited=0 → final=0
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ depth_insufficient: poly_fillable=0 leg2_fillable=2618 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size.
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: depth_insufficient: poly_fillable=0 leg2_fillable=2618 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 29 14:31:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔄 Token-swap detected: live=0.9900 vs quote=0.1900 (gap=0.8000) — trying NO token 2553594501505202...
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

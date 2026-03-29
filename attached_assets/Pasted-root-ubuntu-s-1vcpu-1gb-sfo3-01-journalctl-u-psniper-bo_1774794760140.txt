@@ -1,0 +1,52 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# journalctl -u psniper-bot -n 50 | tail -50
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 2135798214913074... for price check
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2135798214913074... (side=YES) venue2=opinion opinion=371
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 📊 On-chain: supply=402.0291, buffer=4.95, forwarded=106.06, expected=99.92, lastRoundId=15
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ❌ Error reading withdrawal exclusions: Could not decode contract function call to getVaultState() with return data: b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00i\xb1\xd2n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15\xcbFj"\x94x\x13<\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00K\x8b=\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\xf4\xb3\xd7\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06RK\xa9\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', output_types: ['uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'bool', 'bool', 'uint256']
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]:    🔄 Withdrawal bridge in-transit: $5.00 (from withdrawal_state.json)
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 📝 RoundId cache synced from chain: 15
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ============================================================
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ============================================================
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.1030 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='371')
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=2.6000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=0.103
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.8500 slippage=0.1400 > 0.0200
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_toronto_raptors: poly_slippage_exceeded: live=0.9900 quote=0.8500 slippage=0.1400 > 0.0200 unwound=False
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ✈️ In-flight (at deposit addr): $0.00
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 📡 Fetching positions with cost basis for 0xd1EdE018...
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_gavin_newsom venue2=kalshi | score=308.2 AR=0.00× net_edge=1.10% conf=0.99 | days=953.19d size=$73923.86
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔍 Starting execution for pair dem-nominee-2028_gavin_newsom (venue2=kalshi)
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 5453304381994659... for price check
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: cache hit 'KXPRESNOMD-28'[gavin_newsom] → 'KXPRESNOMD-28-BORO'
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXPRESNOMD-28' → 'KXPRESNOMD-28-BORO'
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=5453304381994659... (side=YES) venue2=kalshi kalshi=KXPRESNOMD-28-BORO
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔄 Token-swap detected: live=0.9990 vs quote=0.2450 (gap=0.7540) — trying NO token 8785417414807465...
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ⚠️ Token-swap alt not better (alt_ask=0.999 gap=0.754) — keeping original token
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXPRESNOMD-28-BORO': yes_ask=None no_ask=None
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.1000 | min_edge=0.0030 | live poly_ask=0.999 kalshi_ask=None
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.2450 slippage=0.7540 > 0.0200
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gavin_newsom: poly_slippage_exceeded: live=0.9990 quote=0.2450 slippage=0.7540 > 0.0200 unwound=False
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=openai-ipo-closing-market-cap_ipo_1t_125t venue2=opinion | score=301.0 AR=0.19× net_edge=4.40% conf=0.80 | days=92.39d size=$2024.05
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔍 Starting execution for pair openai-ipo-closing-market-cap_ipo_1t_125t (venue2=opinion)
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 1839956575106867... for price check
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=1839956575106867... (side=NO) venue2=opinion opinion=152
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.0600 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='152')
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=4.4000 | min_edge=0.0030 | live poly_ask=0.999 opinion_ask=0.06
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9990 quote=0.8750 slippage=0.1240 > 0.0200
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_1t_125t: poly_slippage_exceeded: live=0.9990 quote=0.8750 slippage=0.1240 > 0.0200 unwound=False
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=btc-max-2026_value_above_120k venue2=opinion | score=300.9 AR=0.12× net_edge=8.90% conf=0.86 | days=277.60d size=$2964.60
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔍 Starting execution for pair btc-max-2026_value_above_120k (venue2=opinion)
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 6596521422507360... for price check
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=6596521422507360... (side=YES) venue2=opinion opinion=340
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔄 Token-swap detected: live=0.9900 vs quote=0.1900 (gap=0.8000) — trying NO token 2308734997590895...
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ⚠️ Token-swap alt not better (alt_ask=0.99 gap=0.8) — keeping original token
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.7000 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='340')
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=8.9000 | min_edge=0.0030 | live poly_ask=0.99 opinion_ask=0.7
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ❌ poly_slippage_exceeded: live=0.9900 quote=0.1900 slippage=0.8000 > 0.0200
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_above_120k: poly_slippage_exceeded: live=0.9900 quote=0.1900 slippage=0.8000 > 0.0200 unwound=False
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_nicolas_maduro venue2=kalshi | score=180.0 AR=0.04× net_edge=2.90% conf=0.91 | days=276.39d size=$5135.09
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] 🔍 Starting execution for pair venezuela-leader-2026_nicolas_maduro (venue2=kalshi)
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 2152744600516272... for price check
+Mar 29 14:32:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3477160]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: cache hit 'KXVENEZUELALEADER-26DEC31'[nicolas_maduro] → 'KXVENEZUELALEADER-26DEC31-JGUA'
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
