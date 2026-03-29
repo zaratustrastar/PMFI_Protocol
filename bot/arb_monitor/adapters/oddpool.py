@@ -56,29 +56,27 @@ def _slug_cache_key(slug: str, label: str) -> tuple[str, str]:
     return (slug, label.lower().replace("_", " ").replace("-", " ").strip())
 
 
-def _fetch_mid_price(token_id: str) -> Optional[float]:
-    """Fetch the mid-price (bid+ask)/2 for a Polymarket CLOB token.
+def _fetch_ask_price(token_id: str) -> Optional[float]:
+    """Fetch the best ask price for a Polymarket CLOB token.
 
     Used to validate token-to-outcome assignment at resolution time.
 
-    Mid-price is used over bid-only or ask-only because:
-    - Stale limit-sell asks can sit at 99¢ on illiquid 1¢ tokens (ask unreliable).
-    - Bids alone may not exist on illiquid markets (bid unreliable alone).
-    - Mid-price anchors validation to the true midpoint of the spread.
-    Falls back to best_bid (if ask absent) or best_ask (if bid absent).
+    Asks are the only real, actionable buy liquidity — someone has actively posted
+    shares for sale at this price.  Oddpool's own price quotes come from the same
+    CLOB asks, so comparing ask-to-ask gives the most direct validation signal.
+
+    Wrong-market tokens (near-settled markets) show stale high asks (~99¢), which
+    creates a large delta vs Oddpool's live quote — exactly what we want to detect.
+    Returns None if the orderbook fetch fails or the token is empty.
     """
     if not token_id:
         return None
     try:
         from .polymarket import get_best_prices
         prices = get_best_prices(token_id)
-        bid = prices.get("best_bid")
-        ask = prices.get("best_ask")
-        if bid is not None and ask is not None:
-            return (bid + ask) / 2.0
-        return bid if bid is not None else ask
+        return prices.get("best_ask")
     except Exception as e:
-        log(f"⚠️ _fetch_mid_price({token_id[:16]}...): {e}")
+        log(f"⚠️ _fetch_ask_price({token_id[:16]}...): {e}")
         return None
 
 
@@ -95,12 +93,12 @@ def _resolve_poly_tokens(
     team/candidate gets its own entry.
 
     When expected_poly_ask is provided, the resolved tokens are price-validated:
-    - Fetch mid-price (bid+ask)/2 for both YES and NO tokens from the Poly CLOB.
+    - Fetch best_ask for both YES and NO tokens from the Poly CLOB.
     - `buying_poly_no` specifies which token we actually buy on Poly:
-        False → buying YES  (expected_poly_ask ≈ YES mid-price)
-        True  → buying NO   (expected_poly_ask ≈ NO  mid-price)
-    - Accept tokens if the "buying" token's mid-price is closest AND within 30¢.
-    - Swap YES/NO order if the "other" token's mid-price is closer (Gamma inverted order).
+        False → buying YES  (expected_poly_ask ≈ YES ask)
+        True  → buying NO   (expected_poly_ask ≈ NO  ask)
+    - Accept tokens if the "buying" token's ask is closest AND within 30¢.
+    - Swap YES/NO order if the "other" token's ask is closer (Gamma inverted order).
     - Cache as failure (5-min TTL) if neither token is within 30¢ — Gamma resolved
       the wrong market entirely (e.g. wrong sub-market in multi-outcome events).
 
@@ -127,54 +125,55 @@ def _resolve_poly_tokens(
             # ── Price-validate resolved tokens ─────────────────────────────
             # Gamma sometimes maps a slug to the wrong sub-market (e.g. "will BTC
             # exceed $90k?" resolves to the settled "exceeded $85k?" market instead).
-            # Both wrong-market tokens then show ~99¢ bids, the slippage check fires,
-            # and nothing executes.
+            # Both wrong-market tokens then show stale high asks (~99¢), and the
+            # slippage check fires every cycle so no trades ever execute.
             #
-            # Strategy: fetch mid-price (bid+ask)/2 for both tokens and validate
-            # the token we're actually buying against Oddpool's quoted price.
+            # Strategy: fetch best_ask for both tokens and compare against Oddpool's
+            # quoted price (our_poly_ask — itself a CLOB ask).  Ask-to-ask comparison
+            # is the most direct validation: asks are real, buyable liquidity.
             # `buying_poly_no` tells us which token we're buying:
-            #   False → YES token mid should ≈ expected_poly_ask
-            #   True  → NO  token mid should ≈ expected_poly_ask
+            #   False → YES token ask should ≈ expected_poly_ask
+            #   True  → NO  token ask should ≈ expected_poly_ask
             #
             # Tolerance 0.30 (30¢): wide enough for normal spread + minor price
             # movement since Oddpool priced the opportunity; tight enough to reject
             # wrong-market tokens that differ by 50–90¢.
             if expected_poly_ask is not None:
                 _TOLERANCE = 0.30
-                yes_mid = _fetch_mid_price(yes_tok)
-                no_mid  = _fetch_mid_price(no_tok)
-                yes_delta = abs(yes_mid - expected_poly_ask) if yes_mid is not None else 999.0
-                no_delta  = abs(no_mid  - expected_poly_ask) if no_mid  is not None else 999.0
+                yes_ask = _fetch_ask_price(yes_tok)
+                no_ask  = _fetch_ask_price(no_tok)
+                yes_delta = abs(yes_ask - expected_poly_ask) if yes_ask is not None else 999.0
+                no_delta  = abs(no_ask  - expected_poly_ask) if no_ask  is not None else 999.0
 
                 # "buying" token is the one we expect to match expected_poly_ask.
                 # "other" token should NOT match — if it does, Gamma inverted the order.
                 if not buying_poly_no:
-                    buying_label, buying_delta, buying_mid = "YES", yes_delta, yes_mid
-                    other_label,  other_delta,  other_mid  = "NO",  no_delta,  no_mid
+                    buying_label, buying_delta, buying_ask_val = "YES", yes_delta, yes_ask
+                    other_label,  other_delta,  other_ask_val  = "NO",  no_delta,  no_ask
                 else:
-                    buying_label, buying_delta, buying_mid = "NO",  no_delta,  no_mid
-                    other_label,  other_delta,  other_mid  = "YES", yes_delta, yes_mid
+                    buying_label, buying_delta, buying_ask_val = "NO",  no_delta,  no_ask
+                    other_label,  other_delta,  other_ask_val  = "YES", yes_delta, yes_ask
 
                 if buying_delta <= other_delta and buying_delta < _TOLERANCE:
                     log(
-                        f"✅ Token price validated ({buying_label} correct): "
-                        f"{buying_label} mid={buying_mid:.4f} Δ={buying_delta:.4f} | "
-                        f"{other_label} mid={other_mid} Δ={other_delta:.4f} | "
+                        f"✅ Token ask validated ({buying_label} correct): "
+                        f"{buying_label} ask={buying_ask_val:.4f} Δ={buying_delta:.4f} | "
+                        f"{other_label} ask={other_ask_val} Δ={other_delta:.4f} | "
                         f"expected={expected_poly_ask:.4f} slug={slug!r}"
                     )
                     # correct order — proceed
                 elif other_delta < buying_delta and other_delta < _TOLERANCE:
                     log(
                         f"🔄 Token YES/NO order corrected: "
-                        f"{other_label} mid={other_mid:.4f} Δ={other_delta:.4f} closer than "
-                        f"{buying_label} mid={buying_mid} Δ={buying_delta:.4f} → swapping | "
+                        f"{other_label} ask={other_ask_val:.4f} Δ={other_delta:.4f} closer than "
+                        f"{buying_label} ask={buying_ask_val} Δ={buying_delta:.4f} → swapping | "
                         f"expected={expected_poly_ask:.4f} slug={slug!r}"
                     )
                     yes_tok, no_tok = no_tok, yes_tok
                 else:
                     log(
-                        f"⚠️ Token price mismatch — wrong market for slug={slug!r}: "
-                        f"YES mid={yes_mid} (Δ={yes_delta:.4f}) NO mid={no_mid} (Δ={no_delta:.4f}) "
+                        f"⚠️ Token ask mismatch — wrong market for slug={slug!r}: "
+                        f"YES ask={yes_ask} (Δ={yes_delta:.4f}) NO ask={no_ask} (Δ={no_delta:.4f}) "
                         f"buying={buying_label} expected={expected_poly_ask:.4f} "
                         f"— neither within {_TOLERANCE:.2f} → display-only (5-min retry)"
                     )
