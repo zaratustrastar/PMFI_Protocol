@@ -1,0 +1,61 @@
+Correct fix
+
+Use the execution guard only when comparing live prices against quoted prices during execution. Do not include it in the score.
+
+So the scorer should be:
+
+# Step 1: net edge
+net_edge_pct = net_cents - ARB_RISK_BUFFER_PCT
+
+if net_edge_pct > 0:
+    net_frac = net_edge_pct / 100.0
+    annualized_return = (1.0 + net_frac) ** (365.0 / effective_days) - 1.0
+else:
+    annualized_return = 0.0
+
+And keep the execution-time guard somewhere else, like:
+
+max_allowed_move_pct = ARB_SLIPPAGE_GUARD_BPS / 100.0
+if live_price_moved_against_us_pct > max_allowed_move_pct:
+    abort_trade()
+Important unit check
+
+You should still verify one thing carefully: whether net_cents is being treated as:
+
+cents on a $1 payoff, or
+percentage points
+
+In prediction markets they are often numerically similar, so the bug can hide. For example:
+
+0.20¢ on a $1 contract is effectively 0.20%
+2.30¢ gross is effectively 2.30%
+
+If your whole scoring system assumes that equivalence, fine. But be consistent everywhere.
+
+Best interpretation of your findings
+
+Based on your examples:
+
+Small arb: gross 2.30¢ → Oddpool net 0.20¢
+Whitmer: gross 8.5¢ → Oddpool net maybe 0.7¢
+
+That means Oddpool is already doing the heavy cost haircut. So your scorer should only apply your own tiny conservative buffer, not a second pseudo-cost.
+
+Recommended change
+
+Replace lines 474–481 with something like:
+
+# Step 1: net edge
+# Oddpool net_cents is already fee-adjusted; only apply our own small safety buffer here.
+net_edge_pct = net_cents - ARB_RISK_BUFFER_PCT
+net_frac = max(net_edge_pct, 0.0) / 100.0
+
+Then preserve the rest:
+
+if net_edge_pct > 0:
+    annualized_return = (1.0 + net_frac) ** (365.0 / effective_days) - 1.0
+else:
+    annualized_return = 0.0
+Bottom line
+
+Your trades are not executing because the scorer is incorrectly subtracting ARB_SLIPPAGE_GUARD_BPS from net_cents, even though net_cents is already net of Oddpool’s fee model. That drives net_edge_pct below zero, zeroes annualized return, and kills every score.
