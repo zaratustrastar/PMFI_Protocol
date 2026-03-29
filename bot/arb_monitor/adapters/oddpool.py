@@ -12,7 +12,9 @@ Actual Oddpool API (https://api.oddpool.com/arbitrage/current):
       buy_yes_market, buy_no_market, gross_cents, fee_cents, net_cents
 
 Scoring (profit-maximising):
-  net_edge_pct   = net_cents - slippage_guard_pct - risk_buffer_pct
+  net_edge_pct   = net_cents - risk_buffer_pct
+                   (net_cents is already fee-adjusted by Oddpool; ARB_SLIPPAGE_GUARD_BPS
+                    is an execution-time staleness check only, not a scoring cost)
   annualized_return = (1 + net_edge_pct/100)^(365 / max(days_to_expiry, 0.5)) - 1
   confidence     = logistic function of min(poly_liq, venue2_liq); 0 when net_edge <= 0
   fillable_size  = CLOB ask-ladder walk (max_price = 1 - venue2_ask - ARB_MIN_EDGE_PCT) when
@@ -34,7 +36,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from ..config import (
     ODDPOOL_API_KEY, ODDPOOL_BASE_URL,
-    ARB_SLIPPAGE_GUARD_BPS, ARB_RISK_BUFFER_PCT, ARB_FILLABLE_FRACTION,
+    ARB_RISK_BUFFER_PCT, ARB_FILLABLE_FRACTION,
     ARB_MIN_EDGE_PCT,
 )
 
