@@ -284,6 +284,32 @@ def _label_match_score(label: str, market: dict) -> float:
     return best
 
 
+def _is_market_live(m: dict) -> bool:
+    """Return True only when a market is genuinely open and tradeable.
+
+    Filters out settled/resolved markets before label-matching so that old
+    seasons (e.g. NBA Champion 2024-25, already resolved) are never returned
+    for an opportunity referencing the current live season.
+
+    Checks both boolean flags and their common string representations because
+    the Gamma API occasionally returns "true"/"false" strings.
+    """
+    def _bool(val) -> bool:
+        if isinstance(val, bool):
+            return val
+        return str(val).lower() == "true"
+
+    if _bool(m.get("closed", False)):
+        return False
+    if _bool(m.get("archived", False)):
+        return False
+    # active defaults to True when absent (open markets may omit it)
+    active_raw = m.get("active")
+    if active_raw is not None and not _bool(active_raw):
+        return False
+    return True
+
+
 def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, str]]:
     """Fetch YES/NO CLOB token IDs for a Polymarket event by its URL slug.
 
@@ -294,29 +320,57 @@ def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, 
     Oddpool's entry["label"]) is used to score and pick the correct market rather
     than blindly returning the first one. Without label, falls back to first market.
 
+    Filtering strategy (guards against resolved/old-season markets):
+      1. API-level: pass active=true, closed=false to both endpoints.
+      2. In-memory: skip markets where _is_market_live() returns False.
+      3. Post-resolution sanity gate: if both YES and NO asks are ≥ 0.98 the
+         market is settled — reject and return None.
+
     Tries the /events endpoint first (event slug → markets), then /markets with slug filter.
     """
     if not slug:
         return None
     try:
+        # ── Path 1: /events endpoint ──────────────────────────────────────────
         resp = http_client.get(
             f"{POLY_GAMMA_URL}/events",
             venue="polymarket",
-            params={"slug": slug, "limit": 3},
+            params={"slug": slug, "limit": 3, "active": "true", "closed": "false"},
             timeout=10,
         )
         if resp and resp.status_code == 200:
             payload = resp.json()
             events = payload if isinstance(payload, list) else payload.get("events", [payload])
-            # Collect all markets from all matching events
+            # Collect live markets only — skip settled/archived/closed ones.
             all_markets = []
+            skipped = 0
             for event in events:
                 for m in event.get("markets", []):
+                    if not _is_market_live(m):
+                        skipped += 1
+                        continue
                     clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
                     if len(clob_ids) >= 2:
                         all_markets.append((clob_ids, m))
+            if skipped:
+                log(f"🚫 /events slug={slug!r}: skipped {skipped} closed/archived/inactive markets")
             if all_markets:
                 chosen_ids, chosen_m = _pick_best_market(all_markets, label)
+                # ── Post-resolution sanity gate ───────────────────────────────
+                # If both YES and NO asks are ≥ 0.98 the market is settled even
+                # though the API said active=true (cache lag or API inconsistency).
+                # Reject before returning to avoid triggering the ask-mismatch
+                # rejection path in _resolve_poly_tokens with a confusing error.
+                yes_ask_raw = get_best_prices(chosen_ids[0]).get("best_ask")
+                no_ask_raw  = get_best_prices(chosen_ids[1]).get("best_ask")
+                if (yes_ask_raw is not None and no_ask_raw is not None
+                        and yes_ask_raw >= 0.98 and no_ask_raw >= 0.98):
+                    log(
+                        f"⚠️ Post-resolution settled-market gate: both tokens at "
+                        f"YES={yes_ask_raw:.3f} NO={no_ask_raw:.3f} — rejecting "
+                        f"slug={slug!r} label={label!r}"
+                    )
+                    return None
                 log(
                     f"✅ Token lookup for slug={slug!r} label={label!r}: "
                     f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
@@ -324,10 +378,11 @@ def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, 
                 )
                 return (chosen_ids[0], chosen_ids[1])
 
+        # ── Path 2: /markets fallback ─────────────────────────────────────────
         resp2 = http_client.get(
             f"{POLY_GAMMA_URL}/markets",
             venue="polymarket",
-            params={"slug": slug, "limit": 10},
+            params={"slug": slug, "limit": 10, "active": "true", "closed": "false"},
             timeout=10,
         )
         if resp2 and resp2.status_code == 200:
@@ -335,12 +390,29 @@ def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, 
             if isinstance(markets, dict):
                 markets = markets.get("markets", [markets])
             all_markets = []
+            skipped = 0
             for m in (markets if isinstance(markets, list) else []):
+                if not _is_market_live(m):
+                    skipped += 1
+                    continue
                 clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
                 if len(clob_ids) >= 2:
                     all_markets.append((clob_ids, m))
+            if skipped:
+                log(f"🚫 /markets slug={slug!r}: skipped {skipped} closed/archived/inactive markets")
             if all_markets:
                 chosen_ids, chosen_m = _pick_best_market(all_markets, label)
+                # Post-resolution sanity gate (same as Path 1)
+                yes_ask_raw = get_best_prices(chosen_ids[0]).get("best_ask")
+                no_ask_raw  = get_best_prices(chosen_ids[1]).get("best_ask")
+                if (yes_ask_raw is not None and no_ask_raw is not None
+                        and yes_ask_raw >= 0.98 and no_ask_raw >= 0.98):
+                    log(
+                        f"⚠️ Post-resolution settled-market gate (fallback): both tokens at "
+                        f"YES={yes_ask_raw:.3f} NO={no_ask_raw:.3f} — rejecting "
+                        f"slug={slug!r} label={label!r}"
+                    )
+                    return None
                 log(
                     f"✅ Token lookup (markets fallback) slug={slug!r} label={label!r}: "
                     f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
