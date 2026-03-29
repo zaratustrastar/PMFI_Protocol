@@ -313,6 +313,8 @@ def _is_market_live(m: dict) -> bool:
     # Hard endDate check — catch resolved markets Gamma hasn't closed yet
     end_ts = _parse_expiry(m)
     if end_ts > 0 and end_ts < (time.time() - 7200):
+        end_date_str = m.get("endDate", m.get("end_date_iso", ""))
+        log(f"⚠️ skipping expired sub-market endDate={end_date_str!r} (ts={end_ts}) — Gamma flag lag")
         return False
     return True
 
@@ -520,15 +522,28 @@ def _pick_best_market(
         chosen_ids, chosen_m = candidates[0]
         return (_extract_yes_no_ordered(chosen_ids, chosen_m), chosen_m)
 
-    _MIN_COMBINED = 0.5
+    # label_score must independently meet this threshold — temporal_bonus cannot
+    # rescue a poor label match. This prevents time-proximity from selecting the
+    # wrong market (e.g. "Carolina Panthers" for label "Las Vegas Raiders").
+    _MIN_LABEL_SCORE = 0.5
+
     best_combined = -1.0
     best_clob: list[str] = []
     best_m: dict = {}
+    best_label_score = -1.0
 
     for clob_ids, m in candidates:
         label_score = _label_match_score(label, m)
 
-        # Temporal bonus: prefer candidate whose endDate ≈ Oddpool's resolution_time
+        # Hard label gate: reject before computing temporal bonus.
+        # Temporal bonus is only for tie-breaking among candidates that already
+        # pass the label threshold — it cannot substitute for a label match.
+        if label_score < _MIN_LABEL_SCORE:
+            continue
+
+        # Temporal bonus: prefer candidate whose endDate ≈ Oddpool's resolution_time.
+        # High when delta=0d (1.0), zero when delta≥30d; used only for disambiguation
+        # between multiple candidates that all cleared the label threshold.
         temporal_bonus = 0.0
         if resolution_ts:
             end_ts = _parse_expiry(m)
@@ -548,27 +563,21 @@ def _pick_best_market(
         combined = label_score + temporal_bonus
         if combined > best_combined:
             best_combined = combined
+            best_label_score = label_score
             best_clob = clob_ids
             best_m = m
 
     if not best_m:
         log(
-            f"⚠️ _pick_best_market: no candidates survived period filter "
-            f"for label={label!r} resolution_ts={resolution_ts}"
-        )
-        return None
-
-    if best_combined < _MIN_COMBINED:
-        log(
-            f"⚠️ _pick_best_market: best combined score {best_combined:.2f} < {_MIN_COMBINED} "
-            f"for label={label!r} resolution_ts={resolution_ts} — rejecting "
-            f"({best_m.get('groupItemTitle') or best_m.get('question', '')[:35]!r})"
+            f"⚠️ _pick_best_market: no candidates with label_score ≥ {_MIN_LABEL_SCORE} "
+            f"for label={label!r} resolution_ts={resolution_ts} — rejecting"
         )
         return None
 
     ordered = _extract_yes_no_ordered(best_clob, best_m)
     log(
-        f"🎯 _pick_best_market: label={label!r} combined={best_combined:.2f} "
+        f"🎯 _pick_best_market: label={label!r} label_score={best_label_score:.2f} "
+        f"combined={best_combined:.2f} "
         f"matched={best_m.get('groupItemTitle') or best_m.get('question', '')[:40]!r} "
         f"outcomes={best_m.get('outcomes')} "
         f"YES={ordered[0][:12] if ordered else 'n/a'}... "
