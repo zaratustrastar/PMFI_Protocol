@@ -15,8 +15,9 @@ Scoring (profit-maximising):
   net_edge_pct   = net_cents - slippage_guard_pct - risk_buffer_pct
   annualized_return = (1 + net_edge_pct/100)^(365 / max(days_to_expiry, 0.5)) - 1
   confidence     = logistic function of min(poly_liq, venue2_liq); 0 when net_edge <= 0
-  fillable_size  = ARB_FILLABLE_FRACTION × min(poly_liq, venue2_liq)  (heuristic from Oddpool data)
-  score          = annualized_return × confidence × fillable_size
+  fillable_size  = CLOB ask-ladder walk (max_price = 1 - venue2_ask - ARB_MIN_EDGE_PCT) when
+                   price-validated token IDs are available; else Oddpool liquidity proxy
+  score          = annualized_return × confidence × fillable_size  (0 when CLOB depth = 0)
 
 Opportunities are sorted by score descending. Deployment caps (ARB_MAX_PAIR_USDC etc.)
 are applied at execution time; fillable_size intentionally has no artificial cap here.
@@ -34,6 +35,7 @@ from typing import Optional
 from ..config import (
     ODDPOOL_API_KEY, ODDPOOL_BASE_URL,
     ARB_SLIPPAGE_GUARD_BPS, ARB_RISK_BUFFER_PCT, ARB_FILLABLE_FRACTION,
+    ARB_MIN_EDGE_PCT,
 )
 
 def log(msg: str):
@@ -54,12 +56,42 @@ def _slug_cache_key(slug: str, label: str) -> tuple[str, str]:
     return (slug, label.lower().replace("_", " ").replace("-", " ").strip())
 
 
-def _resolve_poly_tokens(slug: str, label: str = "") -> tuple[Optional[str], Optional[str]]:
+def _fetch_bid_price(token_id: str) -> Optional[float]:
+    """Fetch the best bid price for a Polymarket CLOB token.
+
+    Returns best_bid when available, else best_ask as fallback, else None.
+    Used to validate token-to-outcome assignment at resolution time.
+
+    Bid is preferred over ask because stale asks can remain artificially high
+    (e.g. 99¢ on a 1¢ NO token when an MM never cancelled an old limit sell).
+    Bids must be actively posted, so they faithfully reflect true market value.
+    """
+    if not token_id:
+        return None
+    try:
+        from .polymarket import get_best_prices
+        prices = get_best_prices(token_id)
+        bid = prices.get("best_bid")
+        ask = prices.get("best_ask")
+        return bid if bid is not None else ask
+    except Exception as e:
+        log(f"⚠️ _fetch_bid_price({token_id[:16]}...): {e}")
+        return None
+
+
+def _resolve_poly_tokens(slug: str, label: str = "", expected_poly_ask: Optional[float] = None) -> tuple[Optional[str], Optional[str]]:
     """Resolve a Polymarket event slug to a (YES token, NO token) pair.
 
     Uses the label to pick the right market within multi-outcome events (e.g. NBA
     Champion — Houston vs. LA Lakers). Cache key is (slug, normalised_label) so each
     team/candidate gets its own entry.
+
+    When expected_poly_ask is provided, the resolved tokens are price-validated:
+    - Fetch best bid for both YES and NO tokens from the Poly CLOB.
+    - Accept the token whose bid is closest to expected_poly_ask (within 30¢).
+    - Swap YES/NO order if NO is the closer match (Gamma returned wrong order).
+    - Cache as failure (5-min TTL) if neither token's bid is within 30¢ — this means
+      Gamma resolved the wrong market entirely (e.g. wrong sub-market in multi-outcome).
 
     Returns (None, None) on failure (display-only, retry on next cycle).
     """
@@ -80,6 +112,54 @@ def _resolve_poly_tokens(slug: str, label: str = "") -> tuple[Optional[str], Opt
         result = lookup_token_ids_by_slug(slug, label=label)
         if result:
             yes_tok, no_tok = result
+
+            # ── Price-validate resolved tokens ─────────────────────────────
+            # Gamma sometimes maps a slug to the wrong sub-market (e.g. "will BTC
+            # exceed $90k?" resolves to the settled "exceeded $85k?" market instead).
+            # Both wrong-market tokens then show ~99¢ bids, the slippage check fires,
+            # and nothing executes.
+            #
+            # Strategy: fetch bid for both tokens and accept whichever is closest to
+            # Oddpool's quoted price (expected_poly_ask).  Bid is used (not ask)
+            # because stale limit-sell asks can sit at 99¢ on an illiquid 1¢ token
+            # while bids must be actively posted and reflect true value.
+            #
+            # Tolerance 0.30 (30¢): wide enough for normal spread + minor price
+            # movement since Oddpool priced the opportunity; tight enough to reject
+            # wrong-market tokens that differ by 50–90¢.
+            if expected_poly_ask is not None:
+                _TOLERANCE = 0.30
+                yes_bid = _fetch_bid_price(yes_tok)
+                no_bid  = _fetch_bid_price(no_tok)
+                yes_delta = abs(yes_bid - expected_poly_ask) if yes_bid is not None else 999.0
+                no_delta  = abs(no_bid  - expected_poly_ask) if no_bid  is not None else 999.0
+
+                if yes_delta <= no_delta and yes_delta < _TOLERANCE:
+                    log(
+                        f"✅ Token price validated (YES correct order): "
+                        f"YES bid={yes_bid:.4f} Δ={yes_delta:.4f} | "
+                        f"NO bid={no_bid} Δ={no_delta:.4f} | "
+                        f"expected={expected_poly_ask:.4f} slug={slug!r}"
+                    )
+                    # correct order — proceed
+                elif no_delta < yes_delta and no_delta < _TOLERANCE:
+                    log(
+                        f"🔄 Token YES/NO order corrected via price validation: "
+                        f"NO bid={no_bid:.4f} Δ={no_delta:.4f} closer than "
+                        f"YES bid={yes_bid} Δ={yes_delta:.4f} → swapping | "
+                        f"expected={expected_poly_ask:.4f} slug={slug!r}"
+                    )
+                    yes_tok, no_tok = no_tok, yes_tok
+                else:
+                    log(
+                        f"⚠️ Token price mismatch — wrong market resolved for slug={slug!r}: "
+                        f"YES bid={yes_bid} (Δ={yes_delta:.4f}) NO bid={no_bid} (Δ={no_delta:.4f}) "
+                        f"expected={expected_poly_ask:.4f} — neither within {_TOLERANCE:.2f} "
+                        f"→ caching as display-only (5-min retry)"
+                    )
+                    _SLUG_CACHE[key] = (None, None, now)
+                    return (None, None)
+
             _SLUG_CACHE[key] = (yes_tok, no_tok, now)
             log(
                 f"✅ Tokens resolved slug={slug!r} label={label!r}: "
@@ -359,8 +439,14 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         # to pick the right market within multi-outcome events (NBA Champion, elections, etc.).
         # Prefers label; falls back to outcome_key when label is empty.
         # Cached 60 min; failures 5 min to avoid hammering Gamma.
+        # Pass expected_poly_ask so _resolve_poly_tokens can price-validate the resolved tokens
+        # against Oddpool's quote — catching wrong-market resolutions (both tokens ~99¢).
         match_hint = label or outcome_key
-        resolved_yes_token, resolved_no_token = _resolve_poly_tokens(polymarket_slug, match_hint)
+        resolved_yes_token, resolved_no_token = _resolve_poly_tokens(
+            polymarket_slug,
+            match_hint,
+            expected_poly_ask=our_poly_ask if our_poly_ask > 0 else None,
+        )
 
         # ── Profit-maximising scorer ──────────────────────────────────────────
         # Step 1: net edge — subtract expected slippage and execution risk buffer.
@@ -401,18 +487,60 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
             # k = 5000 → half-confidence at $5k liquidity; tuned for prediction markets
             confidence = max(0.05, min(1.0, bottleneck_liq / (bottleneck_liq + 5000.0)))
 
-        # Step 4: fillable size — use Oddpool's reported liquidity data directly.
-        #   ARB_FILLABLE_FRACTION × bottleneck_liq gives a conservative estimate of
-        #   deployable capital without making additional API calls per opportunity.
-        #   Floor at $10 so tiny-but-valid markets still receive a non-zero score.
+        # Step 4: fillable size — walk the real Polymarket CLOB ask ladder when we have
+        #   price-validated token IDs (the price validation in _resolve_poly_tokens ensures
+        #   they point to the correct market).  This replaces the Oddpool liquidity proxy
+        #   that was used when token IDs were frequently wrong (returning 0 depth).
         #
-        #   Note: we previously walked the Polymarket CLOB orderbook here to get a
-        #   "real" depth number, but CLOB calls for every opportunity added significant
-        #   per-cycle latency and returned 0 contracts most of the time due to token ID
-        #   format mismatches. Oddpool's own liquidity figures are fresh (updated every
-        #   second) and are a better signal at this stage. Actual depth is rechecked
-        #   at execution time before any order is placed.
-        fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
+        #   max_poly_price: highest price we can pay on the Poly leg and still keep at
+        #   least ARB_MIN_EDGE_PCT edge.  Walk asks from lowest upward; stop when price
+        #   exceeds this ceiling.  fillable_contracts × our_poly_ask gives USDC cost.
+        #
+        #   Fallback hierarchy (most to least preferred):
+        #     1. Real CLOB depth  (validated token IDs available)
+        #     2. Oddpool liquidity proxy  (token IDs unavailable or book fetch failed)
+        #
+        #   Score = 0 when real depth returns 0 contracts — this market never reaches
+        #   the executor, saving unnecessary execution-time API calls.
+        if resolved_yes_token and our_poly_ask > 0 and our_venue2_ask > 0:
+            try:
+                from .polymarket import fetch_orderbook, compute_fillable_contracts
+                # Which token do we actually BUY on Poly?
+                #   buy_yes_market=="polymarket" → buying YES on Poly → use yes_token
+                #   buy_yes_market in ("kalshi","opinion") → buying NO on Poly → use no_token
+                depth_token = resolved_yes_token if buy_yes_market == "polymarket" else resolved_no_token
+                if depth_token:
+                    max_poly_price = max(0.0, 1.0 - our_venue2_ask - ARB_MIN_EDGE_PCT)
+                    book = fetch_orderbook(depth_token)
+                    if book:
+                        poly_fillable, _poly_usdc = compute_fillable_contracts(book, max_poly_price)
+                        if poly_fillable > 0:
+                            fillable_size_usdc = poly_fillable * our_poly_ask
+                            log(
+                                f"📏 CLOB depth pre-filter: {poly_fillable} contracts at "
+                                f"≤{max_poly_price:.4f} → ${fillable_size_usdc:.2f} USDC fillable"
+                            )
+                        else:
+                            fillable_size_usdc = 0.0
+                            log(
+                                f"📏 CLOB depth pre-filter: 0 contracts at ≤{max_poly_price:.4f} "
+                                f"— no profitable depth, score → 0"
+                            )
+                    else:
+                        fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
+                        log(
+                            f"⚠️ CLOB fetch failed for depth pre-filter — "
+                            f"using Oddpool proxy ${fillable_size_usdc:.0f}"
+                        )
+                else:
+                    fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
+            except Exception as e:
+                log(f"⚠️ CLOB depth pre-filter error: {e} — using Oddpool liquidity proxy")
+                fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
+        else:
+            # Token IDs not yet resolved (display-only) — use Oddpool proxy so the
+            # opportunity still gets scored and displayed while resolution retries.
+            fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
 
         # Step 5: composite score — natural language: "expected annualised dollar edge"
         #   Ties together quality (annualized_return), reliability (confidence), and
