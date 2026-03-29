@@ -1,0 +1,132 @@
+Yes — those look like the two main blockers.
+
+**Blocker 1 is the real bug. Blocker 2 is mostly the system doing its job.**
+
+When Gamma resolves a multi-outcome event by slug to the wrong historical event, you end up pulling token IDs from an old or closed market instead of the current live one. On Polymarket, events group related markets, and the APIs expose event metadata like slug, title, and dates, while market discovery is meant to be filtered for active/live markets rather than assuming the first slug match is the right one. ([Polymarket Documentation][1]) If your resolver is grabbing an old season’s market, the order book symptoms you described are exactly what you would expect: outcome tokens near `0.999` on resolved markets, or otherwise nonsensical pairings for the current opportunity.
+
+The fix for Blocker 1 is to stop using “best fuzzy label match under an event slug” as the primary resolver for multi-outcome markets. Instead, resolve against **active, unclosed markets only**, and rank candidates using time and status first, text similarity second. Polymarket’s own market-fetching guidance emphasizes filtering by active/closed state, and its quickstart example explicitly shows querying markets with `active=true&closed=false`. ([Polymarket Documentation][2]) In practice, your resolver should reject any candidate market whose event or market is closed/resolved, whose end date is already in the past for the target season/election/campaign, or whose title/series metadata indicates the wrong year or cycle. For sports outrights, add explicit year/season parsing so “NBA Champion 2026” cannot match a 2024–25 champion market.
+
+A robust resolver for multi-outcome markets should do this:
+
+1. Search candidates by slug/title.
+2. Filter to `active=true` and `closed=false`.
+3. Filter out settled/resolved markets.
+4. Parse and require year/season alignment from the Oddpool opportunity and the Polymarket title/subtitle.
+5. Only then do label matching for the specific runner/team/candidate.
+6. Verify the selected market’s tokens look sane before trading.
+
+That last verification step matters a lot. If both “YES” and “NO” token asks are around `0.999`, or more generally if the selected token pair violates basic market sanity checks, abort resolution and mark the opportunity as unresolved instead of letting it proceed to scoring/execution. That is an internal consistency check, not just a pricing check.
+
+**Blocker 2 is different:** when you do resolve to the right market, but your CLOB depth walk returns zero, that usually means the live book does not actually support the price implied by Oddpool’s quote. Oddpool states that `net_cents` is per-contract profit after all fees, but that does not guarantee the quoted cross-venue opportunity is still fillable when you hit the live books. ([docs.oddpool.com][3]) Polymarket’s docs also explicitly warn that large orders can move price significantly and that you should always check order book depth before trading size. ([Polymarket Documentation][4]) So if your depth walk says zero fillable contracts at or below your profitable ceiling, those are stale or phantom arbs, and rejecting them is correct.
+
+How to fix Blocker 2:
+
+* Keep the pre-filter.
+* Treat `fillable_size == 0` as “not executable now,” not as a bug.
+* Refresh the live order book immediately before sizing and again immediately before order placement.
+* Make sure your ceiling/floor math matches Polymarket tick-size rules, because orders must conform to each market’s minimum tick size. ([Polymarket Documentation][5])
+* If you are using a stale snapshot or rounding to a price increment that the market does not accept, you can falsely conclude there is no depth or fail to place valid orders.
+
+The most likely implementation problems behind what you are seeing are:
+
+**1. Resolver chooses the first event under a slug instead of the current active market.**
+This is the big one. Historical and current seasons can share nearly identical labels.
+
+**2. Resolver does fuzzy matching before date/status filtering.**
+That allows old settled markets to “win” because the text match is perfect.
+
+**3. Token-pair extraction assumes `ids[0], ids[1]` mean current yes/no for the intended market.**
+That is unsafe for multi-outcome event traversal. You need to verify you are inside the correct live market first.
+
+**4. No market-sanity gate after resolution.**
+A resolved market with asks near `0.999` should be discarded immediately.
+
+**5. Order-book validation is working, but exposing upstream quote staleness.**
+This is not a trading-engine bug; it means Oddpool found something that is no longer there on the live CLOB. Oddpool’s `net_cents` being post-fee does not mean the displayed arb is still executable. ([docs.oddpool.com][3])
+
+Here is the practical fix order I would use:
+
+```python
+def resolve_polymarket_tokens(oddpool_event):
+    candidates = search_markets_or_event(oddpool_event.slug)
+
+    # 1) Only live markets
+    candidates = [
+        m for m in candidates
+        if m.active and not m.closed and not m.archived
+    ]
+
+    # 2) Reject wrong cycle/year/season
+    candidates = [
+        m for m in candidates
+        if season_or_year_matches(oddpool_event, m)
+    ]
+
+    # 3) Match the specific outcome label only within surviving live candidates
+    candidates = sorted(
+        candidates,
+        key=lambda m: label_similarity(oddpool_event.label, m.title),
+        reverse=True
+    )
+
+    best = candidates[0] if candidates else None
+    if not best:
+        return None
+
+    yes_token, no_token = extract_tokens(best)
+
+    # 4) Sanity-check live book before accepting resolution
+    yes_book = get_book(yes_token)
+    no_book  = get_book(no_token)
+
+    if looks_settled_or_wrong_market(yes_book, no_book):
+        return None
+
+    return yes_token, no_token
+```
+
+And your sanity check can be blunt:
+
+```python
+def looks_settled_or_wrong_market(yes_book, no_book):
+    yes_ask = best_ask(yes_book)
+    no_ask = best_ask(no_book)
+
+    if yes_ask is None or no_ask is None:
+        return True
+
+    # Strong red flag for a resolved/wrong market
+    if yes_ask >= 0.98 and no_ask >= 0.98:
+        return True
+
+    return False
+```
+
+Then, after resolution, keep your existing fillability test:
+
+```python
+fillable = walk_book_to_limit_price(token_id, max_profitable_price)
+if fillable <= 0:
+    reject_as_stale_or_unfillable()
+```
+
+So the answer to “what might be the problem here?” is:
+
+* **Primary problem:** your Gamma/Polymarket market resolver is selecting the wrong market for multi-outcome events, usually an old settled one.
+* **Secondary problem:** even correctly resolved markets often have no executable depth at your target price because the Oddpool quote is stale by the time you check the live book.
+
+And the answer to “how to fix?” is:
+
+* fix market resolution first with active/closed/date/season filters before any fuzzy matching,
+* add a post-resolution sanity gate to detect obviously wrong/settled books,
+* keep the zero-depth rejection logic, because that is protecting you from stale phantom arbs,
+* ensure your live-book walk uses correct tick-size rounding and the freshest possible book data. ([Polymarket Documentation][6])
+
+If you paste your `_resolve_poly_tokens()` function, I’ll rewrite it to avoid the settled-market trap.
+
+[1]: https://docs.polymarket.com/concepts/markets-events?utm_source=chatgpt.com "Markets & Events"
+[2]: https://docs.polymarket.com/market-data/fetching-markets?utm_source=chatgpt.com "Fetching Markets"
+[3]: https://docs.oddpool.com/arbitrage/current?utm_source=chatgpt.com "Cross-venue arbitrage"
+[4]: https://docs.polymarket.com/concepts/prices-orderbook?utm_source=chatgpt.com "Prices & Orderbook"
+[5]: https://docs.polymarket.com/trading/orders/overview?utm_source=chatgpt.com "Overview - Polymarket Documentation"
+[6]: https://docs.polymarket.com/trading/orderbook?utm_source=chatgpt.com "Orderbook"

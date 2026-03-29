@@ -1,0 +1,195 @@
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-101-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Sun Mar 29 22:27:50 UTC 2026
+
+  System load:  0.13               Processes:             136
+  Usage of /:   70.3% of 23.17GB   Users logged in:       1
+  Memory usage: 22%                IPv4 address for eth0: 147.182.206.35
+  Swap usage:   6%                 IPv4 address for eth0: 10.48.0.5
+
+Expanded Security Maintenance for Applications is not enabled.
+
+54 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+*** System restart required ***
+Last login: Sun Mar 29 16:19:42 2026 from 162.243.190.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot
+git pull
+remote: Enumerating objects: 27, done.
+remote: Counting objects: 100% (27/27), done.
+remote: Compressing objects: 100% (6/6), done.
+remote: Total 20 (delta 14), reused 20 (delta 14), pack-reused 0 (from 0)
+Unpacking objects: 100% (20/20), 231.38 KiB | 2.41 MiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   20331f0..15ebac8  main       -> origin/main
+Updating 20331f0..15ebac8
+Fast-forward
+ .../Pasted-Correct-fix-Use-the-execution-guard-only-when-comparing_1774822634452.txt           |  61 ++++++++++++++++++++++++++++++++++++++++
+ .../Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1774799847314.txt           |  69 ++++++++++++++++++++++++++++++++++++++++++++++
+ attached_assets/Screenshot_2026-03-29_at_23.42.33_1774820566297.png                            | Bin 0 -> 125029 bytes
+ attached_assets/Screenshot_2026-03-29_at_23.42.56_1774820581057.png                            | Bin 0 -> 147101 bytes
+ bot/arb_monitor/adapters/oddpool.py                                                            |  24 +++++++++++-----
+ bot/arb_monitor/config.py                                                                      |  13 +++++----
+ 6 files changed, 155 insertions(+), 12 deletions(-)
+ create mode 100644 attached_assets/Pasted-Correct-fix-Use-the-execution-guard-only-when-comparing_1774822634452.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1774799847314.txt
+ create mode 100644 attached_assets/Screenshot_2026-03-29_at_23.42.33_1774820566297.png
+ create mode 100644 attached_assets/Screenshot_2026-03-29_at_23.42.56_1774820581057.png
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl restart psniper-bot
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "\[Arb/"
+Mar 29 22:36:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='spacex-ipo-closing-market-cap_ipo_500b_600b' edge=2.30¢ poly=0.00 venue2(opinion/NO)=0.97 days=641.1 token=slug-only no_token=missing title='SpaceX IPO Closing Market Cap'
+Mar 29 22:36:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='fed-rate-cuts-2026_cuts_7': net_edge=2.00% AR=0.03× conf=0.88 fill=3790 score=88.8 | gross=2.10¢ days=276.1
+Mar 29 22:36:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='fed-rate-cuts-2026_cuts_7' edge=2.10¢ poly=0.01 venue2(opinion/NO)=0.97 days=276.1 token=slug-only no_token=missing title='Number of Fed Rate Cuts in 2026'
+Mar 29 22:36:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9570 → 0 contracts fillable ($0.00 USDC) across 11 ask levels
+Mar 29 22:36:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📏 CLOB depth pre-filter: 0 contracts at ≤0.9570 — no profitable depth, score → 0
+Mar 29 22:36:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='nh-democratic-senate-primary-winner-2026_karishma_manzur': net_edge=2.00% AR=0.05× conf=0.06 fill=0 score=0.0 | gross=3.10¢ days=162.1
+Mar 29 22:36:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ✅ pair='nh-democratic-senate-primary-winner-2026_karishma_manzur' edge=3.10¢ poly=0.93 venue2(kalshi/YES)=0.04 days=162.1 token=resolved no_token=set title='New Hampshire Democratic Senate Primary '
+Mar 29 22:36:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='spacex-ticker-prediction_space': net_edge=2.00% AR=0.01× conf=0.83 fill=2405 score=22.6 | gross=2.10¢ days=641.1
+Mar 29 22:36:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='spacex-ticker-prediction_space' edge=2.10¢ poly=0.01 venue2(opinion/NO)=0.97 days=641.1 token=slug-only no_token=missing title='SpaceX Public Ticker Prediction'
+Mar 29 22:36:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='spx-close-end-2026_price_7000_7500': net_edge=2.00% AR=0.03× conf=0.55 fill=615 score=9.0 | gross=2.10¢ days=276.9
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='spx-close-end-2026_price_7000_7500' edge=2.10¢ poly=0.20 venue2(opinion/NO)=0.78 days=276.9 token=slug-only no_token=missing title='S&P 500 (SPX) Close at End of 2026'
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.7970 → 0 contracts fillable ($0.00 USDC) across 22 ask levels
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📏 CLOB depth pre-filter: 0 contracts at ≤0.7970 — no profitable depth, score → 0
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='acquisitions-before-2027_viking_therapeutics': net_edge=1.90% AR=0.03× conf=0.43 fill=0 score=0.0 | gross=2.00¢ days=276.1
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ✅ pair='acquisitions-before-2027_viking_therapeutics' edge=2.00¢ poly=0.78 venue2(opinion/YES)=0.20 days=276.1 token=resolved no_token=set title='Which Companies Will Be Acquired Before '
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9070 → 0 contracts fillable ($0.00 USDC) across 7 ask levels
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📏 CLOB depth pre-filter: 0 contracts at ≤0.9070 — no profitable depth, score → 0
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='fields-medal-winner-2026_alexander_efimov': net_edge=1.90% AR=0.06× conf=0.05 fill=0 score=0.0 | gross=3.00¢ days=122.1
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ✅ pair='fields-medal-winner-2026_alexander_efimov' edge=3.00¢ poly=0.88 venue2(kalshi/YES)=0.09 days=122.1 token=resolved no_token=set title='Fields Medal Winner 2026'
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Yair Lapid' score=1.00 matched='Yair Lapid' outcomes=["Yes", "No"] YES=309128548508... NO=111793355166...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='who-will-be-the-next-prime-minister-of-israel-after-the-next-election' label='Yair Lapid': matched='Yair Lapid' YES=309128548508... NO=111793355166...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='who-will-be-the-next-prime-minister-of-israel-after-the-next-election': YES ask=0.999 (Δ=0.9690) NO ask=0.999 (Δ=0.9690) buying=YES expected=0.0300 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='israel-pm-2045_yair_lapid': net_edge=1.90% AR=0.03× conf=0.26 fill=172 score=1.1 | gross=3.00¢ days=276.1
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='israel-pm-2045_yair_lapid' edge=3.00¢ poly=0.03 venue2(kalshi/NO)=0.94 days=276.1 token=slug-only no_token=missing title='Israel Prime Minister Election 2045'
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_colorado_avalanche': net_edge=1.90% AR=0.08× conf=0.73 fill=1351 score=76.6 | gross=2.00¢ days=91.8
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='stanley-cup-2026_colorado_avalanche' edge=2.00¢ poly=0.20 venue2(opinion/NO)=0.78 days=91.8 token=slug-only no_token=missing title='NHL Stanley Cup Champion 2026'
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Robert F. Kennedy Jr.' score=1.00 matched='Robert F. Kennedy Jr.' outcomes=["Yes", "No"] YES=156799070992... NO=255359450150...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='who-will-leave-trump-administration-before-2027' label='Robert F. Kennedy Jr.': matched='Robert F. Kennedy Jr.' YES=156799070992... NO=255359450150...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='who-will-leave-trump-administration-before-2027': YES ask=0.99 (Δ=0.7600) NO ask=0.99 (Δ=0.7600) buying=YES expected=0.2300 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='trump-admin-departures-2026_robert_f_kennedy_jr': net_edge=1.90% AR=0.03× conf=0.71 fill=1227 score=22.0 | gross=4.00¢ days=276.1
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='trump-admin-departures-2026_robert_f_kennedy_jr' edge=4.00¢ poly=0.23 venue2(kalshi/NO)=0.73 days=276.1 token=slug-only no_token=missing title='Who Will Leave Trump Administration in 2'
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Tatsuro Taira' score=1.00 matched='Tatsuro Taira' outcomes=["Yes", "No"] YES=128798143264... NO=297380619484...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='who-will-be-ufc-flyweight-champion-at-the-end-of-2026' label='Tatsuro Taira': matched='Tatsuro Taira' YES=128798143264... NO=297380619484...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='who-will-be-ufc-flyweight-champion-at-the-end-of-2026': YES ask=0.99 (Δ=0.8800) NO ask=0.97 (Δ=0.8600) buying=YES expected=0.1100 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='ufc-flyweight-champion-2026_tatsuro_taira': net_edge=1.90% AR=0.03× conf=0.08 fill=46 score=0.1 | gross=3.00¢ days=276.1
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='ufc-flyweight-champion-2026_tatsuro_taira' edge=3.00¢ poly=0.11 venue2(kalshi/NO)=0.86 days=276.1 token=slug-only no_token=missing title='UFC Flyweight Champion in 2026'
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='$SX' score=1.00 matched='$SX' outcomes=["Yes", "No"] YES=302766729778... NO=345387259047...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='what-will-spacexs-public-ticker-be' label='$SX': matched='$SX' YES=302766729778... NO=345387259047...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='what-will-spacexs-public-ticker-be': YES ask=0.999 (Δ=0.9880) NO ask=0.999 (Δ=0.9880) buying=YES expected=0.0110 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='spacex-ticker-prediction_sx': net_edge=1.80% AR=0.01× conf=0.76 fill=1576 score=12.2 | gross=1.90¢ days=641.1
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='spacex-ticker-prediction_sx' edge=1.90¢ poly=0.01 venue2(opinion/NO)=0.97 days=641.1 token=slug-only no_token=missing title='SpaceX Public Ticker Prediction'
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9050 → 0 contracts fillable ($0.00 USDC) across 10 ask levels
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📏 CLOB depth pre-filter: 0 contracts at ≤0.9050 — no profitable depth, score → 0
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='english-premier-league-winner-2026_man_city': net_edge=1.70% AR=0.11× conf=0.91 fill=0 score=0.0 | gross=1.80¢ days=58.1
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ✅ pair='english-premier-league-winner-2026_man_city' edge=1.80¢ poly=0.89 venue2(opinion/YES)=0.09 days=58.1 token=resolved no_token=set title='English Premier League Winner 2026'
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8490 → 0 contracts fillable ($0.00 USDC) across 74 ask levels
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📏 CLOB depth pre-filter: 0 contracts at ≤0.8490 — no profitable depth, score → 0
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='nba-champion-2026_sas': net_edge=1.70% AR=0.07× conf=0.91 fill=0 score=0.0 | gross=1.80¢ days=93.1
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ✅ pair='nba-champion-2026_sas' edge=1.80¢ poly=0.83 venue2(opinion/YES)=0.15 days=93.1 token=resolved no_token=set title='NBA Champion 2026'
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Philadelphia' score=1.00 matched='Philadelphia Eagles' outcomes=["Yes", "No"] YES=416264741737... NO=114274608051...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='where-will-maxx-crosby-play-in-2026' label='Philadelphia': matched='Philadelphia Eagles' YES=416264741737... NO=114274608051...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='where-will-maxx-crosby-play-in-2026': YES ask=0.999 (Δ=0.9960) NO ask=0.999 (Δ=0.9960) buying=YES expected=0.0030 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='crosby-2026-team_philadelphia_eagles': net_edge=1.60% AR=0.04× conf=0.12 fill=69 score=0.3 | gross=2.70¢ days=155.1
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='crosby-2026-team_philadelphia_eagles' edge=2.70¢ poly=0.00 venue2(kalshi/NO)=0.97 days=155.1 token=slug-only no_token=missing title='Maxx Crosby 2026 Team'
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Other' score=1.00 matched='Democrats Sweep' outcomes=["Yes", "No"] YES=347224106080... NO=244835632286...
+Mar 29 22:36:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='balance-of-power-2026-midterms' label='Other': matched='Democrats Sweep' YES=347224106080... NO=244835632286...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='balance-of-power-2026-midterms': YES ask=0.99 (Δ=0.9860) NO ask=0.99 (Δ=0.9860) buying=YES expected=0.0040 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='balance-of-power-2026-midterms_other': net_edge=1.60% AR=0.03× conf=0.92 fill=5509 score=136.0 | gross=1.70¢ days=218.1
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='balance-of-power-2026-midterms_other' edge=1.70¢ poly=0.00 venue2(opinion/NO)=0.98 days=218.1 token=slug-only no_token=missing title='Balance of Power 2026 Midterms'
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Trần Thanh Mẫn' score=1.00 matched='Trần Thanh Mẫn' outcomes=["Yes", "No"] YES=628147521013... NO=384844375180...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='next-president-of-vietnam' label='Trần Thanh Mẫn': matched='Trần Thanh Mẫn' YES=628147521013... NO=384844375180...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='next-president-of-vietnam': YES ask=0.999 (Δ=0.9760) NO ask=0.999 (Δ=0.9760) buying=YES expected=0.0230 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='next-president-vietnam_tran_thanh_man': net_edge=1.60% AR=107746.40× conf=0.53 fill=572 score=32855240.3 | gross=1.70¢ days=0.0
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='next-president-vietnam_tran_thanh_man' edge=1.70¢ poly=0.02 venue2(opinion/NO)=0.96 days=0.0 token=slug-only no_token=missing title='Next President of Vietnam'
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Chad Bianco' score=1.00 matched='Chad Bianco' outcomes=["Yes", "No"] YES=896943144274... NO=617574693176...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='california-governor-election-2026' label='Chad Bianco': matched='Chad Bianco' YES=896943144274... NO=617574693176...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='california-governor-election-2026': YES ask=0.999 (Δ=0.9750) NO ask=0.999 (Δ=0.9750) buying=YES expected=0.0240 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='california-governor-2026_chad_bianco': net_edge=1.50% AR=0.03× conf=0.88 fill=3635 score=80.7 | gross=2.60¢ days=217.8
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='california-governor-2026_chad_bianco' edge=2.60¢ poly=0.02 venue2(kalshi/NO)=0.95 days=217.8 token=slug-only no_token=missing title='California Governor Election 2026'
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9570 → 0 contracts fillable ($0.00 USDC) across 12 ask levels
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📏 CLOB depth pre-filter: 0 contracts at ≤0.9570 — no profitable depth, score → 0
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='sixth-man-of-the-year-2026_naz_reid': net_edge=1.50% AR=0.06× conf=0.33 fill=0 score=0.0 | gross=2.60¢ days=92.1
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ✅ pair='sixth-man-of-the-year-2026_naz_reid' edge=2.60¢ poly=0.93 venue2(kalshi/YES)=0.04 days=92.1 token=resolved no_token=set title='Sixth Man of the Year Winner 2026'
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Dallas Stars' score=1.00 matched='Dallas Stars' outcomes=["Yes", "No"] YES=175815518356... NO=483508860756...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='2026-nhl-stanley-cup-champion' label='Dallas Stars': matched='Dallas Stars' YES=175815518356... NO=483508860756...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='2026-nhl-stanley-cup-champion': YES ask=0.999 (Δ=0.9150) NO ask=0.999 (Δ=0.9150) buying=YES expected=0.0840 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_dallas_stars': net_edge=1.50% AR=0.06× conf=0.95 fill=9982 score=579.4 | gross=1.60¢ days=91.8
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='stanley-cup-2026_dallas_stars' edge=1.60¢ poly=0.08 venue2(opinion/NO)=0.90 days=91.8 token=slug-only no_token=missing title='NHL Stanley Cup Champion 2026'
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='December 31' score=1.00 matched='December 31, 2025' outcomes=["Yes", "No"] YES=914440608941... NO=104208414994...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='starmer-out-in-2025' label='December 31': matched='December 31, 2025' YES=914440608941... NO=104208414994...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 9144406089415588...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 1042084149946047...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='starmer-out-in-2025': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.6600 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='starmer-out-by_december_31_2026': net_edge=1.50% AR=0.02× conf=0.27 fill=187 score=1.0 | gross=1.60¢ days=276.6
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='starmer-out-by_december_31_2026' edge=1.60¢ poly=0.66 venue2(opinion/NO)=0.32 days=276.6 token=slug-only no_token=missing title='Keir Starmer Out By Date'
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Jorge Rodríguez' score=1.00 matched='Jorge Rodríguez' outcomes=["Yes", "No"] YES=427276387660... NO=527298756125...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='venezuela-leader-end-of-2026' label='Jorge Rodríguez': matched='Jorge Rodríguez' YES=427276387660... NO=527298756125...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='venezuela-leader-end-of-2026': YES ask=0.999 (Δ=0.9950) NO ask=0.999 (Δ=0.9950) buying=YES expected=0.0040 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='venezuela-leader-2026_jorge_rodriguez': net_edge=1.50% AR=0.02× conf=0.75 fill=1486 score=22.1 | gross=2.60¢ days=276.1
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='venezuela-leader-2026_jorge_rodriguez' edge=2.60¢ poly=0.00 venue2(kalshi/NO)=0.97 days=276.1 token=slug-only no_token=missing title='Venezuela Leader End of 2026'
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Marco Rubio' score=1.00 matched='Marco Rubio' outcomes=["Yes", "No"] YES=861697453078... NO=824737717974...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='venezuela-leader-end-of-2026' label='Marco Rubio': matched='Marco Rubio' YES=861697453078... NO=824737717974...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='venezuela-leader-end-of-2026': YES ask=0.999 (Δ=0.9950) NO ask=0.999 (Δ=0.9950) buying=YES expected=0.0040 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='venezuela-leader-2026_marco_rubio': net_edge=1.50% AR=0.02× conf=0.88 fill=3675 score=64.3 | gross=2.60¢ days=276.1
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='venezuela-leader-2026_marco_rubio' edge=2.60¢ poly=0.00 venue2(kalshi/NO)=0.97 days=276.1 token=slug-only no_token=missing title='Venezuela Leader End of 2026'
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9870 → 0 contracts fillable ($0.00 USDC) across 7 ask levels
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📏 CLOB depth pre-filter: 0 contracts at ≤0.9870 — no profitable depth, score → 0
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='crosby-2026-team_baltimore_ravens': net_edge=1.40% AR=0.03× conf=0.10 fill=0 score=0.0 | gross=2.50¢ days=155.1
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ✅ pair='crosby-2026-team_baltimore_ravens' edge=2.50¢ poly=0.96 venue2(kalshi/YES)=0.01 days=155.1 token=resolved no_token=set title='Maxx Crosby 2026 Team'
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Oh My God' score=1.00 matched='Oh My God' outcomes=["Yes", "No"] YES=430949633356... NO=574715461458...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='lol-lpl-2026-season-winner' label='Oh My God': matched='Oh My God' YES=430949633356... NO=574715461458...
+Mar 29 22:36:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='lol-lpl-2026-season-winner': YES ask=0.999 (Δ=0.9950) NO ask=0.999 (Δ=0.9950) buying=YES expected=0.0040 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='lol-lpl-2026-season-winner_oh_my_god': net_edge=1.40% AR=0.02× conf=0.61 fill=798 score=9.1 | gross=1.50¢ days=276.1
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='lol-lpl-2026-season-winner_oh_my_god' edge=1.50¢ poly=0.00 venue2(opinion/NO)=0.98 days=276.1 token=slug-only no_token=missing title='LoL: LPL 2026 Season Winner'
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Houston Rockets' score=1.00 matched='Houston Rockets' outcomes=["Yes", "No"] YES=507052487133... NO=900325100169...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='2026-nba-champion' label='Houston Rockets': matched='Houston Rockets' YES=507052487133... NO=900325100169...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='2026-nba-champion': YES ask=0.999 (Δ=0.9830) NO ask=0.999 (Δ=0.9830) buying=YES expected=0.0160 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='nba-champion-2026_hou': net_edge=1.40% AR=0.06× conf=0.96 fill=11454 score=615.1 | gross=1.50¢ days=93.1
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='nba-champion-2026_hou' edge=1.50¢ poly=0.02 venue2(opinion/NO)=0.97 days=93.1 token=slug-only no_token=missing title='NBA Champion 2026'
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='$STAR' score=1.00 matched='$STAR' outcomes=["Yes", "No"] YES=895459206507... NO=558366219170...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='what-will-spacexs-public-ticker-be' label='$STAR': matched='$STAR' YES=895459206507... NO=558366219170...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='what-will-spacexs-public-ticker-be': YES ask=0.999 (Δ=0.9770) NO ask=0.999 (Δ=0.9770) buying=YES expected=0.0220 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='spacex-ticker-prediction_star': net_edge=1.40% AR=0.01× conf=0.78 fill=1738 score=10.7 | gross=1.50¢ days=641.1
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='spacex-ticker-prediction_star' edge=1.50¢ poly=0.02 venue2(opinion/NO)=0.96 days=641.1 token=slug-only no_token=missing title='SpaceX Public Ticker Prediction'
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Vladimir Padrino López' score=1.00 matched='Vladimir Padrino López' outcomes=["Yes", "No"] YES=549069631854... NO=764955960108...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='venezuela-leader-end-of-2026' label='Vladimir Padrino López': matched='Vladimir Padrino López' YES=549069631854... NO=764955960108...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='venezuela-leader-end-of-2026': YES ask=0.999 (Δ=0.9940) NO ask=0.999 (Δ=0.9940) buying=YES expected=0.0050 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='venezuela-leader-2026_vladimir_padrino': net_edge=1.40% AR=0.02× conf=0.81 fill=2172 score=32.7 | gross=2.50¢ days=276.1
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='venezuela-leader-2026_vladimir_padrino' edge=2.50¢ poly=0.01 venue2(kalshi/NO)=0.97 days=276.1 token=slug-only no_token=missing title='Venezuela Leader End of 2026'
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8570 → 0 contracts fillable ($0.00 USDC) across 37 ask levels
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📏 CLOB depth pre-filter: 0 contracts at ≤0.8570 — no profitable depth, score → 0
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='israel-pm-2045_gadi_eisenkot': net_edge=1.30% AR=0.02× conf=0.28 fill=0 score=0.0 | gross=2.40¢ days=276.1
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ✅ pair='israel-pm-2045_gadi_eisenkot' edge=2.40¢ poly=0.84 venue2(kalshi/YES)=0.14 days=276.1 token=resolved no_token=set title='Israel Prime Minister Election 2045'
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Cleveland Cavaliers' score=1.00 matched='Cleveland Cavaliers' outcomes=["Yes", "No"] YES=219298638940... NO=873306899062...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='2026-nba-champion' label='Cleveland Cavaliers': matched='Cleveland Cavaliers' YES=219298638940... NO=873306899062...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='2026-nba-champion': YES ask=0.999 (Δ=0.9520) NO ask=0.999 (Δ=0.9520) buying=YES expected=0.0470 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='nba-champion-2026_cle': net_edge=1.30% AR=0.05× conf=0.98 fill=25298 score=1289.2 | gross=1.40¢ days=93.1
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='nba-champion-2026_cle' edge=1.40¢ poly=0.05 venue2(opinion/NO)=0.94 days=93.1 token=slug-only no_token=missing title='NBA Champion 2026'
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Republican Party' score=1.00 matched='Republican Party' outcomes=["Yes", "No"] YES=519394901096... NO=108587038225...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='which-party-will-win-the-senate-in-2026' label='Republican Party': matched='Republican Party' YES=519394901096... NO=108587038225...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='which-party-will-win-the-senate-in-2026': YES ask=0.99 (Δ=0.5000) NO ask=0.99 (Δ=0.5000) buying=YES expected=0.4900 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='senate-winner-2026_republican_party': net_edge=1.30% AR=0.02× conf=0.47 fill=448 score=4.6 | gross=1.40¢ days=218.1
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='senate-winner-2026_republican_party' edge=1.40¢ poly=0.49 venue2(opinion/NO)=0.50 days=218.1 token=slug-only no_token=missing title='Which Party Will Win the U.S. Senate in '
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Josh Shapiro' score=1.00 matched='Josh Shapiro' outcomes=["Yes", "No"] YES=711698394974... NO=552908275995...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='democratic-presidential-nominee-2028' label='Josh Shapiro': matched='Josh Shapiro' YES=711698394974... NO=552908275995...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='democratic-presidential-nominee-2028': YES ask=0.999 (Δ=0.9610) NO ask=0.999 (Δ=0.9610) buying=YES expected=0.0380 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='dem-nominee-2028_josh_shapiro': net_edge=1.20% AR=0.00× conf=0.99 fill=57560 score=261.3 | gross=2.30¢ days=952.8
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='dem-nominee-2028_josh_shapiro' edge=2.30¢ poly=0.04 venue2(kalshi/NO)=0.94 days=952.8 token=slug-only no_token=missing title='Democratic Nominee 2028'
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Matthew Schaefer' score=1.00 matched='Matthew Schaefer' outcomes=["Yes", "No"] YES=554575483690... NO=793167025077...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='nhl-2025-26-calder-memorial-trophy' label='Matthew Schaefer': matched='Matthew Schaefer' YES=554575483690... NO=793167025077...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='nhl-2025-26-calder-memorial-trophy': YES ask=0.999 (Δ=0.9810) NO ask=0.999 (Δ=0.9810) buying=NO expected=0.0180 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='nhl-calder-memorial-trophy-2026_matthew_schaefer': net_edge=1.10% AR=0.04× conf=0.75 fill=1520 score=50.7 | gross=2.20¢ days=92.1
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 👁 pair='nhl-calder-memorial-trophy-2026_matthew_schaefer' edge=2.20¢ poly=0.02 venue2(kalshi/YES)=0.96 days=92.1 token=slug-only no_token=missing title='NHL Calder Memorial Trophy Winner 2026'
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Democratic Party' score=1.00 matched='Democratic Party' outcomes=["Yes", "No"] YES=113287701564... NO=107118433685...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 📊 [Arb/Polymarket] ✅ Token lookup for slug='which-party-will-win-the-senate-in-2026' label='Democratic Party': matched='Democratic Party' YES=113287701564... NO=107118433685...
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='which-party-will-win-the-senate-in-2026': YES ask=0.99 (Δ=0.5000) NO ask=0.99 (Δ=0.5000) buying=NO expected=0.4900 — neither within 0.30 → display-only (5-min retry)
+Mar 29 22:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3528539]: 🔀 [Arb/Oddpool] 📊 Scored pair='senate-winner-2026_democratic_party': net_edge=1.10% AR=0.02× conf=0.98 fill=20296 score=366.1 | gross=3.20¢ days=218.1
