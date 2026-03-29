@@ -56,15 +56,16 @@ def _slug_cache_key(slug: str, label: str) -> tuple[str, str]:
     return (slug, label.lower().replace("_", " ").replace("-", " ").strip())
 
 
-def _fetch_bid_price(token_id: str) -> Optional[float]:
-    """Fetch the best bid price for a Polymarket CLOB token.
+def _fetch_mid_price(token_id: str) -> Optional[float]:
+    """Fetch the mid-price (bid+ask)/2 for a Polymarket CLOB token.
 
-    Returns best_bid when available, else best_ask as fallback, else None.
     Used to validate token-to-outcome assignment at resolution time.
 
-    Bid is preferred over ask because stale asks can remain artificially high
-    (e.g. 99¢ on a 1¢ NO token when an MM never cancelled an old limit sell).
-    Bids must be actively posted, so they faithfully reflect true market value.
+    Mid-price is used over bid-only or ask-only because:
+    - Stale limit-sell asks can sit at 99¢ on illiquid 1¢ tokens (ask unreliable).
+    - Bids alone may not exist on illiquid markets (bid unreliable alone).
+    - Mid-price anchors validation to the true midpoint of the spread.
+    Falls back to best_bid (if ask absent) or best_ask (if bid absent).
     """
     if not token_id:
         return None
@@ -73,13 +74,20 @@ def _fetch_bid_price(token_id: str) -> Optional[float]:
         prices = get_best_prices(token_id)
         bid = prices.get("best_bid")
         ask = prices.get("best_ask")
+        if bid is not None and ask is not None:
+            return (bid + ask) / 2.0
         return bid if bid is not None else ask
     except Exception as e:
-        log(f"⚠️ _fetch_bid_price({token_id[:16]}...): {e}")
+        log(f"⚠️ _fetch_mid_price({token_id[:16]}...): {e}")
         return None
 
 
-def _resolve_poly_tokens(slug: str, label: str = "", expected_poly_ask: Optional[float] = None) -> tuple[Optional[str], Optional[str]]:
+def _resolve_poly_tokens(
+    slug: str,
+    label: str = "",
+    expected_poly_ask: Optional[float] = None,
+    buying_poly_no: bool = False,
+) -> tuple[Optional[str], Optional[str]]:
     """Resolve a Polymarket event slug to a (YES token, NO token) pair.
 
     Uses the label to pick the right market within multi-outcome events (e.g. NBA
@@ -87,11 +95,14 @@ def _resolve_poly_tokens(slug: str, label: str = "", expected_poly_ask: Optional
     team/candidate gets its own entry.
 
     When expected_poly_ask is provided, the resolved tokens are price-validated:
-    - Fetch best bid for both YES and NO tokens from the Poly CLOB.
-    - Accept the token whose bid is closest to expected_poly_ask (within 30¢).
-    - Swap YES/NO order if NO is the closer match (Gamma returned wrong order).
-    - Cache as failure (5-min TTL) if neither token's bid is within 30¢ — this means
-      Gamma resolved the wrong market entirely (e.g. wrong sub-market in multi-outcome).
+    - Fetch mid-price (bid+ask)/2 for both YES and NO tokens from the Poly CLOB.
+    - `buying_poly_no` specifies which token we actually buy on Poly:
+        False → buying YES  (expected_poly_ask ≈ YES mid-price)
+        True  → buying NO   (expected_poly_ask ≈ NO  mid-price)
+    - Accept tokens if the "buying" token's mid-price is closest AND within 30¢.
+    - Swap YES/NO order if the "other" token's mid-price is closer (Gamma inverted order).
+    - Cache as failure (5-min TTL) if neither token is within 30¢ — Gamma resolved
+      the wrong market entirely (e.g. wrong sub-market in multi-outcome events).
 
     Returns (None, None) on failure (display-only, retry on next cycle).
     """
@@ -119,43 +130,53 @@ def _resolve_poly_tokens(slug: str, label: str = "", expected_poly_ask: Optional
             # Both wrong-market tokens then show ~99¢ bids, the slippage check fires,
             # and nothing executes.
             #
-            # Strategy: fetch bid for both tokens and accept whichever is closest to
-            # Oddpool's quoted price (expected_poly_ask).  Bid is used (not ask)
-            # because stale limit-sell asks can sit at 99¢ on an illiquid 1¢ token
-            # while bids must be actively posted and reflect true value.
+            # Strategy: fetch mid-price (bid+ask)/2 for both tokens and validate
+            # the token we're actually buying against Oddpool's quoted price.
+            # `buying_poly_no` tells us which token we're buying:
+            #   False → YES token mid should ≈ expected_poly_ask
+            #   True  → NO  token mid should ≈ expected_poly_ask
             #
             # Tolerance 0.30 (30¢): wide enough for normal spread + minor price
             # movement since Oddpool priced the opportunity; tight enough to reject
             # wrong-market tokens that differ by 50–90¢.
             if expected_poly_ask is not None:
                 _TOLERANCE = 0.30
-                yes_bid = _fetch_bid_price(yes_tok)
-                no_bid  = _fetch_bid_price(no_tok)
-                yes_delta = abs(yes_bid - expected_poly_ask) if yes_bid is not None else 999.0
-                no_delta  = abs(no_bid  - expected_poly_ask) if no_bid  is not None else 999.0
+                yes_mid = _fetch_mid_price(yes_tok)
+                no_mid  = _fetch_mid_price(no_tok)
+                yes_delta = abs(yes_mid - expected_poly_ask) if yes_mid is not None else 999.0
+                no_delta  = abs(no_mid  - expected_poly_ask) if no_mid  is not None else 999.0
 
-                if yes_delta <= no_delta and yes_delta < _TOLERANCE:
+                # "buying" token is the one we expect to match expected_poly_ask.
+                # "other" token should NOT match — if it does, Gamma inverted the order.
+                if not buying_poly_no:
+                    buying_label, buying_delta, buying_mid = "YES", yes_delta, yes_mid
+                    other_label,  other_delta,  other_mid  = "NO",  no_delta,  no_mid
+                else:
+                    buying_label, buying_delta, buying_mid = "NO",  no_delta,  no_mid
+                    other_label,  other_delta,  other_mid  = "YES", yes_delta, yes_mid
+
+                if buying_delta <= other_delta and buying_delta < _TOLERANCE:
                     log(
-                        f"✅ Token price validated (YES correct order): "
-                        f"YES bid={yes_bid:.4f} Δ={yes_delta:.4f} | "
-                        f"NO bid={no_bid} Δ={no_delta:.4f} | "
+                        f"✅ Token price validated ({buying_label} correct): "
+                        f"{buying_label} mid={buying_mid:.4f} Δ={buying_delta:.4f} | "
+                        f"{other_label} mid={other_mid} Δ={other_delta:.4f} | "
                         f"expected={expected_poly_ask:.4f} slug={slug!r}"
                     )
                     # correct order — proceed
-                elif no_delta < yes_delta and no_delta < _TOLERANCE:
+                elif other_delta < buying_delta and other_delta < _TOLERANCE:
                     log(
-                        f"🔄 Token YES/NO order corrected via price validation: "
-                        f"NO bid={no_bid:.4f} Δ={no_delta:.4f} closer than "
-                        f"YES bid={yes_bid} Δ={yes_delta:.4f} → swapping | "
+                        f"🔄 Token YES/NO order corrected: "
+                        f"{other_label} mid={other_mid:.4f} Δ={other_delta:.4f} closer than "
+                        f"{buying_label} mid={buying_mid} Δ={buying_delta:.4f} → swapping | "
                         f"expected={expected_poly_ask:.4f} slug={slug!r}"
                     )
                     yes_tok, no_tok = no_tok, yes_tok
                 else:
                     log(
-                        f"⚠️ Token price mismatch — wrong market resolved for slug={slug!r}: "
-                        f"YES bid={yes_bid} (Δ={yes_delta:.4f}) NO bid={no_bid} (Δ={no_delta:.4f}) "
-                        f"expected={expected_poly_ask:.4f} — neither within {_TOLERANCE:.2f} "
-                        f"→ caching as display-only (5-min retry)"
+                        f"⚠️ Token price mismatch — wrong market for slug={slug!r}: "
+                        f"YES mid={yes_mid} (Δ={yes_delta:.4f}) NO mid={no_mid} (Δ={no_delta:.4f}) "
+                        f"buying={buying_label} expected={expected_poly_ask:.4f} "
+                        f"— neither within {_TOLERANCE:.2f} → display-only (5-min retry)"
                     )
                     _SLUG_CACHE[key] = (None, None, now)
                     return (None, None)
@@ -442,10 +463,13 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         # Pass expected_poly_ask so _resolve_poly_tokens can price-validate the resolved tokens
         # against Oddpool's quote — catching wrong-market resolutions (both tokens ~99¢).
         match_hint = label or outcome_key
+        # buying_poly_no: True when the Poly leg buys NO (buy_yes_market is venue2)
+        _buying_poly_no = buy_yes_market != "polymarket"
         resolved_yes_token, resolved_no_token = _resolve_poly_tokens(
             polymarket_slug,
             match_hint,
             expected_poly_ask=our_poly_ask if our_poly_ask > 0 else None,
+            buying_poly_no=_buying_poly_no,
         )
 
         # ── Profit-maximising scorer ──────────────────────────────────────────
@@ -513,9 +537,12 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
                     max_poly_price = max(0.0, 1.0 - our_venue2_ask - ARB_MIN_EDGE_PCT)
                     book = fetch_orderbook(depth_token)
                     if book:
-                        poly_fillable, _poly_usdc = compute_fillable_contracts(book, max_poly_price)
+                        poly_fillable, poly_usdc = compute_fillable_contracts(book, max_poly_price)
                         if poly_fillable > 0:
-                            fillable_size_usdc = poly_fillable * our_poly_ask
+                            # Use actual USDC cost from the ask-ladder walk rather than
+                            # fillable_contracts × our_poly_ask: the walk accounts for
+                            # varying prices across levels, giving a more accurate total.
+                            fillable_size_usdc = poly_usdc
                             log(
                                 f"📏 CLOB depth pre-filter: {poly_fillable} contracts at "
                                 f"≤{max_poly_price:.4f} → ${fillable_size_usdc:.2f} USDC fillable"
