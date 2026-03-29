@@ -335,7 +335,7 @@ def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, 
         resp = http_client.get(
             f"{POLY_GAMMA_URL}/events",
             venue="polymarket",
-            params={"slug": slug, "limit": 3, "active": "true", "closed": "false"},
+            params={"slug": slug, "limit": 3, "active": "true", "closed": "false", "archived": "false"},
             timeout=10,
         )
         if resp and resp.status_code == 200:
@@ -382,7 +382,7 @@ def lookup_token_ids_by_slug(slug: str, label: str = "") -> Optional[tuple[str, 
         resp2 = http_client.get(
             f"{POLY_GAMMA_URL}/markets",
             venue="polymarket",
-            params={"slug": slug, "limit": 10, "active": "true", "closed": "false"},
+            params={"slug": slug, "limit": 10, "active": "true", "closed": "false", "archived": "false"},
             timeout=10,
         )
         if resp2 and resp2.status_code == 200:
