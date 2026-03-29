@@ -472,11 +472,19 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         )
 
         # ── Profit-maximising scorer ──────────────────────────────────────────
-        # Step 1: net edge — subtract expected slippage and execution risk buffer.
-        #   ARB_SLIPPAGE_GUARD_BPS is in bps (e.g. 50 bps = 0.5%), convert to pct.
-        #   ARB_RISK_BUFFER_PCT is already in pct (e.g. 0.1 = 0.1%).
-        slippage_pct = ARB_SLIPPAGE_GUARD_BPS / 100.0
-        net_edge_pct = net_cents - slippage_pct - ARB_RISK_BUFFER_PCT
+        # Step 1: net edge.
+        #   Oddpool's net_cents is already fee-adjusted (they apply their own cost
+        #   model before returning it).  We only subtract our own small safety buffer
+        #   (ARB_RISK_BUFFER_PCT, default 0.1%) to absorb residual execution risk
+        #   (partial fills, minor spread widening, etc.).
+        #
+        #   ARB_SLIPPAGE_GUARD_BPS is an EXECUTION-TIME guard only — it aborts a
+        #   trade when the live CLOB price has moved more than N bps against us since
+        #   Oddpool quoted it (staleness check).  It is NOT an expected execution cost
+        #   and must not be subtracted here.  Doing so (200 bps = 2%) would drive
+        #   net_edge_pct negative for every opportunity in the feed, zeroing all scores
+        #   and preventing any trades from executing.
+        net_edge_pct = net_cents - ARB_RISK_BUFFER_PCT
 
         # Step 2: annualized return — converts absolute edge into an annual rate,
         #   correctly handling compounding (short-dated trades compound faster).

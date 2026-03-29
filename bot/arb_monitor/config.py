@@ -53,11 +53,14 @@ ODDPOOL_API_KEY = os.environ.get("ODDPOOL_API_KEY", "")
 ODDPOOL_POLL_INTERVAL = int(os.environ.get("ODDPOOL_POLL_INTERVAL", "30"))
 
 ARB_MIN_EDGE_PCT = float(os.environ.get("ARB_MIN_EDGE_PCT", "0.025"))
-# Maximum adverse slippage (in basis points) allowed between Oddpool's quoted
-# Poly price and the live CLOB price before we abort the trade.
-# 50 bps (0.5%) was too tight — it blocked valid opportunities where Oddpool's
-# data was 1-2% stale (e.g. dem-nominee markets with 1.3% drift). Genuinely
-# bad opportunities (Oddpool stale by 50%+) are blocked regardless of threshold.
+# EXECUTION-TIME staleness guard (basis points).
+# Aborts a trade when the live CLOB ask has moved more than N bps worse than
+# Oddpool's quoted price since the opportunity was scored.
+# This is NOT a scoring cost — the scorer must NOT subtract it from net_cents.
+# Oddpool's net_cents is already fee-adjusted; subtracting 200 bps on top would
+# drive every opportunity to a negative net_edge and zero score.
+# 50 bps (0.5%) was too tight — blocked valid opportunities where Oddpool's
+# data was 1-2% stale (e.g. dem-nominee markets with 1.3% drift).
 # 200 bps (2%) tolerates minor staleness while protecting against large moves.
 # Override: set ARB_SLIPPAGE_GUARD_BPS=50 in .env to restore original behavior.
 ARB_SLIPPAGE_GUARD_BPS = int(os.environ.get("ARB_SLIPPAGE_GUARD_BPS", "200"))
