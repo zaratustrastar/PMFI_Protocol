@@ -1,0 +1,87 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.oddpool.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Cross-venue arbitrage
+
+> Find risk-free cross-venue arbitrage opportunities.
+
+Find markets where buying YES on one venue and NO on another costs less than 1 dollar combined. The gap is risk-free profit.
+
+<Tip>
+  **Example:** "Will the Fed cut rates?" -- YES is 42c on Kalshi, NO is 55c on Polymarket. Buy both for 97c. One side pays 1 dollar, so you pocket 3c per contract guaranteed.
+</Tip>
+
+## Parameters
+
+<ParamField query="min_net_cents" type="float" default="0">
+  Minimum net profit after fees, in cents.
+</ParamField>
+
+<ParamField query="minutes" type="integer" default="10000">
+  Lookback window in minutes.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+  ```bash cURL theme={null}
+  curl -H "X-API-Key: your_api_key" \
+    "https://api.oddpool.com/arbitrage/current?min_net_cents=0.5&minutes=10"
+  ```
+
+  ```python Python theme={null}
+  import requests
+
+  response = requests.get(
+      "https://api.oddpool.com/arbitrage/current",
+      headers={"X-API-Key": "your_api_key"},
+      params={"min_net_cents": 0.5, "minutes": 10}
+  )
+  opportunities = response.json()
+  ```
+</CodeGroup>
+
+## Response
+
+`net_cents` is your per-contract profit after all fees.
+
+```json  theme={null}
+[
+  {
+    "event_id": 42,
+    "event_title": "Fed rate decision March",
+    "kalshi_event_ticker": "KXFEDDECISION-26MAR",
+    "polymarket_event_slug": "fed-rate-march",
+    "opinion_market_id": null,
+    "market_type": "binary",
+    "outcome_key": "yes",
+    "label": "25bps cut",
+    "timestamp": "2026-03-11T14:30:00",
+    "resolution_time": "2026-03-19T18:00:00",
+    "kalshi": {
+      "yes_ask": 0.42, "no_ask": 0.60,
+      "volume": 150000, "volume_24h": 12000,
+      "open_interest": 80000
+    },
+    "polymarket": {
+      "yes_ask": 0.39, "no_ask": 0.63,
+      "volume": 200000.0, "volume_24h": 15000.0,
+      "liquidity": 50000.0
+    },
+    "opinion": {
+      "yes_ask": null, "no_ask": null,
+      "volume": null, "volume_24h": null,
+      "liquidity": null
+    },
+    "buy_yes_market": "polymarket",
+    "buy_no_market": "kalshi",
+    "gross_cents": 1.0,
+    "fee_cents": 0,
+    "net_cents": 1.0
+  }
+]
+```
+
+
+Built with [Mintlify](https://mintlify.com).
