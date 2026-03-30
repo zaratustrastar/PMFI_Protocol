@@ -692,21 +692,44 @@ def fetch_opportunities() -> list[ArbOpportunity]:
     log(f"Fetched {len(raw_entries)} raw entries from Oddpool")
 
     # ── WS pre-pass: batch-resolve top-10 pairs by pnl_velocity ─────────────
-    ws_books: dict = {}
+    # Key change vs. v1: WS adapter now takes (event_key, label_normalized)
+    # pairs — not (event_id, outcome_key). We resolve event_id → event_key via
+    # /websocket/catalog (5-min cache) and normalize the REST label for matching.
+    ws_books: dict = {}          # (event_key, label_normalized) → book data
+    _ws_key_map: dict = {}       # (event_id_str, label) → (event_key, label_normalized)
     if ODDPOOL_API_KEY and raw_entries:
         try:
-            from .oddpool_ws import fetch_book_snapshots, invalidate_cache
+            from .oddpool_ws import (
+                fetch_book_snapshots, invalidate_cache,
+                resolve_event_key, normalize_label,
+            )
             invalidate_cache()  # Fresh per cycle
 
             sorted_entries = sorted(raw_entries, key=_quick_pnl_velocity, reverse=True)
             seen_pairs: set = set()
-            top_pairs: list = []
+            top_pairs: list = []  # (event_key, label_normalized)
+
             for e in sorted_entries:
-                eid  = e.get("event_id") or ""
-                okey = e.get("outcome_key") or "yes"
-                if eid and (eid, okey) not in seen_pairs:
-                    top_pairs.append((eid, okey))
-                    seen_pairs.add((eid, okey))
+                eid    = e.get("event_id") or ""
+                etitle = e.get("event_title") or ""
+                label  = e.get("label") or e.get("outcome_key") or "yes"
+                okey   = e.get("outcome_key") or "yes"
+                lbl_n  = normalize_label(label)
+
+                if not eid:
+                    continue
+
+                ekey = resolve_event_key(eid, etitle, ODDPOOL_API_KEY, ODDPOOL_BASE_URL)
+                log(
+                    f"🗺 mapping event_id={eid!r} title={etitle[:30]!r} "
+                    f"label={label!r} okey={okey!r} → event_key={ekey!r} lbl_n={lbl_n!r}"
+                )
+                _ws_key_map[(str(eid), label)] = (ekey, lbl_n)
+
+                k = (ekey, lbl_n)
+                if k not in seen_pairs:
+                    top_pairs.append(k)
+                    seen_pairs.add(k)
                 if len(top_pairs) >= _WS_MAX_EVENTS:
                     break
 
@@ -720,16 +743,18 @@ def fetch_opportunities() -> list[ArbOpportunity]:
                 )
                 log(
                     f"🔌 WS resolved {len(ws_books)}/{len(top_pairs)} pairs — "
-                    f"remaining {len(raw_entries) - len(top_pairs)} use Gamma fallback"
+                    f"remaining {max(0, len(raw_entries) - len(top_pairs))} use Gamma fallback"
                 )
         except Exception as e:
             log(f"⚠️ WS pre-pass failed: {e} — all pairs fall back to Gamma")
 
     opportunities = []
     for entry in raw_entries:
-        eid  = entry.get("event_id") or ""
-        okey = entry.get("outcome_key") or "yes"
-        ws_book = ws_books.get((eid, okey))  # None for non-top-10 pairs
+        eid   = entry.get("event_id") or ""
+        label = entry.get("label") or entry.get("outcome_key") or "yes"
+        # Look up the (event_key, label_normalized) key we built in the pre-pass
+        ws_key = _ws_key_map.get((str(eid), label))
+        ws_book = ws_books.get(ws_key) if ws_key else None
         opp = normalize_opportunity(entry, ws_book=ws_book)
         if opp is not None:
             opportunities.append(opp)

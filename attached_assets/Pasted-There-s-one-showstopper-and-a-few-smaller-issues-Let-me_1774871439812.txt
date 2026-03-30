@@ -1,0 +1,25 @@
+There's one showstopper and a few smaller issues. Let me walk through them.
+
+**The critical bug: `event_id` ≠ `event_key`**
+
+The REST `/arbitrage/current` endpoint returns `event_id: 42` (an integer). The WebSocket channels use `event_key` like `"fomc-2026-04-29"` (a human-readable string). The plan constructs channels as `book:{event_id}:{outcome_key}`, which would produce `book:42:yes` — that's not a valid channel. It should be `book:fomc-2026-04-29:hold`. These are completely different identifier systems, so the WS subscription would silently match nothing, return zero messages, and fall back to Gamma every single time. The whole integration would be a no-op.
+
+You need a mapping from REST `event_id` → WS `event_key`. The `/websocket/catalog` endpoint probably provides the list of available event_keys, but I didn't see a documented REST→WS ID mapping. You'd want to fetch the catalog first, build a lookup, and then subscribe. Worth checking with Oddpool (avi@oddpool.com) whether there's a direct field or if the catalog is the right bridge.
+
+**Smaller issues that would bite you:**
+
+The plan connects, auths, subscribes, collects, and disconnects every 60-second cron cycle. That defeats the whole point of WebSockets. You save the Gamma round-trip but add a WS connect + auth + subscribe round-trip instead. For a first iteration it's fine, but the real win comes from a persistent connection with a local book cache that's always warm.
+
+On deltas vs snapshots — the `book` channel sends `update_type: "delta"` messages (incremental level changes). The plan assumes the first messages after subscribing will contain `venue_id.token_id`, which is likely true since deltas include it. But you're not guaranteed a full book state from deltas alone. If you need accurate depth, you'd want to also subscribe to the `snapshot` channel (which resets every 60s) or at least handle the case where early deltas only show a few changed levels.
+
+The `asyncio.run()` sync wrapper will blow up if your bot already runs in an async context (which is common). The fallback to `get_event_loop().run_until_complete()` also fails with a running loop. You'd need either `nest_asyncio`, a dedicated thread, or just make the whole bot async.
+
+**What's correct:**
+
+The decision to use WS for token resolution but keep CLOB depth walk for fillable size is right — WS `ask_depth_usd` is total depth within ±5c of mid, not depth at profitable prices. The CLOB walk filtered by `max_poly_price` is more precise.
+
+The sanity gate change from `yes_ask >= 0.98 AND no_ask >= 0.98` to `yes_bid >= 0.98 OR no_bid >= 0.98` is logically sound. One token's bid at 98¢+ means that side has won. Just be aware that very high-probability live markets (95%+ favorites) could occasionally have bids near 0.96–0.97, so 0.98 gives you a small buffer but it's tight.
+
+The pre-pass sorting by `pnl_velocity` to pick top 10 for the Pro tier limit is a clean approach.
+
+**Bottom line:** fix the `event_id` → `event_key` mapping first — without that, nothing else matters. Then decide whether a connect-per-cycle approach is fast enough for your arb latency requirements or if you need a persistent connection.

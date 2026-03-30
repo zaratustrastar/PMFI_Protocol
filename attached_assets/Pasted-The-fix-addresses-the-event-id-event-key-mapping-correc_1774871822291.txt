@@ -1,0 +1,23 @@
+The fix addresses the `event_id` → `event_key` mapping correctly in principle, but it misses a second mapping problem that would leave the subscriptions broken even after this fix ships.
+
+**The second mapping gap: `outcome_key` ≠ WS outcome**
+
+The REST endpoint returns `outcome_key: "yes"` and `label: "25bps cut"`. The WS channel expects the outcome *slug* like `"hold"` or `"25bps_cut"`. The fix plan still constructs channels as `book:{event_key}:{outcome_key}`, which would produce `book:fomc-2026-04-29:yes` — that's not a valid channel either. The WS expects `book:fomc-2026-04-29:hold`.
+
+The cleanest workaround: subscribe to `book:{event_key}` (no outcome suffix). The docs show this is valid and returns all outcomes for that event. Then filter incoming messages by matching the `outcome` field in the response against the REST entry's `label`. This sidesteps the outcome slug mapping entirely and costs you nothing since Pro tier limits are per-event, not per-channel.
+
+Task 2 should change from:
+
+> subscribe to `book:{event_key}:{outcome_key}`
+
+to:
+
+> subscribe to `book:{event_key}` (all outcomes), then match incoming messages by comparing `msg["outcome"]` against a normalized version of the REST entry's `label` field (or just collect all outcomes and match after the fact)
+
+**The catalog gamble**
+
+Task 1 assumes `/websocket/catalog` provides an `event_id → event_key` mapping. We haven't actually seen the catalog response format — it might just list available event_keys with no integer ID cross-reference. If that's the case, you'd need a fuzzy join between `event_title` from REST and the catalog entries, which is fragile. Before writing the code, I'd fetch the catalog response to see its actual shape, or email avi@oddpool.com to ask whether the REST response can include `event_key` directly. That's a one-line API change on their side that saves you a whole mapping layer.
+
+**The asyncio thread fix is correct.** `threading.Thread` + `queue.Queue` with a join timeout is the standard pattern. No notes there.
+
+**One addition to the task list:** add a log line in `fetch_opportunities()` that prints the raw REST fields used for mapping (event_id, event_title, label, outcome_key) alongside the resolved event_key, so when the mapping fails you can immediately see why in production logs without re-deploying.
