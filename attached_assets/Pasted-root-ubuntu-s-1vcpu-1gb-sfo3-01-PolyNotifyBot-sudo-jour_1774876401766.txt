@@ -1,0 +1,19 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "5 minutes ago" | grep -E "OddpoolWS|ws_token|catalog|ODDPOOL|oddpool_ws|WS pre-pass|fetch_book"
+Mar 30 13:08:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+Mar 30 13:09:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 📡 [Arb/OddpoolWS] ⚠️ No auth response within 5s — proceeding
+Mar 30 13:09:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 📡 [Arb/OddpoolWS] 📬 Subscribed to 8 book channels (no outcome suffix)
+Mar 30 13:09:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 📡 [Arb/OddpoolWS] ⚠️ WS thread timed out — returning empty, Gamma fallback will run
+Mar 30 13:09:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 📡 [Arb/OddpoolWS] 📊 WS batch complete: 0/10 pairs resolved
+Mar 30 13:09:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+Mar 30 13:10:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 📡 [Arb/OddpoolWS] ⚠️ No auth response within 5s — proceeding
+Mar 30 13:10:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 📡 [Arb/OddpoolWS] 📬 Subscribed to 8 book channels (no outcome suffix)
+Mar 30 13:10:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+Mar 30 13:10:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 📡 [Arb/OddpoolWS] ⚠️ WS thread timed out — returning empty, Gamma fallback will run
+Mar 30 13:10:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3566846]: 📡 [Arb/OddpoolWS] 📊 WS batch complete: 0/10 pairs resolved
+Mar 30 13:12:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3568482]: ℹ️ ARB_USE_ODDPOOL_ONLY=true — OddScreeners (Opinion SSE) is DISABLED (Oddpool is sole source)
+Mar 30 13:12:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3568482]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+Mar 30 13:12:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3568482]: 📡 [Arb/OddpoolWS] ⚠️ No auth response within 5s — proceeding
+Mar 30 13:12:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3568482]: 📡 [Arb/OddpoolWS] 📬 Subscribed to 6 book channels (no outcome suffix)
+Mar 30 13:12:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3568482]: 📡 [Arb/OddpoolWS] ⚠️ WS thread timed out — returning empty, Gamma fallback will run
+Mar 30 13:12:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3568482]: 📡 [Arb/OddpoolWS] 📊 WS batch complete: 0/10 pairs resolved
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

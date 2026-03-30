@@ -442,20 +442,24 @@ def get_best_prices(yes_token_id: str, no_token_id: str) -> dict:
         yes_asks = yes_book.get("asks", [])
         yes_bids = yes_book.get("bids", [])
         if yes_asks:
-            result["yes_best_ask"] = float(yes_asks[0]["price"])
-            result["yes_ask_size"] = float(yes_asks[0].get("size", 0))
+            best = min(yes_asks, key=lambda x: float(x["price"]))
+            result["yes_best_ask"] = float(best["price"])
+            result["yes_ask_size"] = float(best.get("size", 0))
         if yes_bids:
-            result["yes_best_bid"] = float(yes_bids[0]["price"])
-            result["yes_bid_size"] = float(yes_bids[0].get("size", 0))
+            best = max(yes_bids, key=lambda x: float(x["price"]))
+            result["yes_best_bid"] = float(best["price"])
+            result["yes_bid_size"] = float(best.get("size", 0))
 
     if no_book:
         no_asks = no_book.get("asks", [])
         no_bids = no_book.get("bids", [])
         if no_asks:
-            result["no_best_ask"] = float(no_asks[0]["price"])
-            result["no_ask_size"] = float(no_asks[0].get("size", 0))
+            best = min(no_asks, key=lambda x: float(x["price"]))
+            result["no_best_ask"] = float(best["price"])
+            result["no_ask_size"] = float(best.get("size", 0))
         if no_bids:
-            result["no_best_bid"] = float(no_bids[0]["price"])
-            result["no_bid_size"] = float(no_bids[0].get("size", 0))
+            best = max(no_bids, key=lambda x: float(x["price"]))
+            result["no_best_bid"] = float(best["price"])
+            result["no_bid_size"] = float(best.get("size", 0))
 
     return result

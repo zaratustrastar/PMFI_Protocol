@@ -687,14 +687,32 @@ def get_best_prices(token_id: str) -> dict:
     bids = book.get("bids", [])
     asks = book.get("asks", [])
 
-    best_bid = float(bids[0]["price"]) if bids else None
-    best_ask = float(asks[0]["price"]) if asks else None
-    bid_size = float(bids[0].get("size", 0)) if bids else 0
-    ask_size = float(asks[0].get("size", 0)) if asks else 0
+    # The CLOB API returns asks in descending order (highest price first).
+    # asks[0] is the synthetic ceiling order (e.g. 0.999), NOT the best ask.
+    # We must find the true best prices by taking min(asks) and max(bids).
+    best_bid_entry = max(bids, key=lambda x: float(x["price"])) if bids else None
+    best_ask_entry = min(asks, key=lambda x: float(x["price"])) if asks else None
+
+    best_bid = float(best_bid_entry["price"]) if best_bid_entry else None
+    best_ask = float(best_ask_entry["price"]) if best_ask_entry else None
+    bid_size = float(best_bid_entry.get("size", 0)) if best_bid_entry else 0
+    ask_size = float(best_ask_entry.get("size", 0)) if best_ask_entry else 0
+
+    neg_risk = bool(book.get("neg_risk", False))
+    last_trade_price = book.get("last_trade_price")
+
+    log(
+        f"📖 get_best_prices({token_id[:16]}...): "
+        f"best_ask={best_ask} best_bid={best_bid} "
+        f"neg_risk={neg_risk} last_trade={last_trade_price} "
+        f"asks={len(asks)} bids={len(bids)}"
+    )
 
     return {
         "best_bid": best_bid,
         "best_ask": best_ask,
         "bid_size": bid_size,
         "ask_size": ask_size,
+        "neg_risk": neg_risk,
+        "last_trade_price": float(last_trade_price) if last_trade_price else None,
     }

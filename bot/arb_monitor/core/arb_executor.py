@@ -426,8 +426,8 @@ def _opinion_get_best_ask(market_id: str, side: str = "YES") -> Optional[float]:
         if not asks:
             log(f"⚠️ [OPINION] no asks in {side} orderbook for token={token_id[:16]}...")
             return None
-        # asks sorted best-first (lowest ask at index 0)
-        best = asks[0]
+        # Use min() to guarantee lowest ask regardless of API sort order
+        best = min(asks, key=lambda x: float(x.get("price") or x.get("yes_price") or 999))
         price = best.get("price") or best.get("yes_price")
         if price is None:
             return None
