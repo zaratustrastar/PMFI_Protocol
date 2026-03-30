@@ -1,0 +1,30 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep "📊 Scored pair"
+Mar 30 15:06:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='nh-democratic-senate-primary-winner-2026_karishma_manzur': net_edge=2.00% AR=0.05× conf=0.06 fill=0 score=0.0 | gross=3.10¢ days=161.4
+Mar 30 15:06:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='nh-democratic-senate-primary-winner-2026_karishma_manzur': net_edge=2.00% AR=0.05× conf=0.06 fill=0 score=0.0 | gross=3.10¢ days=161.4
+Mar 30 15:06:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='spx-close-end-2026_price_7000_7500': net_edge=2.00% AR=0.03× conf=0.52 fill=0 score=0.0 | gross=2.10¢ days=276.2
+Mar 30 15:06:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='spx-close-end-2026_price_7000_7500': net_edge=2.00% AR=0.03× conf=0.52 fill=0 score=0.0 | gross=2.10¢ days=276.2
+Mar 30 15:06:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='acquisitions-before-2027_viking_therapeutics': net_edge=1.90% AR=0.03× conf=0.40 fill=0 score=0.0 | gross=2.00¢ days=275.4
+Mar 30 15:06:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='acquisitions-before-2027_viking_therapeutics': net_edge=1.90% AR=0.03× conf=0.40 fill=0 score=0.0 | gross=2.00¢ days=275.4
+Mar 30 15:06:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='al-champion-2026_toronto_blue_jays': net_edge=1.90% AR=0.03× conf=0.75 fill=0 score=0.0 | gross=3.00¢ days=215.4
+Mar 30 15:06:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='al-champion-2026_toronto_blue_jays': net_edge=1.90% AR=0.03× conf=0.75 fill=0 score=0.0 | gross=3.00¢ days=215.4
+Mar 30 15:06:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='btc-max-2026_value_below_25k': net_edge=1.90% AR=0.03× conf=0.86 fill=0 score=0.0 | gross=2.00¢ days=276.6
+Mar 30 15:06:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='btc-max-2026_value_below_25k': net_edge=1.90% AR=0.03× conf=0.86 fill=0 score=0.0 | gross=2.00¢ days=276.6
+Mar 30 15:06:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='fomc-2026-06-17_no_change': net_edge=1.90% AR=0.09× conf=0.90 fill=0 score=0.0 | gross=2.00¢ days=78.4
+Mar 30 15:06:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='fomc-2026-06-17_no_change': net_edge=1.90% AR=0.09× conf=0.90 fill=0 score=0.0 | gross=2.00¢ days=78.4
+Mar 30 15:06:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='french-presidential-election-2027_jordan_bardella': net_edge=1.90% AR=0.02× conf=0.67 fill=0 score=0.0 | gross=4.00¢ days=395.4
+Mar 30 15:06:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='french-presidential-election-2027_jordan_bardella': net_edge=1.90% AR=0.02× conf=0.67 fill=0 score=0.0 | gross=4.00¢ days=395.4
+Mar 30 15:06:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='tyreek-hill-next-team-2026_dallas_cowboys': net_edge=1.90% AR=0.05× conf=0.05 fill=0 score=0.0 | gross=3.00¢ days=154.4
+Mar 30 15:06:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_colorado_avalanche': net_edge=1.90% AR=0.08× conf=0.85 fill=0 score=0.0 | gross=2.00¢ days=91.2
+Mar 30 15:06:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='tyreek-hill-next-team-2026_dallas_cowboys': net_edge=1.90% AR=0.05× conf=0.05 fill=0 score=0.0 | gross=3.00¢ days=154.4
+Mar 30 15:06:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='ufc-flyweight-champion-2026_tatsuro_taira': net_edge=1.90% AR=0.03× conf=0.05 fill=0 score=0.0 | gross=3.00¢ days=275.4
+Mar 30 15:06:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='ufc-flyweight-champion-2026_tatsuro_taira': net_edge=1.90% AR=0.03× conf=0.05 fill=0 score=0.0 | gross=3.00¢ days=275.4
+Mar 30 15:06:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='english-premier-league-winner-2026_man_city': net_edge=1.70% AR=0.11× conf=0.90 fill=0 score=0.0 | gross=1.80¢ days=57.4
+Mar 30 15:06:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='english-premier-league-winner-2026_man_city': net_edge=1.70% AR=0.11× conf=0.90 fill=0 score=0.0 | gross=1.80¢ days=57.4
+Mar 30 15:06:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_colorado_avalanche': net_edge=1.70% AR=0.07× conf=0.85 fill=0 score=0.0 | gross=1.80¢ days=91.2
+Mar 30 15:06:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='california-governor-2026_chad_bianco': net_edge=1.70% AR=0.03× conf=0.87 fill=0 score=0.0 | gross=2.80¢ days=217.2
+Mar 30 15:06:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='california-governor-2026_chad_bianco': net_edge=1.70% AR=0.03× conf=0.87 fill=0 score=0.0 | gross=2.80¢ days=217.2
+Mar 30 15:06:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='balance-of-power-2026-midterms_other': net_edge=1.60% AR=0.03× conf=0.92 fill=5769 score=143.4 | gross=1.70¢ days=217.4
+Mar 30 15:06:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='balance-of-power-2026-midterms_other': net_edge=1.60% AR=0.03× conf=0.92 fill=5769 score=143.4 | gross=1.70¢ days=217.4
+Mar 30 15:06:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='english-premier-league-winner-2026_arsenal': net_edge=1.50% AR=0.10× conf=0.92 fill=0 score=0.0 | gross=1.60¢ days=57.4
+Mar 30 15:06:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='english-premier-league-winner-2026_arsenal': net_edge=1.50% AR=0.10× conf=0.92 fill=0 score=0.0 | gross=1.60¢ days=57.4
+Mar 30 15:06:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3581853]: 🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_dallas_stars': net_edge=1.50% AR=0.06× c
