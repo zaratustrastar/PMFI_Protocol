@@ -13,4 +13,5 @@ dependencies = [
     "pysocks>=1.7.1",
     "requests[socks]>=2.32.5",
     "web3>=7.14.0",
+    "websockets>=15.0.1",
 ]

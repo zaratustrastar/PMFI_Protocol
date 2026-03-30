@@ -35,7 +35,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 from ..config import (
-    ODDPOOL_API_KEY, ODDPOOL_BASE_URL,
+    ODDPOOL_API_KEY, ODDPOOL_BASE_URL, ODDPOOL_WS_URL,
     ARB_RISK_BUFFER_PCT, ARB_FILLABLE_FRACTION,
     ARB_MIN_EDGE_PCT,
 )
@@ -363,7 +363,7 @@ def _parse_resolution_time(entry: dict) -> int:
     return 0
 
 
-def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
+def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Optional[ArbOpportunity]:
     """Normalize a raw Oddpool /arbitrage/current entry into an ArbOpportunity.
 
     Actual Oddpool field structure:
@@ -463,23 +463,34 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         days_to_expiry = max(0.0, (expiry_ts - now) / 86400) if expiry_ts > now else 0.0
         pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)
 
-        # Resolve both YES and NO token IDs early so the scorer (Step 4) can use them
-        # for real book depth. Uses label (e.g. "Houston Rockets") or outcome_key (e.g. "hou")
-        # to pick the right market within multi-outcome events (NBA Champion, elections, etc.).
-        # Prefers label; falls back to outcome_key when label is empty.
-        # Cached 60 min; failures 5 min to avoid hammering Gamma.
-        # Pass expected_poly_ask so _resolve_poly_tokens can price-validate the resolved tokens
-        # against Oddpool's quote — catching wrong-market resolutions (both tokens ~99¢).
+        # ── Token resolution: WS primary, Gamma fallback ─────────────────────
+        # Primary path: Oddpool WebSocket delivers CLOB token_id directly in
+        # venue_id.token_id — no Gamma lookup needed.  This eliminates the
+        # 3-hop REST → Gamma → CLOB chain and the ask-based sanity gate that
+        # caused false positives on live markets with resting backstop orders.
+        # Fallback: slug-based Gamma resolution (existing _resolve_poly_tokens).
         match_hint = label or outcome_key
-        # buying_poly_no: True when the Poly leg buys NO (buy_yes_market is venue2)
         _buying_poly_no = buy_yes_market != "polymarket"
-        resolved_yes_token, resolved_no_token = _resolve_poly_tokens(
-            polymarket_slug,
-            match_hint,
-            expected_poly_ask=our_poly_ask if our_poly_ask > 0 else None,
-            buying_poly_no=_buying_poly_no,
-            resolution_ts=expiry_ts if expiry_ts > 0 else None,
-        )
+
+        if ws_book and (ws_book.get("yes_token_id") or ws_book.get("no_token_id")):
+            resolved_yes_token = ws_book.get("yes_token_id") or None
+            resolved_no_token  = ws_book.get("no_token_id") or None
+            log(
+                f"🌐 ws_resolved pair={pair_id!r}: "
+                f"YES={resolved_yes_token[:16] if resolved_yes_token else 'missing'}... "
+                f"NO={resolved_no_token[:16] if resolved_no_token else 'missing'}... "
+                f"yes_ask={ws_book.get('yes_best_ask', 0.0):.4f} "
+                f"ask_depth=${ws_book.get('ask_depth_usd', 0):.0f}"
+            )
+        else:
+            # Gamma fallback — used when WS data is unavailable or pair not in top-10
+            resolved_yes_token, resolved_no_token = _resolve_poly_tokens(
+                polymarket_slug,
+                match_hint,
+                expected_poly_ask=our_poly_ask if our_poly_ask > 0 else None,
+                buying_poly_no=_buying_poly_no,
+                resolution_ts=expiry_ts if expiry_ts > 0 else None,
+            )
 
         # ── Profit-maximising scorer ──────────────────────────────────────────
         # Step 1: net edge.
@@ -645,6 +656,23 @@ def normalize_opportunity(entry: dict) -> Optional[ArbOpportunity]:
         return None
 
 
+def _quick_pnl_velocity(entry: dict) -> float:
+    """Fast pnl_velocity estimate for ranking before full normalization."""
+    gross = float(entry.get("gross_cents") or entry.get("net_cents") or 0)
+    resolution_time = entry.get("resolution_time") or entry.get("timestamp") or ""
+    days = 90.0
+    if resolution_time:
+        try:
+            dt = datetime.fromisoformat(str(resolution_time).replace("Z", "+00:00"))
+            days = max(0.5, (dt.timestamp() - time.time()) / 86400)
+        except Exception:
+            pass
+    return gross / max(days, 0.5)
+
+
+_WS_MAX_EVENTS = 10  # Oddpool Pro tier limit (also enforced inside oddpool_ws.py)
+
+
 def fetch_opportunities() -> list[ArbOpportunity]:
     """Fetch, normalize, and sort opportunities by score descending.
 
@@ -652,13 +680,57 @@ def fetch_opportunities() -> list[ArbOpportunity]:
     This ranking maximises expected risk-adjusted annualised dollar return
     and naturally deprioritises thin/negative-edge and illiquid opportunities
     without requiring manual threshold tuning for each dimension separately.
+
+    Token resolution uses a two-stage approach:
+      1. Oddpool WebSocket (primary): batch-fetch CLOB token IDs directly from
+         the WS feed for the top-10 pairs by pnl_velocity. This eliminates the
+         3-hop REST → Gamma → CLOB chain entirely.
+      2. Gamma slug resolver (fallback): used for pairs outside the top-10 or
+         when the WS connection fails.
     """
     raw_entries = fetch_arb_current()
     log(f"Fetched {len(raw_entries)} raw entries from Oddpool")
 
+    # ── WS pre-pass: batch-resolve top-10 pairs by pnl_velocity ─────────────
+    ws_books: dict = {}
+    if ODDPOOL_API_KEY and raw_entries:
+        try:
+            from .oddpool_ws import fetch_book_snapshots, invalidate_cache
+            invalidate_cache()  # Fresh per cycle
+
+            sorted_entries = sorted(raw_entries, key=_quick_pnl_velocity, reverse=True)
+            seen_pairs: set = set()
+            top_pairs: list = []
+            for e in sorted_entries:
+                eid  = e.get("event_id") or ""
+                okey = e.get("outcome_key") or "yes"
+                if eid and (eid, okey) not in seen_pairs:
+                    top_pairs.append((eid, okey))
+                    seen_pairs.add((eid, okey))
+                if len(top_pairs) >= _WS_MAX_EVENTS:
+                    break
+
+            if top_pairs:
+                log(f"🔌 WS pre-fetch for top {len(top_pairs)} pairs by pnl_velocity...")
+                ws_books = fetch_book_snapshots(
+                    top_pairs,
+                    api_key=ODDPOOL_API_KEY,
+                    ws_url=ODDPOOL_WS_URL,
+                    timeout=12.0,
+                )
+                log(
+                    f"🔌 WS resolved {len(ws_books)}/{len(top_pairs)} pairs — "
+                    f"remaining {len(raw_entries) - len(top_pairs)} use Gamma fallback"
+                )
+        except Exception as e:
+            log(f"⚠️ WS pre-pass failed: {e} — all pairs fall back to Gamma")
+
     opportunities = []
     for entry in raw_entries:
-        opp = normalize_opportunity(entry)
+        eid  = entry.get("event_id") or ""
+        okey = entry.get("outcome_key") or "yes"
+        ws_book = ws_books.get((eid, okey))  # None for non-top-10 pairs
+        opp = normalize_opportunity(entry, ws_book=ws_book)
         if opp is not None:
             opportunities.append(opp)
 

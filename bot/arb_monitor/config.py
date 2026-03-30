@@ -49,6 +49,7 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 ARB_USE_ODDPOOL_ONLY = os.environ.get("ARB_USE_ODDPOOL_ONLY", "true").lower() == "true"
 ODDPOOL_BASE_URL = os.environ.get("ODDPOOL_BASE_URL", "https://api.oddpool.com")
+ODDPOOL_WS_URL = os.environ.get("ODDPOOL_WS_URL", "wss://feeds.oddpool.com/ws")
 ODDPOOL_API_KEY = os.environ.get("ODDPOOL_API_KEY", "")
 ODDPOOL_POLL_INTERVAL = int(os.environ.get("ODDPOOL_POLL_INTERVAL", "30"))
 

@@ -1778,6 +1778,7 @@ dependencies = [
     { name = "pysocks" },
     { name = "requests", extra = ["socks"] },
     { name = "web3" },
+    { name = "websockets" },
 ]
 
 [package.metadata]
@@ -1791,6 +1792,7 @@ requires-dist = [
     { name = "pysocks", specifier = ">=1.7.1" },
     { name = "requests", extras = ["socks"], specifier = ">=2.32.5" },
     { name = "web3", specifier = ">=7.14.0" },
+    { name = "websockets", specifier = ">=15.0.1" },
 ]
 
 [[package]]

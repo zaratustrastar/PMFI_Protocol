@@ -380,17 +380,22 @@ def lookup_token_ids_by_slug(
                 else:
                     chosen_ids, chosen_m = pick
                     # ── Post-resolution sanity gate ───────────────────────────
-                    # Defence-in-depth: if both YES and NO asks are ≥ 0.98 the
-                    # market is settled (Gamma cache lag). Reject so the caller
-                    # doesn't waste a 5-min display-only cache slot.
-                    yes_ask_raw = get_best_prices(chosen_ids[0]).get("best_ask")
-                    no_ask_raw  = get_best_prices(chosen_ids[1]).get("best_ask")
-                    if (yes_ask_raw is not None and no_ask_raw is not None
-                            and yes_ask_raw >= 0.98 and no_ask_raw >= 0.98):
+                    # Defence-in-depth: if either YES or NO bid is ≥ 0.98 the
+                    # market is settled (winning token trades near $1.00).
+                    # Using bids (not asks): a bid at 0.98+ means buyers pay
+                    # that price → confirmed winner.  Ask-based gate caused
+                    # false positives because market-makers post backstop resting
+                    # orders at $0.99 ask even on live, unresolved markets.
+                    yes_prices = get_best_prices(chosen_ids[0])
+                    no_prices  = get_best_prices(chosen_ids[1])
+                    yes_bid_raw = yes_prices.get("best_bid")
+                    no_bid_raw  = no_prices.get("best_bid")
+                    if ((yes_bid_raw is not None and yes_bid_raw >= 0.98)
+                            or (no_bid_raw is not None and no_bid_raw >= 0.98)):
                         log(
-                            f"⚠️ Post-resolution settled-market gate: both tokens at "
-                            f"YES={yes_ask_raw:.3f} NO={no_ask_raw:.3f} — rejecting "
-                            f"slug={slug!r} label={label!r}"
+                            f"⚠️ Post-resolution settled-market gate: "
+                            f"YES_bid={yes_bid_raw} NO_bid={no_bid_raw} — "
+                            f"one token has won, rejecting slug={slug!r} label={label!r}"
                         )
                         return None
                     log(
@@ -428,15 +433,17 @@ def lookup_token_ids_by_slug(
                     log(f"⚠️ /markets: no market passed label/period filter slug={slug!r} label={label!r}")
                 else:
                     chosen_ids, chosen_m = pick2
-                    # Post-resolution sanity gate (same as Path 1)
-                    yes_ask_raw = get_best_prices(chosen_ids[0]).get("best_ask")
-                    no_ask_raw  = get_best_prices(chosen_ids[1]).get("best_ask")
-                    if (yes_ask_raw is not None and no_ask_raw is not None
-                            and yes_ask_raw >= 0.98 and no_ask_raw >= 0.98):
+                    # Post-resolution sanity gate (same logic as Path 1)
+                    yes_prices2 = get_best_prices(chosen_ids[0])
+                    no_prices2  = get_best_prices(chosen_ids[1])
+                    yes_bid2 = yes_prices2.get("best_bid")
+                    no_bid2  = no_prices2.get("best_bid")
+                    if ((yes_bid2 is not None and yes_bid2 >= 0.98)
+                            or (no_bid2 is not None and no_bid2 >= 0.98)):
                         log(
-                            f"⚠️ Post-resolution settled-market gate (fallback): both tokens at "
-                            f"YES={yes_ask_raw:.3f} NO={no_ask_raw:.3f} — rejecting "
-                            f"slug={slug!r} label={label!r}"
+                            f"⚠️ Post-resolution settled-market gate (fallback): "
+                            f"YES_bid={yes_bid2} NO_bid={no_bid2} — "
+                            f"one token has won, rejecting slug={slug!r} label={label!r}"
                         )
                         return None
                     log(
