@@ -323,6 +323,7 @@ def lookup_token_ids_by_slug(
     slug: str,
     label: str = "",
     resolution_ts: Optional[int] = None,
+    buying_no: bool = False,
 ) -> Optional[tuple[str, str]]:
     """Fetch YES/NO CLOB token IDs for a Polymarket event by its URL slug.
 
@@ -338,11 +339,20 @@ def lookup_token_ids_by_slug(
     preferred over candidates from prior periods. This disambiguates recurrent events
     like "aapl-above-in-march-2026" (March 2025 vs March 2026 sub-markets).
 
+    `buying_no`: True when the execution plan buys the NO token on Polymarket (the
+    Kalshi/Opinion side is buying YES).  Used by the post-resolution sanity gate to
+    check only the bid for the token we are actually buying.  Checking the other
+    side would cause false rejections on valid high-probability markets where the
+    opposite outcome bids near $1 (e.g. a 98% YES market is still tradeable when
+    we are buying NO, since NO ask will be ~2¢ and arb edge may still exist at
+    the other venue).
+
     Filtering strategy (guards against resolved/old-season markets):
       1. API-level: pass active=true, closed=false, archived=false to both endpoints.
       2. In-memory: _is_market_live() rejects closed/archived/inactive/past-endDate markets.
       3. _pick_best_market: temporal bonus + score threshold (≥ 0.5); returns None for mismatches.
-      4. Post-resolution sanity gate: if both YES and NO asks ≥ 0.98 → resolved, reject.
+      4. Post-resolution sanity gate: buy-side bid ≥ 0.98 → that token won, reject.
+         (Only the buy-side is checked to avoid false positives on the other side.)
 
     Tries the /events endpoint first (event slug → markets), then /markets with slug filter.
     """
@@ -380,24 +390,34 @@ def lookup_token_ids_by_slug(
                 else:
                     chosen_ids, chosen_m = pick
                     # ── Post-resolution sanity gate ───────────────────────────
-                    # Defence-in-depth: if either YES or NO bid is ≥ 0.98 the
-                    # market is settled (winning token trades near $1.00).
+                    # Defence-in-depth: if the BUY-side bid is ≥ 0.98 the token
+                    # we need to buy has already won — there is no edge.
                     # Using bids (not asks): a bid at 0.98+ means buyers pay
                     # that price → confirmed winner.  Ask-based gate caused
-                    # false positives because market-makers post backstop resting
-                    # orders at $0.99 ask even on live, unresolved markets.
-                    yes_prices = get_best_prices(chosen_ids[0])
-                    no_prices  = get_best_prices(chosen_ids[1])
-                    yes_bid_raw = yes_prices.get("best_bid")
-                    no_bid_raw  = no_prices.get("best_bid")
-                    if ((yes_bid_raw is not None and yes_bid_raw >= 0.98)
-                            or (no_bid_raw is not None and no_bid_raw >= 0.98)):
+                    # false positives (market-makers post resting $0.99 asks on
+                    # live markets).  Checking ONLY the buy-side avoids false
+                    # rejections when the opposite side bids near $1 (e.g. 98%
+                    # YES market is still tradeable when we buy NO).
+                    buy_id   = chosen_ids[1] if buying_no else chosen_ids[0]
+                    other_id = chosen_ids[0] if buying_no else chosen_ids[1]
+                    buy_prices   = get_best_prices(buy_id)
+                    other_prices = get_best_prices(other_id)
+                    buy_bid   = buy_prices.get("best_bid")
+                    other_bid = other_prices.get("best_bid")
+                    side_name = "NO" if buying_no else "YES"
+                    if buy_bid is not None and buy_bid >= 0.98:
                         log(
                             f"⚠️ Post-resolution settled-market gate: "
-                            f"YES_bid={yes_bid_raw} NO_bid={no_bid_raw} — "
-                            f"one token has won, rejecting slug={slug!r} label={label!r}"
+                            f"{side_name}_bid={buy_bid} — buy-side token won, "
+                            f"rejecting slug={slug!r} label={label!r}"
                         )
                         return None
+                    if other_bid is not None and other_bid >= 0.98:
+                        log(
+                            f"ℹ️ Other-side bid={other_bid:.2f} ≥ 0.98 (opposite outcome "
+                            f"likely winner) but we buy {side_name} — not rejected, "
+                            f"edge filter will handle if no arb exists"
+                        )
                     log(
                         f"✅ Token lookup for slug={slug!r} label={label!r}: "
                         f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
@@ -433,19 +453,24 @@ def lookup_token_ids_by_slug(
                     log(f"⚠️ /markets: no market passed label/period filter slug={slug!r} label={label!r}")
                 else:
                     chosen_ids, chosen_m = pick2
-                    # Post-resolution sanity gate (same logic as Path 1)
-                    yes_prices2 = get_best_prices(chosen_ids[0])
-                    no_prices2  = get_best_prices(chosen_ids[1])
-                    yes_bid2 = yes_prices2.get("best_bid")
-                    no_bid2  = no_prices2.get("best_bid")
-                    if ((yes_bid2 is not None and yes_bid2 >= 0.98)
-                            or (no_bid2 is not None and no_bid2 >= 0.98)):
+                    # Post-resolution sanity gate — buy-side only (same rationale as Path 1)
+                    buy_id2   = chosen_ids[1] if buying_no else chosen_ids[0]
+                    other_id2 = chosen_ids[0] if buying_no else chosen_ids[1]
+                    buy_bid2   = get_best_prices(buy_id2).get("best_bid")
+                    other_bid2 = get_best_prices(other_id2).get("best_bid")
+                    side_name2 = "NO" if buying_no else "YES"
+                    if buy_bid2 is not None and buy_bid2 >= 0.98:
                         log(
                             f"⚠️ Post-resolution settled-market gate (fallback): "
-                            f"YES_bid={yes_bid2} NO_bid={no_bid2} — "
-                            f"one token has won, rejecting slug={slug!r} label={label!r}"
+                            f"{side_name2}_bid={buy_bid2} — buy-side token won, "
+                            f"rejecting slug={slug!r} label={label!r}"
                         )
                         return None
+                    if other_bid2 is not None and other_bid2 >= 0.98:
+                        log(
+                            f"ℹ️ Other-side bid={other_bid2:.2f} ≥ 0.98 (fallback) — "
+                            f"buying {side_name2}, not rejected"
+                        )
                     log(
                         f"✅ Token lookup (markets fallback) slug={slug!r} label={label!r}: "
                         f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "

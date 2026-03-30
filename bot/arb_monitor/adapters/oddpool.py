@@ -127,7 +127,9 @@ def _resolve_poly_tokens(
 
     try:
         from .polymarket import lookup_token_ids_by_slug
-        result = lookup_token_ids_by_slug(slug, label=label, resolution_ts=resolution_ts)
+        result = lookup_token_ids_by_slug(
+            slug, label=label, resolution_ts=resolution_ts, buying_no=buying_poly_no
+        )
         if result:
             yes_tok, no_tok = result
 
