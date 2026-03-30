@@ -1,0 +1,17 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "Poly balance:|Poly servicer|Balance sufficient|funding_failed"
+Mar 30 19:01:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (49999.3100 USDC needed)
+Mar 30 19:01:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_man_city: funding_failed: servicer cannot cover Poly leg (49999.3100 USDC needed) unwound=False
+Mar 30 19:01:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (405.0000 USDC needed)
+Mar 30 19:01:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_charlotte_hornets: funding_failed: servicer cannot cover Poly leg (405.0000 USDC needed) unwound=False
+Mar 30 19:01:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0100 USDC needed)
+Mar 30 19:01:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: 🔁 [ArbExecLoop] ❌ Execution failed for sp500-add-q1-2026_pure_storage: funding_failed: servicer cannot cover Poly leg (0.0100 USDC needed) unwound=False
+Mar 30 19:01:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (14419.3900 USDC needed)
+Mar 30 19:01:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_below_35k: funding_failed: servicer cannot cover Poly leg (14419.3900 USDC needed) unwound=False
+Mar 30 19:01:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (3813.2900 USDC needed)
+Mar 30 19:02:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3813.2900 USDC needed) unwound=False
+Mar 30 19:02:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (3813.2900 USDC needed)
+Mar 30 19:02:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3813.2900 USDC needed) unwound=False
+Mar 30 19:02:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (7508.8000 USDC needed)
+Mar 30 19:02:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: 🔁 [ArbExecLoop] ❌ Execution failed for la-liga-winner-2026_barcelona: funding_failed: servicer cannot cover Poly leg (7508.8000 USDC needed) unwound=False
+Mar 30 19:02:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (552.6000 USDC needed)
+Mar 30 19:02:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3622267]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_above_120k: funding_failed: servicer cannot cover Poly leg (552.6000 USDC needed) unwound=False

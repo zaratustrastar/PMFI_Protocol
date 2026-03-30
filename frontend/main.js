@@ -9,6 +9,25 @@
 // Read from global config (set by HTML template) or use default
 const VAULT_ADDRESS         = window.PSNIPER_CONFIG?.VAULT_ADDRESS || "0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1";
 const ARB_VAULT_V2_ADDRESS  = window.PSNIPER_CONFIG?.ARB_VAULT_V2_ADDRESS || "";
+
+// ── pARB vault allowlist ──────────────────────────────────────────────────────
+// Only wallets in this list can see and interact with the pARBITRAGE vault.
+// To open the vault to everyone, set this to an empty array: []
+const ARB_ALLOWED_WALLETS = [
+    '0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF',
+    '0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0',
+].map(a => a.toLowerCase());
+
+function _isArbAllowed(addr) {
+    if (!ARB_ALLOWED_WALLETS.length) return true;
+    return !!addr && ARB_ALLOWED_WALLETS.includes(addr.toLowerCase());
+}
+
+function _updateArbVaultVisibility(addr) {
+    const card = document.getElementById('arbVaultCard');
+    if (!card) return;
+    card.style.display = _isArbAllowed(addr) ? '' : 'none';
+}
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
 const REFRESH_INTERVAL = 30000;
@@ -719,6 +738,8 @@ async function connectWallet() {
         const _arbDepBtn = document.getElementById('openArbDepositBtn');
         if (_arbDepBtn && ARB_VAULT_V2_ADDRESS) _arbDepBtn.disabled = false;
 
+        _updateArbVaultVisibility(userAddress);
+
         await refreshAll();
         startAutoRefresh();
 
@@ -752,7 +773,8 @@ function disconnectWallet() {
     if (_arbDepBtn) _arbDepBtn.disabled = true;
     const _arbStats = document.getElementById('arbUserStats');
     if (_arbStats) _arbStats.classList.add('hidden');
-    
+    _updateArbVaultVisibility(null);
+
     // Reinitialize with read-only provider
     initReadOnlyProvider();
 }
@@ -762,6 +784,7 @@ function handleAccountsChanged(accounts) {
         disconnectWallet();
     } else {
         userAddress = accounts[0];
+        _updateArbVaultVisibility(userAddress);
         refreshAll();
     }
 }
@@ -1102,6 +1125,7 @@ async function handleArbDeposit() {
     if (!amountStr || Number(amountStr) <= 0) { showStatus(statusEl, 'Enter a valid amount', 'error'); return; }
     if (Number(amountStr) < 10)               { showStatus(statusEl, 'Minimum deposit is $10 USDC', 'error'); return; }
     if (!signer || !userAddress)              { showStatus(statusEl, 'Connect your wallet first', 'error'); return; }
+    if (!_isArbAllowed(userAddress))          { showStatus(statusEl, 'Deposits restricted to authorized wallets', 'error'); return; }
     if (!_arbActiveAddress())                 { showStatus(statusEl, 'pARB vault not configured', 'error'); return; }
     const isCorrectNetwork = await checkNetwork();
     if (!isCorrectNetwork) { showStatus(statusEl, 'Switch to Base Mainnet', 'error'); await switchToBase(); return; }
@@ -1170,6 +1194,7 @@ async function handleArbWithdrawRequest() {
     const amountStr = amountEl?.value;
     if (!amountStr || Number(amountStr) <= 0) { showStatus(statusEl, 'Enter a valid share amount', 'error'); return; }
     if (!signer || !userAddress)              { showStatus(statusEl, 'Connect your wallet first', 'error'); return; }
+    if (!_isArbAllowed(userAddress))          { showStatus(statusEl, 'Withdrawals restricted to authorized wallets', 'error'); return; }
     if (!_arbActiveAddress())                 { showStatus(statusEl, 'pARB vault not configured', 'error'); return; }
     const isCorrectNetwork = await checkNetwork();
     if (!isCorrectNetwork) { showStatus(statusEl, 'Switch to Base Mainnet', 'error'); await switchToBase(); return; }
