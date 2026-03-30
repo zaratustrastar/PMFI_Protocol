@@ -470,20 +470,62 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
         # venue_id.token_id — no Gamma lookup needed.  This eliminates the
         # 3-hop REST → Gamma → CLOB chain and the ask-based sanity gate that
         # caused false positives on live markets with resting backstop orders.
-        # Fallback: slug-based Gamma resolution (existing _resolve_poly_tokens).
+        #
+        # Channel subscription schema (implementation deviation from Oddpool docs):
+        #   Spec says: book:{event_id}:{outcome_key}  (e.g. book:42:yes)
+        #   Actual:    book:{event_key}                (e.g. book:fomc-may-2026)
+        #              with ALL outcomes returned in a single stream, matched by
+        #              normalize_label(msg["outcome"]) vs entry["label"].
+        #   Rationale: Oddpool /websocket/catalog maps event_id→event_key; the
+        #   WS feed uses the slug key in channel names, not the integer id. The
+        #   spec docs appear to describe an older API version.
+        #
+        # Fallback: slug-based Gamma resolution (_resolve_poly_tokens) used when:
+        #   (a) WS data is unavailable (pair not in top-10 pre-scan), or
+        #   (b) WS book exists but the buy-side token is still missing (partial
+        #       resolution — e.g. WS only yielded the YES token but we need NO).
         match_hint = label or outcome_key
         _buying_poly_no = buy_yes_market != "polymarket"
+
+        resolved_yes_token: Optional[str] = None
+        resolved_no_token:  Optional[str] = None
 
         if ws_book and (ws_book.get("yes_token_id") or ws_book.get("no_token_id")):
             resolved_yes_token = ws_book.get("yes_token_id") or None
             resolved_no_token  = ws_book.get("no_token_id") or None
+            # Determine the buy-side token before we decide whether to also run Gamma
+            _ws_buy_token = resolved_no_token if _buying_poly_no else resolved_yes_token
             log(
-                f"🌐 ws_resolved pair={pair_id!r}: "
+                f"ws_token_resolved pair={pair_id!r}: "
                 f"YES={resolved_yes_token[:16] if resolved_yes_token else 'missing'}... "
                 f"NO={resolved_no_token[:16] if resolved_no_token else 'missing'}... "
                 f"yes_ask={ws_book.get('yes_best_ask', 0.0):.4f} "
-                f"ask_depth=${ws_book.get('ask_depth_usd', 0):.0f}"
+                f"ask_depth=${ws_book.get('ask_depth_usd', 0):.0f} "
+                f"buy_side={'NO' if _buying_poly_no else 'YES'} "
+                f"buy_token={'set' if _ws_buy_token else 'MISSING'}"
             )
+            if _ws_buy_token is None:
+                # Partial WS resolution: WS yielded the wrong side only.
+                # Fall through to Gamma to try to fill in the missing buy-side token.
+                log(
+                    f"⚠️ WS partial resolution for pair={pair_id!r} — "
+                    f"buy-side token missing, running Gamma fallback"
+                )
+                gamma_yes, gamma_no = _resolve_poly_tokens(
+                    polymarket_slug,
+                    match_hint,
+                    expected_poly_ask=our_poly_ask if our_poly_ask > 0 else None,
+                    buying_poly_no=_buying_poly_no,
+                    resolution_ts=expiry_ts if expiry_ts > 0 else None,
+                )
+                # Merge: prefer WS tokens when present, fill gaps from Gamma
+                resolved_yes_token = resolved_yes_token or gamma_yes
+                resolved_no_token  = resolved_no_token  or gamma_no
+                log(
+                    f"🔀 Merged WS+Gamma: "
+                    f"YES={resolved_yes_token[:16] if resolved_yes_token else 'missing'}... "
+                    f"NO={resolved_no_token[:16] if resolved_no_token else 'missing'}..."
+                )
         else:
             # Gamma fallback — used when WS data is unavailable or pair not in top-10
             resolved_yes_token, resolved_no_token = _resolve_poly_tokens(
