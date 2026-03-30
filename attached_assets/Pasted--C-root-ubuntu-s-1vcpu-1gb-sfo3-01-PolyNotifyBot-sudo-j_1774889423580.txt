@@ -1,0 +1,238 @@
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -iE "\[Arb/" | grep -vE "get_best_prices|Token lookup|Scored pair"
+Mar 30 16:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='dem-nominee-2028_pete_buttigieg' edge=0.00¢ poly=0.04 venue2(opinion/NO)=0.96 days=952.1 token=resolved no_token=set title='Democratic Nominee 2028'
+Mar 30 16:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0130 → 0 contracts fillable ($0.00 USDC) across 121 ask levels
+Mar 30 16:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.0130 — no profitable depth, score → 0
+Mar 30 16:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='dem-nominee-2028_wes_moore' edge=0.00¢ poly=0.02 venue2(opinion/NO)=0.98 days=952.1 token=resolved no_token=set title='Democratic Nominee 2028'
+Mar 30 16:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0130 → 0 contracts fillable ($0.00 USDC) across 121 ask levels
+Mar 30 16:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.0130 — no profitable depth, score → 0
+Mar 30 16:50:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='dem-nominee-2028_wes_moore' edge=0.00¢ poly=0.02 venue2(opinion/NO)=0.98 days=952.1 token=resolved no_token=set title='Democratic Nominee 2028'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2370 → 53569 contracts fillable ($4735.10 USDC) across 65 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 53569 contracts at ≤0.2370 → $4735.10 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='eth-max-2026_eth_4k' edge=2.00¢ poly=0.22 venue2(kalshi/NO)=0.76 days=276.5 token=resolved no_token=set title='Ethereum Maximum Price in 2026'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2370 → 53569 contracts fillable ($4735.10 USDC) across 65 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 53569 contracts at ≤0.2370 → $4735.10 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='eth-max-2026_eth_4k' edge=2.00¢ poly=0.22 venue2(kalshi/NO)=0.76 days=276.5 token=resolved no_token=set title='Ethereum Maximum Price in 2026'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8370 → 15546 contracts fillable ($11288.60 USDC) across 69 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 15546 contracts at ≤0.8370 → $11288.60 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fed-rate-cuts-2026_cuts_2' edge=1.00¢ poly=0.83 venue2(kalshi/YES)=0.16 days=275.3 token=resolved no_token=set title='Number of Fed Rate Cuts in 2026'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8370 → 15546 contracts fillable ($11288.60 USDC) across 69 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 15546 contracts at ≤0.8370 → $11288.60 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fed-rate-cuts-2026_cuts_2' edge=1.00¢ poly=0.83 venue2(kalshi/YES)=0.16 days=275.3 token=resolved no_token=set title='Number of Fed Rate Cuts in 2026'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1770 → 0 contracts fillable ($0.00 USDC) across 105 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.1770 — no profitable depth, score → 0
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fed-rate-cuts-2026_cuts_2' edge=0.00¢ poly=0.18 venue2(opinion/NO)=0.82 days=275.3 token=resolved no_token=set title='Number of Fed Rate Cuts in 2026'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1770 → 0 contracts fillable ($0.00 USDC) across 105 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.1770 — no profitable depth, score → 0
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fed-rate-cuts-2026_cuts_2' edge=0.00¢ poly=0.18 venue2(opinion/NO)=0.82 days=275.3 token=resolved no_token=set title='Number of Fed Rate Cuts in 2026'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1870 → 969 contracts fillable ($169.17 USDC) across 43 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 969 contracts at ≤0.1870 → $169.17 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-group-a-winner-2026_south_korea' edge=2.00¢ poly=0.17 venue2(kalshi/NO)=0.81 days=88.3 token=resolved no_token=set title='FIFA World Cup Group A Winner'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1870 → 969 contracts fillable ($169.17 USDC) across 43 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 969 contracts at ≤0.1870 → $169.17 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-group-a-winner-2026_south_korea' edge=2.00¢ poly=0.17 venue2(kalshi/NO)=0.81 days=88.3 token=resolved no_token=set title='FIFA World Cup Group A Winner'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1570 → 7 contracts fillable ($1.05 USDC) across 35 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 7 contracts at ≤0.1570 → $1.05 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-group-c-winner-2026_morocco' edge=1.00¢ poly=0.15 venue2(kalshi/NO)=0.84 days=88.3 token=resolved no_token=set title='FIFA World Cup Group C Winner'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1570 → 7 contracts fillable ($1.05 USDC) across 35 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 7 contracts at ≤0.1570 → $1.05 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-group-c-winner-2026_morocco' edge=1.00¢ poly=0.15 venue2(kalshi/NO)=0.84 days=88.3 token=resolved no_token=set title='FIFA World Cup Group C Winner'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8470 → 88 contracts fillable ($73.92 USDC) across 10 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 88 contracts at ≤0.8470 → $73.92 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-group-j-winner-2026_austria' edge=1.00¢ poly=0.84 venue2(kalshi/YES)=0.15 days=88.3 token=resolved no_token=set title='FIFA World Cup Group J Winner'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8470 → 88 contracts fillable ($73.92 USDC) across 10 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 88 contracts at ≤0.8470 → $73.92 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-group-j-winner-2026_austria' edge=1.00¢ poly=0.84 venue2(kalshi/YES)=0.15 days=88.3 token=resolved no_token=set title='FIFA World Cup Group J Winner'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9770 → 114 contracts fillable ($110.70 USDC) across 12 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 114 contracts at ≤0.9770 → $110.70 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='florida-governor-democratic-primary-winner-2026_angie_nixon' edge=1.00¢ poly=0.97 venue2(kalshi/YES)=0.02 days=140.3 token=resolved no_token=set title='Florida Governor Democratic Primary Winn'
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9770 → 114 contracts fillable ($110.70 USDC) across 12 ask levels
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 114 contracts at ≤0.9770 → $110.70 USDC fillable
+Mar 30 16:50:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='florida-governor-democratic-primary-winner-2026_angie_nixon' edge=1.00¢ poly=0.97 venue2(kalshi/YES)=0.02 days=140.3 token=resolved no_token=set title='Florida Governor Democratic Primary Winn'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 🚫 /events slug='republican-nominee-for-florida-governor': skipped 16 closed/archived/inactive/expired markets
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Jay Collins' label_score=1.00 combined=2.00 matched='Jay Collins' outcomes=["Yes", "No"] YES=997072315077... NO=105744442806...
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 🚫 /events slug='republican-nominee-for-florida-governor': skipped 16 closed/archived/inactive/expired markets
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Jay Collins' label_score=1.00 combined=2.00 matched='Jay Collins' outcomes=["Yes", "No"] YES=997072315077... NO=105744442806...
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0400 Δ=0.0000 | NO ask=0.978 Δ=0.9380 | expected=0.0400 slug='republican-nominee-for-florida-governor'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ Tokens resolved slug='republican-nominee-for-florida-governor' label='Jay Collins': YES=9970723150775912... NO=1057444428066821...
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0400 Δ=0.0000 | NO ask=0.978 Δ=0.9380 | expected=0.0400 slug='republican-nominee-for-florida-governor'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ Tokens resolved slug='republican-nominee-for-florida-governor' label='Jay Collins': YES=9970723150775912... NO=1057444428066821...
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0470 → 159 contracts fillable ($6.36 USDC) across 85 ask levels
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 159 contracts at ≤0.0470 → $6.36 USDC fillable
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='florida-governor-republican-primary-winner-2026_jay_collins' edge=1.00¢ poly=0.04 venue2(kalshi/NO)=0.95 days=140.3 token=resolved no_token=set title='Florida Governor Republican Primary Winn'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='fomc-2026-04-29_cut_50bps' edge=0.00¢ poly=1.00 venue2(opinion/YES)=0.00 days=29.3 token=slug-only no_token=missing title='Fed decision in April 2026'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='fomc-2026-04-29_hike_25bps' edge=0.00¢ poly=0.01 venue2(opinion/NO)=0.99 days=29.3 token=slug-only no_token=missing title='Fed decision in April 2026'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='fomc-2026-06-17_cut_50bps' edge=1.00¢ poly=0.01 venue2(kalshi/NO)=0.98 days=78.3 token=slug-only no_token=missing title='Fed Decision in June 2026'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='fomc-2026-06-17_cut_50bps' edge=0.00¢ poly=0.01 venue2(opinion/NO)=0.99 days=78.3 token=slug-only no_token=missing title='Fed Decision in June 2026'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0470 → 159 contracts fillable ($6.36 USDC) across 85 ask levels
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 159 contracts at ≤0.0470 → $6.36 USDC fillable
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='florida-governor-republican-primary-winner-2026_jay_collins' edge=1.00¢ poly=0.04 venue2(kalshi/NO)=0.95 days=140.3 token=resolved no_token=set title='Florida Governor Republican Primary Winn'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='fomc-2026-04-29_cut_50bps' edge=0.00¢ poly=1.00 venue2(opinion/YES)=0.00 days=29.3 token=slug-only no_token=missing title='Fed decision in April 2026'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='fomc-2026-04-29_hike_25bps' edge=0.00¢ poly=0.01 venue2(opinion/NO)=0.99 days=29.3 token=slug-only no_token=missing title='Fed decision in April 2026'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='fomc-2026-06-17_cut_50bps' edge=1.00¢ poly=0.01 venue2(kalshi/NO)=0.98 days=78.3 token=slug-only no_token=missing title='Fed Decision in June 2026'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='fomc-2026-06-17_cut_50bps' edge=0.00¢ poly=0.01 venue2(opinion/NO)=0.99 days=78.3 token=slug-only no_token=missing title='Fed Decision in June 2026'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1370 → 95024 contracts fillable ($7846.71 USDC) across 67 ask levels
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 95024 contracts at ≤0.1370 → $7846.71 USDC fillable
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fomc-2026-06-17_no_change' edge=1.00¢ poly=0.13 venue2(kalshi/YES)=0.86 days=78.3 token=resolved no_token=set title='Fed Decision in June 2026'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1370 → 95024 contracts fillable ($7846.71 USDC) across 67 ask levels
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 95024 contracts at ≤0.1370 → $7846.71 USDC fillable
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='fomc-2026-06-17_no_change' edge=1.00¢ poly=0.13 venue2(kalshi/YES)=0.86 days=78.3 token=resolved no_token=set title='Fed Decision in June 2026'
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0240 → 205432 contracts fillable ($4050.42 USDC) across 158 ask levels
+Mar 30 16:50:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 205432 contracts at ≤0.0240 → $4050.42 USDC fillable
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='gop-nominee-2028_donald_trump' edge=1.00¢ poly=0.02 venue2(kalshi/NO)=0.97 days=952.1 token=resolved no_token=set title='Republican Nominee 2028'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0240 → 205432 contracts fillable ($4050.42 USDC) across 158 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 205432 contracts at ≤0.0240 → $4050.42 USDC fillable
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='gop-nominee-2028_donald_trump' edge=1.00¢ poly=0.02 venue2(kalshi/NO)=0.97 days=952.1 token=resolved no_token=set title='Republican Nominee 2028'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0000 → 0 contracts fillable ($0.00 USDC) across 44 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.0000 — no profitable depth, score → 0
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='gpt-6-release_date_mar_31_2026' edge=0.00¢ poly=0.00 venue2(opinion/NO)=1.00 days=275.3 token=resolved no_token=set title='GPT-6 Release Prediction'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0000 → 0 contracts fillable ($0.00 USDC) across 44 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.0000 — no profitable depth, score → 0
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='gpt-6-release_date_mar_31_2026' edge=0.00¢ poly=0.00 venue2(opinion/NO)=1.00 days=275.3 token=resolved no_token=set title='GPT-6 Release Prediction'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1570 → 0 contracts fillable ($0.00 USDC) across 72 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.1570 — no profitable depth, score → 0
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='greenland-2026_will_the_us_acquire_part_of_greenland_in_2026' edge=0.00¢ poly=0.16 venue2(opinion/NO)=0.84 days=275.3 token=resolved no_token=set title='Will the US Acquire Part of Greenland in'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1570 → 0 contracts fillable ($0.00 USDC) across 72 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.1570 — no profitable depth, score → 0
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='greenland-2026_will_the_us_acquire_part_of_greenland_in_2026' edge=0.00¢ poly=0.16 venue2(opinion/NO)=0.84 days=275.3 token=resolved no_token=set title='Will the US Acquire Part of Greenland in'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2470 → 15122 contracts fillable ($3478.72 USDC) across 46 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 15122 contracts at ≤0.2470 → $3478.72 USDC fillable
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='la-liga-winner-2026_real_madrid' edge=2.00¢ poly=0.23 venue2(kalshi/NO)=0.75 days=60.3 token=resolved no_token=set title='La Liga Winner 2026'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2470 → 15122 contracts fillable ($3478.72 USDC) across 46 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 15122 contracts at ≤0.2470 → $3478.72 USDC fillable
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='la-liga-winner-2026_real_madrid' edge=2.00¢ poly=0.23 venue2(kalshi/NO)=0.75 days=60.3 token=resolved no_token=set title='La Liga Winner 2026'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0080 → 0 contracts fillable ($0.00 USDC) across 53 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.0080 — no profitable depth, score → 0
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='lol-lck-2026-winner_drx' edge=0.00¢ poly=0.01 venue2(opinion/NO)=0.99 days=275.3 token=resolved no_token=set title='LoL LCK 2026 Season Winner'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0080 → 0 contracts fillable ($0.00 USDC) across 53 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.0080 — no profitable depth, score → 0
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='lol-lck-2026-winner_drx' edge=0.00¢ poly=0.01 venue2(opinion/NO)=0.99 days=275.3 token=resolved no_token=set title='LoL LCK 2026 Season Winner'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.6870 → 0 contracts fillable ($0.00 USDC) across 27 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.6870 — no profitable depth, score → 0
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='lol-worlds-2026-winning-region_lck_south_korea' edge=0.00¢ poly=0.69 venue2(opinion/NO)=0.31 days=275.3 token=resolved no_token=set title='LoL Worlds 2026 Winning Region'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.6870 → 0 contracts fillable ($0.00 USDC) across 27 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.6870 — no profitable depth, score → 0
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='lol-worlds-2026-winning-region_lck_south_korea' edge=0.00¢ poly=0.69 venue2(opinion/NO)=0.31 days=275.3 token=resolved no_token=set title='LoL Worlds 2026 Winning Region'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.7670 → 806 contracts fillable ($587.88 USDC) across 27 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 806 contracts at ≤0.7670 → $587.88 USDC fillable
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='lol-worlds-2026-winning-region_lpl_china' edge=0.00¢ poly=0.77 venue2(opinion/YES)=0.23 days=275.3 token=resolved no_token=set title='LoL Worlds 2026 Winning Region'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.7670 → 806 contracts fillable ($587.88 USDC) across 27 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 806 contracts at ≤0.7670 → $587.88 USDC fillable
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='lol-worlds-2026-winning-region_lpl_china' edge=0.00¢ poly=0.77 venue2(opinion/YES)=0.23 days=275.3 token=resolved no_token=set title='LoL Worlds 2026 Winning Region'
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9570 → 5 contracts fillable ($4.75 USDC) across 8 ask levels
+Mar 30 16:50:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 5 contracts at ≤0.9570 → $4.75 USDC fillable
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='ma-06-democrat-nominee-2026_seth_moulton' edge=1.00¢ poly=0.95 venue2(kalshi/YES)=0.04 days=168.3 token=resolved no_token=set title='MA-06 Democratic Nominee 2026'
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9570 → 5 contracts fillable ($4.75 USDC) across 8 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 5 contracts at ≤0.9570 → $4.75 USDC fillable
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='ma-06-democrat-nominee-2026_seth_moulton' edge=1.00¢ poly=0.95 venue2(kalshi/YES)=0.04 days=168.3 token=resolved no_token=set title='MA-06 Democratic Nominee 2026'
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1570 → 3057 contracts fillable ($458.55 USDC) across 44 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 3057 contracts at ≤0.1570 → $458.55 USDC fillable
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='maine-democratic-senate-primary-winner-2026_graham_platner' edge=1.00¢ poly=0.15 venue2(kalshi/YES)=0.84 days=122.3 token=resolved no_token=set title='Maine Democratic Senate Primary Winner 2'
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1570 → 3057 contracts fillable ($458.55 USDC) across 44 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 3057 contracts at ≤0.1570 → $458.55 USDC fillable
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='maine-democratic-senate-primary-winner-2026_graham_platner' edge=1.00¢ poly=0.15 venue2(kalshi/YES)=0.84 days=122.3 token=resolved no_token=set title='Maine Democratic Senate Primary Winner 2'
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1570 → 23 contracts fillable ($3.45 USDC) across 53 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 23 contracts at ≤0.1570 → $3.45 USDC fillable
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='maine-democratic-senate-primary-winner-2026_janet_mills' edge=1.00¢ poly=0.15 venue2(kalshi/NO)=0.84 days=122.3 token=resolved no_token=set title='Maine Democratic Senate Primary Winner 2'
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1570 → 23 contracts fillable ($3.45 USDC) across 53 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 23 contracts at ≤0.1570 → $3.45 USDC fillable
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='maine-democratic-senate-primary-winner-2026_janet_mills' edge=1.00¢ poly=0.15 venue2(kalshi/NO)=0.84 days=122.3 token=resolved no_token=set title='Maine Democratic Senate Primary Winner 2'
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8170 → 698 contracts fillable ($561.29 USDC) across 15 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 698 contracts at ≤0.8170 → $561.29 USDC fillable
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='mi11-democratic-primary-winner-2026_jeremy_moss' edge=2.00¢ poly=0.80 venue2(kalshi/NO)=0.18 days=126.3 token=resolved no_token=set title='MI-11 Democratic Primary Winner'
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8170 → 698 contracts fillable ($561.29 USDC) across 15 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 698 contracts at ≤0.8170 → $561.29 USDC fillable
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='mi11-democratic-primary-winner-2026_jeremy_moss' edge=2.00¢ poly=0.80 venue2(kalshi/NO)=0.18 days=126.3 token=resolved no_token=set title='MI-11 Democratic Primary Winner'
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2470 → 120 contracts fillable ($28.45 USDC) across 53 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 120 contracts at ≤0.2470 → $28.45 USDC fillable
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='minnesota-governor-republican-nominee-2026_kendall_qualls' edge=2.00¢ poly=0.23 venue2(kalshi/NO)=0.75 days=133.3 token=resolved no_token=set title='Minnesota Governor Republican Nominee 20'
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2470 → 120 contracts fillable ($28.45 USDC) across 53 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 120 contracts at ≤0.2470 → $28.45 USDC fillable
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='minnesota-governor-republican-nominee-2026_kendall_qualls' edge=2.00¢ poly=0.23 venue2(kalshi/NO)=0.75 days=133.3 token=resolved no_token=set title='Minnesota Governor Republican Nominee 20'
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0000 → 0 contracts fillable ($0.00 USDC) across 55 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.0000 — no profitable depth, score → 0
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='nba-dpoy-winner-2026_amen_thompson' edge=0.00¢ poly=0.00 venue2(opinion/NO)=1.00 days=91.3 token=resolved no_token=set title='NBA Defensive Player of the Year Winner '
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0000 → 0 contracts fillable ($0.00 USDC) across 55 ask levels
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.0000 — no profitable depth, score → 0
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='nba-dpoy-winner-2026_amen_thompson' edge=0.00¢ poly=0.00 venue2(opinion/NO)=1.00 days=91.3 token=resolved no_token=set title='NBA Defensive Player of the Year Winner '
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 🚫 /events slug='next-president-of-vietnam': skipped 19 closed/archived/inactive/expired markets
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ skipping expired sub-market endDate='2026-01-25T00:00:00Z' (ts=1769299200) — Gamma flag lag
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 🚫 /events slug='next-president-of-vietnam': skipped 19 closed/archived/inactive/expired markets
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='next-president-of-vietnam' label='Trần Cẩm Tú'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='next-president-of-vietnam' label='Trần Cẩm Tú' — display-only
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='next-president-vietnam_tran_cam_tu' edge=0.00¢ poly=0.00 venue2(opinion/NO)=1.00 days=0.0 token=slug-only no_token=missing title='Next President of Vietnam'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='next-president-of-vietnam' label='Trần Cẩm Tú'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='next-president-of-vietnam' label='Trần Cẩm Tú' — display-only
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='next-president-vietnam_tran_cam_tu' edge=0.00¢ poly=0.00 venue2(opinion/NO)=1.00 days=0.0 token=slug-only no_token=missing title='Next President of Vietnam'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9070 → 415 contracts fillable ($373.50 USDC) across 9 ask levels
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 415 contracts at ≤0.9070 → $373.50 USDC fillable
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='nh-01-democratic-primary-winner-2026_carleigh_beriont' edge=1.00¢ poly=0.90 venue2(kalshi/YES)=0.09 days=161.3 token=resolved no_token=set title='NH-01 Democratic Primary Winner'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9070 → 415 contracts fillable ($373.50 USDC) across 9 ask levels
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 415 contracts at ≤0.9070 → $373.50 USDC fillable
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='nh-01-democratic-primary-winner-2026_carleigh_beriont' edge=1.00¢ poly=0.90 venue2(kalshi/YES)=0.09 days=161.3 token=resolved no_token=set title='NH-01 Democratic Primary Winner'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.3170 → 729 contracts fillable ($225.13 USDC) across 35 ask levels
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 729 contracts at ≤0.3170 → $225.13 USDC fillable
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='nh-01-democratic-primary-winner-2026_maura_sullivan' edge=2.00¢ poly=0.30 venue2(kalshi/NO)=0.68 days=161.3 token=resolved no_token=set title='NH-01 Democratic Primary Winner'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.3170 → 729 contracts fillable ($225.13 USDC) across 35 ask levels
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 729 contracts at ≤0.3170 → $225.13 USDC fillable
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='nh-01-democratic-primary-winner-2026_maura_sullivan' edge=2.00¢ poly=0.30 venue2(kalshi/NO)=0.68 days=161.3 token=resolved no_token=set title='NH-01 Democratic Primary Winner'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9070 → 501 contracts fillable ($450.90 USDC) across 8 ask levels
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 501 contracts at ≤0.9070 → $450.90 USDC fillable
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='nh-democratic-governor-nominee-2026_jon_kiper' edge=1.00¢ poly=0.90 venue2(kalshi/YES)=0.09 days=161.3 token=resolved no_token=set title='Democratic Nominee for Governor of New H'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9070 → 501 contracts fillable ($450.90 USDC) across 8 ask levels
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 501 contracts at ≤0.9070 → $450.90 USDC fillable
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='nh-democratic-governor-nominee-2026_jon_kiper' edge=1.00¢ poly=0.90 venue2(kalshi/YES)=0.09 days=161.3 token=resolved no_token=set title='Democratic Nominee for Governor of New H'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='pro-baseball-2026-nl-cy-young-winner' label='Yoshinobu Yamamoto'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='pro-baseball-2026-nl-cy-young-winner' label='Yoshinobu Yamamoto' — display-only
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='nl-cy-young-winner-2026_yoshinobu_yamamoto' edge=1.00¢ poly=0.13 venue2(kalshi/NO)=0.86 days=226.3 token=slug-only no_token=missing title='NL Cy Young Winner 2026'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='pro-baseball-2026-nl-cy-young-winner' label='Yoshinobu Yamamoto'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='pro-baseball-2026-nl-cy-young-winner' label='Yoshinobu Yamamoto' — display-only
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='nl-cy-young-winner-2026_yoshinobu_yamamoto' edge=1.00¢ poly=0.13 venue2(kalshi/NO)=0.86 days=226.3 token=slug-only no_token=missing title='NL Cy Young Winner 2026'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.3670 → 19 contracts fillable ($6.65 USDC) across 43 ask levels
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 19 contracts at ≤0.3670 → $6.65 USDC fillable
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='nm-gov-republican-primary-winner-2026_duke_rodriguez' edge=2.00¢ poly=0.35 venue2(kalshi/NO)=0.63 days=63.3 token=resolved no_token=set title='New Mexico Governor Republican Primary W'
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.3670 → 19 contracts fillable ($6.65 USDC) across 43 ask levels
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 19 contracts at ≤0.3670 → $6.65 USDC fillable
+Mar 30 16:50:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='nm-gov-republican-primary-winner-2026_duke_rodriguez' edge=2.00¢ poly=0.35 venue2(kalshi/NO)=0.63 days=63.3 token=resolved no_token=set title='New Mexico Governor Republican Primary W'
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.7970 → 50 contracts fillable ($39.50 USDC) across 17 ask levels
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 50 contracts at ≤0.7970 → $39.50 USDC fillable
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='ny-10-democratic-primary-winner-2026_brad_lander' edge=2.00¢ poly=0.78 venue2(kalshi/NO)=0.20 days=84.3 token=resolved no_token=set title='NY-10 Democratic Primary Winner'
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.7970 → 50 contracts fillable ($39.50 USDC) across 17 ask levels
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 50 contracts at ≤0.7970 → $39.50 USDC fillable
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='ny-10-democratic-primary-winner-2026_brad_lander' edge=2.00¢ poly=0.78 venue2(kalshi/NO)=0.20 days=84.3 token=resolved no_token=set title='NY-10 Democratic Primary Winner'
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9870 → 5 contracts fillable ($4.90 USDC) across 7 ask levels
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 5 contracts at ≤0.9870 → $4.90 USDC fillable
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='ny12-dem-nominee-2026_erik_bottcher' edge=1.00¢ poly=0.98 venue2(kalshi/YES)=0.01 days=84.3 token=resolved no_token=set title='NY-12 Democratic Nominee 2026'
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9870 → 5 contracts fillable ($4.90 USDC) across 7 ask levels
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 5 contracts at ≤0.9870 → $4.90 USDC fillable
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='ny12-dem-nominee-2026_erik_bottcher' edge=1.00¢ poly=0.98 venue2(kalshi/YES)=0.01 days=84.3 token=resolved no_token=set title='NY-12 Democratic Nominee 2026'
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1470 → 135 contracts fillable ($18.90 USDC) across 46 ask levels
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 135 contracts at ≤0.1470 → $18.90 USDC fillable
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='ny-15-democratic-primary-winner-2026_michael_blake' edge=1.00¢ poly=0.14 venue2(kalshi/NO)=0.85 days=84.3 token=resolved no_token=set title='NY-15 Democratic Primary Winner 2026'
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='pahlavi-iran-leader-2026_reza_pahlavi_us_recognition_before_2027' edge=2.00¢ poly=0.16 venue2(kalshi/NO)=0.82 days=275.3 token=slug-only no_token=missing title='US Recognizes Reza Pahlavi as Leader of '
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1470 → 135 contracts fillable ($18.90 USDC) across 46 ask levels
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 135 contracts at ≤0.1470 → $18.90 USDC fillable
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='ny-15-democratic-primary-winner-2026_michael_blake' edge=1.00¢ poly=0.14 venue2(kalshi/NO)=0.85 days=84.3 token=resolved no_token=set title='NY-15 Democratic Primary Winner 2026'
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 👁 pair='pahlavi-iran-leader-2026_reza_pahlavi_us_recognition_before_2027' edge=2.00¢ poly=0.16 venue2(kalshi/NO)=0.82 days=275.3 token=slug-only no_token=missing title='US Recognizes Reza Pahlavi as Leader of '
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.4870 → 0 contracts fillable ($0.00 USDC) across 47 ask levels
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.4870 — no profitable depth, score → 0
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='senate-winner-2026_democratic_party' edge=0.00¢ poly=0.49 venue2(opinion/YES)=0.51 days=217.3 token=resolved no_token=set title='Which Party Will Win the U.S. Senate in '
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.4870 → 0 contracts fillable ($0.00 USDC) across 47 ask levels
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 0 contracts at ≤0.4870 — no profitable depth, score → 0
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='senate-winner-2026_democratic_party' edge=0.00¢ poly=0.49 venue2(opinion/YES)=0.51 days=217.3 token=resolved no_token=set title='Which Party Will Win the U.S. Senate in '
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8370 → 53 contracts fillable ($43.99 USDC) across 14 ask levels
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 53 contracts at ≤0.8370 → $43.99 USDC fillable
+Mar 30 16:50:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3583354]: 🔀 [Arb/Oddpool] ✅ pair='serie-a-winner-2026_inter' edge=1.00¢ poly=0.83 venue2(kalshi/NO)=0.16 days=58.3 token=resolved no_token=set title='Serie A Winner 2026'
