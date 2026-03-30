@@ -28,6 +28,7 @@ from ..core.arb_positions_db import (
 from ..config import (
     ODDPOOL_POLL_INTERVAL,
     ARB_MIN_EDGE_PCT,
+    ARB_MIN_SCORE,
     ARB_MAX_PAIR_USDC,
     ARB_MAX_DEPLOYED_USDC,
     ARB_USE_ODDPOOL_ONLY,
@@ -237,6 +238,19 @@ def _execution_cycle():
             log(
                 f"⏭ Skipping {opp.pair_id}: net_edge={net_edge:.4f}% < "
                 f"min_edge={ARB_MIN_EDGE_PCT:.4f}% (gross={opp.gross_edge_pct:.4f}%)"
+            )
+            continue
+
+        # ── Score guard: skip pairs the scoring engine rates as near-zero ─────
+        # score = annualized_return × confidence × fillable_size_usdc.
+        # A score below ARB_MIN_SCORE means the trade would generate negligible
+        # return even if it fills perfectly — not worth execution overhead.
+        pair_score = getattr(opp, "score", 0.0)
+        if pair_score < ARB_MIN_SCORE:
+            skipped_thin += 1
+            log(
+                f"⏭ Skipping {opp.pair_id}: score={pair_score:.2f} < "
+                f"min_score={ARB_MIN_SCORE:.2f} (net_edge={net_edge:.4f}%)"
             )
             continue
 

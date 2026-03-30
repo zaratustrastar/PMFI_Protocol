@@ -54,6 +54,11 @@ ODDPOOL_API_KEY = os.environ.get("ODDPOOL_API_KEY", "")
 ODDPOOL_POLL_INTERVAL = int(os.environ.get("ODDPOOL_POLL_INTERVAL", "30"))
 
 ARB_MIN_EDGE_PCT = float(os.environ.get("ARB_MIN_EDGE_PCT", "0.025"))
+# Minimum composite score (annualized_return × confidence × fillable_size_usdc) required
+# before a pair is submitted to execute_arb(). Pairs with score=0.0 mean either
+# annualized_return ≈ 0, confidence = 0, or fillable_size = 0 — none worth executing.
+# Set ARB_MIN_SCORE=0 to disable this guard entirely.
+ARB_MIN_SCORE = float(os.environ.get("ARB_MIN_SCORE", "1.0"))
 # EXECUTION-TIME staleness guard (basis points).
 # Aborts a trade when the live CLOB ask has moved more than N bps worse than
 # Oddpool's quoted price since the opportunity was scored.
