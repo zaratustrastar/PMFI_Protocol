@@ -539,58 +539,64 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
             # k = 5000 → half-confidence at $5k liquidity; tuned for prediction markets
             confidence = max(0.05, min(1.0, bottleneck_liq / (bottleneck_liq + 5000.0)))
 
-        # Step 4: fillable size — walk the real Polymarket CLOB ask ladder when we have
-        #   price-validated token IDs (the price validation in _resolve_poly_tokens ensures
-        #   they point to the correct market).  This replaces the Oddpool liquidity proxy
-        #   that was used when token IDs were frequently wrong (returning 0 depth).
+        # Step 4: fillable size
+        # ── Depth source priority ─────────────────────────────────────────────
+        #   1. WS ask_depth_usd (primary) — set when token IDs came from the
+        #      WS pre-pass. Depth is aggregated within ±5c of mid per Oddpool
+        #      spec; we apply ARB_FILLABLE_FRACTION for conservatism since the
+        #      full depth may not be fillable at the profitable price ceiling.
+        #   2. CLOB depth walk (fallback) — used when ws_book is absent (Gamma-
+        #      resolved tokens or WS data unavailable). Walks ask ladder up to
+        #      max_poly_price = 1 - venue2_ask - ARB_MIN_EDGE_PCT; more precise
+        #      but costs an extra HTTP call per opportunity.
+        #   3. Oddpool liquidity proxy — last resort when tokens unresolved.
+        # ─────────────────────────────────────────────────────────────────────
         #
-        #   max_poly_price: highest price we can pay on the Poly leg and still keep at
-        #   least ARB_MIN_EDGE_PCT edge.  Walk asks from lowest upward; stop when price
-        #   exceeds this ceiling.  fillable_contracts × our_poly_ask gives USDC cost.
-        #
-        #   Fallback hierarchy (most to least preferred):
-        #     1. Real CLOB depth  (validated token IDs available)
-        #     2. Oddpool liquidity proxy  (token IDs unavailable or book fetch failed)
-        #
-        #   Score = 0 when real depth returns 0 contracts — this market never reaches
-        #   the executor, saving unnecessary execution-time API calls.
-        if resolved_yes_token and our_poly_ask > 0 and our_venue2_ask > 0:
+        # Which token do we BUY on Poly determines both depth and executability:
+        #   buy_yes_market=="polymarket" → buying YES → use yes_token
+        #   buy_yes_market in ("kalshi","opinion") → buying NO → use no_token
+        buy_token = resolved_yes_token if buy_yes_market == "polymarket" else resolved_no_token
+
+        if ws_book and ws_book.get("ask_depth_usd"):
+            # Primary path: use WS depth (already aggregated by Oddpool)
+            ws_ask_depth = float(ws_book.get("ask_depth_usd") or 0)
+            if ws_ask_depth > 0:
+                fillable_size_usdc = max(10.0, ws_ask_depth * ARB_FILLABLE_FRACTION)
+                log(
+                    f"📏 WS depth (primary): ask_depth_usd=${ws_ask_depth:.0f} × "
+                    f"fraction={ARB_FILLABLE_FRACTION} → ${fillable_size_usdc:.0f} fillable"
+                )
+            else:
+                fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
+                log(f"📏 WS ask_depth_usd=0 — using Oddpool proxy ${fillable_size_usdc:.0f}")
+        elif buy_token and our_poly_ask > 0 and our_venue2_ask > 0:
+            # Fallback: CLOB depth walk — precise but slower (one API call per entry)
             try:
                 from .polymarket import fetch_orderbook, compute_fillable_contracts
-                # Which token do we actually BUY on Poly?
-                #   buy_yes_market=="polymarket" → buying YES on Poly → use yes_token
-                #   buy_yes_market in ("kalshi","opinion") → buying NO on Poly → use no_token
-                depth_token = resolved_yes_token if buy_yes_market == "polymarket" else resolved_no_token
-                if depth_token:
-                    max_poly_price = max(0.0, 1.0 - our_venue2_ask - ARB_MIN_EDGE_PCT)
-                    book = fetch_orderbook(depth_token)
-                    if book:
-                        poly_fillable, poly_usdc = compute_fillable_contracts(book, max_poly_price)
-                        if poly_fillable > 0:
-                            # Use actual USDC cost from the ask-ladder walk rather than
-                            # fillable_contracts × our_poly_ask: the walk accounts for
-                            # varying prices across levels, giving a more accurate total.
-                            fillable_size_usdc = poly_usdc
-                            log(
-                                f"📏 CLOB depth pre-filter: {poly_fillable} contracts at "
-                                f"≤{max_poly_price:.4f} → ${fillable_size_usdc:.2f} USDC fillable"
-                            )
-                        else:
-                            fillable_size_usdc = 0.0
-                            log(
-                                f"📏 CLOB depth pre-filter: 0 contracts at ≤{max_poly_price:.4f} "
-                                f"— no profitable depth, score → 0"
-                            )
-                    else:
-                        fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
+                max_poly_price = max(0.0, 1.0 - our_venue2_ask - ARB_MIN_EDGE_PCT)
+                book = fetch_orderbook(buy_token)
+                if book:
+                    poly_fillable, poly_usdc = compute_fillable_contracts(book, max_poly_price)
+                    if poly_fillable > 0:
+                        # Use total USDC cost from the walk (accounts for varying prices)
+                        fillable_size_usdc = poly_usdc
                         log(
-                            f"⚠️ CLOB fetch failed for depth pre-filter — "
-                            f"using Oddpool proxy ${fillable_size_usdc:.0f}"
+                            f"📏 CLOB depth (fallback): {poly_fillable} contracts at "
+                            f"≤{max_poly_price:.4f} → ${fillable_size_usdc:.2f} USDC fillable"
+                        )
+                    else:
+                        fillable_size_usdc = 0.0
+                        log(
+                            f"📏 CLOB depth (fallback): 0 contracts at ≤{max_poly_price:.4f} "
+                            f"— no profitable depth, score → 0"
                         )
                 else:
                     fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
+                    log(
+                        f"⚠️ CLOB fetch failed — using Oddpool proxy ${fillable_size_usdc:.0f}"
+                    )
             except Exception as e:
-                log(f"⚠️ CLOB depth pre-filter error: {e} — using Oddpool liquidity proxy")
+                log(f"⚠️ CLOB depth error: {e} — using Oddpool liquidity proxy")
                 fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
         else:
             # Token IDs not yet resolved (display-only) — use Oddpool proxy so the
@@ -614,7 +620,12 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
         # resolved_yes_token / resolved_no_token were set earlier (before scorer).
         poly_yes_token = resolved_yes_token if resolved_yes_token else polymarket_slug
         poly_no_token = resolved_no_token or ""
-        is_display_only = resolved_yes_token is None  # False when we have real token IDs
+        # is_display_only: True when the token we need to BUY on Poly is not resolved.
+        # buy_token (computed in Step 4) is the specific side we need for execution:
+        #   buying YES on Poly → need resolved_yes_token
+        #   buying NO on Poly  → need resolved_no_token
+        # Knowing only the other side is insufficient — the executor would fail.
+        is_display_only = buy_token is None
 
         log(
             f"{'✅' if not is_display_only else '👁'} pair={pair_id!r} edge={gross_edge_pct:.2f}¢ "

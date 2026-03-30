@@ -272,6 +272,12 @@ async def _async_fetch_book_snapshots(
                 except Exception:
                     continue
 
+                # We intentionally accept both update_type="snapshot" and
+                # update_type="delta": venue_id.token_id is present in every
+                # message from the WS feed regardless of update type.  We only
+                # need the token ID and price data, not a fully reconstructed
+                # book; filtering to snapshot-only would mean waiting up to
+                # 60 s for the next snapshot cycle and would be unnecessarily slow.
                 if msg.get("venue") != "polymarket":
                     continue
 
