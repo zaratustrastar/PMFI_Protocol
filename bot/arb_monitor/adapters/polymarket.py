@@ -647,7 +647,9 @@ def compute_fillable_contracts(book: dict, max_fill_price: float) -> tuple[int, 
         (contracts_fillable, usdc_cost) — integer contracts and total USDC cost.
         Returns (0, 0.0) when no depth exists below max_fill_price.
     """
-    asks = book.get("asks", [])
+    # CLOB API returns asks in descending order (highest first); sort ascending so
+    # we walk from the cheapest level upward and break correctly at max_fill_price.
+    asks = sorted(book.get("asks", []), key=lambda x: float(x.get("price", 0)))
     contracts = 0
     usdc_cost = 0.0
 
@@ -659,7 +661,7 @@ def compute_fillable_contracts(book: dict, max_fill_price: float) -> tuple[int, 
             continue
 
         if price > max_fill_price:
-            break  # asks are sorted best-first; once we exceed the limit we're done
+            break  # sorted ascending; once we exceed the limit all remaining levels are worse
 
         level_contracts = int(size)  # Polymarket trades in whole-number contract sizes
         if level_contracts > 0:
