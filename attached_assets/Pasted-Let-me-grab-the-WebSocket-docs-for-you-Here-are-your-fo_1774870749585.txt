@@ -1,0 +1,56 @@
+Let me grab the WebSocket docs for you.Here are your four answers straight from the docs:
+
+**1. WebSocket URL:**
+`wss://feeds.oddpool.com/ws`
+
+**2. Authentication — NOT the same as REST.** It's *not* an `X-API-Key` header on the handshake. You connect first, then send an auth message over the socket:
+```json
+{"action": "auth", "api_key": "oddpool_abc123..."}
+```
+The server responds with your tier, limits, and which channels you can access.
+
+**3. Subscribe message format:**
+```json
+{"action": "subscribe", "channels": ["book:fomc-2026-04-29:hold", "dist:fomc-2026-04-29"]}
+```
+Note it's `channels` (plural, array) — you can batch multiple subscriptions in one message. Channel format is `{type}:{event_key}` for all outcomes, or `{type}:{event_key}:{outcome}` for a single one.
+
+**4. Full `venue_id` structure — yes, it's in the same message as the orderbook.** Here's the complete book update shape from the docs:
+
+```json
+{
+  "event_key": "fomc-2026-04-29",
+  "outcome": "hold",
+  "venue": "polymarket",
+  "token": "yes",
+  "venue_id": {
+    "condition_id": "0x36e8ca2...",
+    "token_id": "63586620628..."
+  },
+  "seq": 4217,
+  "exchange_ts": 1773892530351,
+  "received_ts": 1773892530360,
+  "published_ts": 1773892530363,
+  "update_type": "delta",
+  "levels": [
+    {"side": "bid", "price": "0.955", "size": 8300.00},
+    {"side": "ask", "price": "0.965", "size": 0}
+  ],
+  "best_bid": "0.955",
+  "best_ask": "0.965",
+  "mid": "0.960",
+  "spread": "0.010",
+  "bid_depth_usd": 47141.97,
+  "ask_depth_usd": 23456.78
+}
+```
+
+Everything — `token_id`, bids/asks, best bid/ask, depth — is in the **same message**. No separate stream to join. For Kalshi, `venue_id` is `{"market_ticker": "KXFEDDECISION-26APR-H0"}` instead.
+
+**Key constraints for your plan:**
+- `book` channel requires **Pro tier** (Free only gets `dist`)
+- Pro allows **3 connections, 10 concurrent events**
+- Premium gets 10 connections with unlimited events
+- If you need more than 10 events simultaneously, you'll need Premium
+
+The doc pages are at [docs.oddpool.com/websocket/overview](https://docs.oddpool.com/websocket/overview) and [docs.oddpool.com/websocket/messages](https://docs.oddpool.com/websocket/messages). That should be everything you need to write the plan.
