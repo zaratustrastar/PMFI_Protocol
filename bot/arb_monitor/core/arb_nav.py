@@ -254,22 +254,39 @@ def _get_servicer_balances() -> tuple[float, float, float]:
     poly_cash = 0.0
     kalshi_cash = 0.0
 
-    poly_api_key = os.environ.get("POLY_API_KEY", "")
+    poly_api_key        = os.environ.get("POLY_API_KEY", "")
+    poly_api_secret     = os.environ.get("POLY_API_SECRET", "")
+    poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
     if poly_api_key:
         try:
-            import requests
-            clob_url = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
-            resp = requests.get(
-                f"{clob_url}/balance",
-                headers={"Authorization": f"Bearer {poly_api_key}"},
-                timeout=10,
-            )
+            import requests, hmac as _hmac, hashlib, base64, time as _time
+            clob_url  = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+            timestamp = str(int(_time.time()))
+            message   = timestamp + "GET" + "/balance"
+            if poly_api_secret:
+                sig = base64.b64encode(
+                    _hmac.new(
+                        poly_api_secret.encode("utf-8"),
+                        message.encode("utf-8"),
+                        hashlib.sha256,
+                    ).digest()
+                ).decode("utf-8")
+            else:
+                sig = ""
+            headers = {
+                "POLY-API-KEY":    poly_api_key,
+                "POLY-SIGNATURE":  sig,
+                "POLY-TIMESTAMP":  timestamp,
+                "POLY-PASSPHRASE": poly_api_passphrase,
+                "Content-Type":    "application/json",
+            }
+            resp = requests.get(f"{clob_url}/balance", headers=headers, timeout=10)
             if resp.status_code == 200:
                 data = resp.json()
                 poly_cash = float(data.get("balance", data.get("usdc", 0)))
                 log(f"Poly servicer cash: {poly_cash} USDC")
             else:
-                log(f"⚠️ Poly balance HTTP {resp.status_code}: {resp.text[:100]}")
+                log(f"⚠️ Poly balance HTTP {resp.status_code}: {resp.text[:120]}")
         except Exception as e:
             log(f"⚠️ Error fetching poly servicer balance: {e}")
     else:

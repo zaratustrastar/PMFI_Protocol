@@ -102,9 +102,23 @@ def _place_poly_order(token_id: str, side: str, price: float, size_usdc: float) 
         return False, "", err
 
     try:
-        clob_url = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
-        chain_id = int(os.environ.get("POLY_CHAIN_ID", "137"))
-        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id)
+        from py_clob_client.clob_types import ApiCreds
+        clob_url            = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+        chain_id            = int(os.environ.get("POLY_CHAIN_ID", "137"))
+        poly_api_key        = os.environ.get("POLY_API_KEY", "")
+        poly_api_secret     = os.environ.get("POLY_API_SECRET", "")
+        poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
+        if poly_api_key and poly_api_secret and poly_api_passphrase:
+            creds  = ApiCreds(
+                api_key=poly_api_key,
+                api_secret=poly_api_secret,
+                api_passphrase=poly_api_passphrase,
+            )
+            client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id, creds=creds)
+            log(f"🔑 [POLY] Using L2-authenticated ClobClient")
+        else:
+            client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id)
+            log(f"🔑 [POLY] Using L1-only ClobClient (POLY_API_KEY/SECRET/PASSPHRASE not all set)")
 
         shares = size_usdc / price if price > 0 else 0
         order_args = OrderArgs(
@@ -622,12 +636,14 @@ def execute_arb(
     if live_kalshi_ask is None:
         # Venue2 live price unavailable — fall back to Oddpool-quoted price with a
         # freshness guard. Oddpool updates prices every second; if the opportunity
-        # was fetched within the last 120 seconds the quote is reliable.
+        # was fetched within the last ARB_STALE_QUOTE_SECONDS seconds the quote is
+        # reliable enough to proceed (default 300s to cover full cycle length).
+        stale_limit = int(os.environ.get("ARB_STALE_QUOTE_SECONDS", "300"))
         opp_age = time.time() - getattr(opportunity, "fetched_at", 0)
-        if opp_age > 120:
+        if opp_age > stale_limit:
             result.error = (
                 f"{leg2_venue_label}_orderbook_missing: live fetch failed and "
-                f"Oddpool quote is stale ({opp_age:.0f}s old > 120s limit)"
+                f"Oddpool quote is stale ({opp_age:.0f}s old > {stale_limit}s limit)"
             )
             log(f"❌ {result.error}")
             return result

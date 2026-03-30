@@ -440,24 +440,41 @@ def _get_platform_balance(venue: str) -> float:
     Returns USDC float. Returns 0.0 on any error.
     """
     if venue == "polymarket":
-        poly_api_key = os.environ.get("POLY_API_KEY", "")
+        poly_api_key        = os.environ.get("POLY_API_KEY", "")
+        poly_api_secret     = os.environ.get("POLY_API_SECRET", "")
+        poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
         if not poly_api_key:
             log("⚠️ POLY_API_KEY not set — Poly balance unknown (returning 0)")
             return 0.0
         try:
-            import requests
-            clob_url = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
-            resp = requests.get(
-                f"{clob_url}/balance",
-                headers={"Authorization": f"Bearer {poly_api_key}"},
-                timeout=10,
-            )
+            import requests, hmac as _hmac, hashlib, base64, time as _time
+            clob_url  = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+            timestamp = str(int(_time.time()))
+            message   = timestamp + "GET" + "/balance"
+            if poly_api_secret:
+                sig = base64.b64encode(
+                    _hmac.new(
+                        poly_api_secret.encode("utf-8"),
+                        message.encode("utf-8"),
+                        hashlib.sha256,
+                    ).digest()
+                ).decode("utf-8")
+            else:
+                sig = ""
+            headers = {
+                "POLY-API-KEY":    poly_api_key,
+                "POLY-SIGNATURE":  sig,
+                "POLY-TIMESTAMP":  timestamp,
+                "POLY-PASSPHRASE": poly_api_passphrase,
+                "Content-Type":    "application/json",
+            }
+            resp = requests.get(f"{clob_url}/balance", headers=headers, timeout=10)
             if resp.status_code == 200:
                 data = resp.json()
                 bal = float(data.get("balance", data.get("usdc", 0)))
                 log(f"💰 Poly balance: {bal:.4f} USDC")
                 return bal
-            log(f"⚠️ Poly balance HTTP {resp.status_code}: {resp.text[:80]}")
+            log(f"⚠️ Poly balance HTTP {resp.status_code}: {resp.text[:120]}")
             return 0.0
         except Exception as e:
             log(f"⚠️ Poly balance read error: {e}")

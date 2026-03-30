@@ -1,0 +1,601 @@
+poly_fillable=4526 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:06:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_diosdado_cabello: depth_insufficient: poly_fillable=6272 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_7: funding_failed: servicer cannot cover Poly leg (0.8480 USDC needed) unwound=False
+Mar 30 18:07:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for jerome-powell-out-fed-chair_may_14: funding_failed: servicer cannot cover Poly leg (0.9310 USDC needed) unwound=False
+Mar 30 18:07:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tiktok-acquirer_elonmusk_x: funding_failed: servicer cannot cover Poly leg (310.8090 USDC needed) unwound=False
+Mar 30 18:07:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for discord-ipo-closing-market-cap_ipo_under_15b: funding_failed: servicer cannot cover Poly leg (8.0010 USDC needed) unwound=False
+Mar 30 18:07:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for israel-pm-2045_gadi_eisenkot: depth_insufficient: poly_fillable=771 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for french-presidential-election-2027_jean_luc_melenchon: depth_insufficient: poly_fillable=20357 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tiktok-acquirer_meta: funding_failed: servicer cannot cover Poly leg (106.0020 USDC needed) unwound=False
+Mar 30 18:07:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for sp500-add-q1-2026_sofi_technologies: trade_too_small: budget=0.60 / max_ask=0.9940 = 0.6066 contracts < 1 minimum unwound=False
+Mar 30 18:07:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ecb-interest-rates-april-2026_cut_50bps: funding_failed: servicer cannot cover Poly leg (0.0340 USDC needed) unwound=False
+Mar 30 18:07:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_pete_hegseth: depth_insufficient: poly_fillable=71402 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for california-governor-2026_chad_bianco: depth_insufficient: poly_fillable=2687 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_marco_rubio: depth_insufficient: poly_fillable=14555 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_andy_beshear: depth_insufficient: poly_fillable=88173 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ma-06-democrat-nominee-2026_dan_koh: depth_insufficient: poly_fillable=409 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_spac: funding_failed: servicer cannot cover Poly leg (0.1360 USDC needed) unwound=False
+Mar 30 18:07:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for manchester-united-next-manager-2026_ole_gunnar_solskjaer: depth_insufficient: poly_fillable=1178 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_vladimir_padrino: depth_insufficient: poly_fillable=11493 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-pardon-2027_martin_shkreli: depth_insufficient: poly_fillable=398 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_jorge_rodriguez: kalshi_orderbook_missing: live fetch failed and Oddpool quote is stale (120s old > 120s limit) unwound=False
+Mar 30 18:07:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jb_pritzker: funding_failed: servicer cannot cover Poly leg (11.8220 USDC needed) unwound=False
+Mar 30 18:07:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for al-champion-2026_toronto_blue_jays: kalshi_orderbook_missing: live fetch failed and Oddpool quote is stale (126s old > 120s limit) unwound=False
+Mar 30 18:07:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_nyk: funding_failed: servicer cannot cover Poly leg (4.0920 USDC needed) unwound=False
+Mar 30 18:07:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for mi-13-democratic-primary-winner-2026_shri_thanedar: depth_insufficient: poly_fillable=534 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:07:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_space: funding_failed: servicer cannot cover Poly leg (0.9130 USDC needed) unwound=False
+Mar 30 18:07:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=83 skipped_display_only=28 skipped_thin_edge=120 skipped_expiry=0 skipped_caps=0 depth_insufficient=36 depth_unavailable=0
+Mar 30 18:09:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_charlotte_hornets: funding_failed: servicer cannot cover Poly leg (382.0000 USDC needed) unwound=False
+Mar 30 18:09:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_man_city: funding_failed: servicer cannot cover Poly leg (49999.3100 USDC needed) unwound=False
+Mar 30 18:09:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for sp500-add-q1-2026_pure_storage: funding_failed: servicer cannot cover Poly leg (0.0150 USDC needed) unwound=False
+Mar 30 18:09:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_below_35k: funding_failed: servicer cannot cover Poly leg (13729.9800 USDC needed) unwound=False
+Mar 30 18:09:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed) unwound=False
+Mar 30 18:09:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed) unwound=False
+Mar 30 18:09:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for la-liga-winner-2026_barcelona: funding_failed: servicer cannot cover Poly leg (7741.3600 USDC needed) unwound=False
+Mar 30 18:09:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for brazil-presidential-election-2026_flavio_bolsonaro: depth_insufficient: poly_fillable=77935 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gavin_newsom: depth_insufficient: poly_fillable=315029 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_above_120k: funding_failed: servicer cannot cover Poly leg (589.7600 USDC needed) unwound=False
+Mar 30 18:09:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_below_25k: funding_failed: servicer cannot cover Poly leg (15138.5800 USDC needed) unwound=False
+Mar 30 18:09:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nobel-peace-prize-winner-2026_donald_trump: depth_insufficient: poly_fillable=39260 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_nicolas_maduro: depth_insufficient: poly_fillable=7539 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for senate-winner-2026_democratic_party: depth_insufficient: poly_fillable=56578 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-coach-of-the-year-winner-2026_mitch_johnson: depth_insufficient: poly_fillable=6974 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_lal: funding_failed: servicer cannot cover Poly leg (11375.6500 USDC needed) unwound=False
+Mar 30 18:09:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for hottest-years-2026_number_1: funding_failed: servicer cannot cover Poly leg (2273.0400 USDC needed) unwound=False
+Mar 30 18:09:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_marco_rubio: depth_insufficient: poly_fillable=117490 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for aliens-exist-2027_us_aliens_confirm_before_2027: depth_insufficient: poly_fillable=472441 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fifa-world-cup-winner-2026_spain: depth_insufficient: poly_fillable=200795 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_1t_125t: funding_failed: servicer cannot cover Poly leg (585.5700 USDC needed) unwound=False
+Mar 30 18:09:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gretchen_whitmer: funding_failed: servicer cannot cover Poly leg (64.0220 USDC needed) unwound=False
+Mar 30 18:09:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_colorado_avalanche: funding_failed: servicer cannot cover Poly leg (330.4720 USDC needed) unwound=False
+Mar 30 18:09:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tim-cook-out-apple-ceo-march-31_tim_cook_out_yes_no: funding_failed: servicer cannot cover Poly leg (0.0020 USDC needed) unwound=False
+Mar 30 18:09:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for michigan-democratic-senate-primary-winner-2026_mallory_mcmorrow: depth_insufficient: poly_fillable=2006 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for champions-league-2026_arsenal: funding_failed: servicer cannot cover Poly leg (1283.0400 USDC needed) unwound=False
+Mar 30 18:09:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for french-presidential-election-2027_jordan_bardella: depth_insufficient: poly_fillable=23065 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for microstrategy-sells-bitcoin-by-date_date_jun_30_2026: funding_failed: servicer cannot cover Poly leg (29.7000 USDC needed) unwound=False
+Mar 30 18:09:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fifa-world-cup-winner-2026_portugal: depth_insufficient: poly_fillable=267049 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_josh_shapiro: depth_insufficient: poly_fillable=298069 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_hou: funding_failed: servicer cannot cover Poly leg (7.5840 USDC needed) unwound=False
+Mar 30 18:09:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_t1: funding_failed: servicer cannot cover Poly leg (761.5300 USDC needed) unwound=False
+Mar 30 18:09:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_bos: depth_insufficient: poly_fillable=20675 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for israel-pm-2045_naftali_bennett: depth_insufficient: poly_fillable=3107 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_sas: funding_failed: servicer cannot cover Poly leg (681.4480 USDC needed) unwound=False
+Mar 30 18:09:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: funding_failed: servicer cannot cover Poly leg (5.1940 USDC needed) unwound=False
+Mar 30 18:09:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_dallas_stars: funding_failed: servicer cannot cover Poly leg (20.1720 USDC needed) unwound=False
+Mar 30 18:09:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_minnesota_wild: funding_failed: servicer cannot cover Poly leg (471.2400 USDC needed) unwound=False
+Mar 30 18:09:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_vegas_golden_knights: funding_failed: servicer cannot cover Poly leg (17.6400 USDC needed) unwound=False
+Mar 30 18:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jon_ossoff: funding_failed: servicer cannot cover Poly leg (104.3840 USDC needed) unwound=False
+Mar 30 18:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for president-2028_marco_rubio: depth_insufficient: poly_fillable=60323 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for french-presidential-election-2027_marine_le_pen: depth_insufficient: poly_fillable=16751 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:09:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for space-x-ipo-closing-market-cap-above_above_1_2t: funding_failed: servicer cannot cover Poly leg (55.5300 USDC needed) unwound=False
+Mar 30 18:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for inflation-2026_above_10p: funding_failed: servicer cannot cover Poly leg (23.4650 USDC needed) unwound=False
+Mar 30 18:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_2: funding_failed: servicer cannot cover Poly leg (1845.2560 USDC needed) unwound=False
+Mar 30 18:10:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_cle: funding_failed: servicer cannot cover Poly leg (10.0940 USDC needed) unwound=False
+Mar 30 18:10:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_edmundo_gonzalez: depth_insufficient: poly_fillable=28893 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for la-liga-winner-2026_atletico_madrid: funding_failed: servicer cannot cover Poly leg (1.8690 USDC needed) unwound=False
+Mar 30 18:10:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-admin-departures-2026_pete_hegseth: depth_insufficient: poly_fillable=550 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-admin-departures-2026_stephen_miller: depth_insufficient: poly_fillable=788 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_thomas_massie: funding_failed: servicer cannot cover Poly leg (26.2820 USDC needed) unwound=False
+Mar 30 18:10:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ny-15-democratic-primary-winner-2026_michael_blake: depth_insufficient: poly_fillable=2456 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_geng_esports: funding_failed: servicer cannot cover Poly leg (392.7000 USDC needed) unwound=False
+Mar 30 18:10:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for seoul-mayor-election-winner-2026_na_kyung_won: funding_failed: servicer cannot cover Poly leg (0.2070 USDC needed) unwound=False
+Mar 30 18:10:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for minnesota-governor-republican-nominee-2026_kendall_qualls: depth_insufficient: poly_fillable=713 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-putin-next-meeting-location-2029_russia: depth_insufficient: poly_fillable=2358 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_over_15t: funding_failed: servicer cannot cover Poly leg (1.3440 USDC needed) unwound=False
+Mar 30 18:10:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nhl-calder-memorial-trophy-2026_matthew_schaefer: depth_insufficient: poly_fillable=10050 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for discord-ipo-closing-market-cap_ipo_under_15b: funding_failed: servicer cannot cover Poly leg (7.8750 USDC needed) unwound=False
+Mar 30 18:10:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for president-2028_alexandria_ocasio_cortez: depth_insufficient: poly_fillable=4526 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_diosdado_cabello: depth_insufficient: poly_fillable=6321 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for jerome-powell-out-fed-chair_may_14: funding_failed: servicer cannot cover Poly leg (0.9310 USDC needed) unwound=False
+Mar 30 18:10:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for sp500-add-q1-2026_sofi_technologies: trade_too_small: budget=0.98 / max_ask=0.9940 = 0.9824 contracts < 1 minimum unwound=False
+Mar 30 18:10:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tiktok-acquirer_elonmusk_x: funding_failed: servicer cannot cover Poly leg (332.4060 USDC needed) unwound=False
+Mar 30 18:10:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_7: funding_failed: servicer cannot cover Poly leg (0.8480 USDC needed) unwound=False
+Mar 30 18:10:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for israel-pm-2045_gadi_eisenkot: depth_insufficient: poly_fillable=771 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for french-presidential-election-2027_jean_luc_melenchon: depth_insufficient: poly_fillable=20357 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tiktok-acquirer_meta: funding_failed: servicer cannot cover Poly leg (106.0020 USDC needed) unwound=False
+Mar 30 18:10:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for california-governor-2026_chad_bianco: depth_insufficient: poly_fillable=2993 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_pete_hegseth: depth_insufficient: poly_fillable=71402 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ecb-interest-rates-april-2026_cut_50bps: funding_failed: servicer cannot cover Poly leg (0.0340 USDC needed) unwound=False
+Mar 30 18:10:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ma-06-democrat-nominee-2026_dan_koh: depth_insufficient: poly_fillable=359 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_marco_rubio: depth_insufficient: poly_fillable=14555 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_andy_beshear: depth_insufficient: poly_fillable=87597 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for manchester-united-next-manager-2026_ole_gunnar_solskjaer: depth_insufficient: poly_fillable=1178 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_vladimir_padrino: depth_insufficient: poly_fillable=11493 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_spac: funding_failed: servicer cannot cover Poly leg (0.1180 USDC needed) unwound=False
+Mar 30 18:10:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for trump-pardon-2027_martin_shkreli: depth_insufficient: poly_fillable=398 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:10:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_jorge_rodriguez: kalshi_orderbook_missing: live fetch failed and Oddpool quote is stale (124s old > 120s limit) unwound=False
+Mar 30 18:10:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for mi-13-democratic-primary-winner-2026_shri_thanedar: kalshi_orderbook_missing: live fetch failed and Oddpool quote is stale (120s old > 120s limit) unwound=False
+Mar 30 18:10:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jb_pritzker: funding_failed: servicer cannot cover Poly leg (11.8220 USDC needed) unwound=False
+Mar 30 18:10:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for al-champion-2026_toronto_blue_jays: kalshi_orderbook_missing: live fetch failed and Oddpool quote is stale (129s old > 120s limit) unwound=False
+Mar 30 18:10:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_space: funding_failed: servicer cannot cover Poly leg (0.9570 USDC needed) unwound=False
+Mar 30 18:10:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_nyk: funding_failed: servicer cannot cover Poly leg (4.0920 USDC needed) unwound=False
+Mar 30 18:10:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_tucker_carlson: funding_failed: servicer cannot cover Poly leg (9.6500 USDC needed) unwound=False
+Mar 30 18:10:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=85 skipped_display_only=27 skipped_thin_edge=125 skipped_expiry=0 skipped_caps=0 depth_insufficient=36 depth_unavailable=0
+Mar 30 18:12:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_charlotte_hornets: funding_failed: servicer cannot cover Poly leg (384.5000 USDC needed) unwound=False
+Mar 30 18:12:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_man_city: funding_failed: servicer cannot cover Poly leg (49999.3100 USDC needed) unwound=False
+Mar 30 18:12:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for sp500-add-q1-2026_pure_storage: funding_failed: servicer cannot cover Poly leg (0.0150 USDC needed) unwound=False
+Mar 30 18:12:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_below_35k: funding_failed: servicer cannot cover Poly leg (14486.1300 USDC needed) unwound=False
+Mar 30 18:12:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed) unwound=False
+Mar 30 18:12:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed) unwound=False
+Mar 30 18:12:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for la-liga-winner-2026_barcelona: funding_failed: servicer cannot cover Poly leg (7741.3600 USDC needed) unwound=False
+Mar 30 18:12:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for brazil-presidential-election-2026_flavio_bolsonaro: depth_insufficient: poly_fillable=77636 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:12:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gavin_newsom: depth_insufficient: poly_fillable=312988 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:12:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_above_120k: funding_failed: servicer cannot cover Poly leg (589.7600 USDC needed) unwound=False
+Mar 30 18:12:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nobel-peace-prize-winner-2026_donald_trump: depth_insufficient: poly_fillable=39460 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:12:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_nicolas_maduro: depth_insufficient: poly_fillable=7480 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:12:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for senate-winner-2026_democratic_party: depth_insufficient: poly_fillable=56778 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:12:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-coach-of-the-year-winner-2026_mitch_johnson: depth_insufficient: poly_fillable=6974 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:12:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for hottest-years-2026_number_1: funding_failed: servicer cannot cover Poly leg (2273.0400 USDC needed) unwound=False
+Mar 30 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_lal: funding_failed: servicer cannot cover Poly leg (11375.6500 USDC needed) unwound=False
+Mar 30 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for aliens-exist-2027_us_aliens_confirm_before_2027: depth_insufficient: poly_fillable=472441 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:12:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fifa-world-cup-winner-2026_spain: depth_insufficient: poly_fillable=200555 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:12:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_marco_rubio: depth_insufficient: poly_fillable=115970 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gretchen_whitmer: funding_failed: servicer cannot cover Poly leg (68.5200 USDC needed) unwound=False
+Mar 30 18:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_1t_125t: funding_failed: servicer cannot cover Poly leg (565.0080 USDC needed) unwound=False
+Mar 30 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tim-cook-out-apple-ceo-march-31_tim_cook_out_yes_no: funding_failed: servicer cannot cover Poly leg (0.0020 USDC needed) unwound=False
+Mar 30 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for michigan-democratic-senate-primary-winner-2026_mallory_mcmorrow: depth_insufficient: poly_fillable=1708 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_colorado_avalanche: funding_failed: servicer cannot cover Poly leg (328.6540 USDC needed) unwound=False
+Mar 30 18:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for champions-league-2026_arsenal: funding_failed: servicer cannot cover Poly leg (1283.0400 USDC needed) unwound=False
+Mar 30 18:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for french-presidential-election-2027_jordan_bardella: depth_insufficient: poly_fillable=22825 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 30 18:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for microstrategy-sells-bitcoin-by-date_date_jun_30_2026: funding_failed: servicer cannot cover Poly leg (29.7000 USDC needed) unwound=False
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# grep -E "ARB_VAULT_V2_ADDRESS|ARB_SERVICER_WALLET|POLY_BASE_DEPOSIT|POLY_PRIVATE_KEY" ~/PolyNotifyBot/.env
+ARB_SERVICER_WALLET=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+POLY_PRIVATE_KEY=0x1257c41bdff997fa63c1788cc46567fb6af1a914a55cb6bc76a335a98cfc1f56 
+ARB_VAULT_V2_ADDRESS=0x1182054b82f96c110698eAe6Af73FdA013599F9d
+POLY_BASE_DEPOSIT_ADDR=0xE19F664dc348c3802afBf32eD6eF26879d90625f
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "10 minutes ago" | grep -E "funder tick|tend\(\)|Deposited|poly_float|servicer"
+Mar 30 18:11:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 📋 [ArbReporter]   servicer on Base: 5.8318
+Mar 30 18:11:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-30T18:11:23Z
+Mar 30 18:11:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 30 18:11:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774894083, cooldown=60s) — calling
+Mar 30 18:11:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ✅ tend() sent: tx=0x77d1863226fd3becce86d03b29049f1374b6f42afb1a1386a2d8fcb8beb83df0
+Mar 30 18:11:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💼 Servicer status [2026-03-30T18:11:23Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=5.8318 ETH=0.010130 poly_float_min=3.0 kalshi_float_min=3.0 gas_reserve=0.0100 ETH
+Mar 30 18:11:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] [2026-03-30T18:11:23Z] Vault liquidity: idle=1.00 required_idle=5.00 pending_redeem=0.00 servicer=5.83 deployable=0.83 under_pressure=False
+Mar 30 18:11:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Poly float low (0.0000 < 3.0) but servicer only has 5.8318 USDC — skipping
+Mar 30 18:11:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Kalshi float low (0.0000 < 3.0) but servicer only has 5.8318 USDC — skipping
+Mar 30 18:11:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Opinion float low (0.0000 < 5.0) but servicer only has 5.8318 USDC — skipping bridge
+Mar 30 18:12:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 385.5000 USDC — topping up 385.5000 USDC from servicer
+Mar 30 18:12:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (384.5000 USDC needed)
+Mar 30 18:12:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_charlotte_hornets: funding_failed: servicer cannot cover Poly leg (384.5000 USDC needed) unwound=False
+Mar 30 18:12:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 50000.3100 USDC — topping up 50000.3100 USDC from servicer
+Mar 30 18:12:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (49999.3100 USDC needed)
+Mar 30 18:12:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_man_city: funding_failed: servicer cannot cover Poly leg (49999.3100 USDC needed) unwound=False
+Mar 30 18:12:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.0150 USDC — topping up 1.0150 USDC from servicer
+Mar 30 18:12:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0150 USDC needed)
+Mar 30 18:12:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for sp500-add-q1-2026_pure_storage: funding_failed: servicer cannot cover Poly leg (0.0150 USDC needed) unwound=False
+Mar 30 18:12:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 14487.1300 USDC — topping up 14487.1300 USDC from servicer
+Mar 30 18:12:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (14486.1300 USDC needed)
+Mar 30 18:12:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_below_35k: funding_failed: servicer cannot cover Poly leg (14486.1300 USDC needed) unwound=False
+Mar 30 18:12:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 3818.5800 USDC — topping up 3818.5800 USDC from servicer
+Mar 30 18:12:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed)
+Mar 30 18:12:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed) unwound=False
+Mar 30 18:12:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 3818.5800 USDC — topping up 3818.5800 USDC from servicer
+Mar 30 18:12:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed)
+Mar 30 18:12:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed) unwound=False
+Mar 30 18:12:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 7742.3600 USDC — topping up 7742.3600 USDC from servicer
+Mar 30 18:12:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (7741.3600 USDC needed)
+Mar 30 18:12:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for la-liga-winner-2026_barcelona: funding_failed: servicer cannot cover Poly leg (7741.3600 USDC needed) unwound=False
+Mar 30 18:12:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 590.7600 USDC — topping up 590.7600 USDC from servicer
+Mar 30 18:12:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (589.7600 USDC needed)
+Mar 30 18:12:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_above_120k: funding_failed: servicer cannot cover Poly leg (589.7600 USDC needed) unwound=False
+Mar 30 18:12:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 2274.0400 USDC — topping up 2274.0400 USDC from servicer
+Mar 30 18:12:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (2273.0400 USDC needed)
+Mar 30 18:12:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for hottest-years-2026_number_1: funding_failed: servicer cannot cover Poly leg (2273.0400 USDC needed) unwound=False
+Mar 30 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 11376.6500 USDC — topping up 11376.6500 USDC from servicer
+Mar 30 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (11375.6500 USDC needed)
+Mar 30 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_lal: funding_failed: servicer cannot cover Poly leg (11375.6500 USDC needed) unwound=False
+Mar 30 18:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 69.5200 USDC — topping up 69.5200 USDC from servicer
+Mar 30 18:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (68.5200 USDC needed)
+Mar 30 18:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gretchen_whitmer: funding_failed: servicer cannot cover Poly leg (68.5200 USDC needed) unwound=False
+Mar 30 18:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 566.0080 USDC — topping up 566.0080 USDC from servicer
+Mar 30 18:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (565.0080 USDC needed)
+Mar 30 18:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_1t_125t: funding_failed: servicer cannot cover Poly leg (565.0080 USDC needed) unwound=False
+Mar 30 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.0020 USDC — topping up 1.0020 USDC from servicer
+Mar 30 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0020 USDC needed)
+Mar 30 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tim-cook-out-apple-ceo-march-31_tim_cook_out_yes_no: funding_failed: servicer cannot cover Poly leg (0.0020 USDC needed) unwound=False
+Mar 30 18:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 329.6540 USDC — topping up 329.6540 USDC from servicer
+Mar 30 18:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (328.6540 USDC needed)
+Mar 30 18:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_colorado_avalanche: funding_failed: servicer cannot cover Poly leg (328.6540 USDC needed) unwound=False
+Mar 30 18:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1284.0400 USDC — topping up 1284.0400 USDC from servicer
+Mar 30 18:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1283.0400 USDC needed)
+Mar 30 18:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for champions-league-2026_arsenal: funding_failed: servicer cannot cover Poly leg (1283.0400 USDC needed) unwound=False
+Mar 30 18:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 30.7000 USDC — topping up 30.7000 USDC from servicer
+Mar 30 18:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (29.7000 USDC needed)
+Mar 30 18:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for microstrategy-sells-bitcoin-by-date_date_jun_30_2026: funding_failed: servicer cannot cover Poly leg (29.7000 USDC needed) unwound=False
+Mar 30 18:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 8.5840 USDC — topping up 8.5840 USDC from servicer
+Mar 30 18:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (7.5840 USDC needed)
+Mar 30 18:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_hou: funding_failed: servicer cannot cover Poly leg (7.5840 USDC needed) unwound=False
+Mar 30 18:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 770.2300 USDC — topping up 770.2300 USDC from servicer
+Mar 30 18:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (769.2300 USDC needed)
+Mar 30 18:13:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_t1: funding_failed: servicer cannot cover Poly leg (769.2300 USDC needed) unwound=False
+Mar 30 18:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 618.7690 USDC — topping up 618.7690 USDC from servicer
+Mar 30 18:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (617.7690 USDC needed)
+Mar 30 18:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_sas: funding_failed: servicer cannot cover Poly leg (617.7690 USDC needed) unwound=False
+Mar 30 18:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 21.7480 USDC — topping up 21.7480 USDC from servicer
+Mar 30 18:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (20.7480 USDC needed)
+Mar 30 18:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_dallas_stars: funding_failed: servicer cannot cover Poly leg (20.7480 USDC needed) unwound=False
+Mar 30 18:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 3038.1360 USDC — topping up 3038.1360 USDC from servicer
+Mar 30 18:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (3037.1360 USDC needed)
+Mar 30 18:13:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_2: funding_failed: servicer cannot cover Poly leg (3037.1360 USDC needed) unwound=False
+Mar 30 18:13:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 472.2400 USDC — topping up 472.2400 USDC from servicer
+Mar 30 18:13:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (471.2400 USDC needed)
+Mar 30 18:13:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_minnesota_wild: funding_failed: servicer cannot cover Poly leg (471.2400 USDC needed) unwound=False
+Mar 30 18:13:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 6.1380 USDC — topping up 6.1380 USDC from servicer
+Mar 30 18:13:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (5.1380 USDC needed)
+Mar 30 18:13:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: funding_failed: servicer cannot cover Poly leg (5.1380 USDC needed) unwound=False
+Mar 30 18:13:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 164.6800 USDC — topping up 164.6800 USDC from servicer
+Mar 30 18:13:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (163.6800 USDC needed)
+Mar 30 18:13:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ipos-before-2027_discord: funding_failed: servicer cannot cover Poly leg (163.6800 USDC needed) unwound=False
+Mar 30 18:13:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 105.3840 USDC — topping up 105.3840 USDC from servicer
+Mar 30 18:13:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (104.3840 USDC needed)
+Mar 30 18:13:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jon_ossoff: funding_failed: servicer cannot cover Poly leg (104.3840 USDC needed) unwound=False
+Mar 30 18:13:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 18.3950 USDC — topping up 18.3950 USDC from servicer
+Mar 30 18:13:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (17.3950 USDC needed)
+Mar 30 18:13:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_vegas_golden_knights: funding_failed: servicer cannot cover Poly leg (17.3950 USDC needed) unwound=False
+Mar 30 18:13:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 56.5300 USDC — topping up 56.5300 USDC from servicer
+Mar 30 18:13:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (55.5300 USDC needed)
+Mar 30 18:13:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for space-x-ipo-closing-market-cap-above_above_1_2t: funding_failed: servicer cannot cover Poly leg (55.5300 USDC needed) unwound=False
+Mar 30 18:13:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 24.1400 USDC — topping up 24.1400 USDC from servicer
+Mar 30 18:13:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (23.1400 USDC needed)
+Mar 30 18:13:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for inflation-2026_above_10p: funding_failed: servicer cannot cover Poly leg (23.1400 USDC needed) unwound=False
+Mar 30 18:13:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 11.3390 USDC — topping up 11.3390 USDC from servicer
+Mar 30 18:13:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (10.3390 USDC needed)
+Mar 30 18:13:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_cle: funding_failed: servicer cannot cover Poly leg (10.3390 USDC needed) unwound=False
+Mar 30 18:13:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 2.8690 USDC — topping up 2.8690 USDC from servicer
+Mar 30 18:13:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1.8690 USDC needed)
+Mar 30 18:13:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for la-liga-winner-2026_atletico_madrid: funding_failed: servicer cannot cover Poly leg (1.8690 USDC needed) unwound=False
+Mar 30 18:13:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 63.0500 USDC — topping up 63.0500 USDC from servicer
+Mar 30 18:13:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (62.0500 USDC needed)
+Mar 30 18:13:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_tucker_carlson: funding_failed: servicer cannot cover Poly leg (62.0500 USDC needed) unwound=False
+Mar 30 18:13:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 393.7000 USDC — topping up 393.7000 USDC from servicer
+Mar 30 18:13:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (392.7000 USDC needed)
+Mar 30 18:13:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_geng_esports: funding_failed: servicer cannot cover Poly leg (392.7000 USDC needed) unwound=False
+Mar 30 18:13:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.2040 USDC — topping up 1.2040 USDC from servicer
+Mar 30 18:13:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.2040 USDC needed)
+Mar 30 18:13:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for seoul-mayor-election-winner-2026_na_kyung_won: funding_failed: servicer cannot cover Poly leg (0.2040 USDC needed) unwound=False
+Mar 30 18:13:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 27.2140 USDC — topping up 27.2140 USDC from servicer
+Mar 30 18:13:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (26.2140 USDC needed)
+Mar 30 18:13:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_thomas_massie: funding_failed: servicer cannot cover Poly leg (26.2140 USDC needed) unwound=False
+Mar 30 18:13:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 2.3440 USDC — topping up 2.3440 USDC from servicer
+Mar 30 18:13:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1.3440 USDC needed)
+Mar 30 18:13:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_over_15t: funding_failed: servicer cannot cover Poly leg (1.3440 USDC needed) unwound=False
+Mar 30 18:13:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 8.3800 USDC — topping up 8.3800 USDC from servicer
+Mar 30 18:13:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (7.3800 USDC needed)
+Mar 30 18:13:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for discord-ipo-closing-market-cap_ipo_under_15b: funding_failed: servicer cannot cover Poly leg (7.3800 USDC needed) unwound=False
+Mar 30 18:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 486.5840 USDC — topping up 486.5840 USDC from servicer
+Mar 30 18:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (485.5840 USDC needed)
+Mar 30 18:13:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for inflation-2026_above_3p: funding_failed: servicer cannot cover Poly leg (485.5840 USDC needed) unwound=False
+Mar 30 18:13:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.9310 USDC — topping up 1.9310 USDC from servicer
+Mar 30 18:13:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.9310 USDC needed)
+Mar 30 18:13:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for jerome-powell-out-fed-chair_may_14: funding_failed: servicer cannot cover Poly leg (0.9310 USDC needed) unwound=False
+Mar 30 18:13:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 333.4060 USDC — topping up 333.4060 USDC from servicer
+Mar 30 18:13:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (332.4060 USDC needed)
+Mar 30 18:13:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tiktok-acquirer_elonmusk_x: funding_failed: servicer cannot cover Poly leg (332.4060 USDC needed) unwound=False
+Mar 30 18:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.8320 USDC — topping up 1.8320 USDC from servicer
+Mar 30 18:13:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.8320 USDC needed)
+Mar 30 18:13:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_7: funding_failed: servicer cannot cover Poly leg (0.8320 USDC needed) unwound=False
+Mar 30 18:13:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 107.0020 USDC — topping up 107.0020 USDC from servicer
+Mar 30 18:13:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (106.0020 USDC needed)
+Mar 30 18:13:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tiktok-acquirer_meta: funding_failed: servicer cannot cover Poly leg (106.0020 USDC needed) unwound=False
+Mar 30 18:13:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.0340 USDC — topping up 1.0340 USDC from servicer
+Mar 30 18:13:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0340 USDC needed)
+Mar 30 18:13:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ecb-interest-rates-april-2026_cut_50bps: funding_failed: servicer cannot cover Poly leg (0.0340 USDC needed) unwound=False
+Mar 30 18:14:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 12.7760 USDC — topping up 12.7760 USDC from servicer
+Mar 30 18:14:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (11.7760 USDC needed)
+Mar 30 18:14:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jb_pritzker: funding_failed: servicer cannot cover Poly leg (11.7760 USDC needed) unwound=False
+Mar 30 18:14:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 5.0920 USDC — topping up 5.0920 USDC from servicer
+Mar 30 18:14:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (4.0920 USDC needed)
+Mar 30 18:14:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_nyk: funding_failed: servicer cannot cover Poly leg (4.0920 USDC needed) unwound=False
+Mar 30 18:14:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.9130 USDC — topping up 1.9130 USDC from servicer
+Mar 30 18:14:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.9130 USDC needed)
+Mar 30 18:14:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_space: funding_failed: servicer cannot cover Poly leg (0.9130 USDC needed) unwound=False
+Mar 30 18:14:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 📋 [ArbReporter]   servicer on Base: 5.8318
+Mar 30 18:14:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-30T18:14:48Z
+Mar 30 18:14:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 30 18:14:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774894285, cooldown=60s) — calling
+Mar 30 18:14:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ✅ tend() sent: tx=0x0dcb0a9214086960f184ef6b220ab030869dcab68dd3b3c716599fe7ee1631f2
+Mar 30 18:14:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💼 Servicer status [2026-03-30T18:14:48Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=5.8318 ETH=0.010129 poly_float_min=3.0 kalshi_float_min=3.0 gas_reserve=0.0100 ETH
+Mar 30 18:14:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] [2026-03-30T18:14:48Z] Vault liquidity: idle=1.00 required_idle=5.00 pending_redeem=0.00 servicer=5.83 deployable=0.83 under_pressure=False
+Mar 30 18:14:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Poly float low (0.0000 < 3.0) but servicer only has 5.8318 USDC — skipping
+Mar 30 18:14:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Kalshi float low (0.0000 < 3.0) but servicer only has 5.8318 USDC — skipping
+Mar 30 18:14:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Opinion float low (0.0000 < 5.0) but servicer only has 5.8318 USDC — skipping bridge
+Mar 30 18:15:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 397.0000 USDC — topping up 397.0000 USDC from servicer
+Mar 30 18:15:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (396.0000 USDC needed)
+Mar 30 18:15:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_charlotte_hornets: funding_failed: servicer cannot cover Poly leg (396.0000 USDC needed) unwound=False
+Mar 30 18:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 50000.3100 USDC — topping up 50000.3100 USDC from servicer
+Mar 30 18:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (49999.3100 USDC needed)
+Mar 30 18:16:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_man_city: funding_failed: servicer cannot cover Poly leg (49999.3100 USDC needed) unwound=False
+Mar 30 18:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.0150 USDC — topping up 1.0150 USDC from servicer
+Mar 30 18:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0150 USDC needed)
+Mar 30 18:16:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for sp500-add-q1-2026_pure_storage: funding_failed: servicer cannot cover Poly leg (0.0150 USDC needed) unwound=False
+Mar 30 18:16:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 14487.1300 USDC — topping up 14487.1300 USDC from servicer
+Mar 30 18:16:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (14486.1300 USDC needed)
+Mar 30 18:16:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_below_35k: funding_failed: servicer cannot cover Poly leg (14486.1300 USDC needed) unwound=False
+Mar 30 18:16:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 3818.5800 USDC — topping up 3818.5800 USDC from servicer
+Mar 30 18:16:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed)
+Mar 30 18:16:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed) unwound=False
+Mar 30 18:16:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 3818.5800 USDC — topping up 3818.5800 USDC from servicer
+Mar 30 18:16:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed)
+Mar 30 18:16:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed) unwound=False
+Mar 30 18:16:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 7740.8400 USDC — topping up 7740.8400 USDC from servicer
+Mar 30 18:16:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (7739.8400 USDC needed)
+Mar 30 18:16:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for la-liga-winner-2026_barcelona: funding_failed: servicer cannot cover Poly leg (7739.8400 USDC needed) unwound=False
+Mar 30 18:16:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 590.7600 USDC — topping up 590.7600 USDC from servicer
+Mar 30 18:16:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (589.7600 USDC needed)
+Mar 30 18:16:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_above_120k: funding_failed: servicer cannot cover Poly leg (589.7600 USDC needed) unwound=False
+Mar 30 18:16:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 2274.0400 USDC — topping up 2274.0400 USDC from servicer
+Mar 30 18:16:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (2273.0400 USDC needed)
+Mar 30 18:16:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for hottest-years-2026_number_1: funding_failed: servicer cannot cover Poly leg (2273.0400 USDC needed) unwound=False
+Mar 30 18:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 11376.6500 USDC — topping up 11376.6500 USDC from servicer
+Mar 30 18:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (11375.6500 USDC needed)
+Mar 30 18:16:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_lal: funding_failed: servicer cannot cover Poly leg (11375.6500 USDC needed) unwound=False
+Mar 30 18:16:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 582.9940 USDC — topping up 582.9940 USDC from servicer
+Mar 30 18:16:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (581.9940 USDC needed)
+Mar 30 18:16:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_1t_125t: funding_failed: servicer cannot cover Poly leg (581.9940 USDC needed) unwound=False
+Mar 30 18:16:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 69.5200 USDC — topping up 69.5200 USDC from servicer
+Mar 30 18:16:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (68.5200 USDC needed)
+Mar 30 18:16:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gretchen_whitmer: funding_failed: servicer cannot cover Poly leg (68.5200 USDC needed) unwound=False
+Mar 30 18:16:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.0020 USDC — topping up 1.0020 USDC from servicer
+Mar 30 18:16:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0020 USDC needed)
+Mar 30 18:16:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tim-cook-out-apple-ceo-march-31_tim_cook_out_yes_no: funding_failed: servicer cannot cover Poly leg (0.0020 USDC needed) unwound=False
+Mar 30 18:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1284.0400 USDC — topping up 1284.0400 USDC from servicer
+Mar 30 18:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1283.0400 USDC needed)
+Mar 30 18:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for champions-league-2026_arsenal: funding_failed: servicer cannot cover Poly leg (1283.0400 USDC needed) unwound=False
+Mar 30 18:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 325.2100 USDC — topping up 325.2100 USDC from servicer
+Mar 30 18:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (324.2100 USDC needed)
+Mar 30 18:16:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_colorado_avalanche: funding_failed: servicer cannot cover Poly leg (324.2100 USDC needed) unwound=False
+Mar 30 18:16:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 30.7000 USDC — topping up 30.7000 USDC from servicer
+Mar 30 18:16:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (29.7000 USDC needed)
+Mar 30 18:16:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for microstrategy-sells-bitcoin-by-date_date_jun_30_2026: funding_failed: servicer cannot cover Poly leg (29.7000 USDC needed) unwound=False
+Mar 30 18:16:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 8.6000 USDC — topping up 8.6000 USDC from servicer
+Mar 30 18:16:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (7.6000 USDC needed)
+Mar 30 18:16:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_hou: funding_failed: servicer cannot cover Poly leg (7.6000 USDC needed) unwound=False
+Mar 30 18:16:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 770.2300 USDC — topping up 770.2300 USDC from servicer
+Mar 30 18:16:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (769.2300 USDC needed)
+Mar 30 18:16:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_t1: funding_failed: servicer cannot cover Poly leg (769.2300 USDC needed) unwound=False
+Mar 30 18:16:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 23.3440 USDC — topping up 23.3440 USDC from servicer
+Mar 30 18:16:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (22.3440 USDC needed)
+Mar 30 18:16:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_dallas_stars: funding_failed: servicer cannot cover Poly leg (22.3440 USDC needed) unwound=False
+Mar 30 18:16:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 586.5160 USDC — topping up 586.5160 USDC from servicer
+Mar 30 18:16:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (585.5160 USDC needed)
+Mar 30 18:16:46 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_sas: funding_failed: servicer cannot cover Poly leg (585.5160 USDC needed) unwound=False
+Mar 30 18:16:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 519.8400 USDC — topping up 519.8400 USDC from servicer
+Mar 30 18:16:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (518.8400 USDC needed)
+Mar 30 18:16:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_minnesota_wild: funding_failed: servicer cannot cover Poly leg (518.8400 USDC needed) unwound=False
+Mar 30 18:16:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 3051.4630 USDC — topping up 3051.4630 USDC from servicer
+Mar 30 18:16:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (3050.4630 USDC needed)
+Mar 30 18:16:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_2: funding_failed: servicer cannot cover Poly leg (3050.4630 USDC needed) unwound=False
+Mar 30 18:16:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 6.1380 USDC — topping up 6.1380 USDC from servicer
+Mar 30 18:16:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (5.1380 USDC needed)
+Mar 30 18:16:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: funding_failed: servicer cannot cover Poly leg (5.1380 USDC needed) unwound=False
+Mar 30 18:16:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 167.5110 USDC — topping up 167.5110 USDC from servicer
+Mar 30 18:16:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (166.5110 USDC needed)
+Mar 30 18:16:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ipos-before-2027_discord: funding_failed: servicer cannot cover Poly leg (166.5110 USDC needed) unwound=False
+Mar 30 18:16:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 105.1600 USDC — topping up 105.1600 USDC from servicer
+Mar 30 18:16:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (104.1600 USDC needed)
+Mar 30 18:16:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jon_ossoff: funding_failed: servicer cannot cover Poly leg (104.1600 USDC needed) unwound=False
+Mar 30 18:16:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 18.3950 USDC — topping up 18.3950 USDC from servicer
+Mar 30 18:16:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (17.3950 USDC needed)
+Mar 30 18:16:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_vegas_golden_knights: funding_failed: servicer cannot cover Poly leg (17.3950 USDC needed) unwound=False
+Mar 30 18:16:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 55.5400 USDC — topping up 55.5400 USDC from servicer
+Mar 30 18:16:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (54.5400 USDC needed)
+Mar 30 18:16:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for space-x-ipo-closing-market-cap-above_above_1_2t: funding_failed: servicer cannot cover Poly leg (54.5400 USDC needed) unwound=False
+Mar 30 18:16:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 493.6400 USDC — topping up 493.6400 USDC from servicer
+Mar 30 18:16:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (492.6400 USDC needed)
+Mar 30 18:16:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for us-house-2026_democratic_party: funding_failed: servicer cannot cover Poly leg (492.6400 USDC needed) unwound=False
+Mar 30 18:16:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 11.2900 USDC — topping up 11.2900 USDC from servicer
+Mar 30 18:16:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (10.2900 USDC needed)
+Mar 30 18:16:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_cle: funding_failed: servicer cannot cover Poly leg (10.2900 USDC needed) unwound=False
+Mar 30 18:16:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 21.9950 USDC — topping up 21.9950 USDC from servicer
+Mar 30 18:16:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (20.9950 USDC needed)
+Mar 30 18:16:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for inflation-2026_above_10p: funding_failed: servicer cannot cover Poly leg (20.9950 USDC needed) unwound=False
+Mar 30 18:17:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 2.8690 USDC — topping up 2.8690 USDC from servicer
+Mar 30 18:17:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1.8690 USDC needed)
+Mar 30 18:17:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for la-liga-winner-2026_atletico_madrid: funding_failed: servicer cannot cover Poly leg (1.8690 USDC needed) unwound=False
+Mar 30 18:17:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 63.1000 USDC — topping up 63.1000 USDC from servicer
+Mar 30 18:17:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (62.1000 USDC needed)
+Mar 30 18:17:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_tucker_carlson: funding_failed: servicer cannot cover Poly leg (62.1000 USDC needed) unwound=False
+Mar 30 18:17:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 393.7000 USDC — topping up 393.7000 USDC from servicer
+Mar 30 18:17:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (392.7000 USDC needed)
+Mar 30 18:17:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_geng_esports: funding_failed: servicer cannot cover Poly leg (392.7000 USDC needed) unwound=False
+Mar 30 18:17:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.2040 USDC — topping up 1.2040 USDC from servicer
+Mar 30 18:17:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.2040 USDC needed)
+Mar 30 18:17:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for seoul-mayor-election-winner-2026_na_kyung_won: funding_failed: servicer cannot cover Poly leg (0.2040 USDC needed) unwound=False
+Mar 30 18:17:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 27.2140 USDC — topping up 27.2140 USDC from servicer
+Mar 30 18:17:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (26.2140 USDC needed)
+Mar 30 18:17:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_thomas_massie: funding_failed: servicer cannot cover Poly leg (26.2140 USDC needed) unwound=False
+Mar 30 18:17:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 486.5840 USDC — topping up 486.5840 USDC from servicer
+Mar 30 18:17:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (485.5840 USDC needed)
+Mar 30 18:17:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for inflation-2026_above_3p: funding_failed: servicer cannot cover Poly leg (485.5840 USDC needed) unwound=False
+Mar 30 18:17:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 7.8970 USDC — topping up 7.8970 USDC from servicer
+Mar 30 18:17:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (6.8970 USDC needed)
+Mar 30 18:17:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for discord-ipo-closing-market-cap_ipo_under_15b: funding_failed: servicer cannot cover Poly leg (6.8970 USDC needed) unwound=False
+Mar 30 18:17:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 493.6400 USDC — topping up 493.6400 USDC from servicer
+Mar 30 18:17:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (492.6400 USDC needed)
+Mar 30 18:17:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for us-house-2026_democratic_party: funding_failed: servicer cannot cover Poly leg (492.6400 USDC needed) unwound=False
+Mar 30 18:17:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 2.0240 USDC — topping up 2.0240 USDC from servicer
+Mar 30 18:17:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1.0240 USDC needed)
+Mar 30 18:17:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_over_15t: funding_failed: servicer cannot cover Poly leg (1.0240 USDC needed) unwound=False
+Mar 30 18:17:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.8930 USDC — topping up 1.8930 USDC from servicer
+Mar 30 18:17:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.8930 USDC needed)
+Mar 30 18:17:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for jerome-powell-out-fed-chair_may_14: funding_failed: servicer cannot cover Poly leg (0.8930 USDC needed) unwound=False
+Mar 30 18:17:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 333.4060 USDC — topping up 333.4060 USDC from servicer
+Mar 30 18:17:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (332.4060 USDC needed)
+Mar 30 18:17:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tiktok-acquirer_elonmusk_x: funding_failed: servicer cannot cover Poly leg (332.4060 USDC needed) unwound=False
+Mar 30 18:17:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.8000 USDC — topping up 1.8000 USDC from servicer
+Mar 30 18:17:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.8000 USDC needed)
+Mar 30 18:17:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_7: funding_failed: servicer cannot cover Poly leg (0.8000 USDC needed) unwound=False
+Mar 30 18:17:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 107.0020 USDC — topping up 107.0020 USDC from servicer
+Mar 30 18:17:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (106.0020 USDC needed)
+Mar 30 18:17:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tiktok-acquirer_meta: funding_failed: servicer cannot cover Poly leg (106.0020 USDC needed) unwound=False
+Mar 30 18:17:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.0340 USDC — topping up 1.0340 USDC from servicer
+Mar 30 18:17:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0340 USDC needed)
+Mar 30 18:17:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ecb-interest-rates-april-2026_cut_50bps: funding_failed: servicer cannot cover Poly leg (0.0340 USDC needed) unwound=False
+Mar 30 18:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 12.7760 USDC — topping up 12.7760 USDC from servicer
+Mar 30 18:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (11.7760 USDC needed)
+Mar 30 18:17:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jb_pritzker: funding_failed: servicer cannot cover Poly leg (11.7760 USDC needed) unwound=False
+Mar 30 18:17:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 5.0040 USDC — topping up 5.0040 USDC from servicer
+Mar 30 18:17:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (4.0040 USDC needed)
+Mar 30 18:17:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_nyk: funding_failed: servicer cannot cover Poly leg (4.0040 USDC needed) unwound=False
+Mar 30 18:17:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.9020 USDC — topping up 1.9020 USDC from servicer
+Mar 30 18:17:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.9020 USDC needed)
+Mar 30 18:17:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_space: funding_failed: servicer cannot cover Poly leg (0.9020 USDC needed) unwound=False
+Mar 30 18:17:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.1400 USDC — topping up 1.1400 USDC from servicer
+Mar 30 18:17:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.1400 USDC needed)
+Mar 30 18:17:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_spac: funding_failed: servicer cannot cover Poly leg (0.1400 USDC needed) unwound=False
+Mar 30 18:18:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 📋 [ArbReporter]   servicer on Base: 5.8318
+Mar 30 18:18:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-30T18:18:16Z
+Mar 30 18:18:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 30 18:18:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774894491, cooldown=60s) — calling
+Mar 30 18:18:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ✅ tend() sent: tx=0xf8d97a527e3becbc320cad80ecce91c7550a11952a35079b602e3e20e97b2a53
+Mar 30 18:18:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💼 Servicer status [2026-03-30T18:18:16Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=5.8318 ETH=0.010129 poly_float_min=3.0 kalshi_float_min=3.0 gas_reserve=0.0100 ETH
+Mar 30 18:18:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] [2026-03-30T18:18:16Z] Vault liquidity: idle=1.00 required_idle=5.00 pending_redeem=0.00 servicer=5.83 deployable=0.83 under_pressure=False
+Mar 30 18:18:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Poly float low (0.0000 < 3.0) but servicer only has 5.8318 USDC — skipping
+Mar 30 18:18:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Kalshi float low (0.0000 < 3.0) but servicer only has 5.8318 USDC — skipping
+Mar 30 18:18:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Opinion float low (0.0000 < 5.0) but servicer only has 5.8318 USDC — skipping bridge
+Mar 30 18:19:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 396.5000 USDC — topping up 396.5000 USDC from servicer
+Mar 30 18:19:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (395.5000 USDC needed)
+Mar 30 18:19:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-playoffs-teams_charlotte_hornets: funding_failed: servicer cannot cover Poly leg (395.5000 USDC needed) unwound=False
+Mar 30 18:19:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 50000.3100 USDC — topping up 50000.3100 USDC from servicer
+Mar 30 18:19:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (49999.3100 USDC needed)
+Mar 30 18:19:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_man_city: funding_failed: servicer cannot cover Poly leg (49999.3100 USDC needed) unwound=False
+Mar 30 18:19:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.0080 USDC — topping up 1.0080 USDC from servicer
+Mar 30 18:19:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0080 USDC needed)
+Mar 30 18:19:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for sp500-add-q1-2026_pure_storage: funding_failed: servicer cannot cover Poly leg (0.0080 USDC needed) unwound=False
+Mar 30 18:19:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 3818.5800 USDC — topping up 3818.5800 USDC from servicer
+Mar 30 18:19:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed)
+Mar 30 18:19:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed) unwound=False
+Mar 30 18:19:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 3818.5800 USDC — topping up 3818.5800 USDC from servicer
+Mar 30 18:19:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed)
+Mar 30 18:19:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for english-premier-league-winner-2026_arsenal: funding_failed: servicer cannot cover Poly leg (3817.5800 USDC needed) unwound=False
+Mar 30 18:19:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 7740.8400 USDC — topping up 7740.8400 USDC from servicer
+Mar 30 18:19:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (7739.8400 USDC needed)
+Mar 30 18:19:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for la-liga-winner-2026_barcelona: funding_failed: servicer cannot cover Poly leg (7739.8400 USDC needed) unwound=False
+Mar 30 18:19:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 590.7600 USDC — topping up 590.7600 USDC from servicer
+Mar 30 18:19:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (589.7600 USDC needed)
+Mar 30 18:19:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_above_120k: funding_failed: servicer cannot cover Poly leg (589.7600 USDC needed) unwound=False
+Mar 30 18:19:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 2318.7000 USDC — topping up 2318.7000 USDC from servicer
+Mar 30 18:19:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (2317.7000 USDC needed)
+Mar 30 18:19:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for hottest-years-2026_number_1: funding_failed: servicer cannot cover Poly leg (2317.7000 USDC needed) unwound=False
+Mar 30 18:19:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 11374.7260 USDC — topping up 11374.7260 USDC from servicer
+Mar 30 18:19:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (11373.7260 USDC needed)
+Mar 30 18:19:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_lal: funding_failed: servicer cannot cover Poly leg (11373.7260 USDC needed) unwound=False
+Mar 30 18:19:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 69.4900 USDC — topping up 69.4900 USDC from servicer
+Mar 30 18:19:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (68.4900 USDC needed)
+Mar 30 18:19:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gretchen_whitmer: funding_failed: servicer cannot cover Poly leg (68.4900 USDC needed) unwound=False
+Mar 30 18:19:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.0020 USDC — topping up 1.0020 USDC from servicer
+Mar 30 18:19:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0020 USDC needed)
+Mar 30 18:19:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tim-cook-out-apple-ceo-march-31_tim_cook_out_yes_no: funding_failed: servicer cannot cover Poly leg (0.0020 USDC needed) unwound=False
+Mar 30 18:19:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 297.4760 USDC — topping up 297.4760 USDC from servicer
+Mar 30 18:19:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (296.4760 USDC needed)
+Mar 30 18:19:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_1t_125t: funding_failed: servicer cannot cover Poly leg (296.4760 USDC needed) unwound=False
+Mar 30 18:19:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1284.0400 USDC — topping up 1284.0400 USDC from servicer
+Mar 30 18:19:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1283.0400 USDC needed)
+Mar 30 18:19:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for champions-league-2026_arsenal: funding_failed: servicer cannot cover Poly leg (1283.0400 USDC needed) unwound=False
+Mar 30 18:19:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 325.2100 USDC — topping up 325.2100 USDC from servicer
+Mar 30 18:19:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (324.2100 USDC needed)
+Mar 30 18:19:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_colorado_avalanche: funding_failed: servicer cannot cover Poly leg (324.2100 USDC needed) unwound=False
+Mar 30 18:19:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 30.7990 USDC — topping up 30.7990 USDC from servicer
+Mar 30 18:19:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (29.7990 USDC needed)
+Mar 30 18:19:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for microstrategy-sells-bitcoin-by-date_date_jun_30_2026: funding_failed: servicer cannot cover Poly leg (29.7990 USDC needed) unwound=False
+Mar 30 18:19:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 8.5040 USDC — topping up 8.5040 USDC from servicer
+Mar 30 18:19:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (7.5040 USDC needed)
+Mar 30 18:19:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_hou: funding_failed: servicer cannot cover Poly leg (7.5040 USDC needed) unwound=False
+Mar 30 18:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 770.2300 USDC — topping up 770.2300 USDC from servicer
+Mar 30 18:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (769.2300 USDC needed)
+Mar 30 18:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_t1: funding_failed: servicer cannot cover Poly leg (769.2300 USDC needed) unwound=False
+Mar 30 18:19:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 519.8400 USDC — topping up 519.8400 USDC from servicer
+Mar 30 18:19:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (518.8400 USDC needed)
+Mar 30 18:19:47 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_minnesota_wild: funding_failed: servicer cannot cover Poly leg (518.8400 USDC needed) unwound=False
+Mar 30 18:19:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 23.1610 USDC — topping up 23.1610 USDC from servicer
+Mar 30 18:19:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (22.1610 USDC needed)
+Mar 30 18:19:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_dallas_stars: funding_failed: servicer cannot cover Poly leg (22.1610 USDC needed) unwound=False
+Mar 30 18:19:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 565.0140 USDC — topping up 565.0140 USDC from servicer
+Mar 30 18:19:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (564.0140 USDC needed)
+Mar 30 18:19:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_sas: funding_failed: servicer cannot cover Poly leg (564.0140 USDC needed) unwound=False
+Mar 30 18:19:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 6.1660 USDC — topping up 6.1660 USDC from servicer
+Mar 30 18:19:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (5.1660 USDC needed)
+Mar 30 18:19:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: funding_failed: servicer cannot cover Poly leg (5.1660 USDC needed) unwound=False
+Mar 30 18:19:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 167.5110 USDC — topping up 167.5110 USDC from servicer
+Mar 30 18:19:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (166.5110 USDC needed)
+Mar 30 18:19:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ipos-before-2027_discord: funding_failed: servicer cannot cover Poly leg (166.5110 USDC needed) unwound=False
+Mar 30 18:19:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 104.9920 USDC — topping up 104.9920 USDC from servicer
+Mar 30 18:19:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (103.9920 USDC needed)
+Mar 30 18:19:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jon_ossoff: funding_failed: servicer cannot cover Poly leg (103.9920 USDC needed) unwound=False
+Mar 30 18:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 18.0520 USDC — topping up 18.0520 USDC from servicer
+Mar 30 18:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (17.0520 USDC needed)
+Mar 30 18:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_vegas_golden_knights: funding_failed: servicer cannot cover Poly leg (17.0520 USDC needed) unwound=False
+Mar 30 18:19:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 56.5300 USDC — topping up 56.5300 USDC from servicer
+Mar 30 18:19:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (55.5300 USDC needed)
+Mar 30 18:19:56 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for space-x-ipo-closing-market-cap-above_above_1_2t: funding_failed: servicer cannot cover Poly leg (55.5300 USDC needed) unwound=False
+Mar 30 18:19:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 493.6400 USDC — topping up 493.6400 USDC from servicer
+Mar 30 18:19:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (492.6400 USDC needed)
+Mar 30 18:19:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for us-house-2026_democratic_party: funding_failed: servicer cannot cover Poly leg (492.6400 USDC needed) unwound=False
+Mar 30 18:19:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 23.8800 USDC — topping up 23.8800 USDC from servicer
+Mar 30 18:19:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (22.8800 USDC needed)
+Mar 30 18:19:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for inflation-2026_above_10p: funding_failed: servicer cannot cover Poly leg (22.8800 USDC needed) unwound=False
+Mar 30 18:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1845.4660 USDC — topping up 1845.4660 USDC from servicer
+Mar 30 18:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1844.4660 USDC needed)
+Mar 30 18:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_2: funding_failed: servicer cannot cover Poly leg (1844.4660 USDC needed) unwound=False
+Mar 30 18:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 10.8490 USDC — topping up 10.8490 USDC from servicer
+Mar 30 18:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (9.8490 USDC needed)
+Mar 30 18:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_cle: funding_failed: servicer cannot cover Poly leg (9.8490 USDC needed) unwound=False
+Mar 30 18:20:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 2.8660 USDC — topping up 2.8660 USDC from servicer
+Mar 30 18:20:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1.8660 USDC needed)
+Mar 30 18:20:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for la-liga-winner-2026_atletico_madrid: funding_failed: servicer cannot cover Poly leg (1.8660 USDC needed) unwound=False
+Mar 30 18:20:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 393.7000 USDC — topping up 393.7000 USDC from servicer
+Mar 30 18:20:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (392.7000 USDC needed)
+Mar 30 18:20:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_geng_esports: funding_failed: servicer cannot cover Poly leg (392.7000 USDC needed) unwound=False
+Mar 30 18:20:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.2040 USDC — topping up 1.2040 USDC from servicer
+Mar 30 18:20:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.2040 USDC needed)
+Mar 30 18:20:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for seoul-mayor-election-winner-2026_na_kyung_won: funding_failed: servicer cannot cover Poly leg (0.2040 USDC needed) unwound=False
+Mar 30 18:20:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 27.2140 USDC — topping up 27.2140 USDC from servicer
+Mar 30 18:20:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (26.2140 USDC needed)
+Mar 30 18:20:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for gop-nominee-2028_thomas_massie: funding_failed: servicer cannot cover Poly leg (26.2140 USDC needed) unwound=False
+Mar 30 18:20:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 2.3440 USDC — topping up 2.3440 USDC from servicer
+Mar 30 18:20:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1.3440 USDC needed)
+Mar 30 18:20:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_over_15t: funding_failed: servicer cannot cover Poly leg (1.3440 USDC needed) unwound=False
+Mar 30 18:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 486.5840 USDC — topping up 486.5840 USDC from servicer
+Mar 30 18:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (485.5840 USDC needed)
+Mar 30 18:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for inflation-2026_above_3p: funding_failed: servicer cannot cover Poly leg (485.5840 USDC needed) unwound=False
+Mar 30 18:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 7.4260 USDC — topping up 7.4260 USDC from servicer
+Mar 30 18:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (6.4260 USDC needed)
+Mar 30 18:20:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for discord-ipo-closing-market-cap_ipo_under_15b: funding_failed: servicer cannot cover Poly leg (6.4260 USDC needed) unwound=False
+Mar 30 18:20:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 493.6400 USDC — topping up 493.6400 USDC from servicer
+Mar 30 18:20:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (492.6400 USDC needed)
+Mar 30 18:20:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for us-house-2026_democratic_party: funding_failed: servicer cannot cover Poly leg (492.6400 USDC needed) unwound=False
+Mar 30 18:20:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.8930 USDC — topping up 1.8930 USDC from servicer
+Mar 30 18:20:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.8930 USDC needed)
+Mar 30 18:20:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for jerome-powell-out-fed-chair_may_14: funding_failed: servicer cannot cover Poly leg (0.8930 USDC needed) unwound=False
+Mar 30 18:20:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 311.8090 USDC — topping up 311.8090 USDC from servicer
+Mar 30 18:20:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (310.8090 USDC needed)
+Mar 30 18:20:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tiktok-acquirer_elonmusk_x: funding_failed: servicer cannot cover Poly leg (310.8090 USDC needed) unwound=False
+Mar 30 18:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.8080 USDC — topping up 1.8080 USDC from servicer
+Mar 30 18:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.8080 USDC needed)
+Mar 30 18:20:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_7: funding_failed: servicer cannot cover Poly leg (0.8080 USDC needed) unwound=False
+Mar 30 18:20:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 84.3520 USDC — topping up 84.3520 USDC from servicer
+Mar 30 18:20:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (83.3520 USDC needed)
+Mar 30 18:20:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for tiktok-acquirer_meta: funding_failed: servicer cannot cover Poly leg (83.3520 USDC needed) unwound=False
+Mar 30 18:20:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.0340 USDC — topping up 1.0340 USDC from servicer
+Mar 30 18:20:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0340 USDC needed)
+Mar 30 18:20:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for ecb-interest-rates-april-2026_cut_50bps: funding_failed: servicer cannot cover Poly leg (0.0340 USDC needed) unwound=False
+Mar 30 18:20:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 12.7760 USDC — topping up 12.7760 USDC from servicer
+Mar 30 18:20:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (11.7760 USDC needed)
+Mar 30 18:20:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jb_pritzker: funding_failed: servicer cannot cover Poly leg (11.7760 USDC needed) unwound=False
+Mar 30 18:20:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 5.0920 USDC — topping up 5.0920 USDC from servicer
+Mar 30 18:20:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (4.0920 USDC needed)
+Mar 30 18:20:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_nyk: funding_failed: servicer cannot cover Poly leg (4.0920 USDC needed) unwound=False
+Mar 30 18:20:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.1420 USDC — topping up 1.1420 USDC from servicer
+Mar 30 18:20:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.1420 USDC needed)
+Mar 30 18:20:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_spac: funding_failed: servicer cannot cover Poly leg (0.1420 USDC needed) unwound=False
+Mar 30 18:21:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 📋 [ArbReporter]   servicer on Base: 5.8318
+Mar 30 18:21:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💓 [funder tick] starting — 2026-03-30T18:21:19Z
+Mar 30 18:21:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 🔄 tend() check — vault=0x1182054b82f96c110698eAe6Af73FdA013599F9d servicer=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF
+Mar 30 18:21:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1774894699, cooldown=60s) — calling
+Mar 30 18:21:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ✅ tend() sent: tx=0x2829951b15f7d9821dc66b39e1f2452ad8450555bfad2e55af70174d3a6301a1
+Mar 30 18:21:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] 💼 Servicer status [2026-03-30T18:21:19Z]: address=0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF USDC=5.8318 ETH=0.010128 poly_float_min=3.0 kalshi_float_min=3.0 gas_reserve=0.0100 ETH
+Mar 30 18:21:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] [2026-03-30T18:21:19Z] Vault liquidity: idle=1.00 required_idle=5.00 pending_redeem=0.00 servicer=5.83 deployable=0.83 under_pressure=False
+Mar 30 18:21:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Poly float low (0.0000 < 3.0) but servicer only has 5.8318 USDC — skipping
+Mar 30 18:21:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Kalshi float low (0.0000 < 3.0) but servicer only has 5.8318 USDC — skipping
+Mar 30 18:21:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3614378]: 💸 [ArbFunder] ℹ️ Opinion float low (0.0000 < 5.0) but servicer only has 5.8318 USDC — skipping bridge
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
