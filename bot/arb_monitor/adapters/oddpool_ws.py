@@ -155,9 +155,16 @@ def resolve_event_key(
         catalog = _fetch_catalog(api_key, base_url)
         if catalog and int_id in catalog:
             return catalog[int_id]
+        # Integer id not in catalog — fall through to title normalization
     except (ValueError, TypeError):
-        pass
-    # Fallback: normalize the title
+        # event_id is already a string slug (e.g. 'sp500-add-q1-2026') — use it directly.
+        # Oddpool REST returns string slugs as event_id, not integers; these ARE
+        # the event_key and must not be passed through normalize_title() which
+        # would mangle them (e.g. 'S&P' → 's-p', breaking the channel name).
+        str_id = str(event_id).strip()
+        if str_id:
+            return str_id
+    # Integer id not in catalog — normalize the title as last resort
     fallback = normalize_title(event_title)
     log(
         f"⚠️ event_id={event_id!r} not in catalog — "

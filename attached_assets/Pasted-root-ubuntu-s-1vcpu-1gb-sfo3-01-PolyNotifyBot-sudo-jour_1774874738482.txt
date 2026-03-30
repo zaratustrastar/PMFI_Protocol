@@ -1,0 +1,35 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "5 minutes ago" | grep -E "OddpoolWS|ws_token|catalog|ODDPOOL|oddpool_ws|WS pre-pass|fetch_book"
+Mar 30 12:40:18 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+Mar 30 12:41:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+Mar 30 12:42:08 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='sp500-add-q1-2026' not in catalog — using title fallback: 'S&P 500 Additions in Q1 2026' → 's-p-500-additions-in-q1-2026'
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='next-president-vietnam' not in catalog — using title fallback: 'Next President of Vietnam' → 'next-president-of-vietnam'
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='tim-cook-out-apple-ceo-march-31' not in catalog — using title fallback: 'Tim Cook Out as Apple CEO by March 31' → 'tim-cook-out-as-apple-ceo-by-march-31'
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='next-president-vietnam' not in catalog — using title fallback: 'Next President of Vietnam' → 'next-president-of-vietnam'
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='nba-playoffs-teams' not in catalog — using title fallback: 'Which Teams Will Make the NBA Playoffs?' → 'which-teams-will-make-the-nba-playoffs'
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='epstein-foul-play-confirmed' not in catalog — using title fallback: 'Jeffrey Epstein Foul Play Confirmed' → 'jeffrey-epstein-foul-play-confirmed'
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='sp500-add-q1-2026' not in catalog — using title fallback: 'S&P 500 Additions in Q1 2026' → 's-p-500-additions-in-q1-2026'
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='epstein-foul-play-confirmed' not in catalog — using title fallback: 'Jeffrey Epstein Foul Play Confirmed' → 'jeffrey-epstein-foul-play-confirmed'
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='next-president-vietnam' not in catalog — using title fallback: 'Next President of Vietnam' → 'next-president-of-vietnam'
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='sp500-add-q1-2026' not in catalog — using title fallback: 'S&P 500 Additions in Q1 2026' → 's-p-500-additions-in-q1-2026'
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ No auth response within 5s — proceeding
+Mar 30 12:42:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] 📬 Subscribed to 5 book channels (no outcome suffix)
+Mar 30 12:42:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ WS thread timed out — returning empty, Gamma fallback will run
+Mar 30 12:42:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] 📊 WS batch complete: 0/10 pairs resolved
+Mar 30 12:43:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+Mar 30 12:43:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='sp500-add-q1-2026' not in catalog — using title fallback: 'S&P 500 Additions in Q1 2026' → 's-p-500-additions-in-q1-2026'
+Mar 30 12:43:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='next-president-vietnam' not in catalog — using title fallback: 'Next President of Vietnam' → 'next-president-of-vietnam'
+Mar 30 12:43:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='tim-cook-out-apple-ceo-march-31' not in catalog — using title fallback: 'Tim Cook Out as Apple CEO by March 31' → 'tim-cook-out-as-apple-ceo-by-march-31'
+Mar 30 12:43:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='next-president-vietnam' not in catalog — using title fallback: 'Next President of Vietnam' → 'next-president-of-vietnam'
+Mar 30 12:43:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='nba-playoffs-teams' not in catalog — using title fallback: 'Which Teams Will Make the NBA Playoffs?' → 'which-teams-will-make-the-nba-playoffs'
+Mar 30 12:43:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='epstein-foul-play-confirmed' not in catalog — using title fallback: 'Jeffrey Epstein Foul Play Confirmed' → 'jeffrey-epstein-foul-play-confirmed'
+Mar 30 12:43:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='sp500-add-q1-2026' not in catalog — using title fallback: 'S&P 500 Additions in Q1 2026' → 's-p-500-additions-in-q1-2026'
+Mar 30 12:43:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='epstein-foul-play-confirmed' not in catalog — using title fallback: 'Jeffrey Epstein Foul Play Confirmed' → 'jeffrey-epstein-foul-play-confirmed'
+Mar 30 12:43:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='next-president-vietnam' not in catalog — using title fallback: 'Next President of Vietnam' → 'next-president-of-vietnam'
+Mar 30 12:43:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ event_id='sp500-add-q1-2026' not in catalog — using title fallback: 'S&P 500 Additions in Q1 2026' → 's-p-500-additions-in-q1-2026'
+Mar 30 12:43:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ WS connection error: server rejected WebSocket connection: HTTP 502
+Mar 30 12:43:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] 📊 WS batch complete: 0/10 pairs resolved
+Mar 30 12:44:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "5 minutes ago" | grep -iE "error|exception|traceback|failed|timeout" | grep -i "ws\|oddpool\|websocket" | head -30
+Mar 30 12:43:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3565511]: 📡 [Arb/OddpoolWS] ⚠️ WS connection error: server rejected WebSocket connection: HTTP 502
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
