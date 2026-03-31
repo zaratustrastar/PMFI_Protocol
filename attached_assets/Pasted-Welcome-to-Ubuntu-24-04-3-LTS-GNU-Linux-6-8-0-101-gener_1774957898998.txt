@@ -1,0 +1,162 @@
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-101-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Tue Mar 31 10:27:38 UTC 2026
+
+  System load:  0.2                Processes:             140
+  Usage of /:   72.6% of 23.17GB   Users logged in:       1
+  Memory usage: 15%                IPv4 address for eth0: 147.182.206.35
+  Swap usage:   6%                 IPv4 address for eth0: 10.48.0.5
+
+Expanded Security Maintenance for Applications is not enabled.
+
+54 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+*** System restart required ***
+Last login: Tue Mar 31 09:24:41 2026 from 162.243.188.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot
+nano .env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# nano .env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+python3 - <<'EOF'
+from py_clob_client.client import ClobClient
+from py_clob_client.clob_types import ApiCreds
+
+# Replace with your new private key
+PRIVATE_KEY = "0x71ef0fd2bd17ce76b390e1a05e0295828e94fc27b8bd58c91c2437128975107e"
+HOST = "https://clob.polymarket.com"
+CHAIN_ID = 137  # Polygon
+
+client = ClobClient(HOST, key=PRIVATE_KEY, chain_id=CHAIN_ID)
+creds = client.create_api_key()
+print(f"POLY_API_KEY={creds.api_key}")
+print(f"POLY_API_SECRET={creds.api_secret}")
+print(f"POLY_API_PASSPHRASE={creds.api_passphrase}")
+EOF
+POLY_API_KEY=f1c1c42d-7a91-b310-bbd7-4f8e03db1e77
+POLY_API_SECRET=Hw7dllF348EVQK990yklImiMO6ZMLEe0OmiyQnZIEWM=
+POLY_API_PASSPHRASE=82f6d7585683c71ce7f41d8e2786534854ed407bdf9076bfe93213579ce460b3
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+nano .env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# nano .env
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+git pull
+sudo systemctl restart psniper-bot
+remote: Enumerating objects: 18, done.
+remote: Counting objects: 100% (18/18), done.
+remote: Compressing objects: 100% (4/4), done.
+remote: Total 11 (delta 7), reused 11 (delta 7), pack-reused 0 (from 0)
+Unpacking objects: 100% (11/11), 63.71 KiB | 1.99 MiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   018e664..2a3a625  main       -> origin/main
+Updating 018e664..2a3a625
+Fast-forward
+ .../Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1774949155054.txt           |  42 +++++++++++++++++
+ .../Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-syst_1774949119145.txt           | 113 ++++++++++++++++++++++++++++++++++++++++++++++
+ attached_assets/Screenshot_2026-03-31_at_11.37.35_1774949858921.png                            | Bin 0 -> 62412 bytes
+ bot/arb_monitor/core/arb_funder.py                                                             |  15 ++++--
+ bot/arb_monitor/core/arb_nav.py                                                                |  15 ++++--
+ 5 files changed, 177 insertions(+), 8 deletions(-)
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1774949155054.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-syst_1774949119145.txt
+ create mode 100644 attached_assets/Screenshot_2026-03-31_at_11.37.35_1774949858921.png
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep "Poly servicer cash"
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep --line-buffered "Poly servicer cash"
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep --line-buffered -E "Poly servicer|funding_failed|Balance sufficient|ArbExecLoop|cycle"
+Mar 31 11:50:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-coach-of-the-year-winner-2026_mitch_johnson: depth_insufficient: poly_fillable=11923 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 31 11:50:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fomc-2026-06-17_no_change venue2=kalshi | score=340.7 AR=0.04× net_edge=0.90% conf=0.96 | days=77.51d size=$8197.17
+Mar 31 11:50:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for fomc-2026-06-17_no_change: depth_insufficient: poly_fillable=103433 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 31 11:50:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_nicolas_maduro venue2=kalshi | score=325.9 AR=0.05× net_edge=4.00% conf=0.91 | days=274.51d size=$6674.09
+Mar 31 11:50:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for venezuela-leader-2026_nicolas_maduro: depth_insufficient: poly_fillable=6835 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 31 11:50:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_lal venue2=opinion | score=230.3 AR=0.02× net_edge=0.40% conf=0.92 | days=91.51d size=$15599.73
+Mar 31 11:50:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (7798.9340 USDC needed)
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_lal: funding_failed: servicer cannot cover Poly leg (7798.9340 USDC needed) unwound=False
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_sas venue2=opinion | score=181.8 AR=0.02× net_edge=0.40% conf=0.89 | days=91.51d size=$12740.72
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (6370.0360 USDC needed)
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_sas: funding_failed: servicer cannot cover Poly leg (6370.0360 USDC needed) unwound=False
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_gretchen_whitmer venue2=opinion | score=181.4 AR=0.03× net_edge=8.30% conf=0.79 | days=951.30d size=$7362.33
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (65.4400 USDC needed)
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_gretchen_whitmer: funding_failed: servicer cannot cover Poly leg (65.4400 USDC needed) unwound=False
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=champions-league-2026_arsenal venue2=opinion | score=173.7 AR=0.02× net_edge=0.40% conf=0.75 | days=60.30d size=$9494.01
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (1767.6900 USDC needed)
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for champions-league-2026_arsenal: funding_failed: servicer cannot cover Poly leg (1767.6900 USDC needed) unwound=False
+Mar 31 11:51:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=balance-of-power-2026-midterms_democrats_sweep venue2=kalshi | score=158.2 AR=0.02× net_edge=1.00% conf=0.96 | days=216.51d size=$9692.74
+Mar 31 11:51:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for balance-of-power-2026-midterms_democrats_sweep: depth_insufficient: poly_fillable=19029 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 31 11:51:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=stanley-cup-2026_colorado_avalanche venue2=opinion | score=97.0 AR=0.07× net_edge=1.80% conf=0.51 | days=90.30d size=$2550.15
+Mar 31 11:51:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (324.3700 USDC needed)
+Mar 31 11:51:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for stanley-cup-2026_colorado_avalanche: funding_failed: servicer cannot cover Poly leg (324.3700 USDC needed) unwound=False
+Mar 31 11:51:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=lol-lck-2026-winner_t1 venue2=opinion | score=67.9 AR=0.08× net_edge=6.10% conf=0.52 | days=274.51d size=$1591.86
+Mar 31 11:51:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (795.7200 USDC needed)
+Mar 31 11:51:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_t1: funding_failed: servicer cannot cover Poly leg (795.7200 USDC needed) unwound=False
+Mar 31 11:51:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=french-presidential-election-2027_jordan_bardella venue2=kalshi | score=65.4 AR=0.02× net_edge=1.90% conf=0.67 | days=394.51d size=$5531.97
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for french-presidential-election-2027_jordan_bardella: depth_insufficient: poly_fillable=21404 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_josh_shapiro venue2=kalshi | score=59.7 AR=0.00× net_edge=1.20% conf=0.99 | days=951.30d size=$13131.51
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_josh_shapiro: depth_insufficient: poly_fillable=301628 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 👁 Skipping satoshi-move-btc-2026_satoshi_move_btc_2026_yes: token not yet resolved from slug (will retry on next Oddpool cycle)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_hou venue2=opinion | score=52.7 AR=0.06× net_edge=1.40% conf=0.95 | days=91.51d size=$971.16
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (8.0160 USDC needed)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_hou: funding_failed: servicer cannot cover Poly leg (8.0160 USDC needed) unwound=False
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=israel-pm-2045_naftali_bennett venue2=kalshi | score=52.2 AR=0.08× net_edge=5.90% conf=0.55 | days=274.51d size=$1206.03
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "2 min ago" | tail -50
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=7116983949742059... (side=YES) venue2=kalshi kalshi=KXPRESNOMD-28-BORO
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 📊 [Arb/Polymarket] 📖 get_best_prices(7116983949742059...): best_ask=0.038 best_bid=0.037 neg_risk=True last_trade=0.037 asks=126 bids=26
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXPRESNOMD-28-BORO': yes_ask=None no_ask=None
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.2000 | min_edge=0.0030 | live poly_ask=0.038 kalshi_ask=None
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.0380 quote=0.0380 slippage=+0.0000
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.9390 (opp_age=192s) — skipping slippage check
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.0230 | Oddpool net_edge=1.20% — proceeding to size
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0580 → 301628 contracts fillable ($13131.51 USDC) across 126 ask levels
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🎯 [Arb/Kalshi] 📏 [Kalshi/NO] depth walk: max_fill_price=0.9590 → 0 contracts fillable ($0.00 USDC)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=301628 contracts/$13131.51 (max_fill=0.0580) | depth_leg2=0 contracts/$0.00 (max_fill=0.9590)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=6992 depth_limited=0 → final=0
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ❌ depth_insufficient: poly_fillable=301628 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size.
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_josh_shapiro: depth_insufficient: poly_fillable=301628 leg2_fillable=0 — no contracts available at profitable prices. Headline edge exists but market is too thin at this size. unwound=False
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 👁 Skipping satoshi-move-btc-2026_satoshi_move_btc_2026_yes: token not yet resolved from slug (will retry on next Oddpool cycle)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_hou venue2=opinion | score=52.7 AR=0.06× net_edge=1.40% conf=0.95 | days=91.51d size=$971.16
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-champion-2026_hou (venue2=opinion)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 5070524871332365... for price check
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=5070524871332365... (side=YES) venue2=opinion opinion=103
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 📊 [Arb/Polymarket] 📖 get_best_prices(5070524871332365...): best_ask=0.016 best_bid=0.014 neg_risk=True last_trade=0.016 asks=133 bids=14
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.9690 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='103')
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.4000 | min_edge=0.0030 | live poly_ask=0.016 opinion_ask=0.969
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.0160 quote=0.0160 slippage=+0.0000
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.9690 quote=0.9690 slippage=+0.0000
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.0150 | Oddpool net_edge=1.40% — proceeding to size
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0280 → 56699 contracts fillable ($967.27 USDC) across 133 ask levels
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (501 contracts)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=56699 contracts/$967.27 (max_fill=0.0280) | depth_leg2=501 contracts/$0.00 (max_fill=0.9810)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=501 depth_limited=501 → final=501
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📐 Trade sizing: contract_count=501 (integer, depth-capped, matched) leg1_usdc=8.0160 leg2_usdc=485.4690 total_cost=493.4850
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 💰 On-demand funding check: poly=8.0160 USDC  opinion=485.4690 USDC
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 💸 [ArbFunder] ⚠️ Poly balance HTTP 401: {"error":"Unauthorized/Invalid api key"}
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 9.0160 USDC — topping up 9.0160 USDC from servicer
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 💸 [ArbFunder] ❌ [polymarket] Servicer ETH too low (0.000999 < 0.01 ETH reserve) — cannot fund
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (8.0160 USDC needed)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] ❌ Execution failed for nba-champion-2026_hou: funding_failed: servicer cannot cover Poly leg (8.0160 USDC needed) unwound=False
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=israel-pm-2045_naftali_bennett venue2=kalshi | score=52.2 AR=0.08× net_edge=5.90% conf=0.55 | days=274.51d size=$1206.03
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 🔍 Starting execution for pair israel-pm-2045_naftali_bennett (venue2=kalshi)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 5894593682939265... for price check
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXNEXTISRAELPM-45JAN01'
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: 'KXNEXTISRAELPM-45JAN01' → 'KXNEXTISRAELPM-45JAN01-YLEV' (from 12 markets, outcome_key='naftali_bennett', fallback to first)
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXNEXTISRAELPM-45JAN01' → 'KXNEXTISRAELPM-45JAN01-YLEV'
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=5894593682939265... (side=YES) venue2=kalshi kalshi=KXNEXTISRAELPM-45JAN01-YLEV
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 📊 [Arb/Polymarket] 📖 get_best_prices(5894593682939265...): best_ask=0.23 best_bid=0.22 neg_risk=True last_trade=0.230 asks=59 bids=17
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXNEXTISRAELPM-45JAN01-YLEV': yes_ask=None no_ask=None
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=5.9000 | min_edge=0.0030 | live poly_ask=0.23 kalshi_ask=None
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.2300 quote=0.2300 slippage=+0.0000
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.6900 (opp_age=263s) — skipping slippage check
+Mar 31 11:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3757380]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.0800 | Oddpool net_edge=5.90% — proceeding to size
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

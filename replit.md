@@ -94,7 +94,7 @@ V2 is an async Yearn-style vault: no live NAV required for user flows.
 - Auto-unwind leg 1 if leg 2 fails (Kalshi or Opinion)
 - `run_reporter_tick()` called before `run_funder_tick()` each cycle
 
-**Current V2 Contract**: `ARB_VAULT_V2_ADDRESS` (Base Mainnet) — set after deploy; see `docs/pmfi/DEPLOY_PARB_V2.md`
+**Current V2 Contract**: `0xAc2545695a53D3b57cC1a9118f51fF8efc9B0Ec8` (Base Mainnet) — set `ARB_VAULT_V2_ADDRESS` to this in VPS `.env`
 **Legacy V1 Contract**: `0x10f67BA7aB746a0DC8A48f0D74aA3a962328E689` — stays live until all V1 holders redeem
 
 ## Polymarket Trading Bot

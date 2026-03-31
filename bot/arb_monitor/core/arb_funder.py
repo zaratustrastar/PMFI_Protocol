@@ -674,7 +674,7 @@ def run_funder_tick() -> None:
     if not vault_address:
         log(
             "⚠️ ARB_VAULT_V2_ADDRESS not set — tend() will NOT be called. "
-            "Set ARB_VAULT_V2_ADDRESS=0x1182054b82f96c110698eAe6Af73FdA013599F9d to enable "
+            "Set ARB_VAULT_V2_ADDRESS=0xAc2545695a53D3b57cC1a9118f51fF8efc9B0Ec8 to enable "
             "the vault→servicer USDC flow. The funder will still distribute any "
             "USDC already in the servicer wallet."
         )
