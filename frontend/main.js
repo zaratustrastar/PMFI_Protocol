@@ -14,8 +14,7 @@ const ARB_VAULT_V2_ADDRESS  = window.PSNIPER_CONFIG?.ARB_VAULT_V2_ADDRESS || "";
 // Only wallets in this list can see and interact with the pARBITRAGE vault.
 // To open the vault to everyone, set this to an empty array: []
 const ARB_ALLOWED_WALLETS = [
-    '0xba32aa4cF8800b0e57c79900C11B9c839C6bAeAF',
-    '0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0',
+    '0xEdae94A822582324f19c89a057d694d833E6A6F0',
 ].map(a => a.toLowerCase());
 
 function _isArbAllowed(addr) {
