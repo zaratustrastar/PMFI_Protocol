@@ -1,0 +1,24 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "1 min ago" | grep -E "Poly balance|Poly servicer cash|balance read error"
+Mar 31 20:13:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:45 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:50 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:13:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:14:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:14:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:14:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:14:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:14:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:14:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:14:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3824409]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

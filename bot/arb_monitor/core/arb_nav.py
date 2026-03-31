@@ -259,41 +259,29 @@ def _get_servicer_balances() -> tuple[float, float, float]:
     poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
     if poly_api_key:
         try:
-            import requests, hmac as _hmac, hashlib, base64, time as _time
-            clob_url  = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
-            timestamp = str(int(_time.time()))
-            message   = timestamp + "GET" + "/balance-allowance"
-            if poly_api_secret:
-                sig = base64.b64encode(
-                    _hmac.new(
-                        base64.b64decode(poly_api_secret + "=" * (-len(poly_api_secret) % 4)),
-                        message.encode("utf-8"),
-                        hashlib.sha256,
-                    ).digest()
-                ).decode("utf-8")
-            else:
-                sig = ""
-            headers = {
-                "POLY-API-KEY":    poly_api_key,
-                "POLY-SIGNATURE":  sig,
-                "POLY-TIMESTAMP":  timestamp,
-                "POLY-PASSPHRASE": poly_api_passphrase,
-                "Content-Type":    "application/json",
-            }
-            resp = requests.get(
-                f"{clob_url}/balance-allowance",
-                headers=headers,
-                params={"asset_type": "USDC"},
-                timeout=10,
+            from py_clob_client.client import ClobClient
+            from py_clob_client.clob_types import ApiCreds, BalanceAllowanceParams, AssetType
+            clob_url    = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+            private_key = os.environ.get("POLY_PRIVATE_KEY", "")
+            creds = ApiCreds(
+                api_key=poly_api_key.strip(),
+                api_secret=poly_api_secret.strip(),
+                api_passphrase=poly_api_passphrase.strip(),
             )
-            if resp.status_code == 200:
-                data = resp.json()
-                raw = data.get("balance", data.get("usdc", "0"))
-                bal_raw = float(raw)
-                poly_cash = bal_raw / 1_000_000 if bal_raw > 1_000 else bal_raw
-                log(f"Poly servicer cash: {poly_cash:.4f} USDC (raw={raw})")
-            else:
-                log(f"⚠️ Poly balance HTTP {resp.status_code}: {resp.text[:120]}")
+            client = ClobClient(
+                clob_url,
+                key=private_key,
+                chain_id=137,
+                creds=creds,
+                signature_type=0,
+            )
+            result = client.get_balance_allowance(
+                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
+            )
+            raw = result.get("balance", "0")
+            bal_raw = float(raw)
+            poly_cash = bal_raw / 1_000_000 if bal_raw > 1_000 else bal_raw
+            log(f"Poly servicer cash: {poly_cash:.4f} USDC (raw={raw})")
         except Exception as e:
             log(f"⚠️ Error fetching poly servicer balance: {e}")
     else:

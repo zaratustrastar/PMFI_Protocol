@@ -1,0 +1,22 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "2 min ago" | grep -E "ArbFunder|Poly balance|balance read error|💰 Poly" | tail -20
+Mar 31 20:50:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] [2026-03-31T20:50:12Z] Servicer USDC available for float maintenance: 0.0000
+Mar 31 20:50:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=93
+Mar 31 20:50:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:50:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ℹ️ Poly float low (0.0000 < 3.0) but servicer only has 0.0000 USDC — skipping
+Mar 31 20:50:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ⚠️ Kalshi balance HTTP 401: {"error":{"code":"authentication_error","message":"authentication_error","detail
+Mar 31 20:50:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ℹ️ Kalshi float low (0.0000 < 3.0) but servicer only has 0.0000 USDC — skipping
+Mar 31 20:50:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ⚠️ Opinion balance: all endpoints failed — returning 0
+Mar 31 20:50:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ℹ️ Opinion float low (0.0000 < 5.0) but servicer only has 0.0000 USDC — skipping bridge
+Mar 31 20:51:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:51:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 50000.3100 USDC — topping up 50000.3100 USDC from servicer
+Mar 31 20:51:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ❌ [polymarket] Servicer has 0.0000 USDC — insufficient to top up 50000.3100 while keeping 5.00 safety buffer (needs 50005.3100)
+Mar 31 20:51:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:51:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 6908.9200 USDC — topping up 6908.9200 USDC from servicer
+Mar 31 20:51:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ❌ [polymarket] Servicer has 0.0000 USDC — insufficient to top up 6908.9200 while keeping 5.00 safety buffer (needs 6913.9200)
+Mar 31 20:51:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:51:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 6908.9200 USDC — topping up 6908.9200 USDC from servicer
+Mar 31 20:51:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ❌ [polymarket] Servicer has 0.0000 USDC — insufficient to top up 6908.9200 while keeping 5.00 safety buffer (needs 6913.9200)
+Mar 31 20:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 20:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 8515.2800 USDC — topping up 8515.2800 USDC from servicer
+Mar 31 20:51:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3829245]: 💸 [ArbFunder] ❌ [polymarket] Servicer has 0.0000 USDC — insufficient to top up 8515.2800 while keeping 5.00 safety buffer (needs 8520.2800)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
