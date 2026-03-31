@@ -450,7 +450,7 @@ def _get_platform_balance(venue: str) -> float:
             import requests, hmac as _hmac, hashlib, base64, time as _time
             clob_url  = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
             timestamp = str(int(_time.time()))
-            message   = timestamp + "GET" + "/balance"
+            message   = timestamp + "GET" + "/balance-allowance"
             if poly_api_secret:
                 sig = base64.b64encode(
                     _hmac.new(
@@ -468,11 +468,18 @@ def _get_platform_balance(venue: str) -> float:
                 "POLY-PASSPHRASE": poly_api_passphrase,
                 "Content-Type":    "application/json",
             }
-            resp = requests.get(f"{clob_url}/balance", headers=headers, timeout=10)
+            resp = requests.get(
+                f"{clob_url}/balance-allowance",
+                headers=headers,
+                params={"asset_type": "USDC"},
+                timeout=10,
+            )
             if resp.status_code == 200:
                 data = resp.json()
-                bal = float(data.get("balance", data.get("usdc", 0)))
-                log(f"💰 Poly balance: {bal:.4f} USDC")
+                raw = data.get("balance", data.get("usdc", "0"))
+                bal_raw = float(raw)
+                bal = bal_raw / 1_000_000 if bal_raw > 1_000 else bal_raw
+                log(f"💰 Poly balance: {bal:.4f} USDC (raw={raw})")
                 return bal
             log(f"⚠️ Poly balance HTTP {resp.status_code}: {resp.text[:120]}")
             return 0.0

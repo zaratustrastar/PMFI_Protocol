@@ -1,0 +1,113 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl status psniper-bot
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-03-30 21:38:51 UTC; 11h ago
+   Main PID: 3642598 (python3)
+      Tasks: 6 (limit: 4653)
+     Memory: 133.5M (peak: 134.1M)
+        CPU: 1h 19min 38.521s
+     CGroup: /system.slice/psniper-bot.service
+             └─3642598 /usr/bin/python3 bot/bot_v7.py
+
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ❌ Yes: 67.1 - NO BIDS (illiquid, valued at $0)
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 46888386888771735899...
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:       Full token: 468883868887717358996928183279103492059600043180917038715144884030724>
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ❌ Yes: 64.3 - NO BIDS (illiquid, valued at $0)
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 78486200154613929876...
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8770 → 30683 contracts filla>
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (1556>
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=30683 contracts/$26462.84 (max_fill=0.87>
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=15566 depth_limited=15566 → final=>
+lines 1-20/20 (END)...skipping...
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-03-30 21:38:51 UTC; 11h ago
+   Main PID: 3642598 (python3)
+      Tasks: 6 (limit: 4653)
+     Memory: 133.5M (peak: 134.1M)
+        CPU: 1h 19min 38.521s
+     CGroup: /system.slice/psniper-bot.service
+             └─3642598 /usr/bin/python3 bot/bot_v7.py
+
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ❌ Yes: 67.1 - NO BIDS (illiquid, valued at $0)
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 46888386888771735899...
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:       Full token: 468883868887717358996928183279103492059600043180917038715144884030724>
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ❌ Yes: 64.3 - NO BIDS (illiquid, valued at $0)
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 78486200154613929876...
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8770 → 30683 contracts filla>
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (1556>
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=30683 contracts/$26462.84 (max_fill=0.87>
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=15566 depth_limited=15566 → final=>
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+lines 1-20/20 (END)...skipping...
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-03-30 21:38:51 UTC; 11h ago
+   Main PID: 3642598 (python3)
+      Tasks: 6 (limit: 4653)
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+● psniper-bot.service - pSNIPER Bot V7
+     Loaded: loaded (/etc/systemd/system/psniper-bot.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-03-30 21:38:51 UTC; 11h ago
+   Main PID: 3642598 (python3)
+      Tasks: 6 (limit: 4653)
+     Memory: 133.5M (peak: 134.1M)
+        CPU: 1h 19min 38.521s
+     CGroup: /system.slice/psniper-bot.service
+             └─3642598 /usr/bin/python3 bot/bot_v7.py
+
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ❌ Yes: 67.1 - NO BIDS (illiquid, valued at $0)
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 46888386888771735899...
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:       Full token: 46888386888771735899692818327910349205960004318091703871514488403072467193836
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ❌ Yes: 64.3 - NO BIDS (illiquid, valued at $0)
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 78486200154613929876...
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.8770 → 30683 contracts fillable ($26462.>
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (15566 contracts)
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=30683 contracts/$26462.84 (max_fill=0.8770) | depth_>
+Mar 31 09:24:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=15566 depth_limited=15566 → final=15566
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+lines 1-20/20 (END)

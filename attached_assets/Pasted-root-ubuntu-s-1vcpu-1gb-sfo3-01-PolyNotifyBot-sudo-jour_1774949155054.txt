@@ -1,0 +1,42 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "5 min ago" | tail -40
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: 🔁 [ArbExecLoop] ❌ Execution failed for dem-nominee-2028_jon_ossoff: funding_failed: servicer cannot cover Poly leg (107.5250 USDC needed) unwound=False
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📊 Got 1 bids, 19 asks
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 98533395341749983082...
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=inflation-2026_above_10p venue2=opinion | score=18.1 AR=0.11× net_edge=8.40% conf=0.26 | days=274.61d size=$626.14
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 🔍 Starting execution for pair inflation-2026_above_10p (venue2=opinion)
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 7673130906198078... for price check
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=7673130906198078... (side=YES) venue2=opinion opinion=344
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📊 Got 2 bids, 18 asks
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 74405677891854741300...
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: 📊 [Arb/Polymarket] 📖 get_best_prices(7673130906198078...): best_ask=0.065 best_bid=0.064 neg_risk=False last_trade=0.935 asks=51 bids=23
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.8500 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='344')
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=8.4000 | min_edge=0.0030 | live poly_ask=0.065 opinion_ask=0.85
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.0650 quote=0.0650 slippage=+0.0000
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.8500 quote=0.8500 slippage=+0.0000
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.0850 | Oddpool net_edge=8.40% — proceeding to size
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📊 Got 1 bids, 17 asks
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 51755965453913857230...
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1470 → 7922 contracts fillable ($632.16 USDC) across 51 ask levels
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (368 contracts)
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=7922 contracts/$632.16 (max_fill=0.1470) | depth_leg2=368 contracts/$0.00 (max_fill=0.9320)
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=368 depth_limited=368 → final=368
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 📐 Trade sizing: contract_count=368 (integer, depth-capped, matched) leg1_usdc=23.9200 leg2_usdc=312.8000 total_cost=336.7200
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: ⚡ [Arb/Executor] 💰 On-demand funding check: poly=23.9200 USDC  opinion=312.8000 USDC
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📊 Got 1 bids, 15 asks
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 66178260535641969210...
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📊 Got 1 bids, 17 asks
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ✅ Yes: 6.0 → liq value $0.01
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📖 Orderbook via CLOB client: 65593337933581143027...
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: 💸 [ArbFunder] ⚠️ Poly balance HTTP 404: <html>
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: <head><title>404 Not Found</title></head>
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: <body>
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: <center><h1>404 Not Found</h1></center>
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: <hr><center>nginx</c
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 24.9200 USDC — topping up 24.9200 USDC from servicer
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    📊 Got 1 bids, 17 asks
+Mar 31 09:25:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3642598]:    ✅ Yes: 6.0 → liq value $0.01
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
