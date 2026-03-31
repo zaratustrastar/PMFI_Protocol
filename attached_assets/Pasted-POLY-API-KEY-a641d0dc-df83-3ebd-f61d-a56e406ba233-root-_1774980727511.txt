@@ -1,0 +1,35 @@
+POLY_API_KEY=a641d0dc-df83-3ebd-f61d-a56e406ba233
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl restart psniper-bot && sleep 5 && sudo journalctl -u psniper-bot --since "1 min ago" | grep -E "Poly balance|401|Unauthorized"
+Mar 31 18:10:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:    📖 Orderbook via CLOB client: 60640120450371219557...
+Mar 31 18:10:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 60640120450371219557645736485401557093730446685962094983442588263539993693885
+Mar 31 18:10:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 33232266645693743242360113782846289369111862842261259283273131238140198069954
+Mar 31 18:10:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 80027402304319749255824809564378401748755176732070899513328564468772675008999
+Mar 31 18:10:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 25677894403658628584784556504915649401177748727950500615131784836432605444757
+Mar 31 18:10:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:    📖 Orderbook via CLOB client: 89744013950177979263...
+Mar 31 18:10:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 89744013950177979263972771932686093606025880307336809983753945919397222389271
+Mar 31 18:10:57 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 112077158372930810222949911947897454626412290838649401345718572110306921861417
+Mar 31 18:11:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 35672498649045014124013227320352056495678725948177507309289857165545835305916
+Mar 31 18:11:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:    📖 Orderbook via CLOB client: 21856318575924236401...
+Mar 31 18:11:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 21856318575924236401599725588636429251083466686142600438602160698848074241612
+Mar 31 18:11:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:    📖 Orderbook via CLOB client: 79964013377010924858...
+Mar 31 18:11:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 79964013377010924858173736159812920217906281037668105610525045638432055801148
+Mar 31 18:11:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 71084791699069979141332244012837014903551855895359262177937431393904349482360
+Mar 31 18:11:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]: 📈 [Arb/NAV] ⚠️ Poly balance HTTP 401: {"error":"Unauthorized/Invalid api key"}
+Mar 31 18:11:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]: 📈 [Arb/NAV] ⚠️ Kalshi balance HTTP 401: {"error":{"code":"authentication_error","message":"authentication_error","details":"INCORRECT_API_KE
+Mar 31 18:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]: 💸 [ArbFunder] ⚠️ Poly balance HTTP 401: {"error":"Unauthorized/Invalid api key"}
+Mar 31 18:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]: 💸 [ArbFunder] ⚠️ Kalshi balance HTTP 401: {"error":{"code":"authentication_error","message":"authentication_error","detail
+Mar 31 18:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 16522041626515504925403751949665518027527950705858477693715764015741644769725
+Mar 31 18:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:    📖 Orderbook via CLOB client: 25999723538385014010...
+Mar 31 18:11:14 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 25999723538385014010053820518545750038546699932105208601515071899848058408094
+Mar 31 18:11:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:    📖 Orderbook via CLOB client: 11237194634012918496...
+Mar 31 18:11:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 112371946340129184960918173540079350514642743753523559607357730722282148845537
+Mar 31 18:11:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:    📖 Orderbook via CLOB client: 53081315401174852186...
+Mar 31 18:11:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 53081315401174852186406941080900323885353595408533460368225146967270047598843
+Mar 31 18:11:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 42787093210562452679715032178534218262571441422809000763107924911559679491401
+Mar 31 18:11:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 81198543464320767832243926151879146849351187635151340143208220279993733598136
+Mar 31 18:11:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]:       Full token: 79935592824783552533835343187685487176254067044607001333782877751613066440162
+Mar 31 18:11:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1690 → 40147 contracts fillable ($6423.52 USDC) across 57 ask levels
+Mar 31 18:11:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 40147 contracts at ≤0.1690 → $6423.52 USDC fillable
+Mar 31 18:11:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.1690 → 40147 contracts fillable ($6423.52 USDC) across 57 ask levels
+Mar 31 18:11:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3807917]: 🔀 [Arb/Oddpool] 📏 CLOB depth (fallback): 40147 contracts at ≤0.1690 → $6423.52 USDC fillable
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

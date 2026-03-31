@@ -454,7 +454,7 @@ def _get_platform_balance(venue: str) -> float:
             if poly_api_secret:
                 sig = base64.b64encode(
                     _hmac.new(
-                        poly_api_secret.encode("utf-8"),
+                        base64.b64decode(poly_api_secret),
                         message.encode("utf-8"),
                         hashlib.sha256,
                     ).digest()

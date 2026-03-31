@@ -1,0 +1,62 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "$(sudo systemctl show psniper-bot --property=ActiveEnterTimestamp | cut -d= -f2)" | head -60
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 💰 On-demand funding check: poly=0.8640 USDC  opinion=93.1200 USDC
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 💸 [ArbFunder] ⚠️ Poly balance HTTP 401: {"error":"Unauthorized/Invalid api key"}
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.8640 USDC — topping up 1.8640 USDC from servicer
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 💸 [ArbFunder] ❌ [polymarket] Servicer ETH too low (0.000000 < 0.01 ETH reserve) — cannot fund
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.8640 USDC needed)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_space: funding_failed: servicer cannot cover Poly leg (0.8640 USDC needed) unwound=False
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=acquisitions-before-2027_viking_therapeutics venue2=opinion | score=1.1 AR=0.05× net_edge=3.90% conf=0.35 | days=274.26d size=$60.78
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 🔍 Starting execution for pair acquisitions-before-2027_viking_therapeutics (venue2=opinion)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 9024364352226696... for price check
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=9024364352226696... (side=NO) venue2=opinion opinion=337
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 📊 [Arb/Polymarket] 📖 get_best_prices(9024364352226696...): best_ask=0.76 best_bid=0.74 neg_risk=False last_trade=0.760 asks=20 bids=41
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.2000 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='337')
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=3.9000 | min_edge=0.0030 | live poly_ask=0.76 opinion_ask=0.2
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.7600 quote=0.7600 slippage=+0.0000
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.2000 quote=0.2000 slippage=+0.0000
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.0400 | Oddpool net_edge=3.90% — proceeding to size
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.7970 → 102 contracts fillable ($79.74 USDC) across 20 ask levels
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (39 contracts)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=102 contracts/$79.74 (max_fill=0.7970) | depth_leg2=39 contracts/$0.00 (max_fill=0.2370)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=39 depth_limited=39 → final=39
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📐 Trade sizing: contract_count=39 (integer, depth-capped, matched) leg1_usdc=29.6400 leg2_usdc=7.8000 total_cost=37.4400
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 💰 On-demand funding check: poly=29.6400 USDC  opinion=7.8000 USDC
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ============================================================
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 🔄 BACKGROUND NAV REFRESH
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ============================================================
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 💸 [ArbFunder] ⚠️ Poly balance HTTP 401: {"error":"Unauthorized/Invalid api key"}
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 30.6400 USDC — topping up 30.6400 USDC from servicer
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 💸 [ArbFunder] ❌ [polymarket] Servicer ETH too low (0.000000 < 0.01 ETH reserve) — cannot fund
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (29.6400 USDC needed)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 🔁 [ArbExecLoop] ❌ Execution failed for acquisitions-before-2027_viking_therapeutics: funding_failed: servicer cannot cover Poly leg (29.6400 USDC needed) unwound=False
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=spacex-ticker-prediction_spac venue2=opinion | score=1.1 AR=0.02× net_edge=2.80% conf=0.52 | days=639.26d size=$129.26
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 🔍 Starting execution for pair spacex-ticker-prediction_spac (venue2=opinion)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 9437524297628055... for price check
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=9437524297628055... (side=YES) venue2=opinion opinion=169
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 📊 On-chain: supply=402.0291, buffer=4.95, forwarded=106.06, expected=99.92, lastRoundId=15
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ❌ Error reading withdrawal exclusions: Could not decode contract function call to getVaultState() with return data: b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00i\xb1\xd2n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15\xcbFj"\x94x\x13<\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00K\x8b=\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\xf4\xb3\xd7\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06RK\xa9\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', output_types: ['uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'bool', 'bool', 'uint256']
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]:    🔄 Withdrawal bridge in-transit: $5.00 (from withdrawal_state.json)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 📝 RoundId cache synced from chain: 15
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ============================================================
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ============================================================
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ✈️ In-flight (at deposit addr): $0.00
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 📡 Fetching positions with cost basis for 0xd1EdE018...
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 📊 [Arb/Polymarket] 📖 get_best_prices(9437524297628055...): best_ask=0.002 best_bid=0.001 neg_risk=True last_trade=0.001 asks=78 bids=1
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.9690 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='169')
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=2.8000 | min_edge=0.0030 | live poly_ask=0.002 opinion_ask=0.969
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.0020 quote=0.0020 slippage=+0.0000
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.9690 quote=0.9690 slippage=+0.0000
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.0290 | Oddpool net_edge=2.80% — proceeding to size
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.0280 → 15073 contracts fillable ($129.37 USDC) across 78 ask levels
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (66 contracts)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=15073 contracts/$129.37 (max_fill=0.0280) | depth_leg2=66 contracts/$0.00 (max_fill=0.9950)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=66 depth_limited=66 → final=66
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 📐 Trade sizing: contract_count=66 (integer, depth-capped, matched) leg1_usdc=0.1320 leg2_usdc=63.9540 total_cost=64.0860
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] 💰 On-demand funding check: poly=0.1320 USDC  opinion=63.9540 USDC
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 💸 [ArbFunder] ⚠️ Poly balance HTTP 401: {"error":"Unauthorized/Invalid api key"}
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 1.1320 USDC — topping up 1.1320 USDC from servicer
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 💸 [ArbFunder] ❌ [polymarket] Servicer ETH too low (0.000000 < 0.01 ETH reserve) — cannot fund
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.1320 USDC needed)
+Mar 31 17:53:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3802731]: 🔁 [ArbExecLoop] ❌ Execution failed for spacex-ticker-prediction_spac: funding_failed: servicer cannot cover Poly leg (0.1320 USDC needed) unwound=False
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
