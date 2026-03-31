@@ -15,6 +15,8 @@ const ARB_VAULT_V2_ADDRESS  = window.PSNIPER_CONFIG?.ARB_VAULT_V2_ADDRESS || "";
 // To open the vault to everyone, set this to an empty array: []
 const ARB_ALLOWED_WALLETS = [
     '0xEdae94A822582324f19c89a057d694d833E6A6F0',
+    '0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0',
+    '0xa403d02015aa533662F03970A2F2259331358AdF',
 ].map(a => a.toLowerCase());
 
 function _isArbAllowed(addr) {
