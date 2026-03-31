@@ -1,0 +1,22 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "5 min ago" | grep -E "Poly balance|servicer ETH|funding_failed" | tail -20
+Mar 31 18:49:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.2440 USDC needed)
+Mar 31 18:49:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 🔁 [ArbExecLoop] ❌ Execution failed for seoul-mayor-election-winner-2026_na_kyung_won: funding_failed: servicer cannot cover Poly leg (0.2440 USDC needed) unwound=False
+Mar 31 18:49:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 18:49:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.8700 USDC needed)
+Mar 31 18:49:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 🔁 [ArbExecLoop] ❌ Execution failed for openai-ipo-closing-market-cap_ipo_over_15t: funding_failed: servicer cannot cover Poly leg (0.8700 USDC needed) unwound=False
+Mar 31 18:49:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 18:49:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (11.3520 USDC needed)
+Mar 31 18:49:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 🔁 [ArbExecLoop] ❌ Execution failed for discord-ipo-closing-market-cap_ipo_under_15b: funding_failed: servicer cannot cover Poly leg (11.3520 USDC needed) unwound=False
+Mar 31 18:49:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 18:49:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (2.6260 USDC needed)
+Mar 31 18:49:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 🔁 [ArbExecLoop] ❌ Execution failed for fed-rate-cuts-2026_cuts_6: funding_failed: servicer cannot cover Poly leg (2.6260 USDC needed) unwound=False
+Mar 31 18:49:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 18:49:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (0.0400 USDC needed)
+Mar 31 18:49:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 🔁 [ArbExecLoop] ❌ Execution failed for ecb-interest-rates-april-2026_cut_50bps: funding_failed: servicer cannot cover Poly leg (0.0400 USDC needed) unwound=False
+Mar 31 18:49:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 18:49:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (28.7490 USDC needed)
+Mar 31 18:49:52 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 🔁 [ArbExecLoop] ❌ Execution failed for gold-above-end-of-june_price_6200: funding_failed: servicer cannot cover Poly leg (28.7490 USDC needed) unwound=False
+Mar 31 18:49:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 💸 [ArbFunder] ⚠️ Poly balance read error: Invalid base64-encoded string: number of data characters (37) cannot be 1 more than a multiple of 4
+Mar 31 18:49:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (88.0200 USDC needed)
+Mar 31 18:49:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3813558]: 🔁 [ArbExecLoop] ❌ Execution failed for lol-lck-2026-winner_geng_esports: funding_failed: servicer cannot cover Poly leg (88.0200 USDC needed) unwound=False
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

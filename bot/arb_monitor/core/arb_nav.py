@@ -266,7 +266,7 @@ def _get_servicer_balances() -> tuple[float, float, float]:
             if poly_api_secret:
                 sig = base64.b64encode(
                     _hmac.new(
-                        base64.b64decode(poly_api_secret),
+                        base64.b64decode(poly_api_secret + "=" * (-len(poly_api_secret) % 4)),
                         message.encode("utf-8"),
                         hashlib.sha256,
                     ).digest()
