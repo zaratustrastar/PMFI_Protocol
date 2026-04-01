@@ -145,7 +145,7 @@ def _sign_report(
     digest = _eth_signed_message_hash(struct_hash)
     from eth_account._utils.signing import sign_message_hash
     pk = Account.from_key(private_key)
-    sig = pk.signHash(digest)
+    sig = pk.sign_hash(digest)
     return "0x" + sig.signature.hex()
 
 

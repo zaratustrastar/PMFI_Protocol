@@ -1,0 +1,39 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sleep 60 && sudo journalctl -u psniper-bot --since "2 min ago" | grep -E "Poly balance|Poly servicer cash|balance read error|ArbFunder"
+Mar 31 21:34:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Mar 31 21:34:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 50000.3100 USDC — topping up 50000.3100 USDC from servicer
+Mar 31 21:34:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] ❌ [polymarket] Servicer has 0.0000 USDC — insufficient to top up 50000.3100 while keeping 5.00 safety buffer (needs 50005.3100)
+Mar 31 21:34:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Mar 31 21:34:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 3528.5200 USDC — topping up 3528.5200 USDC from servicer
+Mar 31 21:34:25 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] ❌ [polymarket] Servicer has 0.0000 USDC — insufficient to top up 3528.5200 while keeping 5.00 safety buffer (needs 3533.5200)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "3 min ago" | tail -30
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=11.9000 | min_edge=0.0030 | live poly_ask=0.18 opinion_ask=0.7
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.1800 quote=0.1800 slippage=+0.0000
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.7000 quote=0.7000 slippage=+0.0000
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.1200 | Oddpool net_edge=11.90% — proceeding to size
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.2970 → 18654 contracts fillable ($4239.38 USDC) across 43 ask levels
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (3041 contracts)
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=18654 contracts/$4239.38 (max_fill=0.2970) | depth_leg2=3041 contracts/$0.00 (max_fill=0.8170)
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=3041 depth_limited=3041 → final=3041
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📐 Trade sizing: contract_count=3041 (integer, depth-capped, matched) leg1_usdc=547.3800 leg2_usdc=2128.7000 total_cost=2676.0800
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 💰 On-demand funding check: poly=547.3800 USDC  opinion=2128.7000 USDC
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] 💸 [polymarket] Balance 0.0000 < target 548.3800 USDC — topping up 548.3800 USDC from servicer
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] ❌ [polymarket] Servicer has 0.0000 USDC — insufficient to top up 548.3800 while keeping 5.00 safety buffer (needs 553.3800)
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] ❌ funding_failed: servicer cannot cover Poly leg (547.3800 USDC needed)
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔁 [ArbExecLoop] ❌ Execution failed for btc-max-2026_value_above_120k: funding_failed: servicer cannot cover Poly leg (547.3800 USDC needed) unwound=False
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_lal venue2=opinion | score=373.6 AR=0.02× net_edge=0.60% conf=0.92 | days=91.10d size=$16746.53
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-champion-2026_lal (venue2=opinion)
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 7079975818972526... for price check
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=7079975818972526... (side=NO) venue2=opinion opinion=103
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📊 [Arb/Polymarket] 📖 get_best_prices(7079975818972526...): best_ask=0.962 best_bid=0.961 neg_risk=True last_trade=0.039 asks=38 bids=121
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.0330 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='103')
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.6000 | min_edge=0.0030 | live poly_ask=0.962 opinion_ask=0.033
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.9620 quote=0.9630 slippage=-0.0010
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.0330 quote=0.0330 slippage=+0.0000
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.0050 | Oddpool net_edge=0.60% — proceeding to size
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📊 [Arb/Polymarket] 📏 [Poly] depth walk: max_fill_price=0.9640 → 17414 contracts fillable ($16773.36 USDC) across 38 ask levels
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (8704 contracts)
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=17414 contracts/$16773.36 (max_fill=0.9640) | depth_leg2=8704 contracts/$0.00 (max_fill=0.0350)
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=8704 depth_limited=8704 → final=8704
+Mar 31 21:34:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: ⚡ [Arb/Executor] 📐 Trade sizing: contract_count=8704 (integer, depth-capped, matched) leg1_usdc=8373.2480 leg2_usdc=287.2320 total_cost=8660.4800
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

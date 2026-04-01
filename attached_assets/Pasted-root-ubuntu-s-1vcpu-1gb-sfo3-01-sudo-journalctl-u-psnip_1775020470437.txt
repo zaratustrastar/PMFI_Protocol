@@ -1,0 +1,32 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo journalctl -u psniper-bot --since "30 min ago" | grep -E "Reporter|report|cooldown|waterfall|tend|Report:" | tail -30
+Apr 01 05:07:02 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] ✅ tend() sent: tx=0x8ed7e3bdcebc3d007b1fc5664605a63ba46e48643b79447cfbf1a6b4f46572e7
+Apr 01 05:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=5.90% AR=0.08× conf=0.15 fill=32 score=0.4 | gross=7.00¢ days=273.8
+Apr 01 05:07:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=7.00¢ poly=0.76 venue2(kalshi/NO)=0.17 days=273.8 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Apr 01 05:07:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.03× conf=0.16 fill=21 score=0.1 | gross=3.00¢ days=273.8
+Apr 01 05:07:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=3.00¢ poly=0.81 venue2(kalshi/NO)=0.16 days=273.8 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Apr 01 05:07:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_phoebe_bridgers': net_edge=1.90% AR=0.03× conf=0.05 fill=3 score=0.0 | gross=4.00¢ days=273.8
+Apr 01 05:07:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_phoebe_bridgers' edge=4.00¢ poly=0.56 venue2(kalshi/NO)=0.40 days=273.8 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+Apr 01 05:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_selena_gomez: score=0.39 < min_score=1.00 (net_edge=5.9000%)
+Apr 01 05:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_jack_antonoff: score=0.09 < min_score=1.00 (net_edge=1.9000%)
+Apr 01 05:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔁 [ArbExecLoop] ⏭ Skipping taylorswift-wedding-attend-2028_phoebe_bridgers: score=0.00 < min_score=1.00 (net_edge=1.9000%)
+Apr 01 05:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] ✅ Waterfall: no pending redemptions
+Apr 01 05:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] 🔄 [AutoClaim] Scanning all requests for CLAIMABLE status…
+Apr 01 05:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] 📋 [AutoClaim] Total deposit requests: 1
+Apr 01 05:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] ℹ️ [AutoClaim] No claimable deposit requests
+Apr 01 05:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] 📋 [AutoClaim] Total redeem requests: 0
+Apr 01 05:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] ℹ️ [AutoClaim] No claimable redeem requests
+Apr 01 05:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] 📋 Report firing — reason: cooldown elapsed
+Apr 01 05:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] ✅ Building report — reason: cooldown elapsed (last=0, cooldown=3600s)
+Apr 01 05:10:11 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] Computing conservative reportedAssets...
+Apr 01 05:10:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter]   vault idle USDC: 0.0000
+Apr 01 05:10:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter]   servicer on Base: 0.0000
+Apr 01 05:10:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter]   poly_cash=0.0000 kalshi_cash=0.0000 opinion_cash=0.0000
+Apr 01 05:10:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter]   settled_pnl=0.0000
+Apr 01 05:10:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] reportedAssets: raw=0.0000 → haircut(95%)=0.0000 USDC
+Apr 01 05:10:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 📋 [ArbReporter] ⚠️ Report error (non-fatal): 'LocalAccount' object has no attribute 'signHash'
+Apr 01 05:10:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 01 05:10:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775020023, cooldown=60s) — calling
+Apr 01 05:10:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 💸 [ArbFunder] ✅ tend() sent: tx=0xd53b9f301a7b11ab3ef49df3cf7a0d7b75096aa127075b082f16cd39bf3695bc
+Apr 01 05:10:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=5.90% AR=0.08× conf=0.15 fill=32 score=0.4 | gross=7.00¢ days=273.8
+Apr 01 05:10:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3835301]: 🔀 [Arb/Oddpool] ✅ pair='taylorswift-wedding-attend-2028_selena_gomez' edge=7.00¢ poly=0.76 venue2(kalshi/NO)=0.17 days=273.8 token=resolved no_token=set title='Who Will Attend Taylor Swift and Travis '
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
