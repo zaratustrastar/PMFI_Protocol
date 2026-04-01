@@ -1,0 +1,123 @@
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-101-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Wed Apr  1 22:13:29 UTC 2026
+
+  System load:  0.09               Processes:             136
+  Usage of /:   75.4% of 23.17GB   Users logged in:       1
+  Memory usage: 14%                IPv4 address for eth0: 147.182.206.35
+  Swap usage:   7%                 IPv4 address for eth0: 10.48.0.5
+
+Expanded Security Maintenance for Applications is not enabled.
+
+68 updates can be applied immediately.
+2 of these updates are standard security updates.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+*** System restart required ***
+Last login: Wed Apr  1 21:11:24 2026 from 162.243.190.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd /root/PolyNotifyBot && git pull && sudo systemctl restart psniper-bot
+remote: Enumerating objects: 15, done.
+remote: Counting objects: 100% (15/15), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 9 (delta 6), reused 9 (delta 6), pack-reused 0 (from 0)
+Unpacking objects: 100% (9/9), 100.32 KiB | 1.62 MiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   6971d66..a7ae343  main       -> origin/main
+Updating 6971d66..a7ae343
+Fast-forward
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775080874939.txt | 258 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ attached_assets/Screenshot_2026-04-02_at_00.05.34_1775081137098.png                              | Bin 0 -> 109610 bytes
+ bot/arb_monitor/core/arb_executor.py                                                             |  21 +++--
+ 3 files changed, 272 insertions(+), 7 deletions(-)
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775080874939.txt
+ create mode 100644 attached_assets/Screenshot_2026-04-02_at_00.05.34_1775081137098.png
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "1 hour ago" | grep -E "\[ArbExecLoop\]|\[ArbFunder\]|\[Arb/Executor\]" | tail -80
+Apr 01 22:29:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=0.1000 | min_edge=0.0030 | live poly_ask=0.108 kalshi_ask=None
+Apr 01 22:29:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.1080 quote=0.1080 slippage=+0.0000
+Apr 01 22:29:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]: ⚡ [Arb/Executor] ⚠️ kalshi live orderbook unavailable — using Oddpool quoted price 0.8800 (opp_age=66s) — skipping slippage check
+Apr 01 22:29:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.0120 | Oddpool net_edge=0.10% — proceeding to size
+Apr 01 22:29:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=10343 contracts/$1174.75 (max_fill=0.1170) | depth_leg2=0 contracts/$0.00 (max_fill=0.8890)
+Apr 01 22:29:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=0 depth_limited=0 → final=0
+Apr 01 22:30:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 🟢 Arb execution loop started
+Apr 01 22:30:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 01 22:30:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 🚀 Execution loop daemon thread started (poll_interval=30s)
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=5.00 pending_redeem=0.00 deployable=0.20 under_pressure=False unwind_needed=False
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-01T22:30:24Z
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775082427, cooldown=60s) — calling
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=792
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 📤 TX nonce=792 → 0x7d6cdcc0040414e99545a4e9b49175eb4dda6d3154ff3717afd6084b099aafe2
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] ✅ tend() sent: tx=0x7d6cdcc0040414e99545a4e9b49175eb4dda6d3154ff3717afd6084b099aafe2
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 💼 Servicer [2026-04-01T22:30:24Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=5.2014 ETH=0.010155 safety_buffer=5.0 gas_reserve=0.0100 ETH
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=5.00 pending_redeem=0.00 servicer=5.20 deployable=0.20 under_pressure=False
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 💼 Servicer deployable: 5.2014 USDC total − 5.00 safety_buffer = 0.2014 deployable
+Apr 01 22:30:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.2014 USDC in servicer wallet
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 📊 223 opportunities fetched, sorted by score desc
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 👁 Skipping next-president-vietnam_tran_thanh_man: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 👁 Skipping next-president-vietnam_tran_cam_tu: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 💼 english-premier-league-winner-2026_man_city: size_usdc=100000.00 capped to servicer_deployable=0.20 USDC
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=english-premier-league-winner-2026_man_city venue2=opinion | score=9025.5 AR=0.12× net_edge=1.70% conf=0.75 | days=55.06d size=$0.20
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 🔍 Starting execution for pair english-premier-league-winner-2026_man_city (venue2=opinion)
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 3555750546894242... for price check
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=3555750546894242... (side=NO) venue2=opinion opinion=80
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.0920 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='80')
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.7000 | min_edge=0.0030 | live poly_ask=0.89 opinion_ask=0.092
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.8900 quote=0.8900 slippage=+0.0000
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.0920 quote=0.0920 slippage=+0.0000
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.0180 | Oddpool net_edge=1.70% — proceeding to size
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (0 contracts)
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=113832 contracts/$102102.58 (max_fill=0.9050) | depth_leg2=0 contracts/$0.00 (max_fill=0.1070)
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=0 depth_limited=0 → final=0
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] ❌ Unhandled error in execution cycle: name 'half_budget' is not defined
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 01 22:35:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=5.00 pending_redeem=0.00 deployable=0.20 under_pressure=False unwind_needed=False
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-01T22:35:22Z
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775082627, cooldown=60s) — calling
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=793
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 📤 TX nonce=793 → 0x6626d7951b4814e4b379b3668ed2897084030adddabd3715f28690a203d3f62e
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] ✅ tend() sent: tx=0x6626d7951b4814e4b379b3668ed2897084030adddabd3715f28690a203d3f62e
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 💼 Servicer [2026-04-01T22:35:22Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=5.2014 ETH=0.010155 safety_buffer=5.0 gas_reserve=0.0100 ETH
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=5.00 pending_redeem=0.00 servicer=5.20 deployable=0.20 under_pressure=False
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 💼 Servicer deployable: 5.2014 USDC total − 5.00 safety_buffer = 0.2014 deployable
+Apr 01 22:35:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.2014 USDC in servicer wallet
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 📊 222 opportunities fetched, sorted by score desc
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 👁 Skipping next-president-vietnam_tran_thanh_man: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 👁 Skipping next-president-vietnam_tran_cam_tu: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 💼 english-premier-league-winner-2026_man_city: size_usdc=100000.00 capped to servicer_deployable=0.20 USDC
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=english-premier-league-winner-2026_man_city venue2=opinion | score=9058.7 AR=0.12× net_edge=1.70% conf=0.75 | days=55.06d size=$0.20
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 🔍 Starting execution for pair english-premier-league-winner-2026_man_city (venue2=opinion)
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] ↔️ kalshi_side=YES → buying NO on Poly. Using NO token 3555750546894242... for price check
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=3555750546894242... (side=NO) venue2=opinion opinion=80
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.0920 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='80')
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=1.7000 | min_edge=0.0030 | live poly_ask=0.89 opinion_ask=0.092
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.8900 quote=0.8900 slippage=+0.0000
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.0920 quote=0.0920 slippage=+0.0000
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.0180 | Oddpool net_edge=1.70% — proceeding to size
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (0 contracts)
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=114252 contracts/$102480.58 (max_fill=0.9050) | depth_leg2=0 contracts/$0.00 (max_fill=0.1070)
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=0 depth_limited=0 → final=0
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] ❌ Unhandled error in execution cycle: name 'half_budget' is not defined
+Apr 01 22:36:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=5.00 pending_redeem=0.00 deployable=0.20 under_pressure=False unwind_needed=False
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-01T22:36:42Z
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775082925, cooldown=60s) — calling
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=794
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 📤 TX nonce=794 → 0x989156b6c208a920d40f18ef980417a4db6feee7369eb88ba58b4b66c9df3ebf
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] ✅ tend() sent: tx=0x989156b6c208a920d40f18ef980417a4db6feee7369eb88ba58b4b66c9df3ebf
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 💼 Servicer [2026-04-01T22:36:42Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=5.2014 ETH=0.010154 safety_buffer=5.0 gas_reserve=0.0100 ETH
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=5.00 pending_redeem=0.00 servicer=5.20 deployable=0.20 under_pressure=False
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 💸 [ArbFunder] 💼 Servicer deployable: 5.2014 USDC total − 5.00 safety_buffer = 0.2014 deployable
+Apr 01 22:37:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3997730]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.2014 USDC in servicer wallet
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

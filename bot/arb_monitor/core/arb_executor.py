@@ -768,8 +768,9 @@ def execute_arb(
     if contract_count < 1:
         if budget_contract_count < 1:
             result.error = (
-                f"trade_too_small: budget={half_budget:.2f} / max_ask={max_leg_ask:.4f} "
-                f"= {half_budget/max_leg_ask:.4f} contracts < 1 minimum"
+                f"trade_too_small: budget={total_budget:.2f} / "
+                f"combined_cost={combined_cost_per_contract:.4f} "
+                f"= {total_budget/combined_cost_per_contract:.4f} contracts < 1 minimum"
             )
         else:
             result.error = (

@@ -20,7 +20,7 @@ import threading
 import os
 from ..adapters.oddpool import fetch_opportunities, ArbOpportunity
 from ..core.arb_executor import execute_arb
-from ..core.arb_funder import run_tend_tick, get_servicer_deployable_usdc
+from ..core.arb_funder import run_tend_tick, get_servicer_deployable_usdc, _get_platform_balance
 from ..core.arb_reporter import run_reporter_tick
 from ..core.arb_positions_db import (
     upsert_position, get_open_positions, get_total_deployed_usdc
@@ -172,17 +172,41 @@ def _execution_cycle():
 
     # ── Servicer capital check: log deployable capital for this cycle ─────────
     servicer_deployable = 0.0
+    poly_platform_bal   = 0.0
+    kalshi_platform_bal = 0.0
+    opinion_platform_bal = 0.0
     try:
         servicer_deployable = get_servicer_deployable_usdc()
         log(f"💼 Cycle deployable capital: {servicer_deployable:.4f} USDC in servicer wallet")
-        if servicer_deployable <= 0:
-            log(
-                "⚠️ No deployable capital in servicer wallet — "
-                "skipping trade execution (waiting for vault tend() or new deposits)"
-            )
-            return
     except Exception as e:
         log(f"⚠️ Could not read servicer capital (non-fatal, continuing): {e}")
+
+    # Read existing platform balances — these can cover gap top-ups without needing
+    # additional servicer capital (with gap-based deposits, only the delta is sent).
+    try:
+        poly_platform_bal    = _get_platform_balance("polymarket")
+        kalshi_platform_bal  = _get_platform_balance("kalshi")
+        opinion_platform_bal = _get_platform_balance("opinion")
+        log(
+            f"💼 Platform balances: poly={poly_platform_bal:.4f} "
+            f"kalshi={kalshi_platform_bal:.4f} opinion={opinion_platform_bal:.4f} USDC"
+        )
+    except Exception as e:
+        log(f"⚠️ Could not read platform balances (non-fatal): {e}")
+
+    total_available_capital = (
+        servicer_deployable + poly_platform_bal +
+        max(kalshi_platform_bal, opinion_platform_bal)
+    )
+
+    if total_available_capital <= 0.10:
+        log(
+            f"⚠️ No deployable capital anywhere (servicer={servicer_deployable:.4f} "
+            f"poly={poly_platform_bal:.4f} kalshi={kalshi_platform_bal:.4f} "
+            f"opinion={opinion_platform_bal:.4f}) — "
+            "skipping trade execution (waiting for vault tend() or new deposits)"
+        )
+        return
 
     if not ARB_USE_ODDPOOL_ONLY:
         log("ℹ️ ARB_USE_ODDPOOL_ONLY=false — execution loop skipped (legacy mode)")
@@ -306,16 +330,20 @@ def _execution_cycle():
                     f"by liquidity budget (remaining={liq_budget_remaining:.2f})"
                 )
 
-        # ── Servicer capital cap: size to what the servicer wallet can actually fund ──
-        # Both legs combined cost ~size_usdc. Cap to servicer deployable so we
-        # don't enter execute_arb only to fail at the funding step after expensive
-        # orderbook fetches and slippage checks.
-        if servicer_deployable > 0 and size_usdc > servicer_deployable:
+        # ── Capital cap: size to what's actually available (servicer + existing platforms) ──
+        # With gap-based deposits, servicer only needs to cover the delta between
+        # current platform balance and required leg amount. Include existing platform
+        # balances so we don't block trades that are already partially or fully funded.
+        v2_bal = kalshi_platform_bal if getattr(opp, "venue2", "kalshi") == "kalshi" else opinion_platform_bal
+        opp_total_available = servicer_deployable + poly_platform_bal + v2_bal
+        if size_usdc > opp_total_available:
             log(
                 f"💼 {opp.pair_id}: size_usdc={size_usdc:.2f} capped to "
-                f"servicer_deployable={servicer_deployable:.2f} USDC"
+                f"opp_total_available={opp_total_available:.2f} USDC "
+                f"(servicer={servicer_deployable:.2f} + poly={poly_platform_bal:.2f} "
+                f"+ {getattr(opp, 'venue2', 'kalshi')}={v2_bal:.2f})"
             )
-            size_usdc = servicer_deployable
+            size_usdc = opp_total_available
 
         if size_usdc <= 0:
             log(f"⏭ Skipping {opp.pair_id}: no budget remaining")

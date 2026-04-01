@@ -740,37 +740,44 @@ def fund_both_legs_for_trade(
     venue2_before = _get_platform_balance(venue2)
     venue2_target = venue2_usdc
 
-    # Trade-driven funding (not gap-based top-ups):
+    # Gap-based trade funding:
     # If the platform already has enough balance for this trade → no deposit.
-    # If it doesn't (even partially) → deposit the FULL required amount for this trade.
-    # This ensures each deposit is a complete, self-contained trade allocation,
-    # not a delta on top of whatever residual balance happened to be sitting there.
+    # If it has a partial balance → send only the delta needed to reach the target,
+    # subject to the venue's minimum deposit floor.
+    # This maximises capital efficiency: platforms accumulate balance across trades
+    # and the servicer only ever covers the shortfall, not the full leg amount.
     poly_min  = _VENUE_MIN_DEPOSIT.get("polymarket", 1.0)
     v2_min    = _VENUE_MIN_DEPOSIT.get(venue2, 1.0)
 
     if poly_before >= poly_target:
-        poly_deposit = 0.0   # already funded for this trade
+        poly_deposit = 0.0
         log(f"✅ Poly already has {poly_before:.4f} >= {poly_target:.4f} — no deposit needed")
     else:
-        # Deposit the full trade requirement (not the delta), enforcing venue minimum
-        poly_deposit = max(poly_target, poly_min)
-        if poly_deposit > poly_target:
+        # Gap-based: only send what's needed to reach the target, enforcing venue minimum.
+        # This allows servicer to top up even when the platform has partial balance,
+        # rather than requiring the full leg amount from scratch every time.
+        poly_gap_raw = poly_target - poly_before
+        poly_deposit = max(poly_gap_raw, poly_min)
+        if poly_deposit > poly_gap_raw:
             log(
-                f"📌 Poly trade_amount={poly_target:.4f} < min_deposit={poly_min} "
+                f"📌 Poly gap={poly_gap_raw:.4f} < min_deposit={poly_min} "
                 f"— bumping to minimum"
             )
+        log(f"📤 Poly needs {poly_deposit:.4f} USDC (has={poly_before:.4f} target={poly_target:.4f} gap={poly_gap_raw:.4f})")
 
     if venue2_before >= venue2_target:
-        venue2_deposit = 0.0  # already funded for this trade
+        venue2_deposit = 0.0
         log(f"✅ {venue2} already has {venue2_before:.4f} >= {venue2_target:.4f} — no deposit needed")
     else:
-        # Deposit the full trade requirement (not the delta), enforcing venue minimum
-        venue2_deposit = max(venue2_target, v2_min)
-        if venue2_deposit > venue2_target:
+        # Gap-based: only send what's needed to reach the target, enforcing venue minimum.
+        venue2_gap_raw = venue2_target - venue2_before
+        venue2_deposit = max(venue2_gap_raw, v2_min)
+        if venue2_deposit > venue2_gap_raw:
             log(
-                f"📌 {venue2} trade_amount={venue2_target:.4f} < min_deposit={v2_min} "
+                f"📌 {venue2} gap={venue2_gap_raw:.4f} < min_deposit={v2_min} "
                 f"— bumping to minimum"
             )
+        log(f"📤 {venue2} needs {venue2_deposit:.4f} USDC (has={venue2_before:.4f} target={venue2_target:.4f} gap={venue2_gap_raw:.4f})")
 
     log(
         f"📊 Balances: poly={poly_before:.4f} (required={poly_target:.4f} deposit={poly_deposit:.4f}) | "
