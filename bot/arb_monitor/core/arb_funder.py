@@ -725,6 +725,14 @@ def fund_both_legs_for_trade(
         return False, msg
 
     # ── Step 2 & 3: Read current platform balances and compute gaps ───────
+    # Minimum deposit thresholds enforced by each venue.
+    # Sending below the minimum results in a rejected/lost deposit.
+    _VENUE_MIN_DEPOSIT = {
+        "opinion":    3.0,   # Opinion Labs: $3 minimum deposit
+        "polymarket": 1.0,   # Polymarket CLOB: $1 effective minimum
+        "kalshi":     1.0,   # Kalshi: $1 effective minimum
+    }
+
     log("📊 Reading current platform balances...")
     poly_before   = _get_platform_balance("polymarket")
     poly_target   = poly_usdc
@@ -733,6 +741,17 @@ def fund_both_legs_for_trade(
     venue2_before = _get_platform_balance(venue2)
     venue2_target = venue2_usdc
     venue2_gap    = max(0.0, venue2_target - venue2_before)
+
+    # Enforce minimum deposit amounts: if a gap is positive but smaller than the
+    # venue's minimum, bump it to the minimum to prevent a rejected deposit.
+    poly_min  = _VENUE_MIN_DEPOSIT.get("polymarket", 1.0)
+    v2_min    = _VENUE_MIN_DEPOSIT.get(venue2, 1.0)
+    if 0 < poly_gap < poly_min:
+        log(f"📌 Poly gap={poly_gap:.4f} < min_deposit={poly_min} — bumping to minimum")
+        poly_gap = poly_min
+    if 0 < venue2_gap < v2_min:
+        log(f"📌 {venue2} gap={venue2_gap:.4f} < min_deposit={v2_min} — bumping to minimum")
+        venue2_gap = v2_min
 
     log(
         f"📊 Balances: poly={poly_before:.4f} (target={poly_target:.4f} gap={poly_gap:.4f}) | "

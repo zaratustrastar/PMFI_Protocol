@@ -1,0 +1,88 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "🚀 Executing|💰 fund_both|📤|✅ Both legs|❌ funding"
+Apr 01 21:26:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: deposit timeout after 180s — polymarket=0.0000/7.6720 | opinion=0.0000/0.2640
+Apr 01 21:26:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=hottest-years-2026_number_1 venue2=opinion | score=438.8 AR=0.16× net_edge=11.60% conf=0.36 | days=273.11d size=$17.11
+Apr 01 21:26:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=7.9200 USDC | opinion=1.7930 USDC (total=9.7130)
+Apr 01 21:26:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (7.9200 + 1.7930) + safety_buffer (5.00) = 14.7130 needed
+Apr 01 21:26:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=btc-max-2026_value_below_35k venue2=opinion | score=435.9 AR=0.05× net_edge=4.10% conf=0.84 | days=274.32d size=$17.11
+Apr 01 21:26:30 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=7.9200 USDC | opinion=2.6180 USDC (total=10.5380)
+Apr 01 21:26:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (7.9200 + 2.6180) + safety_buffer (5.00) = 15.5380 needed
+Apr 01 21:26:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=la-liga-winner-2026_barcelona venue2=opinion | score=396.6 AR=0.03× net_edge=0.40% conf=0.93 | days=58.11d size=$17.11
+Apr 01 21:26:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=8.4700 USDC | opinion=2.4750 USDC (total=10.9450)
+Apr 01 21:26:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (8.4700 + 2.4750) + safety_buffer (5.00) = 15.9450 needed
+Apr 01 21:26:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_lal venue2=opinion | score=395.4 AR=0.02× net_edge=0.60% conf=0.92 | days=90.11d size=$17.11
+Apr 01 21:26:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=7.6720 USDC | opinion=0.2640 USDC (total=7.9360)
+Apr 01 21:26:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (7.6720 + 0.2640) + safety_buffer (5.00) = 12.9360 needed
+Apr 01 21:26:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=champions-league-2026_arsenal venue2=opinion | score=249.2 AR=0.03× net_edge=0.50% conf=0.67 | days=58.90d size=$17.11
+Apr 01 21:26:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=2.9700 USDC | opinion=7.9640 USDC (total=10.9340)
+Apr 01 21:26:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (2.9700 + 7.9640) + safety_buffer (5.00) = 15.9340 needed
+Apr 01 21:26:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=gop-nominee-2028_marco_rubio venue2=kalshi | score=195.9 AR=0.00× net_edge=1.30% conf=0.99 | days=949.90d size=$17.11
+Apr 01 21:26:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_gretchen_whitmer venue2=opinion | score=193.8 AR=0.03× net_edge=8.30% conf=0.83 | days=949.91d size=$17.11
+Apr 01 21:26:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=0.1440 USDC | opinion=8.1000 USDC (total=8.2440)
+Apr 01 21:26:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (0.1440 + 8.1000) + safety_buffer (5.00) = 13.2440 needed
+Apr 01 21:26:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=stanley-cup-2026_colorado_avalanche venue2=opinion | score=171.8 AR=0.07× net_edge=1.70% conf=0.88 | days=88.90d size=$17.11
+Apr 01 21:26:44 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=2.0000 USDC | opinion=7.8200 USDC (total=9.8200)
+Apr 01 21:26:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (2.0000 + 7.8200) + safety_buffer (5.00) = 14.8200 needed
+Apr 01 21:26:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_delcy_rodriguez venue2=kalshi | score=105.1 AR=0.01× net_edge=0.90% conf=0.95 | days=273.11d size=$17.11
+Apr 01 21:26:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-coach-of-the-year-winner-2026_mitch_johnson venue2=kalshi | score=92.6 AR=0.08× net_edge=2.00% conf=0.72 | days=89.11d size=$17.11
+Apr 01 21:26:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=us-house-2026_democratic_party venue2=opinion | score=91.8 AR=0.04× net_edge=2.20% conf=0.16 | days=215.11d size=$17.11
+Apr 01 21:26:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=1.5000 USDC | opinion=8.2700 USDC (total=9.7700)
+Apr 01 21:26:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (1.5000 + 8.2700) + safety_buffer (5.00) = 14.7700 needed
+Apr 01 21:26:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=us-house-2026_democratic_party venue2=opinion | score=79.2 AR=0.03× net_edge=1.90% conf=0.16 | days=215.11d size=$17.11
+Apr 01 21:26:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=1.5000 USDC | opinion=8.2700 USDC (total=9.7700)
+Apr 01 21:26:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (1.5000 + 8.2700) + safety_buffer (5.00) = 14.7700 needed
+Apr 01 21:26:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_bos venue2=kalshi | score=70.6 AR=0.05× net_edge=1.10% conf=0.96 | days=90.11d size=$17.11
+Apr 01 21:26:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=btc-max-2026_value_above_150k venue2=opinion | score=64.2 AR=0.02× net_edge=1.60% conf=0.86 | days=274.32d size=$17.11
+Apr 01 21:26:58 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=8.1900 USDC | opinion=0.6570 USDC (total=8.8470)
+Apr 01 21:27:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (8.1900 + 0.6570) + safety_buffer (5.00) = 13.8470 needed
+Apr 01 21:27:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_nicolas_maduro venue2=kalshi | score=59.4 AR=0.03× net_edge=2.10% conf=0.92 | days=273.11d size=$17.11
+Apr 01 21:27:00 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_josh_shapiro venue2=kalshi | score=48.4 AR=0.00× net_edge=1.10% conf=0.99 | days=949.90d size=$17.11
+Apr 01 21:27:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=stanley-cup-2026_vegas_golden_knights venue2=opinion | score=47.7 AR=0.05× net_edge=1.30% conf=0.86 | days=88.90d size=$17.11
+Apr 01 21:27:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=0.4140 USDC | opinion=8.4600 USDC (total=8.8740)
+Apr 01 21:27:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (0.4140 + 8.4600) + safety_buffer (5.00) = 13.8740 needed
+Apr 01 21:27:03 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=israel-pm-2045_gadi_eisenkot venue2=kalshi | score=37.2 AR=0.09× net_edge=7.00% conf=0.28 | days=273.11d size=$17.11
+Apr 01 21:27:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=trump-pardon-2027_martin_shkreli venue2=kalshi | score=33.6 AR=0.03× net_edge=1.90% conf=0.35 | days=273.11d size=$17.11
+Apr 01 21:27:05 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_hou venue2=opinion | score=25.7 AR=0.05× net_edge=1.30% conf=0.95 | days=90.11d size=$17.11
+Apr 01 21:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=0.1360 USDC | opinion=7.7520 USDC (total=7.8880)
+Apr 01 21:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (0.1360 + 7.7520) + safety_buffer (5.00) = 12.8880 needed
+Apr 01 21:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=uk-prime-minister-2026_nigel_farage venue2=opinion | score=16.6 AR=0.02× net_edge=1.60% conf=0.92 | days=273.11d size=$17.11
+Apr 01 21:27:10 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=0.2240 USDC | opinion=7.6400 USDC (total=7.8640)
+Apr 01 21:27:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (0.2240 + 7.6400) + safety_buffer (5.00) = 12.8640 needed
+Apr 01 21:27:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=venezuela-leader-2026_edmundo_gonzalez venue2=kalshi | score=15.5 AR=0.04× net_edge=2.70% conf=0.93 | days=273.11d size=$17.11
+Apr 01 21:27:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=inflation-2026_above_10p venue2=opinion | score=15.1 AR=0.11× net_edge=8.20% conf=0.26 | days=273.11d size=$17.11
+Apr 01 21:27:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=0.6700 USDC | opinion=8.5000 USDC (total=9.1700)
+Apr 01 21:27:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (0.6700 + 8.5000) + safety_buffer (5.00) = 14.1700 needed
+Apr 01 21:27:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=president-2028_marco_rubio venue2=kalshi | score=12.5 AR=0.00× net_edge=0.40% conf=0.99 | days=949.90d size=$17.11
+Apr 01 21:27:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=israel-pm-2045_itamar_ben_gvir venue2=kalshi | score=12.1 AR=0.06× net_edge=4.10% conf=0.43 | days=273.11d size=$17.11
+Apr 01 21:27:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_gsw venue2=opinion | score=12.0 AR=0.01× net_edge=0.20% conf=0.92 | days=90.11d size=$17.11
+Apr 01 21:27:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=0.0240 USDC | opinion=7.9520 USDC (total=7.9760)
+Apr 01 21:27:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (0.0240 + 7.9520) + safety_buffer (5.00) = 12.9760 needed
+Apr 01 21:27:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=president-2028_alexandria_ocasio_cortez venue2=kalshi | score=11.0 AR=0.00× net_edge=0.50% conf=0.99 | days=949.90d size=$17.11
+Apr 01 21:27:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=fl-19-republican-primary-winner-2026_jim_oberweis venue2=kalshi | score=10.4 AR=0.10× net_edge=3.60% conf=0.12 | days=138.11d size=$17.11
+Apr 01 21:27:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=gop-nominee-2028_thomas_massie venue2=opinion | score=10.3 AR=0.00× net_edge=0.90% conf=0.95 | days=949.90d size=$17.11
+Apr 01 21:27:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=0.1360 USDC | opinion=7.7840 USDC (total=7.9200)
+Apr 01 21:27:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (0.1360 + 7.7840) + safety_buffer (5.00) = 12.9200 needed
+Apr 01 21:27:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=ceos-out-2027_sundar_pichai_google venue2=opinion | score=9.9 AR=0.06× net_edge=4.40% conf=0.61 | days=273.11d size=$17.11
+Apr 01 21:27:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 💸 [ArbFunder] 💰 fund_both_legs: poly=1.6000 USDC | opinion=7.9500 USDC (total=9.5500)
+Apr 01 21:27:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 5.3337 USDC — insufficient for gaps (1.6000 + 7.9500) + safety_buffer (5.00) = 14.5500 needed
+Apr 01 21:27:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3988912]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=french-presidential-election-2027_david_lisnard venue2=kalshi | score=8.9 AR=0.01× net_edge=0.80% conf=0.22 | days=393.11d size=$17.11
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd /root/PolyNotifyBot && python3 - <<'EOF'
+from dotenv import load_dotenv
+load_dotenv("/root/PolyNotifyBot/.env", override=True)
+import psycopg2, os
+conn = psycopg2.connect(os.environ["DATABASE_URL"])
+cur = conn.cursor()
+cur.execute("""
+    SELECT pair_id, kalshi_ticker, shares, cost_basis_usdc, status, kalshi_side, created_at
+    FROM arb_positions ORDER BY created_at DESC LIMIT 20
+""")
+for row in cur.fetchall():
+    print(row)
+EOF
+Traceback (most recent call last):
+  File "<stdin>", line 6, in <module>
+psycopg2.errors.UndefinedColumn: column "created_at" does not exist
+LINE 2: ...er, shares, cost_basis_usdc, status, kalshi_side, created_at
+                                                             ^
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

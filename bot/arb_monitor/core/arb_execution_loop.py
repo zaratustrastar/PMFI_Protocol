@@ -208,6 +208,24 @@ def _execution_cycle():
     depth_insufficient = 0   # aborted: depth-capped size < 1 contract at profitable price
     depth_unavailable = 0    # aborted: could not fetch orderbook to verify depth
 
+    # Errors where NO capital was moved — safe to skip to next opportunity.
+    # Everything else (funding_failed, leg1_failed, leg2_failed, success) means
+    # capital was committed and we must stop the cycle to avoid scatter-shot deposits.
+    _PRE_FUNDING_ERRORS = (
+        "depth_insufficient",
+        "depth_unavailable",
+        "oddpool_edge_too_thin",
+        "poly_slippage_exceeded",
+        "kalshi_slippage_exceeded",
+        "opinion_slippage_exceeded",
+        "poly_orderbook_missing",
+        "kalshi_orderbook_missing",
+        "opinion_orderbook_missing",
+        "poly_no_token_missing",
+        "trade_too_small",
+        "cannot_compute_contracts",
+    )
+
     # ── Liquidity budget: caps total new deployment this cycle ────────────────
     # If under_pressure, deployable_capital bounds how much USDC we can commit to
     # new positions this cycle. Decremented with each trade so the cap is cycle-wide.
@@ -325,49 +343,64 @@ def _execution_cycle():
             elif result.error.startswith("depth_unavailable"):
                 depth_unavailable += 1
 
-        if result.success:
-            cost_deployed = getattr(result, "total_cost_usdc", size_usdc)
-            # Decrement servicer deployable so next opportunity is sized correctly
-            servicer_deployable = max(0.0, servicer_deployable - cost_deployed)
-            log(
-                f"💼 Servicer deployable after {opp.pair_id}: "
-                f"deployed={cost_deployed:.2f} remaining={servicer_deployable:.2f}"
-            )
-            # Decrement liquidity budget by actual cost deployed
-            if liq_budget_remaining is not None:
-                liq_budget_remaining -= cost_deployed
+        if not result.success:
+            err = result.error or ""
+            # Pre-funding failures: no capital was moved on-chain.
+            # Safe to skip to the next-best opportunity this cycle.
+            if any(err.startswith(e) for e in _PRE_FUNDING_ERRORS):
                 log(
-                    f"💧 Liquidity budget after {opp.pair_id}: "
-                    f"deployed={cost_deployed:.2f} remaining={liq_budget_remaining:.2f}"
+                    f"⏭ {opp.pair_id}: pre-funding failure ({err[:100]}) — "
+                    f"no capital moved, trying next opportunity"
                 )
-            log(f"✅ Execution succeeded for {opp.pair_id}")
-            try:
-                # Use actual fill data from executor, not quoted/estimated values
-                kalshi_side = getattr(result, "kalshi_side", opp.kalshi_side)
-                upsert_position(
-                    pair_id=opp.pair_id,
-                    poly_yes_token=opp.poly_yes_token,
-                    kalshi_ticker=opp.kalshi_ticker,
-                    shares=result.filled_shares,
-                    cost_basis_usdc=result.total_cost_usdc,
-                    expiry_ts=opp.expiry_ts or 0,
-                    status="open",
-                    poly_title=opp.poly_title,
-                    kalshi_title=opp.kalshi_title,
-                    kalshi_side=kalshi_side,
-                )
-                log(
-                    f"✅ Position persisted for {opp.pair_id}: "
-                    f"shares={result.filled_shares:.4f} "
-                    f"cost={result.total_cost_usdc:.4f} USDC"
-                )
-            except Exception as e:
-                log(f"⚠️ Failed to persist position for {opp.pair_id}: {e}")
-        else:
+                continue
+
+            # Capital was committed (funding attempt, leg failure, post-fill unwind).
+            # Stop the cycle — attempting more trades risks scattering capital across
+            # multiple venues without completing any trade cleanly.
             log(
-                f"❌ Execution failed for {opp.pair_id}: {result.error} "
+                f"❌ {opp.pair_id}: execution stopped cycle — {err} "
                 f"unwound={result.unwound}"
             )
+            break
+
+        # ── Success: persist position and stop cycle ──────────────────────────
+        # One coordinated trade per cycle: pick best opportunity → fund exactly →
+        # execute both legs together → stop. Next cycle starts fresh.
+        cost_deployed = getattr(result, "total_cost_usdc", size_usdc)
+        servicer_deployable = max(0.0, servicer_deployable - cost_deployed)
+        log(
+            f"💼 Servicer deployable after {opp.pair_id}: "
+            f"deployed={cost_deployed:.2f} remaining={servicer_deployable:.2f}"
+        )
+        if liq_budget_remaining is not None:
+            liq_budget_remaining -= cost_deployed
+            log(
+                f"💧 Liquidity budget after {opp.pair_id}: "
+                f"deployed={cost_deployed:.2f} remaining={liq_budget_remaining:.2f}"
+            )
+        log(f"✅ Execution succeeded for {opp.pair_id} — stopping cycle (one trade per cycle)")
+        try:
+            kalshi_side = getattr(result, "kalshi_side", opp.kalshi_side)
+            upsert_position(
+                pair_id=opp.pair_id,
+                poly_yes_token=opp.poly_yes_token,
+                kalshi_ticker=opp.kalshi_ticker,
+                shares=result.filled_shares,
+                cost_basis_usdc=result.total_cost_usdc,
+                expiry_ts=opp.expiry_ts or 0,
+                status="open",
+                poly_title=opp.poly_title,
+                kalshi_title=opp.kalshi_title,
+                kalshi_side=kalshi_side,
+            )
+            log(
+                f"✅ Position persisted for {opp.pair_id}: "
+                f"shares={result.filled_shares:.4f} "
+                f"cost={result.total_cost_usdc:.4f} USDC"
+            )
+        except Exception as e:
+            log(f"⚠️ Failed to persist position for {opp.pair_id}: {e}")
+        break  # Always stop after one successful trade
 
     log(
         f"⚡ Cycle complete: executed={executed} "
