@@ -1,0 +1,258 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "💰|📤|✅ Both legs|❌|🚀 Executing|stopping cycle|⏭"
+Apr 01 22:00:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:21 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Over: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Under: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Over: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Sierra: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Marcinko: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ No: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ No: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Under: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ No: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Under: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Under: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ No: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:26 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Hewitt: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Italy: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 91.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 90.8 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:28 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 87.3 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 76.5 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Switzerland: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ No: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:31 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ No: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ ACT Meteors: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Germany: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 69.8 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 69.8 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:34 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 69.8 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 67.1 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 64.3 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 62.9 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 62.5 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:36 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Over: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 57.5 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.7 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:38 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]: 📊 [Arb/Polymarket] ⏭ _pick_best_market: skipping market ended 184d before resolution_ts — wrong period ('June 30')
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]: 📊 [Arb/Polymarket] ⏭ _pick_best_market: skipping market ended 184d before resolution_ts — wrong period ('April 30')
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ fnatic: 49.5 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 46.0 - NO BIDS (illiquid, valued at $0)
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 01 22:00:39 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3993181]:    ❌ Yes: 46.0 - NO BIDS (illiquid, valued at $0)
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

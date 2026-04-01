@@ -671,17 +671,24 @@ def execute_arb(
     log(f"📐 Live spread (informational): {live_edge:.4f} | Oddpool net_edge={opp_net_edge:.2f}% — proceeding to size")
 
     # ── Budget sizing (computed before depth check so fallbacks can reference it) ──
-    # Use the more expensive leg's ask as the sizing denominator so the integer count
-    # fits within budget for BOTH legs simultaneously (no partial unmatched exposure).
-    half_budget = min(size_usdc, ARB_MAX_PAIR_USDC) / 2.0
-    max_leg_ask = max(live_poly_ask, live_kalshi_ask)
+    # Size from the TOTAL budget across both legs using combined cost per contract.
+    # This maximizes contract count from available capital regardless of the price split.
+    #
+    # Example: poly_ask=0.76, venue2_ask=0.24, total_budget=$17
+    #   combined = 0.76 + 0.24 = 1.00
+    #   contracts = int(17 / 1.00) = 17 → leg1=$12.92, leg2=$4.08 → total=$17
+    #
+    # Old (wrong): half_budget = total/2; contracts = int(half_budget/max_ask)
+    #   → int(8.5/0.76) = 11 → total=$11 (35% of budget wasted on 76/24 splits)
+    total_budget = min(size_usdc, ARB_MAX_PAIR_USDC)
+    combined_cost_per_contract = live_poly_ask + live_kalshi_ask
 
-    if max_leg_ask <= 0:
-        result.error = "cannot_compute_contracts: max ask is zero"
+    if combined_cost_per_contract <= 0:
+        result.error = "cannot_compute_contracts: combined leg cost is zero"
         log(f"❌ {result.error}")
         return result
 
-    budget_contract_count = int(half_budget / max_leg_ask)
+    budget_contract_count = int(total_budget / combined_cost_per_contract)
 
     # ── Order book depth cap ──────────────────────────────────────────────────
     # The slippage guard above only verifies the TOP of book is within edge.
