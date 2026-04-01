@@ -1,0 +1,17 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sleep 30 && sudo journalctl -u psniper-bot --since "2 min ago" | grep -E "ArbReporter|Report|signHash|sign_hash|CLAIMABLE|claimable"
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] ✅ Waterfall: no pending redemptions
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] 🔄 [AutoClaim] Scanning all requests for CLAIMABLE status…
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] 📋 [AutoClaim] Total deposit requests: 1
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] ℹ️ [AutoClaim] No claimable deposit requests
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] 📋 [AutoClaim] Total redeem requests: 0
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] ℹ️ [AutoClaim] No claimable redeem requests
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] 📋 Report firing — reason: cooldown elapsed
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] ✅ Building report — reason: cooldown elapsed (last=0, cooldown=3600s)
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] Computing conservative reportedAssets...
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter]   vault idle USDC: 0.0000
+Apr 01 05:20:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter]   servicer on Base: 0.0000
+Apr 01 05:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter]   poly_cash=0.0000 kalshi_cash=0.0000 opinion_cash=0.0000
+Apr 01 05:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter]   settled_pnl=0.0000
+Apr 01 05:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] reportedAssets: raw=0.0000 → haircut(95%)=0.0000 USDC
+Apr 01 05:20:43 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3893586]: 📋 [ArbReporter] ⚠️ Report error (non-fatal): 'LocalAccount' object has no attribute 'sign_hash'
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
