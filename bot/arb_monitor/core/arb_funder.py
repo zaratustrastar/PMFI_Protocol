@@ -736,29 +736,51 @@ def fund_both_legs_for_trade(
     log("📊 Reading current platform balances...")
     poly_before   = _get_platform_balance("polymarket")
     poly_target   = poly_usdc
-    poly_gap      = max(0.0, poly_target - poly_before)
 
     venue2_before = _get_platform_balance(venue2)
     venue2_target = venue2_usdc
-    venue2_gap    = max(0.0, venue2_target - venue2_before)
 
-    # Enforce minimum deposit amounts: if a gap is positive but smaller than the
-    # venue's minimum, bump it to the minimum to prevent a rejected deposit.
+    # Trade-driven funding (not gap-based top-ups):
+    # If the platform already has enough balance for this trade → no deposit.
+    # If it doesn't (even partially) → deposit the FULL required amount for this trade.
+    # This ensures each deposit is a complete, self-contained trade allocation,
+    # not a delta on top of whatever residual balance happened to be sitting there.
     poly_min  = _VENUE_MIN_DEPOSIT.get("polymarket", 1.0)
     v2_min    = _VENUE_MIN_DEPOSIT.get(venue2, 1.0)
-    if 0 < poly_gap < poly_min:
-        log(f"📌 Poly gap={poly_gap:.4f} < min_deposit={poly_min} — bumping to minimum")
-        poly_gap = poly_min
-    if 0 < venue2_gap < v2_min:
-        log(f"📌 {venue2} gap={venue2_gap:.4f} < min_deposit={v2_min} — bumping to minimum")
-        venue2_gap = v2_min
+
+    if poly_before >= poly_target:
+        poly_deposit = 0.0   # already funded for this trade
+        log(f"✅ Poly already has {poly_before:.4f} >= {poly_target:.4f} — no deposit needed")
+    else:
+        # Deposit the full trade requirement (not the delta), enforcing venue minimum
+        poly_deposit = max(poly_target, poly_min)
+        if poly_deposit > poly_target:
+            log(
+                f"📌 Poly trade_amount={poly_target:.4f} < min_deposit={poly_min} "
+                f"— bumping to minimum"
+            )
+
+    if venue2_before >= venue2_target:
+        venue2_deposit = 0.0  # already funded for this trade
+        log(f"✅ {venue2} already has {venue2_before:.4f} >= {venue2_target:.4f} — no deposit needed")
+    else:
+        # Deposit the full trade requirement (not the delta), enforcing venue minimum
+        venue2_deposit = max(venue2_target, v2_min)
+        if venue2_deposit > venue2_target:
+            log(
+                f"📌 {venue2} trade_amount={venue2_target:.4f} < min_deposit={v2_min} "
+                f"— bumping to minimum"
+            )
 
     log(
-        f"📊 Balances: poly={poly_before:.4f} (target={poly_target:.4f} gap={poly_gap:.4f}) | "
-        f"{venue2}={venue2_before:.4f} (target={venue2_target:.4f} gap={venue2_gap:.4f})"
+        f"📊 Balances: poly={poly_before:.4f} (required={poly_target:.4f} deposit={poly_deposit:.4f}) | "
+        f"{venue2}={venue2_before:.4f} (required={venue2_target:.4f} deposit={venue2_deposit:.4f})"
     )
 
-    total_gap = poly_gap + venue2_gap
+    # Alias for the rest of the function (capital gate, TX sending, wait logic)
+    poly_gap   = poly_deposit
+    venue2_gap = venue2_deposit
+    total_gap  = poly_gap + venue2_gap
 
     # ── Step 4: Single combined capital gate ─────────────────────────────
     if poly_before >= poly_target and venue2_before >= venue2_target:
