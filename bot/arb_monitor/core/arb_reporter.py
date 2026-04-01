@@ -467,7 +467,7 @@ def submit_report(
     signed = account.sign_transaction(tx)
 
     try:
-        raw_hex = "0x" + signed.rawTransaction.hex()
+        raw_hex = "0x" + signed.raw_transaction.hex()
         tx_hash = _rpc("eth_sendRawTransaction", [raw_hex])
         log(f"✅ report() tx sent: {tx_hash}")
         _save_report_snapshot(payload, tx_hash)
@@ -559,7 +559,7 @@ def _refill_buffer_tx(
         "nonce": nonce, "chainId": BASE_CHAIN_ID, "value": 0,
     }
     _rpc("eth_sendRawTransaction",
-         ["0x" + account.sign_transaction(approve_tx).rawTransaction.hex()])
+         ["0x" + account.sign_transaction(approve_tx).raw_transaction.hex()])
 
     # Step B: refillBuffer(amount)
     REFILL_SELECTOR = _keccak256_text("refillBuffer(uint256)")[:4].hex()
@@ -570,7 +570,7 @@ def _refill_buffer_tx(
         "nonce": nonce + 1, "chainId": BASE_CHAIN_ID, "value": 0,
     }
     tx_hash = _rpc("eth_sendRawTransaction",
-                   ["0x" + account.sign_transaction(refill_tx).rawTransaction.hex()])
+                   ["0x" + account.sign_transaction(refill_tx).raw_transaction.hex()])
     return tx_hash
 
 
@@ -882,7 +882,7 @@ def _broadcast_claim_tx(
     }
     log(f"🔧 [{label}] batch ids={batch_ids} gas={gas_limit:,} nonce={nonce}")
     signed  = account.sign_transaction(tx)
-    raw_hex = "0x" + signed.rawTransaction.hex()
+    raw_hex = "0x" + signed.raw_transaction.hex()
     try:
         tx_hash = _rpc("eth_sendRawTransaction", [raw_hex])
         log(f"📤 [{label}] tx broadcast: {tx_hash}")

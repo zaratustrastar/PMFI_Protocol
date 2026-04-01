@@ -1,0 +1,32 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && git pull && sudo systemctl restart psniper-bot
+remote: Enumerating objects: 14, done.
+remote: Counting objects: 100% (14/14), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 8 (delta 6), reused 8 (delta 6), pack-reused 0 (from 0)
+Unpacking objects: 100% (8/8), 1.55 KiB | 158.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   aebb801..cb3e993  main       -> origin/main
+Updating aebb801..cb3e993
+Fast-forward
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sleep-30-_1775020940587.txt | 17 +++++++++++++++++
+ bot/arb_monitor/core/arb_reporter.py                                                             |  3 +--
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sleep-30-_1775020940587.txt
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sleep 45 && sudo journalctl -u psniper-bot --since "1 min ago" | grep -E "ArbReporter|Report error|unsafe_sign| ✅.*report"
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] ✅ Waterfall: no pending redemptions
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] 🔄 [AutoClaim] Scanning all requests for CLAIMABLE status…
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] 📋 [AutoClaim] Total deposit requests: 1
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] ℹ️ [AutoClaim] No claimable deposit requests
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] 📋 [AutoClaim] Total redeem requests: 0
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] ℹ️ [AutoClaim] No claimable redeem requests
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] 📋 Report firing — reason: cooldown elapsed
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] ✅ Building report — reason: cooldown elapsed (last=0, cooldown=3600s)
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] Computing conservative reportedAssets...
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter]   vault idle USDC: 0.0000
+Apr 01 05:32:04 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter]   servicer on Base: 0.0000
+Apr 01 05:32:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter]   poly_cash=0.0000 kalshi_cash=0.0000 opinion_cash=0.0000
+Apr 01 05:32:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter]   settled_pnl=0.0000
+Apr 01 05:32:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] reportedAssets: raw=0.0000 → haircut(95%)=0.0000 USDC
+Apr 01 05:32:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] ✅ Report payload built: reportedAssets=0.0000 USDC nonce=1 deadline=1775025122
+Apr 01 05:32:07 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894076]: 📋 [ArbReporter] ❌ report() tx failed: 'SignedTransaction' object has no attribute 'rawTransaction'
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

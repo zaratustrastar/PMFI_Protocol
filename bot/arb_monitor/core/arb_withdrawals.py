@@ -141,7 +141,7 @@ def _relay_bridge_polygon_to_base(
                 tx_hash = _rpc_call(
                     POLYGON_RPC,
                     "eth_sendRawTransaction",
-                    ["0x" + signed.rawTransaction.hex()],
+                    ["0x" + signed.raw_transaction.hex()],
                 )
                 log(f"✅ Relay bridge tx submitted: {tx_hash}")
                 return True, tx_hash
@@ -441,7 +441,7 @@ def _bridge_bsc_to_base(
             }
             signed_approve = account.sign_transaction(approve_tx)
             _rpc_call(BSC_RPC, "eth_sendRawTransaction",
-                      ["0x" + signed_approve.rawTransaction.hex()])
+                      ["0x" + signed_approve.raw_transaction.hex()])
             nonce += 1
             log(f"✅ BSC USDC approval sent")
 
@@ -457,7 +457,7 @@ def _bridge_bsc_to_base(
         }
         signed_bridge = account.sign_transaction(bridge_tx)
         tx_hash = _rpc_call(BSC_RPC, "eth_sendRawTransaction",
-                            ["0x" + signed_bridge.rawTransaction.hex()])
+                            ["0x" + signed_bridge.raw_transaction.hex()])
         log(f"✅ LI.FI BSC→Base bridge tx: {tx_hash}")
         return True, tx_hash
 
