@@ -1,10 +1,10 @@
 """Kalshi RSA Authentication helper.
 
-Kalshi API v2 uses RSA-PKCS1v15 + SHA-256 signing.
+Kalshi API v2 uses RSA-PSS + SHA-256 signing.
 Each request requires three headers:
-  KALSHI-Access-Key        — your API key ID
-  KALSHI-Access-Timestamp  — current time in milliseconds (string)
-  KALSHI-Access-Signature  — base64( RSA_sign( "{ts}{METHOD}{path}" ) )
+  KALSHI-ACCESS-KEY        — your API key ID
+  KALSHI-ACCESS-TIMESTAMP  — current time in milliseconds (string)
+  KALSHI-ACCESS-SIGNATURE  — base64( RSA_PSS_sign( "{ts}{METHOD}{path}" ) )
 
 The path must be the URL path only (no query string, no host).
 Example: /trade-api/v2/portfolio/orders
@@ -26,7 +26,6 @@ from typing import Optional
 def _load_private_key():
     """Load RSA private key from file path or PEM env var."""
     from cryptography.hazmat.primitives import serialization
-    from cryptography.hazmat.backends import default_backend
 
     pem_path = os.environ.get("KALSHI_PRIVATE_KEY_PATH", "")
     pem_content = os.environ.get("KALSHI_PRIVATE_KEY_PEM", "")
@@ -35,7 +34,7 @@ def _load_private_key():
         with open(pem_path, "rb") as f:
             pem_bytes = f.read()
     elif pem_content:
-        pem_bytes = pem_content.replace("\\n", "\n").encode()
+        pem_bytes = pem_content.replace("\\n", "\n").encode("utf-8")
     else:
         raise ValueError(
             "Kalshi private key not configured — set KALSHI_PRIVATE_KEY_PATH "
@@ -45,12 +44,11 @@ def _load_private_key():
     return serialization.load_pem_private_key(
         pem_bytes,
         password=None,
-        backend=default_backend(),
     )
 
 
 def get_kalshi_headers(method: str, url: str) -> Optional[dict]:
-    """Build Kalshi RSA authentication headers for a given request.
+    """Build Kalshi RSA-PSS authentication headers for a given request.
 
     Args:
         method: HTTP method (GET, POST, DELETE — will be uppercased)
@@ -64,28 +62,35 @@ def get_kalshi_headers(method: str, url: str) -> Optional[dict]:
 
     key_id = os.environ.get("KALSHI_API_KEY_ID", "")
     if not key_id:
+        print("❌ [KalshiAuth] Missing KALSHI_API_KEY_ID")
         return None
 
     ts = str(int(time.time() * 1000))
+    path = urlparse(url).path or "/"
+    method = method.upper()
 
-    parsed = urlparse(url)
-    path = parsed.path
-
-    msg = (ts + method.upper() + path).encode("utf-8")
+    msg = f"{ts}{method}{path}".encode("utf-8")
 
     try:
         private_key = _load_private_key()
-        signature = private_key.sign(msg, padding.PKCS1v15(), hashes.SHA256())
-        sig_b64 = base64.b64encode(signature).decode()
+        signature = private_key.sign(
+            msg,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.DIGEST_LENGTH,
+            ),
+            hashes.SHA256(),
+        )
+        sig_b64 = base64.b64encode(signature).decode("utf-8")
     except Exception as e:
-        print(f"❌ [KalshiAuth] RSA signing failed: {e}")
+        print(f"❌ [KalshiAuth] RSA signing failed: {e!r}")
         return None
 
     return {
-        "KALSHI-Access-Key": key_id,
-        "KALSHI-Access-Timestamp": ts,
-        "KALSHI-Access-Signature": sig_b64,
-        "Content-Type": "application/json",
+        "KALSHI-ACCESS-KEY": key_id,
+        "KALSHI-ACCESS-TIMESTAMP": ts,
+        "KALSHI-ACCESS-SIGNATURE": sig_b64,
+        "Accept": "application/json",
     }
 
 

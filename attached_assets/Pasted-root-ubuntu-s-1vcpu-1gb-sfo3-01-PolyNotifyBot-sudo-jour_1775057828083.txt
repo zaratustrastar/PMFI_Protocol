@@ -1,0 +1,22 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "3 min ago" | grep -E "kalshi|Kalshi|401|funding_failed|Both legs funded|leg1|leg2|Executing pair" | tail -20
+Apr 01 15:36:24 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:       Full token: 71084791699069979141332244012837014903551855895359262177937431393904349482360
+Apr 01 15:36:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]: 🔀 [Arb/Oddpool] ✅ pair='brazil-presidential-election-2026_flavio_bolsonaro' edge=5.30¢ poly=0.40 venue2(kalshi/NO)=0.55 days=185.3 token=resolved no_token=set title='Brazil Presidential Election 2026'
+Apr 01 15:36:32 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]: 🔀 [Arb/Oddpool] ✅ pair='fl-19-republican-primary-winner-2026_jim_oberweis' edge=4.10¢ poly=0.90 venue2(kalshi/YES)=0.06 days=138.3 token=resolved no_token=set title='FL-19 Republican Primary Winner 2026'
+Apr 01 15:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]: 🔀 [Arb/Oddpool] ✅ pair='israel-pm-2045_naftali_bennett' edge=5.00¢ poly=0.25 venue2(kalshi/NO)=0.70 days=273.3 token=resolved no_token=set title='Israel Prime Minister Election 2045'
+Apr 01 15:36:35 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]: 🔀 [Arb/Oddpool] ✅ pair='michigan-democratic-senate-primary-winner-2026_mallory_mcmorrow' edge=5.00¢ poly=0.55 venue2(kalshi/NO)=0.40 days=124.3 token=resolved no_token=set title='Michigan Democratic Senate Primary Winne'
+Apr 01 15:36:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:    📖 Orderbook via CLOB client: 25999723538385014010...
+Apr 01 15:36:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:       Full token: 25999723538385014010053820518545750038546699932105208601515071899848058408094
+Apr 01 15:36:37 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]: 🔀 [Arb/Oddpool] ✅ pair='trump-admin-departures-2026_tulsi_gabbard' edge=5.00¢ poly=0.53 venue2(kalshi/NO)=0.42 days=273.3 token=resolved no_token=set title='Who Will Leave Trump Administration in 2'
+Apr 01 15:36:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:       Full token: 16522041626515504925403751949665518027527950705858477693715764015741644769725
+Apr 01 15:36:40 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]: 🔀 [Arb/Oddpool] ✅ pair='trump-pardon-2027_eric_adams' edge=4.00¢ poly=0.88 venue2(kalshi/YES)=0.08 days=273.3 token=resolved no_token=set title='Who Will Trump Pardon Before 2027'
+Apr 01 15:36:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:    📖 Orderbook via CLOB client: 11237194634012918496...
+Apr 01 15:36:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:       Full token: 112371946340129184960918173540079350514642743753523559607357730722282148845537
+Apr 01 15:36:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]: 🔀 [Arb/Oddpool] ✅ pair='venezuela-leader-2026_edmundo_gonzalez' edge=3.80¢ poly=0.01 venue2(kalshi/NO)=0.95 days=273.3 token=resolved no_token=set title='Venezuela Leader End of 2026'
+Apr 01 15:36:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:       Full token: 42787093210562452679715032178534218262571441422809000763107924911559679491401
+Apr 01 15:36:48 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:       Full token: 81198543464320767832243926151879146849351187635151340143208220279993733598136
+Apr 01 15:36:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:    📖 Orderbook via CLOB client: 53081315401174852186...
+Apr 01 15:36:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:       Full token: 53081315401174852186406941080900323885353595408533460368225146967270047598843
+Apr 01 15:36:51 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]: 🔀 [Arb/Oddpool] ✅ pair='ufc-featherweight-title-2026_lerone_murphy' edge=3.70¢ poly=0.94 venue2(kalshi/YES)=0.02 days=273.3 token=resolved no_token=set title='UFC Featherweight Championship 2026'
+Apr 01 15:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]: 🔀 [Arb/Oddpool] ✅ pair='dem-nominee-2028_gavin_newsom' edge=4.60¢ poly=0.25 venue2(kalshi/NO)=0.71 days=950.1 token=resolved no_token=set title='Democratic Nominee 2028'
+Apr 01 15:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3968886]:       Full token: 79935592824783552533835343187685487176254067044607001333782877751613066440162
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

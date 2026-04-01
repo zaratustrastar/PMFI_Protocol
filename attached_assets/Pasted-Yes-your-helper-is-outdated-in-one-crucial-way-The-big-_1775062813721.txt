@@ -1,0 +1,207 @@
+Yes — your helper is outdated in one crucial way.
+
+The big problem is this line:
+
+```python
+signature = private_key.sign(msg, padding.PKCS1v15(), hashes.SHA256())
+```
+
+Kalshi’s current docs say REST auth uses **RSA-PSS signing**, not PKCS#1 v1.5. Their docs and SDK overview both describe **RSA-PSS** for authenticated requests, and they say to sign `timestamp + method + path_without_query`. ([Kalshi API Documentation][1])
+
+So your file says:
+
+```python
+Kalshi API v2 uses RSA-PKCS1v15 + SHA-256 signing.
+```
+
+but current Kalshi docs indicate that should be **RSA-PSS + SHA-256** instead. ([Kalshi API Documentation][1])
+
+Your `path` handling is basically fine:
+
+```python
+parsed = urlparse(url)
+path = parsed.path
+msg = (ts + method.upper() + path).encode("utf-8")
+```
+
+Kalshi says to sign the **path only** and to strip query parameters, so using `parsed.path` is correct for a normal URL. ([Kalshi API Documentation][2])
+
+## Exact fix
+
+Replace your file with this version:
+
+```python
+import os
+import time
+import base64
+from urllib.parse import urlparse
+from typing import Optional
+
+
+def _load_private_key():
+    from cryptography.hazmat.primitives import serialization
+
+    pem_path = os.environ.get("KALSHI_PRIVATE_KEY_PATH", "")
+    pem_content = os.environ.get("KALSHI_PRIVATE_KEY_PEM", "")
+
+    if pem_path:
+        with open(pem_path, "rb") as f:
+            pem_bytes = f.read()
+    elif pem_content:
+        pem_bytes = pem_content.replace("\\n", "\n").encode("utf-8")
+    else:
+        raise ValueError(
+            "Kalshi private key not configured — set "
+            "KALSHI_PRIVATE_KEY_PATH or KALSHI_PRIVATE_KEY_PEM"
+        )
+
+    return serialization.load_pem_private_key(
+        pem_bytes,
+        password=None,
+    )
+
+
+def get_kalshi_headers(method: str, url: str) -> Optional[dict]:
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import padding
+
+    key_id = os.environ.get("KALSHI_API_KEY_ID", "")
+    if not key_id:
+        print("❌ [KalshiAuth] Missing KALSHI_API_KEY_ID")
+        return None
+
+    ts = str(int(time.time() * 1000))
+    path = urlparse(url).path or "/"
+    method = method.upper()
+
+    msg = f"{ts}{method}{path}".encode("utf-8")
+
+    try:
+        private_key = _load_private_key()
+        signature = private_key.sign(
+            msg,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.DIGEST_LENGTH,
+            ),
+            hashes.SHA256(),
+        )
+        sig_b64 = base64.b64encode(signature).decode("utf-8")
+    except Exception as e:
+        print(f"❌ [KalshiAuth] RSA signing failed: {e!r}")
+        return None
+
+    return {
+        "KALSHI-ACCESS-KEY": key_id,
+        "KALSHI-ACCESS-TIMESTAMP": ts,
+        "KALSHI-ACCESS-SIGNATURE": sig_b64,
+        "Accept": "application/json",
+    }
+
+
+def kalshi_auth_available() -> bool:
+    key_id = os.environ.get("KALSHI_API_KEY_ID", "")
+    has_key = bool(
+        os.environ.get("KALSHI_PRIVATE_KEY_PATH", "")
+        or os.environ.get("KALSHI_PRIVATE_KEY_PEM", "")
+    )
+    return bool(key_id and has_key)
+```
+
+## What changed
+
+You had:
+
+```python
+padding.PKCS1v15()
+```
+
+It should be:
+
+```python
+padding.PSS(
+    mgf=padding.MGF1(hashes.SHA256()),
+    salt_length=padding.PSS.DIGEST_LENGTH,
+)
+```
+
+because Kalshi’s current auth docs and SDK docs specify RSA-PSS. ([Kalshi API Documentation][1])
+
+I also changed:
+
+```python
+"Content-Type": "application/json"
+```
+
+to:
+
+```python
+"Accept": "application/json"
+```
+
+For a `GET`, `Content-Type` is not needed. It usually won’t break auth, but it is cleaner this way.
+
+## After editing, test with this
+
+```bash
+python3 - <<'EOF'
+from bot.arb_monitor.core.kalshi_auth import get_kalshi_headers
+import requests
+
+url = "https://api.elections.kalshi.com/trade-api/v2/portfolio/balance"
+headers = get_kalshi_headers("GET", url)
+
+print("Headers generated:", bool(headers))
+print("Header keys:", list(headers.keys()) if headers else None)
+
+r = requests.get(url, headers=headers or {}, timeout=10)
+print("Status:", r.status_code)
+print("Body:", r.text[:500])
+EOF
+```
+
+## If it still fails
+
+Then the next most likely causes are:
+
+* `KALSHI_API_KEY_ID` does not match the private key
+* the private key file is not the correct one for that API key
+* the PEM content in env is malformed
+* you generated a new key in Kalshi but the bot still uses the old private key
+
+Kalshi’s docs say the API key ID and downloaded private key are paired at creation time, so if they got mixed, auth will fail even with correct signing. ([Kalshi API Documentation][1])
+
+## Quick sanity checks
+
+Run:
+
+```bash
+python3 - <<'EOF'
+import os
+print("API key present:", bool(os.getenv("KALSHI_API_KEY_ID")))
+print("Private key path:", os.getenv("KALSHI_PRIVATE_KEY_PATH"))
+print("PEM env present:", bool(os.getenv("KALSHI_PRIVATE_KEY_PEM")))
+EOF
+```
+
+and:
+
+```bash
+python3 - <<'EOF'
+import os
+from cryptography.hazmat.primitives import serialization
+
+p = os.getenv("KALSHI_PRIVATE_KEY_PATH")
+if p:
+    with open(p, "rb") as f:
+        serialization.load_pem_private_key(f.read(), password=None)
+    print("Private key loads successfully")
+else:
+    print("No KALSHI_PRIVATE_KEY_PATH set")
+EOF
+```
+
+The main fix, though, is clear: **switch from PKCS1v15 to RSA-PSS**.
+
+[1]: https://docs.kalshi.com/getting_started/quick_start_authenticated_requests?utm_source=chatgpt.com "Quick Start: Authenticated Requests (No SDK)"
+[2]: https://docs.kalshi.com/getting_started/api_keys?utm_source=chatgpt.com "API Keys"
