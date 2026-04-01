@@ -40,6 +40,7 @@ from ..config import (
     ARB_SAFETY_BUFFER_USDC,
     POLY_BASE_DEPOSIT_ADDR,
     KALSHI_BASE_DEPOSIT_ADDR,
+    OPINION_BASE_DEPOSIT_ADDR,
     OPINION_BSC_DEPOSIT_ADDR,
 )
 
@@ -675,9 +676,9 @@ def fund_both_legs_for_trade(
          — one check for the whole trade, never per-leg
       5a. Poly + Kalshi: send BOTH deposit TXs in one nonce sequence
           (no sequential wait between them — they land in parallel)
-      5b. Opinion (BSC bridge): check if balance is already sufficient;
-          if not, trigger LI.FI bridge fire-and-forget and return False
-          (bridge takes 3-10 min — engine retries on the next cycle)
+      5b. Opinion: if OPINION_BASE_DEPOSIT_ADDR is set, send direct Base USDC
+          transfer (instant, same path as Kalshi). Otherwise falls back to
+          LI.FI bridge to BSC (fire-and-forget, retries on next cycle).
       6. Poll BOTH platform balances every poll_interval seconds until both
          reach their respective targets or wait_timeout expires
       7. Return (ok, error_message)
@@ -760,19 +761,32 @@ def fund_both_legs_for_trade(
         f"required={required:.4f} (gaps={total_gap:.4f} + buffer={ARB_SAFETY_BUFFER_USDC:.2f})"
     )
 
-    # ── Step 5a: Opinion — bridge fire-and-forget (cannot wait inline) ────
+    # ── Step 5a: Opinion ─────────────────────────────────────────────────────
     if venue2 == "opinion":
         if venue2_before >= venue2_target:
             log(f"✅ Opinion already has {venue2_before:.4f} USDC >= {venue2_target:.4f} needed")
-        else:
-            if not OPINION_BSC_DEPOSIT_ADDR:
-                msg = "fund_both_legs: OPINION_BSC_DEPOSIT_ADDR not set — cannot bridge to Opinion"
+        elif OPINION_BASE_DEPOSIT_ADDR:
+            # Direct Base deposit — instant, same path as Poly/Kalshi
+            log(
+                f"📤 Opinion direct Base deposit: {venue2_gap:.4f} USDC → "
+                f"{OPINION_BASE_DEPOSIT_ADDR}"
+            )
+            try:
+                nt = _NonceTracker(servicer_wallet)
+                opinion_tx = _send_erc20_transfer(
+                    private_key, OPINION_BASE_DEPOSIT_ADDR, round(venue2_gap, 6), nt
+                )
+                log(f"📤 Opinion deposit TX: {venue2_gap:.4f} USDC → tx={opinion_tx}")
+            except Exception as e:
+                msg = f"fund_both_legs: Opinion Base deposit failed: {e}"
                 log(f"❌ {msg}")
                 return False, msg
+        elif OPINION_BSC_DEPOSIT_ADDR:
+            # Fallback: LI.FI bridge to BSC (fire-and-forget — takes 3-10 min)
             bridge_amount = round(venue2_gap + 1.0, 6)  # +$1 buffer for bridge slippage
             log(
                 f"🌉 Opinion balance low ({venue2_before:.4f} < {venue2_target:.4f}) — "
-                f"triggering bridge: {bridge_amount:.4f} USDC Base→BSC (fire-and-forget)"
+                f"triggering BSC bridge: {bridge_amount:.4f} USDC Base→BSC (fire-and-forget)"
             )
             try:
                 nt = _NonceTracker(servicer_wallet)
@@ -785,7 +799,7 @@ def fund_both_legs_for_trade(
                 )
                 log(f"🌉 Bridge initiated: tx={bridge_tx} — will settle in ~3-10 min")
             except Exception as e:
-                msg = f"fund_both_legs: Opinion bridge failed: {e}"
+                msg = f"fund_both_legs: Opinion BSC bridge failed: {e}"
                 log(f"❌ {msg}")
                 return False, msg
             # Cannot wait for bridge inline — return False so engine retries next cycle
@@ -795,8 +809,13 @@ def fund_both_legs_for_trade(
             )
             log(f"⏳ {msg}")
             return False, msg
+        else:
+            msg = "fund_both_legs: no Opinion deposit address configured (set OPINION_BASE_DEPOSIT_ADDR or OPINION_BSC_DEPOSIT_ADDR)"
+            log(f"❌ {msg}")
+            return False, msg
 
-        # Opinion is funded. Now handle Poly if it needs a top-up.
+        # Opinion is funded (already had enough, or direct Base deposit sent).
+        # Handle Poly top-up if needed, then wait for both to settle.
         if poly_gap > 0:
             if not POLY_BASE_DEPOSIT_ADDR:
                 msg = "fund_both_legs: POLY_BASE_DEPOSIT_ADDR not set"
@@ -813,8 +832,17 @@ def fund_both_legs_for_trade(
                 log(f"❌ {msg}")
                 return False, msg
 
-            # Wait for Poly to arrive (Opinion is already funded above)
+        # Wait for both platforms to confirm balance arrival
+        if poly_gap > 0 and venue2_gap > 0:
+            return _wait_for_both_balances(
+                "polymarket", poly_before + poly_gap,
+                "opinion", venue2_before + venue2_gap,
+                wait_timeout, poll_interval,
+            )
+        elif poly_gap > 0:
             return _wait_for_balance("polymarket", poly_before + poly_gap, wait_timeout, poll_interval)
+        elif venue2_gap > 0:
+            return _wait_for_balance("opinion", venue2_before + venue2_gap, wait_timeout, poll_interval)
 
         return True, ""
 
@@ -932,6 +960,42 @@ def _wait_for_balance(
 
     final = _get_platform_balance(venue)
     msg = f"fund_both_legs: {venue} deposit timeout after {wait_timeout}s — {final:.4f}/{target:.4f}"
+    log(f"❌ {msg}")
+    return False, msg
+
+
+def _wait_for_both_balances(
+    venue1: str,
+    target1: float,
+    venue2: str,
+    target2: float,
+    wait_timeout: int,
+    poll_interval: int,
+) -> tuple[bool, str]:
+    """Poll two platform balances simultaneously until both reach their targets or timeout."""
+    deadline = time.time() + wait_timeout
+    while time.time() < deadline:
+        time.sleep(poll_interval)
+        bal1 = _get_platform_balance(venue1)
+        bal2 = _get_platform_balance(venue2)
+        ok1 = bal1 >= target1 - 0.01
+        ok2 = bal2 >= target2 - 0.01
+        remaining = deadline - time.time()
+        log(
+            f"⏳ Balance poll: {venue1}={bal1:.4f}/{target1:.4f} {'✅' if ok1 else '⏳'} | "
+            f"{venue2}={bal2:.4f}/{target2:.4f} {'✅' if ok2 else '⏳'} "
+            f"({remaining:.0f}s remaining)"
+        )
+        if ok1 and ok2:
+            log(f"✅ Both legs funded — {venue1}={bal1:.4f} | {venue2}={bal2:.4f}")
+            return True, ""
+
+    final1 = _get_platform_balance(venue1)
+    final2 = _get_platform_balance(venue2)
+    msg = (
+        f"fund_both_legs: deposit timeout after {wait_timeout}s — "
+        f"{venue1}={final1:.4f}/{target1:.4f} | {venue2}={final2:.4f}/{target2:.4f}"
+    )
     log(f"❌ {msg}")
     return False, msg
 

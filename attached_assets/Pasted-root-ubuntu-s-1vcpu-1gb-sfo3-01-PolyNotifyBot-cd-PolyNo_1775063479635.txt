@@ -1,0 +1,65 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+git pull
+remote: Enumerating objects: 20, done.
+remote: Counting objects: 100% (20/20), done.
+remote: Compressing objects: 100% (8/8), done.
+remote: Total 14 (delta 6), reused 14 (delta 6), pack-reused 0 (from 0)
+Unpacking objects: 100% (14/14), 355.92 KiB | 3.18 MiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   e10840f..f1716da  main       -> origin/main
+Updating e10840f..f1716da
+Fast-forward
+ .../Pasted-Yes-your-helper-is-outdated-in-one-crucial-way-The-big-_1775062813721.txt           | 207 ++++++++++++++++++++++++++++
+ .../Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775056592640.txt           |  24 ++++
+ .../Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775057218807.txt           |  17 +++
+ .../Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775057828083.txt           |  22 +++
+ .../Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775057919959.txt           | 342 ++++++++++++++++++++++++++++++++++++++++++++++
+ attached_assets/Screenshot_2026-04-01_at_17.25.48_1775057151531.png                            | Bin 0 -> 323264 bytes
+ attached_assets/Screenshot_2026-04-01_at_17.47.04_1775058428285.png                            | Bin 0 -> 64921 bytes
+ bot/arb_monitor/core/kalshi_auth.py                                                            |  43 +++---
+ 8 files changed, 636 insertions(+), 19 deletions(-)
+ create mode 100644 attached_assets/Pasted-Yes-your-helper-is-outdated-in-one-crucial-way-The-big-_1775062813721.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775056592640.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775057218807.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775057828083.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775057919959.txt
+ create mode 100644 attached_assets/Screenshot_2026-04-01_at_17.25.48_1775057151531.png
+ create mode 100644 attached_assets/Screenshot_2026-04-01_at_17.47.04_1775058428285.png
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# grep -E "KALSHI_PRIVATE_KEY_PATH|KALSHI_API_KEY_ID|BASE_RPC_URL" /root/PolyNotifyBot/.env
+BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+KALSHI_API_KEY_ID=af5a0a24-5962-4775-b9b1-79e221fdf602
+KALSHI_PRIVATE_KEY_PATH=/root/PolyNotifyBot/kalshi_key.pem
+KALSHI_PRIVATE_KEY_PATH=/root/PolyNotifyBot/kalshi_key.pem
+BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd /root/PolyNotifyBot && git pull && python3 - <<'EOF'
+from bot.arb_monitor.core.kalshi_auth import get_kalshi_headers
+import requests
+url = "https://api.elections.kalshi.com/trade-api/v2/portfolio/balance"
+headers = get_kalshi_headers("GET", url)
+print("Headers generated:", bool(headers))
+r = requests.get(url, headers=headers or {}, timeout=10)
+print("Status:", r.status_code)
+print("Body:", r.text[:300])
+EOF
+Already up to date.
+❌ [KalshiAuth] Missing KALSHI_API_KEY_ID
+Headers generated: False
+Status: 401
+Body: {"error":{"code":"token_authentication_failure","message":"token authentication failure"}}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl restart psniper-bot
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd /root/PolyNotifyBot && git pull && python3 - <<'EOF'
+from bot.arb_monitor.core.kalshi_auth import get_kalshi_headers
+import requests
+url = "https://api.elections.kalshi.com/trade-api/v2/portfolio/balance"
+headers = get_kalshi_headers("GET", url)
+print("Headers generated:", bool(headers))
+r = requests.get(url, headers=headers or {}, timeout=10)
+print("Status:", r.status_code)
+print("Body:", r.text[:300])
+EOF
+Already up to date.
+❌ [KalshiAuth] Missing KALSHI_API_KEY_ID
+Headers generated: False
+Status: 401
+Body: {"error":{"code":"token_authentication_failure","message":"token authentication failure"}}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

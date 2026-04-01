@@ -1,0 +1,19 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "Kalshi balance|🚀 Executing|💰 Funding|✅ Both legs|📤 Kalshi"
+Apr 01 17:14:27 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=ncaa-tournament-winner-2026_illinois venue2=opinion | score=475372.6 AR=81.49× net_edge=2.80% conf=0.31 | days=2.28d size=$17.21
+Apr 01 17:14:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: ⚡ [Arb/Executor] 💰 Funding both legs simultaneously: poly=1.7100 USDC | opinion=8.0000 USDC
+Apr 01 17:14:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=english-premier-league-winner-2026_man_city venue2=opinion | score=19626.8 AR=0.12× net_edge=1.70% conf=0.75 | days=55.28d size=$17.21
+Apr 01 17:14:33 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: ⚡ [Arb/Executor] 💰 Funding both legs simultaneously: poly=8.0100 USDC | opinion=0.8280 USDC
+Apr 01 17:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=english-premier-league-winner-2026_arsenal venue2=opinion | score=4007.8 AR=0.11× net_edge=1.60% conf=0.51 | days=55.28d size=$17.21
+Apr 01 17:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: ⚡ [Arb/Executor] 💰 Funding both legs simultaneously: poly=1.0800 USDC | opinion=7.7670 USDC
+Apr 01 17:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=brazil-presidential-election-2026_flavio_bolsonaro venue2=kalshi | score=3197.7 AR=0.07× net_edge=3.30% conf=0.96 | days=185.28d size=$17.21
+Apr 01 17:14:41 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=hottest-years-2026_number_1 venue2=opinion | score=981.7 AR=0.16× net_edge=11.60% conf=0.85 | days=273.28d size=$17.21
+Apr 01 17:14:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: ⚡ [Arb/Executor] 💰 Funding both legs simultaneously: poly=7.9200 USDC | opinion=1.7930 USDC
+Apr 01 17:14:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nobel-peace-prize-winner-2026_donald_trump venue2=kalshi | score=742.1 AR=0.02× net_edge=0.90% conf=0.97 | days=191.28d size=$17.21
+Apr 01 17:14:49 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=dem-nominee-2028_gavin_newsom venue2=kalshi | score=665.0 AR=0.01× net_edge=2.50% conf=0.99 | days=950.08d size=$17.21
+Apr 01 17:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=btc-max-2026_value_above_120k venue2=opinion | score=622.6 AR=0.18× net_edge=12.90% conf=0.86 | days=274.49d size=$17.21
+Apr 01 17:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: ⚡ [Arb/Executor] 💰 Funding both legs simultaneously: poly=2.0400 USDC | opinion=8.4000 USDC
+Apr 01 17:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=stanley-cup-2026_montreal_canadiens venue2=kalshi | score=425.4 AR=0.04× net_edge=0.90% conf=0.96 | days=89.07d size=$17.21
+Apr 01 17:14:55 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=la-liga-winner-2026_barcelona venue2=opinion | score=397.0 AR=0.03× net_edge=0.40% conf=0.93 | days=58.28d size=$17.21
+Apr 01 17:15:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: ⚡ [Arb/Executor] 💰 Funding both legs simultaneously: poly=8.4700 USDC | opinion=2.4750 USDC
+Apr 01 17:15:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-champion-2026_lal venue2=opinion | score=331.2 AR=0.02× net_edge=0.60% conf=0.92 | days=90.28d size=$17.21
+Apr 01 17:15:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3978847]: ⚡ [Arb/Executor] 💰 Funding both legs simultaneously: poly=7.6880 USDC | opinion=0.2640 USDC
