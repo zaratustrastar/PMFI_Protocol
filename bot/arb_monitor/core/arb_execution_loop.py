@@ -20,7 +20,7 @@ import threading
 import os
 from ..adapters.oddpool import fetch_opportunities, ArbOpportunity
 from ..core.arb_executor import execute_arb
-from ..core.arb_funder import run_funder_tick
+from ..core.arb_funder import run_tend_tick, get_servicer_deployable_usdc
 from ..core.arb_reporter import run_reporter_tick
 from ..core.arb_positions_db import (
     upsert_position, get_open_positions, get_total_deployed_usdc
@@ -147,11 +147,11 @@ def _execution_cycle():
                 f"+ settled={liq.settled_proceeds:.2f}). "
                 f"No new positions until redemption shortfall is resolved."
             )
-            # Still run the funder (it will also see under_pressure and reserve cash)
+            # Still run tend() so vault idle flows to servicer during pressure
             try:
-                run_funder_tick()
+                run_tend_tick()
             except Exception as e:
-                log(f"⚠️ Funder tick raised unexpectedly (non-fatal): {e}")
+                log(f"⚠️ Tend tick raised unexpectedly (non-fatal): {e}")
             return
 
         if liq.under_pressure:
@@ -162,11 +162,27 @@ def _execution_cycle():
     else:
         liq = None  # treat as unknown; allow trading but log
 
-    # ── Auto-funder: distribute deployable USDC to platforms ─────────────────
+    # ── Tend tick: move vault idle USDC → servicer (no float maintenance) ────
+    # Capital is NOT pre-distributed to platforms here. Exact amounts are sent
+    # directly to both platforms when a specific trade is selected and sized.
     try:
-        run_funder_tick()
+        run_tend_tick()
     except Exception as e:
-        log(f"⚠️ Funder tick raised unexpectedly (non-fatal): {e}")
+        log(f"⚠️ Tend tick raised unexpectedly (non-fatal): {e}")
+
+    # ── Servicer capital check: log deployable capital for this cycle ─────────
+    servicer_deployable = 0.0
+    try:
+        servicer_deployable = get_servicer_deployable_usdc()
+        log(f"💼 Cycle deployable capital: {servicer_deployable:.4f} USDC in servicer wallet")
+        if servicer_deployable <= 0:
+            log(
+                "⚠️ No deployable capital in servicer wallet — "
+                "skipping trade execution (waiting for vault tend() or new deposits)"
+            )
+            return
+    except Exception as e:
+        log(f"⚠️ Could not read servicer capital (non-fatal, continuing): {e}")
 
     if not ARB_USE_ODDPOOL_ONLY:
         log("ℹ️ ARB_USE_ODDPOOL_ONLY=false — execution loop skipped (legacy mode)")
@@ -272,6 +288,17 @@ def _execution_cycle():
                     f"by liquidity budget (remaining={liq_budget_remaining:.2f})"
                 )
 
+        # ── Servicer capital cap: size to what the servicer wallet can actually fund ──
+        # Both legs combined cost ~size_usdc. Cap to servicer deployable so we
+        # don't enter execute_arb only to fail at the funding step after expensive
+        # orderbook fetches and slippage checks.
+        if servicer_deployable > 0 and size_usdc > servicer_deployable:
+            log(
+                f"💼 {opp.pair_id}: size_usdc={size_usdc:.2f} capped to "
+                f"servicer_deployable={servicer_deployable:.2f} USDC"
+            )
+            size_usdc = servicer_deployable
+
         if size_usdc <= 0:
             log(f"⏭ Skipping {opp.pair_id}: no budget remaining")
             skipped_caps += 1
@@ -299,9 +326,15 @@ def _execution_cycle():
                 depth_unavailable += 1
 
         if result.success:
+            cost_deployed = getattr(result, "total_cost_usdc", size_usdc)
+            # Decrement servicer deployable so next opportunity is sized correctly
+            servicer_deployable = max(0.0, servicer_deployable - cost_deployed)
+            log(
+                f"💼 Servicer deployable after {opp.pair_id}: "
+                f"deployed={cost_deployed:.2f} remaining={servicer_deployable:.2f}"
+            )
             # Decrement liquidity budget by actual cost deployed
             if liq_budget_remaining is not None:
-                cost_deployed = getattr(result, "total_cost_usdc", size_usdc)
                 liq_budget_remaining -= cost_deployed
                 log(
                     f"💧 Liquidity budget after {opp.pair_id}: "

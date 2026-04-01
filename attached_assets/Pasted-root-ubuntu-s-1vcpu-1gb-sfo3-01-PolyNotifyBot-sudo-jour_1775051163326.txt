@@ -1,0 +1,22 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "1 hour ago" | grep -E "Kalshi|Opinion|servicer only has|float low" | tail -20
+Apr 01 13:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXVENEZUELALEADER-26DEC31' → 'KXVENEZUELALEADER-26DEC31-JGUA'
+Apr 01 13:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXVENEZUELALEADER-26DEC31-JGUA': yes_ask=None no_ask=None
+Apr 01 13:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Apr 01 13:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 🎯 [Arb/Kalshi] 📏 [Kalshi/NO] depth walk: max_fill_price=0.9930 → 0 contracts fillable ($0.00 USDC)
+Apr 01 13:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 🎯 [Arb/Kalshi] ♻️ resolve_market_ticker: cache expired for 'KXPAHLAVIHEAD-27JAN'[reza_pahlavi_lead_iran_2026], re-fetching
+Apr 01 13:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 🎯 [Arb/Kalshi] 🔍 resolve_market_ticker: fetching markets for event 'KXPAHLAVIHEAD-27JAN'
+Apr 01 13:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 🎯 [Arb/Kalshi] ✅ resolve_market_ticker: 'KXPAHLAVIHEAD-27JAN' → 'KXPAHLAVIHEAD-27JAN-RPAH' (only market)
+Apr 01 13:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXPAHLAVIHEAD-27JAN' → 'KXPAHLAVIHEAD-27JAN-RPAH'
+Apr 01 13:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 🎯 [Arb/Kalshi] ✅ Kalshi prices for 'KXPAHLAVIHEAD-27JAN-RPAH': yes_ask=None no_ask=None
+Apr 01 13:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: ⚡ [Arb/Executor] 📊 Kalshi prices: yes_ask=None no_ask=None → using NO ask=None
+Apr 01 13:44:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 🎯 [Arb/Kalshi] 📏 [Kalshi/NO] depth walk: max_fill_price=0.8890 → 0 contracts fillable ($0.00 USDC)
+Apr 01 13:44:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.9690 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='169')
+Apr 01 13:44:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (82 contracts)
+Apr 01 13:44:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.9700 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='169')
+Apr 01 13:44:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (56 contracts)
+Apr 01 13:44:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 💸 [ArbFunder] ℹ️ Poly float low (0.0000 < 3.0) but servicer only has 5.2170 USDC — skipping
+Apr 01 13:44:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 💸 [ArbFunder] ⚠️ Kalshi balance HTTP 401: {"error":{"code":"authentication_error","message":"authentication_error","detail
+Apr 01 13:44:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 💸 [ArbFunder] ℹ️ Kalshi float low (0.0000 < 3.0) but servicer only has 5.2170 USDC — skipping
+Apr 01 13:44:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 💸 [ArbFunder] ⚠️ Opinion balance: all endpoints failed — returning 0
+Apr 01 13:44:54 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3945231]: 💸 [ArbFunder] ℹ️ Opinion float low (0.0000 < 5.0) but servicer only has 5.2170 USDC — skipping bridge
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

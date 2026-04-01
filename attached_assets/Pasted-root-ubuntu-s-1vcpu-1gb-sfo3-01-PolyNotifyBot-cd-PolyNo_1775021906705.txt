@@ -1,0 +1,45 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot && git pull && sudo systemctl restart psniper-bot
+sleep 45 && sudo journalctl -u psniper-bot --since "2 min ago" | grep -E "ArbReporter|report.*tx|✅.*report|tx sent|tx failed"
+remote: Enumerating objects: 17, done.
+remote: Counting objects: 100% (17/17), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 10 (delta 8), reused 10 (delta 8), pack-reused 0 (from 0)
+Unpacking objects: 100% (10/10), 2.49 KiB | 170.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   cb3e993..46bfaae  main       -> origin/main
+Updating cb3e993..46bfaae
+Fast-forward
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cd-PolyNo_1775021617680.txt | 32 ++++++++++++++++++++++++++++++++
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775021381398.txt | 32 ++++++++++++++++++++++++++++++++
+ bot/arb_monitor/core/arb_reporter.py                                                             |  8 ++++----
+ bot/arb_monitor/core/arb_withdrawals.py                                                          |  6 +++---
+ 4 files changed, 71 insertions(+), 7 deletions(-)
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cd-PolyNo_1775021617680.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775021381398.txt
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sleep 45 && sudo journalctl -u psniper-bot --since "2 min ago" | grep -E "ArbReporter|report.*tx|✅.*report|tx sent|tx failed"
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] ✅ Waterfall: no pending redemptions
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] 🔄 [AutoClaim] Scanning all requests for CLAIMABLE status…
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] 📋 [AutoClaim] Total deposit requests: 1
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] ℹ️ [AutoClaim] No claimable deposit requests
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] 📋 [AutoClaim] Total redeem requests: 0
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] ℹ️ [AutoClaim] No claimable redeem requests
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] 📋 Report firing — reason: cooldown elapsed
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] ✅ Building report — reason: cooldown elapsed (last=0, cooldown=3600s)
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] Computing conservative reportedAssets...
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter]   vault idle USDC: 0.0000
+Apr 01 05:37:19 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter]   servicer on Base: 0.0000
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter]   poly_cash=0.0000 kalshi_cash=0.0000 opinion_cash=0.0000
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter]   settled_pnl=0.0000
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] reportedAssets: raw=0.0000 → haircut(95%)=0.0000 USDC
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] ✅ Report payload built: reportedAssets=0.0000 USDC nonce=1 deadline=1775025437
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] ✅ report() tx sent: 0x4ba104290fcf2c06c126098f7667324f0170f3983d3bf56891c330cae58ecaa0
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] 📝 Report snapshot saved (nonce=1)
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] ⏳ [AutoClaim] Waiting for report tx to confirm before sweeping…
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] 📦 Tx 0x4ba104290fcf2c06… mined — status=❌ reverted
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] ⚠️ [AutoClaim] Report tx not confirmed within 90s — running best-effort sweep (may find 0 claimable if tx still pending)
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] 🔄 [AutoClaim] Scanning all requests for CLAIMABLE status…
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] 📋 [AutoClaim] Total deposit requests: 1
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] ℹ️ [AutoClaim] No claimable deposit requests
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] 📋 [AutoClaim] Total redeem requests: 0
+Apr 01 05:37:22 ubuntu-s-1vcpu-1gb-sfo3-01 python3[3894289]: 📋 [ArbReporter] ℹ️ [AutoClaim] No claimable redeem requests
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

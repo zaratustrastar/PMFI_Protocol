@@ -92,7 +92,7 @@ V2 is an async Yearn-style vault: no live NAV required for user flows.
 - Per-pair cap (`ARB_MAX_PAIR_USDC`) and total cap (`ARB_MAX_DEPLOYED_USDC`) enforced
 - Live price re-check + slippage guard (50 bps) before every trade
 - Auto-unwind leg 1 if leg 2 fails (Kalshi or Opinion)
-- `run_reporter_tick()` called before `run_funder_tick()` each cycle
+- `run_reporter_tick()` called at top of each cycle; `run_tend_tick()` called next (tend only, no float maintenance); `fund_both_legs_for_trade()` called from executor when a specific trade is selected
 
 **Current V2 Contract**: `0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC` (Base Mainnet) — set `ARB_VAULT_V2_ADDRESS` to this in VPS `.env`
 **Legacy V1 Contract**: `0x10f67BA7aB746a0DC8A48f0D74aA3a962328E689` — stays live until all V1 holders redeem

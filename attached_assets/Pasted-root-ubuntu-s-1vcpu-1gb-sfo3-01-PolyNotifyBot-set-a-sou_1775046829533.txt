@@ -1,0 +1,53 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# set -a && source ~/PolyNotifyBot/.env && set +a
+python3 -c "
+from eth_abi import encode as abi_encode, decode as abi_decode
+import json, urllib.request, hashlib
+
+vault = '0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC'
+
+def keccak4(text):
+    from eth_hash.auto import keccak
+    return keccak(text.encode())[:4]
+
+def rpc(method, params):
+    body = json.dumps({'jsonrpc':'2.0','method':method,'params':params,'id':1}).encode()
+    req = urllib.request.Request('https://mainnet.base.org', data=body, headers={'Content-Type':'application/json'})
+    return json.loads(urllib.request.urlopen(req).read())['result']
+
+# Check deposit request 0 status directly
+selector = keccak4('depositRequests(uint256)')
+data = '0x' + (selector + abi_encode(['uint256'], [0])).hex()
+raw = rpc('eth_call', [{'to': vault, 'data': data}, 'latest'])
+owner, receiver, assets, submitted_at, status, processed_pps = abi_decode(
+    ['address','address','uint256','uint256','uint8','uint256'],
+    bytes.fromhex(raw[2:])
+)
+statuses = {0:'PENDING', 1:'CLAIMABLE', 2:'CLAIMED', 3:'CANCELLED'}
+print(f'Request #0:')
+print(f'  assets:       {assets/1e6:.4f} USDC')
+print(f'  status:       {status} ({statuses.get(status,\"UNKNOWN\")})')
+print(f'  processedPPS: {processed_pps}')
+print(f'  receiver:     {receiver}')
+"
+Traceback (most recent call last):
+  File "<string>", line 19, in <module>
+  File "<string>", line 14, in rpc
+  File "/usr/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 403: Forbidden
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

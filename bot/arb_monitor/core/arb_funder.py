@@ -1,22 +1,28 @@
-"""pARB Auto-Funder: capital-efficient on-demand funding for arb trades.
+"""pARB Auto-Funder: trade-driven capital allocation for arb trades.
 
-Architecture (on-demand model):
-  Capital stays in the servicer wallet until a specific trade needs it.
-  The executor calls ensure_funded_for_trade() just before placing orders,
-  which reads the platform's current balance and tops up only the exact gap.
-  This eliminates fixed-ratio pre-allocation (e.g. 40/40/20) which wasted
-  capital on platforms with no current opportunities.
+Architecture (trade-driven model):
+  Capital stays in the servicer wallet until a specific, ranked opportunity is
+  selected. The executor calls fund_both_legs_for_trade() BEFORE placing any
+  orders. That function:
+    1. Reads servicer USDC balance ONCE
+    2. Reads current platform balances for both legs
+    3. Computes gaps (may be 0 if platforms already hold enough)
+    4. Checks servicer has (poly_gap + venue2_gap + safety_buffer) combined —
+       a single gate for the whole trade, not per-leg
+    5. Sends BOTH deposit TXs in one nonce sequence (no sequential wait)
+    6. Polls BOTH platform balances concurrently until both reach targets or
+       the wait timeout expires
+    7. Returns (ok: bool, error: str)
 
-Funder tick (run each cycle):
+  Opinion (BSC via LI.FI bridge): takes 3-10 minutes — always checked first;
+  if Opinion balance is insufficient, bridge is triggered fire-and-forget and
+  the call returns False immediately. The engine retries on the next cycle.
+
+Tend tick (run_tend_tick — called from reporter each cycle):
   1. Call tend() — moves excess vault idle USDC to the servicer wallet
   2. Log servicer status (USDC + ETH balances)
-  3. Minimum float maintenance — keeps a small standing reserve (default $3)
-     on each platform so the executor isn't always starting from zero
-
-On-demand top-up (called from executor before each trade):
-  ensure_funded_for_trade(venue, needed_usdc, servicer_wallet, private_key)
-  → reads platform balance → if gap exists, transfers from servicer → waits
-    ARB_DEPOSIT_WAIT_SECS for the deposit to register → returns bool
+  NOTE: No float maintenance — there are no standing reserves. Capital is
+  deposited exactly when and in exactly the amount that a specific trade needs.
 
 Nonce management: _NonceTracker is initialised from pending nonce and
 incremented client-side per transfer to prevent nonce collisions.
@@ -380,7 +386,7 @@ def _call_tend_if_ready(vault_address: str, private_key: str, servicer_wallet: s
     the production flow is:
         deposit processed by report() → idle accumulates in vault
         → _call_tend_if_ready() sends tend() tx → idle moves to servicer wallet
-        → run_funder_tick distributes deployable_capital to platforms
+        → fund_both_legs_for_trade() deposits exact amounts when a trade is selected
 
     tend() invariants (enforced on-chain):
         • Does NOT change officialPPS
@@ -627,19 +633,321 @@ def ensure_funded_for_trade(
         return False
 
 
-def run_funder_tick() -> None:
-    """Maintain vault tend() cadence and minimum platform floats each cycle.
+def get_servicer_deployable_usdc() -> float:
+    """Return servicer wallet USDC minus the safety buffer (deployable capital).
 
-    Called from the arb execution loop at the top of each cycle.
+    This is the total amount that can be safely committed to a trade right now.
+    Returns 0.0 on any error.
+    """
+    servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
+    if not servicer_wallet:
+        log("⚠️ ARB_SERVICER_WALLET not set — cannot determine deployable USDC")
+        return 0.0
+    try:
+        usdc = _get_usdc_balance(servicer_wallet)
+        deployable = max(0.0, usdc - ARB_SAFETY_BUFFER_USDC)
+        log(
+            f"💼 Servicer deployable: {usdc:.4f} USDC total − "
+            f"{ARB_SAFETY_BUFFER_USDC:.2f} safety_buffer = {deployable:.4f} deployable"
+        )
+        return deployable
+    except Exception as e:
+        log(f"⚠️ get_servicer_deployable_usdc error: {e}")
+        return 0.0
+
+
+def fund_both_legs_for_trade(
+    poly_usdc: float,
+    venue2: str,
+    venue2_usdc: float,
+    wait_timeout: int = 180,
+    poll_interval: int = 10,
+) -> tuple[bool, str]:
+    """Deposit exact capital to BOTH legs of a trade simultaneously, then wait.
+
+    This is the ONLY function that moves capital from the servicer wallet to
+    trading platforms. It implements the trade-driven funding algorithm:
+
+      1. Read servicer USDC balance once
+      2. Read current Poly and venue2 balances
+      3. Compute funding gaps for each leg (may be 0 if already funded)
+      4. Single capital gate: check servicer has (poly_gap + venue2_gap + safety_buffer)
+         — one check for the whole trade, never per-leg
+      5a. Poly + Kalshi: send BOTH deposit TXs in one nonce sequence
+          (no sequential wait between them — they land in parallel)
+      5b. Opinion (BSC bridge): check if balance is already sufficient;
+          if not, trigger LI.FI bridge fire-and-forget and return False
+          (bridge takes 3-10 min — engine retries on the next cycle)
+      6. Poll BOTH platform balances every poll_interval seconds until both
+         reach their respective targets or wait_timeout expires
+      7. Return (ok, error_message)
+
+    Args:
+        poly_usdc:    exact USDC required for the Polymarket leg
+        venue2:       "kalshi" or "opinion"
+        venue2_usdc:  exact USDC required for the venue2 leg
+        wait_timeout: seconds to wait for balances to arrive (default 180s)
+        poll_interval: seconds between balance polls (default 10s)
+
+    Returns:
+        (True, "")           — both platforms funded; safe to execute
+        (False, error_str)   — cannot fund; error_str explains why
+    """
+    private_key     = os.environ.get("POLY_PRIVATE_KEY", "")
+    servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
+
+    if not private_key or not servicer_wallet:
+        msg = "fund_both_legs: POLY_PRIVATE_KEY or ARB_SERVICER_WALLET not set — cannot fund"
+        log(f"❌ {msg}")
+        return False, msg
+
+    log(
+        f"💰 fund_both_legs: poly={poly_usdc:.4f} USDC | "
+        f"{venue2}={venue2_usdc:.4f} USDC (total={poly_usdc + venue2_usdc:.4f})"
+    )
+
+    # ── Step 1: Servicer balance ──────────────────────────────────────────
+    try:
+        servicer_eth  = _get_eth_balance(servicer_wallet)
+        servicer_usdc = _get_usdc_balance(servicer_wallet)
+    except Exception as e:
+        msg = f"fund_both_legs: cannot read servicer wallet: {e}"
+        log(f"❌ {msg}")
+        return False, msg
+
+    if servicer_eth < ARB_SERVICER_GAS_RESERVE_ETH:
+        msg = (
+            f"fund_both_legs: servicer ETH too low "
+            f"({servicer_eth:.6f} < {ARB_SERVICER_GAS_RESERVE_ETH} ETH gas reserve)"
+        )
+        log(f"❌ {msg}")
+        return False, msg
+
+    # ── Step 2 & 3: Read current platform balances and compute gaps ───────
+    log("📊 Reading current platform balances...")
+    poly_before   = _get_platform_balance("polymarket")
+    poly_target   = poly_usdc
+    poly_gap      = max(0.0, poly_target - poly_before)
+
+    venue2_before = _get_platform_balance(venue2)
+    venue2_target = venue2_usdc
+    venue2_gap    = max(0.0, venue2_target - venue2_before)
+
+    log(
+        f"📊 Balances: poly={poly_before:.4f} (target={poly_target:.4f} gap={poly_gap:.4f}) | "
+        f"{venue2}={venue2_before:.4f} (target={venue2_target:.4f} gap={venue2_gap:.4f})"
+    )
+
+    total_gap = poly_gap + venue2_gap
+
+    # ── Step 4: Single combined capital gate ─────────────────────────────
+    if poly_before >= poly_target and venue2_before >= venue2_target:
+        log("✅ Both platforms already have sufficient balance — no deposit needed")
+        return True, ""
+
+    required = total_gap + ARB_SAFETY_BUFFER_USDC
+    if servicer_usdc < required:
+        msg = (
+            f"fund_both_legs: servicer has {servicer_usdc:.4f} USDC — "
+            f"insufficient for gaps ({poly_gap:.4f} + {venue2_gap:.4f}) + "
+            f"safety_buffer ({ARB_SAFETY_BUFFER_USDC:.2f}) = {required:.4f} needed"
+        )
+        log(f"❌ {msg}")
+        return False, msg
+
+    log(
+        f"✅ Capital check passed: servicer={servicer_usdc:.4f} >= "
+        f"required={required:.4f} (gaps={total_gap:.4f} + buffer={ARB_SAFETY_BUFFER_USDC:.2f})"
+    )
+
+    # ── Step 5a: Opinion — bridge fire-and-forget (cannot wait inline) ────
+    if venue2 == "opinion":
+        if venue2_before >= venue2_target:
+            log(f"✅ Opinion already has {venue2_before:.4f} USDC >= {venue2_target:.4f} needed")
+        else:
+            if not OPINION_BSC_DEPOSIT_ADDR:
+                msg = "fund_both_legs: OPINION_BSC_DEPOSIT_ADDR not set — cannot bridge to Opinion"
+                log(f"❌ {msg}")
+                return False, msg
+            bridge_amount = round(venue2_gap + 1.0, 6)  # +$1 buffer for bridge slippage
+            log(
+                f"🌉 Opinion balance low ({venue2_before:.4f} < {venue2_target:.4f}) — "
+                f"triggering bridge: {bridge_amount:.4f} USDC Base→BSC (fire-and-forget)"
+            )
+            try:
+                nt = _NonceTracker(servicer_wallet)
+                bridge_tx = _bridge_usdc_base_to_bsc(
+                    private_key=private_key,
+                    from_addr=servicer_wallet,
+                    amount_usdc=bridge_amount,
+                    to_bsc_addr=OPINION_BSC_DEPOSIT_ADDR,
+                    nonce_tracker=nt,
+                )
+                log(f"🌉 Bridge initiated: tx={bridge_tx} — will settle in ~3-10 min")
+            except Exception as e:
+                msg = f"fund_both_legs: Opinion bridge failed: {e}"
+                log(f"❌ {msg}")
+                return False, msg
+            # Cannot wait for bridge inline — return False so engine retries next cycle
+            msg = (
+                f"fund_both_legs: Opinion bridge triggered (gap={venue2_gap:.4f} USDC) — "
+                f"retrying after ~5 min for bridge to settle"
+            )
+            log(f"⏳ {msg}")
+            return False, msg
+
+        # Opinion is funded. Now handle Poly if it needs a top-up.
+        if poly_gap > 0:
+            if not POLY_BASE_DEPOSIT_ADDR:
+                msg = "fund_both_legs: POLY_BASE_DEPOSIT_ADDR not set"
+                log(f"❌ {msg}")
+                return False, msg
+            try:
+                nt = _NonceTracker(servicer_wallet)
+                poly_tx = _send_erc20_transfer(
+                    private_key, POLY_BASE_DEPOSIT_ADDR, round(poly_gap, 6), nt
+                )
+                log(f"📤 Poly deposit: {poly_gap:.4f} USDC → tx={poly_tx}")
+            except Exception as e:
+                msg = f"fund_both_legs: Poly deposit failed: {e}"
+                log(f"❌ {msg}")
+                return False, msg
+
+            # Wait for Poly to arrive (Opinion is already funded above)
+            return _wait_for_balance("polymarket", poly_before + poly_gap, wait_timeout, poll_interval)
+
+        return True, ""
+
+    # ── Step 5b: Poly + Kalshi — send BOTH TXs in one nonce sequence ─────
+    try:
+        nt = _NonceTracker(servicer_wallet)
+    except Exception as e:
+        msg = f"fund_both_legs: cannot init nonce tracker: {e}"
+        log(f"❌ {msg}")
+        return False, msg
+
+    if poly_gap > 0:
+        if not POLY_BASE_DEPOSIT_ADDR:
+            msg = "fund_both_legs: POLY_BASE_DEPOSIT_ADDR not set"
+            log(f"❌ {msg}")
+            return False, msg
+        try:
+            poly_tx = _send_erc20_transfer(
+                private_key, POLY_BASE_DEPOSIT_ADDR, round(poly_gap, 6), nt
+            )
+            log(f"📤 Poly deposit TX: {poly_gap:.4f} USDC → {POLY_BASE_DEPOSIT_ADDR} tx={poly_tx}")
+        except Exception as e:
+            msg = f"fund_both_legs: Poly deposit failed: {e}"
+            log(f"❌ {msg}")
+            return False, msg
+    else:
+        log(f"✅ Poly already funded ({poly_before:.4f} >= {poly_target:.4f}) — no TX needed")
+
+    if venue2_gap > 0:
+        if not KALSHI_BASE_DEPOSIT_ADDR:
+            msg = "fund_both_legs: KALSHI_BASE_DEPOSIT_ADDR not set — cannot fund Kalshi"
+            log(f"❌ {msg}")
+            return False, msg
+        try:
+            # Uses NEXT nonce from the same tracker — guaranteed to be sequenced
+            # correctly with the Poly TX above.
+            kalshi_tx = _send_erc20_transfer(
+                private_key, KALSHI_BASE_DEPOSIT_ADDR, round(venue2_gap, 6), nt
+            )
+            log(f"📤 Kalshi deposit TX: {venue2_gap:.4f} USDC → {KALSHI_BASE_DEPOSIT_ADDR} tx={kalshi_tx}")
+        except Exception as e:
+            msg = f"fund_both_legs: Kalshi deposit failed: {e}"
+            log(f"❌ {msg}")
+            return False, msg
+    else:
+        log(f"✅ Kalshi already funded ({venue2_before:.4f} >= {venue2_target:.4f}) — no TX needed")
+
+    # ── Step 6: Poll BOTH platform balances until both reach targets ──────
+    poly_needed_target   = poly_before + poly_gap
+    kalshi_needed_target = venue2_before + venue2_gap
+
+    log(
+        f"⏳ Waiting for deposits to land: "
+        f"poly_target={poly_needed_target:.4f} USDC | "
+        f"kalshi_target={kalshi_needed_target:.4f} USDC "
+        f"(timeout={wait_timeout}s, poll={poll_interval}s)"
+    )
+
+    deadline = time.time() + wait_timeout
+    while time.time() < deadline:
+        time.sleep(poll_interval)
+        poly_now   = _get_platform_balance("polymarket")
+        kalshi_now = _get_platform_balance("kalshi")
+        log(
+            f"⏳ Balance poll: poly={poly_now:.4f}/{poly_needed_target:.4f} | "
+            f"kalshi={kalshi_now:.4f}/{kalshi_needed_target:.4f}"
+        )
+
+        poly_ok   = poly_now   >= poly_needed_target   - 0.01  # 1-cent tolerance
+        kalshi_ok = kalshi_now >= kalshi_needed_target - 0.01
+
+        if poly_ok and kalshi_ok:
+            log(
+                f"✅ Both legs funded: poly={poly_now:.4f} kalshi={kalshi_now:.4f} "
+                f"— deposits confirmed, proceeding to execution"
+            )
+            return True, ""
+
+        remaining = deadline - time.time()
+        log(
+            f"⏳ Waiting for deposits... "
+            f"poly={'✅' if poly_ok else f'{poly_now:.4f}/{poly_needed_target:.4f}'} "
+            f"kalshi={'✅' if kalshi_ok else f'{kalshi_now:.4f}/{kalshi_needed_target:.4f}'} "
+            f"({remaining:.0f}s remaining)"
+        )
+
+    # Timeout — report which legs didn't arrive
+    poly_final   = _get_platform_balance("polymarket")
+    kalshi_final = _get_platform_balance("kalshi")
+    msg = (
+        f"fund_both_legs: timeout after {wait_timeout}s — "
+        f"poly={poly_final:.4f}/{poly_needed_target:.4f} "
+        f"kalshi={kalshi_final:.4f}/{kalshi_needed_target:.4f}"
+    )
+    log(f"❌ {msg}")
+    return False, msg
+
+
+def _wait_for_balance(
+    venue: str,
+    target: float,
+    wait_timeout: int,
+    poll_interval: int,
+) -> tuple[bool, str]:
+    """Poll a single platform balance until it reaches `target` or timeout."""
+    deadline = time.time() + wait_timeout
+    while time.time() < deadline:
+        time.sleep(poll_interval)
+        current = _get_platform_balance(venue)
+        if current >= target - 0.01:
+            log(f"✅ {venue} balance {current:.4f} >= {target:.4f} — funded")
+            return True, ""
+        remaining = deadline - time.time()
+        log(f"⏳ {venue}: {current:.4f}/{target:.4f} ({remaining:.0f}s remaining)")
+
+    final = _get_platform_balance(venue)
+    msg = f"fund_both_legs: {venue} deposit timeout after {wait_timeout}s — {final:.4f}/{target:.4f}"
+    log(f"❌ {msg}")
+    return False, msg
+
+
+def run_tend_tick() -> None:
+    """Call tend() on the vault and log servicer wallet status each cycle.
+
+    This is the ONLY per-cycle funder action. There is NO float maintenance.
+    Capital is deployed exactly when a specific trade is selected, in the exact
+    amounts both legs need, via fund_both_legs_for_trade().
+
     All errors are logged and suppressed — never raises.
     """
-    # ── Heartbeat: always log at the very top so we can confirm the funder is
-    # being called even if it exits early due to missing env vars or guards.
-    ts_hb = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    log(f"💓 [funder tick] starting — {ts_hb}")
+    ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    log(f"💓 [tend tick] starting — {ts}")
 
-    # ── Env-var check: log each missing variable explicitly so the operator knows
-    # exactly what to add to .env rather than getting a generic "skipped" message.
     private_key     = os.environ.get("POLY_PRIVATE_KEY", "")
     servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
     vault_address   = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
@@ -648,214 +956,61 @@ def run_funder_tick() -> None:
     if not private_key:
         missing_vars.append("POLY_PRIVATE_KEY (servicer wallet signing key)")
     if not servicer_wallet:
-        missing_vars.append("ARB_SERVICER_WALLET (servicer wallet address, e.g. 0xba32aa4c...)")
+        missing_vars.append("ARB_SERVICER_WALLET (servicer wallet address)")
 
     if missing_vars:
         for var in missing_vars:
             log(f"❌ Missing required env var: {var}")
-        log(
-            "⛔ Funder cannot run without the above variables. "
-            "Add them to .env and restart the bot."
-        )
         return
-
-    if not vault_address:
-        log(
-            "⚠️ ARB_VAULT_V2_ADDRESS not set — tend() will NOT be called. "
-            "Set ARB_VAULT_V2_ADDRESS=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC to enable "
-            "the vault→servicer USDC flow. The funder will still distribute any "
-            "USDC already in the servicer wallet."
-        )
 
     _verify_wallet_key_match(private_key, servicer_wallet)
 
     try:
-        _run_funder_tick_inner(private_key, servicer_wallet)
-    except Exception as e:
-        log(f"❌ Funder tick error (non-fatal): {e}")
+        # ── Tend: move vault idle USDC → servicer wallet ──────────────────
+        if vault_address:
+            log(f"🔄 tend() check — vault={vault_address} servicer={servicer_wallet}")
+            _call_tend_if_ready(vault_address, private_key, servicer_wallet)
+        else:
+            log("ℹ️ ARB_VAULT_V2_ADDRESS not set — skipping tend()")
 
-
-def _run_funder_tick_inner(private_key: str, servicer_wallet: str) -> None:
-    """Inner implementation — all exceptions propagate to run_funder_tick for logging."""
-    ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-
-    # ── 0. Call tend() on-chain if cooldown elapsed ────────────────────────
-    # This is the mechanism that moves excess vault idle USDC → servicer wallet.
-    # tend() respects pending-redeem reservations and the idle target buffer on-chain.
-    # Must run BEFORE liquidity state so the state reflects the post-tend balance.
-    vault_address = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
-    if vault_address:
-        log(
-            f"🔄 tend() check — vault={vault_address} servicer={servicer_wallet}"
-        )
-        _call_tend_if_ready(vault_address, private_key, servicer_wallet)
-    else:
-        log(
-            f"ℹ️ ARB_VAULT_V2_ADDRESS not set — skipping tend() "
-            f"(servicer wallet: {servicer_wallet})"
-        )
-
-    # ── 0b. Servicer wallet status: USDC + ETH + threshold ─────────────────
-    # Logged immediately after tend() so the operator can see the wallet state
-    # before any liquidity-state computation.
-    try:
-        raw_usdc = _get_usdc_balance(servicer_wallet)
-        raw_eth  = _get_eth_balance(servicer_wallet)
-        log(
-            f"💼 Servicer status [{ts}]: "
-            f"address={servicer_wallet} "
-            f"USDC={raw_usdc:.4f} "
-            f"ETH={raw_eth:.6f} "
-            f"poly_float_min={ARB_MIN_FLOAT_POLY} "
-            f"kalshi_float_min={ARB_MIN_FLOAT_KALSHI} "
-            f"gas_reserve={ARB_SERVICER_GAS_RESERVE_ETH:.4f} ETH"
-        )
-        if raw_eth < ARB_SERVICER_GAS_RESERVE_ETH:
-            log(
-                f"❌ Servicer ETH too low: {raw_eth:.6f} ETH < gas_reserve "
-                f"{ARB_SERVICER_GAS_RESERVE_ETH:.4f} ETH. "
-                f"Send at least {ARB_SERVICER_GAS_RESERVE_ETH - raw_eth:.6f} ETH to "
-                f"{servicer_wallet} on Base to restore gas capacity."
-            )
-    except Exception as _be:
-        log(f"⚠️ Could not read servicer wallet balances: {_be}")
-
-    # ── 1. Liquidity health snapshot (observability only) ─────────────────
-    # Log the vault liquidity state so operators can monitor vault health.
-    # No longer used to gate distribution — on-demand funding in the executor
-    # handles trade-specific capital deployment.
-    vault_address = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
-    if vault_address:
+        # ── Servicer status ────────────────────────────────────────────────
         try:
-            from .arb_liquidity import compute_liquidity_state
-            liq = compute_liquidity_state(vault_address, servicer_wallet)
-            if liq.ok:
+            raw_usdc = _get_usdc_balance(servicer_wallet)
+            raw_eth  = _get_eth_balance(servicer_wallet)
+            log(
+                f"💼 Servicer [{ts}]: address={servicer_wallet} "
+                f"USDC={raw_usdc:.4f} ETH={raw_eth:.6f} "
+                f"safety_buffer={ARB_SAFETY_BUFFER_USDC} "
+                f"gas_reserve={ARB_SERVICER_GAS_RESERVE_ETH:.4f} ETH"
+            )
+            if raw_eth < ARB_SERVICER_GAS_RESERVE_ETH:
                 log(
-                    f"[{ts}] Vault liquidity: idle={liq.idle_available:.2f} "
-                    f"required_idle={liq.required_idle:.2f} "
-                    f"pending_redeem={liq.pending_redeem_value:.2f} "
-                    f"servicer={liq.free_cash:.2f} "
-                    f"deployable={liq.deployable_capital:.2f} "
-                    f"under_pressure={liq.under_pressure}"
+                    f"❌ Servicer ETH too low: {raw_eth:.6f} < {ARB_SERVICER_GAS_RESERVE_ETH} ETH — "
+                    f"send ETH to {servicer_wallet} on Base"
                 )
-                if liq.under_pressure:
-                    log(
-                        f"⚠️ Redemption pressure: shortfall={liq.shortfall:.2f} USDC — "
-                        f"executor will prioritise liquidity over new trades"
-                    )
-        except Exception as e:
-            log(f"⚠️ Liquidity snapshot failed (non-fatal): {e}")
+        except Exception as _be:
+            log(f"⚠️ Could not read servicer wallet balances: {_be}")
 
-    # ── 2. Minimum float maintenance ───────────────────────────────────────
-    # Keep a small standing balance on each platform so the executor always
-    # has a reserve immediately available for small trades without waiting
-    # for a Base transaction to confirm. Larger trades are funded on-demand
-    # by ensure_funded_for_trade() in the executor just before order placement.
-    #
-    # ETH guard: both the float top-up here and the on-demand top-ups in the
-    # executor require ETH for gas. Log a warning but continue — we may still
-    # be able to call tend() without sending any USDC transfers.
-    try:
-        eth_balance = _get_eth_balance(servicer_wallet)
-        if eth_balance < ARB_SERVICER_GAS_RESERVE_ETH:
-            log(
-                f"⚠️ Servicer ETH low ({eth_balance:.6f} < "
-                f"{ARB_SERVICER_GAS_RESERVE_ETH} ETH) — "
-                f"skipping float top-ups (send ETH to {servicer_wallet} on Base)"
-            )
-            return
+        # ── Liquidity health snapshot (observability only) ─────────────────
+        if vault_address:
+            try:
+                from .arb_liquidity import compute_liquidity_state
+                liq = compute_liquidity_state(vault_address, servicer_wallet)
+                if liq.ok:
+                    log(
+                        f"📊 Vault liquidity: idle={liq.idle_available:.2f} "
+                        f"required_idle={liq.required_idle:.2f} "
+                        f"pending_redeem={liq.pending_redeem_value:.2f} "
+                        f"servicer={liq.free_cash:.2f} "
+                        f"deployable={liq.deployable_capital:.2f} "
+                        f"under_pressure={liq.under_pressure}"
+                    )
+            except Exception as e:
+                log(f"⚠️ Liquidity snapshot failed (non-fatal): {e}")
+
     except Exception as e:
-        log(f"⚠️ Could not read ETH balance — skipping float maintenance: {e}")
-        return
+        log(f"❌ Tend tick error (non-fatal): {e}")
 
-    servicer_usdc = _get_usdc_balance(servicer_wallet)
-    log(f"[{ts}] Servicer USDC available for float maintenance: {servicer_usdc:.4f}")
 
-    # Shared nonce tracker across both top-ups to prevent nonce collisions.
-    try:
-        nonce_tracker = _NonceTracker(servicer_wallet)
-    except Exception as e:
-        log(f"❌ Could not initialise nonce tracker: {e}")
-        return
-
-    # ── Polymarket float ───────────────────────────────────────────────────
-    if POLY_BASE_DEPOSIT_ADDR:
-        try:
-            poly_bal = _get_platform_balance("polymarket")
-            if poly_bal < ARB_MIN_FLOAT_POLY:
-                top_up = round(ARB_MIN_FLOAT_POLY - poly_bal, 6)
-                if servicer_usdc >= top_up + ARB_SAFETY_BUFFER_USDC:
-                    tx = _send_erc20_transfer(private_key, POLY_BASE_DEPOSIT_ADDR, top_up, nonce_tracker)
-                    log(f"✅ [{ts}] Poly float topped up: {top_up:.4f} USDC → {POLY_BASE_DEPOSIT_ADDR} tx={tx}")
-                    servicer_usdc -= top_up
-                else:
-                    log(
-                        f"ℹ️ Poly float low ({poly_bal:.4f} < {ARB_MIN_FLOAT_POLY}) "
-                        f"but servicer only has {servicer_usdc:.4f} USDC — skipping"
-                    )
-            else:
-                log(f"✅ Poly float OK: {poly_bal:.4f} USDC (min={ARB_MIN_FLOAT_POLY})")
-        except Exception as e:
-            log(f"⚠️ Poly float maintenance error: {e}")
-    else:
-        log("ℹ️ POLY_BASE_DEPOSIT_ADDR not set — skipping Poly float maintenance")
-
-    # ── Kalshi float ───────────────────────────────────────────────────────
-    if KALSHI_BASE_DEPOSIT_ADDR:
-        try:
-            kalshi_bal = _get_platform_balance("kalshi")
-            if kalshi_bal < ARB_MIN_FLOAT_KALSHI:
-                top_up = round(ARB_MIN_FLOAT_KALSHI - kalshi_bal, 6)
-                if servicer_usdc >= top_up + ARB_SAFETY_BUFFER_USDC:
-                    tx = _send_erc20_transfer(private_key, KALSHI_BASE_DEPOSIT_ADDR, top_up, nonce_tracker)
-                    log(f"✅ [{ts}] Kalshi float topped up: {top_up:.4f} USDC → {KALSHI_BASE_DEPOSIT_ADDR} tx={tx}")
-                else:
-                    log(
-                        f"ℹ️ Kalshi float low ({kalshi_bal:.4f} < {ARB_MIN_FLOAT_KALSHI}) "
-                        f"but servicer only has {servicer_usdc:.4f} USDC — skipping"
-                    )
-            else:
-                log(f"✅ Kalshi float OK: {kalshi_bal:.4f} USDC (min={ARB_MIN_FLOAT_KALSHI})")
-        except Exception as e:
-            log(f"⚠️ Kalshi float maintenance error: {e}")
-    else:
-        log("ℹ️ KALSHI_BASE_DEPOSIT_ADDR not set — skipping Kalshi float maintenance")
-
-    # ── Opinion float (BSC bridge) ──────────────────────────────────────────
-    # Opinion runs on BSC; capital must be pre-positioned because the LI.FI
-    # bridge takes 3-10 minutes. We trigger a top-up here when the Opinion
-    # balance falls below ARB_MIN_FLOAT_OPINION. The bridge is fire-and-forget
-    # (tx hash logged; we don't wait for BSC receipt).
-    if OPINION_BSC_DEPOSIT_ADDR:
-        try:
-            opinion_bal = _get_platform_balance("opinion")
-            if opinion_bal < ARB_MIN_FLOAT_OPINION:
-                top_up = round(ARB_MIN_FLOAT_OPINION - opinion_bal + 1.0, 6)  # +$1 buffer
-                if servicer_usdc >= top_up + ARB_SAFETY_BUFFER_USDC:
-                    log(
-                        f"🌉 [{ts}] Opinion float low ({opinion_bal:.4f} < {ARB_MIN_FLOAT_OPINION}) — "
-                        f"bridging {top_up:.4f} USDC Base→BSC to {OPINION_BSC_DEPOSIT_ADDR}"
-                    )
-                    try:
-                        bridge_tx = _bridge_usdc_base_to_bsc(
-                            private_key=private_key,
-                            from_addr=servicer_wallet,
-                            amount_usdc=top_up,
-                            to_bsc_addr=OPINION_BSC_DEPOSIT_ADDR,
-                            nonce_tracker=nonce_tracker,
-                        )
-                        log(f"✅ [{ts}] Opinion bridge initiated: {top_up:.4f} USDC → BSC tx={bridge_tx}")
-                        servicer_usdc -= top_up
-                    except Exception as bridge_err:
-                        log(f"⚠️ Opinion bridge failed (non-fatal): {bridge_err}")
-                else:
-                    log(
-                        f"ℹ️ Opinion float low ({opinion_bal:.4f} < {ARB_MIN_FLOAT_OPINION}) "
-                        f"but servicer only has {servicer_usdc:.4f} USDC — skipping bridge"
-                    )
-            else:
-                log(f"✅ Opinion float OK: {opinion_bal:.4f} USDC (min={ARB_MIN_FLOAT_OPINION})")
-        except Exception as e:
-            log(f"⚠️ Opinion float maintenance error: {e}")
-    else:
-        log("ℹ️ OPINION_BSC_DEPOSIT_ADDR not set — skipping Opinion float maintenance")
+# Keep legacy name as alias so any external callers don't break immediately.
+run_funder_tick = run_tend_tick
