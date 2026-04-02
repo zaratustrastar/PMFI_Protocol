@@ -1,0 +1,128 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -s "https://gamma-api.polymarket.com/events?slug=will-democrats-win-us-house-2026&limit=5" | python3 -m json.tool | head -40
+[]
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# curl -s "https://gamma-api.polymarket.com/events?slug=us-house-2026&limit=5" | python3 -m json.tool | head -40
+[]
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f --no-pager | grep -E "slug-only|no_token=missing|display_only|verified|execute|resolved"
+Apr 02 13:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-group-b-winner-2026_qatar: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-group-f-winner-2026_japan: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-group-e-winner-2026_germany: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-04-29_cut_25bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping ipos-before-2027_shein: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping lol-lck-2026-winner_fearx: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping mi11-democratic-primary-winner-2026_jeremy_moss: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-04-29_cut_50bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-06-17_hike_25bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:43 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-06-17_cut_25bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping lol-lck-2026-winner_geng_esports: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping inflation-2026_above_3p: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping minnesota-governor-republican-nominee-2026_kendall_qualls: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-group-a-winner-2026_south_korea: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=0 skipped_display_only=205 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=0 depth_insufficient=0 depth_unavailable=0
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:19:59 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:04 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 02 13:20:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

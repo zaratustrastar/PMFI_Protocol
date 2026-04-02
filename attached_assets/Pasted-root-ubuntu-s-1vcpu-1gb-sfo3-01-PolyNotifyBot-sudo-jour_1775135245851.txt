@@ -1,0 +1,17 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "\[ArbExecLoop\]|\[ArbFunder\]|\[Arb/Executor\]"
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=17.96 under_pressure=False unwind_needed=False
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-02T13:06:30Z
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775135029, cooldown=60s) — calling
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=1054
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] 📤 TX nonce=1054 → 0x1c43734e5f7fd1b9c073dbee8459aac1911c8f754e9942010161386c0854b54e
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] ✅ tend() sent: tx=0x1c43734e5f7fd1b9c073dbee8459aac1911c8f754e9942010161386c0854b54e
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] 💼 Servicer [2026-04-02T13:06:30Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=18.9551 ETH=0.010030 safety_buffer=1.0 gas_reserve=0.0100 ETH
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=18.96 deployable=17.96 under_pressure=False
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] 💼 Servicer deployable: 18.9551 USDC total − 1.00 safety_buffer = 17.9551 deployable
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 17.9551 USDC in servicer wallet
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Apr 02 13:06:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 💸 [ArbFunder] 💰 Kalshi balance: 0.0000 USDC
+Apr 02 13:06:37 ubuntu-s-1vcpu-1gb-sfo3-01 python[4089172]: 🔁 [ArbExecLoop] 💼 Platform balances: poly=0.0000 kalshi=0.0000 opinion=2.9772 USDC
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

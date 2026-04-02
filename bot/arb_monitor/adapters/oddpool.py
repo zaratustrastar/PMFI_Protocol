@@ -101,6 +101,7 @@ def _resolve_poly_tokens(
     expected_poly_ask: Optional[float] = None,
     buying_poly_no: bool = False,
     resolution_ts: Optional[int] = None,
+    event_title: str = "",
 ) -> tuple[Optional[str], Optional[str]]:
     """Resolve a Polymarket event slug to a (YES token, NO token) pair.
 
@@ -143,7 +144,8 @@ def _resolve_poly_tokens(
     try:
         from .polymarket import lookup_token_ids_by_slug
         result = lookup_token_ids_by_slug(
-            slug, label=label, resolution_ts=resolution_ts, buying_no=buying_poly_no
+            slug, label=label, resolution_ts=resolution_ts,
+            buying_no=buying_poly_no, event_title=event_title,
         )
         if result:
             yes_tok, no_tok = result
@@ -532,6 +534,7 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
                     expected_poly_ask=our_poly_ask if our_poly_ask > 0 else None,
                     buying_poly_no=_buying_poly_no,
                     resolution_ts=expiry_ts if expiry_ts > 0 else None,
+                    event_title=event_title,
                 )
                 # Merge: prefer WS tokens when present, fill gaps from Gamma
                 resolved_yes_token = resolved_yes_token or gamma_yes
@@ -549,6 +552,7 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
                 expected_poly_ask=our_poly_ask if our_poly_ask > 0 else None,
                 buying_poly_no=_buying_poly_no,
                 resolution_ts=expiry_ts if expiry_ts > 0 else None,
+                event_title=event_title,
             )
 
         # ── Profit-maximising scorer ──────────────────────────────────────────

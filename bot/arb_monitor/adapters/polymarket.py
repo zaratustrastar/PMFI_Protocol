@@ -319,200 +319,287 @@ def _is_market_live(m: dict) -> bool:
     return True
 
 
+def _keywords_from_title(title: str) -> str:
+    """Extract up to 5 search keywords from an Oddpool event_title.
+
+    Removes common English stop-words and very short tokens so the remaining
+    words are distinctive enough to narrow down a Gamma text search.
+
+    Examples:
+      "FOMC April 29 Rate Decision" → "FOMC April Rate Decision"
+      "2026 FIFA World Cup Group B Winner" → "FIFA World Cup Group"
+    """
+    import re as _re
+    if not title:
+        return ""
+    _STOP = {
+        "the", "a", "an", "of", "in", "for", "to", "and", "or", "at", "on",
+        "by", "is", "be", "will", "with", "from", "who", "what", "when",
+        "which", "that", "it", "its", "this", "these", "those", "vs", "v",
+    }
+    tokens = _re.findall(r"[a-zA-Z0-9]+", title)
+    filtered = [t for t in tokens if len(t) >= 2 and t.lower() not in _STOP]
+    return " ".join(filtered[:5])
+
+
+def _collect_from_events(events: list, slug_hint: str) -> tuple[list, int]:
+    """Collect live (clob_ids, market) tuples from a Gamma events list."""
+    all_markets: list[tuple[list[str], dict]] = []
+    skipped = 0
+    for event in events:
+        for m in event.get("markets", []):
+            if not _is_market_live(m):
+                skipped += 1
+                continue
+            clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
+            if len(clob_ids) >= 2:
+                all_markets.append((clob_ids, m))
+    if skipped:
+        log(f"🚫 events slug={slug_hint!r}: skipped {skipped} closed/archived/inactive/expired markets")
+    return all_markets, skipped
+
+
+def _collect_from_markets(markets_raw, slug_hint: str) -> tuple[list, int]:
+    """Collect live (clob_ids, market) tuples from a flat Gamma markets list."""
+    if isinstance(markets_raw, dict):
+        markets_raw = markets_raw.get("markets", [markets_raw])
+    if not isinstance(markets_raw, list):
+        return [], 0
+    all_markets: list[tuple[list[str], dict]] = []
+    skipped = 0
+    for m in markets_raw:
+        if not _is_market_live(m):
+            skipped += 1
+            continue
+        clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
+        if len(clob_ids) >= 2:
+            all_markets.append((clob_ids, m))
+    if skipped:
+        log(f"🚫 markets slug={slug_hint!r}: skipped {skipped} closed/archived/inactive/expired markets")
+    return all_markets, skipped
+
+
+def _sanity_gate(
+    chosen_ids: list[str],
+    chosen_m: dict,
+    buying_no: bool,
+    slug: str,
+    label: str,
+    path_name: str,
+) -> Optional[tuple[str, str]]:
+    """Post-resolution settled-market gate (buy-side only).
+
+    If the token we are buying has a bid ≥ 0.98, it has already won and there
+    is no edge.  We only check the buy-side to avoid false rejections when the
+    opposite side bids near $1 (e.g. 98% YES market is still tradeable when we
+    buy NO at 2¢).
+
+    Returns (yes_token, no_token) on pass, None on rejection.
+    """
+    buy_id   = chosen_ids[1] if buying_no else chosen_ids[0]
+    other_id = chosen_ids[0] if buying_no else chosen_ids[1]
+    side_name = "NO" if buying_no else "YES"
+    buy_bid   = get_best_prices(buy_id).get("best_bid")
+    other_bid = get_best_prices(other_id).get("best_bid")
+    if buy_bid is not None and buy_bid >= 0.98:
+        log(
+            f"⚠️ {path_name} settled-market gate: {side_name}_bid={buy_bid:.2f} ≥ 0.98, "
+            f"buy-side token won — rejecting slug={slug!r} label={label!r}"
+        )
+        return None
+    if other_bid is not None and other_bid >= 0.98:
+        log(
+            f"ℹ️ {path_name} other-side bid={other_bid:.2f} ≥ 0.98 "
+            f"(opposite likely winner) — buying {side_name}, not rejected"
+        )
+    matched = chosen_m.get("groupItemTitle") or chosen_m.get("question", "")[:50]
+    log(
+        f"✅ {path_name} slug={slug!r} label={label!r} → {matched!r} "
+        f"YES={chosen_ids[0][:12]}... NO={chosen_ids[1][:12]}..."
+    )
+    return (chosen_ids[0], chosen_ids[1])
+
+
 def lookup_token_ids_by_slug(
     slug: str,
     label: str = "",
     resolution_ts: Optional[int] = None,
     buying_no: bool = False,
+    event_title: str = "",
 ) -> Optional[tuple[str, str]]:
-    """Fetch YES/NO CLOB token IDs for a Polymarket event by its URL slug.
+    """Fetch YES/NO CLOB token IDs for a Polymarket event.
 
-    Returns (yes_token_id, no_token_id) or None on failure.
+    The upstream ``slug`` (from Oddpool's ``polymarket_event_slug``) is treated
+    as a *hint*, not a canonical Gamma identifier.  Oddpool uses its own internal
+    event keys that often differ from Polymarket's URL slugs.
 
-    For multi-outcome events (NBA Champion, election candidates, etc.) the event
-    contains many markets — one per outcome. The optional `label` parameter (from
-    Oddpool's entry["label"]) is used to score and pick the correct market rather
-    than blindly returning the first one. Without label, falls back to first market.
+    Resolution strategy (tried in order, stops at first success):
 
-    `resolution_ts` (from Oddpool's resolution_time) is forwarded to _pick_best_market
-    which uses it as a temporal bonus: candidates whose endDate ≈ resolution_ts are
-    preferred over candidates from prior periods. This disambiguates recurrent events
-    like "aapl-above-in-march-2026" (March 2025 vs March 2026 sub-markets).
+      Path 0a — ``GET /events/slug/{slug}``    (REST path endpoint)
+      Path 0b — ``GET /markets/slug/{slug}``   (REST path endpoint)
+      Path 1  — ``GET /events?slug={slug}``    (query-param, active filter)
+      Path 2  — ``GET /markets?slug={slug}``   (query-param, active filter)
+      Path T  — title-based text search via ``search_by_question`` keywords
+                 derived from ``event_title`` (used when slug paths all miss)
 
-    `buying_no`: True when the execution plan buys the NO token on Polymarket (the
-    Kalshi/Opinion side is buying YES).  Used by the post-resolution sanity gate to
-    check only the bid for the token we are actually buying.  Checking the other
-    side would cause false rejections on valid high-probability markets where the
-    opposite outcome bids near $1 (e.g. a 98% YES market is still tradeable when
-    we are buying NO, since NO ask will be ~2¢ and arb edge may still exist at
-    the other venue).
-
-    Filtering strategy (guards against resolved/old-season markets):
-      1. API-level: pass active=true, closed=false, archived=false to both endpoints.
-      2. In-memory: _is_market_live() rejects closed/archived/inactive/past-endDate markets.
-      3. _pick_best_market: temporal bonus + score threshold (≥ 0.5); returns None for mismatches.
-      4. Post-resolution sanity gate: buy-side bid ≥ 0.98 → that token won, reject.
-         (Only the buy-side is checked to avoid false positives on the other side.)
-
-    Tries the /events endpoint first (event slug → markets), then /markets with slug filter.
+    For multi-outcome events (elections, sports finals) ``label`` is used to
+    pick the right sub-market.  ``resolution_ts`` breaks ties between editions
+    of recurrent events.  ``buying_no`` limits the post-resolution sanity gate
+    to the token we are actually buying so we don't false-reject live markets.
     """
     if not slug:
         return None
-    try:
-        # ── Path 1: /events endpoint ──────────────────────────────────────────
-        resp = http_client.get(
-            f"{POLY_GAMMA_URL}/events",
-            venue="polymarket",
-            params={"slug": slug, "limit": 3, "active": "true", "closed": "false", "archived": "false"},
-            timeout=5,
-        )
-        if resp and resp.status_code == 200:
+
+    _filters_active = {"active": "true", "closed": "false", "archived": "false"}
+
+    def _try_events_path(url: str, path_name: str) -> Optional[tuple[str, str]]:
+        try:
+            resp = http_client.get(url, venue="polymarket", params=_filters_active, timeout=5)
+            if not (resp and resp.status_code == 200):
+                return None
             payload = resp.json()
             events = payload if isinstance(payload, list) else payload.get("events", [payload])
-            # Collect live markets only — skip settled/archived/closed/expired ones.
-            all_markets = []
-            skipped = 0
-            for event in events:
-                for m in event.get("markets", []):
-                    if not _is_market_live(m):
-                        skipped += 1
-                        continue
-                    clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
-                    if len(clob_ids) >= 2:
-                        all_markets.append((clob_ids, m))
-            if skipped:
-                log(f"🚫 /events slug={slug!r}: skipped {skipped} closed/archived/inactive/expired markets")
-            if all_markets:
-                pick = _pick_best_market(all_markets, label, resolution_ts=resolution_ts)
-                if pick is None:
-                    log(f"⚠️ /events: no market passed label/period filter slug={slug!r} label={label!r}")
-                    # fall through to Path 2
-                else:
-                    chosen_ids, chosen_m = pick
-                    # ── Post-resolution sanity gate ───────────────────────────
-                    # Defence-in-depth: if the BUY-side bid is ≥ 0.98 the token
-                    # we need to buy has already won — there is no edge.
-                    # Using bids (not asks): a bid at 0.98+ means buyers pay
-                    # that price → confirmed winner.  Ask-based gate caused
-                    # false positives (market-makers post resting $0.99 asks on
-                    # live markets).  Checking ONLY the buy-side avoids false
-                    # rejections when the opposite side bids near $1 (e.g. 98%
-                    # YES market is still tradeable when we buy NO).
-                    buy_id   = chosen_ids[1] if buying_no else chosen_ids[0]
-                    other_id = chosen_ids[0] if buying_no else chosen_ids[1]
-                    buy_prices   = get_best_prices(buy_id)
-                    other_prices = get_best_prices(other_id)
-                    buy_bid   = buy_prices.get("best_bid")
-                    other_bid = other_prices.get("best_bid")
-                    side_name = "NO" if buying_no else "YES"
-                    if buy_bid is not None and buy_bid >= 0.98:
-                        log(
-                            f"⚠️ Post-resolution settled-market gate: "
-                            f"{side_name}_bid={buy_bid} — buy-side token won, "
-                            f"rejecting slug={slug!r} label={label!r}"
-                        )
-                        return None
-                    if other_bid is not None and other_bid >= 0.98:
-                        log(
-                            f"ℹ️ Other-side bid={other_bid:.2f} ≥ 0.98 (opposite outcome "
-                            f"likely winner) but we buy {side_name} — not rejected, "
-                            f"edge filter will handle if no arb exists"
-                        )
-                    log(
-                        f"✅ Token lookup for slug={slug!r} label={label!r}: "
-                        f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
-                        f"YES={chosen_ids[0][:12]}... NO={chosen_ids[1][:12]}..."
-                    )
-                    return (chosen_ids[0], chosen_ids[1])
+            all_m, _ = _collect_from_events(events, slug)
+            if not all_m:
+                return None
+            pick = _pick_best_market(all_m, label, resolution_ts=resolution_ts)
+            if pick is None:
+                log(f"⚠️ {path_name}: no market passed label/period filter slug={slug!r} label={label!r}")
+                return None
+            return _sanity_gate(pick[0], pick[1], buying_no, slug, label, path_name)
+        except Exception as _e:
+            log(f"⚠️ {path_name} failed for slug={slug!r}: {_e}")
+            return None
 
-        # ── Path 2: /markets fallback ─────────────────────────────────────────
-        resp2 = http_client.get(
-            f"{POLY_GAMMA_URL}/markets",
-            venue="polymarket",
-            params={"slug": slug, "limit": 10, "active": "true", "closed": "false", "archived": "false"},
-            timeout=5,
-        )
-        if resp2 and resp2.status_code == 200:
-            markets = resp2.json()
-            if isinstance(markets, dict):
-                markets = markets.get("markets", [markets])
-            all_markets = []
-            skipped = 0
-            for m in (markets if isinstance(markets, list) else []):
-                if not _is_market_live(m):
-                    skipped += 1
-                    continue
-                clob_ids = _parse_clob_token_ids(m.get("clobTokenIds"))
-                if len(clob_ids) >= 2:
-                    all_markets.append((clob_ids, m))
-            if skipped:
-                log(f"🚫 /markets slug={slug!r}: skipped {skipped} closed/archived/inactive/expired markets")
-            if all_markets:
-                pick2 = _pick_best_market(all_markets, label, resolution_ts=resolution_ts)
-                if pick2 is None:
-                    log(f"⚠️ /markets: no market passed label/period filter slug={slug!r} label={label!r}")
-                else:
-                    chosen_ids, chosen_m = pick2
-                    # Post-resolution sanity gate — buy-side only (same rationale as Path 1)
-                    buy_id2   = chosen_ids[1] if buying_no else chosen_ids[0]
-                    other_id2 = chosen_ids[0] if buying_no else chosen_ids[1]
-                    buy_bid2   = get_best_prices(buy_id2).get("best_bid")
-                    other_bid2 = get_best_prices(other_id2).get("best_bid")
-                    side_name2 = "NO" if buying_no else "YES"
-                    if buy_bid2 is not None and buy_bid2 >= 0.98:
-                        log(
-                            f"⚠️ Post-resolution settled-market gate (fallback): "
-                            f"{side_name2}_bid={buy_bid2} — buy-side token won, "
-                            f"rejecting slug={slug!r} label={label!r}"
-                        )
-                        return None
-                    if other_bid2 is not None and other_bid2 >= 0.98:
-                        log(
-                            f"ℹ️ Other-side bid={other_bid2:.2f} ≥ 0.98 (fallback) — "
-                            f"buying {side_name2}, not rejected"
-                        )
-                    log(
-                        f"✅ Token lookup (markets fallback) slug={slug!r} label={label!r}: "
-                        f"matched={chosen_m.get('groupItemTitle') or chosen_m.get('question', '')[:40]!r} "
-                        f"YES={chosen_ids[0][:12]}..."
-                    )
-                    return (chosen_ids[0], chosen_ids[1])
-        # ── Path 3: unfiltered /events — diagnose missing vs filtered ────────
-        # If Paths 1+2 found nothing with active/closed/archived filters,
-        # try once WITHOUT those filters to distinguish:
-        #   (a) Market exists but is inactive/closed → log and skip (truly stale)
-        #   (b) Market genuinely doesn't exist on Polymarket → log and skip
+    def _try_markets_path(url: str, path_name: str, extra_params: Optional[dict] = None) -> Optional[tuple[str, str]]:
         try:
-            resp3 = http_client.get(
+            params = dict(_filters_active)
+            params["limit"] = 50
+            if extra_params:
+                params.update(extra_params)
+            resp = http_client.get(url, venue="polymarket", params=params, timeout=5)
+            if not (resp and resp.status_code == 200):
+                return None
+            all_m, _ = _collect_from_markets(resp.json(), slug)
+            if not all_m:
+                return None
+            pick = _pick_best_market(all_m, label, resolution_ts=resolution_ts)
+            if pick is None:
+                log(f"⚠️ {path_name}: no market passed label/period filter slug={slug!r} label={label!r}")
+                return None
+            return _sanity_gate(pick[0], pick[1], buying_no, slug, label, path_name)
+        except Exception as _e:
+            log(f"⚠️ {path_name} failed for slug={slug!r}: {_e}")
+            return None
+
+    try:
+        # ── Path 0a: /events/slug/{slug} (REST path endpoint) ─────────────────
+        result = _try_events_path(f"{POLY_GAMMA_URL}/events/slug/{slug}", "Path 0a (/events/slug/)")
+        if result:
+            return result
+
+        # ── Path 0b: /markets/slug/{slug} (REST path endpoint) ────────────────
+        result = _try_markets_path(f"{POLY_GAMMA_URL}/markets/slug/{slug}", "Path 0b (/markets/slug/)")
+        if result:
+            return result
+
+        # ── Path 1: /events?slug=... (query param, active filter) ─────────────
+        try:
+            resp1 = http_client.get(
                 f"{POLY_GAMMA_URL}/events",
                 venue="polymarket",
-                params={"slug": slug, "limit": 5},
+                params={"slug": slug, "limit": 3, **_filters_active},
                 timeout=5,
             )
-            if resp3 and resp3.status_code == 200:
-                payload3 = resp3.json()
-                events3 = payload3 if isinstance(payload3, list) else payload3.get("events", [payload3])
-                found_markets = []
-                for ev in events3:
-                    for m in ev.get("markets", []):
-                        found_markets.append(
-                            f"{m.get('question','?')[:50]} "
-                            f"[active={m.get('active')} closed={m.get('closed')} "
-                            f"archived={m.get('archived')} endDate={m.get('endDate','?')[:10]}]"
-                        )
-                if found_markets:
-                    log(
-                        f"🔍 Path 3 (unfiltered): slug={slug!r} EXISTS on Gamma but was filtered — "
-                        f"{len(found_markets)} market(s): {found_markets[:3]}"
+            if resp1 and resp1.status_code == 200:
+                payload1 = resp1.json()
+                events1 = payload1 if isinstance(payload1, list) else payload1.get("events", [payload1])
+                all_m1, _ = _collect_from_events(events1, slug)
+                if all_m1:
+                    pick1 = _pick_best_market(all_m1, label, resolution_ts=resolution_ts)
+                    if pick1 is not None:
+                        result = _sanity_gate(pick1[0], pick1[1], buying_no, slug, label, "Path 1 (/events?slug=)")
+                        if result:
+                            return result
+        except Exception as _e1:
+            log(f"⚠️ Path 1 (/events?slug=) failed for slug={slug!r}: {_e1}")
+
+        # ── Path 2: /markets?slug=... (query param, active filter) ────────────
+        try:
+            resp2 = http_client.get(
+                f"{POLY_GAMMA_URL}/markets",
+                venue="polymarket",
+                params={"slug": slug, "limit": 10, **_filters_active},
+                timeout=5,
+            )
+            if resp2 and resp2.status_code == 200:
+                all_m2, _ = _collect_from_markets(resp2.json(), slug)
+                if all_m2:
+                    pick2 = _pick_best_market(all_m2, label, resolution_ts=resolution_ts)
+                    if pick2 is not None:
+                        result = _sanity_gate(pick2[0], pick2[1], buying_no, slug, label, "Path 2 (/markets?slug=)")
+                        if result:
+                            return result
+        except Exception as _e2:
+            log(f"⚠️ Path 2 (/markets?slug=) failed for slug={slug!r}: {_e2}")
+
+        # ── Path T: title-based text search ───────────────────────────────────
+        # Oddpool slugs are internal identifiers, not Gamma event slugs.
+        # When all slug-based paths fail, use event_title keywords to search
+        # Gamma's /markets endpoint via search_by_question and pick the best
+        # match by label + temporal proximity.
+        if event_title:
+            keywords = _keywords_from_title(event_title)
+            if keywords:
+                try:
+                    resp_t = http_client.get(
+                        f"{POLY_GAMMA_URL}/markets",
+                        venue="polymarket",
+                        params={
+                            "search_by_question": keywords,
+                            "limit": 50,
+                            **_filters_active,
+                        },
+                        timeout=8,
                     )
-                else:
-                    log(f"🔍 Path 3 (unfiltered): slug={slug!r} → 0 events — NOT on Polymarket")
-        except Exception as _p3e:
-            log(f"🔍 Path 3 diagnostic failed for slug={slug!r}: {_p3e}")
+                    if resp_t and resp_t.status_code == 200:
+                        all_m_t, _ = _collect_from_markets(resp_t.json(), slug)
+                        if all_m_t:
+                            pick_t = _pick_best_market(all_m_t, label, resolution_ts=resolution_ts)
+                            if pick_t is not None:
+                                result = _sanity_gate(
+                                    pick_t[0], pick_t[1], buying_no, slug, label,
+                                    f"Path T (title={keywords!r})"
+                                )
+                                if result:
+                                    return result
+                                log(
+                                    f"⚠️ Path T title search: sanity gate rejected "
+                                    f"slug={slug!r} keywords={keywords!r}"
+                                )
+                            else:
+                                log(
+                                    f"🔍 Path T title search: keywords={keywords!r} found "
+                                    f"{len(all_m_t)} live markets but none matched "
+                                    f"label={label!r} — NOT resolved"
+                                )
+                        else:
+                            log(
+                                f"🔍 Path T title search: keywords={keywords!r} returned 0 live "
+                                f"markets for slug={slug!r} — not on Polymarket or all closed"
+                            )
+                    else:
+                        status_t = resp_t.status_code if resp_t else "None"
+                        log(f"🔍 Path T title search: HTTP {status_t} for keywords={keywords!r}")
+                except Exception as _te:
+                    log(f"🔍 Path T title search failed for slug={slug!r}: {_te}")
+        else:
+            log(f"🔍 All slug paths failed for slug={slug!r} and no event_title provided — cannot resolve")
 
     except Exception as e:
         log(f"⚠️ lookup_token_ids_by_slug({slug!r}): {e}")
-    log(f"⚠️ lookup_token_ids_by_slug: no tokens found for slug={slug!r} label={label!r}")
+
+    log(f"⚠️ lookup_token_ids_by_slug: no tokens found for slug={slug!r} label={label!r} title={event_title!r}")
     return None
 
 
