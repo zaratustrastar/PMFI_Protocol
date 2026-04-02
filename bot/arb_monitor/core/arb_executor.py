@@ -335,55 +335,27 @@ def _place_opinion_order(
     size_usdc: float,
     contract_count: int,
 ) -> tuple[bool, str, str]:
-    """Place a limit buy order on Opinion Labs.
+    """Place a limit buy order on Opinion Labs via the CLOB client.
 
-    API reference: https://docs.opinion.trade/developer-guide/opinion-open-api
-    Auth: `apikey` header.
+    Delegates to opinion_clob.place_order which handles:
+      - OPINION_PRIVATE_KEY signing
+      - OPINION_PORTFOLIO_ADDRESS headers
+      - Proper CLOB auth
 
     Returns (ok, order_id, error_msg). Never raises.
     """
-    opinion_api_key = os.environ.get("OPINION_API_KEY", "")
-    if not opinion_api_key:
-        return False, "", "OPINION_API_KEY not set"
-
-    from ..config import OPINION_BASE_URL
-    import requests
-
-    log(f"📤 [OPINION] Placing {side} BUY: market_id={market_id} contracts={contract_count} @ {price:.4f}")
     try:
-        url = f"{OPINION_BASE_URL}/orders"
-        headers = {
-            "apikey": opinion_api_key,
-            "Content-Type": "application/json",
-        }
-        price_cents = int(price * 100)
-        payload = {
-            "marketId": market_id,
-            "side": side.lower(),      # "yes" or "no"
-            "action": "buy",
-            "amount": contract_count,  # number of contracts
-            "price": price_cents,      # cents (0-100)
-            "type": "limit",
-            "clientOrderId": f"arb_{int(time.time())}",
-        }
-        resp = requests.post(url, json=payload, headers=headers, timeout=10)
-        if resp.status_code in (200, 201):
-            data = resp.json()
-            order_id = (
-                data.get("orderId") or
-                data.get("order_id") or
-                data.get("id") or
-                ""
-            )
-            log(f"✅ [OPINION] Order placed: orderId={order_id}")
-            return True, str(order_id), ""
-        else:
-            err = f"HTTP {resp.status_code}: {resp.text[:200]}"
-            log(f"❌ [OPINION] {err}")
-            return False, "", err
+        from ..adapters.opinion_clob import place_order as opinion_place_order
+        return opinion_place_order(
+            market_id=market_id,
+            side=side,
+            price=price,
+            size_usdc=size_usdc,
+            contract_count=contract_count,
+        )
     except Exception as e:
         err = str(e)
-        log(f"❌ [OPINION] Order error: {err}")
+        log(f"❌ [OPINION] _place_opinion_order exception: {err}")
         return False, "", err
 
 

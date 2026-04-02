@@ -101,23 +101,18 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
     accepted: list[dict] = []
     seen_ids: set = set()
 
-    # We use status=activated so the API pre-filters to live markets, giving us
-    # a much higher density of useful markets per page (~12-14 activated vs ~2-3
-    # without the filter). Pagination with status=activated appears to return the
-    # same ~20 markets regardless of offset (server-side bug), so we stop early
-    # via the all-dupes guard. Dynamic offset advances by actual returned count to
-    # avoid skipping records if the API ever fixes its pagination.
+    # Opinion API uses ?page=N (1-indexed) not ?offset=N.
+    # We use status=activated so the API pre-filters to live markets.
     API_PAGE_SIZE = 20
 
-    offset = 0
     for page in range(OPINION_MAX_PAGES):
         url = f"{OPINION_BASE_URL}/market"
         params = {
             "status": "activated",
             "limit": API_PAGE_SIZE,
-            "offset": offset,
+            "page": page + 1,  # 1-indexed
         }
-        log(f"Fetching page {page + 1}: offset={offset} limit={API_PAGE_SIZE}")
+        log(f"Fetching page {page + 1}: page={page + 1} limit={API_PAGE_SIZE}")
 
         resp = http_client.get(
             url, venue="opinion",
@@ -200,9 +195,6 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
             _MARKET_TOKEN_CACHE[str(mid)] = (yes_token, no_token)
 
         log(f"Page {page + 1}: {len(markets)} fetched, {page_new} new accepted, {page_dupes} dupes")
-
-        # Advance offset by actual returned count to avoid skipping records
-        offset += len(markets)
 
         # If all markets on this page were duplicates, the API has looped — stop
         if page_dupes == len(markets) and page > 0:
@@ -327,7 +319,12 @@ def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
             if resp.status_code == 200:
                 try:
                     data = resp.json()
-                    result = data.get("result", data)
+                    # /market/{id} wraps the market object under result.data
+                    result = data.get("result", {})
+                    if isinstance(result, dict) and "data" in result:
+                        result = result["data"]
+                    elif not isinstance(result, dict):
+                        result = data.get("data", data)
                     log(f"📡 Token lookup path 2 raw keys={list(result.keys()) if isinstance(result, dict) else type(result).__name__!r}")
                     if isinstance(result, dict):
                         yes = result.get("yesTokenId", "")

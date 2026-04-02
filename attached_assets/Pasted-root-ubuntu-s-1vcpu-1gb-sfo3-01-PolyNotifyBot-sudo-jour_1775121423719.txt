@@ -1,0 +1,62 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "1 hour ago" | grep -E "\[ArbFunder\]|\[ArbExecLoop\]|\[Arb/Executor\]" | tail -60
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] ⚠️ Opinion balance: all endpoints failed — returning 0
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📤 Poly needs 13.0900 USDC (has=0.0000 target=13.0900 gap=13.0900)
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📌 opinion gap=1.7510 < min_deposit=3.0 — bumping to minimum
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📤 opinion needs 3.0000 USDC (has=0.0000 target=1.7510 gap=1.7510)
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📊 Balances: poly=0.0000 (required=13.0900 deposit=13.0900) | opinion=0.0000 (required=1.7510 deposit=3.0000)
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] ❌ fund_both_legs: servicer has 15.8839 USDC — insufficient for gaps (13.0900 + 3.0000) + safety_buffer (1.00) = 17.0900 needed
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 15.8839 USDC — insufficient for gaps (13.0900 + 3.0000) + safety_buffer (1.00) = 17.0900 needed
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] ❌ nba-playoffs-teams_toronto_raptors: execution stopped cycle — funding_failed: fund_both_legs: servicer has 15.8839 USDC — insufficient for gaps (13.0900 + 3.0000) + safety_buffer (1.00) = 17.0900 needed unwound=False
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=1 skipped_display_only=4 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=0 depth_insufficient=0 depth_unavailable=0
+Apr 02 09:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=14.88 under_pressure=False unwind_needed=False
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-02T09:15:00Z
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775121015, cooldown=60s) — calling
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=1011
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📤 TX nonce=1011 → 0xd467902c26de483904a240f4814a4e44e83986b7cfa6f92c85019650f33337c9
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] ✅ tend() sent: tx=0xd467902c26de483904a240f4814a4e44e83986b7cfa6f92c85019650f33337c9
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 💼 Servicer [2026-04-02T09:15:00Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=15.8839 ETH=0.010050 safety_buffer=1.0 gas_reserve=0.0100 ETH
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=15.88 deployable=14.88 under_pressure=False
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 💼 Servicer deployable: 15.8839 USDC total − 1.00 safety_buffer = 14.8839 deployable
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 14.8839 USDC in servicer wallet
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ���� [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 💰 Kalshi balance: 0.0000 USDC
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] ⚠️ Opinion balance: all endpoints failed — returning 0
+Apr 02 09:15:06 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 💼 Platform balances: poly=0.0000 kalshi=0.0000 opinion=0.0000 USDC
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 📊 212 opportunities fetched, sorted by score desc
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 👁 Skipping megaeth-airdrop_date_june_30_2026: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 👁 Skipping next-president-vietnam_tran_thanh_man: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 👁 Skipping ecb-interest-rates-april-2026_no_change: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 👁 Skipping next-president-vietnam_tran_cam_tu: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 💼 nba-playoffs-teams_toronto_raptors: size_usdc=1295.17 capped to opp_total_available=14.88 USDC (servicer=14.88 + poly=0.00 + opinion=0.00)
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=nba-playoffs-teams_toronto_raptors venue2=opinion | score=32616.1 AR=61.14× net_edge=12.60% conf=0.41 | days=10.49d size=$14.88
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] 🔍 Starting execution for pair nba-playoffs-teams_toronto_raptors (venue2=opinion)
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 2135798214913074... for price check
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=2135798214913074... (side=YES) venue2=opinion opinion=371
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.1030 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='371')
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=12.6000 | min_edge=0.0030 | live poly_ask=0.77 opinion_ask=0.103
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.7700 quote=0.7700 slippage=+0.0000
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.1030 quote=0.1030 slippage=+0.0000
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.1270 | Oddpool net_edge=12.60% — proceeding to size
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (17 contracts)
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=1560 contracts/$1295.17 (max_fill=0.8940) | depth_leg2=17 contracts/$0.00 (max_fill=0.2270)
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=17 depth_limited=17 → final=17
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] 📐 Trade sizing: contract_count=17 (integer, depth-capped, matched) leg1_usdc=13.0900 leg2_usdc=1.7510 total_cost=14.8410
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] 💰 Funding both legs simultaneously: poly=13.0900 USDC | opinion=1.7510 USDC
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 💰 fund_both_legs: poly=13.0900 USDC | opinion=1.7510 USDC (total=14.8410)
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📊 Reading current platform balances...
+Apr 02 09:16:12 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Apr 02 09:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] ⚠️ Opinion balance: all endpoints failed — returning 0
+Apr 02 09:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📤 Poly needs 13.0900 USDC (has=0.0000 target=13.0900 gap=13.0900)
+Apr 02 09:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📌 opinion gap=1.7510 < min_deposit=3.0 — bumping to minimum
+Apr 02 09:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📤 opinion needs 3.0000 USDC (has=0.0000 target=1.7510 gap=1.7510)
+Apr 02 09:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] 📊 Balances: poly=0.0000 (required=13.0900 deposit=13.0900) | opinion=0.0000 (required=1.7510 deposit=3.0000)
+Apr 02 09:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] ❌ fund_both_legs: servicer has 15.8839 USDC — insufficient for gaps (13.0900 + 3.0000) + safety_buffer (1.00) = 17.0900 needed
+Apr 02 09:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: ⚡ [Arb/Executor] ❌ funding_failed: fund_both_legs: servicer has 15.8839 USDC — insufficient for gaps (13.0900 + 3.0000) + safety_buffer (1.00) = 17.0900 needed
+Apr 02 09:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] ❌ nba-playoffs-teams_toronto_raptors: execution stopped cycle — funding_failed: fund_both_legs: servicer has 15.8839 USDC — insufficient for gaps (13.0900 + 3.0000) + safety_buffer (1.00) = 17.0900 needed unwound=False
+Apr 02 09:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=1 skipped_display_only=4 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=0 depth_insufficient=0 depth_unavailable=0
+Apr 02 09:16:16 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

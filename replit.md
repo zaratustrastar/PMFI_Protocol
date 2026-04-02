@@ -77,7 +77,14 @@ V2 is an async Yearn-style vault: no live NAV required for user flows.
 - `POLY_PRIVATE_KEY` — pARB trading wallet private key
 - `ARB_NAV_SIGNER_PRIVATE_KEY` — signs report payloads for V2 contract
 - `KALSHI_API_KEY_ID` + `KALSHI_PRIVATE_KEY_PATH` — Kalshi RSA auth
-- `OPINION_API_KEY` — Opinion Labs API key
+- `OPINION_API_KEY` — Opinion Labs API key (market data + CLOB auth header)
+- `OPINION_PRIVATE_KEY` — signer wallet private key for signing Opinion CLOB orders
+- `OPINION_PORTFOLIO_ADDRESS` — multi-sig/portfolio wallet address that holds Opinion funds
+- `OPINION_CLOB_URL` — Opinion CLOB trading base URL (defaults to OpenAPI base)
+
+**Opinion Integration Architecture** (`bot/arb_monitor/adapters/`):
+- `opinion.py` — market discovery and orderbook data via OpenAPI only; fixed pagination to `page` param (was `offset`); fixed `/market/{id}` parsing to unwrap `result.data`
+- `opinion_clob.py` — new CLOB trading client: balance queries (CLOB API → on-chain USDC fallback) + signed order placement requiring `OPINION_PRIVATE_KEY` and `OPINION_PORTFOLIO_ADDRESS`
 
 **Frontend** (`frontend/main.js`):
 - Auto-routes to V2 when `ARB_VAULT_V2_ADDRESS` is set in `window.PSNIPER_CONFIG`

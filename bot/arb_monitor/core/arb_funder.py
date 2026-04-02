@@ -509,26 +509,8 @@ def _get_platform_balance(venue: str) -> float:
 
     elif venue == "opinion":
         try:
-            from ..config import OPINION_BASE_URL, OPINION_API_KEY
-            if not OPINION_API_KEY:
-                log("⚠️ OPINION_API_KEY not set — Opinion balance unknown (returning 0)")
-                return 0.0
-            import requests
-            headers = {"apikey": OPINION_API_KEY, "Content-Type": "application/json"}
-            for path in ("/account/balance", "/account", "/balance"):
-                try:
-                    resp = requests.get(f"{OPINION_BASE_URL}{path}", headers=headers, timeout=10)
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        for field in ("balance", "usdc", "usdcBalance", "availableBalance", "available"):
-                            if field in data:
-                                bal = float(data[field])
-                                log(f"💰 Opinion balance: {bal:.4f} USDC (via {path})")
-                                return bal
-                except Exception:
-                    continue
-            log("⚠️ Opinion balance: all endpoints failed — returning 0")
-            return 0.0
+            from ..adapters.opinion_clob import get_balance as opinion_get_balance
+            return opinion_get_balance()
         except Exception as e:
             log(f"⚠️ Opinion balance read error: {e}")
             return 0.0
