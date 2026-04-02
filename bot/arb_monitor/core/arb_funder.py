@@ -829,36 +829,8 @@ def fund_both_legs_for_trade(
                 msg = f"fund_both_legs: Opinion Base deposit failed: {e}"
                 log(f"❌ {msg}")
                 return False, msg
-        elif OPINION_BSC_DEPOSIT_ADDR:
-            # Fallback: LI.FI bridge to BSC (fire-and-forget — takes 3-10 min)
-            bridge_amount = round(venue2_gap + 1.0, 6)  # +$1 buffer for bridge slippage
-            log(
-                f"🌉 Opinion balance low ({venue2_before:.4f} < {venue2_target:.4f}) — "
-                f"triggering BSC bridge: {bridge_amount:.4f} USDC Base→BSC (fire-and-forget)"
-            )
-            try:
-                nt = _NonceTracker(servicer_wallet)
-                bridge_tx = _bridge_usdc_base_to_bsc(
-                    private_key=private_key,
-                    from_addr=servicer_wallet,
-                    amount_usdc=bridge_amount,
-                    to_bsc_addr=OPINION_BSC_DEPOSIT_ADDR,
-                    nonce_tracker=nt,
-                )
-                log(f"🌉 Bridge initiated: tx={bridge_tx} — will settle in ~3-10 min")
-            except Exception as e:
-                msg = f"fund_both_legs: Opinion BSC bridge failed: {e}"
-                log(f"❌ {msg}")
-                return False, msg
-            # Cannot wait for bridge inline — return False so engine retries next cycle
-            msg = (
-                f"fund_both_legs: Opinion bridge triggered (gap={venue2_gap:.4f} USDC) — "
-                f"retrying after ~5 min for bridge to settle"
-            )
-            log(f"⏳ {msg}")
-            return False, msg
         else:
-            msg = "fund_both_legs: no Opinion deposit address configured (set OPINION_BASE_DEPOSIT_ADDR or OPINION_BSC_DEPOSIT_ADDR)"
+            msg = "fund_both_legs: OPINION_BASE_DEPOSIT_ADDR not set — BSC bridge path disabled; set OPINION_BASE_DEPOSIT_ADDR in .env"
             log(f"❌ {msg}")
             return False, msg
 
