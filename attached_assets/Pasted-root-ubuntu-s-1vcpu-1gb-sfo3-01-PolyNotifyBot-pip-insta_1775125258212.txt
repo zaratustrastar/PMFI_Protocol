@@ -1,0 +1,145 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# pip install opinion_clob_sdk
+error: externally-managed-environment
+
+× This environment is externally managed
+╰─> To install Python packages system-wide, try apt install
+    python3-xyz, where xyz is the package you are trying to
+    install.
+    
+    If you wish to install a non-Debian-packaged Python package,
+    create a virtual environment using python3 -m venv path/to/venv.
+    Then use path/to/venv/bin/python and path/to/venv/bin/pip. Make
+    sure you have python3-full installed.
+    
+    If you wish to install a non-Debian packaged Python application,
+    it may be easiest to use pipx install xyz, which will manage a
+    virtual environment for you. Make sure you have pipx installed.
+    
+    See /usr/share/doc/python3.12/README.venv for more information.
+
+note: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.
+hint: See PEP 668 for the detailed specification.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+
+python3 -m venv venv
+source venv/bin/activate
+
+pip install --upgrade pip
+pip install opinion_clob_sdk
+Requirement already satisfied: pip in ./venv/lib/python3.12/site-packages (24.0)
+Collecting pip
+  Downloading pip-26.0.1-py3-none-any.whl.metadata (4.7 kB)
+Downloading pip-26.0.1-py3-none-any.whl (1.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 23.5 MB/s eta 0:00:00
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 24.0
+    Uninstalling pip-24.0:
+      Successfully uninstalled pip-24.0
+Successfully installed pip-26.0.1
+Collecting opinion_clob_sdk
+  Downloading opinion_clob_sdk-0.7.0-py3-none-any.whl.metadata (2.9 kB)
+Requirement already satisfied: urllib3>=2.3.0 in ./venv/lib/python3.12/site-packages (from opinion_clob_sdk) (2.6.2)
+Collecting six>=1.17.0 (from opinion_clob_sdk)
+  Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Requirement already satisfied: certifi>=2024.12.14 in ./venv/lib/python3.12/site-packages (from opinion_clob_sdk) (2025.11.12)
+Collecting python-dateutil>=2.9.0.post0 (from opinion_clob_sdk)
+  Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Requirement already satisfied: hexbytes>=1.2.1 in ./venv/lib/python3.12/site-packages (from opinion_clob_sdk) (1.3.1)
+Requirement already satisfied: web3>=7.6.1 in ./venv/lib/python3.12/site-packages (from opinion_clob_sdk) (7.14.0)
+Requirement already satisfied: eth_account>=0.13.0 in ./venv/lib/python3.12/site-packages (from opinion_clob_sdk) (0.13.7)
+Requirement already satisfied: poly_eip712_structs>=0.0.1 in ./venv/lib/python3.12/site-packages (from opinion_clob_sdk) (0.0.1)
+Collecting opinion_api>=0.4.0 (from opinion_clob_sdk)
+  Downloading opinion_api-0.4.0-py3-none-any.whl.metadata (589 bytes)
+Collecting websocket-client>=1.6.0 (from opinion_clob_sdk)
+  Downloading websocket_client-1.9.0-py3-none-any.whl.metadata (8.3 kB)
+Requirement already satisfied: pytest>=7.0.0 in ./venv/lib/python3.12/site-packages (from opinion_clob_sdk) (9.0.2)
+Requirement already satisfied: bitarray>=2.4.0 in ./venv/lib/python3.12/site-packages (from eth_account>=0.13.0->opinion_clob_sdk) (3.8.0)
+Requirement already satisfied: eth-abi>=4.0.0-b.2 in ./venv/lib/python3.12/site-packages (from eth_account>=0.13.0->opinion_clob_sdk) (5.2.0)
+Requirement already satisfied: eth-keyfile<0.9.0,>=0.7.0 in ./venv/lib/python3.12/site-packages (from eth_account>=0.13.0->opinion_clob_sdk) (0.8.1)
+Requirement already satisfied: eth-keys>=0.4.0 in ./venv/lib/python3.12/site-packages (from eth_account>=0.13.0->opinion_clob_sdk) (0.7.0)
+Requirement already satisfied: eth-rlp>=2.1.0 in ./venv/lib/python3.12/site-packages (from eth_account>=0.13.0->opinion_clob_sdk) (2.2.0)
+Requirement already satisfied: eth-utils>=2.0.0 in ./venv/lib/python3.12/site-packages (from eth_account>=0.13.0->opinion_clob_sdk) (5.3.1)
+Requirement already satisfied: rlp>=1.0.0 in ./venv/lib/python3.12/site-packages (from eth_account>=0.13.0->opinion_clob_sdk) (4.1.0)
+Requirement already satisfied: ckzg>=2.0.0 in ./venv/lib/python3.12/site-packages (from eth_account>=0.13.0->opinion_clob_sdk) (2.1.5)
+Requirement already satisfied: pydantic>=2.0.0 in ./venv/lib/python3.12/site-packages (from eth_account>=0.13.0->opinion_clob_sdk) (2.12.5)
+Requirement already satisfied: pycryptodome<4,>=3.6.6 in ./venv/lib/python3.12/site-packages (from eth-keyfile<0.9.0,>=0.7.0->eth_account>=0.13.0->opinion_clob_sdk) (3.23.0)
+Requirement already satisfied: eth-typing>=3.0.0 in ./venv/lib/python3.12/site-packages (from eth-abi>=4.0.0-b.2->eth_account>=0.13.0->opinion_clob_sdk) (5.2.1)
+Requirement already satisfied: parsimonious<0.11.0,>=0.10.0 in ./venv/lib/python3.12/site-packages (from eth-abi>=4.0.0-b.2->eth_account>=0.13.0->opinion_clob_sdk) (0.10.0)
+Requirement already satisfied: regex>=2022.3.15 in ./venv/lib/python3.12/site-packages (from parsimonious<0.11.0,>=0.10.0->eth-abi>=4.0.0-b.2->eth_account>=0.13.0->opinion_clob_sdk) (2025.11.3)
+Requirement already satisfied: typing_extensions>=4.5.0 in ./venv/lib/python3.12/site-packages (from eth-typing>=3.0.0->eth-abi>=4.0.0-b.2->eth_account>=0.13.0->opinion_clob_sdk) (4.15.0)
+Requirement already satisfied: eth-hash>=0.3.1 in ./venv/lib/python3.12/site-packages (from eth-utils>=2.0.0->eth_account>=0.13.0->opinion_clob_sdk) (0.7.1)
+Requirement already satisfied: cytoolz>=0.10.1 in ./venv/lib/python3.12/site-packages (from eth-utils>=2.0.0->eth_account>=0.13.0->opinion_clob_sdk) (1.1.0)
+Requirement already satisfied: annotated-types>=0.6.0 in ./venv/lib/python3.12/site-packages (from pydantic>=2.0.0->eth_account>=0.13.0->opinion_clob_sdk) (0.7.0)
+Requirement already satisfied: pydantic-core==2.41.5 in ./venv/lib/python3.12/site-packages (from pydantic>=2.0.0->eth_account>=0.13.0->opinion_clob_sdk) (2.41.5)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./venv/lib/python3.12/site-packages (from pydantic>=2.0.0->eth_account>=0.13.0->opinion_clob_sdk) (0.4.2)
+Requirement already satisfied: toolz>=0.8.0 in ./venv/lib/python3.12/site-packages (from cytoolz>=0.10.1->eth-utils>=2.0.0->eth_account>=0.13.0->opinion_clob_sdk) (1.1.0)
+Requirement already satisfied: iniconfig>=1.0.1 in ./venv/lib/python3.12/site-packages (from pytest>=7.0.0->opinion_clob_sdk) (2.3.0)
+Requirement already satisfied: packaging>=22 in ./venv/lib/python3.12/site-packages (from pytest>=7.0.0->opinion_clob_sdk) (25.0)
+Requirement already satisfied: pluggy<2,>=1.5 in ./venv/lib/python3.12/site-packages (from pytest>=7.0.0->opinion_clob_sdk) (1.6.0)
+Requirement already satisfied: pygments>=2.7.2 in ./venv/lib/python3.12/site-packages (from pytest>=7.0.0->opinion_clob_sdk) (2.19.2)
+Requirement already satisfied: aiohttp>=3.7.4.post0 in ./venv/lib/python3.12/site-packages (from web3>=7.6.1->opinion_clob_sdk) (3.13.2)
+Requirement already satisfied: requests>=2.23.0 in ./venv/lib/python3.12/site-packages (from web3>=7.6.1->opinion_clob_sdk) (2.32.5)
+Requirement already satisfied: types-requests>=2.0.0 in ./venv/lib/python3.12/site-packages (from web3>=7.6.1->opinion_clob_sdk) (2.32.4.20250913)
+Requirement already satisfied: websockets<16.0.0,>=10.0.0 in ./venv/lib/python3.12/site-packages (from web3>=7.6.1->opinion_clob_sdk) (15.0.1)
+Requirement already satisfied: pyunormalize>=15.0.0 in ./venv/lib/python3.12/site-packages (from web3>=7.6.1->opinion_clob_sdk) (17.0.0)
+Requirement already satisfied: aiohappyeyeballs>=2.5.0 in ./venv/lib/python3.12/site-packages (from aiohttp>=3.7.4.post0->web3>=7.6.1->opinion_clob_sdk) (2.6.1)
+Requirement already satisfied: aiosignal>=1.4.0 in ./venv/lib/python3.12/site-packages (from aiohttp>=3.7.4.post0->web3>=7.6.1->opinion_clob_sdk) (1.4.0)
+Requirement already satisfied: attrs>=17.3.0 in ./venv/lib/python3.12/site-packages (from aiohttp>=3.7.4.post0->web3>=7.6.1->opinion_clob_sdk) (25.4.0)
+Requirement already satisfied: frozenlist>=1.1.1 in ./venv/lib/python3.12/site-packages (from aiohttp>=3.7.4.post0->web3>=7.6.1->opinion_clob_sdk) (1.8.0)
+Requirement already satisfied: multidict<7.0,>=4.5 in ./venv/lib/python3.12/site-packages (from aiohttp>=3.7.4.post0->web3>=7.6.1->opinion_clob_sdk) (6.7.0)
+Requirement already satisfied: propcache>=0.2.0 in ./venv/lib/python3.12/site-packages (from aiohttp>=3.7.4.post0->web3>=7.6.1->opinion_clob_sdk) (0.4.1)
+Requirement already satisfied: yarl<2.0,>=1.17.0 in ./venv/lib/python3.12/site-packages (from aiohttp>=3.7.4.post0->web3>=7.6.1->opinion_clob_sdk) (1.22.0)
+Requirement already satisfied: idna>=2.0 in ./venv/lib/python3.12/site-packages (from yarl<2.0,>=1.17.0->aiohttp>=3.7.4.post0->web3>=7.6.1->opinion_clob_sdk) (3.11)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./venv/lib/python3.12/site-packages (from requests>=2.23.0->web3>=7.6.1->opinion_clob_sdk) (3.4.4)
+Downloading opinion_clob_sdk-0.7.0-py3-none-any.whl (88 kB)
+Downloading opinion_api-0.4.0-py3-none-any.whl (98 kB)
+Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Downloading websocket_client-1.9.0-py3-none-any.whl (82 kB)
+Installing collected packages: websocket-client, six, python-dateutil, opinion_api, opinion_clob_sdk
+Successfully installed opinion_api-0.4.0 opinion_clob_sdk-0.7.0 python-dateutil-2.9.0.post0 six-1.17.0 websocket-client-1.9.0
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo nano /etc/systemd/system/psniper-bot.service
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl cat psniper-bot
+# Warning: psniper-bot.service changed on disk, the version systemd has loaded is outdated.
+# This output shows the current version of the unit's original fragment and drop-in files.
+# If fragments or drop-ins were added or removed, they are not properly reflected in this output.
+# Run 'systemctl daemon-reload' to reload units.
+# /etc/systemd/system/psniper-bot.service
+[Unit]
+Description=pSNIPER Bot V7
+After=network.target
+
+[Service]
+WorkingDirectory=/root/PolyNotifyBot
+ExecStart=/root/PolyNotifyBot/venv/bin/python bot/bot_v7.py
+Restart=always
+User=root
+EnvironmentFile=/root/PolyNotifyBot/.env
+Environment="VAULT_V7_ADDRESS=0xbF0944893e6bd445F715dE76CD6343B1d551D41B"
+Environment="BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5"
+Environment="POLYGON_RPC_URL=https://polygon-mainnet.g.alchemy.com/v2/0tHcICpxKdnmScqh22kL5"
+[Install]
+WantedBy=multi-user.target
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+git pull
+sudo systemctl restart psniper-bot
+remote: Enumerating objects: 21, done.
+remote: Counting objects: 100% (21/21), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 11 (delta 9), reused 11 (delta 9), pack-reused 0 (from 0)
+Unpacking objects: 100% (11/11), 5.22 KiB | 222.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   0150ff2..740fe7a  main       -> origin/main
+Updating 0150ff2..740fe7a
+Fast-forward
+ bot/arb_monitor/adapters/opinion_clob.py | 424 +++++++++++++++++++++++++++++++++++++++++++++-------------------------------------------------------
+ bot/arb_monitor/config.py                |  10 +--
+ bot/arb_monitor/core/arb_nav.py          |  58 ++++----------
+ bot/requirements.txt                     |   1 +
+ replit.md                                |   8 +-
+ 5 files changed, 218 insertions(+), 283 deletions(-)
+Warning: The unit file, source configuration file or drop-ins of psniper-bot.service changed on disk. Run 'systemctl daemon-reload' to reload units.
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl daemon-reload
+sudo systemctl restart psniper-bot
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

@@ -14,11 +14,16 @@ Required env vars:
   OPINION_CLOB_HOST         - CLOB host (default: https://proxy.opinion.trade:8443)
 
 NOTE: Opinion uses USDT on BSC (chain_id=56) as the quote / collateral token.
-      Deposits go from Base USDC → bridged internally → BSC USDT in multi-sig.
+      Deposits go from Base USDC -> bridged internally -> BSC USDT in multi-sig.
+
+IMPORTANT: All SDK calls (Client init, get_my_balances, place_order) run inside
+a ThreadPoolExecutor with a hard timeout so they can never freeze the main
+execution loop if the BSC RPC or Opinion endpoint hangs.
 """
 
 import os
 import time
+import concurrent.futures
 from typing import Optional
 
 from ..config import (
@@ -33,13 +38,32 @@ _OPINION_CHAIN_ID = 56  # BNB Chain Mainnet
 _CONDITIONAL_TOKENS_ADDR = "0xAD1a38cEc043e70E83a3eC30443dB285ED10D774"
 _MULTISEND_ADDR = "0x998739BFdAAdde7C933B942a68053933098f9EDa"
 
+_SDK_INIT_TIMEOUT = 15   # seconds — max wait for Client() constructor
+_SDK_CALL_TIMEOUT = 10   # seconds — max wait for any SDK API call
+
 # Module-level singleton client — created lazily, reused across calls.
 _client = None
 _client_error: Optional[str] = None  # cached init failure message
 
 
 def log(msg: str) -> None:
-    print(f"💬 [Arb/OpinionCLOB] {msg}")
+    print(f"💬 [Arb/OpinionCLOB] {msg}", flush=True)
+
+
+def _run_with_timeout(fn, timeout: float, label: str):
+    """Run fn() in a thread with a hard timeout.
+
+    Returns the result of fn(), or raises TimeoutError if it exceeds `timeout`
+    seconds, or re-raises any exception fn() raises.
+    """
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
+        future = ex.submit(fn)
+        try:
+            return future.result(timeout=timeout)
+        except concurrent.futures.TimeoutError:
+            raise TimeoutError(
+                f"{label} timed out after {timeout}s — BSC RPC or Opinion endpoint may be unreachable"
+            )
 
 
 # ── Client singleton ──────────────────────────────────────────────────────────
@@ -48,8 +72,11 @@ def log(msg: str) -> None:
 def _get_client():
     """Return the singleton SDK Client, initialising it on first call.
 
-    Returns None and logs the reason if required credentials are missing or
-    the SDK is not installed.
+    The constructor runs in a thread with _SDK_INIT_TIMEOUT so a hung BSC RPC
+    call never blocks the main execution loop.
+
+    Returns None and logs the reason if required credentials are missing,
+    the SDK is not installed, or initialisation times out.
     """
     global _client, _client_error
 
@@ -72,11 +99,9 @@ def _get_client():
         log(f"⚠️  {_client_error}")
         return None
 
-    try:
+    def _init():
         from opinion_clob_sdk import Client as OpinionClient
-        log(f"🔧 Initialising Opinion SDK client: host={OPINION_CLOB_HOST} "
-            f"chain_id={_OPINION_CHAIN_ID} multi_sig={OPINION_PORTFOLIO_ADDRESS[:10]}...")
-        _client = OpinionClient(
+        return OpinionClient(
             host=OPINION_CLOB_HOST,
             apikey=OPINION_API_KEY,
             chain_id=_OPINION_CHAIN_ID,
@@ -86,12 +111,24 @@ def _get_client():
             conditional_tokens_addr=_CONDITIONAL_TOKENS_ADDR,
             multisend_addr=_MULTISEND_ADDR,
         )
+
+    try:
+        log(
+            f"🔧 Initialising Opinion SDK client (timeout={_SDK_INIT_TIMEOUT}s): "
+            f"host={OPINION_CLOB_HOST} chain_id={_OPINION_CHAIN_ID} "
+            f"multi_sig={OPINION_PORTFOLIO_ADDRESS[:10]}..."
+        )
+        _client = _run_with_timeout(_init, _SDK_INIT_TIMEOUT, "Opinion SDK Client.__init__")
         log("✅ Opinion SDK client initialised")
         return _client
     except ImportError:
         _client_error = (
             "opinion_clob_sdk not installed — run: pip install opinion_clob_sdk"
         )
+        log(f"❌ {_client_error}")
+        return None
+    except TimeoutError as exc:
+        _client_error = str(exc)
         log(f"❌ {_client_error}")
         return None
     except Exception as exc:
@@ -114,22 +151,30 @@ def get_balance() -> float:
     """Return Opinion Labs portfolio USDT balance.
 
     Uses client.get_my_balances() from the official SDK.
+    The API call runs with _SDK_CALL_TIMEOUT so a hung endpoint never blocks.
     Returns 0.0 on any failure with detailed logging.
     """
     client = _get_client()
     if client is None:
         return 0.0
 
+    def _call():
+        return client.get_my_balances()
+
     try:
-        log("📡 Calling client.get_my_balances()...")
-        response = client.get_my_balances()
-        log(f"📡 get_my_balances() → errno={response.errno} "
+        log(f"📡 Calling client.get_my_balances() (timeout={_SDK_CALL_TIMEOUT}s)...")
+        response = _run_with_timeout(_call, _SDK_CALL_TIMEOUT, "get_my_balances")
+        log(
+            f"📡 get_my_balances() → errno={response.errno} "
             f"errmsg={getattr(response, 'errmsg', '')} "
-            f"result={str(getattr(response, 'result', ''))[:400]}")
+            f"result={str(getattr(response, 'result', ''))[:400]}"
+        )
 
         if response.errno != 0:
-            log(f"❌ get_my_balances() API error errno={response.errno}: "
-                f"{getattr(response, 'errmsg', 'unknown')}")
+            log(
+                f"❌ get_my_balances() API error errno={response.errno}: "
+                f"{getattr(response, 'errmsg', 'unknown')}"
+            )
             return 0.0
 
         result = getattr(response, "result", None)
@@ -138,7 +183,6 @@ def get_balance() -> float:
             return 0.0
 
         # Result may be a list of balance objects or a single object.
-        # Try common field names for USDT / total balance.
         if isinstance(result, list):
             items = result
         elif hasattr(result, "list"):
@@ -150,9 +194,11 @@ def get_balance() -> float:
 
         total = 0.0
         for item in items:
-            for field in ("balance", "usdt", "usdtBalance", "availableBalance",
-                          "available", "cashBalance", "total", "value",
-                          "usdc", "usdcBalance"):
+            for field in (
+                "balance", "usdt", "usdtBalance", "availableBalance",
+                "available", "cashBalance", "total", "value",
+                "usdc", "usdcBalance",
+            ):
                 val = (
                     getattr(item, field, None)
                     if not isinstance(item, dict)
@@ -169,6 +215,9 @@ def get_balance() -> float:
         log(f"💰 Opinion USDT balance: {total:.4f}")
         return total
 
+    except TimeoutError as exc:
+        log(f"⏱️  get_balance() timed out: {exc}")
+        return 0.0
     except Exception as exc:
         log(f"❌ get_my_balances() exception: {exc}")
         return 0.0
@@ -194,6 +243,7 @@ def place_order(
         contract_count: integer number of contracts (used as fallback sizing)
 
     Returns (ok: bool, order_id: str, error_msg: str).
+    The SDK call runs with _SDK_CALL_TIMEOUT so a hung endpoint never blocks.
     """
     client = _get_client()
     if client is None:
@@ -209,8 +259,10 @@ def place_order(
 
     yes_token_id, no_token_id = token_pair
     token_id = yes_token_id if side.upper() == "YES" else no_token_id
-    log(f"📤 Placing {side} BUY: market={market_id} token={token_id[:16]}... "
-        f"price={price:.4f} size_usdt={size_usdc:.2f} contracts={contract_count}")
+    log(
+        f"📤 Placing {side} BUY: market={market_id} token={token_id[:16]}... "
+        f"price={price:.4f} size_usdt={size_usdc:.2f} contracts={contract_count}"
+    )
 
     try:
         from opinion_clob_sdk.chain.py_order_utils.model.order import PlaceOrderDataInput
@@ -226,11 +278,16 @@ def place_order(
             makerAmountInQuoteToken=round(size_usdc, 6),
         )
 
-        log(f"📡 Calling client.place_order()...")
-        result = client.place_order(order, check_approval=True)
-        log(f"📡 place_order() → errno={result.errno} "
+        def _call():
+            return client.place_order(order, check_approval=True)
+
+        log(f"📡 Calling client.place_order() (timeout={_SDK_CALL_TIMEOUT}s)...")
+        result = _run_with_timeout(_call, _SDK_CALL_TIMEOUT, "place_order")
+        log(
+            f"📡 place_order() → errno={result.errno} "
             f"errmsg={getattr(result, 'errmsg', '')} "
-            f"result={str(getattr(result, 'result', ''))[:300]}")
+            f"result={str(getattr(result, 'result', ''))[:300]}"
+        )
 
         if result.errno != 0:
             err = f"Opinion order rejected errno={result.errno}: {getattr(result, 'errmsg', 'unknown')}"
@@ -241,16 +298,24 @@ def place_order(
         order_id = ""
         if order_data:
             if hasattr(order_data, "data") and order_data.data:
-                order_id = str(getattr(order_data.data, "order_id", "")
-                               or getattr(order_data.data, "orderId", "")
-                               or getattr(order_data.data, "id", ""))
+                order_id = str(
+                    getattr(order_data.data, "order_id", "")
+                    or getattr(order_data.data, "orderId", "")
+                    or getattr(order_data.data, "id", "")
+                )
             elif isinstance(order_data, dict):
                 inner = order_data.get("data", order_data)
-                order_id = str(inner.get("order_id") or inner.get("orderId") or inner.get("id") or "")
+                order_id = str(
+                    inner.get("order_id") or inner.get("orderId") or inner.get("id") or ""
+                )
 
         log(f"✅ Opinion order placed: orderId={order_id}")
         return True, order_id, ""
 
+    except TimeoutError as exc:
+        err = str(exc)
+        log(f"⏱️  place_order() timed out: {err}")
+        return False, "", err
     except Exception as exc:
         err = str(exc)
         log(f"❌ place_order() exception: {err}")
