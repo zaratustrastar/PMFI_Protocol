@@ -156,52 +156,24 @@ def _load_open_positions() -> list[ArbPosition]:
 
 
 def _get_opinion_cash() -> float:
-    """Get uninvested USDC balance from Opinion Labs account.
+    """Get uninvested USDT balance from Opinion Labs via the official CLOB SDK.
 
-    Auth: apikey header.
-    Returns balance in USDC (float). Returns 0.0 on any error.
-    Tries /account/balance, then /account, then /balance as fallbacks.
+    OpenAPI (/openapi/*) endpoints do not support balance queries — only the
+    CLOB SDK (opinion_clob_sdk) can read account balances.
+    Returns balance as float (USDT, which Opinion uses as quote token on BSC).
+    Returns 0.0 on any error.
     """
-    if not OPINION_API_KEY:
-        log("ℹ️ OPINION_API_KEY not set — opinion_cash = 0")
+    try:
+        from ..adapters.opinion_clob import get_balance as opinion_sdk_balance
+        bal = opinion_sdk_balance()
+        if bal > 0:
+            log(f"✅ Opinion cash (CLOB SDK): {bal:.4f} USDT")
+        else:
+            log("ℹ️ Opinion cash (CLOB SDK): 0.0000 — SDK returned 0 or credentials missing")
+        return bal
+    except Exception as e:
+        log(f"⚠️ Opinion cash could not be fetched from any endpoint — opinion_cash = 0 ({e})")
         return 0.0
-
-    import requests
-    headers = {
-        "apikey": OPINION_API_KEY,
-        "Content-Type": "application/json",
-    }
-
-    # Try each endpoint in order; return on first success
-    endpoints = [
-        f"{OPINION_BASE_URL}/account/balance",
-        f"{OPINION_BASE_URL}/account",
-        f"{OPINION_BASE_URL}/balance",
-    ]
-    for url in endpoints:
-        try:
-            resp = requests.get(url, headers=headers, timeout=10)
-            log(f"ℹ️ Opinion balance probe {url} → HTTP {resp.status_code}")
-            if resp.status_code == 200:
-                data = resp.json()
-                # Unwrap common wrappers
-                result = data.get("result", data)
-                # Try several field names; convert cents → dollars if value > 100
-                for field in ("balance", "usdc", "usdcBalance", "availableBalance", "available"):
-                    val = result.get(field)
-                    if val is not None:
-                        amount = float(val)
-                        # Opinion Labs often returns cents (integers); convert if > 100
-                        if amount > 100 and isinstance(val, int):
-                            amount = amount / 100.0
-                        log(f"✅ Opinion servicer cash: {amount:.2f} USDC (field={field!r})")
-                        return amount
-                log(f"⚠️ Opinion balance: no recognised field in response: {list(result.keys())[:10]}")
-        except Exception as e:
-            log(f"⚠️ Opinion balance error at {url}: {e}")
-
-    log("⚠️ Opinion cash could not be fetched from any endpoint — opinion_cash = 0")
-    return 0.0
 
 
 def _get_servicer_wallet_usdc_on_base() -> float:

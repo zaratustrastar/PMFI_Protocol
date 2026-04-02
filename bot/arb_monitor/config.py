@@ -14,14 +14,14 @@ POLY_GAMMA_URL = os.environ.get("POLY_GAMMA_URL", "https://gamma-api.polymarket.
 POLY_CLOB_URL = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
 
 OPINION_BASE_URL = os.environ.get("OPINION_BASE_URL", "https://proxy.opinion.trade:8443/openapi")
-OPINION_CLOB_URL = os.environ.get("OPINION_CLOB_URL", "https://proxy.opinion.trade:8443/openapi")
+OPINION_CLOB_HOST = os.environ.get("OPINION_CLOB_HOST", "https://proxy.opinion.trade:8443")
 OPINION_API_KEY = os.environ.get("OPINION_API_KEY", "")
-# Signer wallet private key — signs CLOB orders submitted to Opinion.
-# This is the hot wallet that Opinion authorises to trade on behalf of the portfolio.
+# Signer wallet private key — signs CLOB orders on behalf of the multi-sig.
 OPINION_PRIVATE_KEY = os.environ.get("OPINION_PRIVATE_KEY", "")
-# Portfolio / multi-sig wallet address — where Opinion holds your funds on-chain.
-# Used for on-chain balance reads and as the "owner" in signed orders.
+# Multi-sig / portfolio wallet address that holds USDT collateral on BSC.
 OPINION_PORTFOLIO_ADDRESS = os.environ.get("OPINION_PORTFOLIO_ADDRESS", "")
+# BSC JSON-RPC endpoint. Public dataseed used as default.
+OPINION_RPC_URL = os.environ.get("OPINION_RPC_URL", "https://bsc-dataseed.binance.org")
 OPINION_MAX_PAGES = int(os.environ.get("OPINION_MAX_PAGES", "10"))
 OPINION_ORDERBOOK_DELAY = float(os.environ.get("OPINION_ORDERBOOK_DELAY", "0.08"))
 

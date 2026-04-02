@@ -80,11 +80,15 @@ V2 is an async Yearn-style vault: no live NAV required for user flows.
 - `OPINION_API_KEY` — Opinion Labs API key (market data + CLOB auth header)
 - `OPINION_PRIVATE_KEY` — signer wallet private key for signing Opinion CLOB orders
 - `OPINION_PORTFOLIO_ADDRESS` — multi-sig/portfolio wallet address that holds Opinion funds
-- `OPINION_CLOB_URL` — Opinion CLOB trading base URL (defaults to OpenAPI base)
+- `OPINION_CLOB_HOST` — Opinion CLOB host (default: https://proxy.opinion.trade:8443, no /openapi suffix)
+- `OPINION_RPC_URL` — BSC JSON-RPC endpoint (default: https://bsc-dataseed.binance.org)
 
 **Opinion Integration Architecture** (`bot/arb_monitor/adapters/`):
 - `opinion.py` — market discovery and orderbook data via OpenAPI only; fixed pagination to `page` param (was `offset`); fixed `/market/{id}` parsing to unwrap `result.data`
-- `opinion_clob.py` — new CLOB trading client: balance queries (CLOB API → on-chain USDC fallback) + signed order placement requiring `OPINION_PRIVATE_KEY` and `OPINION_PORTFOLIO_ADDRESS`
+- `opinion_clob.py` — official CLOB SDK client (`opinion_clob_sdk` PyPI package); singleton `Client(host, apikey, chain_id, rpc_url, private_key, multi_sig_addr)`; `get_balance()` via `client.get_my_balances()`; `place_order()` via `client.place_order(PlaceOrderDataInput(...))`
+- Opinion uses **USDT on BSC** (chain_id=56) as quote/collateral token, NOT USDC
+- CLOB host is `https://proxy.opinion.trade:8443` (no `/openapi` suffix)
+- `arb_nav.py::_get_opinion_cash()` also updated to use CLOB SDK (was probing broken OpenAPI endpoints)
 
 **Frontend** (`frontend/main.js`):
 - Auto-routes to V2 when `ARB_VAULT_V2_ADDRESS` is set in `window.PSNIPER_CONFIG`
