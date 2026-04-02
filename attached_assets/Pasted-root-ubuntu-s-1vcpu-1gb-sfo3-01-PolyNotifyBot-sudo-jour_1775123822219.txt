@@ -1,0 +1,14 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "10 min ago" | grep -i "opinion" | grep -i "endpoint\|error\|fail\|exception" | tail -20
+Apr 02 09:44:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] ⚠️ Opinion balance: all endpoints failed — returning 0
+Apr 02 09:44:13 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] ⚠️ Opinion balance: all endpoints failed — returning 0
+Apr 02 09:45:42 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4079016]: 💸 [ArbFunder] ⚠️ Opinion balance: all endpoints failed — returning 0
+Apr 02 09:47:01 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4080414]: ⚠️ [OpinionCache] Pre-warm failed (non-fatal): name 'offset' is not defined
+Apr 02 09:47:09 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4080414]: 📈 [Arb/NAV] ⚠️ Opinion cash could not be fetched from any endpoint — opinion_cash = 0
+Apr 02 09:47:17 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4080414]: 💬 [Arb/OpinionCLOB] ⚠️  CLOB API balance failed — trying on-chain USDC read
+Apr 02 09:47:20 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4080414]: 💬 [Arb/OpinionCLOB] ⚠️  All Opinion balance methods failed — returning 0 (set OPINION_PORTFOLIO_ADDRESS for on-chain fallback)
+Apr 02 09:51:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4080414]: 💬 [Arb/OpinionCLOB] ⚠️  CLOB API balance failed — trying on-chain USDC read
+Apr 02 09:51:23 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4080414]: 💬 [Arb/OpinionCLOB] ⚠️  All Opinion balance methods failed — returning 0 (set OPINION_PORTFOLIO_ADDRESS for on-chain fallback)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "1 min ago" | grep -i "opinion" | grep -i "endpoint\|error\|fail\|exception" | tail -20
+Apr 02 09:53:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4080645]: 💬 [Arb/OpinionCLOB] ⚠️  CLOB API balance failed — trying on-chain USDC read
+Apr 02 09:53:15 ubuntu-s-1vcpu-1gb-sfo3-01 python3[4080645]: 💬 [Arb/OpinionCLOB] ⚠️  All Opinion balance methods failed — returning 0 (set OPINION_PORTFOLIO_ADDRESS for on-chain fallback)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

@@ -73,6 +73,7 @@ def _api_headers() -> dict:
 def _balance_via_clob_api() -> Optional[float]:
     """Try Opinion CLOB API endpoints for portfolio balance."""
     if not OPINION_API_KEY:
+        log("⚠️  OPINION_API_KEY not set — skipping CLOB balance")
         return None
 
     portfolio = OPINION_PORTFOLIO_ADDRESS or ""
@@ -80,6 +81,9 @@ def _balance_via_clob_api() -> Optional[float]:
     if portfolio:
         headers["x-portfolio-address"] = portfolio
         headers["x-wallet-address"] = portfolio
+        log(f"🔑 CLOB balance: using portfolio={portfolio[:10]}... in headers")
+    else:
+        log("⚠️  OPINION_PORTFOLIO_ADDRESS not set — sending requests without portfolio header")
 
     candidate_urls = [
         f"{OPINION_CLOB_URL}/account/balance",
@@ -95,13 +99,19 @@ def _balance_via_clob_api() -> Optional[float]:
             f"{OPINION_CLOB_URL}/account/{portfolio}/balance",
         ]
 
+    log(f"🔍 CLOB balance: trying {len(candidate_urls)} endpoints")
     for url in candidate_urls:
         try:
             resp = requests.get(url, headers=headers, timeout=10)
             if resp.status_code != 200:
-                log(f"⚠️  CLOB balance {url} → HTTP {resp.status_code}")
+                log(f"⚠️  CLOB balance {url} → HTTP {resp.status_code} | body={resp.text[:300]!r}")
                 continue
-            data = resp.json()
+            try:
+                data = resp.json()
+            except Exception as je:
+                log(f"⚠️  CLOB balance {url} → HTTP 200 but JSON parse failed: {je} | raw={resp.text[:300]!r}")
+                continue
+            log(f"📡 CLOB balance {url} → HTTP 200 | json_keys={list(data.keys()) if isinstance(data, dict) else type(data).__name__!r} | body={resp.text[:400]!r}")
             result = data.get("result") or data.get("data") or data
             if isinstance(result, list) and result:
                 result = result[0]
@@ -111,10 +121,12 @@ def _balance_via_clob_api() -> Optional[float]:
                     bal = float(result[field])
                     log(f"💰 CLOB balance {bal:.4f} USDC (via {url} field={field})")
                     return bal
+            log(f"⚠️  CLOB balance {url} → 200 but no balance field found in result | result={str(result)[:300]!r}")
         except Exception as exc:
-            log(f"⚠️  CLOB balance endpoint {url} error: {exc}")
+            log(f"⚠️  CLOB balance endpoint {url} → exception: {exc}")
             continue
 
+    log("❌ CLOB balance: all endpoints exhausted with no usable response")
     return None
 
 
