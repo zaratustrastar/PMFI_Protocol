@@ -308,7 +308,9 @@ def _run_verifier():
         lookup_token_ids_by_market_id,
     )
 
-    # pair_id → {polyYesToken, polyNoToken, opYesToken, opNoToken, cachedAt}
+    # (poly_slug, label, expiry_ts) → {polyYesToken, polyNoToken, opYesToken, opNoToken, cachedAt}
+    # Keyed by (slug, label, expiry) so different outcomes within the same multi-market
+    # event each resolve to their own YES/NO token pair.
     _token_cache: dict = {}
 
     while True:
@@ -343,12 +345,42 @@ def _run_verifier():
                     op_market_id = str(pair.get("opinionMarketId", "") or "")
                     prices = pair.get("prices", {})  # SSE cached prices (fallback)
 
-                    # 2. Refresh token ID cache if stale or missing
-                    cached = _token_cache.get(pair_id, {})
+                    # Extract label and expiry for sub-market disambiguation.
+                    # Many Polymarket events contain multiple binary markets (one per
+                    # outcome). Without label+expiry, lookup_token_ids_by_slug picks
+                    # an arbitrary market — causing wrong YES/NO token IDs or no match.
+                    pair_label = (
+                        pair.get("label", "")
+                        or pair.get("outcome", "")
+                        or pair.get("polyLabel", "")
+                        or ""
+                    )
+                    pair_expiry = expiry  # already parsed above
+
+                    # 2. Refresh token ID cache if stale or missing.
+                    # Cache keyed by (slug, label, expiry) so different outcomes in the
+                    # same multi-market event each resolve to their own token pair.
+                    cache_key = (poly_slug, pair_label, pair_expiry)
+                    cached = _token_cache.get(cache_key, {})
                     cache_age = now - cached.get("cachedAt", 0)
-                    if cache_age > TOKEN_CACHE_TTL_SECONDS or not cached.get("polyYesToken"):
-                        poly_tokens = lookup_token_ids_by_slug(poly_slug) if poly_slug else None
-                        op_tokens = lookup_token_ids_by_market_id(op_market_id) if op_market_id and op_market_id != "0" else None
+                    # Use a short TTL for failed resolutions so we retry quickly;
+                    # successful resolutions are cached for the full TOKEN_CACHE_TTL_SECONDS.
+                    miss_ttl = 60  # 60s retry for unresolved tokens
+                    hit_ttl  = TOKEN_CACHE_TTL_SECONDS
+                    effective_ttl = hit_ttl if cached.get("polyYesToken") else miss_ttl
+                    if cache_age > effective_ttl or not cached.get("polyYesToken"):
+                        poly_tokens = (
+                            lookup_token_ids_by_slug(
+                                poly_slug,
+                                label=pair_label,
+                                resolution_ts=pair_expiry if pair_expiry else None,
+                            )
+                            if poly_slug else None
+                        )
+                        op_tokens = (
+                            lookup_token_ids_by_market_id(op_market_id)
+                            if op_market_id and op_market_id != "0" else None
+                        )
                         cached = {
                             "polyYesToken": poly_tokens[0] if poly_tokens else None,
                             "polyNoToken":  poly_tokens[1] if poly_tokens else None,
@@ -356,10 +388,29 @@ def _run_verifier():
                             "opNoToken":    op_tokens[1]   if op_tokens   else None,
                             "cachedAt": now,
                         }
-                        _token_cache[pair_id] = cached
-                        log(f"  Token cache refresh [{pair_id[:10]}]: "
+                        _token_cache[cache_key] = cached
+                        log(
+                            f"  Token cache refresh [{pair_id[:10]}] "
+                            f"slug={poly_slug!r} label={pair_label!r}: "
                             f"poly={'✅' if poly_tokens else '❌'} "
-                            f"opinion={'✅' if op_tokens else '❌'}")
+                            f"opinion={'✅' if op_tokens else '❌'}"
+                        )
+
+                    # 2b. Require resolved token IDs for execution.
+                    # If Polymarket tokens are missing we cannot place a CLOB order —
+                    # mark the pair display-only and skip it from the executable list.
+                    poly_tokens_resolved = bool(cached.get("polyYesToken") and cached.get("polyNoToken"))
+                    op_tokens_needed = bool(op_market_id and op_market_id != "0")
+                    op_tokens_resolved = bool(cached.get("opYesToken") and cached.get("opNoToken"))
+                    is_executable = poly_tokens_resolved and (not op_tokens_needed or op_tokens_resolved)
+
+                    if not poly_tokens_resolved:
+                        log(
+                            f"  ⏭️ [{pair_id[:10]}] Poly tokens unresolved "
+                            f"(slug={poly_slug!r} label={pair_label!r}) — display-only, skipping"
+                        )
+                        skipped_count += 1
+                        continue
 
                     # 3. Fetch live orderbook ask prices
                     live_poly_yes = live_poly_no = live_op_yes = live_op_no = None
@@ -442,6 +493,12 @@ def _run_verifier():
                     if best["roi"] < MIN_VERIFIED_EDGE_PCT:
                         continue
 
+                    warnings = []
+                    if not using_live:
+                        warnings.append("sse_price_fallback")
+                    if not is_executable:
+                        warnings.append("display_only_tokens_unresolved")
+
                     verified.append({
                         "type": "opportunity",
                         "source": "oddscreeners",
@@ -451,6 +508,8 @@ def _run_verifier():
                         "opinionTitle": pair.get("opinionTitle", ""),
                         "polyUrl": pair.get("polyUrl", ""),
                         "opinionUrl": pair.get("opinionUrl", ""),
+                        "polySlug": poly_slug,
+                        "label": pair_label,
                         "expiryTs": expiry,
                         "minCost": best["cost"],
                         "edge": best["edge"],
@@ -463,7 +522,14 @@ def _run_verifier():
                         "sizes": pair.get("sizes", {}),
                         "priceSource": "live_orderbook" if using_live else "sse_cache",
                         "updatedTs": int(time.time()),
-                        "warnings": [] if using_live else ["sse_price_fallback"],
+                        "warnings": warnings,
+                        # Resolved CLOB token IDs — present only when is_display_only=False.
+                        # Executors must check is_display_only before placing orders.
+                        "is_display_only": not is_executable,
+                        "polyYesToken": cached.get("polyYesToken"),
+                        "polyNoToken":  cached.get("polyNoToken"),
+                        "opYesToken":   cached.get("opYesToken"),
+                        "opNoToken":    cached.get("opNoToken"),
                     })
 
                 except Exception as e:
@@ -471,8 +537,13 @@ def _run_verifier():
 
             verified.sort(key=lambda x: x.get("edge", 0), reverse=True)
             oddscreeners_store.set_verified(verified)
-            log(f"✅ Verified {len(verified)} opps from {len(pairs)} pairs "
-                f"(live={live_count} fallback={fallback_count} skipped={skipped_count})")
+            executable_count = sum(1 for v in verified if not v.get("is_display_only"))
+            display_only_count = len(verified) - executable_count
+            log(
+                f"✅ Verified {len(verified)} opps from {len(pairs)} pairs "
+                f"(executable={executable_count} display_only={display_only_count} "
+                f"live={live_count} fallback={fallback_count} skipped={skipped_count})"
+            )
 
         except Exception as e:
             log(f"❌ Verifier error: {e}")
