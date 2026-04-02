@@ -832,15 +832,36 @@ def fetch_opportunities() -> list[ArbOpportunity]:
         return normalize_opportunity(entry, ws_book=ws_book)
 
     opportunities = []
-    with _cf.ThreadPoolExecutor(max_workers=min(len(raw_entries) or 1, 12)) as _pool:
+    # IO-bound threads — use up to 50 workers so all entries truly fire in parallel.
+    # With 222 entries and 50 workers: ⌈222/50⌉ = 5 batches × 5s timeout each = ~25s max.
+    _n_workers = min(len(raw_entries) or 1, 50)
+    with _cf.ThreadPoolExecutor(max_workers=_n_workers) as _pool:
         futs = [_pool.submit(_norm_entry, e) for e in raw_entries]
-        for fut in _cf.as_completed(futs, timeout=60):
-            try:
-                opp = fut.result()
-                if opp is not None:
-                    opportunities.append(opp)
-            except Exception as _e:
-                log(f"⚠️ normalize_opportunity thread error: {_e}")
+        # Collect whatever finishes within 90s — do NOT fail the whole fetch on timeout.
+        # If some threads are still running when timeout hits, we log and use partial results.
+        try:
+            for fut in _cf.as_completed(futs, timeout=90):
+                try:
+                    opp = fut.result()
+                    if opp is not None:
+                        opportunities.append(opp)
+                except Exception as _e:
+                    log(f"⚠️ normalize_opportunity thread error: {_e}")
+        except _cf.TimeoutError:
+            # Collect whatever already completed before the timeout
+            finished = sum(1 for f in futs if f.done())
+            log(
+                f"⏱️ normalize_opportunity pool timed out after 90s — "
+                f"{finished}/{len(futs)} threads finished; using {len(opportunities)} resolved so far"
+            )
+            for fut in futs:
+                if fut.done() and not fut.cancelled():
+                    try:
+                        opp = fut.result()
+                        if opp is not None and opp not in opportunities:
+                            opportunities.append(opp)
+                    except Exception:
+                        pass
 
     opportunities.sort(key=lambda o: o.score, reverse=True)
     log(

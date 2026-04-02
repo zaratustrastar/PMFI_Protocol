@@ -477,6 +477,39 @@ def lookup_token_ids_by_slug(
                         f"YES={chosen_ids[0][:12]}..."
                     )
                     return (chosen_ids[0], chosen_ids[1])
+        # ── Path 3: unfiltered /events — diagnose missing vs filtered ────────
+        # If Paths 1+2 found nothing with active/closed/archived filters,
+        # try once WITHOUT those filters to distinguish:
+        #   (a) Market exists but is inactive/closed → log and skip (truly stale)
+        #   (b) Market genuinely doesn't exist on Polymarket → log and skip
+        try:
+            resp3 = http_client.get(
+                f"{POLY_GAMMA_URL}/events",
+                venue="polymarket",
+                params={"slug": slug, "limit": 5},
+                timeout=5,
+            )
+            if resp3 and resp3.status_code == 200:
+                payload3 = resp3.json()
+                events3 = payload3 if isinstance(payload3, list) else payload3.get("events", [payload3])
+                found_markets = []
+                for ev in events3:
+                    for m in ev.get("markets", []):
+                        found_markets.append(
+                            f"{m.get('question','?')[:50]} "
+                            f"[active={m.get('active')} closed={m.get('closed')} "
+                            f"archived={m.get('archived')} endDate={m.get('endDate','?')[:10]}]"
+                        )
+                if found_markets:
+                    log(
+                        f"🔍 Path 3 (unfiltered): slug={slug!r} EXISTS on Gamma but was filtered — "
+                        f"{len(found_markets)} market(s): {found_markets[:3]}"
+                    )
+                else:
+                    log(f"🔍 Path 3 (unfiltered): slug={slug!r} → 0 events — NOT on Polymarket")
+        except Exception as _p3e:
+            log(f"🔍 Path 3 diagnostic failed for slug={slug!r}: {_p3e}")
+
     except Exception as e:
         log(f"⚠️ lookup_token_ids_by_slug({slug!r}): {e}")
     log(f"⚠️ lookup_token_ids_by_slug: no tokens found for slug={slug!r} label={label!r}")

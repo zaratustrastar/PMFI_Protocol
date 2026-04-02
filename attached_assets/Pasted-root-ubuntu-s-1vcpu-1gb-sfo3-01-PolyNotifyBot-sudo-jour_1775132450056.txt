@@ -1,0 +1,52 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "5 min ago" | grep "OpinionCLOB" | tail -15
+Apr 02 12:09:16 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 🔧 Initialising Opinion SDK client (timeout=15s): host=https://proxy.opinion.trade:8443 chain_id=56 multi_sig=0xae7fd721...
+Apr 02 12:09:17 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] ✅ Opinion SDK client initialised
+Apr 02 12:09:17 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 📡 Calling client.get_my_balances() (timeout=10s)...
+Apr 02 12:09:17 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 📡 get_my_balances() → errno=0 errmsg= result=balances=[OpenapiQuoteTokenBalance(available_balance='2.97716430021335782', frozen_balance='0', quote_token='0x55d398326f99059ff775485246999027b3197955', token_decimals=18, total_balance='2.97716430021335782')] chain_id='56' multi_sign_address='0xae7fd721efc16c31dc5b7491128b766445d1a9a3' wallet_address='0x61068abfb8349f90bd0bab12347ec10e0c55c20f'
+Apr 02 12:09:17 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 💰 Balance item field='available_balance' value=2.97716430021335782
+Apr 02 12:09:17 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 💰 Opinion USDT balance: 2.9772
+Apr 02 12:09:28 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 📡 Calling client.get_my_balances() (timeout=10s)...
+Apr 02 12:09:28 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 📡 get_my_balances() → errno=0 errmsg= result=balances=[OpenapiQuoteTokenBalance(available_balance='2.97716430021335782', frozen_balance='0', quote_token='0x55d398326f99059ff775485246999027b3197955', token_decimals=18, total_balance='2.97716430021335782')] chain_id='56' multi_sign_address='0xae7fd721efc16c31dc5b7491128b766445d1a9a3' wallet_address='0x61068abfb8349f90bd0bab12347ec10e0c55c20f'
+Apr 02 12:09:28 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 💰 Balance item field='available_balance' value=2.97716430021335782
+Apr 02 12:09:28 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 💰 Opinion USDT balance: 2.9772
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f --no-pager | grep --line-buffered -E "ArbExecLoop|OpinionCLOB|ArbFunder|tend"
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔁 [ArbExecLoop] ❌ Failed to fetch Oddpool opportunities: 173 (of 222) futures unfinished
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=17.96 under_pressure=False unwind_needed=False
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-02T12:14:19Z
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775131769, cooldown=60s) — calling
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=1040
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] 📤 TX nonce=1040 → 0xe0646d12a475b39c4e867eafad454f08961e7f5e042eb13c5ebaa3dc1265351c
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] ✅ tend() sent: tx=0xe0646d12a475b39c4e867eafad454f08961e7f5e042eb13c5ebaa3dc1265351c
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] 💼 Servicer [2026-04-02T12:14:19Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=18.9551 ETH=0.010036 safety_buffer=1.0 gas_reserve=0.0100 ETH
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=18.96 deployable=17.96 under_pressure=False
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] 💼 Servicer deployable: 18.9551 USDC total − 1.00 safety_buffer = 17.9551 deployable
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 17.9551 USDC in servicer wallet
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💸 [ArbFunder] ⚠️ Kalshi balance read error: No module named 'cryptography'
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 📡 Calling client.get_my_balances() (timeout=10s)...
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 📡 get_my_balances() → errno=0 errmsg= result=balances=[OpenapiQuoteTokenBalance(available_balance='2.97716430021335782', frozen_balance='0', quote_token='0x55d398326f99059ff775485246999027b3197955', token_decimals=18, total_balance='2.97716430021335782')] chain_id='56' multi_sign_address='0xae7fd721efc16c31dc5b7491128b766445d1a9a3' wallet_address='0x61068abfb8349f90bd0bab12347ec10e0c55c20f'
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 💰 Balance item field='available_balance' value=2.97716430021335782
+Apr 02 12:14:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 💬 [Arb/OpinionCLOB] 💰 Opinion USDT balance: 2.9772
+Apr 02 12:14:29 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔁 [ArbExecLoop] 💼 Platform balances: poly=0.0000 kalshi=0.0000 opinion=2.9772 USDC
+Apr 02 12:15:39 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Jack Antonoff'
+Apr 02 12:15:39 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Jack Antonoff' — display-only
+Apr 02 12:15:46 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.03× conf=0.16 fill=951 score=3.9 | gross=3.00¢ days=272.5
+Apr 02 12:15:46 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] 👁 pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=3.00¢ poly=0.83 venue2(kalshi/NO)=0.14 days=272.5 token=slug-only no_token=missing title='Who Will Attend Taylor Swift and Travis '
+Apr 02 12:16:37 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Selena Gomez'
+Apr 02 12:16:37 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Selena Gomez' — display-only
+Apr 02 12:16:37 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=0.90% AR=0.01× conf=0.20 fill=1235 score=3.0 | gross=2.00¢ days=272.5
+Apr 02 12:16:37 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] 👁 pair='taylorswift-wedding-attend-2028_selena_gomez' edge=2.00¢ poly=0.83 venue2(kalshi/NO)=0.15 days=272.5 token=slug-only no_token=missing title='Who Will Attend Taylor Swift and Travis '
+^C
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "2 min ago" | grep -E "ArbExecLoop|tend" | tail -10
+Apr 02 12:15:39 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Jack Antonoff'
+Apr 02 12:15:39 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Jack Antonoff' — display-only
+Apr 02 12:15:46 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_jack_antonoff': net_edge=1.90% AR=0.03× conf=0.16 fill=951 score=3.9 | gross=3.00¢ days=272.5
+Apr 02 12:15:46 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] 👁 pair='taylorswift-wedding-attend-2028_jack_antonoff' edge=3.00¢ poly=0.83 venue2(kalshi/NO)=0.14 days=272.5 token=slug-only no_token=missing title='Who Will Attend Taylor Swift and Travis '
+Apr 02 12:16:37 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Selena Gomez'
+Apr 02 12:16:37 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Selena Gomez' — display-only
+Apr 02 12:16:37 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] 📊 Scored pair='taylorswift-wedding-attend-2028_selena_gomez': net_edge=0.90% AR=0.01× conf=0.20 fill=1235 score=3.0 | gross=2.00¢ days=272.5
+Apr 02 12:16:37 ubuntu-s-1vcpu-1gb-sfo3-01 python[4087399]: 🔀 [Arb/Oddpool] 👁 pair='taylorswift-wedding-attend-2028_selena_gomez' edge=2.00¢ poly=0.83 venue2(kalshi/NO)=0.15 days=272.5 token=slug-only no_token=missing title='Who Will Attend Taylor Swift and Travis '
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
