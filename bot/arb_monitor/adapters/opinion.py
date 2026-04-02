@@ -202,7 +202,8 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
             break
 
         total_available = result.get("total", 0)
-        if total_available and offset >= total_available:
+        fetched_so_far = (page + 1) * API_PAGE_SIZE
+        if total_available and fetched_so_far >= total_available:
             break
         if len(markets) < 10:
             break
