@@ -58,6 +58,19 @@ def _slug_cache_key(slug: str, label: str) -> tuple[str, str]:
     return (slug, label.lower().replace("_", " ").replace("-", " ").strip())
 
 
+def clear_slug_cache() -> int:
+    """Clear the slug → token ID cache, forcing fresh Gamma lookups on next cycle.
+
+    Returns the number of entries cleared.
+    Call this on bot startup or via API to force immediate re-resolution
+    after a code fix or Gamma API change.
+    """
+    count = len(_SLUG_CACHE)
+    _SLUG_CACHE.clear()
+    log(f"🗑️  Slug cache cleared ({count} entries removed) — next cycle will re-resolve all slugs")
+    return count
+
+
 def _fetch_ask_price(token_id: str) -> Optional[float]:
     """Fetch the best ask price for a Polymarket CLOB token.
 
@@ -121,7 +134,9 @@ def _resolve_poly_tokens(
     cached = _SLUG_CACHE.get(key)
     if cached is not None:
         yes_tok, no_tok, cached_at = cached
-        ttl = 300 if yes_tok is None else _SLUG_CACHE_TTL
+        # Short TTL for failures so a restarted or fixed market retries quickly.
+        # 60s prevents hammering Gamma on every cycle while not blocking for 5 min.
+        ttl = 60 if yes_tok is None else _SLUG_CACHE_TTL
         if now - cached_at < ttl:
             return (yes_tok, no_tok)
 
@@ -150,7 +165,7 @@ def _resolve_poly_tokens(
             # movement since Oddpool priced the opportunity; tight enough to reject
             # wrong-market tokens that differ by 50–90¢.
             if expected_poly_ask is not None:
-                _TOLERANCE = 0.30
+                _TOLERANCE = 0.50  # widened from 0.30 to handle bid-ask spread + stale Oddpool quotes
                 yes_ask = _fetch_ask_price(yes_tok)
                 no_ask  = _fetch_ask_price(no_tok)
                 yes_delta = abs(yes_ask - expected_poly_ask) if yes_ask is not None else 999.0
@@ -803,16 +818,29 @@ def fetch_opportunities() -> list[ArbOpportunity]:
         except Exception as e:
             log(f"⚠️ WS pre-pass failed: {e} — all pairs fall back to Gamma")
 
-    opportunities = []
-    for entry in raw_entries:
+    # Parallelise normalization so Gamma API calls for all entries fire concurrently.
+    # Without this, 20 entries × up to 4 HTTP calls each × 10s timeout = 800s worst
+    # case, causing tend() gaps of 10+ minutes. With a thread pool the wall-clock time
+    # is bounded by a single timeout (~10s) regardless of entry count.
+    import concurrent.futures as _cf
+
+    def _norm_entry(entry):
         eid   = entry.get("event_id") or ""
         label = entry.get("label") or entry.get("outcome_key") or "yes"
-        # Look up the (event_key, label_normalized) key we built in the pre-pass
         ws_key = _ws_key_map.get((str(eid), label))
         ws_book = ws_books.get(ws_key) if ws_key else None
-        opp = normalize_opportunity(entry, ws_book=ws_book)
-        if opp is not None:
-            opportunities.append(opp)
+        return normalize_opportunity(entry, ws_book=ws_book)
+
+    opportunities = []
+    with _cf.ThreadPoolExecutor(max_workers=min(len(raw_entries) or 1, 12)) as _pool:
+        futs = [_pool.submit(_norm_entry, e) for e in raw_entries]
+        for fut in _cf.as_completed(futs, timeout=60):
+            try:
+                opp = fut.result()
+                if opp is not None:
+                    opportunities.append(opp)
+            except Exception as _e:
+                log(f"⚠️ normalize_opportunity thread error: {_e}")
 
     opportunities.sort(key=lambda o: o.score, reverse=True)
     log(

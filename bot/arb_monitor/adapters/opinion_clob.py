@@ -182,8 +182,12 @@ def get_balance() -> float:
             log("⚠️  get_my_balances() returned errno=0 but result is None")
             return 0.0
 
-        # Result may be a list of balance objects or a single object.
-        if isinstance(result, list):
+        # Unwrap result structure. SDK v0.7 returns a response object with:
+        #   result.balances = [OpenapiQuoteTokenBalance(available_balance=..., total_balance=...)]
+        # Fallback: list, result.list, result.data, or bare object.
+        if hasattr(result, "balances") and result.balances:
+            items = list(result.balances)
+        elif isinstance(result, list):
             items = result
         elif hasattr(result, "list"):
             items = result.list or []
@@ -195,9 +199,12 @@ def get_balance() -> float:
         total = 0.0
         for item in items:
             for field in (
-                "balance", "usdt", "usdtBalance", "availableBalance",
-                "available", "cashBalance", "total", "value",
-                "usdc", "usdcBalance",
+                # snake_case (SDK v0.7 OpenapiQuoteTokenBalance fields)
+                "available_balance", "total_balance", "frozen_balance",
+                # camelCase (older SDK versions / alternative response shapes)
+                "availableBalance", "totalBalance", "balance",
+                "usdt", "usdtBalance", "cashBalance",
+                "available", "total", "value", "usdc", "usdcBalance",
             ):
                 val = (
                     getattr(item, field, None)

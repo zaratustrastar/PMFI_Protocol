@@ -364,7 +364,7 @@ def lookup_token_ids_by_slug(
             f"{POLY_GAMMA_URL}/events",
             venue="polymarket",
             params={"slug": slug, "limit": 3, "active": "true", "closed": "false", "archived": "false"},
-            timeout=10,
+            timeout=5,
         )
         if resp and resp.status_code == 200:
             payload = resp.json()
@@ -430,7 +430,7 @@ def lookup_token_ids_by_slug(
             f"{POLY_GAMMA_URL}/markets",
             venue="polymarket",
             params={"slug": slug, "limit": 10, "active": "true", "closed": "false", "archived": "false"},
-            timeout=10,
+            timeout=5,
         )
         if resp2 and resp2.status_code == 200:
             markets = resp2.json()
@@ -557,7 +557,9 @@ def _pick_best_market(
     # label_score must independently meet this threshold — temporal_bonus cannot
     # rescue a poor label match. This prevents time-proximity from selecting the
     # wrong market (e.g. "Carolina Panthers" for label "Las Vegas Raiders").
-    _MIN_LABEL_SCORE = 0.5
+    # Lowered from 0.5 → 0.3 because Oddpool outcome labels like "above_1_2t"
+    # only partially overlap with Polymarket titles like "Above $1.2T" (score ≈ 0.33).
+    _MIN_LABEL_SCORE = 0.3
 
     best_combined = -1.0
     best_clob: list[str] = []
