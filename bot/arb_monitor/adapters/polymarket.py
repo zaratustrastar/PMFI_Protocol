@@ -533,11 +533,18 @@ def lookup_token_ids_by_slug(
         # _event_slug_index during every fetch_all_active_markets() call, so we can
         # resolve (event_slug, label) → tokens without any additional HTTP request.
         global _event_slug_index, _event_slug_index_ts
+        _INDEX_STALE_SECS = 600  # 10 minutes
+        _index_age = time.time() - _event_slug_index_ts
+        if _event_slug_index and _index_age > _INDEX_STALE_SECS:
+            log(
+                f"⚠️ Path B: bulk index is stale (age={int(_index_age)}s > {_INDEX_STALE_SECS}s threshold) "
+                f"— results may be outdated; next fetch_all_active_markets() will refresh"
+            )
         idx_markets = _event_slug_index.get(slug)
         if idx_markets:
             log(
                 f"📚 Path B (bulk index): found {len(idx_markets)} market(s) for "
-                f"slug={slug!r} in bulk cache (age={int(time.time()-_event_slug_index_ts)}s)"
+                f"slug={slug!r} in bulk cache (age={int(_index_age)}s)"
             )
             try:
                 all_m_b, _ = _collect_from_markets(idx_markets, slug)
@@ -555,7 +562,7 @@ def lookup_token_ids_by_slug(
                 log(f"⚠️ Path B exception for slug={slug!r}: {_be}")
         else:
             if _event_slug_index:
-                log(f"📚 Path B: slug={slug!r} not in bulk index ({len(_event_slug_index)} event slugs cached)")
+                log(f"📚 Path B: slug={slug!r} not in bulk index ({len(_event_slug_index)} event slugs cached, age={int(_index_age)}s)")
             else:
                 log(f"📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called")
 
@@ -616,8 +623,7 @@ def lookup_token_ids_by_slug(
             log(f"⚠️ Path 2 (/markets?slug=) failed for slug={slug!r}: {_e2}")
 
         # ── Path O removed — Oddpool /search/events does not exist ────────────
-        # The /search/events endpoint was never part of the Oddpool API and returned
-        # non-200 for every query.  Path B (bulk index) replaces it entirely.
+        log(f"⚠️ Path O removed — Oddpool /search/events does not exist; falling through")
         log(f"🔍 All slug paths exhausted for slug={slug!r} label={label!r}")
 
     except Exception as e:
