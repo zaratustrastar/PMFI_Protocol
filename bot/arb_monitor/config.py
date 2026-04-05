@@ -180,7 +180,10 @@ ARB_DEPOSIT_WAIT_SECS = int(os.environ.get("ARB_DEPOSIT_WAIT_SECS", "8"))
 
 # Minimum ETH kept in the servicer wallet for gas. Distribution is skipped if
 # the ETH balance falls below this threshold.
-ARB_SERVICER_GAS_RESERVE_ETH = float(os.environ.get("ARB_SERVICER_GAS_RESERVE_ETH", "0.01"))
+# Default lowered from 0.01 → 0.003 (Base txs cost ~0.000001 ETH each, so 0.003
+# covers ~3000 txs).  VPS .env should set ARB_SERVICER_GAS_RESERVE_ETH=0.001
+# explicitly if the servicer wallet has less than 0.003 ETH.
+ARB_SERVICER_GAS_RESERVE_ETH = float(os.environ.get("ARB_SERVICER_GAS_RESERVE_ETH", "0.003"))
 
 # Platform deposit addresses for auto-funder.
 # Polymarket and Kalshi accept USDC directly on Base.
