@@ -7,6 +7,7 @@ from typing import Optional
 from ..config import (
     POLY_GAMMA_URL, POLY_CLOB_URL,
     ARB_MAX_PAGES_POLY, ARB_PAGE_SIZE_POLY, ARB_EXPIRY_WINDOW_DAYS,
+    ODDPOOL_BASE_URL, ODDPOOL_API_KEY,
 )
 from .. import http_client
 from ..models import NormalizedMarket, extract_team_key
@@ -342,6 +343,26 @@ def _keywords_from_title(title: str) -> str:
     return " ".join(filtered[:5])
 
 
+def _title_similarity(a: str, b: str) -> float:
+    """Jaccard word-overlap similarity between two event titles.
+
+    Tokenises both strings to lowercase alphanumeric words (≥2 chars),
+    then returns |intersection| / |union|.  Used by Path O to rank Oddpool
+    Search results when no exact title match is found.
+
+    Examples:
+      "FOMC April 2026 Rate Decision" vs "FOMC April 29, 2026 rate decision" → ~0.71
+      "NBA Champion 2026" vs "NBA Champion 2025-26" → ~0.50
+    """
+    import re as _re
+    def _tok(s: str) -> set:
+        return {t for t in _re.findall(r"[a-z0-9]+", s.lower()) if len(t) >= 2}
+    ta, tb = _tok(a), _tok(b)
+    if not ta or not tb:
+        return 0.0
+    return len(ta & tb) / len(ta | tb)
+
+
 def _collect_from_events(events: list, slug_hint: str) -> tuple[list, int]:
     """Collect live (clob_ids, market) tuples from a Gamma events list."""
     all_markets: list[tuple[list[str], dict]] = []
@@ -439,8 +460,13 @@ def lookup_token_ids_by_slug(
       Path 0b — ``GET /markets/slug/{slug}``   (REST path endpoint)
       Path 1  — ``GET /events?slug={slug}``    (query-param, active filter)
       Path 2  — ``GET /markets?slug={slug}``   (query-param, active filter)
-      Path T  — title-based text search via ``search_by_question`` keywords
-                 derived from ``event_title`` (used when slug paths all miss)
+      Path O  — Oddpool Search API bridge (requires ODDPOOL_API_KEY):
+                   1. GET /search/events?q={event_title}&exchange=polymarket
+                   2. Exact title match → fallback Jaccard similarity (≥0.25)
+                   3. GET /search/events/{event_id}/markets
+                   4. Exact label/question match → fallback _label_match_score
+                   5. PRIMARY:  Gamma by market_id (condition_id)
+                   6. FALLBACK: Gamma by real slug returned by Oddpool Search
 
     For multi-outcome events (elections, sports finals) ``label`` is used to
     pick the right sub-market.  ``resolution_ts`` breaks ties between editions
@@ -543,56 +569,184 @@ def lookup_token_ids_by_slug(
         except Exception as _e2:
             log(f"⚠️ Path 2 (/markets?slug=) failed for slug={slug!r}: {_e2}")
 
-        # ── Path T: title-based text search ───────────────────────────────────
-        # Oddpool slugs are internal identifiers, not Gamma event slugs.
-        # When all slug-based paths fail, use event_title keywords to search
-        # Gamma's /markets endpoint via search_by_question and pick the best
-        # match by label + temporal proximity.
-        if event_title:
-            keywords = _keywords_from_title(event_title)
-            if keywords:
-                try:
-                    resp_t = http_client.get(
-                        f"{POLY_GAMMA_URL}/markets",
-                        venue="polymarket",
-                        params={
-                            "search_by_question": keywords,
-                            "limit": 50,
-                            **_filters_active,
-                        },
-                        timeout=8,
-                    )
-                    if resp_t and resp_t.status_code == 200:
-                        all_m_t, _ = _collect_from_markets(resp_t.json(), slug)
-                        if all_m_t:
-                            pick_t = _pick_best_market(all_m_t, label, resolution_ts=resolution_ts)
-                            if pick_t is not None:
-                                result = _sanity_gate(
-                                    pick_t[0], pick_t[1], buying_no, slug, label,
-                                    f"Path T (title={keywords!r})"
+        # ── Path O: Oddpool Search API → real Polymarket condition_id / slug ───
+        # Oddpool's /search/events endpoint is the authoritative bridge between
+        # its own internal event identifiers and canonical Polymarket market rows.
+        # The returned market_id is a Polymarket condition ID (hex hash) and the
+        # slug is a genuine Polymarket market slug — both work with Gamma directly.
+        #
+        # Steps (user-specified):
+        #   1. GET /search/events?q={event_title}&exchange=polymarket
+        #   2. Exact title match → fallback Jaccard similarity (threshold 0.25)
+        #   3. GET /search/events/{event_id}/markets
+        #   4. Exact question/label match → fallback _label_match_score similarity
+        #   5. PRIMARY resolve: Gamma by market_id (condition_id)
+        #   6. FALLBACK resolve: Gamma by slug
+        if event_title and ODDPOOL_API_KEY:
+            try:
+                _op_headers = {
+                    "X-API-Key": ODDPOOL_API_KEY,
+                    "accept": "application/json",
+                }
+                log(f"🔎 Path O: searching Oddpool for event_title={event_title!r}")
+
+                # Step 1 — search events
+                search_resp = http_client.get(
+                    f"{ODDPOOL_BASE_URL}/search/events",
+                    venue="oddpool_search",
+                    params={"q": event_title, "exchange": "polymarket", "limit": 10},
+                    headers=_op_headers,
+                    timeout=8,
+                )
+                if search_resp and search_resp.status_code == 200:
+                    events_found = search_resp.json()
+                    if isinstance(events_found, dict):
+                        events_found = events_found.get("data", events_found.get("results", []))
+
+                    if events_found:
+                        # Step 2 — exact title match, fallback Jaccard
+                        title_lower = event_title.lower().strip()
+                        best_event = None
+                        best_event_score = -1.0
+                        for ev in events_found:
+                            ev_title = (ev.get("event_title") or ev.get("title") or "").strip()
+                            if ev_title.lower() == title_lower:
+                                best_event = ev
+                                best_event_score = 1.0
+                                log(f"🔎 Path O: exact title match → {ev_title!r}")
+                                break
+                            sim = _title_similarity(event_title, ev_title)
+                            if sim > best_event_score:
+                                best_event_score = sim
+                                best_event = ev
+
+                        if best_event and best_event_score >= 0.25:
+                            event_id = (best_event.get("event_id") or best_event.get("id") or "").strip()
+                            log(
+                                f"🔎 Path O: matched event event_id={event_id!r} "
+                                f"title={best_event.get('event_title', '')!r} score={best_event_score:.3f}"
+                            )
+
+                            if event_id:
+                                # Step 3 — get markets for this event
+                                mkts_resp = http_client.get(
+                                    f"{ODDPOOL_BASE_URL}/search/events/{event_id}/markets",
+                                    venue="oddpool_search",
+                                    headers=_op_headers,
+                                    timeout=8,
                                 )
-                                if result:
-                                    return result
-                                log(
-                                    f"⚠️ Path T title search: sanity gate rejected "
-                                    f"slug={slug!r} keywords={keywords!r}"
-                                )
-                            else:
-                                log(
-                                    f"🔍 Path T title search: keywords={keywords!r} found "
-                                    f"{len(all_m_t)} live markets but none matched "
-                                    f"label={label!r} — NOT resolved"
-                                )
+                                if mkts_resp and mkts_resp.status_code == 200:
+                                    op_markets = mkts_resp.json()
+                                    if isinstance(op_markets, dict):
+                                        op_markets = op_markets.get("data", op_markets.get("results", []))
+
+                                    # Keep only active/open markets
+                                    op_markets = [
+                                        m for m in (op_markets or [])
+                                        if m.get("status", "active") in ("active", "open")
+                                    ]
+
+                                    if op_markets:
+                                        # Step 4 — exact label/question match, fallback similarity
+                                        label_lower = label.lower().strip()
+                                        best_market = None
+                                        best_mkt_score = -1.0
+                                        for om in op_markets:
+                                            q_lower = (om.get("question") or "").lower().strip()
+                                            # Exact: label is a substring of the question
+                                            if label_lower and label_lower in q_lower:
+                                                best_market = om
+                                                best_mkt_score = 1.0
+                                                log(f"🔎 Path O: exact label match in question={q_lower!r}")
+                                                break
+                                            lm = _label_match_score(label, om) if label else 0.5
+                                            if lm > best_mkt_score:
+                                                best_mkt_score = lm
+                                                best_market = om
+
+                                        # Last resort: first active market (single-market events)
+                                        if best_market is None:
+                                            best_market = op_markets[0]
+
+                                        condition_id = (best_market.get("market_id") or "").strip()
+                                        real_slug    = (best_market.get("slug") or "").strip()
+                                        log(
+                                            f"🔎 Path O: using market question={best_market.get('question', '')!r} "
+                                            f"condition_id={condition_id!r} slug={real_slug!r} "
+                                            f"label_score={best_mkt_score:.3f}"
+                                        )
+
+                                        # Step 5 PRIMARY — resolve via Gamma by condition_id.
+                                        # Gamma's REST path /markets/{id} and query params
+                                        # (?condition_id=, ?id=) do not reliably filter by
+                                        # condition ID (they return unrelated markets or 422).
+                                        # We try /markets?conditionId= as the only candidate;
+                                        # if it returns the right market it is used, otherwise
+                                        # we fall through to the slug path immediately.
+                                        if condition_id:
+                                            result = _try_markets_path(
+                                                f"{POLY_GAMMA_URL}/markets",
+                                                "Path O PRIMARY (conditionId)",
+                                                extra_params={"conditionId": condition_id},
+                                            )
+                                            if result:
+                                                return result
+                                            log(
+                                                f"🔎 Path O PRIMARY conditionId miss "
+                                                f"(Gamma ignores param) — falling through to slug"
+                                            )
+
+                                        # Step 6 FALLBACK (and primary in practice) — resolve
+                                        # via Gamma using the real Polymarket slug returned by
+                                        # Oddpool Search. This slug IS canonical Polymarket and
+                                        # works directly with Gamma's /events/slug/ endpoint.
+                                        if real_slug:
+                                            result = _try_events_path(
+                                                f"{POLY_GAMMA_URL}/events/slug/{real_slug}",
+                                                "Path O (slug→events/slug/)",
+                                            )
+                                            if result:
+                                                return result
+                                            result = _try_markets_path(
+                                                f"{POLY_GAMMA_URL}/markets/slug/{real_slug}",
+                                                "Path O (slug→markets/slug/)",
+                                            )
+                                            if result:
+                                                return result
+                                            result = _try_markets_path(
+                                                f"{POLY_GAMMA_URL}/markets",
+                                                "Path O (slug=param)",
+                                                extra_params={"slug": real_slug},
+                                            )
+                                            if result:
+                                                return result
+
+                                        log(
+                                            f"⚠️ Path O: all Gamma lookups failed for "
+                                            f"condition_id={condition_id!r} slug={real_slug!r}"
+                                        )
+                                    else:
+                                        log(f"⚠️ Path O: no active markets for event_id={event_id!r}")
+                                else:
+                                    st = mkts_resp.status_code if mkts_resp else "None"
+                                    log(f"⚠️ Path O: /search/events/{event_id}/markets → HTTP {st}")
                         else:
                             log(
-                                f"🔍 Path T title search: keywords={keywords!r} returned 0 live "
-                                f"markets for slug={slug!r} — not on Polymarket or all closed"
+                                f"⚠️ Path O: no event matched event_title={event_title!r} "
+                                f"(best_score={best_event_score:.3f} < 0.25, "
+                                f"candidates={[ev.get('event_title','') for ev in events_found[:3]]})"
                             )
                     else:
-                        status_t = resp_t.status_code if resp_t else "None"
-                        log(f"🔍 Path T title search: HTTP {status_t} for keywords={keywords!r}")
-                except Exception as _te:
-                    log(f"🔍 Path T title search failed for slug={slug!r}: {_te}")
+                        log(f"⚠️ Path O: /search/events returned 0 results for q={event_title!r}")
+                else:
+                    st = search_resp.status_code if search_resp else "None"
+                    log(f"⚠️ Path O: /search/events HTTP {st} for q={event_title!r}")
+
+            except Exception as _oe:
+                log(f"⚠️ Path O (Oddpool Search) exception for slug={slug!r}: {_oe}")
+
+        elif event_title and not ODDPOOL_API_KEY:
+            log(f"⚠️ Path O skipped: ODDPOOL_API_KEY not set — set it to enable Oddpool Search resolution")
         else:
             log(f"🔍 All slug paths failed for slug={slug!r} and no event_title provided — cannot resolve")
 

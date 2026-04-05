@@ -1,0 +1,88 @@
+We need to verify that our arbitrage system follows the correct execution architecture (Oddpool = discovery only, execution = venue-native).
+
+Please answer YES/NO with code references for each item below:
+
+1. Oddpool usage
+
+Are we using Oddpool strictly as a discovery/ranking feed (not for execution identifiers or prices)?
+
+Show where Oddpool data is converted into internal opportunity objects
+Confirm we do NOT place trades using Oddpool prices directly
+2. Market resolution (CRITICAL)
+
+Before execution, do we resolve each opportunity into exact venue-native identifiers?
+
+Polymarket:
+Do we resolve to exact YES/NO token IDs (CLOB tokens)?
+Show the function used (e.g. lookup_token_ids_by_slug or WS path)
+Kalshi:
+Do we resolve kalshi_event_ticker → exact tradable market ticker?
+Show resolver function
+Opinion:
+Do we use opinion_market_id + SDK to get tradable instruments?
+3. Live price validation
+
+Before placing ANY trade, do we fetch live orderbooks from BOTH venues?
+
+Show where we call:
+Polymarket orderbook
+Kalshi orderbook
+Opinion orderbook
+Confirm we recompute:
+live_cost = poly_ask + venue2_ask
+Confirm we reject if edge < threshold
+4. Fillable size calculation
+
+Do we compute fillable size from orderbook depth (not Oddpool liquidity)?
+
+Show:
+orderbook fetch
+depth walk / fillable calculation
+5. Balance checks
+
+Before execution, do we verify balances on BOTH legs?
+
+Show:
+Polymarket balance call
+Kalshi balance call
+Opinion SDK balance call
+6. Execution atomicity / safety
+
+Do we enforce proper execution sequencing?
+
+Confirm:
+both orderbooks checked BEFORE placing any order
+leg 1 + leg 2 coordinated
+if leg 2 fails → leg 1 is canceled/unwound
+
+Show the exact function handling this (e.g. arb executor)
+
+7. Display-only protection
+
+Do we prevent execution if tokens are not resolved?
+
+Confirm:
+is_display_only == True → NEVER executed
+show where this check happens
+8. Slippage / staleness guard
+
+Do we reject trades if live prices differ from expected?
+
+Show:
+slippage guard logic
+threshold used (bps or %)
+9. Funding flow correctness
+
+Is funding coordinated per trade (not float-based)?
+
+Confirm:
+we calculate required capital per opportunity
+fund both venues BEFORE execution
+not sequentially starving one venue
+10. Final summary
+
+List which of the above are:
+
+✅ correctly implemented
+⚠️ partially implemented
+❌ missing

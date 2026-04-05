@@ -6,7 +6,7 @@ Actual Oddpool API (https://api.oddpool.com/arbitrage/current):
       event_id, event_title, kalshi_event_ticker, polymarket_event_slug,
       opinion_market_id, market_type, outcome_key, label,
       timestamp, resolution_time,
-      kalshi:     { yes_ask, no_ask, volume, volume_24h, open_interest }
+      kalshi:     { yes_ask, no_ask,  volume, volume_24h, open_interest }
       polymarket: { yes_ask, no_ask, volume, volume_24h, liquidity }
       opinion:    { yes_ask, no_ask, volume, volume_24h, liquidity }
       buy_yes_market, buy_no_market, gross_cents, fee_cents, net_cents
