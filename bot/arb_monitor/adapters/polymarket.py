@@ -465,8 +465,8 @@ def lookup_token_ids_by_slug(
                    2. Exact title match → fallback Jaccard similarity (≥0.25)
                    3. GET /search/events/{event_id}/markets
                    4. Exact label/question match → fallback _label_match_score
-                   5. PRIMARY:  Gamma by market_id (condition_id)
-                   6. FALLBACK: Gamma by real slug returned by Oddpool Search
+                   5. Gamma by real slug from Oddpool Search response
+                      (condition_id skipped — Gamma has no working ID endpoint)
 
     For multi-outcome events (elections, sports finals) ``label`` is used to
     pick the right sub-market.  ``resolution_ts`` breaks ties between editions
@@ -569,19 +569,18 @@ def lookup_token_ids_by_slug(
         except Exception as _e2:
             log(f"⚠️ Path 2 (/markets?slug=) failed for slug={slug!r}: {_e2}")
 
-        # ── Path O: Oddpool Search API → real Polymarket condition_id / slug ───
+        # ── Path O: Oddpool Search API → real Polymarket slug → Gamma ──────────
         # Oddpool's /search/events endpoint is the authoritative bridge between
         # its own internal event identifiers and canonical Polymarket market rows.
-        # The returned market_id is a Polymarket condition ID (hex hash) and the
-        # slug is a genuine Polymarket market slug — both work with Gamma directly.
+        # The returned slug is a genuine canonical Polymarket market slug that
+        # works directly with Gamma's /events/slug/ endpoint.
         #
-        # Steps (user-specified):
+        # Steps:
         #   1. GET /search/events?q={event_title}&exchange=polymarket
         #   2. Exact title match → fallback Jaccard similarity (threshold 0.25)
         #   3. GET /search/events/{event_id}/markets
         #   4. Exact question/label match → fallback _label_match_score similarity
-        #   5. PRIMARY resolve: Gamma by market_id (condition_id)
-        #   6. FALLBACK resolve: Gamma by slug
+        #   5. Gamma by real slug (condition_id skipped — no working Gamma ID endpoint)
         if event_title and ODDPOOL_API_KEY:
             try:
                 _op_headers = {
@@ -676,30 +675,11 @@ def lookup_token_ids_by_slug(
                                             f"label_score={best_mkt_score:.3f}"
                                         )
 
-                                        # Step 5 PRIMARY — resolve via Gamma by condition_id.
-                                        # Gamma's REST path /markets/{id} and query params
-                                        # (?condition_id=, ?id=) do not reliably filter by
-                                        # condition ID (they return unrelated markets or 422).
-                                        # We try /markets?conditionId= as the only candidate;
-                                        # if it returns the right market it is used, otherwise
-                                        # we fall through to the slug path immediately.
-                                        if condition_id:
-                                            result = _try_markets_path(
-                                                f"{POLY_GAMMA_URL}/markets",
-                                                "Path O PRIMARY (conditionId)",
-                                                extra_params={"conditionId": condition_id},
-                                            )
-                                            if result:
-                                                return result
-                                            log(
-                                                f"🔎 Path O PRIMARY conditionId miss "
-                                                f"(Gamma ignores param) — falling through to slug"
-                                            )
-
-                                        # Step 6 FALLBACK (and primary in practice) — resolve
-                                        # via Gamma using the real Polymarket slug returned by
-                                        # Oddpool Search. This slug IS canonical Polymarket and
-                                        # works directly with Gamma's /events/slug/ endpoint.
+                                        # Step 5 — resolve via Gamma using the real Polymarket
+                                        # slug returned by Oddpool Search. Gamma has no working
+                                        # query-by-condition-ID endpoint (conditionId param is
+                                        # silently ignored; /markets/{id} returns 422) so the
+                                        # slug is the only reliable Gamma entry point.
                                         if real_slug:
                                             result = _try_events_path(
                                                 f"{POLY_GAMMA_URL}/events/slug/{real_slug}",
