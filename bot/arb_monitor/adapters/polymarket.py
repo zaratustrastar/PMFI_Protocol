@@ -7,7 +7,6 @@ from typing import Optional
 from ..config import (
     POLY_GAMMA_URL, POLY_CLOB_URL,
     ARB_MAX_PAGES_POLY, ARB_PAGE_SIZE_POLY, ARB_EXPIRY_WINDOW_DAYS,
-    ODDPOOL_BASE_URL, ODDPOOL_API_KEY,
 )
 from .. import http_client
 from ..models import NormalizedMarket, extract_team_key
