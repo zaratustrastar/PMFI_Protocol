@@ -1,0 +1,330 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "\[ArbExecLoop\]|\[ArbFunder\]|\[Arb/Polymarket\]"
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='New Hampshire Democratic Senate Primary Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='new-hampshire-democratic-senate-primary-winner' label='Karishma Manzur' title='New Hampshire Democratic Senate Primary Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Venezuela Leader End of 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='venezuela-leader-end-of-2026' label='Vladimir Padrino López' title='Venezuela Leader End of 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NY-07 Democratic Primary Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='ny-07-democratic-primary-winner' label='Julie Won' title='NY-07 Democratic Primary Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Satoshi Moves Bitcoin in 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='will-satoshi-move-any-bitcoin-in-2026' label='Before 2027' title='Satoshi Moves Bitcoin in 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Venezuela Leader End of 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='venezuela-leader-end-of-2026' label='Marco Rubio' title='Venezuela Leader End of 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NBA Champion 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='2026-nba-champion' label='Los Angeles Lakers' title='NBA Champion 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Next James Bond Actor'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='next-james-bond-actor-635' label='Tom Hardy' title='Next James Bond Actor'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='SpaceX Public Ticker Prediction'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='what-will-spacexs-public-ticker-be' label='$MARS' title='SpaceX Public Ticker Prediction'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Which Party Will Win the U.S. House in 2026?'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='which-party-will-win-the-house-in-2026' label='Democratic Party' title='Which Party Will Win the U.S. House in 2026?'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Number of Fed Rate Cuts in 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='how-many-fed-rate-cuts-in-2026' label='Exactly 7 cuts' title='Number of Fed Rate Cuts in 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='New Jersey Republican Senate Primary Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='new-jersey-republican-senate-primary-winner' label='Justin Murphy' title='New Jersey Republican Senate Primary Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='S&P 500 (SPX) Close at End of 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='spx-close-dec-2026' label='$7,500-$8,000' title='S&P 500 (SPX) Close at End of 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Trump and Putin Next Meeting Location 2029'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='where-will-trump-and-putin-meet-next-584' label='Japan' title='Trump and Putin Next Meeting Location 2029'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Largest Company End of June 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='largest-company-end-of-june-712' label='Amazon' title='Largest Company End of June 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Next UK Prime Minister in 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='next-uk-prime-minister-in-2026-122' label='Rupert Lowe' title='Next UK Prime Minister in 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Democratic Nominee for Governor of New Hampshire 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='new-hampshire-governor-democratic-primary-winner' label='Deaglan McEachern' title='Democratic Nominee for Governor of New Hampshire 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Democratic Nominee 2028'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='democratic-presidential-nominee-2028' label='Andy Beshear' title='Democratic Nominee 2028'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Peru Presidential Election Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='peru-presidential-election-winner' label='Roberto Sánchez Palomino' title='Peru Presidential Election Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='LoL: LPL 2026 Season Winner'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='lol-lpl-2026-season-winner' label='LNG Esports' title='LoL: LPL 2026 Season Winner'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='2026 FIFA World Cup Winner'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='2026-fifa-world-cup-winner-595' label='France' title='2026 FIFA World Cup Winner'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Democratic Nominee 2028'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='democratic-presidential-nominee-2028' label='Josh Shapiro' title='Democratic Nominee 2028'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Israel Prime Minister Election 2045'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-be-the-next-prime-minister-of-israel-after-the-next-election' label='Yariv Levin' title='Israel Prime Minister Election 2045'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Number of Fed Rate Cuts in 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='how-many-fed-rate-cuts-in-2026' label='Exactly 6 cuts' title='Number of Fed Rate Cuts in 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Who Will Win the 2026 DC Democratic Mayoral Primary'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-win-the-2026-democratic-dc-mayoral-primary' label='Muriel Bowser' title='Who Will Win the 2026 DC Democratic Mayoral Primary'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NHL Calder Memorial Trophy Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='nhl-2025-26-calder-memorial-trophy' label='Matthew Schaefer' title='NHL Calder Memorial Trophy Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Venezuela Leader End of 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='venezuela-leader-end-of-2026' label='Donald Trump' title='Venezuela Leader End of 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Which CEOs Will Be Out Before 2027?'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='which-ceos-will-be-out-before-2027' label='Dan Clancy - Twitch' title='Which CEOs Will Be Out Before 2027?'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='LoL: LPL 2026 Season Winner'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='lol-lpl-2026-season-winner' label='Oh My God' title='LoL: LPL 2026 Season Winner'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NBA Champion 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='2026-nba-champion' label='Golden State Warriors' title='NBA Champion 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Who Will Acquire TikTok?'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-acquire-tiktok-559' label='Meta' title='Who Will Acquire TikTok?'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Balance of Power 2026 Midterms'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='balance-of-power-2026-midterms' label='Other' title='Balance of Power 2026 Midterms'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Balance of Power 2026 Midterms'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='balance-of-power-2026-midterms' label='D-House, D-Senate' title='Balance of Power 2026 Midterms'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Next President of Vietnam'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='next-president-of-vietnam' label='Phan Văn Giang' title='Next President of Vietnam'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NHL Stanley Cup Champion 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='2026-nhl-stanley-cup-champion' label='Dallas Stars' title='NHL Stanley Cup Champion 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Discord IPO Closing Market Cap'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='discord-ipo-closing-market-cap' label='20–25B' title='Discord IPO Closing Market Cap'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='English Premier League Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='english-premier-league-winner' label='Man City' title='English Premier League Winner 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Manchester United Next Manager 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='next-manchester-united-manager' label='Ole Gunnar Solskjaer' title='Manchester United Next Manager 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='SpaceX IPO Closing Market Cap'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='spacex-ipo-closing-market-cap' label='No IPO before 2028' title='SpaceX IPO Closing Market Cap'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Trump and Putin Next Meeting Location 2029'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='where-will-trump-and-putin-meet-next-584' label='South Korea' title='Trump and Putin Next Meeting Location 2029'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='SpaceX IPO Closing Market Cap'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='spacex-ipo-closing-market-cap' label='<500B' title='SpaceX IPO Closing Market Cap'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='LoL: LPL 2026 Season Winner'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='lol-lpl-2026-season-winner' label='LGD Gaming' title='LoL: LPL 2026 Season Winner'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Balance of Power 2026 Midterms'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='balance-of-power-2026-midterms' label='D-House, D-Senate' title='Balance of Power 2026 Midterms'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Democratic Nominee 2028'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='democratic-presidential-nominee-2028' label='Rahm Emanuel' title='Democratic Nominee 2028'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='2026 FIFA World Cup Winner'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='2026-fifa-world-cup-winner-595' label='Spain' title='2026 FIFA World Cup Winner'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='National League Champion 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='pro-baseball-2026-national-league-champion' label='San Francisco' title='National League Champion 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='National League Champion 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='pro-baseball-2026-national-league-champion' label='Colorado' title='National League Champion 2026'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Which Party Will Win the U.S. House in 2026?'
+Apr 05 18:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='which-party-will-win-the-house-in-2026' label='Democratic Party' title='Which Party Will Win the U.S. House in 2026?'
+Apr 05 18:12:23 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Ligue 1 Top 4 Finishers'
+Apr 05 18:12:23 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='ligue-1-top-4-finish' label='Strasbourg Alsace' title='Ligue 1 Top 4 Finishers'
+Apr 05 18:12:23 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NL Cy Young Winner 2026'
+Apr 05 18:12:23 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='pro-baseball-2026-nl-cy-young-winner' label='Logan Webb' title='NL Cy Young Winner 2026'
+Apr 05 18:12:23 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Will the US Acquire Part of Greenland in 2026?'
+Apr 05 18:12:23 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='will-the-us-acquire-any-part-of-greenland-in-2026' label='Will the US acquire part of Greenland in 2026?' title='Will the US Acquire Part of Greenland in 2026?'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='NBA Champion 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='SpaceX IPO Closing Market Cap Above'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='LoL: LPL 2026 Season Winner'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='SpaceX IPO Closing Market Cap'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Which Companies Will Be Acquired Before 2027?'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Bitcoin Maximum Price in 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Brazil Presidential Election 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Champions League Winner 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Which Companies Will Be Acquired Before 2027?'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Champions League Winner 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Champions League Winner 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Champions League Winner 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='FIFA World Cup Group G Winner'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Ethereum Maximum Price in 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Fed decision in April 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Fed Decision in June 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='French Presidential Election 2027'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Republican Nominee 2028'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Los Angeles Mayoral Election 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Maine Democratic Senate Primary Winner 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Manchester United Next Manager 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Republican Nominee 2028'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Republican Nominee 2028'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Minnesota Governor Republican Nominee 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='NBA Defensive Player of the Year Winner 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='NY-07 Democratic Primary Winner 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='New York Democratic Governor Primary Winner 2025'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='NBA Champion 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='NY-12 Democratic Nominee 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='US Recognizes Reza Pahlavi as Leader of Iran in 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Peru Presidential Election Winner 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='South Korean Local Elections: Party Winner 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Peru Presidential Election Winner 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='South Dakota Governor Republican Nominee 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title="Who Will Attend Taylor Swift and Travis Kelce's Wedding?"
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='TX-19 Republican Primary Winner 2019'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='NHL Stanley Cup Champion 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='UFC Bantamweight Champion 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='UFC Featherweight Championship 2026'
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title="Who Will Attend Taylor Swift and Travis Kelce's Wedding?"
+Apr 05 18:12:50 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] 🔎 Path O: searching Oddpool for event_title='Who Will Trump Pardon Before 2027'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NBA Champion 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='2026-nba-champion' label='Cleveland Cavaliers' title='NBA Champion 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='SpaceX IPO Closing Market Cap Above'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='spacex-ipo-closing-market-cap-above' label='>$1.4T' title='SpaceX IPO Closing Market Cap Above'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='LoL: LPL 2026 Season Winner'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='lol-lpl-2026-season-winner' label='EDward Gaming' title='LoL: LPL 2026 Season Winner'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='SpaceX IPO Closing Market Cap'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='spacex-ipo-closing-market-cap' label='1T+' title='SpaceX IPO Closing Market Cap'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Which Companies Will Be Acquired Before 2027?'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='which-companies-will-be-acquired-before-2027' label='Viking Therapeutics' title='Which Companies Will Be Acquired Before 2027?'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Bitcoin Maximum Price in 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='what-price-will-bitcoin-hit-before-2027' label='↓ 25,000' title='Bitcoin Maximum Price in 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Brazil Presidential Election 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='brazil-presidential-election' label='Renan Santos' title='Brazil Presidential Election 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Champions League Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='uefa-champions-league-winner' label='Real Madrid' title='Champions League Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Champions League Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='uefa-champions-league-winner' label='PSG' title='Champions League Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Which Companies Will Be Acquired Before 2027?'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='which-companies-will-be-acquired-before-2027' label='GitLab' title='Which Companies Will Be Acquired Before 2027?'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Champions League Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='uefa-champions-league-winner' label='PSG' title='Champions League Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='FIFA World Cup Group G Winner'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='fifa-world-cup-group-g-winner' label='IR Iran' title='FIFA World Cup Group G Winner'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Ethereum Maximum Price in 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='what-price-will-ethereum-hit-before-2027' label='$4,500 or above' title='Ethereum Maximum Price in 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Champions League Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='uefa-champions-league-winner' label='Real Madrid' title='Champions League Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Fed decision in April 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='fed-decision-in-april' label='Cut 25bps' title='Fed decision in April 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Fed Decision in June 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='fed-decision-in-june-825' label='Cut >25bps' title='Fed Decision in June 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='French Presidential Election 2027'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='next-french-presidential-election' label='Jordan Bardella' title='French Presidential Election 2027'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Republican Nominee 2028'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='republican-presidential-nominee-2028' label='Ron DeSantis' title='Republican Nominee 2028'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Los Angeles Mayoral Election 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='los-angeles-mayoral-election-117' label='Karen Bass' title='Los Angeles Mayoral Election 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Maine Democratic Senate Primary Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='maine-democratic-senate-primary-winner' label='Janet Mills' title='Maine Democratic Senate Primary Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Manchester United Next Manager 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='next-manchester-united-manager' label='Oliver Glasner' title='Manchester United Next Manager 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Republican Nominee 2028'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='republican-presidential-nominee-2028' label='Ron DeSantis' title='Republican Nominee 2028'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Republican Nominee 2028'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='republican-presidential-nominee-2028' label='Thomas Massie' title='Republican Nominee 2028'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Minnesota Governor Republican Nominee 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='minnesota-governor-republican-primary-winner' label='Mike Lindell' title='Minnesota Governor Republican Nominee 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NBA Defensive Player of the Year Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='nba-2025-26-defensive-player-of-the-year' label='Chet Holmgren' title='NBA Defensive Player of the Year Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='New York Democratic Governor Primary Winner 2025'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='new-york-democratic-governor-primary-winner' label='Kathy Hochul' title='New York Democratic Governor Primary Winner 2025'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NY-07 Democratic Primary Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='ny-07-democratic-primary-winner' label='Antonio Reynoso' title='NY-07 Democratic Primary Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NBA Champion 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='2026-nba-champion' label='Oklahoma City Thunder' title='NBA Champion 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NY-12 Democratic Nominee 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-be-the-democratic-nominee-for-ny-12' label='Erik Bottcher' title='NY-12 Democratic Nominee 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='US Recognizes Reza Pahlavi as Leader of Iran in 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='us-recognizes-reza-pahlavi-as-leader-of-iran-in2026' label='Before 2027' title='US Recognizes Reza Pahlavi as Leader of Iran in 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Peru Presidential Election Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='peru-presidential-election-winner' label='Carlos Álvarez' title='Peru Presidential Election Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='South Korean Local Elections: Party Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='2026-south-korean-local-elections-party-winner' label='Rebuilding Korea Party (RKP)' title='South Korean Local Elections: Party Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Peru Presidential Election Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='peru-presidential-election-winner' label='Rafael López Aliaga' title='Peru Presidential Election Winner 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='South Dakota Governor Republican Nominee 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='south-dakota-governor-republican-primary-winner' label='Larry Rhoden' title='South Dakota Governor Republican Nominee 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q="Who Will Attend Taylor Swift and Travis Kelce's Wedding?"
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Selena Gomez' title="Who Will Attend Taylor Swift and Travis Kelce's Wedding?"
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='NHL Stanley Cup Champion 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='2026-nhl-stanley-cup-champion' label='Minnesota Wild' title='NHL Stanley Cup Champion 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='UFC Featherweight Championship 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-be-ufc-featherweight-champion-at-the-end-of-2026' label='Lerone Murphy' title='UFC Featherweight Championship 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='Who Will Trump Pardon Before 2027'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-trump-pardon-before-2027' label='Steve Bannon' title='Who Will Trump Pardon Before 2027'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='TX-19 Republican Primary Winner 2019'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='tx-19-republican-primary-winner' label='Tom Sell' title='TX-19 Republican Primary Winner 2019'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q='UFC Bantamweight Champion 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-be-ufc-bantamweight-champion-at-the-end-of-2026' label='Umar Nurmagomedov' title='UFC Bantamweight Champion 2026'
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ Path O: /search/events HTTP None for q="Who Will Attend Taylor Swift and Travis Kelce's Wedding?"
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='who-will-attend-taylor-swift-and-travis-kelces-wedding' label='Jack Antonoff' title="Who Will Attend Taylor Swift and Travis Kelce's Wedding?"
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 📊 103 opportunities fetched, sorted by score desc
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping epstein-foul-play-confirmed_december_31_2026: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping nba-playoffs-teams_toronto_raptors: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping brazil-presidential-election-2026_flavio_bolsonaro: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping stanley-cup-2026_montreal_canadiens: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-06-17_hike_25bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_hou: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping btc-max-2026_value_above_120k: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping us-house-2026_republican_party: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping reza-pahlavi-iran-2026_reza_pahlavi_lead_iran_2026: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_edmundo_gonzalez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_kash_patel: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping openai-ipo-closing-market-cap_ipo_500_750b: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_delcy_rodriguez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping english-premier-league-winner-2026_man_united: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping largest-company-end-of-june-2026_alphabet: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_gavin_newsom: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_howard_lutnick: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping sc-governor-republican-primary-winner-2026_pamela_evette: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping stanley-cup-2026_colorado_avalanche: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping president-2028_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping maine-democratic-senate-primary-winner-2026_graham_platner: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping ky-04-republican-primary-winner-2026_ed_gallrein: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping uk-prime-minister-2026_nigel_farage: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_karoline_leavitt: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_pete_hegseth: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_8: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping btc-max-2026_value_below_35k: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_diosdado_cabello: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_susie_wiles: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_stephen_miller: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping nba-coach-of-the-year-winner-2026_mitch_johnson: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping btc-max-2026_value_above_150k: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping nba-dpoy-winner-2026_victor_wembanyama: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping california-governor-2026_eric_swalwell: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping us-house-2026_democratic_party: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping florida-governor-republican-primary-winner-2026_jay_collins: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping israel-pm-2045_naftali_bennett: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping hottest-years-2026_number_1: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_pete_hegseth: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_jorge_rodriguez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping california-governor-2026_tom_steyer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-endorsement-jd-vance-2027_will_trump_endorse_jd_vance_for_president_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping nm-gov-republican-primary-winner-2026_duke_rodriguez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-out-president-before-2027_trump_out_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_sex: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping james-bond-actor_pierce_brosnan: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_no_meeting_by_june_30: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_russia: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_lee_zeldin: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping ny-15-democratic-primary-winner-2026_michael_blake: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_gretchen_whitmer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_sx: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_gretchen_whitmer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping discord-ipo-closing-market-cap_ipo_under_15b: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping silver-end-june_price_70: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping openai-ipo-closing-market-cap_no_ipo_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping lol-lck-2026-winner_fearx: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping fields-medal-winner-2026_yu_deng: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping silver-end-june_price_100: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_0: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping lol-worlds-2026-winning-region_lcp_asia_pacific: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping katy-trudeau-engagement-2026_engagement_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping inflation-2026_above_10p: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_6: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping ligue1-top4-finish-2026_paris_fc: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping nba-coach-of-the-year-winner-2026_joe_mazzulla: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_0: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping israel-pm-2045_itamar_ben_gvir: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_2: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_2: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-pardon-2027_martin_shkreli: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping ufc-lightweight-champion-2026-12-31_ilia_topuria: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping taylorswift-wedding-attend-2028_blake_lively: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping ceos-out-2027_sundar_pichai_google: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_germany_other_eu_country: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping israel-pm-2045_yair_lapid: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping palestine-recognition-2027_new_zealand: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping gop-nominee-2028_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_turkey: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping french-presidential-election-2027_david_lisnard: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_space: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping gop-nominee-2028_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping lol-worlds-2026-winning-region_lpl_china: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:12:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping french-presidential-election-2027_jean_luc_melenchon: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_star: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping tn-09-democratic-primary-winner-2009_steve_cohen: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping ufc-flyweight-champion-2026_manel_kape: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_spac: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping largest-company-end-of-june-2026_tesla: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping crosby-2026-team_philadelphia_eagles: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping ma-06-democrat-nominee-2026_seth_moulton: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping acquisitions-before-2027_nebius_group: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_jb_pritzker: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping ma-06-democrat-nominee-2026_tram_nguyen: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping ufc-lightweight-champion-2026-12-31_charles_oliveira: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping fields-medal-winner-2026_john_pardon: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping tyreek-hill-next-team-2026_dallas_cowboys: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_hungary_other_eu_country: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ipo-closing-market-cap_ipo_500b_600b: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-06-17_hike_25bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping gop-nominee-2028_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_hou: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=0 skipped_display_only=103 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=0 depth_insufficient=0 depth_unavailable=0
+Apr 05 18:13:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[168445]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...

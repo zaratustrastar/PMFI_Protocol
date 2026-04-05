@@ -1,0 +1,163 @@
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-101-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Sun Apr  5 16:26:43 UTC 2026
+
+  System load:  0.07               Processes:             133
+  Usage of /:   72.0% of 23.17GB   Users logged in:       1
+  Memory usage: 16%                IPv4 address for eth0: 147.182.206.35
+  Swap usage:   9%                 IPv4 address for eth0: 10.48.0.5
+
+Expanded Security Maintenance for Applications is not enabled.
+
+55 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+*** System restart required ***
+Last login: Sun Apr  5 12:45:55 2026 from 198.211.111.194
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot
+git pull
+sudo systemctl restart psniper-bot
+remote: Enumerating objects: 23, done.
+remote: Counting objects: 100% (23/23), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 16 (delta 13), reused 16 (delta 13), pack-reused 0 (from 0)
+Unpacking objects: 100% (16/16), 6.89 KiB | 336.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   285ba17..4195c90  main       -> origin/main
+Updating 285ba17..4195c90
+Fast-forward
+ .../Pasted-We-need-to-verify-that-our-arbitrage-system-follows-the_1775138002470.txt           |  88 ++++++++++++++++++
+ .../Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775137450447.txt           |  47 ++++++++++
+ bot/arb_monitor/adapters/oddpool.py                                                            |   2 +-
+ bot/arb_monitor/adapters/polymarket.py                                                         | 228 ++++++++++++++++++++++++++++++++++++----------
+ 4 files changed, 317 insertions(+), 48 deletions(-)
+ create mode 100644 attached_assets/Pasted-We-need-to-verify-that-our-arbitrage-system-follows-the_1775138002470.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775137450447.txt
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "\[ArbExecLoop\]|\[ArbFunder\]|\[Arb/Executor\]"
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 📊 100 opportunities fetched, sorted by score desc
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping epstein-foul-play-confirmed_december_31_2026: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping peru-presidential-election-winner-2026_rafael_lopez_aliaga: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping nba-playoffs-teams_toronto_raptors: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping stanley-cup-2026_montreal_canadiens: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping brazil-presidential-election-2026_flavio_bolsonaro: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-06-17_hike_25bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_hou: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping btc-max-2026_value_above_120k: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping reza-pahlavi-iran-2026_reza_pahlavi_lead_iran_2026: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_edmundo_gonzalez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_kash_patel: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_delcy_rodriguez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping english-premier-league-winner-2026_man_united: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping largest-company-end-of-june-2026_alphabet: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping openai-ipo-closing-market-cap_ipo_500_750b: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_gavin_newsom: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_howard_lutnick: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping stanley-cup-2026_colorado_avalanche: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping sc-governor-republican-primary-winner-2026_pamela_evette: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping president-2028_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping uk-prime-minister-2026_nigel_farage: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping ky-04-republican-primary-winner-2026_ed_gallrein: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_karoline_leavitt: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping maine-democratic-senate-primary-winner-2026_janet_mills: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_8: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping btc-max-2026_value_below_35k: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_pete_hegseth: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping la-mayor-election-2026_karen_bass: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_diosdado_cabello: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_susie_wiles: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping nba-coach-of-the-year-winner-2026_mitch_johnson: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_stephen_miller: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping nba-dpoy-winner-2026_victor_wembanyama: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping california-governor-2026_eric_swalwell: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping us-house-2026_democratic_party: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping florida-governor-republican-primary-winner-2026_jay_collins: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping israel-pm-2045_naftali_bennett: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping james-bond-actor_pierce_brosnan: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping hottest-years-2026_number_1: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_pete_hegseth: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_jorge_rodriguez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-endorsement-jd-vance-2027_will_trump_endorse_jd_vance_for_president_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping california-governor-2026_tom_steyer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping nm-gov-republican-primary-winner-2026_duke_rodriguez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-out-president-before-2027_trump_out_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_sex: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_no_meeting_by_june_30: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping openai-ipo-closing-market-cap_no_ipo_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_gretchen_whitmer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_gretchen_whitmer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_sx: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_russia: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping discord-ipo-closing-market-cap_ipo_under_15b: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_lee_zeldin: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping silver-end-june_price_70: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping lol-lck-2026-winner_fearx: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_0: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fields-medal-winner-2026_yu_deng: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping silver-end-june_price_100: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping lol-worlds-2026-winning-region_lcp_asia_pacific: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping katy-trudeau-engagement-2026_engagement_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping inflation-2026_above_10p: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_6: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping ligue1-top4-finish-2026_paris_fc: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_0: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_2: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping lol-lpl-2026-season-winner_top_esports: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_2: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping israel-pm-2045_itamar_ben_gvir: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping palestine-recognition-2027_new_zealand: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping nba-coach-of-the-year-winner-2026_joe_mazzulla: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-pardon-2027_martin_shkreli: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping ufc-lightweight-champion-2026-12-31_ilia_topuria: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping ceos-out-2027_sundar_pichai_google: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping taylorswift-wedding-attend-2028_blake_lively: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping israel-pm-2045_yair_lapid: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping gop-nominee-2028_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_turkey: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_space: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping gop-nominee-2028_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping french-presidential-election-2027_david_lisnard: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping lol-worlds-2026-winning-region_lpl_china: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_star: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_1: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping tn-09-democratic-primary-winner-2009_steve_cohen: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping acquisitions-before-2027_nebius_group: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_spac: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_1: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping largest-company-end-of-june-2026_tesla: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping ufc-flyweight-champion-2026_manel_kape: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping crosby-2026-team_philadelphia_eagles: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping ma-06-democrat-nominee-2026_seth_moulton: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_jb_pritzker: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping ma-06-democrat-nominee-2026_tram_nguyen: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping fields-medal-winner-2026_john_pardon: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping nh-democratic-senate-primary-winner-2026_karishma_manzur: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping tyreek-hill-next-team-2026_dallas_cowboys: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_hungary_other_eu_country: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:49 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ipo-closing-market-cap_ipo_500b_600b: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 05 17:51:49 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=0 skipped_display_only=100 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=0 depth_insufficient=0 depth_unavailable=0
+Apr 05 17:51:49 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=17.96 under_pressure=False unwind_needed=False
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-05T17:52:18Z
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775411313, cooldown=60s) — calling
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=2309
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] 📤 TX nonce=2309 → 0xe5becc827401f417ee5ea3d23f1618b6cfcb3315f7d0c017360c3f13d87343f5
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] ✅ tend() sent: tx=0xe5becc827401f417ee5ea3d23f1618b6cfcb3315f7d0c017360c3f13d87343f5
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] 💼 Servicer [2026-04-05T17:52:18Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=18.9551 ETH=0.009437 safety_buffer=1.0 gas_reserve=0.0100 ETH
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] ❌ Servicer ETH too low: 0.009437 < 0.01 ETH — send ETH to 0xEdae94A822582324f19c89a057d694d833E6A6F0 on Base
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=18.96 deployable=17.96 under_pressure=False
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] 💼 Servicer deployable: 18.9551 USDC total − 1.00 safety_buffer = 17.9551 deployable
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 17.9551 USDC in servicer wallet
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Apr 05 17:52:20 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 💸 [ArbFunder] 💰 Kalshi balance: 0.0000 USDC
+Apr 05 17:52:34 ubuntu-s-1vcpu-1gb-sfo3-01 python[167242]: 🔁 [ArbExecLoop] 💼 Platform balances: poly=0.0000 kalshi=0.0000 opinion=2.9772 USDC
