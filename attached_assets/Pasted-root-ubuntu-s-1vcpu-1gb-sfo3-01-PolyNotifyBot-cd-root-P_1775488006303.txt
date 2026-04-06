@@ -1,0 +1,29 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd /root/PolyNotifyBot && git pull && sudo systemctl restart psniper-bot
+remote: Enumerating objects: 20, done.
+remote: Counting objects: 100% (20/20), done.
+remote: Compressing objects: 100% (4/4), done.
+remote: Total 12 (delta 8), reused 12 (delta 8), pack-reused 0 (from 0)
+Unpacking objects: 100% (12/12), 156.58 KiB | 2.49 MiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   e2dced6..3bb8ca2  main       -> origin/main
+Updating e2dced6..3bb8ca2
+Fast-forward
+ attached_assets/Pasted-why-is-this-happening-maybe-because-my-nano-env-envirno_1775486707837.txt |  20 ++++++++++++++++++++
+ attached_assets/Pasted-why-is-this-happening-maybe-because-my-nano-env-envirno_1775486717185.txt |  20 ++++++++++++++++++++
+ attached_assets/Screenshot_2026-04-06_at_16.47.57_1775486880270.png                              | Bin 0 -> 132879 bytes
+ attached_assets/Screenshot_2026-04-06_at_16.48.05_1775486888598.png                              | Bin 0 -> 37152 bytes
+ bot/arb_monitor/core/arb_executor.py                                                             |  21 +++++++++++++--------
+ bot/arb_monitor/core/arb_funder.py                                                               |   2 ++
+ bot/arb_monitor/core/arb_nav.py                                                                  |   6 ++++--
+ 7 files changed, 59 insertions(+), 10 deletions(-)
+ create mode 100644 attached_assets/Pasted-why-is-this-happening-maybe-because-my-nano-env-envirno_1775486707837.txt
+ create mode 100644 attached_assets/Pasted-why-is-this-happening-maybe-because-my-nano-env-envirno_1775486717185.txt
+ create mode 100644 attached_assets/Screenshot_2026-04-06_at_16.47.57_1775486880270.png
+ create mode 100644 attached_assets/Screenshot_2026-04-06_at_16.48.05_1775486888598.png
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "2 min ago" | grep -E "Poly balance|Kalshi balance|funder"
+Apr 06 15:04:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[241923]: 💸 [ArbFunder] ⚠️ Poly balance read error: PolyApiException[status_code=None, error_message=Request exception!]
+Apr 06 15:04:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[241923]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
+Apr 06 15:04:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[241923]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Apr 06 15:05:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[241923]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Apr 06 15:05:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[241923]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
