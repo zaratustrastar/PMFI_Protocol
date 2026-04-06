@@ -117,15 +117,15 @@ def _place_poly_order(token_id: str, side: str, price: float, size_usdc: float) 
             )
             client = ClobClient(
                 clob_url, key=poly_private_key, chain_id=chain_id, creds=creds,
-                funder=poly_proxy_address,
+                signature_type=1, funder=poly_proxy_address,
             )
-            log(f"🔑 [POLY] Using L2-authenticated ClobClient (funder={poly_proxy_address})")
+            log(f"🔑 [POLY] Using L2-authenticated ClobClient (sig_type=1, funder={poly_proxy_address})")
         else:
             client = ClobClient(
                 clob_url, key=poly_private_key, chain_id=chain_id,
-                funder=poly_proxy_address,
+                signature_type=1, funder=poly_proxy_address,
             )
-            log(f"🔑 [POLY] Using L1-only ClobClient (funder={poly_proxy_address})")
+            log(f"🔑 [POLY] Using L1-only ClobClient (sig_type=1, funder={poly_proxy_address})")
 
         shares = size_usdc / price if price > 0 else 0
         order_args = OrderArgs(
@@ -245,7 +245,7 @@ def _unwind_poly_leg(
         clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
         chain_id           = int(os.environ.get("POLY_CHAIN_ID", "137"))
         poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
-        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id, funder=poly_proxy_address)
+        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id, signature_type=1, funder=poly_proxy_address)
         resp = client.cancel(order_id=order_id)
         log(f"✅ [POLY] Cancel response: {resp}")
         cancel_ok = True
@@ -268,7 +268,7 @@ def _unwind_poly_leg(
         clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
         chain_id           = int(os.environ.get("POLY_CHAIN_ID", "137"))
         poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
-        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id, funder=poly_proxy_address)
+        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id, signature_type=1, funder=poly_proxy_address)
 
         from ..adapters.polymarket import get_best_prices as poly_prices_fn
         prices = poly_prices_fn(token_id)

@@ -246,11 +246,11 @@ def _get_servicer_balances() -> tuple[float, float, float]:
                 key=private_key,
                 chain_id=137,
                 creds=creds,
-                signature_type=0,
+                signature_type=1,
                 funder=poly_proxy_address,
             )
             result = client.get_balance_allowance(
-                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
+                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=-1)
             )
             raw = result.get("balance", "0")
             bal_raw = float(raw)
