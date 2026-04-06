@@ -1,0 +1,683 @@
+support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:26 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:26 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:26 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:26 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:26 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:26 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:26 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:26 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⏳ [HTTP] polymarket error on https://clob.polymarket.com/book: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 4365724614412139...
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='fed-decision-in-june-825': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.0090 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='fomc-2026-06-17_cut_50bps': score=$0.0000 net_cents=0.00 size=$6468 time_factor=1.0 days=71.4 | poly_liq=$258889 venue2_liq=$6468
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='fomc-2026-06-17_cut_50bps' edge=0.00¢ poly=0.01 venue2(opinion/NO)=0.99 days=71.4 token=slug-only no_token=missing title='Fed Decision in June 2026'
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 4030293895609109...
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='fed-decision-in-june-825': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.9000 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='fomc-2026-06-17_no_change': score=$0.0000 net_cents=0.00 size=$100000 time_factor=1.0 days=71.4 | poly_liq=$182286 venue2_liq=$169461
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='fomc-2026-06-17_no_change' edge=1.00¢ poly=0.90 venue2(kalshi/NO)=0.09 days=71.4 token=slug-only no_token=missing title='Fed Decision in June 2026'
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 1009745041995797...
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='next-james-bond-actor-635': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.0110 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='james-bond-actor_tom_hardy': score=$0.0000 net_cents=0.00 size=$10703 time_factor=1.0 days=84.4 | poly_liq=$12567 venue2_liq=$10703
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='james-bond-actor_tom_hardy' edge=0.00¢ poly=0.01 venue2(opinion/NO)=0.99 days=84.4 token=slug-only no_token=missing title='Next James Bond Actor'
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 7935847595312605...
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='next-french-presidential-election': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.9500 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='french-presidential-election-2027_david_lisnard': score=$0.0000 net_cents=0.00 size=$2777 time_factor=0.5 days=388.4 | poly_liq=$57732 venue2_liq=$2777
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='french-presidential-election-2027_david_lisnard' edge=1.00¢ poly=0.95 venue2(kalshi/YES)=0.04 days=388.4 token=slug-only no_token=missing title='French Presidential Election 2027'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 9534472819324402...
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='republican-presidential-nominee-2028': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.0270 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='gop-nominee-2028_ron_desantis': score=$0.0000 net_cents=0.00 size=$93733 time_factor=0.5 days=945.2 | poly_liq=$360989 venue2_liq=$93733
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='gop-nominee-2028_ron_desantis' edge=0.00¢ poly=0.03 venue2(opinion/NO)=0.97 days=945.2 token=slug-only no_token=missing title='Republican Nominee 2028'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 5649717099758674...
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='next-french-presidential-election': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.0800 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='french-presidential-election-2027_marine_le_pen': score=$0.0000 net_cents=0.00 size=$5574 time_factor=0.5 days=388.4 | poly_liq=$94312 venue2_liq=$5574
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='french-presidential-election-2027_marine_le_pen' edge=1.00¢ poly=0.08 venue2(kalshi/NO)=0.91 days=388.4 token=slug-only no_token=missing title='French Presidential Election 2027'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 9417179109708015...
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='republican-presidential-nominee-2028': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.0160 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='gop-nominee-2028_thomas_massie': score=$0.0000 net_cents=0.00 size=$10476 time_factor=0.5 days=945.2 | poly_liq=$351951 venue2_liq=$10476
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='gop-nominee-2028_thomas_massie' edge=0.00¢ poly=0.02 venue2(opinion/NO)=0.98 days=945.2 token=slug-only no_token=missing title='Republican Nominee 2028'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 3256289008333232...
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='french-ligue-1-winner': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.0200 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='ligue1-winner-2026_lens': score=$0.0000 net_cents=0.00 size=$36615 time_factor=1.0 days=53.4 | poly_liq=$36615 venue2_liq=$136337
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='ligue1-winner-2026_lens' edge=1.00¢ poly=0.02 venue2(kalshi/NO)=0.97 days=53.4 token=slug-only no_token=missing title='Ligue 1 Winner 2026'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support.
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path 2 (/markets?slug=): Gamma returned HTTP None for slug='where-will-trump-and-putin-meet-next-584'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path O removed — Oddpool /search/events does not exist; falling through
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] 🔍 All slug paths exhausted for slug='where-will-trump-and-putin-meet-next-584' label='Turkey'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='where-will-trump-and-putin-meet-next-584' label='Turkey' title='Trump and Putin Next Meeting Location 2029'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='where-will-trump-and-putin-meet-next-584' label='Turkey' — display-only
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='trump-putin-next-meeting-location-2029_turkey': score=$1.3370 net_cents=0.10 size=$1337 time_factor=1.0 days=84.4 | poly_liq=$11196 venue2_liq=$1337
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='trump-putin-next-meeting-location-2029_turkey' edge=1.10¢ poly=0.02 venue2(kalshi/NO)=0.97 days=84.4 token=slug-only no_token=missing title='Trump and Putin Next Meeting Location 20'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 1709992949896582...
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='pro-baseball-2026-national-league-champion': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.9800 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⏭ pair='national-league-champion-2026_colorado_rockies': deployable=$0.00 < $10 minimum — skip
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support.
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path 2 (/markets?slug=): Gamma returned HTTP None for slug='uefa-champions-league-winner'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path O removed — Oddpool /search/events does not exist; falling through
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] 🔍 All slug paths exhausted for slug='uefa-champions-league-winner' label='Arsenal'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='uefa-champions-league-winner' label='Arsenal' title='Champions League Winner 2026'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='uefa-champions-league-winner' label='Arsenal' — display-only
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='champions-league-2026_arsenal': score=$11.1436 net_cents=0.10 size=$11144 time_factor=1.0 days=54.2 | poly_liq=$308377 venue2_liq=$11144
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='champions-league-2026_arsenal' edge=0.10¢ poly=0.26 venue2(opinion/NO)=0.74 days=54.2 token=slug-only no_token=missing title='Champions League Winner 2026'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support.
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path 2 (/markets?slug=): Gamma returned HTTP None for slug='ipos-before-2027'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path O removed — Oddpool /search/events does not exist; falling through
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] 🔍 All slug paths exhausted for slug='ipos-before-2027' label='Cerebras'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='ipos-before-2027' label='Cerebras' title='IPOs Before 2027'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='ipos-before-2027' label='Cerebras' — display-only
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='ipos-before-2027_cerebras': score=$3.1035 net_cents=0.10 size=$6207 time_factor=0.5 days=268.4 | poly_liq=$6207 venue2_liq=$101032
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='ipos-before-2027_cerebras' edge=0.10¢ poly=0.91 venue2(opinion/NO)=0.09 days=268.4 token=slug-only no_token=missing title='IPOs Before 2027'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support.
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path 2 (/markets?slug=): Gamma returned HTTP None for slug='where-will-tyreek-hill-play-in-2026'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path O removed — Oddpool /search/events does not exist; falling through
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] 🔍 All slug paths exhausted for slug='where-will-tyreek-hill-play-in-2026' label='Buffalo'
+Apr 06 13:28:31 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='where-will-tyreek-hill-play-in-2026' label='Buffalo' title='Where Will Tyreek Hill Play in 2026'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='where-will-tyreek-hill-play-in-2026' label='Buffalo' — display-only
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='tyreek-hill-next-team-2026_buffalo_bills': score=$0.4151 net_cents=0.10 size=$519 time_factor=0.8 days=147.4 | poly_liq=$519 venue2_liq=$5348
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='tyreek-hill-next-team-2026_buffalo_bills' edge=1.10¢ poly=0.05 venue2(kalshi/NO)=0.94 days=147.4 token=slug-only no_token=missing title='Where Will Tyreek Hill Play in 2026'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 7650249006003846...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='2026-nba-champion': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.9100 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='nba-champion-2026_den': score=$0.0000 net_cents=0.00 size=$18984 time_factor=1.0 days=85.4 | poly_liq=$186424 venue2_liq=$18984
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='nba-champion-2026_den' edge=0.00¢ poly=0.91 venue2(opinion/YES)=0.09 days=85.4 token=slug-only no_token=missing title='NBA Champion 2026'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 1760172179402410...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='pro-baseball-2026-nl-cy-young-winner': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.1600 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⏭ pair='nl-cy-young-winner-2026_yoshinobu_yamamoto': deployable=$0.00 < $10 minimum — skip
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 1047797561086396...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='nhl-atlantic-division-winner-747': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.9000 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='nhl-atlantic-division-winner-2026_montreal_canadiens': score=$0.0000 net_cents=0.00 size=$8709 time_factor=1.0 days=23.4 | poly_liq=$8709 venue2_liq=$17263
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='nhl-atlantic-division-winner-2026_montreal_canadiens' edge=1.00¢ poly=0.90 venue2(kalshi/YES)=0.09 days=23.4 token=slug-only no_token=missing title='NHL Atlantic Division Winner 2026'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 6117641179230706...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='nba-2025-26-coach-of-the-year': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.9200 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='nba-coach-of-the-year-winner-2026_mitch_johnson': score=$0.0000 net_cents=0.00 size=$18182 time_factor=1.0 days=84.4 | poly_liq=$18182 venue2_liq=$278573
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='nba-coach-of-the-year-winner-2026_mitch_johnson' edge=1.00¢ poly=0.92 venue2(kalshi/YES)=0.07 days=84.4 token=slug-only no_token=missing title='NBA Coach of the Year Winner 2026'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 3568285248653131...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='who-will-be-the-democratic-nominee-for-ny-12': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.9800 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='ny12-dem-nominee-2026_erik_bottcher': score=$0.0000 net_cents=0.00 size=$5419 time_factor=1.0 days=77.4 | poly_liq=$5419 venue2_liq=$8311
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='ny12-dem-nominee-2026_erik_bottcher' edge=1.00¢ poly=0.98 venue2(kalshi/YES)=0.01 days=77.4 token=slug-only no_token=missing title='NY-12 Democratic Nominee 2026'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path 2 (/markets?slug=): Gamma returned HTTP None for slug='lol-lpl-2026-season-winner'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path O removed — Oddpool /search/events does not exist; falling through
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] 🔍 All slug paths exhausted for slug='lol-lpl-2026-season-winner' label='EDward Gaming'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='lol-lpl-2026-season-winner' label='EDward Gaming' title='LoL: LPL 2026 Season Winner'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='lol-lpl-2026-season-winner' label='EDward Gaming' — display-only
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='lol-lpl-2026-season-winner_edward_gaming': score=$4.2196 net_cents=0.10 size=$8439 time_factor=0.5 days=268.4 | poly_liq=$8439 venue2_liq=$94009
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='lol-lpl-2026-season-winner_edward_gaming' edge=0.10¢ poly=0.01 venue2(opinion/NO)=0.99 days=268.4 token=slug-only no_token=missing title='LoL: LPL 2026 Season Winner'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 1942170779517619...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='ny-15-democratic-primary-winner': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.8500 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='ny-15-democratic-primary-winner-2026_ritchie_torres': score=$0.0000 net_cents=0.00 size=$3101 time_factor=1.0 days=77.4 | poly_liq=$13177 venue2_liq=$3101
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='ny-15-democratic-primary-winner-2026_ritchie_torres' edge=1.00¢ poly=0.85 venue2(kalshi/NO)=0.14 days=77.4 token=slug-only no_token=missing title='NY-15 Democratic Primary Winner 2026'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 1650753165432361...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='us-recognizes-reza-pahlavi-as-leader-of-iran-in2026': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=YES expected=0.1400 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='pahlavi-iran-leader-2026_reza_pahlavi_us_recognition_before_2027': score=$0.0000 net_cents=0.00 size=$61659 time_factor=0.5 days=268.4 | poly_liq=$61659 venue2_liq=$275189
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='pahlavi-iran-leader-2026_reza_pahlavi_us_recognition_before_2027' edge=1.00¢ poly=0.14 venue2(kalshi/NO)=0.85 days=268.4 token=slug-only no_token=missing title='US Recognizes Reza Pahlavi as Leader of '
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 9619039969296586...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='spx-close-dec-2026': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.9200 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='spx-close-end-2026_price_7500_8000': score=$0.0000 net_cents=0.00 size=$4596 time_factor=0.5 days=269.3 | poly_liq=$10040 venue2_liq=$4596
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='spx-close-end-2026_price_7500_8000' edge=0.00¢ poly=0.92 venue2(opinion/YES)=0.08 days=269.3 token=slug-only no_token=missing title='S&P 500 (SPX) Close at End of 2026'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 9285947863939661...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='who-will-win-top-chef-season-23': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.0800 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='top-chef-season-23-winner-2026_rhoda_magbitang': score=$0.0000 net_cents=0.00 size=$2138 time_factor=0.8 days=115.4 | poly_liq=$2138 venue2_liq=$14211
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='top-chef-season-23-winner-2026_rhoda_magbitang' edge=1.00¢ poly=0.08 venue2(kalshi/YES)=0.91 days=115.4 token=slug-only no_token=missing title='Top Chef Season 23 Winner 2026'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 1901726369459422...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='who-will-trump-pardon-before-2027': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.8400 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='trump-pardon-2027_steve_bannon': score=$0.0000 net_cents=0.00 size=$1414 time_factor=0.5 days=268.4 | poly_liq=$1414 venue2_liq=$1821
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='trump-pardon-2027_steve_bannon' edge=1.00¢ poly=0.84 venue2(kalshi/YES)=0.15 days=268.4 token=slug-only no_token=missing title='Who Will Trump Pardon Before 2027'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 4239212037625042...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='who-will-be-ufc-featherweight-champion-at-the-end-of-2026': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.9700 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='ufc-featherweight-title-2026_lerone_murphy': score=$0.0000 net_cents=0.00 size=$693 time_factor=0.5 days=268.4 | poly_liq=$693 venue2_liq=$2023
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='ufc-featherweight-title-2026_lerone_murphy' edge=1.00¢ poly=0.97 venue2(kalshi/YES)=0.02 days=268.4 token=slug-only no_token=missing title='UFC Featherweight Championship 2026'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://gamma-api.polymarket.com/markets: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path 2 (/markets?slug=): Gamma returned HTTP None for slug='ligue-1-top-4-finish'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ Path O removed — Oddpool /search/events does not exist; falling through
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] 🔍 All slug paths exhausted for slug='ligue-1-top-4-finish' label='Strasbourg Alsace'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ lookup_token_ids_by_slug: no tokens found for slug='ligue-1-top-4-finish' label='Strasbourg Alsace' title='Ligue 1 Top 4 Finishers'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Could not resolve tokens for slug='ligue-1-top-4-finish' label='Strasbourg Alsace' — display-only
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='ligue1-top4-finish-2026_strasbourg': score=$0.2386 net_cents=0.10 size=$239 time_factor=1.0 days=53.4 | poly_liq=$239 venue2_liq=$2528
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='ligue1-top4-finish-2026_strasbourg' edge=1.10¢ poly=0.01 venue2(kalshi/NO)=0.98 days=53.4 token=slug-only no_token=missing title='Ligue 1 Top 4 Finishers'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ [HTTP] polymarket exhausted 3 retries for https://clob.polymarket.com/book: Missing dependencies for SOCKS support.
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 [Arb/Polymarket] ⚠️ poly_orderbook_missing: fetch returned None for token 3315641099966590...
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] ⚠️ Token ask mismatch — wrong market for slug='which-party-will-win-the-house-in-2026': YES ask=None (Δ=999.0000) NO ask=None (Δ=999.0000) buying=NO expected=0.1300 — neither within 0.50 → display-only (5-min retry)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 📊 Scored pair='us-house-2026_democratic_party': score=$0.0000 net_cents=0.00 size=$9094 time_factor=0.5 days=210.4 | poly_liq=$274082 venue2_liq=$9094
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 👁 pair='us-house-2026_democratic_party' edge=1.00¢ poly=0.13 venue2(opinion/YES)=0.85 days=210.4 token=slug-only no_token=missing title='Which Party Will Win the U.S. House in 2'
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] Normalized 185/196 valid opportunities (sorted by score = annualized_return × confidence × fillable_size)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔀 [Arb/Oddpool] 🏆 Top opportunity: pair='btc-max-2026_value_above_120k' score=2489.7 AR=0.00× net_edge=16.90% conf=0.00 fill=$29290 days=269.6
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 📊 185 opportunities fetched, sorted by score desc
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping btc-max-2026_value_above_120k: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping brazil-presidential-election-2026_flavio_bolsonaro: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-06-17_hike_25bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_hou: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_delcy_rodriguez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_bos: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_kash_patel: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_edmundo_gonzalez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_gavin_newsom: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping reza-pahlavi-iran-2026_reza_pahlavi_lead_iran_2026: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nobel-peace-prize-winner-2026_donald_trump: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping openai-ipo-closing-market-cap_ipo_500_750b: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping balance-of-power-2026-midterms_democrats_sweep: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping largest-company-end-of-june-2026_alphabet: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_okc: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping president-2028_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping uk-prime-minister-2026_nigel_farage: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping us-house-2026_republican_party: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping california-governor-2026_katie_porter: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_susie_wiles: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping english-premier-league-winner-2026_man_united: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-04-29_hike_25bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_howard_lutnick: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping california-governor-2026_eric_swalwell: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_nicolas_maduro: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_karoline_leavitt: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping stanley-cup-2026_colorado_avalanche: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_gretchen_whitmer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_8: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping acquisitions-before-2027_nebius_group: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_diosdado_cabello: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping stanley-cup-2026_boston_bruins: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping btc-max-2026_value_below_35k: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping brazil-presidential-election-2026_renan_santos: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_pete_hegseth: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_gretchen_whitmer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping israel-pm-2045_naftali_bennett: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping sc-governor-republican-primary-winner-2026_pamela_evette: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_stephen_miller: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping btc-max-2026_value_above_150k: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping hottest-years-2026_number_1: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-endorsement-jd-vance-2027_will_trump_endorse_jd_vance_for_president_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-winner-2026_france: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping president-2028_andy_beshear: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping satoshi-move-btc-2026_satoshi_move_btc_2026_yes: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_gsw: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping california-governor-2026_tom_steyer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-winner-2026_spain: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_andy_beshear: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping gop-nominee-2028_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping florida-governor-republican-primary-winner-2026_jay_collins: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_jorge_rodriguez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_lee_zeldin: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_sx: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_pete_hegseth: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping uk-prime-minister-2026_rupert_lowe: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_hou: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_det: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_cle: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping us-house-2026_democratic_party: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ma-06-democrat-nominee-2026_dan_koh: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ny12-dem-nominee-2026_alex_bores: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping james-bond-actor_pierce_brosnan: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-out-president-before-2027_trump_out_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-playoffs-teams_toronto_raptors: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_russia: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_vladimir_padrino: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping taylorswift-wedding-attend-2028_blake_lively: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_lal: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping seoul-mayor-election-winner-2026_na_kyung_won: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping katy-trudeau-engagement-2026_engagement_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping inflation-2026_above_10p: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping french-presidential-election-2027_jordan_bardella: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping english-premier-league-winner-2026_man_city: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping acquisitions-before-2027_viking_therapeutics: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping seoul-mayor-election-winner-2026_oh_se_hoon: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping largest-company-end-of-june-2026_amazon: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping aliens-exist-2027_us_aliens_confirm_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_josh_shapiro: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_rahm_emanuel: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_2: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-admin-departures-2026_marco_rubio: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping venezuela-leader-2026_donald_trump: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping lol-worlds-2026-winning-region_lcp_asia_pacific: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-pardon-2027_martin_shkreli: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_6: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_gavin_newsom: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ceos-out-2027_sundar_pichai_google: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_2: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping discord-ipo-closing-market-cap_ipo_20_25b: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nhl-calder-memorial-trophy-2026_matthew_schaefer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping israel-pm-2045_itamar_ben_gvir: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping manchester-united-next-manager-2026_oliver_glasner: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping palestine-recognition-2027_new_zealand: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_sas: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_star: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_0: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping seoul-mayor-election-winner-2026_jeon_hyun_heui: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_south_korea: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping peru-presidential-election-winner-2026_carlos_alvarez: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping israel-pm-2045_yair_lapid: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ligue1-top4-finish-2026_paris_fc: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping balance-of-power-2026-midterms_other: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_japan: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_jb_pritzker: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ufc-lightweight-champion-2026-12-31_ilia_topuria: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_spac: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_germany_other_eu_country: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping james-bond-actor_callum_turner: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ceos-out-2027_sam_altman_openai: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_7: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping seoul-mayor-election-winner-2026_park_ju_min: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping lol-lpl-2026-season-winner_lng_esports: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping jerome-powell-out-fed-chair_may_14: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nh-democratic-governor-nominee-2026_deaglan_mceachern: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_space: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping champions-league-2026_arsenal: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping lol-lpl-2026-season-winner_oh_my_god: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping senate-winner-2026_republican_party: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping crosby-2026-team_philadelphia_eagles: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping balance-of-power-2026-midterms_democrats_sweep: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping lol-lpl-2026-season-winner_lgd_gaming: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping tn-09-democratic-primary-winner-2009_steve_cohen: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping discord-ipo-closing-market-cap_ipo_under_15b: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping stanley-cup-2026_dallas_stars: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping largest-company-end-of-june-2026_tesla: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping spacex-ticker-prediction_mars: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_6: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping lol-worlds-2026-winning-region_lpl_china: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ufc-bantamweight-champion-2026_merab_dvalishvili: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ipos-before-2027_discord: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ma-06-democrat-nominee-2026_tram_nguyen: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping lol-lpl-2026-season-winner_edward_gaming: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping israel-pm-2045_yariv_levin: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dc-democratic-mayoral-primary-2026_janeese_lewis_george: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fields-medal-winner-2026_john_pardon: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:32 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ipos-before-2027_cerebras: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:34 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 127.0.0.1 - - [06/Apr/2026 13:28:34] "GET /sign-nav HTTP/1.1" 200 -
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ufc-flyweight-champion-2026_manel_kape: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fed-rate-cuts-2026_cuts_0: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping new-jersey-republican-senate-primary-winner-2026_justin_murphy: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping space-x-ipo-closing-market-cap-above_above_1_4t: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping tyreek-hill-next-team-2026_dallas_cowboys: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping spx-close-end-2026_price_7000_7500: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping tyreek-hill-next-team-2026_baltimore_ravens: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping manchester-united-next-manager-2026_ole_gunnar_solskjaer: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-putin-next-meeting-location-2029_turkey: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nh-democratic-senate-primary-winner-2026_karishma_manzur: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dc-democratic-mayoral-primary-2026_muriel_bowser: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fl-19-republican-primary-winner-2026_jim_oberweis: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-group-l-winner-2026_ghana: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping tyreek-hill-next-team-2026_buffalo_bills: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ligue1-top4-finish-2026_strasbourg: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping acquisitions-before-2027_gitlab: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping balance-of-power-2026-midterms_d_senate_r_house: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ceos-out-2027_tim_cook_apple: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-group-g-winner-2026_iran: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping champions-league-2026_psg: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-group-b-winner-2026_switzerland: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping florida-governor-republican-primary-winner-2026_byron_donalds: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-group-d-winner-2026_usa: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fifa-world-cup-group-h-winner-2026_saudi_arabia: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-06-17_cut_25bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping btc-max-2026_value_below_25k: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping champions-league-2026_psg: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping dem-nominee-2028_pete_buttigieg: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-06-17_cut_50bps: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping fomc-2026-06-17_no_change: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping james-bond-actor_tom_hardy: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping french-presidential-election-2027_david_lisnard: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping gop-nominee-2028_ron_desantis: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping french-presidential-election-2027_marine_le_pen: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping gop-nominee-2028_thomas_massie: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ligue1-winner-2026_lens: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-champion-2026_den: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nhl-atlantic-division-winner-2026_montreal_canadiens: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping nba-coach-of-the-year-winner-2026_mitch_johnson: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ny12-dem-nominee-2026_erik_bottcher: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ny-15-democratic-primary-winner-2026_ritchie_torres: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping pahlavi-iran-leader-2026_reza_pahlavi_us_recognition_before_2027: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping spx-close-end-2026_price_7500_8000: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping top-chef-season-23-winner-2026_rhoda_magbitang: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping trump-pardon-2027_steve_bannon: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping ufc-featherweight-title-2026_lerone_murphy: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 👁 Skipping us-house-2026_democratic_party: token not yet resolved from slug (will retry on next Oddpool cycle)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=0 skipped_display_only=185 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=0 depth_insufficient=0 depth_unavailable=0
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ⚡ Returning cached signed NAV (valid until 1775482306)
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ============================================================
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔄 BACKGROUND NAV REFRESH
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ============================================================
+Apr 06 13:28:36 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📊 On-chain: supply=402.0291, buffer=4.95, forwarded=106.06, expected=99.92, lastRoundId=15
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ❌ Error reading withdrawal exclusions: Could not decode contract function call to getVaultState() with return data: b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00i\xb1\xd2n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15\xcbFj"\x94x\x13<\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00K\x8b=\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\xf4\xb3\xd7\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06RK\xa9\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', output_types: ['uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'bool', 'bool', 'uint256']
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    🔄 Withdrawal bridge in-transit: $5.00 (from withdrawal_state.json)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📝 RoundId cache synced from chain: 15
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ============================================================
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 💰 CALCULATING V7.3.2 NAV (expectedAssets from chain)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ============================================================
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ✈️ In-flight (at deposit addr): $0.00
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 📡 Fetching positions with cost basis for 0xd1EdE018...
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: ✅ Found 381 active positions, total cost basis: $288.14
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 1667836829624972349794169863045094685447327883152874928239985530637604343673
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 51016930632024681972660316303534839938931277118703291661621834252411455595973
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Over: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 46704566007208521365383528006358949718901107078002995242935024398520064745516
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 17610139958422259679063677562219561602712145927071305019221007116113735501383
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 113054460569139253520489367604809056774324776331258184579568995417343474536642
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Marcinko: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 60640120450371219557645736485401557093730446685962094983442588263539993693885
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Under: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 50535051770221218614101993530362138365025786326886865386366729460323236469046
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Under: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 74585640553563357334685161293272698975846303348496379109033386631863908781735
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 108080901673966070143917707141466671537908120370414984295556359312282226035712
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 4830689202185089707381448206403434344566748159765080976020389210955905091997
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 45610713538392967980039904827111245775447346606446877353035551527848852809811
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 76666090955661055687061324087858100630274363731005206729622083083419613514926
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 52196231791046048897095113820439680627722223140850901241026004579276855089191
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ No: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 74744558542482624813419031778993532658915201544663946396827329029261280437730
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 48140669383318349318697111926055624080670760469196259669751102597057941933416
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 10369131006424671131545604085446450995068173051384352112715606005327292873474
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ No: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 57236743381149296391318881856959434537755521669041089270423645168221474772903
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 51384317547780430588664367042429046705161320727934890345863017379915015710701
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 33232266645693743242360113782846289369111862842261259283273131238140198069954
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 17703904172344564272475329893818625510325256209556032601417455377697065155959
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 16927090530676892788477709252646945946807730330005590158684023570105492015699
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 82792014716255386199283772337421696971254715190068026756963039732973608616119
+Apr 06 13:28:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Under: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 44427056849324008105200363263285837375321454499736875210550274400918670767275
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 100065276434024362643473978567882001273250594054158065649852537822898449607868
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Under: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 80027402304319749255824809564378401748755176732070899513328564468772675008999
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 67413618234646364227096940756327004621153542853241127028779183746037089421976
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Over: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 63640991943612527285296050154941265809624627539531577138362308741462752903626
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 19154923958213766807434339571045129732896398682483515960001704771459279103832
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 40234360379694221808562345822780270436968077082098751873635790292382268950411
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ No: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 56343671870908293740672476918582674701504830556776944259083779457487737926071
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ No: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 101779683606872511988428780212776185140145414384188971567696796266556652520565
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 18586489931023781378594157537354991367190906349118638868866499577568237928049
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Sierra: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 58368423537599366732441783235382775268526113608322371847517217627940712644394
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 73102171968254150175441789734331062683107726947580722925006610769377018279866
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 25677894403658628584784556504915649401177748727950500615131784836432605444757
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 21323837733024149944651532454275664792107116065796839220204292879731421760527
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 23183837487369274931142628948967799150513106161411500819849899633604214611254
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 48350233035471488941886048676225483471816125295833961142071869482913553279672
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 4369413036175616922241957135632377946942281346872696209549975953254108901688
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 4008669696085501045489161319857051003950474795493052459831657861170782576798
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 8010270730382868588546130570365383621891724310853848910851331100920214793828
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 36546250052433275152118752480995568566472973793027035060392771129211418800668
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Hewitt: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 2835702130887721601174382909314139097306021275568325616474142166004097795018
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 55787199278741291766815809135762176562042974755837158852889960778083573056545
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Italy: 100.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 101504737541355887654713383433244368251071020478609351696835523645449501057413
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 91.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 86995661150460025974680455322509358984396562249418916080397070913659013499115
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 90.8 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 89744013950177979263972771932686093606025880307336809983753945919397222389271
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 26362369430128252543042342811185303767875186453085468451237580030399333595235
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 40080073443559771802478075385003533322215024231941579068450178915645898721678
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 30482453220971678112415395617042125578610678692561070157922796896123774994307
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 95208625385765141549600421635788127431805408547232524510050149845715517867881
+Apr 06 13:28:47 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 90.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 67812092618195747409995417825199567341209650874438457265662243471027001839140
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 87.3 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 84861048811492575708148520522873512697427250625755239760703591610825008428107
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 45029034586020745321762268745699748947840457285820351968580839794867697380532
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 107624188545827344133859938699047858663779390656209594618801173133871583761671
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 80.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 26717421886670521810902055204150836366799036019532059411922483139181409538997
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 76.5 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 91239087200014556768277332868198657371306884651161309059816083923984806282609
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 85076448872710844646112981302782068588938501492043635834561264074618873918784
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    📊 Got 1 bids, 58 asks
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ✅ Yes: 70.0 → liq value $0.07
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 46897146702997413194395626184561384324252380465993669718502603019442811452205
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 18786205906910871781305511705095148535408167112998769030359212752407347520934
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 1226380168883957815440717827555551229948013804695471445834570893805967920002
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 3354636809338183206646216222519541185395128381690016592965323606604816222444
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 110449093137741924883412044769076770609175538315793662631604537570952944192508
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 45976477374749063575479011505472365489597602528825804508194511450924078235653
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 64486132478020667222516149192424693355959275534812149226091814362710531446648
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 87488560891853880065314130485349950312808696330772027373220437853651453548998
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 32000224928068258275954703861642380539840960481140480551532463261141318059131
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ No: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 96664361949912641709827262901134760692421070686226666855959671918552183063265
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 26674447965411420458819952576866470056328456461692323452396460450936410480735
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ ACT Meteors: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 92738405681126255020217218472434280260537798177348051691258342166151940000355
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 84943539769541793042550593258808865049886781326207586468878125210234289158146
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 104689940851823568734656391181360105049762237200235633576875307237991291958059
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 19197086268090078538240396471102357023326552016227338097549914983908923490411
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 26554147094371801408815309706525864456530161935661092661651579395077023000107
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 90186243028907611168047920781746492294962028870523654044509285472734565643464
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 81799731093128185629454223281372065459178068622805786862153096584268852573404
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 69611839231420690100821672489199933458980304447077481750656629119646938032687
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 42049981945350187180129159547246779985076418476193779633293844920226735302963
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ No: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 89785019170242847013623387999257260097479988708320402037126024067109205322981
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 71624342405211217757833384519676120116171663131212086964000253637553828741402
+Apr 06 13:28:51 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Switzerland: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 12602644485789443251308037790848598094423633761594519349480791948353776613098
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 31673477740076327949080473476164878776627935802625998537027525612057011798504
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 103958525795459439912387073241303596120712088891084261349142639738006234603838
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 31159061960983988931878212409914970058528796572323839579099345904245430827265
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 19666810715200483772593698876167336927881142935273292150298829180855607666659
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 65677208856084028506415211314181913710782019789807529882308738102327828178511
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 46176431096902642998692597460951857380496574529582259963603057768707373025157
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 112848596911371428323848695323993948690648455023130612172933949330424613482955
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 88594211538713408962582446998161915694224078378128265174701382243345026762107
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 97815282846022469850778622287252644116072796046958806845298101264302929056976
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Germany: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 100104486712198790865351506110611229823286886897025217429103347841267833051024
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 70.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 71292547080307250028159935885371296707397648643721276829551600236608775563472
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 69.8 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 30932158255282269037025062576485380951370197843876920875733823243286291719442
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 69.8 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 91198887857028426169528701350515995124414345474230313967726161173437050255154
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 69.8 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 62765033167978601448652375208525997245835567911814855030307134443369281684525
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 67.1 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 46888386888771735899692818327910349205960004318091703871514488403072467193836
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 64.3 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 78486200154613929876692928807891105873702544860723824991241378920152908263156
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 62.9 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 105300086803999654923209137231093236923293373616295998970341660284991528005042
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 62.5 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 115637099215218455783221807712437737423183235971569536065734870973622207919264
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 8280847812251459202812483441655129946827386170418374960306725216043182749310
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 80629026239725056261326364202674358550721903775709399958678950424955793744987
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 73002776802776123994946750806885447862269394307070074560451323297088045954726
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 61.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 6815001675920248848666383044442849366897779803041286648261309455149855452970
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 69100577679420024885704808837042966571634946669196874805246046205138056140203
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Over: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 42202097162337450331816561727003912833515416169487970638158115454234469222835
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 6253464690578755171151751634143309336553048795707988364368184689903462088313
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 95601555387682507986023853368130797078824172231553740808427575169765252469986
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 108542302798580454275280608439573104607651660557909874966393882487922669298599
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 60.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 10010409634595520405037839706663860172280839331959788914736126520187174177696
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 57.5 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 115122265673599641335717103663608550142680054380569835347538405405569638785911
+Apr 06 13:28:56 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.7 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 112077158372930810222949911947897454626412290838649401345718572110306921861417
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 36690134795788946926284733310622132809002958430245400318954637625172753947420
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 26384150016870037320605766779886685683037267564559142458702400867384240816109
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 59490640359703333731023400685533897669168309540673266084768462672532506663090
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 114605008186090109230844092010224221068857815706573506897739601260519354867176
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 22946448251484768383361149714393325630397565315736089662148792899451413950436
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 63743351418536090886600993432122806117304858006208509627302541350559323700819
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 110443422468500399577606741500395092854166193798048804141426719662376726113666
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 78759711359242786219336186557043562288769398688186680287031695952310642434682
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 25860356889437696696501789067160672731121168813310957211016555489929833920488
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 99136669335482423654419501690012248743258829218127672406646471390733651339196
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 13915437448377993923434214091311949029888833376232319366980536427543635120714
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 94859817292698801068008088560381918605281193786856246566843022438224615655570
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 50.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 95363830635820361721576548037277802249186162985350599468453639710355209030620
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ fnatic: 49.5 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]: 🔎 [Arb/Scanner] ℹ️ ARB_USE_ODDPOOL_ONLY=true — PMXT discovery pipeline is DISABLED. pArb execution loop handles opportunities via Oddpool.
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 34537445920368329722190876932371885143253226966851044770016024771156680239937
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 46.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 86878292504008234201509471817138231055211752907570486783033066194023751610149
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 46.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 48518667566534596807649834133265945675134934470051425975195951416275471557453
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 45.5 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 17978985622480936111479947750009927273746440459013237071825405918205998849166
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 45.1 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 23044117726108698102143954301812873927444926175729707643432219870858567552596
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 42.4 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 5757178865475863701429620569973183787527102342100910453135208801854055141070
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 41.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 100802980667097094052707547090338670702475127803024626015802800326186881239358
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 41.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 93834053476839257333289318294703957871092376006393996421231109030266308307035
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 41.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 54101173338047551365113091506503967853144647064265554610571569365779738632150
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 41.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 35672498649045014124013227320352056495678725948177507309289857165545835305916
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 41.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 73968477938665446340029718227766456220672837619317625529555210703179225055100
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 40.6 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 21856318575924236401599725588636429251083466686142600438602160698848074241612
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 40.5 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 22305969039171695040778614870419937025252366781015271382416724301830126337658
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 40.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 97162828778172741898480293016333178479501786151979876184924259204751336963095
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 40.0 - NO BIDS (illiquid, valued at $0)
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:       Full token: 113932855112438627549958614722838765277623289896666710033518379886180135679858
+Apr 06 13:29:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[234182]:    ❌ Yes: 40.0 - NO BIDS (illiquid, valued at $0)

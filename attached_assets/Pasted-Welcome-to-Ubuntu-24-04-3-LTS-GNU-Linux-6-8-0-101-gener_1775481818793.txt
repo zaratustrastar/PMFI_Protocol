@@ -1,0 +1,256 @@
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-101-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Mon Apr  6 13:14:04 UTC 2026
+
+  System load:  0.9                Processes:             134
+  Usage of /:   73.9% of 23.17GB   Users logged in:       1
+  Memory usage: 16%                IPv4 address for eth0: 147.182.206.35
+  Swap usage:   8%                 IPv4 address for eth0: 10.48.0.5
+
+Expanded Security Maintenance for Applications is not enabled.
+
+55 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+*** System restart required ***
+Last login: Mon Apr  6 11:27:37 2026 from 198.211.111.194
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# find /root -name "polymarket.py" 2>/dev/null | grep arb_monitor
+/root/PolyNotifyBot/bot/arb_monitor/adapters/polymarket.py
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# pip install pysocks --break-system-packages && \
+grep -n "503\|retry\|Path OS" /root/PolyNotifyBot/bot/arb_monitor/adapters/polymarket.py | head -30
+Requirement already satisfied: pysocks in /usr/lib/python3/dist-packages (1.7.1)
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+111:        log(f"🔍 [Path OS] GET {search_url}")
+114:            log(f"⚠️ [Path OS] HTTP {resp.status_code} for slug={slug!r} — skipping")
+121:            log(f"⚠️ [Path OS] Empty response for slug={slug!r}")
+125:        log(f"🔍 [Path OS] {len(markets)} total markets, {len(pm_markets)} polymarket for slug={slug!r}")
+127:            log(f"⚠️ [Path OS] No polymarket-exchange results for slug={slug!r}")
+143:                log(f"✅ [Path OS] Exact volume match: vol={best.get('volume')} diff={vol_diff:.1f}")
+147:                log(f"⚠️ [Path OS] Fuzzy volume match: vol={best.get('volume')} expected={polymarket_volume:.0f} diff={vol_diff:.0f}")
+149:                log(f"⚠️ [Path OS] Volume mismatch too large (diff={vol_diff:.0f}), using first result")
+155:            log(f"ℹ️ [Path OS] Using first PM market (no volume match)")
+158:            log(f"⚠️ [Path OS] Could not extract conditionId for slug={slug!r}")
+162:        log(f"🔍 [Path OS] conditionId={cid_str[:24]}... question={question[:60]!r}")
+165:        log(f"🔍 [Path OS] GET {clob_url}")
+168:            log(f"⚠️ [Path OS] CLOB HTTP {clob_resp.status_code} for conditionId={cid_str[:24]}...")
+174:            log(f"⚠️ [Path OS] CLOB returned {len(tokens)} tokens (need 2) for conditionId={cid_str[:24]}...")
+178:            log(f"⚠️ [Path OS] Market not accepting_orders for conditionId={cid_str[:24]}...")
+185:            log(f"⚠️ [Path OS] Empty token_id(s) from CLOB for conditionId={cid_str[:24]}...")
+189:            f"✅ [Path OS] Resolved slug={slug!r}: "
+196:        log(f"⚠️ [Path OS] Exception for slug={slug!r}: {e}")
+574:      Path OS — Oddpool search API (PRIMARY — not Cloudflare-blocked from VPS).
+588:    ``polymarket_volume`` is used by Path OS to volume-match the correct sub-market.
+593:    # ── Path OS: Oddpool /search/events/{slug}/markets (PRIMARY — no Cloudflare) ──
+597:    # The Gamma-based paths below are retained as fallbacks in case Path OS fails.
+601:    log(f"⚠️ Path OS failed for slug={slug!r} — falling back to Gamma paths")
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo journalctl -u psniper-bot --since "2 min ago" | grep -E "Orderbook|poly_orderbook|depth_insufficient|Cycle complete" | tail -20
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 10707010945908685187...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 23421591920017964809...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 10094280398326895092...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 96351736365735358169...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 50063461082799962596...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 75941135769679593752...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 15834144903407103045...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 43534843068035380140...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 77194265453022189123...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 87591296180421340023...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    📖 Orderbook via CLOB client: 11283290973115834613...
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# grep -n "Orderbook 404\|orderbook_missing\|fetch_orderbook\|poly_orderbook" /root/PolyNotifyBot/bot/arb_monitor/adapters/polymarket.py | head -20
+896:def fetch_orderbook(token_id: str) -> Optional[dict]:
+956:        log("⚠️ poly_orderbook_missing: no token_id provided")
+957:        return {"best_bid": None, "best_ask": None, "bid_size": 0, "ask_size": 0, "warning": "poly_orderbook_missing"}
+959:    book = fetch_orderbook(token_id)
+961:        log(f"⚠️ poly_orderbook_missing: fetch returned None for token {token_id[:16]}...")
+962:        return {"best_bid": None, "best_ask": None, "bid_size": 0, "ask_size": 0, "warning": "poly_orderbook_missing"}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo journalctl -u psniper-bot --since "5 min ago" | grep -E "Path OS.*Resolved|Orderbook 404|poly_orderbook_missing|skipped_display_only" | grep -v "^--" | tail -40
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:44 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+Apr 06 13:15:48 ubuntu-s-1vcpu-1gb-sfo3-01 python[231214]:    ❌ Orderbook 404: token_id may be wrong format or market resolved
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sed -n '896,940p' /root/PolyNotifyBot/bot/arb_monitor/adapters/polymarket.py
+def fetch_orderbook(token_id: str) -> Optional[dict]:
+    url = f"{POLY_CLOB_URL}/book"
+    resp = http_client.get(url, venue="polymarket", params={"token_id": token_id}, timeout=10)
+    if resp is None or resp.status_code != 200:
+        return None
+    try:
+        return resp.json()
+    except Exception as e:
+        log(f"Orderbook error for {token_id}: {e}")
+        return None
+
+
+def compute_fillable_contracts(book: dict, max_fill_price: float) -> tuple[int, float]:
+    """Walk the ask ladder and return contracts fillable at or below max_fill_price.
+
+    Polymarket order books list asks sorted best-first (lowest price first).
+    We accumulate volume at each price level until we hit a level that would
+    breach max_fill_price — anything beyond that would eat into the arb edge.
+
+    Args:
+        book:           Raw order book dict with "asks" list of {"price", "size"} entries.
+        max_fill_price: Maximum price per contract we are willing to pay on this leg.
+                        Caller derives this as: 1.0 - live_leg2_ask - min_edge_pct
+                        (i.e. the breakeven ask price on the Poly leg given the other leg's cost).
+
+    Returns:
+        (contracts_fillable, usdc_cost) — integer contracts and total USDC cost.
+        Returns (0, 0.0) when no depth exists below max_fill_price.
+    """
+    # CLOB API returns asks in descending order (highest first); sort ascending so
+    # we walk from the cheapest level upward and break correctly at max_fill_price.
+    asks = sorted(book.get("asks", []), key=lambda x: float(x.get("price", 0)))
+    contracts = 0
+    usdc_cost = 0.0
+
+    for level in asks:
+        try:
+            price = float(level.get("price", 0))
+            size = float(level.get("size", 0))
+        except (ValueError, TypeError):
+            continue
+
+        if price > max_fill_price:
+            break  # sorted ascending; once we exceed the limit all remaining levels are worse
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Take one of the short token IDs from the logs and test it
+curl -s "https://clob.polymarket.com/order-book?token_id=10707010945908685187" | head -100
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sudo journalctl -u psniper-bot --since "10 min ago" | grep -c "Orderbook via CLOB client"
+sudo journalctl -u psniper-bot --since "10 min ago" | grep -c "Orderbook 404"
+1978
+1761
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Test the correct endpoint with the full token
+curl -s "https://clob.polymarket.com/book?token_id=10707010945908685187" | head -50
+
+# Also test with a full-length token from the logs
+curl -s "https://clob.polymarket.com/book?token_id=87488560891853880065314130485349950312808696330772027373220437853651453548998" | head -50
+{"error":"No orderbook exists for the requested token id"}
+{"error":"No orderbook exists for the requested token id"}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# curl -s "https://clob.polymarket.com/book?token_id=87488560891853880065314130485349950312808696330772027373220437853651453548998" | head -50
+{"error":"No orderbook exists for the requested token id"}
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# grep -n "POLY_CLOB_URL" /root/PolyNotifyBot/bot/arb_monitor/config.py
+grep "POLY_CLOB_URL" /root/PolyNotifyBot/.env 2>/dev/null
+14:POLY_CLOB_URL = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# # Get a real conditionId from one of the successful resolutions in the logs
+# Use fed-decision-in-june-825 which we saw resolve
+curl -s "https://clob.polymarket.com/markets/0xde04b189b3f19eaccda02529a3ea67abfc46bff5c0c8fc42d8a2d0ed7b8f0d41" | python3 -m json.tool | grep -A5 "tokens\|outcome\|token_id"
+    "is_50_50_outcome": false,
+    "tokens": [
+        {
+            "token_id": "30767812841387255642892182147223249245545002662653079696958384408588201824258",
+            "outcome": "Yes",
+            "price": 0.895,
+            "winner": false
+        },
+        {
+            "token_id": "40302938956091099752849867077837976978448552504757012372843872340644441002059",
+            "outcome": "No",
+            "price": 0.105,
+            "winner": false
+        }
+    ],
+    "tags": [
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# sed -n '180,200p' /root/PolyNotifyBot/bot/arb_monitor/adapters/polymarket.py
+
+        yes_token = tokens[0].get("token_id", "")
+        no_token  = tokens[1].get("token_id", "")
+
+        if not yes_token or not no_token:
+            log(f"⚠️ [Path OS] Empty token_id(s) from CLOB for conditionId={cid_str[:24]}...")
+            return None
+
+        log(
+            f"✅ [Path OS] Resolved slug={slug!r}: "
+            f"conditionId={cid_str[:24]}... "
+            f"YES={yes_token[:16]}... NO={no_token[:16]}..."
+        )
+        return (yes_token, no_token)
+
+    except Exception as e:
+        log(f"⚠️ [Path OS] Exception for slug={slug!r}: {e}")
+        return None
+
+
+def _parse_expiry(market: dict) -> int:
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# grep -n "tokens\[0\]\|tokens\[1\]\|yes_token\|no_token" /root/PolyNotifyBot/bot/arb_monitor/adapters/polymarket.py | head -20
+95:      → tokens[0].token_id = YES token
+96:      → tokens[1].token_id = NO  token
+181:        yes_token = tokens[0].get("token_id", "")
+182:        no_token  = tokens[1].get("token_id", "")
+184:        if not yes_token or not no_token:
+191:            f"YES={yes_token[:16]}... NO={no_token[:16]}..."
+193:        return (yes_token, no_token)
+342:    yes_token = ""
+343:    no_token = ""
+357:                    yes_token = clob_ids[i]
+359:                    no_token = clob_ids[i]
+360:    if not yes_token and len(clob_ids) >= 2:
+361:        yes_token = clob_ids[0]
+362:        no_token = clob_ids[1]
+364:    if not yes_token or not no_token:
+383:        yesTokenId=yes_token,
+384:        noTokenId=no_token,
+536:    Returns (yes_token, no_token) on pass, None on rejection.
+760:    """Return [yes_token, no_token] using the market's 'outcomes' field.
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 

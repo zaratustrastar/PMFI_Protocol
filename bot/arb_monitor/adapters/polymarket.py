@@ -894,11 +894,13 @@ def _pick_best_market(
 
 
 def fetch_orderbook(token_id: str) -> Optional[dict]:
+    # clob.polymarket.com is not Cloudflare-blocked from VPS — connect directly, no proxy needed.
+    # Using the proxy here causes SOCKS errors in environments where pysocks is unavailable.
     url = f"{POLY_CLOB_URL}/book"
-    resp = http_client.get(url, venue="polymarket", params={"token_id": token_id}, timeout=10)
-    if resp is None or resp.status_code != 200:
-        return None
     try:
+        resp = _requests.get(url, params={"token_id": token_id}, timeout=10)
+        if resp.status_code != 200:
+            return None
         return resp.json()
     except Exception as e:
         log(f"Orderbook error for {token_id}: {e}")
