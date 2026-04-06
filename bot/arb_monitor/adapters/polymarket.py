@@ -2,11 +2,13 @@
 
 import json
 import time
+import requests as _requests
 from datetime import datetime, timezone
 from typing import Optional
 from ..config import (
     POLY_GAMMA_URL, POLY_CLOB_URL,
     ARB_MAX_PAGES_POLY, ARB_PAGE_SIZE_POLY, ARB_EXPIRY_WINDOW_DAYS,
+    ODDPOOL_BASE_URL, ODDPOOL_API_KEY,
 )
 from .. import http_client
 from ..models import NormalizedMarket, extract_team_key
@@ -76,6 +78,123 @@ def _parse_clob_token_ids(raw) -> list[str]:
             parts = [p.strip().strip('"').strip("'") for p in raw.split(",") if p.strip()]
             return parts
     return []
+
+
+def _resolve_via_oddpool_search(
+    slug: str,
+    polymarket_volume: Optional[float] = None,
+    buying_no: bool = False,
+) -> Optional[tuple[str, str]]:
+    """Resolve a Polymarket event slug to (YES token, NO token) via Oddpool's search API.
+
+    Step 1: GET {ODDPOOL_BASE_URL}/search/events/{slug}/markets
+      → filter by exchange="polymarket"
+      → volume-match to find the conditionId (market_id)
+
+    Step 2: GET {POLY_CLOB_URL}/markets/{conditionId}
+      → tokens[0].token_id = YES token
+      → tokens[1].token_id = NO  token
+
+    Uses Oddpool's own API (not Gamma) so it is NOT Cloudflare-blocked from VPS.
+    Falls back to first result when no volume match is available.
+    Returns None on any failure so the caller can continue to Gamma paths.
+    """
+    if not slug:
+        return None
+
+    try:
+        search_url = f"{ODDPOOL_BASE_URL}/search/events/{slug}/markets"
+        headers = {"accept": "application/json"}
+        if ODDPOOL_API_KEY:
+            headers["X-API-Key"] = ODDPOOL_API_KEY
+
+        log(f"🔍 [Path OS] GET {search_url}")
+        resp = _requests.get(search_url, headers=headers, timeout=10)
+        if resp.status_code != 200:
+            log(f"⚠️ [Path OS] HTTP {resp.status_code} for slug={slug!r} — skipping")
+            return None
+
+        markets = resp.json()
+        if not isinstance(markets, list):
+            markets = markets.get("data", markets.get("markets", []))
+        if not markets:
+            log(f"⚠️ [Path OS] Empty response for slug={slug!r}")
+            return None
+
+        pm_markets = [m for m in markets if (m.get("exchange") or "").lower() == "polymarket"]
+        log(f"🔍 [Path OS] {len(markets)} total markets, {len(pm_markets)} polymarket for slug={slug!r}")
+        if not pm_markets:
+            log(f"⚠️ [Path OS] No polymarket-exchange results for slug={slug!r}")
+            return None
+
+        condition_id = None
+        question = ""
+
+        if polymarket_volume and polymarket_volume > 0:
+            sorted_by_vol = sorted(
+                pm_markets,
+                key=lambda m: abs(float(m.get("volume") or 0) - polymarket_volume)
+            )
+            best = sorted_by_vol[0]
+            vol_diff = abs(float(best.get("volume") or 0) - polymarket_volume)
+            if vol_diff < 1.0:
+                condition_id = best.get("market_id") or best.get("condition_id") or best.get("id")
+                question = best.get("question", "")
+                log(f"✅ [Path OS] Exact volume match: vol={best.get('volume')} diff={vol_diff:.1f}")
+            elif vol_diff < 50000:
+                condition_id = best.get("market_id") or best.get("condition_id") or best.get("id")
+                question = best.get("question", "")
+                log(f"⚠️ [Path OS] Fuzzy volume match: vol={best.get('volume')} expected={polymarket_volume:.0f} diff={vol_diff:.0f}")
+            else:
+                log(f"⚠️ [Path OS] Volume mismatch too large (diff={vol_diff:.0f}), using first result")
+
+        if not condition_id:
+            first = pm_markets[0]
+            condition_id = first.get("market_id") or first.get("condition_id") or first.get("id")
+            question = first.get("question", "")
+            log(f"ℹ️ [Path OS] Using first PM market (no volume match)")
+
+        if not condition_id:
+            log(f"⚠️ [Path OS] Could not extract conditionId for slug={slug!r}")
+            return None
+
+        cid_str = str(condition_id)
+        log(f"🔍 [Path OS] conditionId={cid_str[:24]}... question={question[:60]!r}")
+
+        clob_url = f"{POLY_CLOB_URL}/markets/{condition_id}"
+        log(f"🔍 [Path OS] GET {clob_url}")
+        clob_resp = _requests.get(clob_url, timeout=10)
+        if clob_resp.status_code != 200:
+            log(f"⚠️ [Path OS] CLOB HTTP {clob_resp.status_code} for conditionId={cid_str[:24]}...")
+            return None
+
+        clob_data = clob_resp.json()
+        tokens = clob_data.get("tokens", [])
+        if len(tokens) < 2:
+            log(f"⚠️ [Path OS] CLOB returned {len(tokens)} tokens (need 2) for conditionId={cid_str[:24]}...")
+            return None
+
+        if not clob_data.get("accepting_orders", True):
+            log(f"⚠️ [Path OS] Market not accepting_orders for conditionId={cid_str[:24]}...")
+            return None
+
+        yes_token = tokens[0].get("token_id", "")
+        no_token  = tokens[1].get("token_id", "")
+
+        if not yes_token or not no_token:
+            log(f"⚠️ [Path OS] Empty token_id(s) from CLOB for conditionId={cid_str[:24]}...")
+            return None
+
+        log(
+            f"✅ [Path OS] Resolved slug={slug!r}: "
+            f"conditionId={cid_str[:24]}... "
+            f"YES={yes_token[:16]}... NO={no_token[:16]}..."
+        )
+        return (yes_token, no_token)
+
+    except Exception as e:
+        log(f"⚠️ [Path OS] Exception for slug={slug!r}: {e}")
+        return None
 
 
 def _parse_expiry(market: dict) -> int:
@@ -446,35 +565,40 @@ def lookup_token_ids_by_slug(
     resolution_ts: Optional[int] = None,
     buying_no: bool = False,
     event_title: str = "",
+    polymarket_volume: Optional[float] = None,
 ) -> Optional[tuple[str, str]]:
     """Fetch YES/NO CLOB token IDs for a Polymarket event.
 
-    The upstream ``slug`` (from Oddpool's ``polymarket_event_slug``) is treated
-    as a *hint*, not a canonical Gamma identifier.  Oddpool uses its own internal
-    event keys that often differ from Polymarket's URL slugs.
-
     Resolution strategy (tried in order, stops at first success):
 
-      Path B  — Bulk market index (PRIMARY — no extra HTTP calls, no Cloudflare).
-                 _build_event_slug_index() populates _event_slug_index during
-                 fetch_all_active_markets() from the Gamma /markets bulk endpoint.
-                 Covers all Oddpool event slugs that appear in the bulk cache.
-      Path 0a — ``GET /events/slug/{slug}``    (REST path endpoint)
-      Path 0b — ``GET /markets/slug/{slug}``   (REST path endpoint)
-      Path 1  — ``GET /events?slug={slug}``    (query-param, active filter)
-      Path 2  — ``GET /markets?slug={slug}``   (query-param, active filter)
+      Path OS — Oddpool search API (PRIMARY — not Cloudflare-blocked from VPS).
+                 GET {ODDPOOL_BASE_URL}/search/events/{slug}/markets
+                 → filter by exchange="polymarket", volume-match to conditionId
+                 → GET clob.polymarket.com/markets/{conditionId} → token IDs.
+                 This uses Oddpool's own API — no Gamma dependency.
+      Path B  — Bulk market index (secondary — cached from last fetch_all_active_markets()).
+                 Covers slugs that appeared in the Gamma /markets bulk payload.
+      Path 0a — ``GET /events/slug/{slug}``    (Gamma REST path, likely CF-blocked on VPS)
+      Path 0b — ``GET /markets/slug/{slug}``   (Gamma REST path, likely CF-blocked on VPS)
+      Path 1  — ``GET /events?slug={slug}``    (Gamma query-param, likely CF-blocked)
+      Path 2  — ``GET /markets?slug={slug}``   (Gamma query-param, likely CF-blocked)
 
-    NOTE: Path O (Oddpool /search/events) has been removed. That endpoint does not
-    exist on the Oddpool API and returned non-200 for every query.  Path B replaces
-    its role using data already fetched by the working /markets bulk endpoint.
-
-    For multi-outcome events (elections, sports finals) ``label`` is used to
-    pick the right sub-market.  ``resolution_ts`` breaks ties between editions
-    of recurrent events.  ``buying_no`` limits the post-resolution sanity gate
-    to the token we are actually buying so we don't false-reject live markets.
+    For multi-outcome events ``label`` is used to pick the right sub-market.
+    ``resolution_ts`` breaks ties between editions of recurrent events.
+    ``polymarket_volume`` is used by Path OS to volume-match the correct sub-market.
     """
     if not slug:
         return None
+
+    # ── Path OS: Oddpool /search/events/{slug}/markets (PRIMARY — no Cloudflare) ──
+    # Uses Oddpool's own search API to resolve the slug to a Polymarket conditionId,
+    # then fetches token IDs directly from the Polymarket CLOB.
+    # This is the intended resolution path per the reference pipeline (Step 4).
+    # The Gamma-based paths below are retained as fallbacks in case Path OS fails.
+    os_result = _resolve_via_oddpool_search(slug, polymarket_volume=polymarket_volume, buying_no=buying_no)
+    if os_result:
+        return os_result
+    log(f"⚠️ Path OS failed for slug={slug!r} — falling back to Gamma paths")
 
     _filters_active = {"active": "true", "closed": "false", "archived": "false"}
 

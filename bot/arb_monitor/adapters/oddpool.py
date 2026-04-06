@@ -102,6 +102,7 @@ def _resolve_poly_tokens(
     buying_poly_no: bool = False,
     resolution_ts: Optional[int] = None,
     event_title: str = "",
+    polymarket_volume: Optional[float] = None,
 ) -> tuple[Optional[str], Optional[str]]:
     """Resolve a Polymarket event slug to a (YES token, NO token) pair.
 
@@ -146,6 +147,7 @@ def _resolve_poly_tokens(
         result = lookup_token_ids_by_slug(
             slug, label=label, resolution_ts=resolution_ts,
             buying_no=buying_poly_no, event_title=event_title,
+            polymarket_volume=polymarket_volume,
         )
         if result:
             yes_tok, no_tok = result
@@ -503,6 +505,7 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
         #       resolution — e.g. WS only yielded the YES token but we need NO).
         match_hint = label or outcome_key
         _buying_poly_no = buy_yes_market != "polymarket"
+        poly_volume = float(poly_data.get("volume") or poly_data.get("volume_24h") or 0)
 
         resolved_yes_token: Optional[str] = None
         resolved_no_token:  Optional[str] = None
@@ -523,10 +526,10 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
             )
             if _ws_buy_token is None:
                 # Partial WS resolution: WS yielded the wrong side only.
-                # Fall through to Gamma to try to fill in the missing buy-side token.
+                # Fall through to Oddpool search (then Gamma) to fill in missing buy-side token.
                 log(
                     f"⚠️ WS partial resolution for pair={pair_id!r} — "
-                    f"buy-side token missing, running Gamma fallback"
+                    f"buy-side token missing, running Oddpool/Gamma fallback"
                 )
                 gamma_yes, gamma_no = _resolve_poly_tokens(
                     polymarket_slug,
@@ -535,17 +538,18 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
                     buying_poly_no=_buying_poly_no,
                     resolution_ts=expiry_ts if expiry_ts > 0 else None,
                     event_title=event_title,
+                    polymarket_volume=poly_volume,
                 )
-                # Merge: prefer WS tokens when present, fill gaps from Gamma
+                # Merge: prefer WS tokens when present, fill gaps from resolution
                 resolved_yes_token = resolved_yes_token or gamma_yes
                 resolved_no_token  = resolved_no_token  or gamma_no
                 log(
-                    f"🔀 Merged WS+Gamma: "
+                    f"🔀 Merged WS+resolution: "
                     f"YES={resolved_yes_token[:16] if resolved_yes_token else 'missing'}... "
                     f"NO={resolved_no_token[:16] if resolved_no_token else 'missing'}..."
                 )
         else:
-            # Gamma fallback — used when WS data is unavailable or pair not in top-10
+            # Oddpool search (primary) then Gamma fallback — when WS data unavailable or pair not in top-10
             resolved_yes_token, resolved_no_token = _resolve_poly_tokens(
                 polymarket_slug,
                 match_hint,
@@ -553,42 +557,48 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
                 buying_poly_no=_buying_poly_no,
                 resolution_ts=expiry_ts if expiry_ts > 0 else None,
                 event_title=event_title,
+                polymarket_volume=poly_volume,
             )
 
-        # ── Profit-maximising scorer ──────────────────────────────────────────
-        # Step 1: net edge.
-        #   Oddpool's net_cents is already fee-adjusted (they apply their own cost
-        #   model before returning it).  We only subtract our own small safety buffer
-        #   (ARB_RISK_BUFFER_PCT, default 0.1%) to absorb residual execution risk
-        #   (partial fills, minor spread widening, etc.).
+        # ── Reference scorer: Score = net_cents × deployable_size × time_factor ────
         #
-        #   ARB_SLIPPAGE_GUARD_BPS is an EXECUTION-TIME guard only — it aborts a
-        #   trade when the live CLOB price has moved more than N bps against us since
-        #   Oddpool quoted it (staleness check).  It is NOT an expected execution cost
-        #   and must not be subtracted here.  Doing so (200 bps = 2%) would drive
-        #   net_edge_pct negative for every opportunity in the feed, zeroing all scores
-        #   and preventing any trades from executing.
-        net_edge_pct = net_cents - ARB_RISK_BUFFER_PCT
+        # net_cents     = gross_edge_pct (cents of profit per $1 invested)
+        #
+        # deployable_size = min(YES-leg liq, NO-leg liq) × ARB_FILLABLE_FRACTION (10%)
+        #                   capped at ARB_MAX_PAIR_USDC ($500)
+        #
+        # time_factor   = tiered penalty based on days to resolution:
+        #                 < 1 day   → skip entirely (too close, partial fill risk)
+        #                 1–7 days  → 0.2  (short window, significant fill risk)
+        #                 7–90 days → 1.0  (ideal window)
+        #                 90–180d   → 0.8  (capital tied up longer)
+        #                 > 180d    → 0.5  (opportunity cost too high)
+        #
+        # Result: expected USD profit from this trade, adjusted for time risk.
+        # Sort descending → always execute the highest expected-profit opportunity first.
+        # ────────────────────────────────────────────────────────────────────────────
 
-        # Step 2: annualized return — converts absolute edge into an annual rate,
-        #   correctly handling compounding (short-dated trades compound faster).
-        #   Use max(days_to_expiry, 0.5) so markets closing in hours still score.
-        if net_edge_pct > 0:
-            net_frac = net_edge_pct / 100.0
-            effective_days = max(days_to_expiry, 0.5)
-            annualized_return = (1.0 + net_frac) ** (365.0 / effective_days) - 1.0
+        # Skip markets expiring in < 1 day
+        if days_to_expiry < 1:
+            log(
+                f"⏭ pair={pair_id!r}: {days_to_expiry:.2f} days to expiry < 1 day minimum — skip"
+            )
+            return None
+
+        if days_to_expiry < 7:
+            time_factor = 0.2
+        elif days_to_expiry <= 90:
+            time_factor = 1.0
+        elif days_to_expiry <= 180:
+            time_factor = 0.8
         else:
-            annualized_return = 0.0
+            time_factor = 0.5
 
-        # Step 3: liquidity-based confidence.
-        #   Uses the thinner of the two legs (bottleneck) as the limiting factor.
-        #   Logistic: $0 → 0.05, $5k → 0.50, $20k → 0.80, $100k → 0.95.
-        #   Zero confidence when net_edge is non-positive.
+        # Liquidity on each leg (YES leg and NO leg, regardless of which is Poly)
         poly_liq = float(poly_data.get("liquidity") or poly_data.get("volume") or 0)
         if venue2 == "opinion":
             venue2_liq = float(opinion_data.get("liquidity") or opinion_data.get("volume") or 0)
         else:
-            # Kalshi doesn't always report liquidity; use open_interest then volume as proxies
             venue2_liq = float(
                 kalshi_data.get("open_interest")
                 or kalshi_data.get("liquidity")
@@ -596,98 +606,37 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
                 or 0
             )
         bottleneck_liq = min(poly_liq, venue2_liq) if venue2_liq > 0 else poly_liq
-        if net_edge_pct <= 0 or bottleneck_liq <= 0:
-            confidence = 0.0
-        else:
-            # k = 5000 → half-confidence at $5k liquidity; tuned for prediction markets
-            confidence = max(0.05, min(1.0, bottleneck_liq / (bottleneck_liq + 5000.0)))
 
-        # Step 4: fillable size
-        # ── Depth source priority ─────────────────────────────────────────────
-        #   1. WS ask_depth_usd (primary) — set when token IDs came from the
-        #      WS pre-pass. Depth is aggregated within ±5c of mid per Oddpool
-        #      spec; we apply ARB_FILLABLE_FRACTION for conservatism since the
-        #      full depth may not be fillable at the profitable price ceiling.
-        #   2. CLOB depth walk (fallback) — used when ws_book is absent (Gamma-
-        #      resolved tokens or WS data unavailable). Walks ask ladder up to
-        #      max_poly_price = 1 - venue2_ask - ARB_MIN_EDGE_PCT; more precise
-        #      but costs an extra HTTP call per opportunity.
-        #   3. Oddpool liquidity proxy — last resort when tokens unresolved.
-        # ─────────────────────────────────────────────────────────────────────
-        #
-        # Which token do we BUY on Poly determines both depth and executability:
-        #   buy_yes_market=="polymarket" → buying YES → use yes_token
-        #   buy_yes_market in ("kalshi","opinion") → buying NO → use no_token
-        buy_token = resolved_yes_token if buy_yes_market == "polymarket" else resolved_no_token
+        deployable = min(bottleneck_liq * ARB_FILLABLE_FRACTION, ARB_MAX_PAIR_USDC)
+        if deployable < 10:
+            log(f"⏭ pair={pair_id!r}: deployable=${deployable:.2f} < $10 minimum — skip")
+            return None
 
-        if ws_book and ws_book.get("ask_depth_usd"):
-            # Primary path: use WS depth (already aggregated by Oddpool)
-            ws_ask_depth = float(ws_book.get("ask_depth_usd") or 0)
-            if ws_ask_depth > 0:
-                fillable_size_usdc = max(10.0, ws_ask_depth * ARB_FILLABLE_FRACTION)
-                log(
-                    f"📏 WS depth (primary): ask_depth_usd=${ws_ask_depth:.0f} × "
-                    f"fraction={ARB_FILLABLE_FRACTION} → ${fillable_size_usdc:.0f} fillable"
-                )
-            else:
-                fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
-                log(f"📏 WS ask_depth_usd=0 — using Oddpool proxy ${fillable_size_usdc:.0f}")
-        elif buy_token and our_poly_ask > 0 and our_venue2_ask > 0:
-            # Fallback: CLOB depth walk — precise but slower (one API call per entry)
-            try:
-                from .polymarket import fetch_orderbook, compute_fillable_contracts
-                max_poly_price = max(0.0, 1.0 - our_venue2_ask - ARB_MIN_EDGE_PCT)
-                book = fetch_orderbook(buy_token)
-                if book:
-                    poly_fillable, poly_usdc = compute_fillable_contracts(book, max_poly_price)
-                    if poly_fillable > 0:
-                        # Use total USDC cost from the walk (accounts for varying prices)
-                        fillable_size_usdc = poly_usdc
-                        log(
-                            f"📏 CLOB depth (fallback): {poly_fillable} contracts at "
-                            f"≤{max_poly_price:.4f} → ${fillable_size_usdc:.2f} USDC fillable"
-                        )
-                    else:
-                        fillable_size_usdc = 0.0
-                        log(
-                            f"📏 CLOB depth (fallback): 0 contracts at ≤{max_poly_price:.4f} "
-                            f"— no profitable depth, score → 0"
-                        )
-                else:
-                    fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
-                    log(
-                        f"⚠️ CLOB fetch failed — using Oddpool proxy ${fillable_size_usdc:.0f}"
-                    )
-            except Exception as e:
-                log(f"⚠️ CLOB depth error: {e} — using Oddpool liquidity proxy")
-                fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
-        else:
-            # Token IDs not yet resolved (display-only) — use Oddpool proxy so the
-            # opportunity still gets scored and displayed while resolution retries.
-            fillable_size_usdc = max(10.0, bottleneck_liq * ARB_FILLABLE_FRACTION)
+        # net_edge_pct for executor validation (kept for slippage guard logic in executor)
+        net_edge_pct = net_cents - ARB_RISK_BUFFER_PCT
+        fillable_size_usdc = deployable  # executor uses this for trade sizing
+        annualized_return = 0.0  # retained in dataclass for API/display compatibility
+        confidence = 0.0         # retained in dataclass for API/display compatibility
 
-        # Step 5: composite score — natural language: "expected annualised dollar edge"
-        #   Ties together quality (annualized_return), reliability (confidence), and
-        #   capacity (fillable_size). Greedy sort on this is globally near-optimal
-        #   because capital units with the highest score-per-dollar come first.
-        score = annualized_return * confidence * fillable_size_usdc
+        # Primary score: expected USD profit
+        score = (gross_edge_pct / 100.0) * deployable * time_factor
 
         log(
             f"📊 Scored pair={pair_id!r}: "
-            f"net_edge={net_edge_pct:.2f}% AR={annualized_return:.2f}× "
-            f"conf={confidence:.2f} fill={fillable_size_usdc:.0f} score={score:.1f} "
-            f"| gross={gross_edge_pct:.2f}¢ days={days_to_expiry:.1f}"
+            f"score=${score:.4f} net={gross_edge_pct:.2f}¢ "
+            f"size=${deployable:.0f} time_factor={time_factor} days={days_to_expiry:.1f} "
+            f"| poly_liq=${poly_liq:.0f} venue2_liq=${venue2_liq:.0f}"
         )
         # ─────────────────────────────────────────────────────────────────────
 
         # resolved_yes_token / resolved_no_token were set earlier (before scorer).
         poly_yes_token = resolved_yes_token if resolved_yes_token else polymarket_slug
         poly_no_token = resolved_no_token or ""
-        # is_display_only: True when the token we need to BUY on Poly is not resolved.
-        # buy_token (computed in Step 4) is the specific side we need for execution:
+        # buy_token: the specific token we need to BUY on Polymarket.
         #   buying YES on Poly → need resolved_yes_token
         #   buying NO on Poly  → need resolved_no_token
-        # Knowing only the other side is insufficient — the executor would fail.
+        buy_token = resolved_yes_token if buy_yes_market == "polymarket" else resolved_no_token
+        # is_display_only: True when the buy-side token is not resolved (can't execute).
         is_display_only = buy_token is None
 
         log(
@@ -750,10 +699,12 @@ _WS_MAX_EVENTS = 10  # Oddpool Pro tier limit (also enforced inside oddpool_ws.p
 def fetch_opportunities() -> list[ArbOpportunity]:
     """Fetch, normalize, and sort opportunities by score descending.
 
-    Score = annualized_return × confidence × fillable_size_usdc
-    This ranking maximises expected risk-adjusted annualised dollar return
-    and naturally deprioritises thin/negative-edge and illiquid opportunities
-    without requiring manual threshold tuning for each dimension separately.
+    Score = (gross_edge_pct / 100) × deployable_size × time_factor
+    where:
+      deployable_size = min(YES_liq, NO_liq) × ARB_FILLABLE_FRACTION, capped at ARB_MAX_PAIR_USDC
+      time_factor     = 0.2 (<7d), 1.0 (7–90d), 0.8 (90–180d), 0.5 (>180d); skip if <1d
+
+    This directly ranks by expected dollar profit, accounting for time-opportunity-cost.
 
     Token resolution uses a two-stage approach:
       1. Oddpool WebSocket (primary): batch-fetch CLOB token IDs directly from

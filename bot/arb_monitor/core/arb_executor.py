@@ -791,71 +791,108 @@ def execute_arb(
     except Exception as _fe:
         log(f"⚠️ fund_both_legs_for_trade raised ({_fe}) — attempting trade with existing platform balance")
 
+    # ── Fire BOTH legs SIMULTANEOUSLY via ThreadPoolExecutor ─────────────────
+    # Per the reference pipeline: submit both orders at the same time so that
+    # execution is atomic — the arb window cannot close between leg 1 and leg 2.
+    # Both futures are awaited with a 30-second timeout.
+    import concurrent.futures as _cf_exec
+
     poly_order_side_label = "NO_BUY" if buying_poly_no else "YES_BUY"
+    leg2_side_label = opinion_side if venue2 == "opinion" else kalshi_side
+
     log(
-        f"📤 Placing LEG 1: Polymarket {('NO' if buying_poly_no else 'YES')} buy "
-        f"{contract_count} contracts @ {live_poly_ask} "
-        f"(token={poly_token_for_price[:16]}...)"
-    )
-    leg1_ok, leg1_order_id, leg1_err = _place_poly_order(
-        token_id=poly_token_for_price,
-        side="BUY",
-        price=live_poly_ask,
-        size_usdc=leg1_usdc,
-    )
-    result.leg1_order_id = leg1_order_id
-    log_execution_to_db(
-        pair_id=pair_id, leg=1, venue="polymarket", side=poly_order_side_label,
-        price=live_poly_ask, size=float(contract_count),
-        success=leg1_ok, error=leg1_err, order_id=leg1_order_id,
+        f"📤 Firing both legs SIMULTANEOUSLY | "
+        f"LEG1: Polymarket {('NO' if buying_poly_no else 'YES')} {contract_count}×"
+        f"@{live_poly_ask} token={poly_token_for_price[:16]}... | "
+        f"LEG2: {venue2} {leg2_side_label} {contract_count}×@{live_kalshi_ask}"
     )
 
-    if not leg1_ok:
-        result.error = f"leg1_failed: {leg1_err}"
-        log(f"❌ Leg 1 failed: {result.error}")
-        return result
-
-    log(f"✅ Leg 1 placed: {contract_count} contracts orderId={leg1_order_id}")
-
-    # ── Place Leg 2: Kalshi or Opinion Labs ───────────────────────────────
-    if venue2 == "opinion":
-        log(f"📤 Placing LEG 2: Opinion Labs {opinion_side} buy {contract_count} contracts @ {live_kalshi_ask}")
-        leg2_ok, leg2_order_id, leg2_err = _place_opinion_order(
-            market_id=opinion_market_id,
-            side=opinion_side,
-            price=live_kalshi_ask,
-            size_usdc=leg2_usdc,
-            contract_count=contract_count,
+    def _run_leg1() -> tuple:
+        return _place_poly_order(
+            token_id=poly_token_for_price,
+            side="BUY",
+            price=live_poly_ask,
+            size_usdc=leg1_usdc,
         )
-        log_execution_to_db(
-            pair_id=pair_id, leg=2, venue="opinion", side=f"{opinion_side}_BUY",
-            price=live_kalshi_ask, size=float(contract_count),
-            success=leg2_ok, error=leg2_err, order_id=leg2_order_id,
-        )
-        result.kalshi_side = opinion_side
-    else:
-        log(f"📤 Placing LEG 2: Kalshi {kalshi_side} buy {contract_count} contracts @ {live_kalshi_ask}")
-        leg2_ok, leg2_order_id, leg2_err = _place_kalshi_order(
+
+    def _run_leg2() -> tuple:
+        if venue2 == "opinion":
+            return _place_opinion_order(
+                market_id=opinion_market_id,
+                side=opinion_side,
+                price=live_kalshi_ask,
+                size_usdc=leg2_usdc,
+                contract_count=contract_count,
+            )
+        return _place_kalshi_order(
             ticker=kalshi_ticker,
             side=kalshi_side,
             price=live_kalshi_ask,
             size_usdc=leg2_usdc,
             contract_count=contract_count,
         )
-        log_execution_to_db(
-            pair_id=pair_id, leg=2, venue="kalshi", side=f"{kalshi_side}_BUY",
-            price=live_kalshi_ask, size=float(contract_count),
-            success=leg2_ok, error=leg2_err, order_id=leg2_order_id,
-        )
-        result.kalshi_side = kalshi_side
 
+    leg1_ok: bool = False;  leg1_order_id: str = "";  leg1_err: str = ""
+    leg2_ok: bool = False;  leg2_order_id: str = "";  leg2_err: str = ""
+
+    with _cf_exec.ThreadPoolExecutor(max_workers=2) as _exec_pool:
+        fut1 = _exec_pool.submit(_run_leg1)
+        fut2 = _exec_pool.submit(_run_leg2)
+        try:
+            leg1_ok, leg1_order_id, leg1_err = fut1.result(timeout=30)
+        except Exception as _e1:
+            leg1_ok, leg1_order_id, leg1_err = False, "", str(_e1)
+            log(f"❌ Leg 1 future raised: {_e1}")
+        try:
+            leg2_ok, leg2_order_id, leg2_err = fut2.result(timeout=30)
+        except Exception as _e2:
+            leg2_ok, leg2_order_id, leg2_err = False, "", str(_e2)
+            log(f"❌ Leg 2 future raised: {_e2}")
+
+    log(
+        f"{'✅' if leg1_ok else '❌'} Leg1={leg1_ok} orderId={leg1_order_id!r} err={leg1_err!r} | "
+        f"{'✅' if leg2_ok else '❌'} Leg2={leg2_ok} orderId={leg2_order_id!r} err={leg2_err!r}"
+    )
+
+    result.leg1_order_id = leg1_order_id
     result.leg2_order_id = leg2_order_id
+    result.kalshi_side = leg2_side_label
+
+    log_execution_to_db(
+        pair_id=pair_id, leg=1, venue="polymarket", side=poly_order_side_label,
+        price=live_poly_ask, size=float(contract_count),
+        success=leg1_ok, error=leg1_err, order_id=leg1_order_id,
+    )
+    log_execution_to_db(
+        pair_id=pair_id, leg=2, venue=venue2, side=f"{leg2_side_label}_BUY",
+        price=live_kalshi_ask, size=float(contract_count),
+        success=leg2_ok, error=leg2_err, order_id=leg2_order_id,
+    )
+
+    # ── Handle failures ──────────────────────────────────────────────────
+    if not leg1_ok and not leg2_ok:
+        result.error = f"both_legs_failed: leg1={leg1_err} | leg2={leg2_err}"
+        log(f"❌ Both legs failed — no capital moved: {result.error}")
+        return result
+
+    if not leg1_ok:
+        # Leg 2 went through but Leg 1 (Polymarket) failed.
+        # The hedge is open with no matching Poly position — flag for manual intervention.
+        result.error = (
+            f"leg1_failed: {leg1_err}. "
+            f"Leg 2 ({venue2}) placed (orderId={leg2_order_id!r}) — "
+            f"manual unwind of leg 2 may be needed."
+        )
+        result.unwound = False
+        log(f"⚠️ Partial fill — leg 1 failed, leg 2 open: {result.error}")
+        return result
 
     if not leg2_ok:
+        # Leg 1 (Polymarket) went through but Leg 2 failed — unwind Polymarket position.
         log(f"❌ Leg 2 failed: {leg2_err} — initiating AUTO-UNWIND of leg 1")
         unwind_ok = _unwind_poly_leg(
             order_id=leg1_order_id,
-            token_id=poly_token_for_price,   # must match the token we actually bought
+            token_id=poly_token_for_price,
             filled_size_usdc=leg1_usdc,
             filled_price=live_poly_ask,
         )
@@ -866,6 +903,8 @@ def execute_arb(
         )
         log(f"{'✅' if unwind_ok else '❌'} Auto-unwind: {result.error}")
         return result
+
+    log(f"✅ Both legs placed! pair_id={pair_id} contracts={contract_count}")
 
     # Post-placement validation: re-check live prices immediately after both legs are placed.
     # If the actual fill caused the locked spread to deteriorate below the minimum edge threshold,
