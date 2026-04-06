@@ -1,0 +1,47 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cat > /tmp/check_poly.py << 'EOF'
+import os
+from dotenv import load_dotenv
+load_dotenv("/root/PolyNotifyBot/.env")
+
+from py_clob_client.client import ClobClient
+from py_clob_client.clob_types import ApiCreds, BalanceAllowanceParams, AssetType
+
+private_key    = os.environ.get("POLY_PRIVATE_KEY", "")
+proxy_address  = os.environ.get("POLY_PROXY_ADDRESS", "")
+api_key        = os.environ.get("POLY_API_KEY", "")
+api_secret     = os.environ.get("POLY_API_SECRET", "")
+api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
+
+print("=== IDENTITY CHECK ===")
+c0 = ClobClient("https://clob.polymarket.com", key=private_key, chain_id=137)
+print(f"EOA from POLY_PRIVATE_KEY : {c0.signer.address()}")
+print(f"POLY_PROXY_ADDRESS        : {proxy_address}")
+print(f"POLY_API_KEY (first 12)   : {api_key[:12]}...")
+
+print("\n=== DERIVE API KEY FROM PRIVATE KEY ===")
+try:
+    derived = c0.derive_api_key()
+    print(f"Derived key: {derived}")
+except Exception as e:
+    print(f"Error: {e}")
+
+print("\n=== BALANCE WITH sig_type=0 (EOA) ===")
+try:
+    creds = ApiCreds(api_key=api_key, api_secret=api_secret, api_passphrase=api_passphrase)
+    c1 = ClobClient("https://clob.polymarket.com", key=private_key, chain_id=137, creds=creds, signature_type=0)
+    r = c1.get_balance_allowance(BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0))
+    print(f"Result: {r}")
+except Exception as e:
+    print(f"Error: {e}")
+
+print("\n=== BALANCE WITH sig_type=1 (POLY_PROXY) ===")
+try:
+    creds = ApiCreds(api_key=api_key, api_secret=api_secret, api_passphrase=api_passphrase)
+    c2 = ClobClient("https://clob.polymarket.com", key=private_key, chain_id=137, creds=creds, signature_type=1, funder=proxy_address)
+    r = c2.get_balance_allowance(BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=-1))
+    print(f"Result: {r}")
+except Exception as e:
+    print(f"Error: {e}")
+EOF
+ey don't match, the private key in `.env` is for a different account than the one with $3.86.compare it against what MetaMask shows as your wallet address. If th
+> ^C

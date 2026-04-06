@@ -1,0 +1,74 @@
+Looking at your code, there are a few points that could explain why you’re always getting **0 balance** from Polymarket CLOB:
+
+---
+
+### 1. **`signature_type` mismatch**
+
+* You correctly set `signature_type=1` for the `ClobClient`, which is the personal-sign type. ✅
+* However, in the calls to `update_balance_allowance` and `get_balance_allowance` you are using `signature_type=-1`.
+
+  * `-1` is **likely invalid**, so the server may ignore the request or return 0.
+  * You should match this to the client’s signature type (`1`) or remove it if the method defaults correctly.
+
+**Fix:**
+
+```python
+BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=1)
+```
+
+---
+
+### 2. **`funder` (proxy address)**
+
+* You pass `poly_proxy_address` as `funder`, which defaults to `None` if empty.
+* If your actual trading account isn’t the funder or proxy address, the balance query may point to the wrong account.
+* Try removing the `funder` parameter or ensure it matches the **EOA associated with your API key**.
+
+---
+
+### 3. **Division logic**
+
+```python
+bal = bal_raw / 1_000_000 if bal_raw > 1_000 else bal_raw
+```
+
+* This is a bit dangerous: if your raw balance is `500` (USDC with 6 decimals), it will **not divide**, giving `500` instead of `0.0005 USDC`.
+* Better: always divide by 1_000_000 for USDC.e:
+
+```python
+bal = bal_raw / 1_000_000
+```
+
+---
+
+### 4. **Error handling / logging**
+
+* You catch exceptions, but if the client silently returns `None` or a dict without `"balance"`, you get `0`.
+* Good idea to log `result` fully (you do that), and confirm `"balance"` exists.
+
+---
+
+### 5. **Full corrected snippet**
+
+```python
+result = client.get_balance_allowance(
+    BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=1)
+)
+log(f"🔍 [POLY] Full balance_allowance response: {result}")
+raw = result.get("balance", "0")
+bal = float(raw) / 1_000_000  # always divide by 1e6
+log(f"💰 Poly balance: {bal:.6f} USDC (raw={raw})")
+return bal
+```
+
+---
+
+✅ **Summary of main issues causing 0 balance**
+
+1. `signature_type=-1` → invalid, should match client (`1`)
+2. `funder` may point to wrong account
+3. USDC division logic could misrepresent small balances
+
+---
+
+If you want, I can rewrite your **full `_get_platform_balance("polymarket")`** function in a corrected form that reliably returns your USDC.e balance from CLOB. This will fix the `0` issue. Do you want me to do that?
