@@ -252,10 +252,27 @@ def _get_servicer_balances() -> tuple[float, float, float]:
             result = client.get_balance_allowance(
                 BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=1)
             )
+            log(f"🔍 [NAV] sig_type=1 (PROXY) response: {result}")
             raw = result.get("balance", "0")
             bal_raw = float(raw)
             poly_cash = bal_raw / 1_000_000
-            log(f"Poly servicer cash: {poly_cash:.6f} USDC (raw={raw})")
+            log(f"Poly servicer cash (proxy): {poly_cash:.6f} USDC (raw={raw})")
+
+            # Diagnostic: also query sig_type=0 (EOA) to locate funds
+            try:
+                client_eoa = ClobClient(clob_url, key=private_key, chain_id=137, creds=creds, signature_type=0)
+                result_eoa = client_eoa.get_balance_allowance(
+                    BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
+                )
+                log(f"🔍 [NAV] sig_type=0 (EOA) response: {result_eoa}")
+                raw_eoa = result_eoa.get("balance", "0")
+                bal_eoa = float(raw_eoa) / 1_000_000
+                log(f"Poly servicer cash (EOA): {bal_eoa:.6f} USDC (raw={raw_eoa})")
+                if poly_cash == 0 and bal_eoa > 0:
+                    log(f"ℹ️ [NAV] Funds found in EOA account — using EOA balance for NAV")
+                    poly_cash = bal_eoa
+            except Exception as eoa_err:
+                log(f"⚠️ [NAV] EOA balance check failed: {eoa_err}")
         except Exception as e:
             log(f"⚠️ Error fetching poly servicer balance: {e}")
     else:
