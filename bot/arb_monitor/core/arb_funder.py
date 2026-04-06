@@ -447,21 +447,29 @@ def _call_tend_if_ready(vault_address: str, private_key: str, servicer_wallet: s
 # Platform balance reading
 # ---------------------------------------------------------------------------
 
-def _get_platform_balance(venue: str) -> float:
+def _get_platform_balance(venue: str, raise_on_error: bool = False) -> float:
     """Read the current USDC balance available for trading on a platform.
 
     Args:
-        venue: "polymarket" or "kalshi"
+        venue:          "polymarket", "kalshi", or "opinion"
+        raise_on_error: When True, re-raises exceptions instead of returning 0.0.
+                        Use this in callers that must distinguish true $0 from
+                        an unreadable balance (e.g. for balance-fit sizing).
 
-    Returns USDC float. Returns 0.0 on any error.
+    Returns USDC float. Returns 0.0 on any error (unless raise_on_error=True).
     """
+    def _handle_err(msg: str, exc: Exception = None):
+        log(msg)
+        if raise_on_error:
+            raise RuntimeError(msg) from exc
+        return 0.0
+
     if venue == "polymarket":
         poly_api_key        = os.environ.get("POLY_API_KEY", "")
         poly_api_secret     = os.environ.get("POLY_API_SECRET", "")
         poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
         if not poly_api_key:
-            log("⚠️ POLY_API_KEY not set — Poly balance unknown (returning 0)")
-            return 0.0
+            return _handle_err("⚠️ POLY_API_KEY not set — Poly balance unknown (returning 0)")
         try:
             from py_clob_client.client import ClobClient
             from py_clob_client.clob_types import ApiCreds, BalanceAllowanceParams, AssetType
@@ -514,66 +522,63 @@ def _get_platform_balance(venue: str) -> float:
 
             return bal
         except Exception as e:
-            log(f"⚠️ Poly balance read error: {e}")
-            return 0.0
+            return _handle_err(f"⚠️ Poly balance read error: {e}", e)
 
     elif venue == "kalshi":
         try:
             from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
             if not kalshi_auth_available():
-                log("⚠️ Kalshi auth not configured — Kalshi balance unknown (returning 0)")
-                return 0.0
+                return _handle_err("⚠️ Kalshi auth not configured — Kalshi balance unknown (returning 0)")
             import requests
             from ..config import KALSHI_BASE_URL
             url = f"{KALSHI_BASE_URL}/portfolio/balance"
             headers = get_kalshi_headers("GET", url)
             if not headers:
-                log("⚠️ Kalshi RSA signing failed — Kalshi balance unknown (returning 0)")
-                return 0.0
+                return _handle_err("⚠️ Kalshi RSA signing failed — Kalshi balance unknown (returning 0)")
             resp = requests.get(url, headers=headers, timeout=10)
             if resp.status_code == 200:
                 data = resp.json()
                 bal = float(data.get("balance", 0)) / 100.0
                 log(f"💰 Kalshi balance: {bal:.4f} USDC")
                 return bal
-            log(f"⚠️ Kalshi balance HTTP {resp.status_code}: {resp.text[:80]}")
-            return 0.0
+            return _handle_err(f"⚠️ Kalshi balance HTTP {resp.status_code}: {resp.text[:80]}")
         except Exception as e:
-            log(f"⚠️ Kalshi balance read error: {e}")
-            return 0.0
+            return _handle_err(f"⚠️ Kalshi balance read error: {e}", e)
 
     elif venue == "opinion":
         try:
             from ..adapters.opinion_clob import get_balance as opinion_get_balance
             return opinion_get_balance()
         except Exception as e:
-            log(f"⚠️ Opinion balance read error: {e}")
-            return 0.0
+            return _handle_err(f"⚠️ Opinion balance read error: {e}", e)
 
     log(f"⚠️ Unknown venue '{venue}' — balance unknown")
     return 0.0
 
 
 def get_platform_spot_balances(venue2: str) -> tuple:
-    """Read current USDC balances on Polymarket and venue2 simultaneously.
+    """Read current USDC balances on Polymarket and venue2.
 
-    Returns (poly_usdc, venue2_usdc). Returns (0.0, 0.0) on any error so
-    callers can fail-open (funder's capital gate remains the authoritative check).
+    Raises on any read failure so callers can distinguish true $0 from an
+    unreadable balance. The executor wraps this in try/except to fail-open
+    (skip balance-fit sizing) while the funder's capital gate stays authoritative.
 
     Args:
         venue2: "kalshi" or "opinion"
+
+    Returns:
+        (poly_usdc: float, venue2_usdc: float)
+
+    Raises:
+        RuntimeError: if either platform balance cannot be read.
     """
-    try:
-        poly_bal   = _get_platform_balance("polymarket")
-        venue2_bal = _get_platform_balance(venue2)
-        log(
-            f"📊 [spot_balances] poly={poly_bal:.4f} USDC "
-            f"| {venue2}={venue2_bal:.4f} USDC"
-        )
-        return poly_bal, venue2_bal
-    except Exception as e:
-        log(f"⚠️ get_platform_spot_balances error (returning 0,0): {e}")
-        return 0.0, 0.0
+    poly_bal   = _get_platform_balance("polymarket", raise_on_error=True)
+    venue2_bal = _get_platform_balance(venue2, raise_on_error=True)
+    log(
+        f"📊 [spot_balances] poly={poly_bal:.4f} USDC "
+        f"| {venue2}={venue2_bal:.4f} USDC"
+    )
+    return poly_bal, venue2_bal
 
 
 # ---------------------------------------------------------------------------
