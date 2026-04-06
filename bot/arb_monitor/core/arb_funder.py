@@ -472,9 +472,16 @@ def _get_platform_balance(venue: str) -> float:
                 signature_type=1,
                 funder=poly_proxy_address,
             )
+            try:
+                client.update_balance_allowance(
+                    BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=-1)
+                )
+            except Exception as upd_err:
+                log(f"⚠️ [POLY] update_balance_allowance failed (non-fatal): {upd_err}")
             result = client.get_balance_allowance(
                 BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=-1)
             )
+            log(f"🔍 [POLY] Full balance_allowance response: {result}")
             raw = result.get("balance", "0")
             bal_raw = float(raw)
             bal = bal_raw / 1_000_000 if bal_raw > 1_000 else bal_raw
