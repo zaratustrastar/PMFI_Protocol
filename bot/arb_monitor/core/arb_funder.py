@@ -481,7 +481,7 @@ def _get_platform_balance(venue: str) -> float:
             result = client.get_balance_allowance(
                 BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=2)
             )
-            log(f"🔍 [POLY] sig_type=1 (PROXY) response: {result}")
+            log(f"🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {result}")
             raw = result.get("balance", "0")
             bal_raw = float(raw)
             bal = bal_raw / 1_000_000
