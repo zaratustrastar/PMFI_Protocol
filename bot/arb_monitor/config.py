@@ -12,6 +12,9 @@ KALSHI_PRIVATE_KEY_PEM = os.environ.get("KALSHI_PRIVATE_KEY_PEM", "")   # PEM co
 
 POLY_GAMMA_URL = os.environ.get("POLY_GAMMA_URL", "https://gamma-api.polymarket.com")
 POLY_CLOB_URL = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+# Polymarket proxy wallet address for pARB — different from pSNIPER's POLYMARKET_PROXY_ADDRESS.
+# Set POLY_PROXY_ADDRESS=0x29832cb67586d80894Dff3194927c9f73Fbf004f in the VPS .env.
+POLY_PROXY_ADDRESS = os.environ.get("POLY_PROXY_ADDRESS", "")
 
 OPINION_BASE_URL = os.environ.get("OPINION_BASE_URL", "https://proxy.opinion.trade:8443/openapi")
 OPINION_CLOB_HOST = os.environ.get("OPINION_CLOB_HOST", "https://proxy.opinion.trade:8443")

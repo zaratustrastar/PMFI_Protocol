@@ -75,6 +75,7 @@ V2 is an async Yearn-style vault: no live NAV required for user flows.
 - `ARB_VAULT_V2_ADDRESS` — deployed V2 contract address on Base (activates V2; unset = silent skip)
 - `POLY_API_KEY` — pARB's Polymarket API key (not `POLYMARKET_API_KEY` which is pSNIPER's)
 - `POLY_PRIVATE_KEY` — pARB trading wallet private key
+- `POLY_PROXY_ADDRESS` — pARB Polymarket proxy wallet (`0x29832cb67586d80894Dff3194927c9f73Fbf004f`); distinct from pSNIPER's `POLYMARKET_PROXY_ADDRESS`
 - `ARB_NAV_SIGNER_PRIVATE_KEY` — signs report payloads for V2 contract
 - `KALSHI_API_KEY_ID` + `KALSHI_PRIVATE_KEY_PATH` — Kalshi RSA auth
 - `OPINION_API_KEY` — Opinion Labs API key (market data + CLOB auth header)
