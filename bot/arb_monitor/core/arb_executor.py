@@ -108,6 +108,7 @@ def _place_poly_order(token_id: str, side: str, price: float, size_usdc: float) 
         poly_api_key        = os.environ.get("POLY_API_KEY", "")
         poly_api_secret     = os.environ.get("POLY_API_SECRET", "")
         poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
+        poly_proxy_address  = os.environ.get("POLY_PROXY_ADDRESS", "") or None
         if poly_api_key and poly_api_secret and poly_api_passphrase:
             creds  = ApiCreds(
                 api_key=poly_api_key,
@@ -116,13 +117,15 @@ def _place_poly_order(token_id: str, side: str, price: float, size_usdc: float) 
             )
             client = ClobClient(
                 clob_url, key=poly_private_key, chain_id=chain_id, creds=creds,
+                funder=poly_proxy_address,
             )
-            log(f"🔑 [POLY] Using L2-authenticated ClobClient")
+            log(f"🔑 [POLY] Using L2-authenticated ClobClient (funder={poly_proxy_address})")
         else:
             client = ClobClient(
                 clob_url, key=poly_private_key, chain_id=chain_id,
+                funder=poly_proxy_address,
             )
-            log(f"🔑 [POLY] Using L1-only ClobClient")
+            log(f"🔑 [POLY] Using L1-only ClobClient (funder={poly_proxy_address})")
 
         shares = size_usdc / price if price > 0 else 0
         order_args = OrderArgs(
@@ -239,9 +242,10 @@ def _unwind_poly_leg(
     cancel_ok = False
     try:
         from py_clob_client.client import ClobClient
-        clob_url = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
-        chain_id = int(os.environ.get("POLY_CHAIN_ID", "137"))
-        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id)
+        clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+        chain_id           = int(os.environ.get("POLY_CHAIN_ID", "137"))
+        poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
+        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id, funder=poly_proxy_address)
         resp = client.cancel(order_id=order_id)
         log(f"✅ [POLY] Cancel response: {resp}")
         cancel_ok = True
@@ -261,9 +265,10 @@ def _unwind_poly_leg(
         from py_clob_client.client import ClobClient
         from py_clob_client.clob_types import OrderArgs, OrderType
 
-        clob_url = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
-        chain_id = int(os.environ.get("POLY_CHAIN_ID", "137"))
-        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id)
+        clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+        chain_id           = int(os.environ.get("POLY_CHAIN_ID", "137"))
+        poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
+        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id, funder=poly_proxy_address)
 
         from ..adapters.polymarket import get_best_prices as poly_prices_fn
         prices = poly_prices_fn(token_id)

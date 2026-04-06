@@ -1,0 +1,20 @@
+why is this happening? maybe because my nano .env envirnoment is POLY_PROXY_ADDRESS=0x29832cb67586d80894Dff3194927c9f73Fbf004f? root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot#  sudo journalctl -u psniper-bot --since "5 min ago" | grep -E "\[ArbFunder\].*balance|Poly balance|Kalshi balance"
+Apr 06 14:37:07 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] ⚠️ Poly balance read error: ClobClient.__init__() got an unexpected keyword argument 'proxy_address'
+Apr 06 14:37:07 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
+Apr 06 14:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] 📊 Reading current platform balances...
+Apr 06 14:37:21 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] ⚠️ Poly balance read error: ClobClient.__init__() got an unexpected keyword argument 'proxy_address'
+Apr 06 14:37:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] ⚠️ Poly balance read error: ClobClient.__init__() got an unexpected keyword argument 'proxy_address'
+Apr 06 14:37:55 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
+Apr 06 14:38:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] 📊 Reading current platform balances...
+Apr 06 14:38:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] ⚠️ Poly balance read error: ClobClient.__init__() got an unexpected keyword argument 'proxy_address'
+Apr 06 14:38:46 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] ⚠️ Poly balance read error: ClobClient.__init__() got an unexpected keyword argument 'proxy_address'
+Apr 06 14:38:46 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
+Apr 06 14:39:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] 📊 Reading current platform balances...
+Apr 06 14:39:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] ⚠️ Poly balance read error: ClobClient.__init__() got an unexpected keyword argument 'proxy_address'
+Apr 06 14:39:34 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] ⚠️ Poly balance read error: ClobClient.__init__() got an unexpected keyword argument 'proxy_address'
+Apr 06 14:39:34 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
+Apr 06 14:39:49 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] 📊 Reading current platform balances...
+Apr 06 14:39:49 ubuntu-s-1vcpu-1gb-sfo3-01 python[238505]: 💸 [ArbFunder] ⚠️ Poly balance read error: ClobClient.__init__() got an unexpected keyword argument 'proxy_address'
+Apr 06 14:41:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[239596]: 💸 [ArbFunder] 💰 Poly balance: 0.0000 USDC (raw=0)
+Apr 06 14:41:30 ubuntu-s-1vcpu-1gb-sfo3-01 python[239596]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
