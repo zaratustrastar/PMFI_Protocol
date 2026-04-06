@@ -60,10 +60,16 @@ def _get_session() -> requests.Session:
 
 
 def _get_direct_session() -> requests.Session:
-    """Return a session that always connects directly, bypassing any configured proxy."""
+    """Return a session that always connects directly, bypassing any configured proxy.
+
+    trust_env=False ensures HTTP_PROXY/HTTPS_PROXY env vars are also ignored,
+    so bypass_proxy=True is guaranteed to be truly proxy-free regardless of
+    how the environment is configured.
+    """
     global _direct_session
     if _direct_session is None:
         _direct_session = requests.Session()
+        _direct_session.trust_env = False
         _direct_session.headers.update({"User-Agent": DEFAULT_USER_AGENT})
     return _direct_session
 
