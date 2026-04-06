@@ -826,8 +826,51 @@ def execute_arb(
     leg1_usdc = contract_count * live_poly_ask
     leg2_usdc = contract_count * live_kalshi_ask
 
+    # ── Balance-fit cap: scale down if servicer can't cover the funding gaps ──
+    # Finds the largest N ≤ contract_count where:
+    #   max(0, N*poly_ask - poly_bal) + max(0, N*v2_ask - v2_bal) <= svc_deployable
+    # This lets the bot trade with money already on the platforms without
+    # needing the servicer to bridge new capital, avoiding avoidable failures.
+    try:
+        from .arb_funder import get_platform_spot_balances, get_servicer_deployable_usdc
+        _poly_bal, _v2_bal = get_platform_spot_balances(venue2)
+        _svc_dep = get_servicer_deployable_usdc()
+        log(
+            f"💰 Balance-fit check: poly_on_platform={_poly_bal:.4f} "
+            f"{venue2}_on_platform={_v2_bal:.4f} "
+            f"servicer_deployable={_svc_dep:.4f}"
+        )
+        _original_count = contract_count
+        _found = False
+        for _n in range(contract_count, 0, -1):
+            _poly_gap = max(0.0, _n * live_poly_ask - _poly_bal)
+            _v2_gap   = max(0.0, _n * live_kalshi_ask - _v2_bal)
+            if _poly_gap + _v2_gap <= _svc_dep:
+                if _n < _original_count:
+                    log(
+                        f"⬇️ Balance-fit: scaled {_original_count}→{_n} contracts "
+                        f"(poly_gap={_poly_gap:.4f} {venue2}_gap={_v2_gap:.4f} "
+                        f"fits svc_deployable={_svc_dep:.4f})"
+                    )
+                contract_count = _n
+                _found = True
+                break
+        if not _found:
+            result.error = (
+                f"insufficient_capital: no contract count (1..{_original_count}) fits "
+                f"poly_bal={_poly_bal:.4f} + {venue2}_bal={_v2_bal:.4f} + "
+                f"servicer_deployable={_svc_dep:.4f}"
+            )
+            log(f"❌ {result.error}")
+            return result
+        # Re-derive leg costs from the (possibly scaled-down) contract_count
+        leg1_usdc = contract_count * live_poly_ask
+        leg2_usdc = contract_count * live_kalshi_ask
+    except Exception as _bfe:
+        log(f"⚠️ Balance-fit check failed (non-fatal, proceeding with original size): {_bfe}")
+
     log(
-        f"📐 Trade sizing: contract_count={contract_count} (integer, depth-capped, matched) "
+        f"📐 Trade sizing: contract_count={contract_count} (integer, depth-capped, balance-fit) "
         f"leg1_usdc={leg1_usdc:.4f} leg2_usdc={leg2_usdc:.4f} "
         f"total_cost={leg1_usdc + leg2_usdc:.4f}"
     )

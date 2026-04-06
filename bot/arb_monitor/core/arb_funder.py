@@ -545,6 +545,28 @@ def _get_platform_balance(venue: str) -> float:
     return 0.0
 
 
+def get_platform_spot_balances(venue2: str) -> tuple:
+    """Read current USDC balances on Polymarket and venue2 simultaneously.
+
+    Returns (poly_usdc, venue2_usdc). Returns (0.0, 0.0) on any error so
+    callers can fail-open (funder's capital gate remains the authoritative check).
+
+    Args:
+        venue2: "kalshi" or "opinion"
+    """
+    try:
+        poly_bal   = _get_platform_balance("polymarket")
+        venue2_bal = _get_platform_balance(venue2)
+        log(
+            f"📊 [spot_balances] poly={poly_bal:.4f} USDC "
+            f"| {venue2}={venue2_bal:.4f} USDC"
+        )
+        return poly_bal, venue2_bal
+    except Exception as e:
+        log(f"⚠️ get_platform_spot_balances error (returning 0,0): {e}")
+        return 0.0, 0.0
+
+
 # ---------------------------------------------------------------------------
 # On-demand top-up (called from executor before each trade)
 # ---------------------------------------------------------------------------
