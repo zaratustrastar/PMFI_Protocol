@@ -619,14 +619,15 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
         annualized_return = 0.0  # retained in dataclass for API/display compatibility
         confidence = 0.0         # retained in dataclass for API/display compatibility
 
-        # Reference formula: score = net_cents × deployable × time_factor
-        # net_cents is the fee-adjusted edge per dollar — lower than gross_edge_pct,
-        # giving a conservative expected-profit estimate.
-        score = net_cents * deployable * time_factor
+        # Reference formula: score = (net_cents / 100) × deployable × time_factor
+        # net_cents is in cents-per-dollar (e.g. 3.2 = 3.2¢ profit per $1 deployed).
+        # Dividing by 100 converts to fraction-of-dollar so the resulting score is in USD:
+        #   score ≈ expected dollar profit from this deployment, adjusted for time risk.
+        score = (net_cents / 100.0) * deployable * time_factor
 
         log(
             f"📊 Scored pair={pair_id!r}: "
-            f"score={score:.4f} net_cents={net_cents:.2f} "
+            f"score=${score:.4f} net_cents={net_cents:.2f} "
             f"size=${deployable:.0f} time_factor={time_factor} days={days_to_expiry:.1f} "
             f"| poly_liq=${poly_liq:.0f} venue2_liq=${venue2_liq:.0f}"
         )
@@ -702,12 +703,13 @@ _WS_MAX_EVENTS = 10  # Oddpool Pro tier limit (also enforced inside oddpool_ws.p
 def fetch_opportunities() -> list[ArbOpportunity]:
     """Fetch, normalize, and sort opportunities by score descending.
 
-    Score = (gross_edge_pct / 100) × deployable_size × time_factor
+    Score = (net_cents / 100) × deployable_size × time_factor  [units: USD]
     where:
+      net_cents       = gross_edge_pct minus ARB_RISK_BUFFER_PCT (fee-adjusted edge, in ¢ per $1)
       deployable_size = min(YES_liq, NO_liq) × ARB_FILLABLE_FRACTION, capped at ARB_MAX_PAIR_USDC
       time_factor     = 0.2 (<7d), 1.0 (7–90d), 0.8 (90–180d), 0.5 (>180d); skip if <1d
 
-    This directly ranks by expected dollar profit, accounting for time-opportunity-cost.
+    Score approximates expected USD profit from this deployment, adjusted for time-opportunity-cost.
 
     Token resolution uses a two-stage approach:
       1. Oddpool WebSocket (primary): batch-fetch CLOB token IDs directly from
