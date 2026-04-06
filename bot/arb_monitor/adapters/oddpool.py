@@ -36,7 +36,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from ..config import (
     ODDPOOL_API_KEY, ODDPOOL_BASE_URL, ODDPOOL_WS_URL,
-    ARB_RISK_BUFFER_PCT, ARB_FILLABLE_FRACTION,
+    ARB_RISK_BUFFER_PCT, ARB_FILLABLE_FRACTION, ARB_MAX_PAIR_USDC,
     ARB_MIN_EDGE_PCT,
 )
 
@@ -613,17 +613,20 @@ def normalize_opportunity(entry: dict, ws_book: Optional[dict] = None) -> Option
             return None
 
         # net_edge_pct for executor validation (kept for slippage guard logic in executor)
+        # net_cents is already in cents (e.g. 3.2 = 3.2 cents profit per $1 invested)
         net_edge_pct = net_cents - ARB_RISK_BUFFER_PCT
         fillable_size_usdc = deployable  # executor uses this for trade sizing
         annualized_return = 0.0  # retained in dataclass for API/display compatibility
         confidence = 0.0         # retained in dataclass for API/display compatibility
 
-        # Primary score: expected USD profit
-        score = (gross_edge_pct / 100.0) * deployable * time_factor
+        # Reference formula: score = net_cents × deployable × time_factor
+        # net_cents is the fee-adjusted edge per dollar — lower than gross_edge_pct,
+        # giving a conservative expected-profit estimate.
+        score = net_cents * deployable * time_factor
 
         log(
             f"📊 Scored pair={pair_id!r}: "
-            f"score=${score:.4f} net={gross_edge_pct:.2f}¢ "
+            f"score={score:.4f} net_cents={net_cents:.2f} "
             f"size=${deployable:.0f} time_factor={time_factor} days={days_to_expiry:.1f} "
             f"| poly_liq=${poly_liq:.0f} venue2_liq=${venue2_liq:.0f}"
         )

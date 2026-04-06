@@ -359,6 +359,66 @@ def _place_opinion_order(
         return False, "", err
 
 
+def _cancel_leg2_order(
+    venue2: str,
+    order_id: str,
+    kalshi_ticker: str = "",
+    opinion_market_id: str = "",
+) -> bool:
+    """Best-effort cancel of a leg 2 (Kalshi or Opinion) order that was placed but
+    needs to be unwound because leg 1 (Polymarket) failed simultaneously.
+
+    Returns True if the cancel request succeeded (HTTP 200/204), False otherwise.
+    Failure means the order may have already filled — flag for manual reconciliation.
+    """
+    if not order_id:
+        log(f"⚠️ [LEG2 CANCEL] No order_id provided for {venue2} cancel — cannot cancel")
+        return False
+
+    if venue2 == "kalshi":
+        try:
+            from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
+            if not kalshi_auth_available():
+                log("⚠️ [LEG2 CANCEL] Kalshi credentials not configured — cannot cancel")
+                return False
+            from ..config import KALSHI_BASE_URL
+            import requests as _req
+            url = f"{KALSHI_BASE_URL}/portfolio/orders/{order_id}"
+            headers = get_kalshi_headers("DELETE", url)
+            if not headers:
+                log("⚠️ [LEG2 CANCEL] Kalshi RSA signing failed")
+                return False
+            resp = _req.delete(url, headers=headers, timeout=10)
+            ok = resp.status_code in (200, 204)
+            log(
+                f"{'✅' if ok else '❌'} [LEG2 CANCEL] Kalshi cancel orderId={order_id!r} "
+                f"HTTP {resp.status_code}"
+            )
+            return ok
+        except Exception as e:
+            log(f"❌ [LEG2 CANCEL] Kalshi cancel exception: {e}")
+            return False
+
+    elif venue2 == "opinion":
+        try:
+            from ..adapters.opinion_clob import get_client as opinion_get_client
+            client = opinion_get_client()
+            if client is None:
+                log("⚠️ [LEG2 CANCEL] Opinion CLOB client not available — cannot cancel")
+                return False
+            result = client.cancel_order(order_id)
+            ok = result is not None
+            log(f"{'✅' if ok else '❌'} [LEG2 CANCEL] Opinion cancel orderId={order_id!r} result={result}")
+            return ok
+        except Exception as e:
+            log(f"❌ [LEG2 CANCEL] Opinion cancel exception: {e}")
+            return False
+
+    else:
+        log(f"⚠️ [LEG2 CANCEL] Unknown venue2={venue2!r} — cannot cancel")
+        return False
+
+
 # ── Opinion market_id → token_id resolution cache ────────────────────────────
 # Opinion's /token/orderbook endpoint needs a token ID, not a market ID.
 # Cache the lookup for 30 minutes to avoid per-execution round-trips.
@@ -877,14 +937,22 @@ def execute_arb(
 
     if not leg1_ok:
         # Leg 2 went through but Leg 1 (Polymarket) failed.
-        # The hedge is open with no matching Poly position — flag for manual intervention.
+        # Immediately cancel leg 2 to avoid holding a one-sided hedge.
+        log(f"❌ Leg 1 failed: {leg1_err} — initiating AUTO-CANCEL of leg 2 ({venue2} orderId={leg2_order_id!r})")
+        cancel2_ok = _cancel_leg2_order(
+            venue2=venue2,
+            order_id=leg2_order_id,
+            kalshi_ticker=kalshi_ticker,
+            opinion_market_id=opinion_market_id,
+        )
+        result.unwound = cancel2_ok
         result.error = (
             f"leg1_failed: {leg1_err}. "
-            f"Leg 2 ({venue2}) placed (orderId={leg2_order_id!r}) — "
-            f"manual unwind of leg 2 may be needed."
+            f"Leg 2 ({venue2}) auto-cancel "
+            f"{'succeeded' if cancel2_ok else 'FAILED — manual intervention needed'} "
+            f"(orderId={leg2_order_id!r})."
         )
-        result.unwound = False
-        log(f"⚠️ Partial fill — leg 1 failed, leg 2 open: {result.error}")
+        log(f"{'✅' if cancel2_ok else '⚠️'} Leg 2 cancel: {result.error}")
         return result
 
     if not leg2_ok:
