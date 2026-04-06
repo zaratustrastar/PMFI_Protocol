@@ -474,18 +474,35 @@ def _get_platform_balance(venue: str) -> float:
             )
             try:
                 client.update_balance_allowance(
-                    BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=-1)
+                    BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=1)
                 )
             except Exception as upd_err:
                 log(f"⚠️ [POLY] update_balance_allowance failed (non-fatal): {upd_err}")
             result = client.get_balance_allowance(
-                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=-1)
+                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=1)
             )
-            log(f"🔍 [POLY] Full balance_allowance response: {result}")
+            log(f"🔍 [POLY] sig_type=1 (PROXY) response: {result}")
             raw = result.get("balance", "0")
             bal_raw = float(raw)
-            bal = bal_raw / 1_000_000 if bal_raw > 1_000 else bal_raw
-            log(f"💰 Poly balance: {bal:.4f} USDC (raw={raw})")
+            bal = bal_raw / 1_000_000
+            log(f"💰 Poly balance (proxy): {bal:.6f} USDC (raw={raw})")
+
+            # Diagnostic: also query sig_type=0 (EOA) to see which account has funds
+            try:
+                client_eoa = ClobClient(clob_url, key=private_key, chain_id=137, creds=creds, signature_type=0)
+                result_eoa = client_eoa.get_balance_allowance(
+                    BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
+                )
+                raw_eoa = result_eoa.get("balance", "0")
+                bal_eoa = float(raw_eoa) / 1_000_000
+                log(f"🔍 sig_type=0 (EOA) response: {result_eoa}")
+                log(f"💰 Poly balance (EOA): {bal_eoa:.6f} USDC (raw={raw_eoa})")
+                if bal == 0 and bal_eoa > 0:
+                    log(f"ℹ️ [POLY] Funds found in EOA account — returning EOA balance")
+                    return bal_eoa
+            except Exception as eoa_err:
+                log(f"⚠️ [POLY] EOA balance check failed: {eoa_err}")
+
             return bal
         except Exception as e:
             log(f"⚠️ Poly balance read error: {e}")

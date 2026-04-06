@@ -250,12 +250,12 @@ def _get_servicer_balances() -> tuple[float, float, float]:
                 funder=poly_proxy_address,
             )
             result = client.get_balance_allowance(
-                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=-1)
+                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=1)
             )
             raw = result.get("balance", "0")
             bal_raw = float(raw)
-            poly_cash = bal_raw / 1_000_000 if bal_raw > 1_000 else bal_raw
-            log(f"Poly servicer cash: {poly_cash:.4f} USDC (raw={raw})")
+            poly_cash = bal_raw / 1_000_000
+            log(f"Poly servicer cash: {poly_cash:.6f} USDC (raw={raw})")
         except Exception as e:
             log(f"⚠️ Error fetching poly servicer balance: {e}")
     else:
