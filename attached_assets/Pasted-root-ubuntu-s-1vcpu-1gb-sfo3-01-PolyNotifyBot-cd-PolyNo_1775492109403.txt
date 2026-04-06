@@ -1,0 +1,31 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd ~/PolyNotifyBot
+git pull
+sudo systemctl restart psniper-bot
+remote: Enumerating objects: 27, done.
+remote: Counting objects: 100% (27/27), done.
+remote: Compressing objects: 100% (5/5), done.
+remote: Total 20 (delta 13), reused 20 (delta 13), pack-reused 0 (from 0)
+Unpacking objects: 100% (20/20), 6.13 KiB | 251.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   736d12b..b526461  main       -> origin/main
+Updating 736d12b..b526461
+Fast-forward
+ .../Pasted-Looking-at-your-code-there-are-a-few-points-that-could-_1775491411486.txt           | 74 +++++++++++++++++++++++++++++++++++++++++++++++
+ .../Pasted-Looking-at-your-code-there-are-a-few-points-that-could-_1775491420903.txt           | 74 +++++++++++++++++++++++++++++++++++++++++++++++
+ .../Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cat-tmp-c_1775491126102.txt           | 47 ++++++++++++++++++++++++++++++
+ bot/arb_monitor/core/arb_funder.py                                                             | 27 +++++++++++++----
+ bot/arb_monitor/core/arb_nav.py                                                                | 23 +++++++++++++--
+ python3 /tmp/check_poly.py                                                                     |  0
+ 6 files changed, 237 insertions(+), 8 deletions(-)
+ create mode 100644 attached_assets/Pasted-Looking-at-your-code-there-are-a-few-points-that-could-_1775491411486.txt
+ create mode 100644 attached_assets/Pasted-Looking-at-your-code-there-are-a-few-points-that-could-_1775491420903.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-cat-tmp-c_1775491126102.txt
+ create mode 100644 python3 /tmp/check_poly.py
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot --since "2 min ago" | grep -E "Full balance_allowance|Poly balance|update_balance"
+Apr 06 16:11:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[249170]: 💸 [ArbFunder] 💰 Poly balance (proxy): 0.000000 USDC (raw=0)
+Apr 06 16:11:57 ubuntu-s-1vcpu-1gb-sfo3-01 python[249170]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# echo $POLY_API_KEY
+echo $POLY_PRIVATE_KEY
+
+
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
