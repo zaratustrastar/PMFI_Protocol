@@ -246,13 +246,13 @@ def _get_servicer_balances() -> tuple[float, float, float]:
                 key=private_key,
                 chain_id=137,
                 creds=creds,
-                signature_type=1,
+                signature_type=2,
                 funder=poly_proxy_address,
             )
             result = client.get_balance_allowance(
-                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=1)
+                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=2)
             )
-            log(f"🔍 [NAV] sig_type=1 (PROXY) response: {result}")
+            log(f"🔍 [NAV] sig_type=2 (GNOSIS_SAFE) response: {result}")
             raw = result.get("balance", "0")
             bal_raw = float(raw)
             poly_cash = bal_raw / 1_000_000

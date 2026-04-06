@@ -469,17 +469,17 @@ def _get_platform_balance(venue: str) -> float:
                 key=private_key,
                 chain_id=137,
                 creds=creds,
-                signature_type=1,
+                signature_type=2,
                 funder=poly_proxy_address,
             )
             try:
                 client.update_balance_allowance(
-                    BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=1)
+                    BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=2)
                 )
             except Exception as upd_err:
                 log(f"⚠️ [POLY] update_balance_allowance failed (non-fatal): {upd_err}")
             result = client.get_balance_allowance(
-                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=1)
+                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=2)
             )
             log(f"🔍 [POLY] sig_type=1 (PROXY) response: {result}")
             raw = result.get("balance", "0")
