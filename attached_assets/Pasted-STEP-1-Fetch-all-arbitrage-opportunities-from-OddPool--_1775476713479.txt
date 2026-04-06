@@ -1,0 +1,194 @@
+STEP 1: Fetch all arbitrage opportunities from OddPool
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GET https://api.oddpool.com/arbitrage/current?min_net_cents=5
+
+Returns list of opportunities, each with:
+  - polymarket_event_slug
+  - kalshi_event_ticker
+  - opinion_market_id
+  - outcome_key / label
+  - buy_yes_market  (which platform to buy YES on)
+  - buy_no_market   (which platform to buy NO on)
+  - polymarket.yes_ask / no_ask / volume / liquidity
+  - kalshi.yes_ask / no_ask / liquidity
+  - opinion.yes_ask / no_ask / liquidity
+  - net_cents
+  - resolution_time
+
+
+STEP 2: Score every opportunity BEFORE doing anything else
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  For each opportunity calculate:
+
+  Score = net_cents x deployable_size x time_factor
+                                                       
+  Where:
+
+  net_cents
+    → taken directly from OddPool signal
+    → profit rate per $1 invested (in cents)
+    → example: 16.7 means 16.7 cents profit per dollar
+
+  deployable_size
+    → min(liquidity on YES leg, liquidity on NO leg) x 10%
+    → capped at your MAX_POSITION_USD (e.g. $500)
+    → example: min($3018, $35548) x 0.10 = $301 deployable
+
+  time_factor  (based on days until resolution_time)
+    → < 1 day   = skip entirely (too risky to fill both legs)
+    → 1 - 7d    = 0.2  (very short, partial fill risk)
+    → 7 - 90d   = 1.0  (ideal window, full score)
+    → 90 - 180d = 0.8  (acceptable, capital tied up longer)
+    → > 180d    = 0.5  (too long, opportunity cost)
+
+  example calculation:
+    net_cents=16.7, deployable=$301, days=269, time_factor=0.5
+    score = (16.7/100) x 301 x 0.5 = $25.13 expected profit
+
+  Filter out any opportunity where:
+    - yes_liq or no_liq is zero or missing
+    - deployable_size < $10
+    - net_cents <= 0
+    - days < 1
+
+
+STEP 3: Sort by score descending, pick #1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ranked = sorted(opportunities, by score, descending)
+  best   = ranked[0]
+
+  Log top 5 for visibility:
+    #1 score=$41.20 | net=8c  | size=$500 | days=45  | time=1.0 | NBA Champion 2026
+    #2 score=$25.13 | net=16c | size=$301 | days=269 | time=0.5 | Hottest Year 2026
+    #3 score=$18.40 | net=15c | size=$230 | days=270 | time=0.5 | Bitcoin >120k
+    ...
+
+  From this point forward work ONLY with best opportunity.
+
+
+STEP 4: Resolve the exact market on each platform
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  4a. POLYMARKET (if polymarket is buy_yes_market or buy_no_market):
+
+      GET https://api.oddpool.com/search/events/{polymarket_event_slug}/markets
+      → filter results by exchange="polymarket"
+      → match correct child market by volume
+          (volume in arb signal == volume in search result)
+      → extract market_id → this is the conditionId
+
+      Then one more call:
+      GET https://clob.polymarket.com/markets/{conditionId}
+      → tokens[0].token_id = YES token
+      → tokens[1].token_id = NO  token
+      → pick index 0 if buying YES, index 1 if buying NO
+
+  4b. KALSHI (if kalshi is buy_yes_market or buy_no_market):
+      → kalshi_event_ticker already in arb signal
+      → no extra lookup needed
+
+  4c. OPINION MARKETS (if opinion is buy_yes_market or buy_no_market):
+      → opinion_market_id + outcome_key already in arb signal
+      → no extra lookup needed
+
+
+STEP 5: Validate with live prices before committing capital
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Check 1 — signal freshness:
+    age = now - signal timestamp
+    if age > 30 seconds → skip, prices may have moved
+
+  Check 2 — combined cost still profitable:
+    if yes_ask + no_ask >= 1.0 → skip, arb is gone
+
+  Check 3 — live price drift on Polymarket:
+    GET https://clob.polymarket.com/books?token_id={token_id}
+    live_ask = lowest ask in orderbook
+    drift    = abs(live_ask - signal_ask)
+    if drift > 0.02 → skip, price moved too much
+
+  Check 4 — market still open:
+    if accepting_orders = false → skip
+
+  If any check fails → log reason and exit
+  If all pass → continue
+
+
+STEP 6: Calculate exact position size
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  yes_liq = liquidity on buy_yes_market platform
+  no_liq  = liquidity on buy_no_market  platform
+
+  size = min(yes_liq, no_liq) x 10%
+  size = min(size, MAX_POSITION_USD)
+
+  expected_profit = (net_cents / 100) x size
+
+
+STEP 7: Execute both legs simultaneously
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Fire LEG A and LEG B at the same time using threads.
+
+  LEG A — buy YES on {buy_yes_market}:
+
+    if Polymarket:
+      POST https://clob.polymarket.com/order
+      {
+        "token_id":   <YES token from step 4a>,
+        "side":       "BUY",
+        "price":      yes_ask,
+        "size":       size,
+        "order_type": "GTC"
+      }
+
+    if Kalshi:
+      POST https://trading-api.kalshi.com/trade-api/v2/portfolio/orders
+      {
+        "ticker":     kalshi_event_ticker,
+        "side":       "yes",
+        "count":      size,
+        "type":       "limit",
+        "yes_price":  int(yes_ask * 100)
+      }
+
+    if Opinion:
+      POST https://api.opinionaire.com/orders
+      {
+        "market_id":   opinion_market_id,
+        "outcome_key": outcome_key,
+        "side":        "YES",
+        "price":       yes_ask,
+        "size":        size
+      }
+
+  LEG B — buy NO on {buy_no_market}:
+    → same platform routing as above
+    → use no_ask price
+    → side = "NO" / "no"
+
+
+STEP 8: Monitor fills
+━━━━━━━━━━━━━━━━━━━━
+
+  Wait up to 30 seconds for both legs to confirm.
+
+  if both filled:
+    → log success
+    → profit locked = expected_profit from step 6
+
+  if one leg filled but other did not within 30s:
+    → immediately cancel the filled leg OR hedge
+    → log failure, do not leave one-sided position open
+
+
+STEP 9: Wait for resolution
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Nothing to do after both legs fill.
+  At resolution_time one leg pays $1, other pays $0.
+  Net profit = $1 - (yes_ask + no_ask) per share.
+  Platforms pay out automatically.
