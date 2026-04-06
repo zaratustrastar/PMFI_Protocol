@@ -1,0 +1,28 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# cd /root/PolyNotifyBot && git pull
+sudo systemctl restart psniper-bot
+remote: Enumerating objects: 18, done.
+remote: Counting objects: 100% (18/18), done.
+remote: Compressing objects: 100% (5/5), done.
+remote: Total 12 (delta 7), reused 12 (delta 7), pack-reused 0 (from 0)
+Unpacking objects: 100% (12/12), 27.71 KiB | 1.03 MiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   97bd073..b221a74  main       -> origin/main
+Updating 97bd073..b221a74
+Fast-forward
+ attached_assets/Pasted-Welcome-to-Ubuntu-24-04-3-LTS-GNU-Linux-6-8-0-101-gener_1775481818793.txt | 256 +++++++++++++++++++++
+ attached_assets/Pasted-inee-2028-Missing-dependencies-for-SOCKS-support-retry-_1775483090051.txt | 548 +++++++++++++++++++++++++++++++++++++++++++++
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-curl-v-x-_1775482583230.txt |  72 ++++++
+ attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775482105019.txt |  52 +++++
+ attached_assets/Pasted-support-retry-in-2-2s-attempt-2-3-Apr-06-13-28-26-ubunt_1775482148229.txt | 683 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ bot/arb_monitor/adapters/polymarket.py                                                           |   8 +-
+ 6 files changed, 1616 insertions(+), 3 deletions(-)
+ create mode 100644 attached_assets/Pasted-Welcome-to-Ubuntu-24-04-3-LTS-GNU-Linux-6-8-0-101-gener_1775481818793.txt
+ create mode 100644 attached_assets/Pasted-inee-2028-Missing-dependencies-for-SOCKS-support-retry-_1775483090051.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-curl-v-x-_1775482583230.txt
+ create mode 100644 attached_assets/Pasted-root-ubuntu-s-1vcpu-1gb-sfo3-01-PolyNotifyBot-sudo-jour_1775482105019.txt
+ create mode 100644 attached_assets/Pasted-support-retry-in-2-2s-attempt-2-3-Apr-06-13-28-26-ubunt_1775482148229.txt
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "score=\\\$|poly_orderbook_missing|SOCKS"
+Apr 06 14:00:19 ubuntu-s-1vcpu-1gb-sfo3-01 python[236153]: ⏳ [HTTP] kalshi error on https://api.elections.kalshi.com/trade-api/v2/markets/KXBRPRES-26/orderbook: Missing dependencies for SOCKS support., retry in 1.5s (attempt 1/3)
+Apr 06 14:00:19 ubuntu-s-1vcpu-1gb-sfo3-01 python[236153]: ⏳ [HTTP] kalshi error on https://api.elections.kalshi.com/trade-api/v2/markets/KXBRPRES-26/orderbook: Missing dependencies for SOCKS support., retry in 2.2s (attempt 2/3)
+Apr 06 14:00:19 ubuntu-s-1vcpu-1gb-sfo3-01 python[236153]: ⏳ [HTTP] kalshi error on https://api.elections.kalshi.com/trade-api/v2/markets/KXBRPRES-26/orderbook: Missing dependencies for SOCKS support., retry in 3.4s (attempt 3/3)
+Apr 06 14:00:19 ubuntu-s-1vcpu-1gb-sfo3-01 python[236153]: ❌ [HTTP] kalshi exhausted 3 retries for https://api.elections.kalshi.com/trade-api/v2/markets/KXBRPRES-26/orderbook: Missing dependencies for SOCKS support.
