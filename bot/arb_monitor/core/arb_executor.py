@@ -827,29 +827,45 @@ def execute_arb(
     leg2_usdc = contract_count * live_kalshi_ask
 
     # ── Balance-fit cap: scale down if servicer can't cover the funding gaps ──
-    # Finds the largest N ≤ contract_count where:
-    #   max(0, N*poly_ask - poly_bal) + max(0, N*v2_ask - v2_bal) <= svc_deployable
-    # This lets the bot trade with money already on the platforms without
-    # needing the servicer to bridge new capital, avoiding avoidable failures.
+    # Finds the largest N ≤ contract_count where the EFFECTIVE funding requirement
+    # (raw gap raised to venue minimum deposit when positive) fits in svc_deployable.
+    # Uses VENUE_MIN_DEPOSIT from arb_funder so this mirrors fund_both_legs_for_trade()
+    # exactly — preventing the case where a tiny positive gap looks affordable here
+    # but triggers a $3 min-deposit in the funder and fails again.
+    #
+    # Effective gap per leg:
+    #   raw_gap = max(0, N*ask - platform_balance)
+    #   eff_gap = max(raw_gap, venue_min) if raw_gap > 0 else 0
+    # Accept N when: eff_poly_gap + eff_v2_gap <= svc_deployable
     try:
-        from .arb_funder import get_platform_spot_balances, get_servicer_deployable_usdc
+        from .arb_funder import (
+            get_platform_spot_balances,
+            get_servicer_deployable_usdc,
+            VENUE_MIN_DEPOSIT,
+        )
         _poly_bal, _v2_bal = get_platform_spot_balances(venue2)
         _svc_dep = get_servicer_deployable_usdc()
+        _poly_min = VENUE_MIN_DEPOSIT.get("polymarket", 1.0)
+        _v2_min   = VENUE_MIN_DEPOSIT.get(venue2, 1.0)
         log(
             f"💰 Balance-fit check: poly_on_platform={_poly_bal:.4f} "
             f"{venue2}_on_platform={_v2_bal:.4f} "
-            f"servicer_deployable={_svc_dep:.4f}"
+            f"servicer_deployable={_svc_dep:.4f} "
+            f"(poly_min={_poly_min} {venue2}_min={_v2_min})"
         )
         _original_count = contract_count
         _found = False
         for _n in range(contract_count, 0, -1):
-            _poly_gap = max(0.0, _n * live_poly_ask - _poly_bal)
-            _v2_gap   = max(0.0, _n * live_kalshi_ask - _v2_bal)
-            if _poly_gap + _v2_gap <= _svc_dep:
+            _raw_poly = max(0.0, _n * live_poly_ask - _poly_bal)
+            _raw_v2   = max(0.0, _n * live_kalshi_ask - _v2_bal)
+            # Effective gap mirrors funder: any positive raw gap is raised to venue minimum
+            _eff_poly = max(_raw_poly, _poly_min) if _raw_poly > 0 else 0.0
+            _eff_v2   = max(_raw_v2,   _v2_min)   if _raw_v2   > 0 else 0.0
+            if _eff_poly + _eff_v2 <= _svc_dep:
                 if _n < _original_count:
                     log(
                         f"⬇️ Balance-fit: scaled {_original_count}→{_n} contracts "
-                        f"(poly_gap={_poly_gap:.4f} {venue2}_gap={_v2_gap:.4f} "
+                        f"(eff_poly_gap={_eff_poly:.4f} eff_{venue2}_gap={_eff_v2:.4f} "
                         f"fits svc_deployable={_svc_dep:.4f})"
                     )
                 contract_count = _n
@@ -859,7 +875,8 @@ def execute_arb(
             result.error = (
                 f"insufficient_capital: no contract count (1..{_original_count}) fits "
                 f"poly_bal={_poly_bal:.4f} + {venue2}_bal={_v2_bal:.4f} + "
-                f"servicer_deployable={_svc_dep:.4f}"
+                f"servicer_deployable={_svc_dep:.4f} "
+                f"(poly_min={_poly_min} {venue2}_min={_v2_min})"
             )
             log(f"❌ {result.error}")
             return result

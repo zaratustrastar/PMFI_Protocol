@@ -59,6 +59,15 @@ SELECTOR_APPROVE = "095ea7b3"    # approve(address,uint256)
 SELECTOR_ALLOWANCE = "dd62ed3e"  # allowance(address,address)
 SELECTOR_BALANCE_OF = "70a08231" # balanceOf(address)
 
+# Minimum deposit enforced by each trading venue.
+# Sending below this amount results in a rejected/lost deposit.
+# Must stay in sync with fund_both_legs_for_trade() logic.
+VENUE_MIN_DEPOSIT: dict = {
+    "opinion":    3.0,   # Opinion Labs: $3 minimum deposit
+    "polymarket": 1.0,   # Polymarket CLOB: $1 effective minimum
+    "kalshi":     1.0,   # Kalshi: $1 effective minimum
+}
+
 
 def log(msg: str):
     print(f"💸 [ArbFunder] {msg}")
@@ -755,14 +764,6 @@ def fund_both_legs_for_trade(
         return False, msg
 
     # ── Step 2 & 3: Read current platform balances and compute gaps ───────
-    # Minimum deposit thresholds enforced by each venue.
-    # Sending below the minimum results in a rejected/lost deposit.
-    _VENUE_MIN_DEPOSIT = {
-        "opinion":    3.0,   # Opinion Labs: $3 minimum deposit
-        "polymarket": 1.0,   # Polymarket CLOB: $1 effective minimum
-        "kalshi":     1.0,   # Kalshi: $1 effective minimum
-    }
-
     log("📊 Reading current platform balances...")
     poly_before   = _get_platform_balance("polymarket")
     poly_target   = poly_usdc
@@ -776,8 +777,8 @@ def fund_both_legs_for_trade(
     # subject to the venue's minimum deposit floor.
     # This maximises capital efficiency: platforms accumulate balance across trades
     # and the servicer only ever covers the shortfall, not the full leg amount.
-    poly_min  = _VENUE_MIN_DEPOSIT.get("polymarket", 1.0)
-    v2_min    = _VENUE_MIN_DEPOSIT.get(venue2, 1.0)
+    poly_min  = VENUE_MIN_DEPOSIT.get("polymarket", 1.0)
+    v2_min    = VENUE_MIN_DEPOSIT.get(venue2, 1.0)
 
     if poly_before >= poly_target:
         poly_deposit = 0.0
