@@ -458,7 +458,6 @@ def _get_platform_balance(venue: str) -> float:
             from py_clob_client.clob_types import ApiCreds, BalanceAllowanceParams, AssetType
             clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
             private_key        = os.environ.get("POLY_PRIVATE_KEY", "")
-            poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
             creds = ApiCreds(
                 api_key=poly_api_key.strip(),
                 api_secret=poly_api_secret.strip(),
@@ -470,7 +469,6 @@ def _get_platform_balance(venue: str) -> float:
                 chain_id=137,
                 creds=creds,
                 signature_type=0,
-                proxy_address=poly_proxy_address,
             )
             result = client.get_balance_allowance(
                 BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
