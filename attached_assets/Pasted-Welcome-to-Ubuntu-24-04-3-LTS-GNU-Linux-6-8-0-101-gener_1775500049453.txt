@@ -1,0 +1,164 @@
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-101-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Mon Apr  6 18:10:25 UTC 2026
+
+  System load:  0.26               Processes:             141
+  Usage of /:   74.7% of 23.17GB   Users logged in:       1
+  Memory usage: 18%                IPv4 address for eth0: 147.182.206.35
+  Swap usage:   8%                 IPv4 address for eth0: 10.48.0.5
+
+Expanded Security Maintenance for Applications is not enabled.
+
+55 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+*** System restart required ***
+Last login: Mon Apr  6 16:43:42 2026 from 162.243.188.66
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# 
+cd ~/PolyNotifyBot
+git pull
+sudo systemctl restart psniper-bot
+remote: Enumerating objects: 31, done.
+remote: Counting objects: 100% (31/31), done.
+remote: Compressing objects: 100% (5/5), done.
+remote: Total 24 (delta 19), reused 24 (delta 19), pack-reused 0 (from 0)
+Unpacking objects: 100% (24/24), 11.30 KiB | 330.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   176ea2e..24d6706  main       -> origin/main
+Updating 176ea2e..24d6706
+Fast-forward
+ .../Pasted-Welcome-to-Ubuntu-24-04-3-LTS-GNU-Linux-6-8-0-101-gener_1775494155187.txt           | 135 ++++++++++++++++++++++++++++++++++++++++++++++
+ bot/arb_monitor/core/arb_executor.py                                                           |  62 ++++++++++++++++++++-
+ bot/arb_monitor/core/arb_funder.py                                                             |  82 ++++++++++++++++++----------
+ 3 files changed, 251 insertions(+), 28 deletions(-)
+ create mode 100644 attached_assets/Pasted-Welcome-to-Ubuntu-24-04-3-LTS-GNU-Linux-6-8-0-101-gener_1775494155187.txt
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "\[ArbExecLoop\]|\[ArbFunder\]|\[Arb/Executor\]"
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=0.68 under_pressure=False unwind_needed=False
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-06T18:24:52Z
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775499791, cooldown=60s) — calling
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=2853
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 📤 TX nonce=2853 → 0xde93254bff24636ffc5c93dad87de23b322a9790057bb42388a406faae8343cf
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] ✅ tend() sent: tx=0xde93254bff24636ffc5c93dad87de23b322a9790057bb42388a406faae8343cf
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💼 Servicer [2026-04-06T18:24:52Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=1.6823 ETH=0.009181 safety_buffer=1.0 gas_reserve=0.0010 ETH
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=1.68 deployable=0.68 under_pressure=False
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.6823 USDC in servicer wallet
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3855878', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.855878 USDC (raw=3855878)
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 sig_type=0 (EOA) response: {'balance': '0', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '0', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '0', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '0'}}
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+Apr 06 18:24:54 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
+Apr 06 18:25:08 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 💼 Platform balances: poly=3.8559 kalshi=5.6000 opinion=9.0559 USDC
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 📊 186 opportunities fetched, sorted by score desc
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 💼 btc-max-2026_value_above_120k: size_usdc=29311.21 capped to opp_total_available=13.59 USDC (servicer=0.68 + poly=3.86 + opinion=9.06)
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=btc-max-2026_value_above_120k venue2=opinion | score=2344.9 AR=0.00× net_edge=15.90% conf=0.00 | days=269.44d size=$13.59
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 🔍 Starting execution for pair btc-max-2026_value_above_120k (venue2=opinion)
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 6596521422507360... for price check
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=6596521422507360... (side=YES) venue2=opinion opinion=340
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.7000 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='340')
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=15.9000 | min_edge=0.0030 | live poly_ask=0.14 opinion_ask=0.7
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.1400 quote=0.1400 slippage=+0.0000
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.7000 quote=0.7000 slippage=+0.0000
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.1600 | Oddpool net_edge=15.90% — proceeding to size
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (16 contracts)
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=33046 contracts/$6720.65 (max_fill=0.2970) | depth_leg2=16 contracts/$0.00 (max_fill=0.8570)
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=16 depth_limited=16 → final=16
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3855878', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.855878 USDC (raw=3855878)
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 sig_type=0 (EOA) response: {'balance': '0', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '0', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '0', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '0'}}
+Apr 06 18:25:09 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 📊 [spot_balances] poly=3.8559 USDC | opinion=9.0559 USDC
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 💰 Balance-fit check: poly_on_platform=3.8559 opinion_on_platform=9.0559 servicer_deployable=0.6823 (poly_min=1.0 opinion_min=3.0)
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ⬇️ Balance-fit: scaled 16→12 contracts (eff_poly_gap=0.0000 eff_opinion_gap=0.0000 fits svc_deployable=0.6823)
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📐 Trade sizing: contract_count=12 (integer, depth-capped, balance-fit) leg1_usdc=1.6800 leg2_usdc=8.4000 total_cost=10.0800
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 💰 Funding both legs simultaneously: poly=1.6800 USDC | opinion=8.4000 USDC
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 fund_both_legs: poly=1.6800 USDC | opinion=8.4000 USDC (total=10.0800)
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 📊 Reading current platform balances...
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3855878', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.855878 USDC (raw=3855878)
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 sig_type=0 (EOA) response: {'balance': '0', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '0', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '0', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '0'}}
+Apr 06 18:25:10 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+Apr 06 18:25:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] ✅ Poly already has 3.8559 >= 1.6800 — no deposit needed
+Apr 06 18:25:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] ✅ opinion already has 9.0559 >= 8.4000 — no deposit needed
+Apr 06 18:25:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 📊 Balances: poly=3.8559 (required=1.6800 deposit=0.0000) | opinion=9.0559 (required=8.4000 deposit=0.0000)
+Apr 06 18:25:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] ✅ Both platforms already have sufficient balance — no deposit needed
+Apr 06 18:25:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ✅ Both legs funded — proceeding to order placement
+Apr 06 18:25:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📤 Firing both legs SIMULTANEOUSLY | LEG1: Polymarket YES 12×@0.14 token=6596521422507360... | LEG2: opinion NO 12×@0.7
+Apr 06 18:25:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📤 [POLY] Placing BUY order: token=6596521422507360... price=0.14 size_usdc=1.6800000000000002
+Apr 06 18:25:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 🔑 [POLY] Using L2-authenticated ClobClient (sig_type=2/GNOSIS_SAFE, funder=0x29832cb67586d80894Dff3194927c9f73Fbf004f)
+Apr 06 18:25:11 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ❌ [POLY] Order error: PolyApiException[status_code=403, error_message={'error': 'Trading restricted in your region, please refer to available regions - https://docs.polymarket.com/developers/CLOB/geoblock'}]
+Apr 06 18:25:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ❌ Leg1=False orderId='' err="PolyApiException[status_code=403, error_message={'error': 'Trading restricted in your region, please refer to available regions - https://docs.polymarket.com/developers/CLOB/geoblock'}]" | ❌ Leg2=False orderId='' err="Cannot resolve token IDs for Opinion market_id='340'"
+Apr 06 18:25:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ❌ Both legs failed — no capital moved: both_legs_failed: leg1=PolyApiException[status_code=403, error_message={'error': 'Trading restricted in your region, please refer to available regions - https://docs.polymarket.com/developers/CLOB/geoblock'}] | leg2=Cannot resolve token IDs for Opinion market_id='340'
+Apr 06 18:25:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] ❌ btc-max-2026_value_above_120k: execution stopped cycle — both_legs_failed: leg1=PolyApiException[status_code=403, error_message={'error': 'Trading restricted in your region, please refer to available regions - https://docs.polymarket.com/developers/CLOB/geoblock'}] | leg2=Cannot resolve token IDs for Opinion market_id='340' unwound=False
+Apr 06 18:25:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=1 skipped_display_only=0 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=0 depth_insufficient=0 depth_unavailable=0
+Apr 06 18:25:33 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 06 18:25:42 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=0.68 under_pressure=False unwind_needed=False
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-06T18:25:43Z
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] ⏳ tend() cooldown: 11s remaining — skip
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💼 Servicer [2026-04-06T18:25:43Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=1.6823 ETH=0.009181 safety_buffer=1.0 gas_reserve=0.0010 ETH
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=1.68 deployable=0.68 under_pressure=False
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.6823 USDC in servicer wallet
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3855878', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.855878 USDC (raw=3855878)
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 sig_type=0 (EOA) response: {'balance': '0', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '0', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '0', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '0'}}
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+Apr 06 18:25:45 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
+Apr 06 18:25:49 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 💼 Platform balances: poly=3.8559 kalshi=5.6000 opinion=9.0559 USDC
+Apr 06 18:26:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 📊 188 opportunities fetched, sorted by score desc
+Apr 06 18:26:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 💼 btc-max-2026_value_above_120k: size_usdc=29311.21 capped to opp_total_available=13.59 USDC (servicer=0.68 + poly=3.86 + opinion=9.06)
+Apr 06 18:26:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=btc-max-2026_value_above_120k venue2=opinion | score=2344.9 AR=0.00× net_edge=15.90% conf=0.00 | days=269.44d size=$13.59
+Apr 06 18:26:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 🔍 Starting execution for pair btc-max-2026_value_above_120k (venue2=opinion)
+Apr 06 18:26:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 6596521422507360... for price check
+Apr 06 18:26:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📊 Re-checking live prices for poly=6596521422507360... (side=YES) venue2=opinion opinion=340
+Apr 06 18:26:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask=0.7000 (token-based re-fetch skipped — proxy API does not resolve opinion_market_id='340')
+Apr 06 18:26:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📊 Oddpool net_edge=15.9000 | min_edge=0.0030 | live poly_ask=0.14 opinion_ask=0.7
+Apr 06 18:26:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ✅ Poly slippage OK: live=0.1400 quote=0.1400 slippage=+0.0000
+Apr 06 18:26:00 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ✅ opinion slippage OK: live=0.7000 quote=0.7000 slippage=+0.0000
+Apr 06 18:26:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📐 Live spread (informational): 0.1600 | Oddpool net_edge=15.90% — proceeding to size
+Apr 06 18:26:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ℹ️ Opinion Labs depth API not available — leg-2 capped at budget (16 contracts)
+Apr 06 18:26:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📏 Depth summary: depth_poly=33046 contracts/$6720.65 (max_fill=0.2970) | depth_leg2=16 contracts/$0.00 (max_fill=0.8570)
+Apr 06 18:26:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📐 Contract sizing: budget_derived=16 depth_limited=16 → final=16
+Apr 06 18:26:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] ⚠️ [POLY] update_balance_allowance failed (non-fatal): PolyApiException[status_code=None, error_message=Request exception!]
+Apr 06 18:26:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3855878', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 06 18:26:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.855878 USDC (raw=3855878)
+Apr 06 18:26:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 sig_type=0 (EOA) response: {'balance': '0', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '0', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '0', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '0'}}
+Apr 06 18:26:01 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 📊 [spot_balances] poly=3.8559 USDC | opinion=9.0559 USDC
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 💰 Balance-fit check: poly_on_platform=3.8559 opinion_on_platform=9.0559 servicer_deployable=0.6823 (poly_min=1.0 opinion_min=3.0)
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ⬇️ Balance-fit: scaled 16→12 contracts (eff_poly_gap=0.0000 eff_opinion_gap=0.0000 fits svc_deployable=0.6823)
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📐 Trade sizing: contract_count=12 (integer, depth-capped, balance-fit) leg1_usdc=1.6800 leg2_usdc=8.4000 total_cost=10.0800
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 💰 Funding both legs simultaneously: poly=1.6800 USDC | opinion=8.4000 USDC
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 fund_both_legs: poly=1.6800 USDC | opinion=8.4000 USDC (total=10.0800)
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 📊 Reading current platform balances...
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3855878', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.855878 USDC (raw=3855878)
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] ⚠️ [POLY] EOA balance check failed: PolyApiException[status_code=None, error_message=Request exception!]
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] ✅ Poly already has 3.8559 >= 1.6800 — no deposit needed
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] ✅ opinion already has 9.0559 >= 8.4000 — no deposit needed
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] 📊 Balances: poly=3.8559 (required=1.6800 deposit=0.0000) | opinion=9.0559 (required=8.4000 deposit=0.0000)
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 💸 [ArbFunder] ✅ Both platforms already have sufficient balance — no deposit needed
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ✅ Both legs funded — proceeding to order placement
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📤 Firing both legs SIMULTANEOUSLY | LEG1: Polymarket YES 12×@0.14 token=6596521422507360... | LEG2: opinion NO 12×@0.7
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 📤 [POLY] Placing BUY order: token=6596521422507360... price=0.14 size_usdc=1.6800000000000002
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] 🔑 [POLY] Using L2-authenticated ClobClient (sig_type=2/GNOSIS_SAFE, funder=0x29832cb67586d80894Dff3194927c9f73Fbf004f)
+Apr 06 18:26:02 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ❌ [POLY] Order error: PolyApiException[status_code=403, error_message={'error': 'Trading restricted in your region, please refer to available regions - https://docs.polymarket.com/developers/CLOB/geoblock'}]
+Apr 06 18:26:06 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ❌ Leg1=False orderId='' err="PolyApiException[status_code=403, error_message={'error': 'Trading restricted in your region, please refer to available regions - https://docs.polymarket.com/developers/CLOB/geoblock'}]" | ❌ Leg2=False orderId='' err="Cannot resolve token IDs for Opinion market_id='340'"
+Apr 06 18:26:06 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: ⚡ [Arb/Executor] ❌ Both legs failed — no capital moved: both_legs_failed: leg1=PolyApiException[status_code=403, error_message={'error': 'Trading restricted in your region, please refer to available regions - https://docs.polymarket.com/developers/CLOB/geoblock'}] | leg2=Cannot resolve token IDs for Opinion market_id='340'
+Apr 06 18:26:06 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] ❌ btc-max-2026_value_above_120k: execution stopped cycle — both_legs_failed: leg1=PolyApiException[status_code=403, error_message={'error': 'Trading restricted in your region, please refer to available regions - https://docs.polymarket.com/developers/CLOB/geoblock'}] | leg2=Cannot resolve token IDs for Opinion market_id='340' unwound=False
+Apr 06 18:26:06 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=1 skipped_display_only=0 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=0 depth_insufficient=0 depth_unavailable=0
+Apr 06 18:26:06 ubuntu-s-1vcpu-1gb-sfo3-01 python[265029]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
