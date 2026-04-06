@@ -9,6 +9,11 @@ Example (nano.env):
 
 Cloudflare detection: Only blocks responses that are clearly HTML challenge pages.
 Valid JSON is accepted regardless of Content-Type header.
+
+Proxy routing:
+  Only gamma-api.polymarket.com (Cloudflare-protected) needs the proxy.
+  All other venues (Kalshi, Opinion, clob.polymarket.com) connect directly.
+  Pass bypass_proxy=True on get() calls for those venues.
 """
 
 import os
@@ -27,6 +32,7 @@ DEFAULT_MAX_RETRIES = 3
 BACKOFF_BASE = 1.5
 
 _session: Optional[requests.Session] = None
+_direct_session: Optional[requests.Session] = None
 
 
 def _get_session() -> requests.Session:
@@ -51,6 +57,15 @@ def _get_session() -> requests.Session:
         else:
             print("🌐 [HTTP] No proxy configured (direct connections)")
     return _session
+
+
+def _get_direct_session() -> requests.Session:
+    """Return a session that always connects directly, bypassing any configured proxy."""
+    global _direct_session
+    if _direct_session is None:
+        _direct_session = requests.Session()
+        _direct_session.headers.update({"User-Agent": DEFAULT_USER_AGENT})
+    return _direct_session
 
 
 def _looks_like_json(resp: requests.Response) -> bool:
@@ -81,9 +96,10 @@ def get(url: str, *,
         params: Optional[dict] = None,
         headers: Optional[dict] = None,
         timeout: int = DEFAULT_TIMEOUT,
-        max_retries: int = DEFAULT_MAX_RETRIES) -> Optional[requests.Response]:
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        bypass_proxy: bool = False) -> Optional[requests.Response]:
 
-    session = _get_session()
+    session = _get_direct_session() if bypass_proxy else _get_session()
     req_headers = {}
     if headers:
         req_headers.update(headers)

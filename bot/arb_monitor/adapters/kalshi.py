@@ -80,7 +80,7 @@ def fetch_events_page(limit: int = 200, cursor: str = "", status: str = "open") 
     if cursor:
         params["cursor"] = cursor
 
-    resp = http_client.get(url, venue="kalshi", params=params, headers=_headers())
+    resp = http_client.get(url, venue="kalshi", params=params, headers=_headers(), bypass_proxy=True)
     if resp is None:
         log(f"❌ Events API returned None (likely proxy/network/Cloudflare error)")
         return [], ""
@@ -106,7 +106,7 @@ def fetch_markets_page(limit: int = 200, cursor: str = "", status: str = "open")
     if cursor:
         params["cursor"] = cursor
 
-    resp = http_client.get(url, venue="kalshi", params=params, headers=_headers())
+    resp = http_client.get(url, venue="kalshi", params=params, headers=_headers(), bypass_proxy=True)
     if resp is None:
         log(f"❌ Markets API returned None (likely proxy/network/Cloudflare error)")
         return [], ""
@@ -325,7 +325,7 @@ def resolve_market_ticker(event_ticker: str, outcome_key: str = "yes") -> Option
     url = f"{KALSHI_BASE_URL}/markets"
     params = {"event_ticker": event_ticker, "status": "open", "limit": 20}
     log(f"🔍 resolve_market_ticker: fetching markets for event {event_ticker!r}")
-    resp = http_client.get(url, venue="kalshi", headers=_headers(), params=params, timeout=10)
+    resp = http_client.get(url, venue="kalshi", headers=_headers(), params=params, timeout=10, bypass_proxy=True)
     if resp is None or resp.status_code != 200:
         log(f"⚠️ resolve_market_ticker: HTTP {resp.status_code if resp else 'None'} for {event_ticker!r}")
         return None
@@ -426,7 +426,7 @@ def get_best_prices(ticker: str, debug: bool = False) -> dict:
     except Exception:
         req_headers = _headers()
 
-    resp = http_client.get(url, venue="kalshi", headers=req_headers, timeout=10)
+    resp = http_client.get(url, venue="kalshi", headers=req_headers, timeout=10, bypass_proxy=True)
     if resp is None:
         # http_client.get() returns None when all retries are exhausted
         # (network error, connection refused, or Cloudflare completely blocked the TCP).
@@ -549,7 +549,7 @@ def fetch_orderbook_depth(ticker: str, depth: int = 25) -> Optional[dict]:
             headers = _headers()
     except Exception:
         headers = _headers()
-    resp = http_client.get(url, venue="kalshi", headers=headers, params={"depth": depth}, timeout=10)
+    resp = http_client.get(url, venue="kalshi", headers=headers, params={"depth": depth}, timeout=10, bypass_proxy=True)
     if resp is None or resp.status_code != 200:
         log(f"⚠️ [Kalshi] orderbook_depth HTTP {resp.status_code if resp else 'None'} for {ticker}")
         return None

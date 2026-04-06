@@ -119,6 +119,7 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
             params=params,
             headers=_headers(),
             timeout=15,
+            bypass_proxy=True,
         )
 
         if resp is None:
@@ -314,6 +315,7 @@ def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
             venue="opinion",
             headers=_headers(),
             timeout=10,
+            bypass_proxy=True,
         )
         if resp is not None:
             log(f"📡 Token lookup path 2 status={resp.status_code}")
@@ -351,6 +353,7 @@ def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
             params={"marketId": market_id, "limit": 5},
             headers=_headers(),
             timeout=10,
+            bypass_proxy=True,
         )
         if resp2 is not None:
             log(f"📡 Token lookup path 3 status={resp2.status_code}")
@@ -397,6 +400,7 @@ def fetch_orderbook(token_id: str) -> Optional[dict]:
         params={"token_id": token_id},
         headers=_headers(),
         timeout=10,
+        bypass_proxy=True,
     )
 
     if resp is None or resp.status_code != 200:
