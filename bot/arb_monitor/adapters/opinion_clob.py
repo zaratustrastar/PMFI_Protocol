@@ -34,6 +34,52 @@ from ..config import (
     OPINION_RPC_URL,
 )
 
+# ── Route opinion_clob_sdk through Serbian residential proxy ──────────────────
+# opinion_clob_sdk uses requests internally with no proxy support of its own.
+# We patch requests.adapters.HTTPAdapter.send to inject OPINION_PROXY_URL
+# for any request destined for opinion.trade — other venues are unaffected.
+# The patch is URL-filtered: only URLs containing "opinion.trade" get the proxy.
+# Kalshi (_KALSHI_SESSION with trust_env=False) never calls opinion.trade, so
+# it is guaranteed unaffected.  BSC RPC calls (bsc-dataseed.binance.org) are
+# also outside the filter — they stay direct.
+import re as _re
+
+_opinion_clob_proxy = os.environ.get("OPINION_PROXY_URL", "")
+_opinion_proxy_display = (
+    _re.sub(r"//[^@]+@", "//<redacted>@", _opinion_clob_proxy)
+    if _opinion_clob_proxy else ""
+)
+
+if _opinion_clob_proxy:
+    try:
+        from requests.adapters import HTTPAdapter as _HTTPAdapter
+
+        _orig_http_adapter_send = _HTTPAdapter.send
+        _op_proxy_dict = {"http": _opinion_clob_proxy, "https": _opinion_clob_proxy}
+
+        def _opinion_proxied_send(self, request, **kwargs):
+            if "opinion.trade" in (request.url or ""):
+                if not kwargs.get("proxies"):
+                    kwargs = dict(kwargs)
+                    kwargs["proxies"] = _op_proxy_dict
+            return _orig_http_adapter_send(self, request, **kwargs)
+
+        _HTTPAdapter.send = _opinion_proxied_send
+        print(
+            f"⚡ [Arb/OpinionCLOB] 🌐 Opinion CLOB proxy ACTIVE (monkey-patched): {_opinion_proxy_display}",
+            flush=True,
+        )
+    except Exception as _patch_err:
+        print(
+            f"⚡ [Arb/OpinionCLOB] ⚠️ Failed to patch Opinion CLOB proxy: {_patch_err}",
+            flush=True,
+        )
+else:
+    print(
+        "⚡ [Arb/OpinionCLOB] ⚠️ No OPINION_PROXY_URL set — Opinion CLOB will connect directly (may be geo-blocked)",
+        flush=True,
+    )
+
 _OPINION_CHAIN_ID = 56  # BNB Chain Mainnet
 _CONDITIONAL_TOKENS_ADDR = "0xAD1a38cEc043e70E83a3eC30443dB285ED10D774"
 _MULTISEND_ADDR = "0x998739BFdAAdde7C933B942a68053933098f9EDa"

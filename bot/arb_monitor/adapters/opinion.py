@@ -121,12 +121,11 @@ def fetch_all_active_markets() -> tuple[list[dict], dict]:
         }
         log(f"Fetching page {page + 1}: page={page + 1} limit={API_PAGE_SIZE}")
 
-        resp = http_client.get(
+        resp = http_client.opinion_get(
             url, venue="opinion",
             params=params,
             headers=_headers(),
             timeout=15,
-            bypass_proxy=True,
         )
 
         if resp is None:
@@ -317,12 +316,11 @@ def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
         # Path 2: single-market endpoint
         url1 = f"{OPINION_BASE_URL}/market/{market_id}"
         log(f"📡 Token lookup path 2: GET {url1}")
-        resp = http_client.get(
+        resp = http_client.opinion_get(
             url1,
             venue="opinion",
             headers=_headers(),
             timeout=10,
-            bypass_proxy=True,
         )
         if resp is not None:
             log(f"📡 Token lookup path 2 status={resp.status_code}")
@@ -354,13 +352,12 @@ def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
         # Path 3: filtered list endpoint
         url3 = f"{OPINION_BASE_URL}/market"
         log(f"📡 Token lookup path 3: GET {url3}?marketId={market_id}&limit=5")
-        resp2 = http_client.get(
+        resp2 = http_client.opinion_get(
             url3,
             venue="opinion",
             params={"marketId": market_id, "limit": 5},
             headers=_headers(),
             timeout=10,
-            bypass_proxy=True,
         )
         if resp2 is not None:
             log(f"📡 Token lookup path 3 status={resp2.status_code}")
@@ -470,8 +467,8 @@ def resolve_tradable_market(
         # ── Path 1: direct binary market endpoint ─────────────────────────────
         url_binary = f"{OPINION_BASE_URL}/market/{market_id}"
         log(f"📡 resolve_tradable_market path 1 (binary): GET {url_binary}")
-        r1 = http_client.get(
-            url_binary, venue="opinion", headers=_headers(), timeout=10, bypass_proxy=True,
+        r1 = http_client.opinion_get(
+            url_binary, venue="opinion", headers=_headers(), timeout=10,
         )
         if r1 is not None and r1.status_code == 200:
             try:
@@ -496,8 +493,8 @@ def resolve_tradable_market(
         # ── Path 2: categorical market endpoint → childMarkets ────────────────
         url_cat = f"{OPINION_BASE_URL}/market/categorical/{market_id}"
         log(f"📡 resolve_tradable_market path 2 (categorical): GET {url_cat}")
-        r2 = http_client.get(
-            url_cat, venue="opinion", headers=_headers(), timeout=10, bypass_proxy=True,
+        r2 = http_client.opinion_get(
+            url_cat, venue="opinion", headers=_headers(), timeout=10,
         )
         if r2 is not None and r2.status_code == 200:
             try:
@@ -546,10 +543,10 @@ def resolve_tradable_market(
         # ── Path 3: list endpoint fallback ────────────────────────────────────
         url_list = f"{OPINION_BASE_URL}/market"
         log(f"📡 resolve_tradable_market path 3 (list): GET {url_list}?marketId={market_id}")
-        r3 = http_client.get(
+        r3 = http_client.opinion_get(
             url_list, venue="opinion",
             params={"marketId": market_id, "limit": 5},
-            headers=_headers(), timeout=10, bypass_proxy=True,
+            headers=_headers(), timeout=10,
         )
         if r3 is not None and r3.status_code == 200:
             try:
@@ -582,12 +579,11 @@ def fetch_orderbook(token_id: str) -> Optional[dict]:
         return None
 
     url = f"{OPINION_BASE_URL}/token/orderbook"
-    resp = http_client.get(
+    resp = http_client.opinion_get(
         url, venue="opinion",
         params={"token_id": token_id},
         headers=_headers(),
         timeout=10,
-        bypass_proxy=True,
     )
 
     if resp is None or resp.status_code != 200:
