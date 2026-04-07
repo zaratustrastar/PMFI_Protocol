@@ -239,15 +239,20 @@ def place_order(
     price: float,
     size_usdc: float,
     contract_count: int,
+    outcome_hint: str = "",
 ) -> tuple[bool, str, str]:
     """Place a limit buy order on Opinion Labs CLOB.
 
     Args:
-        market_id:      Opinion market ID (numeric string, e.g. "371")
+        market_id:      Opinion market ID (numeric string). May be a categorical
+                        parent ID (e.g. "340") — this function resolves it to the
+                        correct tradable child market automatically.
         side:           "YES" or "NO"
         price:          fractional price (0.0–1.0)
         size_usdc:      total USDT to spend (Opinion quote token is USDT)
         contract_count: integer number of contracts (used as fallback sizing)
+        outcome_hint:   Oddpool outcome_key (e.g. "value_above_120k") — used to
+                        select the correct child from a categorical parent market.
 
     Returns (ok: bool, order_id: str, error_msg: str).
     The SDK call runs with _SDK_CALL_TIMEOUT so a hung endpoint never blocks.
@@ -256,19 +261,25 @@ def place_order(
     if client is None:
         return False, "", (_client_error or "Opinion SDK client not available")
 
-    # Resolve token IDs for the market (YES or NO token).
-    from ..adapters.opinion import lookup_token_ids_by_market_id
-    token_pair = lookup_token_ids_by_market_id(market_id)
-    if not token_pair:
-        err = f"Cannot resolve token IDs for Opinion market_id={market_id!r}"
+    # Resolve to a tradable child market — handles both binary and categorical parents.
+    # For a binary market: child_market_id == market_id.
+    # For a categorical parent (e.g. 340): picks the correct child via outcome_hint.
+    from ..adapters.opinion import resolve_tradable_market
+    resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint)
+    if not resolved:
+        err = (
+            f"Cannot resolve tradable market for Opinion market_id={market_id!r} "
+            f"outcome_hint={outcome_hint!r}"
+        )
         log(f"❌ {err}")
         return False, "", err
 
-    yes_token_id, no_token_id = token_pair
+    child_market_id, yes_token_id, no_token_id = resolved
     token_id = yes_token_id if side.upper() == "YES" else no_token_id
     log(
-        f"📤 Placing {side} BUY: market={market_id} token={token_id[:16]}... "
-        f"price={price:.4f} size_usdt={size_usdc:.2f} contracts={contract_count}"
+        f"📤 Placing {side} BUY: parent={market_id} child={child_market_id} "
+        f"token={token_id[:16]}... price={price:.4f} size_usdt={size_usdc:.2f} "
+        f"contracts={contract_count}"
     )
 
     try:
@@ -277,7 +288,7 @@ def place_order(
         from opinion_clob_sdk.chain.py_order_utils.model.order_type import LIMIT_ORDER
 
         order = PlaceOrderDataInput(
-            marketId=int(market_id),
+            marketId=int(child_market_id),   # child market ID — not the categorical parent
             tokenId=token_id,
             side=OrderSide.BUY,
             orderType=LIMIT_ORDER,

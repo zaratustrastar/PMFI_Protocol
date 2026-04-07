@@ -6,6 +6,7 @@ Auth: apikey header
 Rate limit: 15 req/s — we add small delays between orderbook fetches.
 """
 
+import re
 import time
 from datetime import datetime, timezone
 from typing import Optional
@@ -24,6 +25,10 @@ _last_opinion_stats: dict = {}
 # Populated during fetch_all_active_markets so executor can look up tokens
 # without a live API call. Oddpool-supplied market IDs match these keys.
 _MARKET_TOKEN_CACHE: dict[str, tuple[str, str]] = {}
+
+# Resolved tradable market cache: parent_market_id (str) → (child_market_id, yes, no)
+# Populated when resolve_tradable_market resolves a categorical parent to a child.
+_RESOLVED_MARKET_CACHE: dict[str, tuple[str, str, str]] = {}
 
 
 def log(msg: str):
@@ -387,6 +392,182 @@ def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
 
     log(f"❌ lookup_token_ids_by_market_id: no tokens found for marketId={market_id!r} "
         f"(cache_size={len(_MARKET_TOKEN_CACHE)}, checked both /market/{{id}} and /market?marketId={{id}})")
+    return None
+
+
+def _score_child_by_hint(child_title: str, outcome_hint: str) -> int:
+    """Score a categorical child market title against the outcome_hint string.
+
+    Higher score = better match. Used to pick the right child from a categorical market.
+
+    E.g. outcome_hint="value_above_120k", child_title="↑ 120,000" → score 2
+         outcome_hint="value_above_120k", child_title="↑ 150,000" → score 1 or 0
+    """
+    if not outcome_hint:
+        return 0
+    title_digits = re.sub(r"[^0-9]", "", child_title)   # "120000" from "↑ 120,000"
+    # Extract digits from hint (e.g. "120" from "120k" or "120000" from hint)
+    m_k = re.search(r"(\d+)k", outcome_hint, re.IGNORECASE)
+    hint_k = m_k.group(1) if m_k else ""            # "120"
+    hint_digits = re.sub(r"[^0-9]", "", outcome_hint)   # "120000" or "120"
+
+    if hint_k and hint_k in title_digits:
+        return 2   # strong: "120" appears in "120000"
+    if hint_digits and hint_digits[:3] in title_digits:
+        return 1   # partial overlap on first 3 digits
+    return 0
+
+
+def resolve_tradable_market(
+    market_id: str,
+    outcome_hint: str = "",
+) -> Optional[tuple[str, str, str]]:
+    """Resolve an Opinion market_id to a tradable child market.
+
+    Returns (child_market_id, yes_token_id, no_token_id) or None.
+
+    For a binary market:  child_market_id == market_id.
+    For a categorical parent (e.g. market_id=340 "BTC max 2026"):
+        - Calls GET /market/categorical/{market_id}
+        - Parses childMarkets[], each with marketId, marketTitle, yesTokenId, noTokenId
+        - Picks the best child using outcome_hint scoring (e.g. "value_above_120k" → child "↑ 120,000")
+        - Caches child under parent ID for future calls (30-min TTL handled by executor cache)
+
+    Args:
+        market_id:    Opinion market ID string (e.g. "340").
+        outcome_hint: Oddpool outcome_key (e.g. "value_above_120k") — used to select
+                      the correct child market from a categorical parent.
+    """
+    if not market_id or not OPINION_API_KEY:
+        log(f"⚠️ resolve_tradable_market: skipped — "
+            f"{'OPINION_API_KEY not set' if not OPINION_API_KEY else 'empty market_id'}")
+        return None
+
+    # ── Check resolved cache (covers categorical parents already resolved) ────
+    cached_resolved = _RESOLVED_MARKET_CACHE.get(str(market_id))
+    if cached_resolved:
+        child_id, yes, no = cached_resolved
+        log(f"✅ resolve_tradable_market (cache hit): parent={market_id!r} → "
+            f"child={child_id!r} YES={yes[:12]}... NO={no[:12]}...")
+        return cached_resolved
+
+    # ── Check binary token cache (populated during discovery) ─────────────────
+    binary = _MARKET_TOKEN_CACHE.get(str(market_id))
+    if binary:
+        yes, no = binary
+        log(f"✅ resolve_tradable_market (binary cache): market={market_id!r} "
+            f"YES={yes[:12]}... NO={no[:12]}...")
+        return (str(market_id), yes, no)
+
+    log(f"🔍 resolve_tradable_market: marketId={market_id!r} outcome_hint={outcome_hint!r} "
+        f"— not in cache, trying live API")
+
+    try:
+        # ── Path 1: direct binary market endpoint ─────────────────────────────
+        url_binary = f"{OPINION_BASE_URL}/market/{market_id}"
+        log(f"📡 resolve_tradable_market path 1 (binary): GET {url_binary}")
+        r1 = http_client.get(
+            url_binary, venue="opinion", headers=_headers(), timeout=10, bypass_proxy=True,
+        )
+        if r1 is not None and r1.status_code == 200:
+            try:
+                d1 = r1.json()
+                result1 = d1.get("result", {})
+                if isinstance(result1, dict) and "data" in result1:
+                    result1 = result1["data"]
+                if isinstance(result1, dict):
+                    yes = result1.get("yesTokenId", "")
+                    no  = result1.get("noTokenId", "")
+                    log(f"📡 path 1: yesTokenId={yes!r} noTokenId={no!r}")
+                    if yes and no:
+                        _MARKET_TOKEN_CACHE[str(market_id)] = (yes, no)
+                        log(f"✅ resolve_tradable_market (binary /market/{{id}}): "
+                            f"market={market_id!r} YES={yes[:12]}... NO={no[:12]}...")
+                        return (str(market_id), yes, no)
+            except Exception as _je:
+                log(f"⚠️ path 1 JSON parse error: {_je}")
+        else:
+            log(f"⚠️ path 1 status={getattr(r1, 'status_code', None)}")
+
+        # ── Path 2: categorical market endpoint → childMarkets ────────────────
+        url_cat = f"{OPINION_BASE_URL}/market/categorical/{market_id}"
+        log(f"📡 resolve_tradable_market path 2 (categorical): GET {url_cat}")
+        r2 = http_client.get(
+            url_cat, venue="opinion", headers=_headers(), timeout=10, bypass_proxy=True,
+        )
+        if r2 is not None and r2.status_code == 200:
+            try:
+                d2 = r2.json()
+                children = (
+                    d2.get("result", {}).get("data", {}).get("childMarkets") or []
+                )
+                log(f"📡 path 2 (categorical): {len(children)} child markets found")
+                valid_children = []
+                for child in children:
+                    cid   = str(child.get("marketId", ""))
+                    title = child.get("marketTitle", "") or ""
+                    yes   = child.get("yesTokenId", "")
+                    no    = child.get("noTokenId", "")
+                    log(f"📡   child marketId={cid!r} title={title!r} "
+                        f"yes={yes[:12] if yes else '(none)'}... "
+                        f"no={no[:12] if no else '(none)'}...")
+                    if cid and yes and no:
+                        # Cache each child individually
+                        _MARKET_TOKEN_CACHE[cid] = (yes, no)
+                        valid_children.append({
+                            "child_id": cid, "title": title, "yes": yes, "no": no,
+                        })
+                if not valid_children:
+                    log(f"⚠️ path 2: no child markets with valid token pairs for marketId={market_id!r}")
+                else:
+                    # Score children against outcome_hint and pick best
+                    best = max(
+                        valid_children,
+                        key=lambda c: _score_child_by_hint(c["title"], outcome_hint),
+                    )
+                    score = _score_child_by_hint(best["title"], outcome_hint)
+                    log(f"✅ resolve_tradable_market (categorical): parent={market_id!r} → "
+                        f"child={best['child_id']!r} title={best['title']!r} "
+                        f"score={score} YES={best['yes'][:12]}... NO={best['no'][:12]}...")
+                    resolved = (best["child_id"], best["yes"], best["no"])
+                    _RESOLVED_MARKET_CACHE[str(market_id)] = resolved
+                    return resolved
+            except Exception as _je:
+                log(f"⚠️ path 2 JSON parse error: {_je} | raw={r2.text[:300]!r}")
+        else:
+            log(f"⚠️ path 2 (categorical) status={getattr(r2, 'status_code', None)}")
+
+        # ── Path 3: list endpoint fallback ────────────────────────────────────
+        url_list = f"{OPINION_BASE_URL}/market"
+        log(f"📡 resolve_tradable_market path 3 (list): GET {url_list}?marketId={market_id}")
+        r3 = http_client.get(
+            url_list, venue="opinion",
+            params={"marketId": market_id, "limit": 5},
+            headers=_headers(), timeout=10, bypass_proxy=True,
+        )
+        if r3 is not None and r3.status_code == 200:
+            try:
+                d3 = r3.json()
+                markets = d3.get("result", {}).get("list", []) or []
+                for m in markets:
+                    mid_str = str(m.get("marketId", ""))
+                    yes = m.get("yesTokenId", "")
+                    no  = m.get("noTokenId", "")
+                    if mid_str == str(market_id) and yes and no:
+                        _MARKET_TOKEN_CACHE[mid_str] = (yes, no)
+                        log(f"✅ resolve_tradable_market (list fallback): "
+                            f"market={market_id!r} YES={yes[:12]}... NO={no[:12]}...")
+                        return (str(market_id), yes, no)
+            except Exception as _je:
+                log(f"⚠️ path 3 JSON parse error: {_je}")
+        else:
+            log(f"⚠️ path 3 status={getattr(r3, 'status_code', None)}")
+
+    except Exception as e:
+        log(f"⚠️ resolve_tradable_market({market_id!r}) exception: {e}")
+
+    log(f"❌ resolve_tradable_market: no tradable market found for marketId={market_id!r} "
+        f"outcome_hint={outcome_hint!r}")
     return None
 
 

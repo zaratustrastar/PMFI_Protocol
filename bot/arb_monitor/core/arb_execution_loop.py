@@ -40,6 +40,14 @@ from ..config import (
 ARB_MIN_HOURS_TO_EXPIRY = float(os.environ.get("ARB_MIN_HOURS_TO_EXPIRY", "0"))
 ARB_MIN_DAYS_TO_EXPIRY = ARB_MIN_HOURS_TO_EXPIRY / 24.0
 
+# ── Opinion skip cache ────────────────────────────────────────────────────────
+# Tracks (opinion_market_id, outcome_key) pairs that recently returned
+# "opinion_token_unresolvable". Keyed on the tuple — not just market_id —
+# because market 340 may be resolvable for one child outcome but not another.
+# TTL matches the executor's token cache (30 min) so a refresh may fix it.
+_OPINION_SKIP_CACHE: dict[tuple[str, str], float] = {}
+_OPINION_SKIP_TTL = 1800  # 30 minutes
+
 
 def log(msg: str):
     print(f"🔁 [ArbExecLoop] {msg}")
@@ -229,6 +237,7 @@ def _execution_cycle():
     skipped_caps = 0
     skipped_expiry = 0
     skipped_display = 0
+    skipped_opinion_token = 0  # Opinion categorical parent → child resolution failed
     depth_insufficient = 0   # aborted: depth-capped size < 1 contract at profitable price
     depth_unavailable = 0    # aborted: could not fetch orderbook to verify depth
 
@@ -248,6 +257,7 @@ def _execution_cycle():
         "poly_no_token_missing",
         "trade_too_small",
         "cannot_compute_contracts",
+        "opinion_token_unresolvable",  # categorical parent → child resolution failed
     )
 
     # ── Liquidity budget: caps total new deployment this cycle ────────────────
@@ -276,6 +286,25 @@ def _execution_cycle():
                 f"(will retry on next Oddpool cycle)"
             )
             continue
+
+        # ── Opinion skip cache: skip (market_id, outcome_key) pairs that recently ──
+        # returned opinion_token_unresolvable, keyed on the exact (parent, outcome)
+        # tuple so different outcomes of the same categorical parent are independent.
+        if getattr(opp, "venue2", "kalshi") == "opinion":
+            _skip_key = (
+                getattr(opp, "opinion_market_id", ""),
+                getattr(opp, "outcome_key", ""),
+            )
+            _skip_ts = _OPINION_SKIP_CACHE.get(_skip_key, 0.0)
+            if _skip_ts > 0 and time.time() < _skip_ts + _OPINION_SKIP_TTL:
+                remaining = int(_skip_ts + _OPINION_SKIP_TTL - time.time())
+                skipped_opinion_token += 1
+                log(
+                    f"⏭ Skipping {opp.pair_id}: opinion token unresolvable "
+                    f"(market={_skip_key[0]!r} outcome={_skip_key[1]!r}), "
+                    f"retry in {remaining}s"
+                )
+                continue
 
         # ── Expiry guard: don't enter markets closing too soon ─────────────
         if opp.days_to_expiry < ARB_MIN_DAYS_TO_EXPIRY:
@@ -370,6 +399,19 @@ def _execution_cycle():
                 depth_insufficient += 1
             elif result.error.startswith("depth_unavailable"):
                 depth_unavailable += 1
+            elif result.error.startswith("opinion_token_unresolvable"):
+                # Record in skip cache so this (market_id, outcome_key) is not
+                # retried for the next _OPINION_SKIP_TTL seconds.
+                _cache_key = (
+                    getattr(opp, "opinion_market_id", ""),
+                    getattr(opp, "outcome_key", ""),
+                )
+                _OPINION_SKIP_CACHE[_cache_key] = time.time()
+                log(
+                    f"⏭ {opp.pair_id}: opinion_token_unresolvable — cached "
+                    f"(market={_cache_key[0]!r} outcome={_cache_key[1]!r}), "
+                    f"will skip for {_OPINION_SKIP_TTL}s"
+                )
 
         if not result.success:
             err = result.error or ""
@@ -436,6 +478,7 @@ def _execution_cycle():
         f"skipped_thin_edge={skipped_thin} "
         f"skipped_expiry={skipped_expiry} "
         f"skipped_caps={skipped_caps} "
+        f"skipped_opinion_token={skipped_opinion_token} "
         f"depth_insufficient={depth_insufficient} "
         f"depth_unavailable={depth_unavailable}"
     )

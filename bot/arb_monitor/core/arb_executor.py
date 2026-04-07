@@ -11,6 +11,21 @@ Security principles:
 import time
 import os
 from typing import Optional
+
+# ── Route Polymarket CLOB through residential proxy (bypasses geoblock) ──────
+# py_clob_client uses requests with trust_env=True, so HTTPS_PROXY is honoured.
+# Kalshi/Opinion adapters use trust_env=False — they are NOT routed here.
+_poly_clob_proxy = (
+    os.environ.get("POLY_CLOB_PROXY_URL")
+    or os.environ.get("PROXY_URL", "")
+)
+if _poly_clob_proxy:
+    os.environ.setdefault("HTTPS_PROXY", _poly_clob_proxy)
+    os.environ.setdefault("HTTP_PROXY", _poly_clob_proxy)
+    print(f"⚡ [Arb/Executor] 🌐 Poly CLOB proxy active: {_poly_clob_proxy[:40]}...", flush=True)
+else:
+    print("⚡ [Arb/Executor] ⚠️ No Poly CLOB proxy configured (POLY_CLOB_PROXY_URL / PROXY_URL)", flush=True)
+
 from ..adapters.polymarket import (
     get_best_prices as poly_get_best_prices,
     fetch_orderbook as poly_fetch_orderbook,
@@ -343,13 +358,19 @@ def _place_opinion_order(
     price: float,
     size_usdc: float,
     contract_count: int,
+    outcome_hint: str = "",
 ) -> tuple[bool, str, str]:
     """Place a limit buy order on Opinion Labs via the CLOB client.
 
     Delegates to opinion_clob.place_order which handles:
+      - Categorical parent → child market resolution (via resolve_tradable_market)
       - OPINION_PRIVATE_KEY signing
       - OPINION_PORTFOLIO_ADDRESS headers
       - Proper CLOB auth
+
+    Args:
+        market_id:    Opinion market ID (may be categorical parent, e.g. "340").
+        outcome_hint: Oddpool outcome_key for categorical child selection.
 
     Returns (ok, order_id, error_msg). Never raises.
     """
@@ -361,6 +382,7 @@ def _place_opinion_order(
             price=price,
             size_usdc=size_usdc,
             contract_count=contract_count,
+            outcome_hint=outcome_hint,
         )
     except Exception as e:
         err = str(e)
@@ -428,37 +450,56 @@ def _cancel_leg2_order(
         return False
 
 
-# ── Opinion market_id → token_id resolution cache ────────────────────────────
-# Opinion's /token/orderbook endpoint needs a token ID, not a market ID.
-# Cache the lookup for 30 minutes to avoid per-execution round-trips.
-_OPINION_TOKEN_CACHE: dict[str, tuple[tuple[str, str], float]] = {}
+# ── Opinion market_id → resolved tradable market cache ───────────────────────
+# Caches (child_market_id, yes_token_id, no_token_id) keyed by parent market_id.
+# For binary markets: child_market_id == market_id.
+# For categorical parents: child_market_id is the specific tradable child.
+_OPINION_TOKEN_CACHE: dict[str, tuple[tuple[str, str, str], float]] = {}
 _OPINION_TOKEN_CACHE_TTL = 1800  # 30 minutes
 
 
-def _opinion_resolve_tokens(market_id: str) -> Optional[tuple[str, str]]:
-    """Return (yes_token_id, no_token_id) for an Opinion market, with caching."""
-    from ..adapters.opinion import lookup_token_ids_by_market_id
+def _opinion_resolve_tokens(
+    market_id: str,
+    outcome_hint: str = "",
+) -> Optional[tuple[str, str, str]]:
+    """Return (child_market_id, yes_token_id, no_token_id) for an Opinion market.
+
+    Handles both binary markets (child_market_id == market_id) and categorical
+    parents (child_market_id is the specific tradable child resolved via outcome_hint).
+    Results are cached for _OPINION_TOKEN_CACHE_TTL seconds.
+
+    Args:
+        market_id:    Opinion market ID (may be categorical parent like "340").
+        outcome_hint: Oddpool outcome_key (e.g. "value_above_120k") to select
+                      the correct child from a categorical parent.
+    """
+    from ..adapters.opinion import resolve_tradable_market
     now = time.time()
     cached = _OPINION_TOKEN_CACHE.get(market_id)
     if cached is not None:
-        token_pair, cached_at = cached
+        resolved, cached_at = cached
         if now - cached_at < _OPINION_TOKEN_CACHE_TTL:
-            return token_pair
-    token_pair = lookup_token_ids_by_market_id(market_id)
-    if token_pair:
-        _OPINION_TOKEN_CACHE[market_id] = (token_pair, now)
-    return token_pair
+            return resolved
+    resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint)
+    if resolved:
+        _OPINION_TOKEN_CACHE[market_id] = (resolved, now)
+    return resolved
 
 
-def _opinion_get_best_ask(market_id: str, side: str = "YES") -> Optional[float]:
+def _opinion_get_best_ask(
+    market_id: str,
+    side: str = "YES",
+    outcome_hint: str = "",
+) -> Optional[float]:
     """Fetch the best ask for the given side of an Opinion Labs market.
 
-    Resolves market_id → (yes_token_id, no_token_id) via lookup_token_ids_by_market_id
-    (checks discovery cache first, then API), then fetches the correct side's orderbook.
+    Resolves market_id to a tradable child (binary or categorical) via
+    resolve_tradable_market, then fetches the correct side's orderbook.
 
     Args:
-        market_id: Opinion Labs market ID (numeric string, e.g. "403").
-        side: "YES" or "NO" — which side we are buying and need the ask for.
+        market_id:    Opinion Labs market ID (numeric string, e.g. "403" or "340").
+        side:         "YES" or "NO" — which side we are buying.
+        outcome_hint: Oddpool outcome_key used to pick categorical child markets.
 
     Returns the best ask price (0.0–1.0) or None if unavailable.
     """
@@ -466,13 +507,13 @@ def _opinion_get_best_ask(market_id: str, side: str = "YES") -> Optional[float]:
     if not market_id:
         return None
     try:
-        token_pair = _opinion_resolve_tokens(market_id)
-        if not token_pair:
-            log(f"⚠️ [OPINION] could not resolve token IDs for marketId={market_id!r}")
+        resolved = _opinion_resolve_tokens(market_id, outcome_hint=outcome_hint)
+        if not resolved:
+            log(f"⚠️ [OPINION] could not resolve tradable market for marketId={market_id!r}")
             return None
-        yes_token_id, no_token_id = token_pair
+        child_market_id, yes_token_id, no_token_id = resolved
         token_id = yes_token_id if side == "YES" else no_token_id
-        log(f"🔍 [OPINION] fetching {side} orderbook for marketId={market_id!r} token={token_id[:16]}...")
+        log(f"🔍 [OPINION] fetching {side} orderbook: parent={market_id!r} child={child_market_id!r} token={token_id[:16]}...")
         book = fetch_orderbook(token_id)
         if not book:
             log(f"⚠️ [OPINION] empty orderbook for {side} token={token_id[:16]}...")
@@ -487,7 +528,7 @@ def _opinion_get_best_ask(market_id: str, side: str = "YES") -> Optional[float]:
         if price is None:
             return None
         result = float(price) / 100.0 if float(price) > 1 else float(price)
-        log(f"✅ [OPINION] live {side} ask={result:.4f} for marketId={market_id!r}")
+        log(f"✅ [OPINION] live {side} ask={result:.4f} for marketId={market_id!r} child={child_market_id!r}")
         return result
     except Exception as e:
         log(f"⚠️ [OPINION] fetch best ask error for {market_id!r} side={side}: {e}")
@@ -920,6 +961,23 @@ def execute_arb(
     except Exception as _fe:
         log(f"⚠️ fund_both_legs_for_trade raised ({_fe}) — attempting trade with existing platform balance")
 
+    # ── Opinion pre-flight: confirm tradable child is resolvable before firing ─
+    # Categorical parents (e.g. 340) must resolve to a specific child market
+    # (e.g. 5517 "↑ 120,000") before any order can be placed. This check runs
+    # after funding so the resolved child is cached for the leg-2 order placement.
+    if venue2 == "opinion" and opinion_market_id:
+        _pre_resolved = _opinion_resolve_tokens(opinion_market_id, outcome_hint=outcome_key)
+        if not _pre_resolved:
+            result.error = (
+                f"opinion_token_unresolvable: parent={opinion_market_id!r} "
+                f"outcome={outcome_key!r} — no tradable child market found; "
+                "skipping to avoid certain leg-2 failure"
+            )
+            log(f"❌ {result.error}")
+            return result
+        _pre_child_id = _pre_resolved[0]
+        log(f"✅ [OPINION] Pre-flight: parent={opinion_market_id!r} → child={_pre_child_id!r} — token pair verified")
+
     # ── Fire BOTH legs SIMULTANEOUSLY via ThreadPoolExecutor ─────────────────
     # Per the reference pipeline: submit both orders at the same time so that
     # execution is atomic — the arb window cannot close between leg 1 and leg 2.
@@ -952,6 +1010,7 @@ def execute_arb(
                 price=live_kalshi_ask,
                 size_usdc=leg2_usdc,
                 contract_count=contract_count,
+                outcome_hint=outcome_key,
             )
         return _place_kalshi_order(
             ticker=kalshi_ticker,
