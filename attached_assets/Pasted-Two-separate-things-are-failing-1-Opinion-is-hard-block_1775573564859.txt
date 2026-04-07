@@ -1,0 +1,67 @@
+Two separate things are failing.
+
+1. Opinion is hard-blocked by jurisdiction, not by your code.
+Your leg 2 is returning HTTP 403 with: “API is not available to persons located in the United States, China, or persons located in restricted jurisdictions.” That means the Opinion order will never place from that environment/account path until the restriction is removed or you stop routing trades there. This is separate from token resolution; your pre-flight already resolves 340 -> 5517, but placement is still denied. The failure is at API access, not market lookup. Your own logs show that clearly.
+
+2. Polymarket is accepting auth/balance checks but rejecting the order body itself.
+Polymarket’s docs say Invalid order payload means the order body is malformed, missing required fields, or has invalid values. They also note that even with L2 auth headers, order creation still requires a properly signed order payload, and limit orders are built with tokenID, price, and size where size is shares/contracts, not quote USDC amount. Price also has to match the market tick size, and some markets require negRisk=true.
+
+What your logs suggest most strongly:
+
+You are not failing basic Polymarket auth. Balance/allowance reads work with sig_type=2/GNOSIS_SAFE, so the client can talk to CLOB successfully.
+The failure happens only on order placement, so the bad part is likely the signed order fields or how the SDK call is being built.
+The most likely causes are:
+Using USDC amount where Polymarket expects share size for a limit order. Your log says BUY order ... price=0.14 size_usdc=1.6800000000000002. For limit orders, Polymarket docs expect size in contracts/shares, not quote amount. Market orders use amount; limit orders use size.
+Bad order options: missing or wrong tickSize / negRisk. Polymarket explicitly says every order needs market-specific tickSize and negRisk, and price must conform to tick size.
+Payload rounding/precision issue. There is a public py-clob-client issue showing FOK-style orders can fail because maker/taker amounts exceed allowed decimal accuracy even when the values look normal at the strategy layer.
+Less likely, but still possible: maker/signer/API key ownership mismatch or wrong funder/profile address. Polymarket documents distinct errors for owner/signer mismatch and for invalid funder address, but depending on your SDK path some malformed signed payloads can still collapse into the generic “Invalid order payload.”
+What is wrong in plain English
+
+Your bot is doing this:
+
+finds opportunity
+verifies balances
+resolves Opinion child market correctly
+tries to fire both legs
+Opinion gets blocked by venue policy
+Polymarket gets rejected because the order object you submit is not valid for CLOB
+
+So the arb loop is currently trying an execution path that is impossible on one venue and malformed on the other.
+
+Highest-probability fix for Polymarket
+
+For the Poly leg, make sure you are doing one of these two patterns, and not mixing them:
+
+Limit order
+
+token_id=<token>
+price=0.14
+size=12
+side=BUY
+plus correct tick_size and neg_risk
+
+Market order
+
+token_id=<token>
+amount=1.68
+side=BUY
+order_type=FOK/FAK
+
+Do not send a limit order built from size_usdc=1.68 unless you intentionally converted it to size=12 first.
+
+What I would check in your code immediately
+The exact function that places Poly orders.
+If it logs size_usdc, I would verify whether you are passing that straight into OrderArgs.size instead of converting to contract count.
+
+Whether you fetch and pass:
+
+tickSize = client.getTickSize(token_id)
+negRisk = client.getNegRisk(token_id)
+
+before create_order(...).
+
+Whether your signed order is limit vs market:
+create_order(OrderArgs(... size=contracts ...))
+or create_market_order(MarketOrderArgs(... amount=usdc ...))
+Whether the SDK/client version changed recently.
+There are open 2026 py-clob-client issues around order signing and account behavior, so pinning or comparing versions is worth doing
