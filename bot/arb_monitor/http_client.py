@@ -79,24 +79,31 @@ def _get_direct_session() -> requests.Session:
     return _direct_session
 
 
+_opinion_session_proxy: str = ""  # tracks which proxy URL the current session was built for
+
+
 def _get_opinion_session() -> requests.Session:
     """Return a session that routes through OPINION_PROXY_URL (Serbian residential proxy).
 
     trust_env=False ensures VPS env vars (HTTPS_PROXY etc.) don't bleed in.
-    The Opinion proxy is injected explicitly. Falls back to direct if OPINION_PROXY_URL
-    is not set — calls will still work but may be blocked by jurisdiction.
+    Reads OPINION_PROXY_URL from the environment on each call so runtime
+    changes (os.environ updates) are picked up on the next call without restart.
+    Falls back to direct connection if OPINION_PROXY_URL is not set.
     """
-    global _opinion_session
+    global _opinion_session, _opinion_session_proxy
+    current = os.environ.get("OPINION_PROXY_URL", "")
+    if _opinion_session is not None and current != _opinion_session_proxy:
+        # Proxy URL changed at runtime — discard the cached session.
+        print(f"🌐 [HTTP] Opinion proxy changed — resetting session")
+        _opinion_session = None
     if _opinion_session is None:
+        _opinion_session_proxy = current
         _opinion_session = requests.Session()
         _opinion_session.trust_env = False
         _opinion_session.headers.update({"User-Agent": DEFAULT_USER_AGENT})
-        if OPINION_PROXY_URL:
-            _opinion_session.proxies.update({
-                "http": OPINION_PROXY_URL,
-                "https": OPINION_PROXY_URL,
-            })
-            host_display = OPINION_PROXY_URL.split("@")[-1] if "@" in OPINION_PROXY_URL else OPINION_PROXY_URL
+        if current:
+            _opinion_session.proxies.update({"http": current, "https": current})
+            host_display = current.split("@")[-1] if "@" in current else current
             print(f"🌐 [HTTP] Opinion proxy configured: {host_display} (source: OPINION_PROXY_URL)")
         else:
             print("🌐 [HTTP] No Opinion proxy configured — Opinion calls will go direct (may be blocked)")
