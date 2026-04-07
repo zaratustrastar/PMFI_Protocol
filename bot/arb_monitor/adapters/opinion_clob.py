@@ -35,20 +35,27 @@ from ..config import (
 )
 
 # ── Route opinion_clob_sdk through Serbian residential proxy ──────────────────
-# opinion_clob_sdk uses requests internally with no proxy support of its own.
-# We patch requests.adapters.HTTPAdapter.send to inject OPINION_PROXY_URL
-# for any request destined for opinion.trade — other venues are unaffected.
-# The patch is URL-filtered: only URLs containing "opinion.trade" get the proxy.
-# Kalshi (_KALSHI_SESSION with trust_env=False) never calls opinion.trade, so
-# it is guaranteed unaffected.  BSC RPC calls (bsc-dataseed.binance.org) are
-# also outside the filter — they stay direct.
+# opinion_clob_sdk uses requests internally with no exposed proxy config.
+# We patch requests.adapters.HTTPAdapter.send — the unified transport layer —
+# with a strict URL filter: only requests whose URL contains "opinion.trade"
+# get the proxy injected.  This is effectively scoped to Opinion's API alone:
+#   - Kalshi (_KALSHI_SESSION, trust_env=False) → never calls opinion.trade ✓
+#   - BSC RPC (bsc-dataseed.binance.org)        → never calls opinion.trade ✓
+#   - Polymarket (clob.polymarket.com)           → never calls opinion.trade ✓
+# The http_client._opinion_session already carries the proxy on its session
+# object, so kwargs["proxies"] is non-empty when it reaches adapter.send —
+# the `not kwargs.get("proxies")` guard prevents double-proxying there.
 import re as _re
 
 _opinion_clob_proxy = os.environ.get("OPINION_PROXY_URL", "")
-_opinion_proxy_display = (
-    _re.sub(r"//[^@]+@", "//<redacted>@", _opinion_clob_proxy)
-    if _opinion_clob_proxy else ""
+# host:port for logs (strip credentials)
+_opinion_proxy_host = (
+    _opinion_clob_proxy.split("@")[-1] if "@" in _opinion_clob_proxy
+    else _opinion_clob_proxy
 )
+# Track the proxy URL active at patch-time; _get_client() compares against this
+# to detect runtime changes and reset the singleton client automatically.
+_active_proxy_url: str = _opinion_clob_proxy
 
 if _opinion_clob_proxy:
     try:
@@ -58,6 +65,7 @@ if _opinion_clob_proxy:
         _op_proxy_dict = {"http": _opinion_clob_proxy, "https": _opinion_clob_proxy}
 
         def _opinion_proxied_send(self, request, **kwargs):
+            """Inject Opinion proxy for opinion.trade URLs only; skip all others."""
             if "opinion.trade" in (request.url or ""):
                 if not kwargs.get("proxies"):
                     kwargs = dict(kwargs)
@@ -66,17 +74,17 @@ if _opinion_clob_proxy:
 
         _HTTPAdapter.send = _opinion_proxied_send
         print(
-            f"⚡ [Arb/OpinionCLOB] 🌐 Opinion CLOB proxy ACTIVE (monkey-patched): {_opinion_proxy_display}",
+            f"⚡ [Opinion] proxy ACTIVE (monkey-patched): {_opinion_proxy_host}",
             flush=True,
         )
     except Exception as _patch_err:
         print(
-            f"⚡ [Arb/OpinionCLOB] ⚠️ Failed to patch Opinion CLOB proxy: {_patch_err}",
+            f"⚡ [Opinion] ⚠️ Failed to patch Opinion CLOB proxy: {_patch_err}",
             flush=True,
         )
 else:
     print(
-        "⚡ [Arb/OpinionCLOB] ⚠️ No OPINION_PROXY_URL set — Opinion CLOB will connect directly (may be geo-blocked)",
+        "⚡ [Opinion] ⚠️ No OPINION_PROXY_URL set — Opinion CLOB will connect directly (may be geo-blocked)",
         flush=True,
     )
 
@@ -123,8 +131,20 @@ def _get_client():
 
     Returns None and logs the reason if required credentials are missing,
     the SDK is not installed, or initialisation times out.
+
+    Proxy-change detection: if OPINION_PROXY_URL differs from the value that
+    was active when the client was last created, the singleton is reset so the
+    next init picks up the new proxy (via the HTTPAdapter patch).
     """
-    global _client, _client_error
+    global _client, _client_error, _active_proxy_url
+
+    # Detect proxy URL changes at runtime and reset the client so it
+    # re-initialises with the updated proxy on the next call.
+    current_proxy = os.environ.get("OPINION_PROXY_URL", "")
+    if _client is not None and current_proxy != _active_proxy_url:
+        log(f"🔄 OPINION_PROXY_URL changed ({_active_proxy_url!r} → {current_proxy.split('@')[-1]!r}) — resetting client for re-init")
+        _active_proxy_url = current_proxy
+        reset_client()
 
     if _client is not None:
         return _client
