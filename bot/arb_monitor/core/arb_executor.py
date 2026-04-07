@@ -1131,7 +1131,8 @@ def execute_arb(
         post_poly = poly_get_best_prices(poly_yes_token)
         post_poly_ask = post_poly.get("best_ask", live_poly_ask)
         if venue2 == "opinion":
-            post_leg2_ask = _opinion_get_best_ask(opinion_market_id) or live_kalshi_ask
+            # Pass outcome_key so categorical parents resolve the same child as pre-flight
+            post_leg2_ask = _opinion_get_best_ask(opinion_market_id, outcome_hint=outcome_key) or live_kalshi_ask
         else:
             post_kalshi = kalshi_get_best_prices(kalshi_ticker)
             post_leg2_ask = post_kalshi.get("yes_best_ask", live_kalshi_ask)
