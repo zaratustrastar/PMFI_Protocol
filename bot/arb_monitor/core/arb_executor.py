@@ -2,7 +2,7 @@
 
 Security principles:
 - Live orderbook re-check at execution (never stale/cached prices)
-- Leg atomicity guard: verify BOTH orderbooks before placing EITHER order
+- Leg atomicity guard: verify Bopinion_clob.py  OTH orderbooks before placing EITHER order
 - Auto-unwind: if leg 2 (Kalshi) fails, immediately cancel/sell leg 1 (Polymarket)
 - Slippage guard: reject if live ask is more than 50 bps worse than Oddpool quote
 - MIN_EDGE_PCT (default 2.5%) ensures fees are covered before any trade is placed
@@ -139,14 +139,19 @@ def log_execution_to_db(
         conn.close()
 
 
-def _place_poly_order(token_id: str, side: str, price: float, size_usdc: float) -> tuple[bool, str, str]:
+def _place_poly_order(
+    token_id: str,
+    side: str,
+    price: float,
+    contract_count: int,
+) -> tuple[bool, str, str]:
     """Place a Polymarket CLOB order (FOK — Fill or Kill).
 
     Returns (success, order_id, error_message).
-    Fails hard if POLY_PRIVATE_KEY is missing or py_clob_client is not installed.
-    Never simulates success: a missing credential means an error, not a fake fill.
+    Accepts contract_count directly — avoids float/int drift from re-deriving
+    via size_usdc/price inside this function.
     """
-    log(f"📤 [POLY] Placing {side} order: token={token_id[:16]}... price={price} size_usdc={size_usdc}")
+    log(f"📤 [POLY] Placing {side} order: token={token_id[:16]}... price={price} contracts={contract_count}")
 
     poly_private_key = os.environ.get("POLY_PRIVATE_KEY", "")
     if not poly_private_key:
@@ -156,22 +161,24 @@ def _place_poly_order(token_id: str, side: str, price: float, size_usdc: float) 
 
     try:
         from py_clob_client.client import ClobClient
-        from py_clob_client.clob_types import OrderArgs, OrderType
+        from py_clob_client.clob_types import (
+            ApiCreds, OrderArgs, OrderType, PartialCreateOrderOptions
+        )
     except ImportError:
         err = "py_clob_client not installed — cannot place Polymarket orders"
         log(f"❌ [POLY] {err}")
         return False, "", err
 
     try:
-        from py_clob_client.clob_types import ApiCreds
         clob_url            = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
         chain_id            = int(os.environ.get("POLY_CHAIN_ID", "137"))
         poly_api_key        = os.environ.get("POLY_API_KEY", "")
         poly_api_secret     = os.environ.get("POLY_API_SECRET", "")
         poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
         poly_proxy_address  = os.environ.get("POLY_PROXY_ADDRESS", "") or None
+
         if poly_api_key and poly_api_secret and poly_api_passphrase:
-            creds  = ApiCreds(
+            creds = ApiCreds(
                 api_key=poly_api_key,
                 api_secret=poly_api_secret,
                 api_passphrase=poly_api_passphrase,
@@ -190,25 +197,32 @@ def _place_poly_order(token_id: str, side: str, price: float, size_usdc: float) 
 
         tick_size = client.get_tick_size(token_id)
         neg_risk  = client.get_neg_risk(token_id)
-        log(f"📐 [POLY] Market params: tick_size={tick_size} neg_risk={neg_risk}")
 
-        contracts = int(round(size_usdc / price)) if price > 0 else 0
-        log(f"📤 [POLY] Submitting order: side={side} contracts={contracts} price={price} tick_size={tick_size} neg_risk={neg_risk}")
-        from py_clob_client.clob_types import PartialCreateOrderOptions
+        px       = round(float(price), 2)
+        size_str = str(int(contract_count))
+
+        log(
+            f"📤 [POLY] Submitting order: side={side} contracts={contract_count} "
+            f"price={px} size={size_str!r} tick_size={tick_size} neg_risk={neg_risk}"
+        )
+
         order_args = OrderArgs(
             token_id=token_id,
-            price=price,
-            size=contracts,
+            price=px,
+            size=size_str,
             side=side,
         )
         signed_order = client.create_order(
             order_args,
             PartialCreateOrderOptions(tick_size=tick_size, neg_risk=neg_risk),
         )
+        log("🧾 [POLY] Signed order built — posting FOK")
         resp = client.post_order(signed_order, OrderType.FOK)
-        order_id = resp.get("orderID", "")
-        if resp.get("status") in ("matched", "filled"):
-            log(f"✅ [POLY] Order filled: orderId={order_id}")
+        log(f"📡 [POLY] post_order response: {resp}")
+
+        order_id = resp.get("orderID", "") or resp.get("orderId", "")
+        if resp.get("status") in ("matched", "filled", "live"):
+            log(f"✅ [POLY] Order accepted: orderId={order_id} status={resp.get('status')}")
             return True, order_id, ""
         else:
             err = f"Order status={resp.get('status')} errorMsg={resp.get('errorMsg', '')}"
@@ -348,15 +362,23 @@ def _unwind_poly_leg(
             log(f"⚠️ [POLY] No live bid; using fallback sell price={sell_price}")
 
         shares = filled_size_usdc / filled_price if filled_price > 0 else 0
+        size_str = str(int(round(shares)))
+        sell_px  = round(float(sell_price), 2)
+        from py_clob_client.clob_types import PartialCreateOrderOptions
+        tick_size = client.get_tick_size(token_id)
+        neg_risk  = client.get_neg_risk(token_id)
         order_args = OrderArgs(
             token_id=token_id,
-            price=sell_price,
-            size=shares,
+            price=sell_px,
+            size=size_str,
             side="SELL",
         )
-        signed_order = client.create_order(order_args)
+        signed_order = client.create_order(
+            order_args,
+            PartialCreateOrderOptions(tick_size=tick_size, neg_risk=neg_risk),
+        )
         resp = client.post_order(signed_order, OrderType.FOK)
-        if resp.get("status") in ("matched", "filled"):
+        if resp.get("status") in ("matched", "filled", "live"):
             log(f"✅ [POLY] Offset SELL filled. Leg 1 unwound. Recovered ~{shares * sell_price:.2f} USDC")
             return True
         else:
@@ -1061,7 +1083,7 @@ def execute_arb(
             token_id=poly_token_for_price,
             side="BUY",
             price=live_poly_ask,
-            size_usdc=leg1_usdc,
+            contract_count=contract_count,
         )
 
     def _run_leg2() -> tuple:

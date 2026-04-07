@@ -1,0 +1,189 @@
+Right now:
+
+contracts = int(round(size_usdc / price)) if price > 0 else 0
+...
+order_args = OrderArgs(
+    token_id=token_id,
+    price=price,
+    size=contracts,
+    side=side,
+)
+
+For py_clob_client, OrderArgs.size should be a string quantity, not an int, and it should be formatted as the share amount expected by the SDK. Your current payload likely serializes into something the API rejects, which matches:
+
+400 Invalid order payload
+
+There is also a second issue: your function accepts size_usdc, then re-derives contracts from float math inside the Poly function. That is unnecessary and can drift. You already computed contract_count correctly in execute_arb.
+
+Exact fix
+
+Change _place_poly_order to accept contract_count directly and send size as a string.
+
+Replace this function
+def _place_poly_order(token_id: str, side: str, price: float, size_usdc: float) -> tuple[bool, str, str]:
+
+with:
+
+def _place_poly_order(
+    token_id: str,
+    side: str,
+    price: float,
+    contract_count: int,
+) -> tuple[bool, str, str]:
+    """Place a Polymarket CLOB order (FOK — Fill or Kill).
+
+    Returns (success, order_id, error_message).
+    """
+    log(
+        f"📤 [POLY] Placing {side} order: token={token_id[:16]}... "
+        f"price={price} contracts={contract_count}"
+    )
+
+    poly_private_key = os.environ.get("POLY_PRIVATE_KEY", "")
+    if not poly_private_key:
+        err = "POLY_PRIVATE_KEY not set — cannot place real Polymarket order"
+        log(f"❌ [POLY] {err}")
+        return False, "", err
+
+    try:
+        from py_clob_client.client import ClobClient
+        from py_clob_client.clob_types import OrderArgs, OrderType, ApiCreds, PartialCreateOrderOptions
+    except ImportError:
+        err = "py_clob_client not installed — cannot place Polymarket orders"
+        log(f"❌ [POLY] {err}")
+        return False, "", err
+
+    try:
+        clob_url            = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+        chain_id            = int(os.environ.get("POLY_CHAIN_ID", "137"))
+        poly_api_key        = os.environ.get("POLY_API_KEY", "")
+        poly_api_secret     = os.environ.get("POLY_API_SECRET", "")
+        poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
+        poly_proxy_address  = os.environ.get("POLY_PROXY_ADDRESS", "") or None
+
+        if poly_api_key and poly_api_secret and poly_api_passphrase:
+            creds = ApiCreds(
+                api_key=poly_api_key,
+                api_secret=poly_api_secret,
+                api_passphrase=poly_api_passphrase,
+            )
+            client = ClobClient(
+                clob_url,
+                key=poly_private_key,
+                chain_id=chain_id,
+                creds=creds,
+                signature_type=2,
+                funder=poly_proxy_address,
+            )
+            log(f"🔑 [POLY] Using L2-authenticated ClobClient (sig_type=2/GNOSIS_SAFE, funder={poly_proxy_address})")
+        else:
+            client = ClobClient(
+                clob_url,
+                key=poly_private_key,
+                chain_id=chain_id,
+                signature_type=2,
+                funder=poly_proxy_address,
+            )
+            log(f"🔑 [POLY] Using L1-only ClobClient (sig_type=2/GNOSIS_SAFE, funder={poly_proxy_address})")
+
+        tick_size = client.get_tick_size(token_id)
+        neg_risk = client.get_neg_risk(token_id)
+
+        px = round(float(price), 2)
+        size_str = str(int(contract_count))
+
+        log(
+            f"📤 [POLY] Submitting order: side={side} contracts={contract_count} "
+            f"price={px} size={size_str!r} tick_size={tick_size} neg_risk={neg_risk}"
+        )
+
+        order_args = OrderArgs(
+            token_id=token_id,
+            price=px,
+            size=size_str,
+            side=side,
+        )
+
+        signed_order = client.create_order(
+            order_args,
+            PartialCreateOrderOptions(
+                tick_size=tick_size,
+                neg_risk=neg_risk,
+            ),
+        )
+
+        log(f"🧾 [POLY] Signed order built successfully; posting FOK")
+
+        resp = client.post_order(signed_order, OrderType.FOK)
+        log(f"📡 [POLY] post_order response: {resp}")
+
+        order_id = resp.get("orderID", "") or resp.get("orderId", "")
+        if resp.get("status") in ("matched", "filled", "live"):
+            log(f"✅ [POLY] Order accepted: orderId={order_id} status={resp.get('status')}")
+            return True, order_id, ""
+
+        err = f"Order status={resp.get('status')} errorMsg={resp.get('errorMsg', '')}"
+        log(f"❌ [POLY] {err}")
+        return False, "", err
+
+    except Exception as e:
+        err = str(e)
+        log(f"❌ [POLY] Order error: {err}")
+        return False, "", err
+Then change the call site
+
+Current:
+
+def _run_leg1() -> tuple:
+    return _place_poly_order(
+        token_id=poly_token_for_price,
+        side="BUY",
+        price=live_poly_ask,
+        size_usdc=leg1_usdc,
+    )
+
+Replace with:
+
+def _run_leg1() -> tuple:
+    return _place_poly_order(
+        token_id=poly_token_for_price,
+        side="BUY",
+        price=live_poly_ask,
+        contract_count=contract_count,
+    )
+Why this is the most likely fix
+
+Because your own logs show:
+
+you already know the intended contract count is 12
+you already know the price is 0.14
+the rejection happens only at final order submission
+the SDK commonly expects size in a precise payload shape, and int vs string is a common failure source
+
+Also this removes the float recomputation path:
+
+current: 1.6800000000000002 / 0.14 -> round -> int
+fixed: use already-computed contract_count
+
+That is cleaner and safer.
+
+Another important bug nearby
+
+Your unwind path still uses raw float shares:
+
+shares = filled_size_usdc / filled_price if filled_price > 0 else 0
+...
+size=shares,
+
+That may also be wrong for Poly SDK for the same reason. Make it a string too.
+
+Change to:
+
+shares = filled_size_usdc / filled_price if filled_price > 0 else 0
+size_str = str(int(round(shares)))
+order_args = OrderArgs(
+    token_id=token_id,
+    price=round(float(sell_price), 2),
+    size=size_str,
+    side="SELL",
+)
