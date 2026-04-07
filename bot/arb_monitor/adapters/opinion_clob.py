@@ -53,20 +53,25 @@ if _opinion_clob_proxy:
         _orig_http_adapter_send = _HTTPAdapter.send
 
         def _opinion_proxied_send(self, request, **kwargs):
-            """Inject current OPINION_PROXY_URL for opinion.trade URLs; others unchanged."""
+            """Always inject current OPINION_PROXY_URL for opinion.trade URLs; others unchanged.
+
+            Unconditionally overwrites kwargs["proxies"] for opinion.trade — this ensures
+            the Serbian proxy wins even if the SDK session already has proxies set (e.g.
+            empty dict, system proxy, or leftover Spain proxy from another session).
+            """
             if "opinion.trade" in (request.url or ""):
                 proxy = os.environ.get("OPINION_PROXY_URL", "")
-                if proxy and not kwargs.get("proxies"):
+                if proxy:
                     kwargs = dict(kwargs)
                     kwargs["proxies"] = {"http": proxy, "https": proxy}
             return _orig_http_adapter_send(self, request, **kwargs)
 
         _HTTPAdapter.send = _opinion_proxied_send
-        print(f"⚡ [Opinion] proxy ACTIVE (monkey-patched): {_opinion_proxy_host}", flush=True)
+        print(f"⚡ [Opinion CLOB] proxy ACTIVE (monkey-patched): {_opinion_proxy_host}", flush=True)
     except Exception as _patch_err:
-        print(f"⚡ [Opinion] ⚠️ Failed to patch Opinion CLOB proxy: {_patch_err}", flush=True)
+        print(f"⚡ [Opinion CLOB] ⚠️ Failed to patch Opinion CLOB proxy: {_patch_err}", flush=True)
 else:
-    print("⚡ [Opinion] ⚠️ No OPINION_PROXY_URL set — Opinion CLOB will connect directly (may be geo-blocked)", flush=True)
+    print("⚡ [Opinion CLOB] ⚠️ No OPINION_PROXY_URL set — Opinion CLOB will connect directly (may be geo-blocked)", flush=True)
 
 _OPINION_CHAIN_ID = 56  # BNB Chain Mainnet
 _CONDITIONAL_TOKENS_ADDR = "0xAD1a38cEc043e70E83a3eC30443dB285ED10D774"
@@ -98,6 +103,33 @@ def _run_with_timeout(fn, timeout: float, label: str):
             raise TimeoutError(
                 f"{label} timed out after {timeout}s — BSC RPC or Opinion endpoint may be unreachable"
             )
+
+
+def _inject_sdk_proxy(client) -> None:
+    """Best-effort: find requests Session(s) on the SDK client and force Serbian proxy.
+
+    This is a belt-and-suspenders fallback for when the HTTPAdapter.send monkey-patch
+    doesn't reach the SDK's HTTP transport (e.g. if the SDK creates sessions before
+    the patch, or uses a nested session the patch can't reach at class-dispatch time).
+    Probes common attribute names used by SDK clients.  Silently skips unknown layouts.
+    """
+    proxy_url = os.environ.get("OPINION_PROXY_URL", "")
+    if not proxy_url or client is None:
+        return
+    import requests as _requests
+    proxy_dict = {"http": proxy_url, "https": proxy_url}
+    injected = []
+    for attr in ("session", "_session", "http_session", "_http", "http_client", "_client"):
+        obj = getattr(client, attr, None)
+        if isinstance(obj, _requests.Session):
+            obj.proxies.update(proxy_dict)
+            obj.trust_env = False
+            injected.append(attr)
+    if injected:
+        host = proxy_url.split("@")[-1] if "@" in proxy_url else proxy_url
+        log(f"✅ Serbian proxy injected into SDK sessions: {injected} → {host}")
+    else:
+        log("ℹ️ No SDK session attrs found for direct proxy injection — HTTPAdapter patch is sole guard")
 
 
 # ── Client singleton ──────────────────────────────────────────────────────────
@@ -165,6 +197,7 @@ def _get_client():
             f"multi_sig={OPINION_PORTFOLIO_ADDRESS[:10]}..."
         )
         _client = _run_with_timeout(_init, _SDK_INIT_TIMEOUT, "Opinion SDK Client.__init__")
+        _inject_sdk_proxy(_client)
         log("✅ Opinion SDK client initialised")
         return _client
     except ImportError:

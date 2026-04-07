@@ -194,15 +194,17 @@ def _place_poly_order(token_id: str, side: str, price: float, size_usdc: float) 
 
         contracts = int(round(size_usdc / price)) if price > 0 else 0
         log(f"📤 [POLY] Submitting order: side={side} contracts={contracts} price={price} tick_size={tick_size} neg_risk={neg_risk}")
+        from py_clob_client.clob_types import PartialCreateOrderOptions
         order_args = OrderArgs(
             token_id=token_id,
             price=price,
             size=contracts,
             side=side,
-            tick_size=tick_size,
-            neg_risk=neg_risk,
         )
-        signed_order = client.create_order(order_args)
+        signed_order = client.create_order(
+            order_args,
+            PartialCreateOrderOptions(tick_size=tick_size, neg_risk=neg_risk),
+        )
         resp = client.post_order(signed_order, OrderType.FOK)
         order_id = resp.get("orderID", "")
         if resp.get("status") in ("matched", "filled"):
