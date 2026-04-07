@@ -26,9 +26,11 @@ _last_opinion_stats: dict = {}
 # without a live API call. Oddpool-supplied market IDs match these keys.
 _MARKET_TOKEN_CACHE: dict[str, tuple[str, str]] = {}
 
-# Resolved tradable market cache: parent_market_id (str) → (child_market_id, yes, no)
-# Populated when resolve_tradable_market resolves a categorical parent to a child.
-_RESOLVED_MARKET_CACHE: dict[str, tuple[str, str, str]] = {}
+# Resolved tradable market cache: (market_id, outcome_hint) → (child_market_id, yes, no)
+# Keyed on the FULL (market_id, outcome_hint) pair so different outcomes of the same
+# categorical parent (e.g. "340"+"value_above_120k" vs "340"+"value_above_150k") never
+# pollute each other's cached child market.
+_RESOLVED_MARKET_CACHE: dict[tuple[str, str], tuple[str, str, str]] = {}
 
 
 def log(msg: str):
@@ -443,12 +445,14 @@ def resolve_tradable_market(
             f"{'OPINION_API_KEY not set' if not OPINION_API_KEY else 'empty market_id'}")
         return None
 
-    # ── Check resolved cache (covers categorical parents already resolved) ────
-    cached_resolved = _RESOLVED_MARKET_CACHE.get(str(market_id))
+    # ── Check resolved cache: keyed by (market_id, outcome_hint) so different ──
+    # outcome_hints for the same categorical parent never share a cached child.
+    _resolve_cache_key = (str(market_id), outcome_hint)
+    cached_resolved = _RESOLVED_MARKET_CACHE.get(_resolve_cache_key)
     if cached_resolved:
         child_id, yes, no = cached_resolved
-        log(f"✅ resolve_tradable_market (cache hit): parent={market_id!r} → "
-            f"child={child_id!r} YES={yes[:12]}... NO={no[:12]}...")
+        log(f"✅ resolve_tradable_market (cache hit): parent={market_id!r} "
+            f"hint={outcome_hint!r} → child={child_id!r} YES={yes[:12]}... NO={no[:12]}...")
         return cached_resolved
 
     # ── Check binary token cache (populated during discovery) ─────────────────
@@ -530,7 +534,9 @@ def resolve_tradable_market(
                         f"child={best['child_id']!r} title={best['title']!r} "
                         f"score={score} YES={best['yes'][:12]}... NO={best['no'][:12]}...")
                     resolved = (best["child_id"], best["yes"], best["no"])
-                    _RESOLVED_MARKET_CACHE[str(market_id)] = resolved
+                    # Key by (market_id, outcome_hint) — not just market_id — so
+                    # different outcomes of the same categorical parent don't collide.
+                    _RESOLVED_MARKET_CACHE[(str(market_id), outcome_hint)] = resolved
                     return resolved
             except Exception as _je:
                 log(f"⚠️ path 2 JSON parse error: {_je} | raw={r2.text[:300]!r}")

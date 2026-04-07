@@ -13,8 +13,17 @@ import os
 from typing import Optional
 
 # ── Route Polymarket CLOB through residential proxy (bypasses geoblock) ──────
-# py_clob_client uses requests with trust_env=True, so HTTPS_PROXY is honoured.
-# Kalshi/Opinion adapters use trust_env=False — they are NOT routed here.
+# py_clob_client creates its HTTP sessions with requests' default trust_env=True,
+# so setting HTTPS_PROXY/HTTP_PROXY here causes py_clob_client to route through
+# the residential proxy.
+#
+# Safety: Kalshi and Opinion adapters use http_client._get_direct_session() which
+# always sets trust_env=False, so they are NEVER routed through this proxy even
+# when HTTPS_PROXY is set.
+#
+# No direct requests.get/post calls to external venues exist in this module —
+# all venue traffic goes through the typed adapters above.
+import re as _re
 _poly_clob_proxy = (
     os.environ.get("POLY_CLOB_PROXY_URL")
     or os.environ.get("PROXY_URL", "")
@@ -22,7 +31,9 @@ _poly_clob_proxy = (
 if _poly_clob_proxy:
     os.environ.setdefault("HTTPS_PROXY", _poly_clob_proxy)
     os.environ.setdefault("HTTP_PROXY", _poly_clob_proxy)
-    print(f"⚡ [Arb/Executor] 🌐 Poly CLOB proxy active: {_poly_clob_proxy[:40]}...", flush=True)
+    # Redact credentials from log output (user:pass@host → ***@host)
+    _proxy_display = _re.sub(r"//[^@]+@", "//<redacted>@", _poly_clob_proxy)
+    print(f"⚡ [Arb/Executor] 🌐 Poly CLOB proxy active: {_proxy_display}", flush=True)
 else:
     print("⚡ [Arb/Executor] ⚠️ No Poly CLOB proxy configured (POLY_CLOB_PROXY_URL / PROXY_URL)", flush=True)
 
@@ -454,7 +465,10 @@ def _cancel_leg2_order(
 # Caches (child_market_id, yes_token_id, no_token_id) keyed by parent market_id.
 # For binary markets: child_market_id == market_id.
 # For categorical parents: child_market_id is the specific tradable child.
-_OPINION_TOKEN_CACHE: dict[str, tuple[tuple[str, str, str], float]] = {}
+# Keyed by (market_id, outcome_hint) so different outcomes of the same categorical
+# parent (e.g. market 340 + "value_above_120k" vs "value_above_150k") are stored
+# independently and never return each other's child token IDs.
+_OPINION_TOKEN_CACHE: dict[tuple[str, str], tuple[tuple[str, str, str], float]] = {}
 _OPINION_TOKEN_CACHE_TTL = 1800  # 30 minutes
 
 
@@ -466,7 +480,8 @@ def _opinion_resolve_tokens(
 
     Handles both binary markets (child_market_id == market_id) and categorical
     parents (child_market_id is the specific tradable child resolved via outcome_hint).
-    Results are cached for _OPINION_TOKEN_CACHE_TTL seconds.
+    Results are cached for _OPINION_TOKEN_CACHE_TTL seconds per (market_id, outcome_hint)
+    pair — different outcomes of the same categorical parent are independent.
 
     Args:
         market_id:    Opinion market ID (may be categorical parent like "340").
@@ -475,14 +490,15 @@ def _opinion_resolve_tokens(
     """
     from ..adapters.opinion import resolve_tradable_market
     now = time.time()
-    cached = _OPINION_TOKEN_CACHE.get(market_id)
+    _cache_key = (market_id, outcome_hint)
+    cached = _OPINION_TOKEN_CACHE.get(_cache_key)
     if cached is not None:
         resolved, cached_at = cached
         if now - cached_at < _OPINION_TOKEN_CACHE_TTL:
             return resolved
     resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint)
     if resolved:
-        _OPINION_TOKEN_CACHE[market_id] = (resolved, now)
+        _OPINION_TOKEN_CACHE[_cache_key] = (resolved, now)
     return resolved
 
 
@@ -933,6 +949,25 @@ def execute_arb(
         f"total_cost={leg1_usdc + leg2_usdc:.4f}"
     )
 
+    # ── Opinion pre-flight: confirm tradable child is resolvable BEFORE funding ─
+    # Categorical parents (e.g. 340) must resolve to a specific child market
+    # (e.g. 5517 "↑ 120,000") before any order can be placed.
+    # This check runs BEFORE fund_both_legs_for_trade so that an unresolvable
+    # token causes a clean abort with no capital moved.
+    # The resolved child is cached and reused by the leg-2 placement below.
+    if venue2 == "opinion" and opinion_market_id:
+        _pre_resolved = _opinion_resolve_tokens(opinion_market_id, outcome_hint=outcome_key)
+        if not _pre_resolved:
+            result.error = (
+                f"opinion_token_unresolvable: parent={opinion_market_id!r} "
+                f"outcome={outcome_key!r} — no tradable child market found; "
+                "skipping to avoid certain leg-2 failure"
+            )
+            log(f"❌ {result.error}")
+            return result
+        _pre_child_id = _pre_resolved[0]
+        log(f"✅ [OPINION] Pre-flight: parent={opinion_market_id!r} → child={_pre_child_id!r} — token pair verified")
+
     # ── Simultaneous funding: deposit BOTH legs in one nonce sequence ────────
     # Sends poly_deposit_tx and venue2_deposit_tx without waiting between them,
     # then polls BOTH platform balances until they reach their targets. This
@@ -960,23 +995,6 @@ def execute_arb(
         log(f"✅ Both legs funded — proceeding to order placement")
     except Exception as _fe:
         log(f"⚠️ fund_both_legs_for_trade raised ({_fe}) — attempting trade with existing platform balance")
-
-    # ── Opinion pre-flight: confirm tradable child is resolvable before firing ─
-    # Categorical parents (e.g. 340) must resolve to a specific child market
-    # (e.g. 5517 "↑ 120,000") before any order can be placed. This check runs
-    # after funding so the resolved child is cached for the leg-2 order placement.
-    if venue2 == "opinion" and opinion_market_id:
-        _pre_resolved = _opinion_resolve_tokens(opinion_market_id, outcome_hint=outcome_key)
-        if not _pre_resolved:
-            result.error = (
-                f"opinion_token_unresolvable: parent={opinion_market_id!r} "
-                f"outcome={outcome_key!r} — no tradable child market found; "
-                "skipping to avoid certain leg-2 failure"
-            )
-            log(f"❌ {result.error}")
-            return result
-        _pre_child_id = _pre_resolved[0]
-        log(f"✅ [OPINION] Pre-flight: parent={opinion_market_id!r} → child={_pre_child_id!r} — token pair verified")
 
     # ── Fire BOTH legs SIMULTANEOUSLY via ThreadPoolExecutor ─────────────────
     # Per the reference pipeline: submit both orders at the same time so that
