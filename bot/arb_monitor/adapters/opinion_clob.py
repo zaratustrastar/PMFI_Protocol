@@ -35,26 +35,15 @@ from ..config import (
 )
 
 # ── Route opinion_clob_sdk through Serbian residential proxy ──────────────────
-# opinion_clob_sdk uses requests internally with no exposed proxy config.
-# We patch requests.adapters.HTTPAdapter.send — the unified transport layer —
-# with a strict URL filter: only requests whose URL contains "opinion.trade"
-# get the proxy injected.  This is effectively scoped to Opinion's API alone:
-#   - Kalshi (_KALSHI_SESSION, trust_env=False) → never calls opinion.trade ✓
-#   - BSC RPC (bsc-dataseed.binance.org)        → never calls opinion.trade ✓
-#   - Polymarket (clob.polymarket.com)           → never calls opinion.trade ✓
-# The http_client._opinion_session already carries the proxy on its session
-# object, so kwargs["proxies"] is non-empty when it reaches adapter.send —
-# the `not kwargs.get("proxies")` guard prevents double-proxying there.
-import re as _re
-
+# Patches HTTPAdapter.send with a URL filter so only opinion.trade requests
+# get the proxy injected (Kalshi/Poly/BSC-RPC are unaffected).
+# Reads OPINION_PROXY_URL per-request so runtime env changes propagate without
+# needing a module reload.
 _opinion_clob_proxy = os.environ.get("OPINION_PROXY_URL", "")
-# host:port for logs (strip credentials)
 _opinion_proxy_host = (
     _opinion_clob_proxy.split("@")[-1] if "@" in _opinion_clob_proxy
     else _opinion_clob_proxy
 )
-# Track the proxy URL active at patch-time; _get_client() compares against this
-# to detect runtime changes and reset the singleton client automatically.
 _active_proxy_url: str = _opinion_clob_proxy
 
 if _opinion_clob_proxy:
@@ -62,31 +51,22 @@ if _opinion_clob_proxy:
         from requests.adapters import HTTPAdapter as _HTTPAdapter
 
         _orig_http_adapter_send = _HTTPAdapter.send
-        _op_proxy_dict = {"http": _opinion_clob_proxy, "https": _opinion_clob_proxy}
 
         def _opinion_proxied_send(self, request, **kwargs):
-            """Inject Opinion proxy for opinion.trade URLs only; skip all others."""
+            """Inject current OPINION_PROXY_URL for opinion.trade URLs; others unchanged."""
             if "opinion.trade" in (request.url or ""):
-                if not kwargs.get("proxies"):
+                proxy = os.environ.get("OPINION_PROXY_URL", "")
+                if proxy and not kwargs.get("proxies"):
                     kwargs = dict(kwargs)
-                    kwargs["proxies"] = _op_proxy_dict
+                    kwargs["proxies"] = {"http": proxy, "https": proxy}
             return _orig_http_adapter_send(self, request, **kwargs)
 
         _HTTPAdapter.send = _opinion_proxied_send
-        print(
-            f"⚡ [Opinion] proxy ACTIVE (monkey-patched): {_opinion_proxy_host}",
-            flush=True,
-        )
+        print(f"⚡ [Opinion] proxy ACTIVE (monkey-patched): {_opinion_proxy_host}", flush=True)
     except Exception as _patch_err:
-        print(
-            f"⚡ [Opinion] ⚠️ Failed to patch Opinion CLOB proxy: {_patch_err}",
-            flush=True,
-        )
+        print(f"⚡ [Opinion] ⚠️ Failed to patch Opinion CLOB proxy: {_patch_err}", flush=True)
 else:
-    print(
-        "⚡ [Opinion] ⚠️ No OPINION_PROXY_URL set — Opinion CLOB will connect directly (may be geo-blocked)",
-        flush=True,
-    )
+    print("⚡ [Opinion] ⚠️ No OPINION_PROXY_URL set — Opinion CLOB will connect directly (may be geo-blocked)", flush=True)
 
 _OPINION_CHAIN_ID = 56  # BNB Chain Mainnet
 _CONDITIONAL_TOKENS_ADDR = "0xAD1a38cEc043e70E83a3eC30443dB285ED10D774"
