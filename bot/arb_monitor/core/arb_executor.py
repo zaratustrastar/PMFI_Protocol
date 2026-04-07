@@ -17,13 +17,11 @@ from typing import Optional
 # so setting HTTPS_PROXY/HTTP_PROXY here causes py_clob_client to route through
 # the residential proxy.
 #
-# Safety: Kalshi and Opinion adapters use http_client._get_direct_session() which
-# always sets trust_env=False, so they are NEVER routed through this proxy even
-# when HTTPS_PROXY is set.
-#
-# No direct requests.get/post calls to external venues exist in this module —
-# all venue traffic goes through the typed adapters above.
+# NOTE: This file also makes direct requests.Session calls to Kalshi (order/cancel/
+# unwind). A dedicated _KALSHI_SESSION with trust_env=False is defined below to
+# explicitly exclude those calls from the proxy — they must reach Kalshi directly.
 import re as _re
+import requests as _requests_mod
 _poly_clob_proxy = (
     os.environ.get("POLY_CLOB_PROXY_URL")
     or os.environ.get("PROXY_URL", "")
@@ -36,6 +34,11 @@ if _poly_clob_proxy:
     print(f"⚡ [Arb/Executor] 🌐 Poly CLOB proxy active: {_proxy_display}", flush=True)
 else:
     print("⚡ [Arb/Executor] ⚠️ No Poly CLOB proxy configured (POLY_CLOB_PROXY_URL / PROXY_URL)", flush=True)
+
+# Kalshi API calls must bypass the proxy — use a dedicated session with trust_env=False
+# so that even if HTTPS_PROXY is set globally, Kalshi traffic goes direct.
+_KALSHI_SESSION = _requests_mod.Session()
+_KALSHI_SESSION.trust_env = False
 
 from ..adapters.polymarket import (
     get_best_prices as poly_get_best_prices,
@@ -204,7 +207,6 @@ def _place_kalshi_order(
 
     try:
         from ..config import KALSHI_BASE_URL
-        import requests
         url = f"{KALSHI_BASE_URL}/portfolio/orders"
         headers = get_kalshi_headers("POST", url)
         if not headers:
@@ -228,7 +230,8 @@ def _place_kalshi_order(
             "expiration_ts": int(time.time()) + 30,
         }
         payload = {k: v for k, v in payload.items() if v is not None}
-        resp = requests.post(url, json=payload, headers=headers, timeout=10)
+        # Use _KALSHI_SESSION (trust_env=False) to bypass proxy — Kalshi must be direct
+        resp = _KALSHI_SESSION.post(url, json=payload, headers=headers, timeout=10)
         if resp.status_code in (200, 201):
             data = resp.json()
             order_id = data.get("order", {}).get("order_id", "")
@@ -424,13 +427,13 @@ def _cancel_leg2_order(
                 log("⚠️ [LEG2 CANCEL] Kalshi credentials not configured — cannot cancel")
                 return False
             from ..config import KALSHI_BASE_URL
-            import requests as _req
             url = f"{KALSHI_BASE_URL}/portfolio/orders/{order_id}"
             headers = get_kalshi_headers("DELETE", url)
             if not headers:
                 log("⚠️ [LEG2 CANCEL] Kalshi RSA signing failed")
                 return False
-            resp = _req.delete(url, headers=headers, timeout=10)
+            # Use _KALSHI_SESSION (trust_env=False) — bypass proxy for Kalshi
+            resp = _KALSHI_SESSION.delete(url, headers=headers, timeout=10)
             ok = resp.status_code in (200, 204)
             log(
                 f"{'✅' if ok else '❌'} [LEG2 CANCEL] Kalshi cancel orderId={order_id!r} "
@@ -1193,7 +1196,6 @@ def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float, si
 
     try:
         from ..config import KALSHI_BASE_URL
-        import requests
 
         # Place sell limit 5 cents below fill price (in cents) to ensure fill
         sell_price_cents = max(int(fill_price * 100) - 5, 1)
@@ -1218,7 +1220,8 @@ def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float, si
         else:
             payload["no_price"] = sell_price_cents
 
-        resp = requests.post(url, json=payload, headers=headers, timeout=10)
+        # Use _KALSHI_SESSION (trust_env=False) — bypass proxy for Kalshi
+        resp = _KALSHI_SESSION.post(url, json=payload, headers=headers, timeout=10)
         if resp.status_code in (200, 201):
             log(f"✅ [KALSHI] Unwind order placed (side={side})")
             return True
