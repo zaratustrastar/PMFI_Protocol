@@ -13,30 +13,62 @@ import os
 from typing import Optional
 
 # ── Route Polymarket CLOB through residential proxy (bypasses geoblock) ──────
-# py_clob_client creates its HTTP sessions with requests' default trust_env=True,
-# so setting HTTPS_PROXY/HTTP_PROXY here causes py_clob_client to route through
-# the residential proxy.
+# py_clob_client calls requests.request() directly (no Session, no proxies arg).
+# Setting env vars (HTTPS_PROXY) is NOT reliable inside systemd-managed processes.
+# Instead we monkey-patch py_clob_client.http_helpers.helpers.request directly so
+# every call made by ClobClient.post_order / get / post automatically goes through
+# the proxy — no env-var dependency whatsoever.
 #
-# NOTE: This file also makes direct requests.Session calls to Kalshi (order/cancel/
-# unwind). A dedicated _KALSHI_SESSION with trust_env=False is defined below to
-# explicitly exclude those calls from the proxy — they must reach Kalshi directly.
+# Kalshi has dedicated direct-request calls in this file that use _KALSHI_SESSION
+# (trust_env=False) so they are never routed through the proxy.
 import re as _re
 import requests as _requests_mod
+
 _poly_clob_proxy = (
     os.environ.get("POLY_CLOB_PROXY_URL")
     or os.environ.get("PROXY_URL", "")
 )
-if _poly_clob_proxy:
-    os.environ.setdefault("HTTPS_PROXY", _poly_clob_proxy)
-    os.environ.setdefault("HTTP_PROXY", _poly_clob_proxy)
-    # Redact credentials from log output (user:pass@host → ***@host)
-    _proxy_display = _re.sub(r"//[^@]+@", "//<redacted>@", _poly_clob_proxy)
-    print(f"⚡ [Arb/Executor] 🌐 Poly CLOB proxy active: {_proxy_display}", flush=True)
-else:
-    print("⚡ [Arb/Executor] ⚠️ No Poly CLOB proxy configured (POLY_CLOB_PROXY_URL / PROXY_URL)", flush=True)
+_proxy_display = (
+    _re.sub(r"//[^@]+@", "//<redacted>@", _poly_clob_proxy)
+    if _poly_clob_proxy else ""
+)
 
-# Kalshi API calls must bypass the proxy — use a dedicated session with trust_env=False
-# so that even if HTTPS_PROXY is set globally, Kalshi traffic goes direct.
+if _poly_clob_proxy:
+    # Monkey-patch py_clob_client's internal request function to inject proxies.
+    # post() and get() in helpers.py resolve "request" via the module namespace,
+    # so replacing helpers.request here redirects ALL py_clob_client HTTP calls.
+    import py_clob_client.http_helpers.helpers as _pch_helpers
+    from py_clob_client.exceptions import PolyApiException as _PolyApiException
+
+    _pch_proxies = {"https": _poly_clob_proxy, "http": _poly_clob_proxy}
+    _pch_orig_request = _pch_helpers.request  # keep reference for debugging
+
+    def _pch_proxied_request(endpoint, method, headers=None, data=None):
+        try:
+            headers = _pch_helpers.overloadHeaders(method, headers)
+            resp = _requests_mod.request(
+                method=method,
+                url=endpoint,
+                headers=headers,
+                json=data if data else None,
+                proxies=_pch_proxies,
+            )
+            if resp.status_code != 200:
+                raise _PolyApiException(resp)
+            try:
+                return resp.json()
+            except _requests_mod.exceptions.JSONDecodeError:
+                return resp.text
+        except _requests_mod.exceptions.RequestException:
+            raise _PolyApiException(error_msg="Request exception!")
+
+    _pch_helpers.request = _pch_proxied_request
+    print(f"⚡ [Arb/Executor] 🌐 Poly CLOB proxy ACTIVE (monkey-patched): {_proxy_display}", flush=True)
+else:
+    print("⚡ [Arb/Executor] ⚠️ No Poly CLOB proxy configured (PROXY_URL / POLY_CLOB_PROXY_URL)", flush=True)
+
+# Kalshi HTTP calls in this file use a dedicated session with trust_env=False
+# to ensure they always go direct and are never affected by any proxy settings.
 _KALSHI_SESSION = _requests_mod.Session()
 _KALSHI_SESSION.trust_env = False
 
