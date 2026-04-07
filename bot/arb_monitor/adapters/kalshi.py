@@ -510,6 +510,29 @@ def get_best_prices(ticker: str, debug: bool = False) -> dict:
                 "no_ask": raw_no_ask,
             }
 
+        # If the market endpoint returned no price data, fall back to the orderbook
+        # endpoint and read the best ask from orderbook_fp.yes_dollars / no_dollars.
+        # The new Elections API (/markets/{ticker}) no longer populates yes_ask/no_ask
+        # in some response shapes, so this prevents silent all-None slippage checks.
+        if yes_best_ask is None and no_best_ask is None:
+            log(f"⚠️ [Kalshi] yes_ask/no_ask both None from market endpoint for {ticker!r} — fetching orderbook for best prices")
+            try:
+                ob = fetch_orderbook_depth(ticker, depth=1)
+                if ob:
+                    fp = ob.get("orderbook_fp", {})
+                    yes_lvls = fp.get("yes_dollars") or []
+                    no_lvls  = fp.get("no_dollars") or []
+                    if yes_lvls:
+                        yes_best_ask = _to_dollars(yes_lvls[0][0])
+                    if no_lvls:
+                        no_best_ask = _to_dollars(no_lvls[0][0])
+                    result["yes_best_ask"] = yes_best_ask
+                    result["no_best_ask"]  = no_best_ask
+                    result["best_ask"]     = yes_best_ask
+                    log(f"↩️ [Kalshi] orderbook fallback prices for {ticker!r}: yes_ask={yes_best_ask} no_ask={no_best_ask}")
+            except Exception as fb_err:
+                log(f"⚠️ [Kalshi] orderbook fallback failed for {ticker!r}: {fb_err}")
+
         log(f"✅ Kalshi prices for {ticker!r}: yes_ask={yes_best_ask} no_ask={no_best_ask}")
         return result
     except Exception as e:
@@ -579,9 +602,24 @@ def compute_kalshi_fillable_contracts(
         (contracts_fillable, usdc_cost).  Returns (0, 0.0) on error or no depth.
     """
     try:
-        book = orderbook.get("orderbook", orderbook)
-        key = "yes" if side.upper() == "YES" else "no"
-        levels = book.get(key, [])
+        # ── Detect Elections API shape (orderbook_fp) vs legacy shape ─────────
+        # New: {"orderbook_fp": {"yes_dollars": [["0.064","350.00"], ...], "no_dollars": [...]}}
+        #   Each level: [price_str (dollars), usdc_amount_str]
+        #   contracts at level = int(usdc_amount / price)
+        # Old: {"orderbook": {"yes": [{"price": <cents>, "delta": <qty>}, ...], "no": [...]}}
+        #   Each level: {"price": cents_int, "delta": qty_int}
+        fp = orderbook.get("orderbook_fp")
+        if fp is not None:
+            # New Elections API format
+            fp_key = "yes_dollars" if side.upper() == "YES" else "no_dollars"
+            raw_levels = fp.get(fp_key) or []
+            use_fp_format = True
+        else:
+            # Legacy format
+            book = orderbook.get("orderbook", orderbook)
+            key = "yes" if side.upper() == "YES" else "no"
+            raw_levels = book.get(key, [])
+            use_fp_format = False
     except Exception as e:
         log(f"⚠️ [Kalshi] depth parse error: {e}")
         return 0, 0.0
@@ -589,34 +627,47 @@ def compute_kalshi_fillable_contracts(
     contracts = 0
     usdc_cost = 0.0
 
-    # Validate schema: expect list of {"price": <cents>, "delta": <qty>} dicts.
-    # Warn loudly if the format looks wrong so production log scanning can catch
-    # Kalshi API shape changes before they silently produce zero-depth results.
-    if levels:
-        sample = levels[0]
-        if not isinstance(sample, dict) or "price" not in sample or "delta" not in sample:
-            log(
-                f"⚠️ [Kalshi/{side}] unexpected orderbook level format — "
-                f"expected {{price, delta}} got {type(sample).__name__}: {sample!r}. "
-                f"Depth may be underestimated. Update compute_kalshi_fillable_contracts()."
-            )
+    if use_fp_format:
+        # Elections API: each level is [price_str, usdc_amount_str]
+        # price is already in dollars; usdc_amount is the dollar value at that level.
+        # contracts = floor(usdc_amount / price) — Kalshi nominal is $1 per contract.
+        parsed_levels: list[tuple[float, int]] = []
+        for level in raw_levels:
+            try:
+                price_dollars = float(level[0])
+                usdc_amount   = float(level[1])
+                if price_dollars <= 0:
+                    continue
+                qty = int(usdc_amount / price_dollars)
+                parsed_levels.append((price_dollars, qty))
+            except (ValueError, TypeError, IndexError):
+                continue
+        log(f"📐 [Kalshi/{side}] Elections API (orderbook_fp): {len(parsed_levels)} levels parsed from {fp_key}")
+    else:
+        # Legacy API: each level is {"price": <cents>, "delta": <qty>}
+        if raw_levels:
+            sample = raw_levels[0]
+            if not isinstance(sample, dict) or "price" not in sample or "delta" not in sample:
+                log(
+                    f"⚠️ [Kalshi/{side}] unexpected legacy orderbook level format — "
+                    f"expected {{price, delta}} got {type(sample).__name__}: {sample!r}. "
+                    f"Depth may be underestimated."
+                )
+        parsed_levels = []
+        for level in raw_levels:
+            try:
+                price_cents = float(level.get("price", 0))
+                qty = int(level.get("delta", 0))
+                parsed_levels.append((price_cents / 100.0, qty))
+            except (ValueError, TypeError):
+                continue
 
-    # Normalise and sort explicitly — API usually returns best-first but we
-    # cannot guarantee ordering across API versions or response edge cases.
-    parsed_levels: list[tuple[float, int]] = []
-    for level in levels:
-        try:
-            price_cents = float(level.get("price", 0))
-            qty = int(level.get("delta", 0))
-            parsed_levels.append((price_cents / 100.0, qty))
-        except (ValueError, TypeError):
-            continue
-    parsed_levels.sort(key=lambda x: x[0])  # ascending: cheapest ask first
+    # Sort ascending (cheapest ask first) — both formats may be unordered.
+    parsed_levels.sort(key=lambda x: x[0])
 
     for price_dollars, qty in parsed_levels:
         if price_dollars > max_fill_price:
             break  # sorted ascending — no cheaper levels remain
-
         if qty > 0:
             contracts += qty
             usdc_cost += qty * price_dollars
