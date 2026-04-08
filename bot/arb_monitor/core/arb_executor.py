@@ -743,6 +743,17 @@ def execute_arb(
     result.live_poly_ask = live_poly_ask
     result.live_kalshi_ask = live_kalshi_ask
 
+    # ── Side-aware quoted price aliases ───────────────────────────────────────
+    # opportunity.poly_yes_ask / kalshi_yes_ask are historical names; Oddpool
+    # already stores "what we pay on each leg" (side-corrected).  We alias here
+    # so every downstream comparison explicitly names what it is comparing.
+    #   buying_poly_no==False → poly_yes_ask IS the YES ask  → quoted_poly_ask = YES ask
+    #   buying_poly_no==True  → poly_yes_ask IS the NO  ask  → quoted_poly_ask = NO  ask
+    #   kalshi_side=="NO"     → kalshi_yes_ask IS the NO  ask → quoted_venue2_ask = NO  ask
+    #   kalshi_side=="YES"    → kalshi_yes_ask IS the YES ask → quoted_venue2_ask = YES ask
+    quoted_poly_ask   = opportunity.poly_yes_ask    # our Poly leg cost (side-corrected by Oddpool)
+    quoted_venue2_ask = opportunity.kalshi_yes_ask  # our venue2 leg cost (side-corrected by Oddpool)
+
     # ── Primary edge gate: trust Oddpool's net_edge_pct ──────────────────────
     # Oddpool's net_cents already deducts platform fees, slippage allowance, and
     # risk buffer. It is the authoritative source for whether an opportunity is
@@ -780,16 +791,16 @@ def execute_arb(
     slippage_bps = ARB_SLIPPAGE_GUARD_BPS / 10000
 
     if live_poly_ask is not None:
-        poly_slippage = live_poly_ask - opportunity.poly_yes_ask
+        poly_slippage = live_poly_ask - quoted_poly_ask
         if poly_slippage > slippage_bps:
             result.error = (
                 f"poly_slippage_exceeded: live={live_poly_ask:.4f} "
-                f"quote={opportunity.poly_yes_ask:.4f} "
+                f"quote={quoted_poly_ask:.4f} "
                 f"slippage={poly_slippage:.4f} > {slippage_bps:.4f}"
             )
             log(f"❌ {result.error}")
             return result
-        log(f"✅ Poly slippage OK: live={live_poly_ask:.4f} quote={opportunity.poly_yes_ask:.4f} slippage={poly_slippage:+.4f}")
+        log(f"✅ Poly slippage OK: live={live_poly_ask:.4f} quote={quoted_poly_ask:.4f} slippage={poly_slippage:+.4f}")
     else:
         # Poly price unavailable — abort. The executor needs at least Poly live
         # price since that's the leg we control directly.
@@ -811,23 +822,23 @@ def execute_arb(
             )
             log(f"❌ {result.error}")
             return result
-        live_kalshi_ask = opportunity.kalshi_yes_ask
+        live_kalshi_ask = quoted_venue2_ask  # side-aware fallback from Oddpool quote
         log(
             f"⚠️ {leg2_venue_label} live orderbook unavailable — using Oddpool "
             f"quoted price {live_kalshi_ask:.4f} (opp_age={opp_age:.0f}s) — skipping slippage check"
         )
         result.live_kalshi_ask = live_kalshi_ask
     else:
-        leg2_slippage = live_kalshi_ask - opportunity.kalshi_yes_ask
+        leg2_slippage = live_kalshi_ask - quoted_venue2_ask
         if leg2_slippage > slippage_bps:
             result.error = (
                 f"{leg2_venue_label}_slippage_exceeded: live={live_kalshi_ask:.4f} "
-                f"quote={opportunity.kalshi_yes_ask:.4f} "
+                f"quote={quoted_venue2_ask:.4f} "
                 f"slippage={leg2_slippage:.4f} > {slippage_bps:.4f}"
             )
             log(f"❌ {result.error}")
             return result
-        log(f"✅ {leg2_venue_label} slippage OK: live={live_kalshi_ask:.4f} quote={opportunity.kalshi_yes_ask:.4f} slippage={leg2_slippage:+.4f}")
+        log(f"✅ {leg2_venue_label} slippage OK: live={live_kalshi_ask:.4f} quote={quoted_venue2_ask:.4f} slippage={leg2_slippage:+.4f}")
 
     # Store computed live edge for logging/DB (informational only — not used for gating)
     live_edge = 1.0 - live_poly_ask - live_kalshi_ask
@@ -1191,14 +1202,19 @@ def execute_arb(
     # trigger immediate unwind of both legs to prevent holding a loss-making position.
     log("🔍 Post-placement validation: re-checking live prices after both fills...")
     try:
-        post_poly = poly_get_best_prices(poly_yes_token)
+        # Use the same token we priced pre-trade (poly_token_for_price respects buying_poly_no).
+        post_poly = poly_get_best_prices(poly_token_for_price)
         post_poly_ask = post_poly.get("best_ask", live_poly_ask)
         if venue2 == "opinion":
             # Pass outcome_key so categorical parents resolve the same child as pre-flight
             post_leg2_ask = _opinion_get_best_ask(opinion_market_id, outcome_hint=outcome_key) or live_kalshi_ask
         else:
             post_kalshi = kalshi_get_best_prices(kalshi_ticker)
-            post_leg2_ask = post_kalshi.get("yes_best_ask", live_kalshi_ask)
+            # Select the side we actually bought — same logic as the pre-trade price fetch.
+            post_leg2_ask = post_kalshi.get(
+                "yes_best_ask" if kalshi_side == "YES" else "no_best_ask",
+                live_kalshi_ask,
+            )
         post_edge = 1.0 - post_poly_ask - post_leg2_ask
         log(
             f"📐 Post-fill edge check: poly_ask={post_poly_ask:.4f} "

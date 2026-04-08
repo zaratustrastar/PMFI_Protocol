@@ -1,0 +1,51 @@
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo apt-get install -y proxychains4
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  libproxychains4
+The following NEW packages will be installed:
+  libproxychains4 proxychains4
+0 upgraded, 2 newly installed, 0 to remove and 55 not upgraded.
+Need to get 42.6 kB of archives.
+After this operation, 135 kB of additional disk space will be used.
+Get:1 http://mirrors.digitalocean.com/ubuntu noble/universe amd64 libproxychains4 amd64 4.17-1 [24.1 kB]
+Get:2 http://mirrors.digitalocean.com/ubuntu noble/universe amd64 proxychains4 amd64 4.17-1 [18.5 kB]
+Fetched 42.6 kB in 0s (815 kB/s)         
+Selecting previously unselected package libproxychains4:amd64.
+(Reading database ... 213002 files and directories currently installed.)
+Preparing to unpack .../libproxychains4_4.17-1_amd64.deb ...
+Unpacking libproxychains4:amd64 (4.17-1) ...
+Selecting previously unselected package proxychains4.
+Preparing to unpack .../proxychains4_4.17-1_amd64.deb ...
+Unpacking proxychains4 (4.17-1) ...
+Setting up libproxychains4:amd64 (4.17-1) ...
+Setting up proxychains4 (4.17-1) ...
+update-alternatives: using /usr/bin/proxychains4 to provide /usr/bin/proxychains (proxychains) in auto mode
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+Scanning processes...                                                                                                                                            
+Scanning candidates...                                                                                                                                           
+Scanning linux images...                                                                                                                                         
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-101-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 6.8.0-107-generic.
+
+Restarting the system to load the new kernel will not be handled automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+(venv) root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 
