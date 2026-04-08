@@ -567,17 +567,19 @@ def resolve_tradable_market(
                     log(f"⚠️ path 2: no child markets with valid token pairs for marketId={market_id!r}")
                 else:
                     # Score children against outcome_hint and pick best.
-                    # If all scores are 0 (no hint / hint doesn't match any title),
-                    # fall back to the first child — still better than returning None.
+                    # If all scores are 0 with 2+ children we genuinely cannot tell
+                    # which outcome to trade — return None so the executor aborts
+                    # cleanly rather than placing an order on the wrong child.
+                    # Exception: exactly 1 valid child means there is no ambiguity.
                     best = max(valid_children, key=lambda c: c["score"])
                     best_score = best["score"]
-                    if best_score == 0 and outcome_hint:
+                    if best_score == 0 and outcome_hint and len(valid_children) > 1:
                         log(
-                            f"⚠️ path 2: all children scored 0 for hint={outcome_hint!r} — "
-                            f"using first valid child as blind fallback "
-                            f"(child={valid_children[0]['child_id']!r} title={valid_children[0]['title']!r})"
+                            f"❌ path 2: {len(valid_children)} children found but all scored 0 "
+                            f"for hint={outcome_hint!r} — cannot safely pick a child; "
+                            f"children={[c['title'] for c in valid_children]!r}"
                         )
-                        best = valid_children[0]
+                        return None
                     log(f"✅ resolve_tradable_market (categorical): parent={market_id!r} → "
                         f"child={best['child_id']!r} title={best['title']!r} "
                         f"score={best_score} YES={best['yes'][:12]}... NO={best['no'][:12]}...")
