@@ -199,17 +199,17 @@ def _place_poly_order(
         neg_risk  = client.get_neg_risk(token_id)
 
         px       = round(float(price), 2)
-        size_str = str(int(contract_count))
+        size_val = float(int(contract_count))
 
         log(
             f"📤 [POLY] Submitting order: side={side} contracts={contract_count} "
-            f"price={px} size={size_str!r} tick_size={tick_size} neg_risk={neg_risk}"
+            f"price={px} size={size_val} tick_size={tick_size} neg_risk={neg_risk}"
         )
 
         order_args = OrderArgs(
             token_id=token_id,
             price=px,
-            size=size_str,
+            size=size_val,
             side=side,
         )
         signed_order = client.create_order(
@@ -362,7 +362,7 @@ def _unwind_poly_leg(
             log(f"⚠️ [POLY] No live bid; using fallback sell price={sell_price}")
 
         shares = filled_size_usdc / filled_price if filled_price > 0 else 0
-        size_str = str(int(round(shares)))
+        size_val = float(int(round(shares)))
         sell_px  = round(float(sell_price), 2)
         from py_clob_client.clob_types import PartialCreateOrderOptions
         tick_size = client.get_tick_size(token_id)
@@ -370,7 +370,7 @@ def _unwind_poly_leg(
         order_args = OrderArgs(
             token_id=token_id,
             price=sell_px,
-            size=size_str,
+            size=size_val,
             side="SELL",
         )
         signed_order = client.create_order(
