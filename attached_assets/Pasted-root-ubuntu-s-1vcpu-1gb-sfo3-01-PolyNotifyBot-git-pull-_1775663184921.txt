@@ -1,0 +1,41 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# git pull && sudo systemctl restart psniper-bot
+remote: Enumerating objects: 22, done.
+remote: Counting objects: 100% (22/22), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 12 (delta 10), reused 12 (delta 10), pack-reused 0 (from 0)
+Unpacking objects: 100% (12/12), 4.85 KiB | 381.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   fcfc791..5138011  main       -> origin/main
+Updating fcfc791..5138011
+Fast-forward
+ attached_assets/Pasted--Opinion-Categorical-Market-Resolution-Fix-Root-cau-177_1775662085324.txt | 185 ++++++++++++++++++++++++++++++++++++++++++++++
+ bot/arb_monitor/adapters/opinion.py                                                              | 224 ++++++++++++++++++++++++++++++--------------------------
+ bot/arb_monitor/adapters/opinion_clob.py                                                         |   3 +-
+ bot/arb_monitor/core/arb_execution_loop.py                                                       |   3 +-
+ bot/arb_monitor/core/arb_executor.py                                                             |  14 +++-
+ 5 files changed, 320 insertions(+), 109 deletions(-)
+ create mode 100644 attached_assets/Pasted--Opinion-Categorical-Market-Resolution-Fix-Root-cau-177_1775662085324.txt
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "\[ArbExecLoop\]|\[ArbFunder\]|\[Arb/Executor\]"
+Apr 08 15:41:08 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: ⚡ [Arb/Executor] ⚠️ No Poly CLOB proxy configured (PROXY_URL / POLY_CLOB_PROXY_URL)
+Apr 08 15:41:08 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: [proxychains] Strict chain  ...  45.202.213.98:62318 🔁 [ArbExecLoop] 🟢 Arb execution loop started
+Apr 08 15:41:08 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 08 15:41:08 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 🔁 [ArbExecLoop] 🚀 Execution loop daemon thread started (poll_interval=30s)
+Apr 08 15:41:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=0.68 under_pressure=False unwind_needed=False
+Apr 08 15:41:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-08T15:41:33Z
+Apr 08 15:41:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 08 15:41:41 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775661929, cooldown=60s) — calling
+Apr 08 15:41:41 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=4604
+Apr 08 15:41:41 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] 📤 TX nonce=4604 → 0xf01e38b127da8dd50fed0b23366cde68a9738903ffe1ea5f11163d47d2bad759
+Apr 08 15:41:41 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] ✅ tend() sent: tx=0xf01e38b127da8dd50fed0b23366cde68a9738903ffe1ea5f11163d47d2bad759
+Apr 08 15:41:41 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] 💼 Servicer [2026-04-08T15:41:33Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=1.6823 ETH=0.008358 safety_buffer=1.0 gas_reserve=0.0010 ETH
+Apr 08 15:41:51 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=1.68 deployable=0.68 under_pressure=False
+Apr 08 15:41:51 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 08 15:41:51 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.6823 USDC in servicer wallet
+Apr 08 15:41:51 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] ⚠️ Poly balance read error: PolyApiException[status_code=None, error_message=Request exception!]
+Apr 08 15:41:51 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
+Apr 08 15:41:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 🔁 [ArbExecLoop] 💼 Platform balances: poly=0.0000 kalshi=5.6000 opinion=9.0559 USDC
+Apr 08 15:42:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 🔁 [ArbExecLoop] 📊 175 opportunities fetched, sorted by score desc
+Apr 08 15:42:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 🔁 [ArbExecLoop] 🔍 [OpinionPreWarm] Resolving tokens for 84 Opinion opportunities...
+Apr 08 15:43:11 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] btc-max-2026_value_above_120k: could not resolve parent='340' hint='value_above_120k'
+Apr 08 15:43:40 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] fomc-2026-06-17_hike_25bps: could not resolve parent='319' hint='hike_25bps'
+Apr 08 15:44:04 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[554594]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_hou: could not resolve parent='103' hint='hou'

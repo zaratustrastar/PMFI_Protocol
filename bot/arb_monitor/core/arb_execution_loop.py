@@ -247,8 +247,16 @@ def _execution_cycle():
     ]
     if _opinion_opps:
         from ..core.arb_executor import _opinion_resolve_tokens
-        log(f"🔍 [OpinionPreWarm] Resolving tokens for {len(_opinion_opps)} Opinion opportunities...")
+        _PREWARM_BUDGET_SECS = 30
+        _prewarm_deadline = time.time() + _PREWARM_BUDGET_SECS
+        log(f"🔍 [OpinionPreWarm] Resolving tokens for {len(_opinion_opps)} Opinion opportunities (budget={_PREWARM_BUDGET_SECS}s)...")
+        _prewarm_resolved = 0
+        _prewarm_skipped = 0
         for _opp in _opinion_opps:
+            if time.time() >= _prewarm_deadline:
+                _remaining = len(_opinion_opps) - _prewarm_resolved - _prewarm_skipped
+                log(f"⏱️ [OpinionPreWarm] Time budget exhausted after {_prewarm_resolved} resolved, {_remaining} deferred to pre-flight")
+                break
             _mid = getattr(_opp, "opinion_market_id", "")
             _hint = getattr(_opp, "outcome_key", "")
             if not _mid:
@@ -257,14 +265,14 @@ def _execution_cycle():
             _skip_ts = _OPINION_SKIP_CACHE.get(_skip_key, 0.0)
             if _skip_ts > 0 and time.time() < _skip_ts + _OPINION_SKIP_TTL:
                 log(f"🔍 [OpinionPreWarm] Skipping {_opp.pair_id} — in skip cache")
+                _prewarm_skipped += 1
                 continue
             try:
                 _label = getattr(_opp, "label", "") or ""
                 _pre = _opinion_resolve_tokens(_mid, outcome_hint=_hint, label_hint=_label)
                 if _pre:
                     log(f"✅ [OpinionPreWarm] {_opp.pair_id}: parent={_mid!r} → child={_pre[0]!r}")
-                    # If this pair was previously skip-cached (failed last time), clear
-                    # it now that resolution succeeded — let execution proceed this cycle.
+                    _prewarm_resolved += 1
                     if _skip_key in _OPINION_SKIP_CACHE:
                         del _OPINION_SKIP_CACHE[_skip_key]
                         log(f"🔓 [OpinionPreWarm] {_opp.pair_id}: cleared skip cache — resolution succeeded")

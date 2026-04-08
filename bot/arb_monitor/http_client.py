@@ -82,18 +82,36 @@ def _get_direct_session() -> requests.Session:
 _opinion_session_proxy: str = ""  # tracks which proxy URL the current session was built for
 
 
-def _get_opinion_session() -> requests.Session:
-    """Return a session that routes through OPINION_PROXY_URL (Serbian residential proxy).
+def _under_proxychains() -> bool:
+    """Return True when the process is wrapped by proxychains4.
 
-    trust_env=False ensures VPS env vars (HTTPS_PROXY etc.) don't bleed in.
+    proxychains injects itself via LD_PRELOAD. When active it is already
+    routing ALL outbound TCP through the configured SOCKS/HTTP chain at the
+    OS level, so setting session.proxies would send traffic through the proxy
+    server TWICE (application-level → proxychains TCP-level → proxy again),
+    creating a circular connection that always times out.
+    """
+    return "proxychains" in os.environ.get("LD_PRELOAD", "").lower()
+
+
+def _get_opinion_session() -> requests.Session:
+    """Return a session for Opinion Labs API calls.
+
+    Proxy strategy (mutually exclusive):
+      A) proxychains active  — trust_env=False, no session.proxies.
+         proxychains already routes all TCP (including Opinion) through the
+         Serbian residential proxy at the OS level. Adding session.proxies on
+         top causes a circular double-proxy loop → timeout.
+      B) proxychains absent  — trust_env=False, session.proxies = OPINION_PROXY_URL.
+         Application-level proxy routes Opinion through Serbian residential IP
+         to bypass geo-blocking.
+
     Reads OPINION_PROXY_URL from the environment on each call so runtime
-    changes (os.environ updates) are picked up on the next call without restart.
-    Falls back to direct connection if OPINION_PROXY_URL is not set.
+    changes are picked up on the next call without restart.
     """
     global _opinion_session, _opinion_session_proxy
     current = os.environ.get("OPINION_PROXY_URL", "")
     if _opinion_session is not None and current != _opinion_session_proxy:
-        # Proxy URL changed at runtime — discard the cached session.
         print(f"🌐 [HTTP] Opinion proxy changed — resetting session")
         _opinion_session = None
     if _opinion_session is None:
@@ -101,7 +119,12 @@ def _get_opinion_session() -> requests.Session:
         _opinion_session = requests.Session()
         _opinion_session.trust_env = False
         _opinion_session.headers.update({"User-Agent": DEFAULT_USER_AGENT})
-        if current:
+        if _under_proxychains():
+            print(
+                "🌐 [HTTP] Opinion session: proxychains detected — skipping session.proxies "
+                "(TCP already routed through Serbian proxy at OS level)"
+            )
+        elif current:
             _opinion_session.proxies.update({"http": current, "https": current})
             host_display = current.split("@")[-1] if "@" in current else current
             print(f"🌐 [HTTP] Opinion proxy configured: {host_display} (source: OPINION_PROXY_URL)")
