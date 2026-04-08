@@ -101,7 +101,7 @@ _CONDITIONAL_TOKENS_ADDR = "0xAD1a38cEc043e70E83a3eC30443dB285ED10D774"
 _MULTISEND_ADDR = "0x998739BFdAAdde7C933B942a68053933098f9EDa"
 
 _SDK_INIT_TIMEOUT = 15   # seconds — max wait for Client() constructor
-_SDK_CALL_TIMEOUT = 10   # seconds — max wait for any SDK API call
+_SDK_CALL_TIMEOUT = 45   # seconds — max wait for any SDK API call (BSC tx via SOCKS5 proxy needs up to ~30s)
 
 # Module-level singleton client — created lazily, reused across calls.
 _client = None
@@ -400,6 +400,10 @@ def place_order(
             makerAmountInQuoteToken=round(size_usdc, 6),
         )
 
+        # Snapshot balance before placing so we can detect a filled BSC tx on timeout.
+        balance_before = get_balance()
+        log(f"📊 Opinion balance before place_order: {balance_before:.4f} USDT")
+
         def _call():
             return client.place_order(order, check_approval=True)
 
@@ -437,6 +441,27 @@ def place_order(
     except TimeoutError as exc:
         err = str(exc)
         log(f"⏱️  place_order() timed out: {err}")
+        # BSC transactions submitted through proxychains can confirm on-chain but the
+        # SDK receipt poll may exceed our timeout. Verify by checking if the balance
+        # dropped by at least 50% of the expected cost — if so, the order filled.
+        import time as _time
+        log("🔍 [timeout-verify] Waiting 8s then checking Opinion balance for silent fill...")
+        _time.sleep(8)
+        balance_after = get_balance()
+        dropped = balance_before - balance_after
+        threshold = size_usdc * 0.50
+        log(
+            f"🔍 [timeout-verify] balance_before={balance_before:.4f} "
+            f"balance_after={balance_after:.4f} dropped={dropped:.4f} "
+            f"threshold(50%*cost)={threshold:.4f}"
+        )
+        if dropped >= threshold:
+            log(
+                f"✅ [timeout-verify] Balance dropped {dropped:.4f} >= {threshold:.4f} — "
+                f"BSC tx confirmed despite SDK timeout. Treating as filled."
+            )
+            return True, "timeout-confirmed", ""
+        log(f"⏱️  [timeout-verify] Drop {dropped:.4f} < threshold {threshold:.4f} — treating as failed: {err}")
         return False, "", err
     except Exception as exc:
         err = str(exc)
