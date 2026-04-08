@@ -106,6 +106,7 @@ _SDK_CALL_TIMEOUT = 10   # seconds — max wait for any SDK API call
 # Module-level singleton client — created lazily, reused across calls.
 _client = None
 _client_error: Optional[str] = None  # cached init failure message
+_active_proxy_url: str = os.environ.get("OPINION_PROXY_URL", "")  # tracks proxy URL for client reset
 
 
 def log(msg: str) -> None:
