@@ -35,13 +35,27 @@ from ..config import (
 )
 
 # ── Route opinion_clob_sdk through Serbian residential proxy ──────────────────
-# Patches HTTPAdapter.send with a URL filter so only opinion.trade requests
-# get the proxy injected (Kalshi/Poly/BSC-RPC are unaffected).
-# Proxy is read at request time (not import time) so startup order does not matter:
-# if OPINION_PROXY_URL is missing when the module loads, the patch is still installed
-# and will pick up the variable as soon as it appears in os.environ (e.g. after the
-# systemd EnvironmentFile is applied and the process restarts).
-_active_proxy_url: str = os.environ.get("OPINION_PROXY_URL", "")
+# Patches HTTPAdapter.send globally so ALL requests to *.opinion.trade URLs
+# are routed through the Serbian residential proxy regardless of which session
+# object or SDK client issued the request.
+#
+# Double-proxy guard (critical):
+#   When the process runs under proxychains4, ALL outbound TCP is already
+#   routed through Serbia at the OS level.  Injecting session.proxies on top
+#   would make requests connect to the SOCKS5 server, and proxychains would
+#   then route THAT connection back through the same SOCKS5 server — circular.
+#   In that case we skip the application-level proxy injection entirely and let
+#   proxychains handle routing transparently.
+#
+# Protocol:
+#   OPINION_PROXY_URL must use socks5h:// (or socks5://) so that PySocks
+#   handles DNS inside the proxy tunnel — prevents DNS leaks and avoids
+#   situations where the local resolver can't reach the destination host.
+
+def _under_proxychains() -> bool:
+    """Return True when wrapped by proxychains4 (checks LD_PRELOAD)."""
+    return "proxychains" in os.environ.get("LD_PRELOAD", "").lower()
+
 
 try:
     from requests.adapters import HTTPAdapter as _HTTPAdapter
@@ -49,25 +63,34 @@ try:
     _orig_http_adapter_send = _HTTPAdapter.send
 
     def _opinion_proxied_send(self, request, **kwargs):
-        """Always inject current OPINION_PROXY_URL for opinion.trade URLs; others unchanged.
+        """Inject OPINION_PROXY_URL for opinion.trade URLs unless proxychains is active.
 
-        Proxy is read dynamically on every call — no dependency on import-time env state.
-        If OPINION_PROXY_URL is empty, the request passes through unmodified (safe fallback).
-        Unconditionally overwrites kwargs["proxies"] for opinion.trade so the Serbian proxy
-        wins even if the SDK session already has proxies set (empty dict, system proxy, etc).
+        Strategy:
+          A) proxychains active  — skip injection; TCP already routed through Serbia.
+             Injecting here would cause a circular double-proxy loop → timeout.
+          B) proxychains absent  — inject socks5h:// proxy so the SDK session routes
+             through Serbian residential IP to bypass geo-blocking.
+
+        Proxy URL is read from os.environ on every call so runtime changes and
+        systemd EnvironmentFile reloads are picked up without restart.
         """
         if "opinion.trade" in (request.url or ""):
-            proxy = os.environ.get("OPINION_PROXY_URL", "")
-            if proxy:
-                kwargs = dict(kwargs)
-                kwargs["proxies"] = {"http": proxy, "https": proxy}
+            if _under_proxychains():
+                pass  # proxychains handles TCP routing — do not double-proxy
+            else:
+                proxy = os.environ.get("OPINION_PROXY_URL", "")
+                if proxy:
+                    kwargs = dict(kwargs)
+                    kwargs["proxies"] = {"http": proxy, "https": proxy}
         return _orig_http_adapter_send(self, request, **kwargs)
 
     _HTTPAdapter.send = _opinion_proxied_send
     _boot_proxy = os.environ.get("OPINION_PROXY_URL", "")
     _boot_proxy_host = _boot_proxy.split("@")[-1] if "@" in _boot_proxy else _boot_proxy
-    if _boot_proxy_host:
-        print(f"⚡ [Opinion CLOB] proxy ACTIVE (monkey-patched): {_boot_proxy_host}", flush=True)
+    if _under_proxychains():
+        print("⚡ [Opinion CLOB] proxychains detected — monkey-patch installed in passthrough mode (TCP routed by proxychains)", flush=True)
+    elif _boot_proxy_host:
+        print(f"⚡ [Opinion CLOB] proxy ACTIVE (monkey-patched SOCKS5): {_boot_proxy_host}", flush=True)
     else:
         print("⚡ [Opinion CLOB] patch installed — proxy will activate once OPINION_PROXY_URL is in env", flush=True)
 except Exception as _patch_err:

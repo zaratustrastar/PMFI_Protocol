@@ -1,0 +1,17 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "Poly balance|PolyApiException|ArbFunder"
+Apr 08 16:32:47 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 📈 [Arb/NAV] ⚠️ [NAV] EOA balance check failed: PolyApiException[status_code=None, error_message=Request exception!]
+Apr 08 16:32:47 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]:    ⚠️  CLOB client orderbook error: PolyApiException[status_code=None, error_message=Request exception!], trying HTTP fallback...
+Apr 08 16:33:12 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-08T16:33:07Z
+Apr 08 16:33:12 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 08 16:33:12 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775665409, cooldown=60s) — calling
+Apr 08 16:33:12 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=4606
+Apr 08 16:33:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 📤 TX nonce=4606 → 0x843df49d1131fc9b8863a39485a6a5f473da41db98c9b05284d4efe5432179c7
+Apr 08 16:33:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] ✅ tend() sent: tx=0x843df49d1131fc9b8863a39485a6a5f473da41db98c9b05284d4efe5432179c7
+Apr 08 16:33:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 💼 Servicer [2026-04-08T16:33:07Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=1.6823 ETH=0.008357 safety_buffer=1.0 gas_reserve=0.0010 ETH
+Apr 08 16:33:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=1.68 deployable=0.68 under_pressure=False
+Apr 08 16:33:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 08 16:33:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3575878', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913123269935', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913129639935', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 08 16:33:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.575878 USDC (raw=3575878)
+Apr 08 16:33:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 🔍 sig_type=0 (EOA) response: {'balance': '0', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '0', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '0', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '0'}}
+Apr 08 16:33:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+Apr 08 16:33:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[557785]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC
