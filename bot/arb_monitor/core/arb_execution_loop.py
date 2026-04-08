@@ -232,6 +232,46 @@ def _execution_cycle():
 
     log(f"📊 {len(opportunities)} opportunities fetched, sorted by score desc")
 
+    # ── Opinion categorical pre-warm ─────────────────────────────────────────
+    # Resolve all (parent_id, outcome_key) pairs for Opinion opportunities BEFORE
+    # the execution loop starts. This populates the in-process token cache so
+    # that the pre-flight check inside execute_arb() always hits the cache path
+    # rather than making a live API call under execution pressure.
+    #
+    # We skip pairs already in _OPINION_SKIP_CACHE — those recently failed and
+    # retrying immediately would just waste API quota.
+    _opinion_opps = [
+        opp for opp in opportunities
+        if getattr(opp, "venue2", "kalshi") == "opinion"
+        and not getattr(opp, "is_display_only", True)
+    ]
+    if _opinion_opps:
+        from ..core.arb_executor import _opinion_resolve_tokens
+        log(f"🔍 [OpinionPreWarm] Resolving tokens for {len(_opinion_opps)} Opinion opportunities...")
+        for _opp in _opinion_opps:
+            _mid = getattr(_opp, "opinion_market_id", "")
+            _hint = getattr(_opp, "outcome_key", "")
+            if not _mid:
+                continue
+            _skip_key = (_mid, _hint)
+            _skip_ts = _OPINION_SKIP_CACHE.get(_skip_key, 0.0)
+            if _skip_ts > 0 and time.time() < _skip_ts + _OPINION_SKIP_TTL:
+                log(f"🔍 [OpinionPreWarm] Skipping {_opp.pair_id} — in skip cache")
+                continue
+            try:
+                _pre = _opinion_resolve_tokens(_mid, outcome_hint=_hint)
+                if _pre:
+                    log(f"✅ [OpinionPreWarm] {_opp.pair_id}: parent={_mid!r} → child={_pre[0]!r}")
+                    # If this pair was previously skip-cached (failed last time), clear
+                    # it now that resolution succeeded — let execution proceed this cycle.
+                    if _skip_key in _OPINION_SKIP_CACHE:
+                        del _OPINION_SKIP_CACHE[_skip_key]
+                        log(f"🔓 [OpinionPreWarm] {_opp.pair_id}: cleared skip cache — resolution succeeded")
+                else:
+                    log(f"⚠️ [OpinionPreWarm] {_opp.pair_id}: could not resolve parent={_mid!r} hint={_hint!r}")
+            except Exception as _pw_exc:
+                log(f"⚠️ [OpinionPreWarm] {_opp.pair_id}: exception: {_pw_exc}")
+
     executed = 0
     skipped_thin = 0
     skipped_caps = 0

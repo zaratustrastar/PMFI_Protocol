@@ -399,22 +399,54 @@ def _score_child_by_hint(child_title: str, outcome_hint: str) -> int:
 
     Higher score = better match. Used to pick the right child from a categorical market.
 
-    E.g. outcome_hint="value_above_120k", child_title="↑ 120,000" → score 2
-         outcome_hint="value_above_120k", child_title="↑ 150,000" → score 1 or 0
+    Handles three match classes:
+      1. Numeric: "120k" / "120000" matches "↑ 120,000" → scores 4-5
+      2. Direction: hint containing above/up/yes/more matches "↑"; below/down/no/less → "↓"
+      3. Token overlap: lowercase word tokens shared between hint and title → +1 per token
+
+    E.g. outcome_hint="value_above_120k", child_title="↑ 120,000"  → score ≥ 5
+         outcome_hint="andy_jassy_amazon", child_title="Andy Jassy" → score ≥ 2
+         outcome_hint="yes",               child_title="↑ Yes"      → score ≥ 2
     """
     if not outcome_hint:
         return 0
-    title_digits = re.sub(r"[^0-9]", "", child_title)   # "120000" from "↑ 120,000"
-    # Extract digits from hint (e.g. "120" from "120k" or "120000" from hint)
+
+    score = 0
+    title_lower = child_title.lower()
+    hint_lower = outcome_hint.lower()
+
+    # ── 1. Numeric matching ───────────────────────────────────────────────────
+    title_digits = re.sub(r"[^0-9]", "", child_title)
     m_k = re.search(r"(\d+)k", outcome_hint, re.IGNORECASE)
-    hint_k = m_k.group(1) if m_k else ""            # "120"
-    hint_digits = re.sub(r"[^0-9]", "", outcome_hint)   # "120000" or "120"
+    hint_k = m_k.group(1) if m_k else ""
+    hint_digits = re.sub(r"[^0-9]", "", outcome_hint)
 
     if hint_k and hint_k in title_digits:
-        return 2   # strong: "120" appears in "120000"
-    if hint_digits and hint_digits[:3] in title_digits:
-        return 1   # partial overlap on first 3 digits
-    return 0
+        score += 5    # strong: "120" appears in "120000"
+    elif hint_digits and hint_digits[:3] in title_digits:
+        score += 3    # partial overlap on first 3 digits
+
+    # ── 2. Direction keyword matching ─────────────────────────────────────────
+    _UP_WORDS = ("above", "up", "higher", "more", "over", "exceed", "yes")
+    _DOWN_WORDS = ("below", "down", "lower", "less", "under", "no")
+    hint_has_up   = any(w in hint_lower for w in _UP_WORDS)
+    hint_has_down = any(w in hint_lower for w in _DOWN_WORDS)
+    title_has_up   = "↑" in child_title or "up" in title_lower or "above" in title_lower or "yes" in title_lower
+    title_has_down = "↓" in child_title or "down" in title_lower or "below" in title_lower or "no" in title_lower
+
+    if hint_has_up and title_has_up and not (hint_has_down and title_has_down):
+        score += 2
+    elif hint_has_down and title_has_down and not (hint_has_up and title_has_up):
+        score += 2
+
+    # ── 3. Word token overlap ─────────────────────────────────────────────────
+    # Split both hint ("andy_jassy_amazon") and title ("Andy Jassy") into tokens
+    hint_tokens  = set(re.split(r"[_\s\-/]+", hint_lower)) - {"", "the", "a", "an", "of", "in"}
+    title_tokens = set(re.split(r"[_\s\-/,\.]+", title_lower)) - {"", "the", "a", "an", "of", "in"}
+    shared = hint_tokens & title_tokens
+    score += len(shared)   # +1 per shared word (handles names, tickers, etc.)
+
+    return score
 
 
 def resolve_tradable_market(
@@ -499,37 +531,56 @@ def resolve_tradable_market(
         if r2 is not None and r2.status_code == 200:
             try:
                 d2 = r2.json()
+                log(f"📡 path 2 raw top-level keys={list(d2.keys()) if isinstance(d2, dict) else type(d2).__name__!r}")
+                # The API may nest childMarkets differently across versions — try all known shapes.
+                result2 = d2.get("result") or {}
                 children = (
-                    d2.get("result", {}).get("data", {}).get("childMarkets") or []
+                    # Shape A: result.data.childMarkets
+                    (result2.get("data") or {}).get("childMarkets")
+                    # Shape B: result.childMarkets
+                    or result2.get("childMarkets")
+                    # Shape C: data.childMarkets
+                    or (d2.get("data") or {}).get("childMarkets")
+                    # Shape D: top-level childMarkets
+                    or d2.get("childMarkets")
+                    or []
                 )
                 log(f"📡 path 2 (categorical): {len(children)} child markets found")
                 valid_children = []
                 for child in children:
                     cid   = str(child.get("marketId", ""))
-                    title = child.get("marketTitle", "") or ""
+                    title = child.get("marketTitle", "") or child.get("title", "") or ""
                     yes   = child.get("yesTokenId", "")
                     no    = child.get("noTokenId", "")
                     log(f"📡   child marketId={cid!r} title={title!r} "
                         f"yes={yes[:12] if yes else '(none)'}... "
                         f"no={no[:12] if no else '(none)'}...")
                     if cid and yes and no:
-                        # Cache each child individually
+                        # Cache each child individually so future lookups are instant.
                         _MARKET_TOKEN_CACHE[cid] = (yes, no)
+                        sc = _score_child_by_hint(title, outcome_hint)
                         valid_children.append({
                             "child_id": cid, "title": title, "yes": yes, "no": no,
+                            "score": sc,
                         })
                 if not valid_children:
                     log(f"⚠️ path 2: no child markets with valid token pairs for marketId={market_id!r}")
                 else:
-                    # Score children against outcome_hint and pick best
-                    best = max(
-                        valid_children,
-                        key=lambda c: _score_child_by_hint(c["title"], outcome_hint),
-                    )
-                    score = _score_child_by_hint(best["title"], outcome_hint)
+                    # Score children against outcome_hint and pick best.
+                    # If all scores are 0 (no hint / hint doesn't match any title),
+                    # fall back to the first child — still better than returning None.
+                    best = max(valid_children, key=lambda c: c["score"])
+                    best_score = best["score"]
+                    if best_score == 0 and outcome_hint:
+                        log(
+                            f"⚠️ path 2: all children scored 0 for hint={outcome_hint!r} — "
+                            f"using first valid child as blind fallback "
+                            f"(child={valid_children[0]['child_id']!r} title={valid_children[0]['title']!r})"
+                        )
+                        best = valid_children[0]
                     log(f"✅ resolve_tradable_market (categorical): parent={market_id!r} → "
                         f"child={best['child_id']!r} title={best['title']!r} "
-                        f"score={score} YES={best['yes'][:12]}... NO={best['no'][:12]}...")
+                        f"score={best_score} YES={best['yes'][:12]}... NO={best['no'][:12]}...")
                     resolved = (best["child_id"], best["yes"], best["no"])
                     # Key by (market_id, outcome_hint) — not just market_id — so
                     # different outcomes of the same categorical parent don't collide.
