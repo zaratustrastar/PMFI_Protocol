@@ -1,0 +1,93 @@
+Correct — **that should not be expected to work for Opinion if `market_id` is the parent Opinion market ID**.
+
+In your example:
+
+```bash
+_place_opinion_order(
+    market_id='MARKET_ID_HERE',
+    side='NO',
+    price=0.07,
+    size_usdc=1.0,
+    contract_count=14,
+    outcome_hint='',
+)
+```
+
+it will only work if `MARKET_ID_HERE` is already the **tradable child market**, or if `_place_opinion_order()` internally does:
+
+* parent market lookup
+* outcome matching
+* child market resolution
+* token lookup for that child
+
+And with `outcome_hint=''`, even that resolution is likely to fail or become ambiguous for grouped markets like:
+
+* BTC thresholds
+* Fed cuts
+* NBA champion
+* SpaceX ticker
+
+Because `340`, `78`, `103`, `169`, etc. are not single contracts. They are containers for many outcomes.
+
+So these cases:
+
+* `market_id='340', outcome_hint=''` → **should not be trusted**
+* `market_id='340', outcome_hint='value_above_120k'` → **could work**, if resolver is implemented
+* `market_id='5517', outcome_hint=''` where `5517` is already the child → **much more likely to work**
+
+What you want for a real test is one of these two:
+
+### 1. Test the resolver path
+
+Use the **parent** plus a real outcome hint:
+
+```bash
+cd /root/PolyNotifyBot && python3 -c "
+from dotenv import load_dotenv; load_dotenv()
+from bot.arb_monitor.core.arb_executor import _place_opinion_order
+ok, oid, err = _place_opinion_order(
+    market_id='340',
+    side='NO',
+    price=0.70,
+    size_usdc=1.0,
+    contract_count=1,
+    outcome_hint='value_above_120k',
+)
+print('ok:', ok, '| orderId:', oid, '| err:', err)
+"
+```
+
+This checks whether parent→child resolution works.
+
+### 2. Test the direct tradable child path
+
+Use the resolved child market ID directly, if you know it:
+
+```bash
+market_id='5517'
+```
+
+That checks whether the actual order placement works once resolution is bypassed.
+
+Important detail: even if the resolution is correct, **execution can still fail for geoblock / API restriction reasons** on Opinion. But that is a separate problem from contract resolution.
+
+So the answer is:
+
+**Yes — with a parent Opinion ID and empty `outcome_hint`, this should generally not be considered a valid automation test.**
+
+A proper Opinion execution test must include either:
+
+* a **child market ID**, or
+* a **parent market ID plus an outcome hint**
+
+The clean rule is:
+
+* **parent ID alone** → not enough
+* **parent ID + outcome hint** → maybe enough
+* **child ID** → executable unit
+
+Your main concern is contract automation, and for that the minimum successful chain is:
+
+`Oddpool pair -> opinion parent id -> outcome hint -> child market -> token ids -> order side`
+
+Without that chain, Opinion is not execution-ready.

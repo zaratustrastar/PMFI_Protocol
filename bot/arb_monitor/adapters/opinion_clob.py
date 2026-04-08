@@ -37,41 +37,41 @@ from ..config import (
 # ── Route opinion_clob_sdk through Serbian residential proxy ──────────────────
 # Patches HTTPAdapter.send with a URL filter so only opinion.trade requests
 # get the proxy injected (Kalshi/Poly/BSC-RPC are unaffected).
-# Reads OPINION_PROXY_URL per-request so runtime env changes propagate without
-# needing a module reload.
-_opinion_clob_proxy = os.environ.get("OPINION_PROXY_URL", "")
-_opinion_proxy_host = (
-    _opinion_clob_proxy.split("@")[-1] if "@" in _opinion_clob_proxy
-    else _opinion_clob_proxy
-)
-_active_proxy_url: str = _opinion_clob_proxy
+# Proxy is read at request time (not import time) so startup order does not matter:
+# if OPINION_PROXY_URL is missing when the module loads, the patch is still installed
+# and will pick up the variable as soon as it appears in os.environ (e.g. after the
+# systemd EnvironmentFile is applied and the process restarts).
+_active_proxy_url: str = os.environ.get("OPINION_PROXY_URL", "")
 
-if _opinion_clob_proxy:
-    try:
-        from requests.adapters import HTTPAdapter as _HTTPAdapter
+try:
+    from requests.adapters import HTTPAdapter as _HTTPAdapter
 
-        _orig_http_adapter_send = _HTTPAdapter.send
+    _orig_http_adapter_send = _HTTPAdapter.send
 
-        def _opinion_proxied_send(self, request, **kwargs):
-            """Always inject current OPINION_PROXY_URL for opinion.trade URLs; others unchanged.
+    def _opinion_proxied_send(self, request, **kwargs):
+        """Always inject current OPINION_PROXY_URL for opinion.trade URLs; others unchanged.
 
-            Unconditionally overwrites kwargs["proxies"] for opinion.trade — this ensures
-            the Serbian proxy wins even if the SDK session already has proxies set (e.g.
-            empty dict, system proxy, or leftover Spain proxy from another session).
-            """
-            if "opinion.trade" in (request.url or ""):
-                proxy = os.environ.get("OPINION_PROXY_URL", "")
-                if proxy:
-                    kwargs = dict(kwargs)
-                    kwargs["proxies"] = {"http": proxy, "https": proxy}
-            return _orig_http_adapter_send(self, request, **kwargs)
+        Proxy is read dynamically on every call — no dependency on import-time env state.
+        If OPINION_PROXY_URL is empty, the request passes through unmodified (safe fallback).
+        Unconditionally overwrites kwargs["proxies"] for opinion.trade so the Serbian proxy
+        wins even if the SDK session already has proxies set (empty dict, system proxy, etc).
+        """
+        if "opinion.trade" in (request.url or ""):
+            proxy = os.environ.get("OPINION_PROXY_URL", "")
+            if proxy:
+                kwargs = dict(kwargs)
+                kwargs["proxies"] = {"http": proxy, "https": proxy}
+        return _orig_http_adapter_send(self, request, **kwargs)
 
-        _HTTPAdapter.send = _opinion_proxied_send
-        print(f"⚡ [Opinion CLOB] proxy ACTIVE (monkey-patched): {_opinion_proxy_host}", flush=True)
-    except Exception as _patch_err:
-        print(f"⚡ [Opinion CLOB] ⚠️ Failed to patch Opinion CLOB proxy: {_patch_err}", flush=True)
-else:
-    print("⚡ [Opinion CLOB] ⚠️ No OPINION_PROXY_URL set — Opinion CLOB will connect directly (may be geo-blocked)", flush=True)
+    _HTTPAdapter.send = _opinion_proxied_send
+    _boot_proxy = os.environ.get("OPINION_PROXY_URL", "")
+    _boot_proxy_host = _boot_proxy.split("@")[-1] if "@" in _boot_proxy else _boot_proxy
+    if _boot_proxy_host:
+        print(f"⚡ [Opinion CLOB] proxy ACTIVE (monkey-patched): {_boot_proxy_host}", flush=True)
+    else:
+        print("⚡ [Opinion CLOB] patch installed — proxy will activate once OPINION_PROXY_URL is in env", flush=True)
+except Exception as _patch_err:
+    print(f"⚡ [Opinion CLOB] ⚠️ Failed to patch Opinion CLOB proxy: {_patch_err}", flush=True)
 
 _OPINION_CHAIN_ID = 56  # BNB Chain Mainnet
 _CONDITIONAL_TOKENS_ADDR = "0xAD1a38cEc043e70E83a3eC30443dB285ED10D774"

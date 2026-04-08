@@ -1,0 +1,741 @@
+mpion'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-nhl-stanley-cup-champion' label='Boston Bruins': YES=9615623057874710... NO=2478990590389967...
+🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_boston_bruins': score=$300.0000 net_cents=0.30 size=$100000 time_factor=1.0 days=82.9 | poly_liq=$161295 venue2_liq=$622467
+🔀 [Arb/Oddpool] ✅ pair='stanley-cup-2026_boston_bruins' edge=1.30¢ poly=0.02 venue2(kalshi/NO)=0.97 days=82.9 token=resolved no_token=set title='NHL Stanley Cup Champion 2026'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/what-price-will-ethereum-hit-before-2027/markets
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/balance-of-power-2026-midterms/markets
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='will-jesus-christ-return-before-2027': conditionId=0x0b4cc3b739e1dfe5d73274... YES=6932431735503727... NO=5179715774304650...
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0040 Δ=0.0000 | NO ask=0.997 Δ=0.9930 | expected=0.0040 slug='what-will-spacexs-public-ticker-be'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='what-will-spacexs-public-ticker-be' label='$MARS': YES=6572733366953123... NO=7822031587733147...
+🔀 [Arb/Oddpool] 📊 Scored pair='spacex-ticker-prediction_mars': score=$26.1735 net_cents=0.70 size=$7478 time_factor=0.5 days=632.1 | poly_liq=$28659 venue2_liq=$7478
+🔀 [Arb/Oddpool] ✅ pair='spacex-ticker-prediction_mars' edge=0.70¢ poly=0.00 venue2(opinion/NO)=0.99 days=632.1 token=resolved no_token=set title='SpaceX Public Ticker Prediction'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/what-price-will-ethereum-hit-before-2027/markets
+📊 [Arb/Polymarket] ⚠️ [Path OS] Fuzzy volume match: vol=13183956 expected=13186097 diff=2141
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0xd4d00e5bf8b960cc37c74c... question='Will the Fed increase interest rates by 25+ bps after the Ap'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0xd4d00e5bf8b960cc37c74c1ec19e41e00b0706add203ddcfbb65ad006c5c223a
+📊 [Arb/Polymarket] 🔍 [Path OS] 32 total markets, 32 polymarket for slug='2026-nhl-stanley-cup-champion'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='pro-baseball-2026-national-league-champion' label='St. Louis': YES=8985877191605043... NO=1709992949896582...
+🔀 [Arb/Oddpool] ⏭ pair='national-league-champion-2026_st_louis_cardinals': deployable=$0.00 < $10 minimum — skip
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/how-many-fed-rate-cuts-in-2026/markets
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='balance-of-power-2026-midterms': conditionId=0x7987a821b8032824f1805e... YES=3547763128924170... NO=5815457490959081...
+📊 [Arb/Polymarket] 📖 get_best_prices(2633536236344864...): best_ask=0.982 best_bid=0.98 neg_risk=True last_trade=0.981 asks=18 bids=127
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0200 Δ=0.0000 | NO ask=0.982 Δ=0.9620 | expected=0.0200 slug='democratic-presidential-nominee-2028'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='democratic-presidential-nominee-2028' label='Andy Beshear': YES=2646865639297855... NO=2633536236344864...
+🔀 [Arb/Oddpool] 📊 Scored pair='dem-nominee-2028_andy_beshear': score=$300.0000 net_cents=0.60 size=$100000 time_factor=0.5 days=943.9 | poly_liq=$620837 venue2_liq=$2283925
+🔀 [Arb/Oddpool] ✅ pair='dem-nominee-2028_andy_beshear' edge=1.60¢ poly=0.02 venue2(kalshi/NO)=0.96 days=943.9 token=resolved no_token=set title='Democratic Nominee 2028'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/fifa-world-cup-group-d-winner/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(1078298934652442...): best_ask=0.936 best_bid=0.935 neg_risk=True last_trade=0.065 asks=59 bids=124
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0650 Δ=0.0010 | NO ask=0.936 Δ=0.8700 | expected=0.0660 slug='democratic-presidential-nominee-2028'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='democratic-presidential-nominee-2028' label='Jon Ossoff': YES=7007159242013747... NO=1078298934652442...
+🔀 [Arb/Oddpool] 📊 Scored pair='dem-nominee-2028_jon_ossoff': score=$17.2921 net_cents=0.60 size=$5764 time_factor=0.5 days=943.9 | poly_liq=$299568 venue2_liq=$5764
+🔀 [Arb/Oddpool] ✅ pair='dem-nominee-2028_jon_ossoff' edge=0.60¢ poly=0.07 venue2(opinion/NO)=0.93 days=943.9 token=resolved no_token=set title='Democratic Nominee 2028'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/fifa-world-cup-group-f-winner/markets
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=988164 diff=0.1
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x44887f53abbfe7531b1384... question='Will the Dallas Stars win the 2026 NHL Stanley Cup?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x44887f53abbfe7531b1384420b185a5f10ee42a4e6c9441d5883abd4f3c1e5ef
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0130 Δ=0.0010 | NO ask=0.99 Δ=0.9760 | expected=0.0140 slug='who-will-be-the-next-prime-minister-of-israel-after-the-next-election'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='who-will-be-the-next-prime-minister-of-israel-after-the-next-election' label='Itamar Ben-Gvir': YES=9703727159238459... NO=5839213084271639...
+🔀 [Arb/Oddpool] ✅ pair='nm-gov-republican-primary-winner-2026_duke_rodriguez' edge=3.00¢ poly=0.47 venue2(kalshi/NO)=0.50 days=55.1 token=resolved no_token=set title='New Mexico Governor Republican Primary W'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/fifa-world-cup-group-g-winner/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(6468230031369085...): best_ask=0.13 best_bid=0.096 neg_risk=False last_trade=0.106 asks=43 bids=22
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.9040 Δ=0.0000 | NO ask=0.13 Δ=0.7740 | expected=0.9040 slug='ipos-before-2027'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='ipos-before-2027' label='Cerebras': YES=2598290700088627... NO=6468230031369085...
+📊 [Arb/Polymarket] 📖 get_best_prices(5010053891344581...): best_ask=0.88 best_bid=0.87 neg_risk=False last_trade=0.130 asks=12 bids=44
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.1300 Δ=0.0000 | NO ask=0.88 Δ=0.7500 | expected=0.1300 slug='will-trump-endorse-jd-vance-for-president-before-2027'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='will-trump-endorse-jd-vance-for-president-before-2027' label='Will Trump endorse JD Vance for president before 2027?': YES=3672885786761163... NO=5010053891344581...
+🔀 [Arb/Oddpool] 📊 Scored pair='trump-endorsement-jd-vance-2027_will_trump_endorse_jd_vance_for_president_before_2027': score=$23.7099 net_cents=0.60 size=$7903 time_factor=0.5 days=267.1 | poly_liq=$22600 venue2_liq=$7903
+🔀 [Arb/Oddpool] ✅ pair='trump-endorsement-jd-vance-2027_will_trump_endorse_jd_vance_for_president_before_2027' edge=0.60¢ poly=0.13 venue2(opinion/NO)=0.86 days=267.1 token=resolved no_token=set title='Trump Endorsement of JD Vance for Presid'
+📊 [Arb/Polymarket] 📖 get_best_prices(6700967232397856...): best_ask=0.996 best_bid=0.983 neg_risk=True last_trade=0.004 asks=4 bids=13
+🔀 [Arb/Oddpool] 📊 Scored pair='ceos-out-2027_andy_jassy_amazon': score=$19.7776 net_cents=0.40 size=$9889 time_factor=0.5 days=267.1 | poly_liq=$10232 venue2_liq=$9889
+🔀 [Arb/Oddpool] ✅ pair='ceos-out-2027_andy_jassy_amazon' edge=0.40¢ poly=0.11 venue2(opinion/NO)=0.89 days=267.1 token=resolved no_token=set title='Which CEOs Will Be Out Before 2027?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/fed-decision-in-june-825/markets
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0xfb1835b887c33862f5749c... question='Will Manchester City win the 2025–26 English Premier League?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0xfb1835b887c33862f5749c619e612d1244ab6e66115f0ef43d373485dc3a1573
+🔀 [Arb/Oddpool] 📊 Scored pair='israel-pm-2045_itamar_ben_gvir': score=$11.3400 net_cents=0.60 size=$3780 time_factor=0.5 days=267.1 | poly_liq=$44218 venue2_liq=$3780
+🔀 [Arb/Oddpool] 📊 Scored pair='ipos-before-2027_cerebras': score=$7.5370 net_cents=0.30 size=$5025 time_factor=0.5 days=267.1 | poly_liq=$5025 venue2_liq=$10918
+🔀 [Arb/Oddpool] ✅ pair='ipos-before-2027_cerebras' edge=0.30¢ poly=0.90 venue2(opinion/NO)=0.09 days=267.1 token=resolved no_token=set title='IPOs Before 2027'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/next-french-presidential-election/markets
+📊 [Arb/Polymarket] 🔍 [Path OS] 49 total markets, 49 polymarket for slug='2026-fifa-world-cup-winner-595'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=9842690 diff=0.7
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x7976b8dbacf9077eb1453a... question='Will Spain win the 2026 FIFA World Cup?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x7976b8dbacf9077eb1453a62bcefd6ab2df199acd28aad276ff0d920d6992892
+📊 [Arb/Polymarket] 🔍 [Path OS] 15 total markets, 15 polymarket for slug='where-will-trump-and-putin-meet-next-584'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/2026-nhl-stanley-cup-champion/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(8322506290086760...): best_ask=0.006 best_bid=0.005 neg_risk=True last_trade=0.005 asks=82 bids=5
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0170 Δ=0.0000 | NO ask=0.996 Δ=0.9790 | expected=0.0170 slug='who-will-win-the-2026-democratic-dc-mayoral-primary'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='who-will-win-the-2026-democratic-dc-mayoral-primary' label='Muriel Bowser': YES=9592947369223808... NO=6700967232397856...
+🔀 [Arb/Oddpool] 📊 Scored pair='dc-democratic-mayoral-primary-2026_muriel_bowser': score=$0.5955 net_cents=0.30 size=$397 time_factor=0.5 days=623.9 | poly_liq=$1123 venue2_liq=$397
+🔀 [Arb/Oddpool] ✅ pair='dc-democratic-mayoral-primary-2026_muriel_bowser' edge=1.30¢ poly=0.02 venue2(kalshi/NO)=0.97 days=623.9 token=resolved no_token=set title='Who Will Win the 2026 DC Democratic Mayo'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/republican-presidential-nominee-2028/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(3485222240030757...): best_ask=0.032 best_bid=0.029 neg_risk=True last_trade=0.033 asks=93 bids=10
+📊 [Arb/Polymarket] 🔍 [Path OS] 15 total markets, 15 polymarket for slug='pro-baseball-2026-national-league-champion'
+📊 [Arb/Polymarket] ℹ️ [Path OS] Using first PM market (no volume match)
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x937298a2c5ff8b4b8a30d0... question='Will Pittsburgh Pirates win the 2026 National League Champio'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x937298a2c5ff8b4b8a30d024e41b8b8d826da63172a7af0e28f2dff42354c5fd
+🔀 [Arb/Oddpool] ✅ pair='israel-pm-2045_itamar_ben_gvir' edge=1.60¢ poly=0.01 venue2(kalshi/NO)=0.97 days=267.1 token=resolved no_token=set title='Israel Prime Minister Election 2045'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/republican-presidential-nominee-2028/markets
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=921898 diff=0.9
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x6c85fe5b4197dc55dafef8... question='Will Trump and Putin meet next in another EU country?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x6c85fe5b4197dc55dafef8368acaddb96adb892447730dfa53076c537b0bd9f6
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/fifa-world-cup-group-h-winner/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(2456245140683390...): best_ask=0.003 best_bid=0.002 neg_risk=True last_trade=0.003 asks=117 bids=2
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/what-price-will-ethereum-hit-before-2027/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(1671501654949619...): best_ask=0.007 best_bid=0.004 neg_risk=True last_trade=0.007 asks=38 bids=3
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='spacex-ipo-closing-market-cap': conditionId=0xe51f231db2100394846056... YES=9828533045665348... NO=3784961974448377...
+📊 [Arb/Polymarket] 🔍 [Path OS] 22 total markets, 22 polymarket for slug='pro-baseball-2026-nl-cy-young-winner'
+📊 [Arb/Polymarket] ℹ️ [Path OS] Using first PM market (no volume match)
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x4cde2a38666140f5914b53... question='Will Paul Skenes win the 2026 NL Cy Young Award?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x4cde2a38666140f5914b53c6699f82b0ab6b25c784969a025b9208f35dcd7a2d
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='discord-ipo-closing-market-cap': conditionId=0x82ea8a008091fd42afc01c... YES=3169655397528941... NO=1577390633164081...
+📊 [Arb/Polymarket] 📖 get_best_prices(7572015600251982...): best_ask=0.785 best_bid=0.784 neg_risk=True last_trade=0.215 asks=96 bids=154
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.2160 Δ=0.0000 | NO ask=0.785 Δ=0.5690 | expected=0.2160 slug='republican-presidential-nominee-2028'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='republican-presidential-nominee-2028' label='Marco Rubio': YES=1356545876122014... NO=7572015600251982...
+🔀 [Arb/Oddpool] 📊 Scored pair='gop-nominee-2028_marco_rubio': score=$200.0000 net_cents=0.40 size=$100000 time_factor=0.5 days=943.9 | poly_liq=$304013 venue2_liq=$1730436
+🔀 [Arb/Oddpool] ✅ pair='gop-nominee-2028_marco_rubio' edge=2.40¢ poly=0.22 venue2(kalshi/NO)=0.76 days=943.9 token=resolved no_token=set title='Republican Nominee 2028'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/ipos-before-2027/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(1009745041995797...): best_ask=0.995 best_bid=0.993 neg_risk=True last_trade=0.005 asks=4 bids=50
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0070 Δ=0.0000 | NO ask=0.995 Δ=0.9880 | expected=0.0070 slug='next-james-bond-actor-635'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='next-james-bond-actor-635' label='Tom Hardy': YES=7185969661856319... NO=1009745041995797...
+🔀 [Arb/Oddpool] 📊 Scored pair='james-bond-actor_tom_hardy': score=$45.7274 net_cents=0.40 size=$11432 time_factor=1.0 days=83.1 | poly_liq=$11432 venue2_liq=$19917
+🔀 [Arb/Oddpool] ✅ pair='james-bond-actor_tom_hardy' edge=0.40¢ poly=0.01 venue2(opinion/NO)=0.99 days=83.1 token=resolved no_token=set title='Next James Bond Actor'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/lai-ching-te-out-as-president-of-taiwan-in-2026/markets
+📊 [Arb/Polymarket] 🔍 [Path OS] 20 total markets, 20 polymarket for slug='nobel-peace-prize-winner-2026-139'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=582687 diff=0.3
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x36081a32ac369bad207447... question='Will the International Court of Justice win the Nobel Peace '
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x36081a32ac369bad207447fa2bc5d6d663fb576e935178a4a297931ec571f5d1
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='who-will-be-the-next-prime-minister-of-israel-after-the-next-election': conditionId=0x93d07ffcf5c243b98e6553... YES=2815579358561921... NO=8804323954886936...
+📊 [Arb/Polymarket] 🔍 [Path OS] 1 total markets, 1 polymarket for slug='will-the-us-acquire-any-part-of-greenland-in-2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(7590832372729832...): best_ask=0.005 best_bid=0.004 neg_risk=True last_trade=0.005 asks=80 bids=4
+📊 [Arb/Polymarket] 📖 get_best_prices(1249518554287309...): best_ask=0.958 best_bid=0.952 neg_risk=True last_trade=0.042 asks=12 bids=77
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0480 Δ=0.0000 | NO ask=0.958 Δ=0.9100 | expected=0.0480 slug='next-uk-prime-minister-in-2026-122'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='next-uk-prime-minister-in-2026-122' label='Ed Miliband': YES=5925328397595073... NO=1249518554287309...
+🔀 [Arb/Oddpool] 📊 Scored pair='uk-prime-minister-2026_ed_miliband': score=$1.6150 net_cents=0.50 size=$646 time_factor=0.5 days=267.1 | poly_liq=$28650 venue2_liq=$646
+🔀 [Arb/Oddpool] ✅ pair='uk-prime-minister-2026_ed_miliband' edge=0.50¢ poly=0.05 venue2(opinion/NO)=0.95 days=267.1 token=resolved no_token=set title='Next UK Prime Minister in 2026'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/lol-lck-2026-season-winner/markets
+📊 [Arb/Polymarket] 🔍 [Path OS] 15 total markets, 15 polymarket for slug='lol-lpl-2026-season-winner'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=35470 diff=0.7
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x775ddcb6005d898894c4c0... question='Will EDward Gaming win the LPL 2026 season?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x775ddcb6005d898894c4c0b3e242a4aec86e36467471733c43d3df149676a392
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=9272645 diff=0.1
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x890fc3ba40458db0b67560... question='Will the US acquire part of Greenland in 2026?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x890fc3ba40458db0b67560691aa1597344c2a0560d18e80f586a4b35f510b4ce
+📊 [Arb/Polymarket] 🔍 [Path OS] 2 total markets, 2 polymarket for slug='new-hampshire-democratic-senate-primary-winner'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=3521 diff=1.0
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x1cf96ff28b0fa76e23f12a... question='Will Karishma Manzur be the Democratic nominee for Senate in'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x1cf96ff28b0fa76e23f12a0cf299fc3bced8b26e0addfc1ef11fb58347c0216e
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='2026-seoul-mayoral-election-winner': conditionId=0x03865bd6273b82fe88954a... YES=2581687364018337... NO=4653026312061704...
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='where-will-trump-and-putin-meet-next-584': conditionId=0xb2ac29ac67bad0e532b821... YES=4800096431192518... NO=6992981724093582...
+📊 [Arb/Polymarket] 🔍 [Path OS] 5 total markets, 5 polymarket for slug='balance-of-power-2026-midterms'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=641997 diff=0.4
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x0808de4f0cfd47947f2d1b... question='2026 Balance of Power: D Senate, R House'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x0808de4f0cfd47947f2d1be51f9a9c52ea0fec76f73a75cfbe79ddec98d8a908
+📊 [Arb/Polymarket] 🔍 [Path OS] 30 total markets, 30 polymarket for slug='2026-nba-champion'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=3691398 diff=0.2
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x4e65282819c98c6aed529f... question='Will the Denver Nuggets win the 2026 NBA Finals?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x4e65282819c98c6aed529f357fbf5983b1ae9407a3c25bd50fe97b2906df68f9
+📊 [Arb/Polymarket] 🔍 [Path OS] 16 total markets, 16 polymarket for slug='spacex-ipo-closing-market-cap'
+📊 [Arb/Polymarket] ℹ️ [Path OS] Using first PM market (no volume match)
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0xe51f231db2100394846056... question="Will SpaceX's market cap be between $2.5T and $3.0T at marke"
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0xe51f231db21003948460569107975a20ed138b642b2952c4f0798da8c64d8591
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='what-price-will-bitcoin-hit-before-2027' — skipping
+📊 [Arb/Polymarket] 🔍 [Path OS] 6 total markets, 6 polymarket for slug='spx-close-dec-2026'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=782 diff=0.9
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x7988f38c0e67179d5d982b... question='Will S&P 500 (SPX) close at $7,000-$7,500 in December?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x7988f38c0e67179d5d982b3ad7e7f04ef86d746ae94f6fca3bdc47101837d4a1
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='what-price-will-bitcoin-hit-before-2027' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] 📖 get_best_prices(5853483122443233...): best_ask=0.95 best_bid=0.949 neg_risk=True last_trade=0.051 asks=24 bids=83
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0510 Δ=0.0000 | NO ask=0.95 Δ=0.8990 | expected=0.0510 slug='2026-nhl-stanley-cup-champion'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-nhl-stanley-cup-champion' label='Vegas Golden Knights': YES=6880348503007359... NO=5853483122443233...
+🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_vegas_golden_knights': score=$95.7194 net_cents=0.90 size=$10635 time_factor=1.0 days=82.9 | poly_liq=$104540 venue2_liq=$10635
+🔀 [Arb/Oddpool] ✅ pair='stanley-cup-2026_vegas_golden_knights' edge=0.90¢ poly=0.05 venue2(opinion/NO)=0.94 days=82.9 token=resolved no_token=set title='NHL Stanley Cup Champion 2026'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/2026-nba-champion/markets
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='fifa-world-cup-group-d-winner' — skipping
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='fed-decision-in-april': conditionId=0xd4d00e5bf8b960cc37c74c... YES=9556122149160720... NO=3069535618487665...
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='jerome-powell-out-as-fed-chair-by' — skipping
+📊 [Arb/Polymarket] 📖 get_best_prices(4309496333561212...): best_ask=0.004 best_bid=0.003 neg_risk=True last_trade=0.004 asks=37 bids=3
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='fifa-world-cup-group-g-winner' — skipping
+📊 [Arb/Polymarket] 🔍 [Path OS] 6 total markets, 6 polymarket for slug='lol-worlds-2026-winning-region-226'
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='jerome-powell-out-as-fed-chair-by' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='fifa-world-cup-group-d-winner' — falling back to Gamma paths
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='next-french-presidential-election' — skipping
+📊 [Arb/Polymarket] 📖 get_best_prices(3547763128924170...): best_ask=0.006 best_bid=0.005 neg_risk=True last_trade=0.005 asks=88 bids=5
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='2026-nhl-stanley-cup-champion': conditionId=0x44887f53abbfe7531b1384... YES=1758155183567018... NO=4835088607564548...
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='fifa-world-cup-group-g-winner' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='what-price-will-ethereum-hit-before-2027' — skipping
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='fifa-world-cup-group-f-winner' — skipping
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='fed-decision-in-june-825' — skipping
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='how-many-fed-rate-cuts-in-2026' — skipping
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='next-french-presidential-election' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=18297 diff=0.8
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x7e8d48c3a6177a197787ff... question='Will a team from CBLOL (Brazil) win LoL Worlds 2026?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x7e8d48c3a6177a197787ff87caa0e660e9049029ebb7040252ef34984f3406fd
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='what-price-will-ethereum-hit-before-2027' — skipping
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='2026-fifa-world-cup-winner-595': conditionId=0x7976b8dbacf9077eb1453a... YES=4394372887385518... NO=1126806300047984...
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='pro-baseball-2026-nl-cy-young-winner': conditionId=0x4cde2a38666140f5914b53... YES=2869055813288324... NO=1760172179402410...
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='fifa-world-cup-group-f-winner' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='how-many-fed-rate-cuts-in-2026' — falling back to Gamma paths
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='2026-nhl-stanley-cup-champion' — skipping
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='fed-decision-in-june-825' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] 📖 get_best_prices(7069498083231250...): best_ask=0.995 best_bid=0.994 neg_risk=True last_trade=0.005 asks=5 bids=82
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0060 Δ=0.0000 | NO ask=0.995 Δ=0.9890 | expected=0.0060 slug='how-many-fed-rate-cuts-in-2026'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='how-many-fed-rate-cuts-in-2026' label='Exactly 7 cuts': YES=8322506290086760... NO=7069498083231250...
+🔀 [Arb/Oddpool] 📊 Scored pair='fed-rate-cuts-2026_cuts_7': score=$30.0217 net_cents=0.50 size=$12009 time_factor=0.5 days=267.1 | poly_liq=$104380 venue2_liq=$12009
+🔀 [Arb/Oddpool] ✅ pair='fed-rate-cuts-2026_cuts_7' edge=0.50¢ poly=0.01 venue2(opinion/NO)=0.99 days=267.1 token=resolved no_token=set title='Number of Fed Rate Cuts in 2026'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/nba-2025-26-coach-of-the-year/markets
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='what-price-will-ethereum-hit-before-2027' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='new-hampshire-democratic-senate-primary-winner': conditionId=0x1cf96ff28b0fa76e23f12a... YES=5662406423161026... NO=3780600711069937...
+📊 [Arb/Polymarket] 🔍 [Path OS] 5 total markets, 5 polymarket for slug='balance-of-power-2026-midterms'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=849200 diff=0.1
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x998bc71817b2d76921d199... question='2026 Balance of Power: R Senate, D House'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x998bc71817b2d76921d1999ce0f3431cfd5945583667a371280ca2b430b0c06e
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='lai-ching-te-out-as-president-of-taiwan-in-2026' — skipping
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='republican-presidential-nominee-2028' — skipping
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='spacex-ipo-closing-market-cap': conditionId=0xe51f231db2100394846056... YES=9828533045665348... NO=3784961974448377...
+📊 [Arb/Polymarket] 📖 get_best_prices(9695468969484878...): best_ask=0.998 best_bid=0.997 neg_risk=True last_trade=0.003 asks=2 bids=117
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='will-the-us-acquire-any-part-of-greenland-in-2026': conditionId=0x890fc3ba40458db0b67560... YES=6074547635033857... NO=1048955452964387...
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='republican-presidential-nominee-2028' — skipping
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='pro-baseball-2026-national-league-champion': conditionId=0x937298a2c5ff8b4b8a30d0... YES=8985877191605043... NO=1709992949896582...
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='where-will-trump-and-putin-meet-next-584': conditionId=0x6c85fe5b4197dc55dafef8... YES=5882057393182324... NO=3663788045473350...
+📊 [Arb/Polymarket] 📖 get_best_prices(9118033125481823...): best_ask=0.996 best_bid=0.993 neg_risk=True last_trade=0.007 asks=3 bids=38
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0070 Δ=0.0000 | NO ask=0.996 Δ=0.9890 | expected=0.0070 slug='lol-lpl-2026-season-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='lol-lpl-2026-season-winner' label='LNG Esports': YES=1671501654949619... NO=9118033125481823...
+🔀 [Arb/Oddpool] 📊 Scored pair='lol-lpl-2026-season-winner_lng_esports': score=$7.7537 net_cents=0.30 size=$5169 time_factor=0.5 days=267.1 | poly_liq=$6502 venue2_liq=$5169
+🔀 [Arb/Oddpool] ✅ pair='lol-lpl-2026-season-winner_lng_esports' edge=0.30¢ poly=0.01 venue2(opinion/NO)=0.99 days=267.1 token=resolved no_token=set title='LoL: LPL 2026 Season Winner'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/new-mexico-governor-republican-primary-winner/markets
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='what-price-will-ethereum-hit-before-2027' — skipping
+📊 [Arb/Polymarket] 🚫 events slug='jerome-powell-out-as-fed-chair-by': skipped 1 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🚫 events slug='what-price-will-bitcoin-hit-before-2027': skipped 7 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='↓ 25,000' label_score=1.00 combined=2.00 matched='↓ 25,000' outcomes=["Yes", "No"] YES=589081602998... NO=440208941434...
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='2026-nba-champion': conditionId=0x4e65282819c98c6aed529f... YES=5681472587017992... NO=7650249006003846...
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0030 Δ=0.0000 | NO ask=0.998 Δ=0.9950 | expected=0.0030 slug='2026-nba-champion'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-nba-champion' label='Golden State Warriors': YES=2456245140683390... NO=9695468969484878...
+🔀 [Arb/Oddpool] 📊 Scored pair='nba-champion-2026_gsw': score=$181.7563 net_cents=0.30 size=$60585 time_factor=1.0 days=84.1 | poly_liq=$1286832 venue2_liq=$60585
+🔀 [Arb/Oddpool] ✅ pair='nba-champion-2026_gsw' edge=0.30¢ poly=0.00 venue2(opinion/NO)=0.99 days=84.1 token=resolved no_token=set title='NBA Champion 2026'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/rhode-island-republican-senate-primary-winner/markets
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='what-price-will-ethereum-hit-before-2027' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] 📖 get_best_prices(8642627265297346...): best_ask=0.971 best_bid=0.968 neg_risk=True last_trade=0.033 asks=10 bids=93
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0320 Δ=0.0000 | NO ask=0.971 Δ=0.9390 | expected=0.0320 slug='next-uk-prime-minister-in-2026-122'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='next-uk-prime-minister-in-2026-122' label='Rupert Lowe': YES=3485222240030757... NO=8642627265297346...
+🔀 [Arb/Oddpool] 📊 Scored pair='uk-prime-minister-2026_rupert_lowe': score=$104.7844 net_cents=0.40 size=$52392 time_factor=0.5 days=267.1 | poly_liq=$52392 venue2_liq=$94933
+🔀 [Arb/Oddpool] ✅ pair='uk-prime-minister-2026_rupert_lowe' edge=0.40¢ poly=0.03 venue2(opinion/NO)=0.96 days=267.1 token=resolved no_token=set title='Next UK Prime Minister in 2026'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/2026-nhl-stanley-cup-champion/markets
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='ipos-before-2027' — skipping
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='what-price-will-ethereum-hit-before-2027' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='lol-worlds-2026-winning-region-226': conditionId=0x7e8d48c3a6177a197787ff... YES=2797492415056469... NO=9763829232276169...
+📊 [Arb/Polymarket] 📖 get_best_prices(4800096431192518...): best_ask=0.003 best_bid=0.002 neg_risk=True last_trade=0.001 asks=95 bids=2
+📊 [Arb/Polymarket] 🔍 [Path OS] 30 total markets, 30 polymarket for slug='2026-nba-champion'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=3691398 diff=0.2
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x4e65282819c98c6aed529f... question='Will the Denver Nuggets win the 2026 NBA Finals?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x4e65282819c98c6aed529f357fbf5983b1ae9407a3c25bd50fe97b2906df68f9
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='republican-presidential-nominee-2028' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ⚠️ [Path OS] HTTP 429 for slug='fifa-world-cup-group-h-winner' — skipping
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='english-premier-league-winner': conditionId=0xfb1835b887c33862f5749c... YES=7814045843217439... NO=3555750546894242...
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='2026-nhl-stanley-cup-champion' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='spx-close-dec-2026': conditionId=0x7988f38c0e67179d5d982b... YES=9043520283477319... NO=1036232522884831...
+📊 [Arb/Polymarket] 🚫 events slug='what-price-will-ethereum-hit-before-2027': skipped 2 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='$4,000 or above' label_score=0.50 combined=1.50 matched='↑ 10,000' outcomes=["Yes", "No"] YES=100865557115... NO=110234250181...
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='balance-of-power-2026-midterms': conditionId=0x0808de4f0cfd47947f2d1b... YES=7099792734946981... NO=4572094730853046...
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='ipos-before-2027' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] 📖 get_best_prices(2869055813288324...): best_ask=0.35 best_bid=0.2 neg_risk=True last_trade=0.170 asks=17 bids=7
+📊 [Arb/Polymarket] 📖 get_best_prices(8851645587670338...): best_ask=0.061 best_bid=0.056 neg_risk=True last_trade=0.939 asks=74 bids=45
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='2026-nhl-stanley-cup-champion' label='Pittsburgh Penguins' → 'Pittsburgh Penguins' YES=885164558767... NO=105159591365...
+📊 [Arb/Polymarket] 🚫 events slug='fifa-world-cup-group-f-winner': skipped 1 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 📖 get_best_prices(2815579358561921...): best_ask=0.016 best_bid=0.015 neg_risk=True last_trade=0.015 asks=70 bids=10
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='republican-presidential-nominee-2028' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📖 get_best_prices(9828533045665348...): best_ask=0.128 best_bid=0.09 neg_risk=True last_trade=0.878 asks=38 bids=19
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='fifa-world-cup-group-h-winner' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] 🚫 events slug='what-price-will-ethereum-hit-before-2027': skipped 2 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='$6,000 or above' label_score=0.50 combined=1.50 matched='↑ 10,000' outcomes=["Yes", "No"] YES=100865557115... NO=110234250181...
+📊 [Arb/Polymarket] 📖 get_best_prices(1758155183567018...): best_ask=0.078 best_bid=0.077 neg_risk=True last_trade=0.077 asks=102 bids=32
+📊 [Arb/Polymarket] ⚠️ Path OS failed for slug='lai-ching-te-out-as-president-of-taiwan-in-2026' — falling back to Gamma paths
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='nobel-peace-prize-winner-2026-139': conditionId=0x36081a32ac369bad207447... YES=7136912749431079... NO=1008259348656722...
+📊 [Arb/Polymarket] 🚫 events slug='next-french-presidential-election': skipped 92 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Marine Le Pen' label_score=1.00 combined=2.00 matched='Marine Le Pen' outcomes=["Yes", "No"] YES=557642122114... NO=564971709975...
+📊 [Arb/Polymarket] 📖 get_best_prices(5747154614580266...): best_ask=0.997 best_bid=0.996 neg_risk=True last_trade=0.004 asks=3 bids=37
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0040 Δ=0.0000 | NO ask=0.997 Δ=0.9930 | expected=0.0040 slug='lol-lpl-2026-season-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='lol-lpl-2026-season-winner' label='Oh My God': YES=4309496333561212... NO=5747154614580266...
+🔀 [Arb/Oddpool] 📊 Scored pair='lol-lpl-2026-season-winner_oh_my_god': score=$21.4897 net_cents=0.50 size=$8596 time_factor=0.5 days=267.1 | poly_liq=$10444 venue2_liq=$8596
+🔀 [Arb/Oddpool] ✅ pair='lol-lpl-2026-season-winner_oh_my_god' edge=0.50¢ poly=0.00 venue2(opinion/NO)=0.99 days=267.1 token=resolved no_token=set title='LoL: LPL 2026 Season Winner'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/who-will-leave-trump-administration-before-2027/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(5815457490959081...): best_ask=0.995 best_bid=0.994 neg_risk=True last_trade=0.005 asks=5 bids=88
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0060 Δ=0.0000 | NO ask=0.995 Δ=0.9890 | expected=0.0060 slug='balance-of-power-2026-midterms'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='balance-of-power-2026-midterms' label='Other': YES=3547763128924170... NO=5815457490959081...
+🔀 [Arb/Oddpool] 📊 Scored pair='balance-of-power-2026-midterms_other': score=$10.3277 net_cents=0.20 size=$10328 time_factor=0.5 days=209.1 | poly_liq=$81360 venue2_liq=$10328
+🔀 [Arb/Oddpool] ✅ pair='balance-of-power-2026-midterms_other' edge=0.20¢ poly=0.01 venue2(opinion/NO)=0.99 days=209.1 token=resolved no_token=set title='Balance of Power 2026 Midterms'
+📊 [Arb/Polymarket] 🚫 events slug='republican-presidential-nominee-2028': skipped 93 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='balance-of-power-2026-midterms': conditionId=0x998bc71817b2d76921d199... YES=6302359956133594... NO=5586002187924301...
+📊 [Arb/Polymarket] 📖 get_best_prices(5882057393182324...): best_ask=0.039 best_bid=0.026 neg_risk=True last_trade=0.040 asks=89 bids=18
+📊 [Arb/Polymarket] 📖 get_best_prices(6932431735503727...): best_ask=0.039 best_bid=0.038 neg_risk=False last_trade=0.039 asks=120 bids=37
+📊 [Arb/Polymarket] 📖 get_best_prices(5662406423161026...): best_ask=0.063 best_bid=0.042 neg_risk=True last_trade=0.063 asks=53 bids=12
+📊 [Arb/Polymarket] 🚫 events slug='fifa-world-cup-group-d-winner': skipped 1 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='USA' label_score=1.00 combined=2.00 matched='USA' outcomes=["Yes", "No"] YES=128519478705... NO=787307161860...
+📊 [Arb/Polymarket] 📖 get_best_prices(2581687364018337...): best_ask=0.004 best_bid=0.003 neg_risk=True last_trade=0.003 asks=71 bids=3
+📊 [Arb/Polymarket] 📖 get_best_prices(6074547635033857...): best_ask=0.15 best_bid=0.14 neg_risk=False last_trade=0.860 asks=75 bids=14
+📊 [Arb/Polymarket] 📖 get_best_prices(9828533045665348...): best_ask=0.128 best_bid=0.09 neg_risk=True last_trade=0.878 asks=38 bids=19
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Netherlands' label_score=1.00 combined=2.00 matched='Netherlands' outcomes=["Yes", "No"] YES=888064193584... NO=250382966235...
+📊 [Arb/Polymarket] 🔍 [Path OS] 2 total markets, 2 polymarket for slug='rhode-island-republican-senate-primary-winner'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=2476 diff=0.3
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x8d3fa7e5d7ec4d8e7e39c9... question='Will Raymond McKay be the Republican nominee for Senate in R'
+📊 [Arb/Polymarket] 🚫 events slug='fifa-world-cup-group-g-winner': skipped 1 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='IR Iran' label_score=0.50 combined=1.50 matched='Iran' outcomes=["Yes", "No"] YES=737891561980... NO=854649518554...
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Exactly 1 cut' label_score=0.67 combined=1.67 matched='1 (25 bps)' outcomes=["Yes", "No"] YES=113379839734... NO=480588050125...
+📊 [Arb/Polymarket] 📖 get_best_prices(3169655397528941...): best_ask=0.012 best_bid=0.005 neg_risk=True last_trade=0.012 asks=60 bids=5
+📊 [Arb/Polymarket] 📖 get_best_prices(5681472587017992...): best_ask=0.1 best_bid=0.09 neg_risk=True last_trade=0.090 asks=62 bids=9
+📊 [Arb/Polymarket] 🔍 [Path OS] 10 total markets, 10 polymarket for slug='lol-lck-2026-season-winner'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=81070 diff=0.7
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x36668e37b463d0762bf6e4... question='Will Gen.G Esports win the LCK 2026 season playoffs?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x36668e37b463d0762bf6e4c053a44682f89fec1198ec07c279812067bb732604
+📊 [Arb/Polymarket] 📖 get_best_prices(4394372887385518...): best_ask=0.16 best_bid=0.159 neg_risk=True last_trade=0.160 asks=112 bids=50
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/who-will-leave-trump-administration-before-2027/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(8985877191605043...): best_ask=0.043 best_bid=0.024 neg_risk=True last_trade=0.051 asks=45 bids=12
+📊 [Arb/Polymarket] 🚫 events slug='ipos-before-2027': skipped 3 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Anthropic' label_score=1.00 combined=2.00 matched='Anthropic' outcomes=["Yes", "No"] YES=316500839652... NO=796591264537...
+📊 [Arb/Polymarket] 📖 get_best_prices(4402089414342929...): best_ask=0.88 best_bid=0.87 neg_risk=False last_trade=0.880 asks=12 bids=35
+📊 [Arb/Polymarket] 🚫 events slug='what-price-will-ethereum-hit-before-2027': skipped 2 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='$3,500 or above' label_score=0.50 combined=1.50 matched='↑ 10,000' outcomes=["Yes", "No"] YES=100865557115... NO=110234250181...
+📊 [Arb/Polymarket] 🔍 [Path OS] 9 total markets, 9 polymarket for slug='new-mexico-governor-republican-primary-winner'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=119750 diff=0.4
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x120b15af9f5f44bf673580... question='Will Greg Hull win the 2026 New Mexico Governor Republican p'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x120b15af9f5f44bf673580aec6e6e555f8bed923e5d3979fcda2617c154ad3d1
+📊 [Arb/Polymarket] 📖 get_best_prices(1760172179402410...): best_ask=0.8 best_bid=0.65 neg_risk=True last_trade=0.170 asks=7 bids=17
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.3500 Δ=0.3210 | NO ask=0.8 Δ=0.7710 | expected=0.0290 slug='pro-baseball-2026-nl-cy-young-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='pro-baseball-2026-nl-cy-young-winner' label='Logan Webb': YES=2869055813288324... NO=1760172179402410...
+🔀 [Arb/Oddpool] ⏭ pair='nl-cy-young-winner-2026_logan_webb': deployable=$0.00 < $10 minimum — skip
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/who-will-trump-pardon-before-2027/markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Fed maintains rate' label_score=0.67 combined=1.67 matched='25 bps decrease' outcomes=["Yes", "No"] YES=651932346666... NO=282902931400...
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x8d3fa7e5d7ec4d8e7e39c9406713aa76b2b1cc3006d5ee046cb1d66cad8e02d6
+📊 [Arb/Polymarket] 📚 Path B: bulk index is empty — fetch_all_active_markets() not yet called
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='2026-nba-champion': conditionId=0x4e65282819c98c6aed529f... YES=5681472587017992... NO=7650249006003846...
+📊 [Arb/Polymarket] 🚫 events slug='fifa-world-cup-group-h-winner': skipped 1 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Saudi Arabia' label_score=1.00 combined=2.00 matched='Saudi Arabia' outcomes=["Yes", "No"] YES=629366731019... NO=822888088245...
+📊 [Arb/Polymarket] 🔍 [Path OS] 30 total markets, 30 polymarket for slug='nba-2025-26-coach-of-the-year'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=222123 diff=0.9
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0xc98057e2ead6760fb748cf... question='Will JB Bickerstaff win the 2025–2026 NBA Coach of the Year?'
+📊 [Arb/Polymarket] 🔍 [Path OS] 32 total markets, 32 polymarket for slug='2026-nhl-stanley-cup-champion'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=810703 diff=0.4
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0xfdc1041ba84bfd8f741eee... question='Will the Utah Mammoth win the 2026 NHL Stanley Cup?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0xfdc1041ba84bfd8f741eee0bdafce8b1887626c83afd017d18ee9b1f77008b9f
+📊 [Arb/Polymarket] 📖 get_best_prices(2797492415056469...): best_ask=0.007 best_bid=0.004 neg_risk=True last_trade=0.006 asks=29 bids=4
+📊 [Arb/Polymarket] 📖 get_best_prices(8804323954886936...): best_ask=0.985 best_bid=0.984 neg_risk=True last_trade=0.015 asks=10 bids=70
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0160 Δ=0.0000 | NO ask=0.985 Δ=0.9690 | expected=0.0160 slug='who-will-be-the-next-prime-minister-of-israel-after-the-next-election'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='who-will-be-the-next-prime-minister-of-israel-after-the-next-election' label='Yariv Levin': YES=2815579358561921... NO=8804323954886936...
+🔀 [Arb/Oddpool] 📊 Scored pair='israel-pm-2045_yariv_levin': score=$5.2425 net_cents=0.50 size=$2097 time_factor=0.5 days=267.1 | poly_liq=$32057 venue2_liq=$2097
+🔀 [Arb/Oddpool] ✅ pair='israel-pm-2045_yariv_levin' edge=1.50¢ poly=0.02 venue2(kalshi/NO)=0.97 days=267.1 token=resolved no_token=set title='Israel Prime Minister Election 2045'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/where-will-trump-and-putin-meet-next-584/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(9043520283477319...): best_ask=0.22 best_bid=0.16 neg_risk=True last_trade=0.160 asks=32 bids=8
+📊 [Arb/Polymarket] 📖 get_best_prices(9556122149160720...): best_ask=0.01 best_bid=0.009 neg_risk=True last_trade=0.010 asks=101 bids=9
+📊 [Arb/Polymarket] 📖 get_best_prices(7978923239572063...): best_ask=0.996 best_bid=0.995 neg_risk=True last_trade=0.005 asks=4 bids=80
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0050 Δ=0.0000 | NO ask=0.996 Δ=0.9910 | expected=0.0050 slug='largest-company-end-of-june-712'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='largest-company-end-of-june-712' label='Amazon': YES=7590832372729832... NO=7978923239572063...
+🔀 [Arb/Oddpool] 📊 Scored pair='largest-company-end-of-june-2026_amazon': score=$79.0015 net_cents=0.50 size=$15800 time_factor=1.0 days=83.1 | poly_liq=$97203 venue2_liq=$15800
+🔀 [Arb/Oddpool] ✅ pair='largest-company-end-of-june-2026_amazon' edge=0.50¢ poly=0.01 venue2(opinion/NO)=0.99 days=83.1 token=resolved no_token=set title='Largest Company End of June 2026'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/who-will-be-ufc-welterweight-champion-at-the-end-of-2026/markets
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Thomas Massie' label_score=1.00 combined=1.99 matched='Thomas Massie' outcomes=["Yes", "No"] YES=997008790151... NO=941717910970...
+📊 [Arb/Polymarket] 📖 get_best_prices(7099792734946981...): best_ask=0.006 best_bid=0.005 neg_risk=True last_trade=0.005 asks=100 bids=5
+📊 [Arb/Polymarket] 📖 get_best_prices(6992981724093582...): best_ask=0.998 best_bid=0.997 neg_risk=True last_trade=0.001 asks=2 bids=95
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0030 Δ=0.0000 | NO ask=0.998 Δ=0.9950 | expected=0.0030 slug='where-will-trump-and-putin-meet-next-584'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='where-will-trump-and-putin-meet-next-584' label='South Korea': YES=4800096431192518... NO=6992981724093582...
+🔀 [Arb/Oddpool] 📊 Scored pair='trump-putin-next-meeting-location-2029_south_korea': score=$24.1325 net_cents=0.20 size=$12066 time_factor=1.0 days=83.1 | poly_liq=$13969 venue2_liq=$12066
+🔀 [Arb/Oddpool] ✅ pair='trump-putin-next-meeting-location-2029_south_korea' edge=0.20¢ poly=0.00 venue2(opinion/NO)=0.99 days=83.1 token=resolved no_token=set title='Trump and Putin Next Meeting Location 20'
+🔀 [Arb/Oddpool] 📊 Scored pair='us-house-2026_democratic_party': score=$0.0000 net_cents=0.00 size=$100000 time_factor=0.5 days=209.1 | poly_liq=$252715 venue2_liq=$2546991
+🔀 [Arb/Oddpool] ✅ pair='us-house-2026_democratic_party' edge=1.00¢ poly=0.13 venue2(kalshi/YES)=0.86 days=209.1 token=resolved no_token=set title='Which Party Will Win the U.S. House in 2'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://api.oddpool.com/search/events/which-party-will-win-the-house-in-2026/markets
+📊 [Arb/Polymarket] 📖 get_best_prices(5179715774304650...): best_ask=0.962 best_bid=0.961 neg_risk=False last_trade=0.039 asks=37 bids=120
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.9620 Δ=0.0000 | YES ask=0.039 Δ=0.9230 | expected=0.9620 slug='will-jesus-christ-return-before-2027'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0xc98057e2ead6760fb748cff4a1592e8412b9dab050477c23d16e98fb5a390ea7
+📊 [Arb/Polymarket] 📖 get_best_prices(7814045843217439...): best_ask=0.14 best_bid=0.12 neg_risk=True last_trade=0.140 asks=60 bids=11
+📊 [Arb/Polymarket] 📖 get_best_prices(1285194787059679...): best_ask=0.36 best_bid=0.33 neg_risk=True last_trade=0.330 asks=36 bids=10
+📊 [Arb/Polymarket] 📖 get_best_prices(1008655571151988...): best_ask=0.039 best_bid=0.038 neg_risk=False last_trade=0.039 asks=56 bids=25
+📊 [Arb/Polymarket] 📖 get_best_prices(4653026312061704...): best_ask=0.997 best_bid=0.996 neg_risk=True last_trade=0.003 asks=3 bids=71
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0040 Δ=0.0000 | NO ask=0.997 Δ=0.9930 | expected=0.0040 slug='2026-seoul-mayoral-election-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-seoul-mayoral-election-winner' label='Jeon Hyun-heui': YES=2581687364018337... NO=4653026312061704...
+🔀 [Arb/Oddpool] 📊 Scored pair='seoul-mayor-election-winner-2026_jeon_hyun_heui': score=$20.0843 net_cents=0.30 size=$6695 time_factor=1.0 days=56.1 | poly_liq=$54987 venue2_liq=$6695
+🔀 [Arb/Oddpool] ✅ pair='seoul-mayor-election-winner-2026_jeon_hyun_heui' edge=0.30¢ poly=0.00 venue2(opinion/NO)=0.99 days=56.1 token=resolved no_token=set title='Seoul Mayor Election Winner 2026'
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='lol-lpl-2026-season-winner': conditionId=0x775ddcb6005d898894c4c0... YES=4270118795550700... NO=4985326613637227...
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Lai Ching-te out as President of Taiwan in 2026?' label_score=0.90 combined=1.90 matched='Lai Ching-te out as President of Taiwan ' outcomes=["Yes", "No"] YES=194333103072... NO=668946348307...
+📊 [Arb/Polymarket] 📖 get_best_prices(3784961974448377...): best_ask=0.91 best_bid=0.872 neg_risk=True last_trade=0.878 asks=19 bids=38
+📊 [Arb/Polymarket] 🚫 events slug='2026-nhl-stanley-cup-champion': skipped 5 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 🚫 events slug='republican-presidential-nominee-2028': skipped 93 closed/archived/inactive/expired markets
+📊 [Arb/Polymarket] 📖 get_best_prices(5576421221146778...): best_ask=0.08 best_bid=0.07 neg_risk=True last_trade=0.070 asks=75 bids=7
+📊 [Arb/Polymarket] 📖 get_best_prices(3784961974448377...): best_ask=0.91 best_bid=0.872 neg_risk=True last_trade=0.878 asks=19 bids=38
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.1280 Δ=0.1240 | NO ask=0.91 Δ=0.9060 | expected=0.0040 slug='spacex-ipo-closing-market-cap'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='spacex-ipo-closing-market-cap' label='<500B': YES=9828533045665348... NO=3784961974448377...
+🔀 [Arb/Oddpool] ⏭ pair='spacex-ipo-closing-market-cap_ipo_below_500b': deployable=$0.00 < $10 minimum — skip
+📊 [Arb/Polymarket] 📖 get_best_prices(7378915619801935...): best_ask=0.05 best_bid=0.025 neg_risk=True last_trade=0.025 asks=36 bids=8
+📊 [Arb/Polymarket] 📖 get_best_prices(8851645587670338...): best_ask=0.061 best_bid=0.056 neg_risk=True last_trade=0.939 asks=74 bids=45
+📊 [Arb/Polymarket] 📖 get_best_prices(1008655571151988...): best_ask=0.039 best_bid=0.038 neg_risk=False last_trade=0.039 asks=56 bids=25
+📊 [Arb/Polymarket] 📖 get_best_prices(3165008396528239...): best_ask=0.51 best_bid=0.49 neg_risk=False last_trade=0.510 asks=31 bids=35
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='rhode-island-republican-senate-primary-winner': conditionId=0x8d3fa7e5d7ec4d8e7e39c9... YES=5382990280964541... NO=4295215073221187...
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.9100 Δ=0.0670 | YES ask=0.128 Δ=0.8490 | expected=0.9770 slug='spacex-ipo-closing-market-cap'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='spacex-ipo-closing-market-cap' label='No IPO before 2028': YES=9828533045665348... NO=3784961974448377...
+🔀 [Arb/Oddpool] ⏭ pair='spacex-ipo-closing-market-cap_ipo_no_before_2028': deployable=$0.00 < $10 minimum — skip
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Ron DeSantis' label_score=1.00 combined=1.99 matched='Ron DeSantis' outcomes=["Yes", "No"] YES=121279756507... NO=953447281932...
+📊 [Arb/Polymarket] 📖 get_best_prices(6519323466662829...): best_ask=0.09 best_bid=0.08 neg_risk=True last_trade=0.090 asks=67 bids=8
+📊 [Arb/Polymarket] 📖 get_best_prices(6302359956133594...): best_ask=0.36 best_bid=0.35 neg_risk=True last_trade=0.350 asks=51 bids=26
+📊 [Arb/Polymarket] 📖 get_best_prices(1048955452964387...): best_ask=0.86 best_bid=0.85 neg_risk=False last_trade=0.860 asks=14 bids=75
+📊 [Arb/Polymarket] 📖 get_best_prices(1709992949896582...): best_ask=0.976 best_bid=0.957 neg_risk=True last_trade=0.051 asks=12 bids=45
+📊 [Arb/Polymarket] 📖 get_best_prices(4835088607564548...): best_ask=0.923 best_bid=0.922 neg_risk=True last_trade=0.077 asks=32 bids=102
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0780 Δ=0.0000 | NO ask=0.923 Δ=0.8450 | expected=0.0780 slug='2026-nhl-stanley-cup-champion'
+📊 [Arb/Polymarket] 📖 get_best_prices(3780600711069937...): best_ask=0.958 best_bid=0.937 neg_risk=True last_trade=0.063 asks=12 bids=53
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.9580 Δ=0.0000 | YES ask=0.063 Δ=0.8950 | expected=0.9580 slug='new-hampshire-democratic-senate-primary-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='new-hampshire-democratic-senate-primary-winner' label='Karishma Manzur': YES=5662406423161026... NO=3780600711069937...
+🔀 [Arb/Oddpool] 📊 Scored pair='nh-democratic-senate-primary-winner-2026_karishma_manzur': score=$0.4992 net_cents=0.20 size=$312 time_factor=0.8 days=153.1 | poly_liq=$9432 venue2_liq=$312
+🔀 [Arb/Oddpool] ✅ pair='nh-democratic-senate-primary-winner-2026_karishma_manzur' edge=1.20¢ poly=0.96 venue2(kalshi/YES)=0.03 days=153.1 token=resolved no_token=set title='New Hampshire Democratic Senate Primary '
+📊 [Arb/Polymarket] 📖 get_best_prices(3663788045473350...): best_ask=0.974 best_bid=0.961 neg_risk=True last_trade=0.040 asks=18 bids=89
+📊 [Arb/Polymarket] 📖 get_best_prices(7650249006003846...): best_ask=0.91 best_bid=0.9 neg_risk=True last_trade=0.090 asks=9 bids=62
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.9100 Δ=0.0000 | YES ask=0.1 Δ=0.8100 | expected=0.9100 slug='2026-nba-champion'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-nba-champion' label='Denver Nuggets': YES=5681472587017992... NO=7650249006003846...
+🔀 [Arb/Oddpool] 📊 Scored pair='nba-champion-2026_den': score=$16.1089 net_cents=0.10 size=$16109 time_factor=1.0 days=84.1 | poly_liq=$229147 venue2_liq=$16109
+🔀 [Arb/Oddpool] ✅ pair='nba-champion-2026_den' edge=0.10¢ poly=0.91 venue2(opinion/YES)=0.09 days=84.1 token=resolved no_token=set title='NBA Champion 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(5681472587017992...): best_ask=0.1 best_bid=0.09 neg_risk=True last_trade=0.090 asks=62 bids=9
+📊 [Arb/Polymarket] 📖 get_best_prices(4805880501259937...): best_ask=0.75 best_bid=0.74 neg_risk=True last_trade=0.260 asks=17 bids=41
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-nhl-stanley-cup-champion' label='Dallas Stars': YES=1758155183567018... NO=4835088607564548...
+🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_dallas_stars': score=$191.4040 net_cents=0.20 size=$95702 time_factor=1.0 days=82.9 | poly_liq=$95702 venue2_liq=$876626
+🔀 [Arb/Oddpool] ✅ pair='stanley-cup-2026_dallas_stars' edge=1.20¢ poly=0.08 venue2(kalshi/NO)=0.91 days=82.9 token=resolved no_token=set title='NHL Stanley Cup Champion 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(7136912749431079...): best_ask=0.039 best_bid=0.037 neg_risk=True last_trade=0.039 asks=92 bids=30
+📊 [Arb/Polymarket] 📖 get_best_prices(9970087901513472...): best_ask=0.016 best_bid=0.015 neg_risk=True last_trade=0.016 asks=96 bids=15
+📊 [Arb/Polymarket] 📖 get_best_prices(1036232522884831...): best_ask=0.84 best_bid=0.78 neg_risk=True last_trade=0.160 asks=8 bids=32
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.2200 Δ=0.0000 | NO ask=0.84 Δ=0.6200 | expected=0.2200 slug='spx-close-dec-2026'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='spx-close-dec-2026' label='$7,000-$7,500': YES=9043520283477319... NO=1036232522884831...
+🔀 [Arb/Oddpool] 📊 Scored pair='spx-close-end-2026_price_7000_7500': score=$3.4077 net_cents=0.10 size=$6815 time_factor=0.5 days=268.0 | poly_liq=$6872 venue2_liq=$6815
+🔀 [Arb/Oddpool] ✅ pair='spx-close-end-2026_price_7000_7500' edge=0.10¢ poly=0.22 venue2(opinion/NO)=0.78 days=268.0 token=resolved no_token=set title='S&P 500 (SPX) Close at End of 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(5890816029989553...): best_ask=0.13 best_bid=0.12 neg_risk=False last_trade=0.880 asks=35 bids=12
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='what-price-will-bitcoin-hit-before-2027' label='↓ 25,000' → '↓ 25,000' YES=589081602998... NO=440208941434...
+📊 [Arb/Polymarket] 📖 get_best_prices(1008655571151988...): best_ask=0.039 best_bid=0.038 neg_risk=False last_trade=0.039 asks=56 bids=25
+📊 [Arb/Polymarket] 📖 get_best_prices(9763829232276169...): best_ask=0.996 best_bid=0.993 neg_risk=True last_trade=0.006 asks=4 bids=29
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0070 Δ=0.0000 | NO ask=0.996 Δ=0.9890 | expected=0.0070 slug='lol-worlds-2026-winning-region-226'
+📊 [Arb/Polymarket] 🔍 [Path OS] 27 total markets, 27 polymarket for slug='who-will-trump-pardon-before-2027'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=5966 diff=0.7
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x1b53ad65dae4809d3d1097... question='Will Trump pardon Nicolas Maduro before 2027?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x1b53ad65dae4809d3d1097bbcd6be1f44ba5cddd47be9ce21896722c7d79681a
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.1500 Δ=0.0000 | NO ask=0.86 Δ=0.7100 | expected=0.1500 slug='will-the-us-acquire-any-part-of-greenland-in-2026'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='will-the-us-acquire-any-part-of-greenland-in-2026' label='Will the US acquire part of Greenland in 2026?': YES=6074547635033857... NO=1048955452964387...
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='will-jesus-christ-return-before-2027' label='Will Jesus Christ return before 2027?': YES=6932431735503727... NO=5179715774304650...
+📊 [Arb/Polymarket] 📖 get_best_prices(2503829662352184...): best_ask=0.44 best_bid=0.42 neg_risk=True last_trade=0.560 asks=35 bids=26
+📊 [Arb/Polymarket] 🔍 [Path OS] 19 total markets, 19 polymarket for slug='who-will-leave-trump-administration-before-2027'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=29854 diff=0.4
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x4f0f481c30d93d0c7c5ffb... question='Will Tulsi Gabbard leave the Trump administration before 202'
+📊 [Arb/Polymarket] 📖 get_best_prices(1577390633164081...): best_ask=0.995 best_bid=0.988 neg_risk=True last_trade=0.012 asks=5 bids=60
+📊 [Arb/Polymarket] 📖 get_best_prices(1126806300047984...): best_ask=0.841 best_bid=0.84 neg_risk=True last_trade=0.160 asks=50 bids=112
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.1600 Δ=0.0000 | NO ask=0.841 Δ=0.6810 | expected=0.1600 slug='2026-fifa-world-cup-winner-595'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-fifa-world-cup-winner-595' label='Spain': YES=4394372887385518... NO=1126806300047984...
+🔀 [Arb/Oddpool] 📊 Scored pair='fifa-world-cup-winner-2026_spain': score=$80.0000 net_cents=0.10 size=$100000 time_factor=0.8 days=103.1 | poly_liq=$850354 venue2_liq=$730589
+🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-winner-2026_spain' edge=1.10¢ poly=0.16 venue2(kalshi/NO)=0.83 days=103.1 token=resolved no_token=set title='2026 FIFA World Cup Winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='lol-worlds-2026-winning-region-226' label='CBLOL (Brazil)': YES=2797492415056469... NO=9763829232276169...
+🔀 [Arb/Oddpool] 📊 Scored pair='lol-worlds-2026-winning-region_cblol_brazil': score=$1.1011 net_cents=0.10 size=$2202 time_factor=0.5 days=267.1 | poly_liq=$2202 venue2_liq=$8037
+🔀 [Arb/Oddpool] ✅ pair='lol-worlds-2026-winning-region_cblol_brazil' edge=0.10¢ poly=0.01 venue2(opinion/NO)=0.99 days=267.1 token=resolved no_token=set title='LoL Worlds 2026 Winning Region'
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0430 Δ=0.0240 | NO ask=0.976 Δ=0.9570 | expected=0.0190 slug='pro-baseball-2026-national-league-champion'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='pro-baseball-2026-national-league-champion' label='San Francisco': YES=8985877191605043... NO=1709992949896582...
+🔀 [Arb/Oddpool] ⏭ pair='national-league-champion-2026_san_francisco_giants': deployable=$0.00 < $10 minimum — skip
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='Buffalo Sabres' label_score=1.00 combined=1.99 matched='Buffalo Sabres' outcomes=["Yes", "No"] YES=869897650007... NO=275676237019...
+📊 [Arb/Polymarket] 🔍 [Path OS] 19 total markets, 19 polymarket for slug='who-will-leave-trump-administration-before-2027'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=2887 diff=0.7
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='lol-lck-2026-season-winner': conditionId=0x36668e37b463d0762bf6e4... YES=2605644305136857... NO=1128695141472296...
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='new-mexico-governor-republican-primary-winner': conditionId=0x120b15af9f5f44bf673580... YES=5025230089837597... NO=7069596121690118...
+📊 [Arb/Polymarket] 🔍 [Path OS] 15 total markets, 15 polymarket for slug='where-will-trump-and-putin-meet-next-584'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=117706 diff=1.0
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x1827f7e35c24f0cd5ff863... question='Will Trump and Putin meet next in Japan?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x1827f7e35c24f0cd5ff86318af815e61fdf89364977ead7e20ff867efec98c39
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0120 Δ=0.0000 | NO ask=0.995 Δ=0.9830 | expected=0.0120 slug='discord-ipo-closing-market-cap'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='discord-ipo-closing-market-cap' label='20–25B': YES=3169655397528941... NO=1577390633164081...
+🔀 [Arb/Oddpool] 📊 Scored pair='discord-ipo-closing-market-cap_ipo_20_25b': score=$20.6469 net_cents=0.30 size=$6882 time_factor=1.0 days=83.1 | poly_liq=$6882 venue2_liq=$103033
+🔀 [Arb/Oddpool] ✅ pair='discord-ipo-closing-market-cap_ipo_20_25b' edge=0.30¢ poly=0.01 venue2(opinion/NO)=0.98 days=83.1 token=resolved no_token=set title='Discord IPO Closing Market Cap'
+📊 [Arb/Polymarket] 📖 get_best_prices(6293667310198645...): best_ask=0.02 best_bid=0.019 neg_risk=True last_trade=0.019 asks=42 bids=5
+📊 [Arb/Polymarket] 📖 get_best_prices(3069535618487665...): best_ask=0.991 best_bid=0.99 neg_risk=True last_trade=0.010 asks=9 bids=101
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.9910 Δ=0.0000 | YES ask=0.01 Δ=0.9810 | expected=0.9910 slug='fed-decision-in-april'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='fed-decision-in-april' label='Hike 25bps': YES=9556122149160720... NO=3069535618487665...
+🔀 [Arb/Oddpool] 📊 Scored pair='fomc-2026-04-29_hike_25bps': score=$200.0000 net_cents=0.20 size=$100000 time_factor=1.0 days=21.1 | poly_liq=$202770 venue2_liq=$596995
+🔀 [Arb/Oddpool] ✅ pair='fomc-2026-04-29_hike_25bps' edge=0.20¢ poly=0.99 venue2(opinion/YES)=0.01 days=21.1 token=resolved no_token=set title='Fed decision in April 2026'
+🔀 [Arb/Oddpool] 📊 Scored pair='greenland-2026_will_the_us_acquire_part_of_greenland_in_2026': score=$3.9592 net_cents=0.10 size=$7918 time_factor=0.5 days=267.1 | poly_liq=$175480 venue2_liq=$7918
+🔀 [Arb/Oddpool] ✅ pair='greenland-2026_will_the_us_acquire_part_of_greenland_in_2026' edge=0.10¢ poly=0.15 venue2(opinion/NO)=0.85 days=267.1 token=resolved no_token=set title='Will the US Acquire Part of Greenland in'
+📊 [Arb/Polymarket] 🔍 [Path OS] 11 total markets, 11 polymarket for slug='who-will-be-ufc-welterweight-champion-at-the-end-of-2026'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=2639 diff=0.6
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0xc0f31bcf5266102629e42f... question='Will Islam Makhachev be the UFC Welterweight Champion on Dec'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0xc0f31bcf5266102629e42f887466dd2345b8966dd5aa0ec8125d6aa233cb3a19
+📊 [Arb/Polymarket] 🎯 _pick_best_market: label='May 14' label_score=1.00 combined=2.00 matched='May 14' outcomes=["Yes", "No"] YES=156994406742... NO=679635385645...
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='2026-nhl-stanley-cup-champion': conditionId=0xfdc1041ba84bfd8f741eee... YES=7738108412170358... NO=1136895646961340...
+📊 [Arb/Polymarket] 📖 get_best_prices(4572094730853046...): best_ask=0.995 best_bid=0.994 neg_risk=True last_trade=0.005 asks=5 bids=100
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0060 Δ=0.0000 | NO ask=0.995 Δ=0.9890 | expected=0.0060 slug='balance-of-power-2026-midterms'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='balance-of-power-2026-midterms' label='R-House, D-Senate': YES=7099792734946981... NO=4572094730853046...
+🔀 [Arb/Oddpool] 📊 Scored pair='balance-of-power-2026-midterms_d_senate_r_house': score=$50.0000 net_cents=0.10 size=$100000 time_factor=0.5 days=209.1 | poly_liq=$112368 venue2_liq=$192569
+🔀 [Arb/Oddpool] ✅ pair='balance-of-power-2026-midterms_d_senate_r_house' edge=0.10¢ poly=0.01 venue2(opinion/NO)=0.99 days=209.1 token=resolved no_token=set title='Balance of Power 2026 Midterms'
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x48a3e95c0bc1b9305e5644... question='Will Marco Rubio leave the Trump administration before 2027?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x48a3e95c0bc1b9305e56445a7affcb857fd61e0ae0d78a4778310a1108ceb08a
+🔀 [Arb/Oddpool] 📊 Scored pair='jesus-christ-return-2027_will_jesus_christ_return_before_2027': score=$59.7621 net_cents=0.20 size=$59762 time_factor=0.5 days=267.1 | poly_liq=$1578976 venue2_liq=$59762
+🔀 [Arb/Oddpool] ✅ pair='jesus-christ-return-2027_will_jesus_christ_return_before_2027' edge=0.20¢ poly=0.96 venue2(opinion/YES)=0.04 days=267.1 token=resolved no_token=set title='Will Jesus Christ Return Before 2027?'
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x4f0f481c30d93d0c7c5ffb8a9b69d9690a4da240b0069562af20e08b6ef8dd64
+📊 [Arb/Polymarket] 📖 get_best_prices(8546495185548358...): best_ask=0.975 best_bid=0.95 neg_risk=True last_trade=0.025 asks=8 bids=36
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='fifa-world-cup-group-g-winner' label='IR Iran' → 'Iran' YES=737891561980... NO=854649518554...
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0390 Δ=0.0000 | NO ask=0.974 Δ=0.9350 | expected=0.0390 slug='where-will-trump-and-putin-meet-next-584'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='where-will-trump-and-putin-meet-next-584' label='Germany': YES=5882057393182324... NO=3663788045473350...
+🔀 [Arb/Oddpool] 📊 Scored pair='trump-putin-next-meeting-location-2029_germany_other_eu_country': score=$1.4440 net_cents=0.10 size=$1444 time_factor=1.0 days=83.1 | poly_liq=$13774 venue2_liq=$1444
+🔀 [Arb/Oddpool] ✅ pair='trump-putin-next-meeting-location-2029_germany_other_eu_country' edge=1.10¢ poly=0.04 venue2(kalshi/NO)=0.95 days=83.1 token=resolved no_token=set title='Trump and Putin Next Meeting Location 20'
+📊 [Arb/Polymarket] 🔍 [Path OS] 2 total markets, 2 polymarket for slug='which-party-will-win-the-house-in-2026'
+📊 [Arb/Polymarket] ✅ [Path OS] Exact volume match: vol=2075775 diff=0.7
+📊 [Arb/Polymarket] 📖 get_best_prices(5649717099758674...): best_ask=0.93 best_bid=0.92 neg_risk=True last_trade=0.070 asks=7 bids=75
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='next-french-presidential-election' label='Marine Le Pen' → 'Marine Le Pen' YES=557642122114... NO=564971709975...
+📊 [Arb/Polymarket] 🔍 [Path OS] conditionId=0x4e4f77e7dbf4cab666e9a1... question='Will the Republican Party control the House after the 2026 M'
+📊 [Arb/Polymarket] 📖 get_best_prices(1943331030721500...): best_ask=0.08 best_bid=0.07 neg_risk=False last_trade=0.070 asks=44 bids=7
+📊 [Arb/Polymarket] 📖 get_best_prices(1102342501819459...): best_ask=0.962 best_bid=0.961 neg_risk=False last_trade=0.039 asks=25 bids=56
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='what-price-will-ethereum-hit-before-2027' label='$6,000 or above' → '↑ 10,000' YES=100865557115... NO=110234250181...
+📊 [Arb/Polymarket] 📖 get_best_prices(7873071618609003...): best_ask=0.67 best_bid=0.64 neg_risk=True last_trade=0.330 asks=10 bids=36
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='fifa-world-cup-group-d-winner' label='USA' → 'USA' YES=128519478705... NO=787307161860...
+📊 [Arb/Polymarket] 🔍 [Path OS] GET https://clob.polymarket.com/markets/0x4e4f77e7dbf4cab666e9a1943674d7ae66348e862df03ea6f44b11eb95731928
+📊 [Arb/Polymarket] 📖 get_best_prices(3555750546894242...): best_ask=0.88 best_bid=0.86 neg_risk=True last_trade=0.140 asks=11 bids=60
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.8800 Δ=0.0000 | YES ask=0.14 Δ=0.7400 | expected=0.8800 slug='english-premier-league-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='english-premier-league-winner' label='Man City': YES=7814045843217439... NO=3555750546894242...
+🔀 [Arb/Oddpool] 📊 Scored pair='english-premier-league-winner-2026_man_city': score=$59.4180 net_cents=0.20 size=$29709 time_factor=1.0 days=49.1 | poly_liq=$847071 venue2_liq=$29709
+🔀 [Arb/Oddpool] ✅ pair='english-premier-league-winner-2026_man_city' edge=1.20¢ poly=0.88 venue2(opinion/YES)=0.13 days=49.1 token=resolved no_token=set title='English Premier League Winner 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(4270118795550700...): best_ask=0.005 best_bid=0.002 neg_risk=True last_trade=0.003 asks=43 bids=2
+📊 [Arb/Polymarket] 📖 get_best_prices(7965912645374411...): best_ask=0.51 best_bid=0.49 neg_risk=False last_trade=0.510 asks=35 bids=31
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='ipos-before-2027' label='Anthropic' → 'Anthropic' YES=316500839652... NO=796591264537...
+📊 [Arb/Polymarket] 📖 get_best_prices(5382990280964541...): best_ask=0.83 best_bid=0.8 neg_risk=True last_trade=0.830 asks=10 bids=33
+📊 [Arb/Polymarket] 📖 get_best_prices(2829029314001810...): best_ask=0.92 best_bid=0.91 neg_risk=True last_trade=0.090 asks=8 bids=67
+📊 [Arb/Polymarket] 📖 get_best_prices(1212797565073611...): best_ask=0.027 best_bid=0.026 neg_risk=True last_trade=0.027 asks=115 bids=19
+📊 [Arb/Polymarket] 📖 get_best_prices(5586002187924301...): best_ask=0.65 best_bid=0.64 neg_risk=True last_trade=0.350 asks=26 bids=51
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.3600 Δ=0.0000 | NO ask=0.65 Δ=0.2900 | expected=0.3600 slug='balance-of-power-2026-midterms'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='balance-of-power-2026-midterms' label='D-House, R-Senate': YES=6302359956133594... NO=5586002187924301...
+🔀 [Arb/Oddpool] 📊 Scored pair='balance-of-power-2026-midterms_r_senate_d_house': score=$0.0000 net_cents=0.00 size=$100000 time_factor=0.5 days=209.1 | poly_liq=$125239 venue2_liq=$503338
+🔀 [Arb/Oddpool] ✅ pair='balance-of-power-2026-midterms_r_senate_d_house' edge=2.00¢ poly=0.36 venue2(kalshi/NO)=0.62 days=209.1 token=resolved no_token=set title='Balance of Power 2026 Midterms'
+📊 [Arb/Polymarket] 📖 get_best_prices(1133798397343510...): best_ask=0.26 best_bid=0.25 neg_risk=True last_trade=0.260 asks=41 bids=17
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='how-many-fed-rate-cuts-in-2026' label='Exactly 1 cut' → '1 (25 bps)' YES=113379839734... NO=480588050125...
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='fed-decision-in-june-825' label='Fed maintains rate' → '25 bps decrease' YES=651932346666... NO=282902931400...
+📊 [Arb/Polymarket] 📖 get_best_prices(1008259348656722...): best_ask=0.963 best_bid=0.961 neg_risk=True last_trade=0.039 asks=30 bids=92
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0390 Δ=0.0000 | NO ask=0.963 Δ=0.9240 | expected=0.0390 slug='nobel-peace-prize-winner-2026-139'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='nobel-peace-prize-winner-2026-139' label='International Court of Justice (ICJ)': YES=7136912749431079... NO=1008259348656722...
+🔀 [Arb/Oddpool] 📊 Scored pair='nobel-peace-prize-winner-2026_international_court_of_justice': score=$0.8755 net_cents=0.10 size=$1751 time_factor=0.5 days=185.1 | poly_liq=$39586 venue2_liq=$1751
+📊 [Arb/Polymarket] 📖 get_best_prices(1051595913659729...): best_ask=0.944 best_bid=0.939 neg_risk=True last_trade=0.939 asks=45 bids=74
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.9440 Δ=0.0000 | YES ask=0.061 Δ=0.8830 | expected=0.9440 slug='2026-nhl-stanley-cup-champion'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-nhl-stanley-cup-champion' label='Pittsburgh Penguins': YES=8851645587670338... NO=1051595913659729...
+📊 [Arb/Polymarket] 📖 get_best_prices(8698976500075015...): best_ask=0.048 best_bid=0.047 neg_risk=True last_trade=0.047 asks=73 bids=46
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='who-will-trump-pardon-before-2027': conditionId=0x1b53ad65dae4809d3d1097... YES=8536708435818195... NO=1006289645967005...
+📊 [Arb/Polymarket] 📖 get_best_prices(9417179109708015...): best_ask=0.985 best_bid=0.984 neg_risk=True last_trade=0.016 asks=15 bids=96
+📊 [Arb/Polymarket] ℹ️ Path 0a (/events/slug/) other-side bid=0.98 ≥ 0.98 (opposite likely winner) — buying YES, not rejected
+📊 [Arb/Polymarket] 📖 get_best_prices(7650249006003846...): best_ask=0.91 best_bid=0.9 neg_risk=True last_trade=0.090 asks=9 bids=62
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.9100 Δ=0.0000 | YES ask=0.1 Δ=0.8100 | expected=0.9100 slug='2026-nba-champion'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-nba-champion' label='Denver Nuggets': YES=5681472587017992... NO=7650249006003846...
+📊 [Arb/Polymarket] 📖 get_best_prices(5025230089837597...): best_ask=0.5 best_bid=0.49 neg_risk=True last_trade=0.480 asks=43 bids=27
+🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_pittsburgh_penguins': score=$600.0000 net_cents=0.60 size=$100000 time_factor=1.0 days=82.9 | poly_liq=$123467 venue2_liq=$639901
+🔀 [Arb/Oddpool] ✅ pair='stanley-cup-2026_pittsburgh_penguins' edge=1.60¢ poly=0.94 venue2(kalshi/YES)=0.04 days=82.9 token=resolved no_token=set title='NHL Stanley Cup Champion 2026'
+🔀 [Arb/Oddpool] 📊 Scored pair='nba-champion-2026_den': score=$0.0000 net_cents=0.00 size=$100000 time_factor=1.0 days=84.1 | poly_liq=$229147 venue2_liq=$2268029
+🔀 [Arb/Oddpool] ✅ pair='nba-champion-2026_den' edge=1.00¢ poly=0.91 venue2(kalshi/YES)=0.08 days=84.1 token=resolved no_token=set title='NBA Champion 2026'
+🔀 [Arb/Oddpool] ✅ pair='nobel-peace-prize-winner-2026_international_court_of_justice' edge=1.10¢ poly=0.04 venue2(kalshi/NO)=0.95 days=185.1 token=resolved no_token=set title='Nobel Peace Prize Winner 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(1102342501819459...): best_ask=0.962 best_bid=0.961 neg_risk=False last_trade=0.039 asks=25 bids=56
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='what-price-will-ethereum-hit-before-2027' label='$4,000 or above' → '↑ 10,000' YES=100865557115... NO=110234250181...
+📊 [Arb/Polymarket] 📖 get_best_prices(5890816029989553...): best_ask=0.13 best_bid=0.12 neg_risk=False last_trade=0.880 asks=35 bids=12
+📊 [Arb/Polymarket] 📖 get_best_prices(8880641935843390...): best_ask=0.58 best_bid=0.56 neg_risk=True last_trade=0.560 asks=26 bids=35
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='fifa-world-cup-group-f-winner' label='Netherlands' → 'Netherlands' YES=888064193584... NO=250382966235...
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='republican-presidential-nominee-2028' label='Thomas Massie' → 'Thomas Massie' YES=997008790151... NO=941717910970...
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='who-will-leave-trump-administration-before-2027': conditionId=0x4f0f481c30d93d0c7c5ffb... YES=2737712962400181... NO=2660941033766655...
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='nba-2025-26-coach-of-the-year': conditionId=0xc98057e2ead6760fb748cf... YES=1906319354102438... NO=6757076361706057...
+📊 [Arb/Polymarket] 📖 get_best_prices(1102342501819459...): best_ask=0.962 best_bid=0.961 neg_risk=False last_trade=0.039 asks=25 bids=56
+📊 [Arb/Polymarket] 📖 get_best_prices(2605644305136857...): best_ask=0.47 best_bid=0.46 neg_risk=True last_trade=0.460 asks=38 bids=16
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='what-price-will-ethereum-hit-before-2027' label='$3,500 or above' → '↑ 10,000' YES=100865557115... NO=110234250181...
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='who-will-be-ufc-welterweight-champion-at-the-end-of-2026': conditionId=0xc0f31bcf5266102629e42f... YES=1156646658762234... NO=4012342659761702...
+📊 [Arb/Polymarket] 📖 get_best_prices(6689463483074745...): best_ask=0.93 best_bid=0.92 neg_risk=False last_trade=0.070 asks=7 bids=44
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='lai-ching-te-out-as-president-of-taiwan-in-2026' label='Lai Ching-te out as President of Taiwan in 2026?' → 'Lai Ching-te out as President of Taiwan by Decembe' YES=194333103072... NO=668946348307...
+📊 [Arb/Polymarket] 📖 get_best_prices(3165008396528239...): best_ask=0.51 best_bid=0.49 neg_risk=False last_trade=0.510 asks=31 bids=35
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='where-will-trump-and-putin-meet-next-584': conditionId=0x1827f7e35c24f0cd5ff863... YES=5123559650156483... NO=2111958235260371...
+📊 [Arb/Polymarket] 📖 get_best_prices(7378915619801935...): best_ask=0.05 best_bid=0.025 neg_risk=True last_trade=0.025 asks=36 bids=8
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='which-party-will-win-the-house-in-2026': conditionId=0x4e4f77e7dbf4cab666e9a1... YES=6513923082741736... NO=1737121711886212...
+📊 [Arb/Polymarket] 📖 get_best_prices(1569944067424179...): best_ask=0.01 best_bid=0.008 neg_risk=False last_trade=0.010 asks=76 bids=8
+📊 [Arb/Polymarket] 📖 get_best_prices(4985326613637227...): best_ask=0.998 best_bid=0.995 neg_risk=True last_trade=0.003 asks=2 bids=43
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0050 Δ=0.0000 | NO ask=0.998 Δ=0.9930 | expected=0.0050 slug='lol-lpl-2026-season-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='lol-lpl-2026-season-winner' label='EDward Gaming': YES=4270118795550700... NO=4985326613637227...
+🔀 [Arb/Oddpool] 📊 Scored pair='lol-lpl-2026-season-winner_edward_gaming': score=$3.7589 net_cents=0.10 size=$7518 time_factor=0.5 days=267.1 | poly_liq=$7518 venue2_liq=$103522
+🔀 [Arb/Oddpool] ✅ pair='lol-lpl-2026-season-winner_edward_gaming' edge=0.10¢ poly=0.01 venue2(opinion/NO)=0.99 days=267.1 token=resolved no_token=set title='LoL: LPL 2026 Season Winner'
+📊 [Arb/Polymarket] 📖 get_best_prices(7738108412170358...): best_ask=0.02 best_bid=0.019 neg_risk=True last_trade=0.019 asks=99 bids=18
+📊 [Arb/Polymarket] 📖 get_best_prices(5576421221146778...): best_ask=0.08 best_bid=0.07 neg_risk=True last_trade=0.070 asks=75 bids=7
+📊 [Arb/Polymarket] 📖 get_best_prices(8228880882451283...): best_ask=0.981 best_bid=0.98 neg_risk=True last_trade=0.019 asks=5 bids=42
+📊 [Arb/Polymarket] ℹ️ Path 0a (/events/slug/) other-side bid=0.98 ≥ 0.98 (opposite likely winner) — buying YES, not rejected
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='fifa-world-cup-group-h-winner' label='Saudi Arabia' → 'Saudi Arabia' YES=629366731019... NO=822888088245...
+📊 [Arb/Polymarket] 📖 get_best_prices(1285194787059679...): best_ask=0.36 best_bid=0.33 neg_risk=True last_trade=0.330 asks=36 bids=10
+📊 [Arb/Polymarket] ✅ [Path OS] Resolved slug='who-will-leave-trump-administration-before-2027': conditionId=0x48a3e95c0bc1b9305e5644... YES=3303926828880224... NO=2550017672103952...
+📊 [Arb/Polymarket] 📖 get_best_prices(1008655571151988...): best_ask=0.039 best_bid=0.038 neg_risk=False last_trade=0.039 asks=56 bids=25
+📊 [Arb/Polymarket] 📖 get_best_prices(9534472819324402...): best_ask=0.974 best_bid=0.973 neg_risk=True last_trade=0.027 asks=19 bids=115
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='republican-presidential-nominee-2028' label='Ron DeSantis' → 'Ron DeSantis' YES=121279756507... NO=953447281932...
+📊 [Arb/Polymarket] 📖 get_best_prices(4295215073221187...): best_ask=0.2 best_bid=0.17 neg_risk=True last_trade=0.830 asks=33 bids=10
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.8300 Δ=0.0000 | NO ask=0.2 Δ=0.6300 | expected=0.8300 slug='rhode-island-republican-senate-primary-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='rhode-island-republican-senate-primary-winner' label='Raymond McKay': YES=5382990280964541... NO=4295215073221187...
+🔀 [Arb/Oddpool] 📊 Scored pair='rhode-island-senate-primary-winner-2026_raymond_mckay': score=$0.0000 net_cents=0.00 size=$272 time_factor=0.8 days=153.1 | poly_liq=$12186 venue2_liq=$272
+🔀 [Arb/Oddpool] ✅ pair='rhode-island-senate-primary-winner-2026_raymond_mckay' edge=1.00¢ poly=0.83 venue2(kalshi/NO)=0.16 days=153.1 token=resolved no_token=set title='Rhode Island Republican Senate Primary W'
+📊 [Arb/Polymarket] 📖 get_best_prices(1133798397343510...): best_ask=0.26 best_bid=0.25 neg_risk=True last_trade=0.260 asks=41 bids=17
+📊 [Arb/Polymarket] 📖 get_best_prices(6519323466662829...): best_ask=0.09 best_bid=0.08 neg_risk=True last_trade=0.090 asks=67 bids=8
+📊 [Arb/Polymarket] 📖 get_best_prices(2756762370193643...): best_ask=0.953 best_bid=0.952 neg_risk=True last_trade=0.047 asks=46 bids=73
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='2026-nhl-stanley-cup-champion' label='Buffalo Sabres' → 'Buffalo Sabres' YES=869897650007... NO=275676237019...
+📊 [Arb/Polymarket] 📖 get_best_prices(8536708435818195...): best_ask=0.12 best_bid=0.09 neg_risk=False last_trade=0.080 asks=38 bids=9
+📊 [Arb/Polymarket] 📖 get_best_prices(1008655571151988...): best_ask=0.039 best_bid=0.038 neg_risk=False last_trade=0.039 asks=56 bids=25
+📊 [Arb/Polymarket] 📖 get_best_prices(9970087901513472...): best_ask=0.016 best_bid=0.015 neg_risk=True last_trade=0.016 asks=96 bids=15
+📊 [Arb/Polymarket] 📖 get_best_prices(4402089414342929...): best_ask=0.88 best_bid=0.87 neg_risk=False last_trade=0.880 asks=12 bids=35
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.8800 Δ=0.0000 | YES ask=0.13 Δ=0.7500 | expected=0.8800 slug='what-price-will-bitcoin-hit-before-2027'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='what-price-will-bitcoin-hit-before-2027' label='↓ 25,000': YES=5890816029989553... NO=4402089414342929...
+🔀 [Arb/Oddpool] 📊 Scored pair='btc-max-2026_value_below_25k': score=$0.0000 net_cents=0.00 size=$27840 time_factor=0.5 days=268.3 | poly_liq=$65831 venue2_liq=$27840
+🔀 [Arb/Oddpool] ✅ pair='btc-max-2026_value_below_25k' edge=0.00¢ poly=0.88 venue2(opinion/YES)=0.12 days=268.3 token=resolved no_token=set title='Bitcoin Maximum Price in 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(2737712962400181...): best_ask=0.63 best_bid=0.62 neg_risk=False last_trade=0.620 asks=24 bids=50
+📊 [Arb/Polymarket] 📖 get_best_prices(7069596121690118...): best_ask=0.51 best_bid=0.5 neg_risk=True last_trade=0.480 asks=27 bids=42
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.5100 Δ=0.0000 | YES ask=0.5 Δ=0.0100 | expected=0.5100 slug='new-mexico-governor-republican-primary-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='new-mexico-governor-republican-primary-winner' label='Gregg Hull': YES=5025230089837597... NO=7069596121690118...
+🔀 [Arb/Oddpool] 📊 Scored pair='nm-gov-republican-primary-winner-2026_greg_hull': score=$0.0000 net_cents=0.00 size=$2035 time_factor=1.0 days=55.1 | poly_liq=$20311 venue2_liq=$2035
+🔀 [Arb/Oddpool] ✅ pair='nm-gov-republican-primary-winner-2026_greg_hull' edge=2.00¢ poly=0.51 venue2(kalshi/YES)=0.47 days=55.1 token=resolved no_token=set title='New Mexico Governor Republican Primary W'
+📊 [Arb/Polymarket] 📖 get_best_prices(8880641935843390...): best_ask=0.58 best_bid=0.56 neg_risk=True last_trade=0.560 asks=26 bids=35
+📊 [Arb/Polymarket] 📖 get_best_prices(1128695141472296...): best_ask=0.54 best_bid=0.53 neg_risk=True last_trade=0.460 asks=16 bids=38
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.4700 Δ=0.0000 | NO ask=0.54 Δ=0.0700 | expected=0.4700 slug='lol-lck-2026-season-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='lol-lck-2026-season-winner' label='Gen.G Esports': YES=2605644305136857... NO=1128695141472296...
+🔀 [Arb/Oddpool] 📊 Scored pair='lol-lck-2026-winner_geng_esports': score=$0.0000 net_cents=0.00 size=$2578 time_factor=0.5 days=267.1 | poly_liq=$10223 venue2_liq=$2578
+📊 [Arb/Polymarket] 📖 get_best_prices(1906319354102438...): best_ask=0.72 best_bid=0.71 neg_risk=True last_trade=0.740 asks=23 bids=22
+🔀 [Arb/Oddpool] ✅ pair='lol-lck-2026-winner_geng_esports' edge=0.00¢ poly=0.47 venue2(opinion/NO)=0.53 days=267.1 token=resolved no_token=set title='LoL LCK 2026 Season Winner'
+📊 [Arb/Polymarket] 📖 get_best_prices(6796353856458949...): best_ask=0.992 best_bid=0.99 neg_risk=False last_trade=0.010 asks=8 bids=76
+📊 [Arb/Polymarket] ℹ️ Path 0a (/events/slug/) other-side bid=0.99 ≥ 0.98 (opposite likely winner) — buying YES, not rejected
+📊 [Arb/Polymarket] ✅ Path 0a (/events/slug/) slug='jerome-powell-out-as-fed-chair-by' label='May 14' → 'May 14' YES=156994406742... NO=679635385645...
+📊 [Arb/Polymarket] 📖 get_best_prices(7965912645374411...): best_ask=0.51 best_bid=0.49 neg_risk=False last_trade=0.510 asks=35 bids=31
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.5100 Δ=0.0000 | NO ask=0.51 Δ=0.0000 | expected=0.5100 slug='ipos-before-2027'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='ipos-before-2027' label='Anthropic': YES=3165008396528239... NO=7965912645374411...
+🔀 [Arb/Oddpool] 📊 Scored pair='ipos-before-2027_anthropic': score=$0.0000 net_cents=0.00 size=$11540 time_factor=0.5 days=267.1 | poly_liq=$11540 venue2_liq=$16160
+🔀 [Arb/Oddpool] ✅ pair='ipos-before-2027_anthropic' edge=0.00¢ poly=0.51 venue2(opinion/NO)=0.49 days=267.1 token=resolved no_token=set title='IPOs Before 2027'
+📊 [Arb/Polymarket] 📖 get_best_prices(1008655571151988...): best_ask=0.039 best_bid=0.038 neg_risk=False last_trade=0.039 asks=56 bids=25
+📊 [Arb/Polymarket] 📖 get_best_prices(1943331030721500...): best_ask=0.08 best_bid=0.07 neg_risk=False last_trade=0.070 asks=44 bids=7
+📊 [Arb/Polymarket] 📖 get_best_prices(1156646658762234...): best_ask=0.78 best_bid=0.69 neg_risk=True last_trade=0.220 asks=9 bids=8
+📊 [Arb/Polymarket] 📖 get_best_prices(8546495185548358...): best_ask=0.975 best_bid=0.95 neg_risk=True last_trade=0.025 asks=8 bids=36
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0500 Δ=0.0000 | NO ask=0.975 Δ=0.9250 | expected=0.0500 slug='fifa-world-cup-group-g-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='fifa-world-cup-group-g-winner' label='IR Iran': YES=7378915619801935... NO=8546495185548358...
+🔀 [Arb/Oddpool] 📊 Scored pair='fifa-world-cup-group-g-winner-2026_iran': score=$0.0000 net_cents=0.00 size=$5089 time_factor=1.0 days=80.1 | poly_liq=$5089 venue2_liq=$6377
+🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-group-g-winner-2026_iran' edge=1.00¢ poly=0.05 venue2(kalshi/NO)=0.94 days=80.1 token=resolved no_token=set title='FIFA World Cup Group G Winner'
+📊 [Arb/Polymarket] 📖 get_best_prices(6293667310198645...): best_ask=0.02 best_bid=0.019 neg_risk=True last_trade=0.019 asks=42 bids=5
+📊 [Arb/Polymarket] 📖 get_best_prices(7873071618609003...): best_ask=0.67 best_bid=0.64 neg_risk=True last_trade=0.330 asks=10 bids=36
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.3600 Δ=0.0000 | NO ask=0.67 Δ=0.3100 | expected=0.3600 slug='fifa-world-cup-group-d-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='fifa-world-cup-group-d-winner' label='USA': YES=1285194787059679... NO=7873071618609003...
+🔀 [Arb/Oddpool] 📊 Scored pair='fifa-world-cup-group-d-winner-2026_usa': score=$0.0000 net_cents=0.00 size=$8921 time_factor=1.0 days=80.1 | poly_liq=$8921 venue2_liq=$9751
+🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-group-d-winner-2026_usa' edge=2.00¢ poly=0.36 venue2(kalshi/NO)=0.62 days=80.1 token=resolved no_token=set title='FIFA World Cup Group D Winner'
+📊 [Arb/Polymarket] 📖 get_best_prices(1136895646961340...): best_ask=0.981 best_bid=0.98 neg_risk=True last_trade=0.019 asks=18 bids=99
+📊 [Arb/Polymarket] 📖 get_best_prices(8698976500075015...): best_ask=0.048 best_bid=0.047 neg_risk=True last_trade=0.047 asks=73 bids=46
+📊 [Arb/Polymarket] 📖 get_best_prices(5649717099758674...): best_ask=0.93 best_bid=0.92 neg_risk=True last_trade=0.070 asks=7 bids=75
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0800 Δ=0.0000 | NO ask=0.93 Δ=0.8500 | expected=0.0800 slug='next-french-presidential-election'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='next-french-presidential-election' label='Marine Le Pen': YES=5576421221146778... NO=5649717099758674...
+🔀 [Arb/Oddpool] 📊 Scored pair='french-presidential-election-2027_marine_le_pen': score=$0.0000 net_cents=0.00 size=$5574 time_factor=0.5 days=387.1 | poly_liq=$94612 venue2_liq=$5574
+🔀 [Arb/Oddpool] ✅ pair='french-presidential-election-2027_marine_le_pen' edge=1.00¢ poly=0.08 venue2(kalshi/NO)=0.91 days=387.1 token=resolved no_token=set title='French Presidential Election 2027'
+📊 [Arb/Polymarket] 📖 get_best_prices(1212797565073611...): best_ask=0.027 best_bid=0.026 neg_risk=True last_trade=0.027 asks=115 bids=19
+📊 [Arb/Polymarket] 📖 get_best_prices(1006289645967005...): best_ask=0.91 best_bid=0.88 neg_risk=False last_trade=0.080 asks=9 bids=38
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.9100 Δ=0.0000 | YES ask=0.12 Δ=0.7900 | expected=0.9100 slug='who-will-trump-pardon-before-2027'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='who-will-trump-pardon-before-2027' label='Nicolás Maduro': YES=8536708435818195... NO=1006289645967005...
+📊 [Arb/Polymarket] 📖 get_best_prices(5123559650156483...): best_ask=0.007 best_bid=0.006 neg_risk=True last_trade=0.006 asks=75 bids=4
+📊 [Arb/Polymarket] 📖 get_best_prices(6513923082741736...): best_ask=0.12 best_bid=0.11 neg_risk=True last_trade=0.120 asks=71 bids=11
+📊 [Arb/Polymarket] 📖 get_best_prices(1102342501819459...): best_ask=0.962 best_bid=0.961 neg_risk=False last_trade=0.039 asks=25 bids=56
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0390 Δ=0.1910 | NO ask=0.962 Δ=0.7320 | expected=0.2300 slug='what-price-will-ethereum-hit-before-2027'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='what-price-will-ethereum-hit-before-2027' label='$4,000 or above': YES=1008655571151988... NO=1102342501819459...
+🔀 [Arb/Oddpool] 📊 Scored pair='eth-max-2026_eth_4k': score=$0.0000 net_cents=0.00 size=$32776 time_factor=0.5 days=268.3 | poly_liq=$32776 venue2_liq=$59531
+🔀 [Arb/Oddpool] ✅ pair='eth-max-2026_eth_4k' edge=2.00¢ poly=0.23 venue2(kalshi/NO)=0.75 days=268.3 token=resolved no_token=set title='Ethereum Maximum Price in 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(4805880501259937...): best_ask=0.75 best_bid=0.74 neg_risk=True last_trade=0.260 asks=17 bids=41
+📊 [Arb/Polymarket] 📖 get_best_prices(3303926828880224...): best_ask=0.17 best_bid=0.13 neg_risk=False last_trade=0.840 asks=48 bids=13
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0200 Δ=0.0000 | NO ask=0.981 Δ=0.9610 | expected=0.0200 slug='2026-nhl-stanley-cup-champion'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-nhl-stanley-cup-champion' label='Utah Mammoth': YES=7738108412170358... NO=1136895646961340...
+🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_utah_mammoth': score=$0.0000 net_cents=0.00 size=$100000 time_factor=1.0 days=82.9 | poly_liq=$152462 venue2_liq=$682836
+🔀 [Arb/Oddpool] ✅ pair='stanley-cup-2026_utah_mammoth' edge=1.00¢ poly=0.02 venue2(kalshi/NO)=0.97 days=82.9 token=resolved no_token=set title='NHL Stanley Cup Champion 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(1102342501819459...): best_ask=0.962 best_bid=0.961 neg_risk=False last_trade=0.039 asks=25 bids=56
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0390 Δ=0.0410 | NO ask=0.962 Δ=0.8820 | expected=0.0800 slug='what-price-will-ethereum-hit-before-2027'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='what-price-will-ethereum-hit-before-2027' label='$6,000 or above': YES=1008655571151988... NO=1102342501819459...
+🔀 [Arb/Oddpool] 📊 Scored pair='eth-max-2026_eth_6k': score=$0.0000 net_cents=0.00 size=$67769 time_factor=0.5 days=268.3 | poly_liq=$67769 venue2_liq=$153584
+🔀 [Arb/Oddpool] ✅ pair='eth-max-2026_eth_6k' edge=1.00¢ poly=0.08 venue2(kalshi/NO)=0.91 days=268.3 token=resolved no_token=set title='Ethereum Maximum Price in 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(9417179109708015...): best_ask=0.985 best_bid=0.984 neg_risk=True last_trade=0.016 asks=15 bids=96
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.7500 Δ=0.0000 | YES ask=0.26 Δ=0.4900 | expected=0.7500 slug='how-many-fed-rate-cuts-in-2026'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='how-many-fed-rate-cuts-in-2026' label='Exactly 1 cut': YES=1133798397343510... NO=4805880501259937...
+📊 [Arb/Polymarket] 📖 get_best_prices(2660941033766655...): best_ask=0.38 best_bid=0.37 neg_risk=False last_trade=0.620 asks=50 bids=24
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.6300 Δ=0.0000 | NO ask=0.38 Δ=0.2500 | expected=0.6300 slug='who-will-leave-trump-administration-before-2027'
+🔀 [Arb/Oddpool] 📊 Scored pair='fed-rate-cuts-2026_cuts_1': score=$0.0000 net_cents=0.00 size=$78896 time_factor=0.5 days=267.1 | poly_liq=$78896 venue2_liq=$114718
+🔀 [Arb/Oddpool] ✅ pair='fed-rate-cuts-2026_cuts_1' edge=2.00¢ poly=0.75 venue2(kalshi/YES)=0.23 days=267.1 token=resolved no_token=set title='Number of Fed Rate Cuts in 2026'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='who-will-leave-trump-administration-before-2027' label='Tulsi Gabbard': YES=2737712962400181... NO=2660941033766655...
+🔀 [Arb/Oddpool] 📊 Scored pair='trump-admin-departures-2026_tulsi_gabbard': score=$0.0000 net_cents=0.00 size=$35006 time_factor=0.5 days=267.1 | poly_liq=$35006 venue2_liq=$95108
+🔀 [Arb/Oddpool] ✅ pair='trump-admin-departures-2026_tulsi_gabbard' edge=2.00¢ poly=0.63 venue2(kalshi/NO)=0.35 days=267.1 token=resolved no_token=set title='Who Will Leave Trump Administration in 2'
+📊 [Arb/Polymarket] 📖 get_best_prices(2829029314001810...): best_ask=0.92 best_bid=0.91 neg_risk=True last_trade=0.090 asks=8 bids=67
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0160 Δ=0.0000 | NO ask=0.985 Δ=0.9690 | expected=0.0160 slug='republican-presidential-nominee-2028'
+🔀 [Arb/Oddpool] 📊 Scored pair='trump-pardon-2027_nicolas_maduro': score=$0.0000 net_cents=0.00 size=$7491 time_factor=0.5 days=267.1 | poly_liq=$13135 venue2_liq=$7491
+🔀 [Arb/Oddpool] ✅ pair='trump-pardon-2027_nicolas_maduro' edge=1.00¢ poly=0.91 venue2(kalshi/YES)=0.08 days=267.1 token=resolved no_token=set title='Who Will Trump Pardon Before 2027'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='republican-presidential-nominee-2028' label='Thomas Massie': YES=9970087901513472... NO=9417179109708015...
+🔀 [Arb/Oddpool] 📊 Scored pair='gop-nominee-2028_thomas_massie': score=$0.0000 net_cents=0.00 size=$98000 time_factor=0.5 days=943.9 | poly_liq=$339444 venue2_liq=$98000
+🔀 [Arb/Oddpool] ✅ pair='gop-nominee-2028_thomas_massie' edge=0.00¢ poly=0.02 venue2(opinion/NO)=0.98 days=943.9 token=resolved no_token=set title='Republican Nominee 2028'
+🔀 [Arb/Oddpool] 🔄 Token YES/NO order corrected: NO ask=0.9200 Δ=0.0300 closer than YES ask=0.09 Δ=0.8000 → swapping | expected=0.8900 slug='fed-decision-in-june-825'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='fed-decision-in-june-825' label='Fed maintains rate': YES=2829029314001810... NO=6519323466662829...
+🔀 [Arb/Oddpool] 📊 Scored pair='fomc-2026-06-17_no_change': score=$0.0000 net_cents=0.00 size=$100000 time_factor=1.0 days=70.1 | poly_liq=$154993 venue2_liq=$189174
+🔀 [Arb/Oddpool] ✅ pair='fomc-2026-06-17_no_change' edge=1.00¢ poly=0.89 venue2(kalshi/NO)=0.10 days=70.1 token=resolved no_token=set title='Fed Decision in June 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(4012342659761702...): best_ask=0.31 best_bid=0.22 neg_risk=True last_trade=0.220 asks=8 bids=9
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.3100 Δ=0.0000 | YES ask=0.78 Δ=0.4700 | expected=0.3100 slug='who-will-be-ufc-welterweight-champion-at-the-end-of-2026'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='who-will-be-ufc-welterweight-champion-at-the-end-of-2026' label='Islam Makhachev': YES=1156646658762234... NO=4012342659761702...
+🔀 [Arb/Oddpool] 📊 Scored pair='ufc-welterweight-title-2026_islam_makhachev': score=$0.0000 net_cents=0.00 size=$3025 time_factor=0.5 days=267.1 | poly_liq=$3025 venue2_liq=$6152
+🔀 [Arb/Oddpool] ✅ pair='ufc-welterweight-title-2026_islam_makhachev' edge=2.00¢ poly=0.31 venue2(kalshi/YES)=0.67 days=267.1 token=resolved no_token=set title='UFC Welterweight Title Holder on Decembe'
+📊 [Arb/Polymarket] 📖 get_best_prices(2503829662352184...): best_ask=0.44 best_bid=0.42 neg_risk=True last_trade=0.560 asks=35 bids=26
+🔀 [Arb/Oddpool] ✅ Token ask validated (NO correct): NO ask=0.4400 Δ=0.0000 | YES ask=0.58 Δ=0.1400 | expected=0.4400 slug='fifa-world-cup-group-f-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='fifa-world-cup-group-f-winner' label='Netherlands': YES=8880641935843390... NO=2503829662352184...
+🔀 [Arb/Oddpool] 📊 Scored pair='fifa-world-cup-group-f-winner-2026_netherlands': score=$0.0000 net_cents=0.00 size=$4308 time_factor=1.0 days=80.1 | poly_liq=$4308 venue2_liq=$4745
+🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-group-f-winner-2026_netherlands' edge=2.00¢ poly=0.44 venue2(kalshi/YES)=0.54 days=80.1 token=resolved no_token=set title='FIFA World Cup Group F Winner'
+📊 [Arb/Polymarket] 📖 get_best_prices(6757076361706057...): best_ask=0.29 best_bid=0.28 neg_risk=True last_trade=0.740 asks=22 bids=23
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.7200 Δ=0.0000 | NO ask=0.29 Δ=0.4300 | expected=0.7200 slug='nba-2025-26-coach-of-the-year'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='nba-2025-26-coach-of-the-year' label='JB Bickerstaff': YES=1906319354102438... NO=6757076361706057...
+🔀 [Arb/Oddpool] 📊 Scored pair='nba-coach-of-the-year-winner-2026_jb_bickerstaff': score=$0.0000 net_cents=0.00 size=$5245 time_factor=1.0 days=83.1 | poly_liq=$5245 venue2_liq=$373539
+🔀 [Arb/Oddpool] ✅ pair='nba-coach-of-the-year-winner-2026_jb_bickerstaff' edge=2.00¢ poly=0.72 venue2(kalshi/NO)=0.26 days=83.1 token=resolved no_token=set title='NBA Coach of the Year Winner 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(1102342501819459...): best_ask=0.962 best_bid=0.961 neg_risk=False last_trade=0.039 asks=25 bids=56
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0390 Δ=0.3010 | NO ask=0.962 Δ=0.6220 | expected=0.3400 slug='what-price-will-ethereum-hit-before-2027'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='what-price-will-ethereum-hit-before-2027' label='$3,500 or above': YES=1008655571151988... NO=1102342501819459...
+🔀 [Arb/Oddpool] 📊 Scored pair='eth-max-2026_eth_3500': score=$0.0000 net_cents=0.00 size=$28154 time_factor=0.5 days=268.3 | poly_liq=$28154 venue2_liq=$64030
+🔀 [Arb/Oddpool] ✅ pair='eth-max-2026_eth_3500' edge=2.00¢ poly=0.34 venue2(kalshi/NO)=0.64 days=268.3 token=resolved no_token=set title='Ethereum Maximum Price in 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(1569944067424179...): best_ask=0.01 best_bid=0.008 neg_risk=False last_trade=0.010 asks=76 bids=8
+📊 [Arb/Polymarket] 📖 get_best_prices(6689463483074745...): best_ask=0.93 best_bid=0.92 neg_risk=False last_trade=0.070 asks=7 bids=44
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0800 Δ=0.0000 | NO ask=0.93 Δ=0.8500 | expected=0.0800 slug='lai-ching-te-out-as-president-of-taiwan-in-2026'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='lai-ching-te-out-as-president-of-taiwan-in-2026' label='Lai Ching-te out as President of Taiwan in 2026?': YES=1943331030721500... NO=6689463483074745...
+🔀 [Arb/Oddpool] 📊 Scored pair='lai-ching-te-out-president-taiwan-2026_lai_chingte_out_2026_yes': score=$0.0000 net_cents=0.00 size=$5908 time_factor=0.5 days=267.1 | poly_liq=$10506 venue2_liq=$5908
+🔀 [Arb/Oddpool] ✅ pair='lai-ching-te-out-president-taiwan-2026_lai_chingte_out_2026_yes' edge=0.00¢ poly=0.08 venue2(opinion/NO)=0.92 days=267.1 token=resolved no_token=set title='Lai Ching-te Out as President of Taiwan '
+📊 [Arb/Polymarket] 📖 get_best_prices(2756762370193643...): best_ask=0.953 best_bid=0.952 neg_risk=True last_trade=0.047 asks=46 bids=73
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0480 Δ=0.0000 | NO ask=0.953 Δ=0.9050 | expected=0.0480 slug='2026-nhl-stanley-cup-champion'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='2026-nhl-stanley-cup-champion' label='Buffalo Sabres': YES=8698976500075015... NO=2756762370193643...
+🔀 [Arb/Oddpool] 📊 Scored pair='stanley-cup-2026_buffalo_sabres': score=$200.0000 net_cents=0.20 size=$100000 time_factor=1.0 days=82.9 | poly_liq=$116802 venue2_liq=$911996
+🔀 [Arb/Oddpool] ✅ pair='stanley-cup-2026_buffalo_sabres' edge=1.20¢ poly=0.05 venue2(kalshi/NO)=0.94 days=82.9 token=resolved no_token=set title='NHL Stanley Cup Champion 2026'
+📊 [Arb/Polymarket] 📖 get_best_prices(8228880882451283...): best_ask=0.981 best_bid=0.98 neg_risk=True last_trade=0.019 asks=5 bids=42
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0200 Δ=0.0000 | NO ask=0.981 Δ=0.9610 | expected=0.0200 slug='fifa-world-cup-group-h-winner'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='fifa-world-cup-group-h-winner' label='Saudi Arabia': YES=6293667310198645... NO=8228880882451283...
+🔀 [Arb/Oddpool] 📊 Scored pair='fifa-world-cup-group-h-winner-2026_saudi_arabia': score=$0.0000 net_cents=0.00 size=$479 time_factor=1.0 days=80.1 | poly_liq=$11606 venue2_liq=$479
+🔀 [Arb/Oddpool] ✅ pair='fifa-world-cup-group-h-winner-2026_saudi_arabia' edge=1.00¢ poly=0.02 venue2(kalshi/NO)=0.97 days=80.1 token=resolved no_token=set title='FIFA World Cup Group H Winner'
+📊 [Arb/Polymarket] 📖 get_best_prices(9534472819324402...): best_ask=0.974 best_bid=0.973 neg_risk=True last_trade=0.027 asks=19 bids=115
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0270 Δ=0.0000 | NO ask=0.974 Δ=0.9470 | expected=0.0270 slug='republican-presidential-nominee-2028'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='republican-presidential-nominee-2028' label='Ron DeSantis': YES=1212797565073611... NO=9534472819324402...
+🔀 [Arb/Oddpool] 📊 Scored pair='gop-nominee-2028_ron_desantis': score=$0.0000 net_cents=0.00 size=$91790 time_factor=0.5 days=943.9 | poly_liq=$324719 venue2_liq=$91790
+🔀 [Arb/Oddpool] ✅ pair='gop-nominee-2028_ron_desantis' edge=0.00¢ poly=0.03 venue2(opinion/NO)=0.97 days=943.9 token=resolved no_token=set title='Republican Nominee 2028'
+📊 [Arb/Polymarket] 📖 get_best_prices(2550017672103952...): best_ask=0.87 best_bid=0.83 neg_risk=False last_trade=0.840 asks=13 bids=48
+📊 [Arb/Polymarket] 📖 get_best_prices(1737121711886212...): best_ask=0.89 best_bid=0.88 neg_risk=True last_trade=0.120 asks=11 bids=71
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.1200 Δ=0.0000 | NO ask=0.89 Δ=0.7700 | expected=0.1200 slug='which-party-will-win-the-house-in-2026'
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.1700 Δ=0.0000 | NO ask=0.87 Δ=0.7000 | expected=0.1700 slug='who-will-leave-trump-administration-before-2027'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='which-party-will-win-the-house-in-2026' label='Republican Party': YES=6513923082741736... NO=1737121711886212...
+🔀 [Arb/Oddpool] 📊 Scored pair='us-house-2026_republican_party': score=$0.0000 net_cents=0.00 size=$100000 time_factor=0.5 days=209.1 | poly_liq=$314774 venue2_liq=$2136808
+🔀 [Arb/Oddpool] ✅ pair='us-house-2026_republican_party' edge=1.00¢ poly=0.12 venue2(kalshi/NO)=0.87 days=209.1 token=resolved no_token=set title='Which Party Will Win the U.S. House in 2'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='who-will-leave-trump-administration-before-2027' label='Marco Rubio': YES=3303926828880224... NO=2550017672103952...
+🔀 [Arb/Oddpool] 📊 Scored pair='trump-admin-departures-2026_marco_rubio': score=$0.0000 net_cents=0.00 size=$15632 time_factor=0.5 days=267.1 | poly_liq=$15632 venue2_liq=$28610
+🔀 [Arb/Oddpool] ✅ pair='trump-admin-departures-2026_marco_rubio' edge=2.00¢ poly=0.17 venue2(kalshi/NO)=0.81 days=267.1 token=resolved no_token=set title='Who Will Leave Trump Administration in 2'
+📊 [Arb/Polymarket] 📖 get_best_prices(2111958235260371...): best_ask=0.994 best_bid=0.993 neg_risk=True last_trade=0.006 asks=4 bids=75
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0070 Δ=0.0000 | NO ask=0.994 Δ=0.9870 | expected=0.0070 slug='where-will-trump-and-putin-meet-next-584'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='where-will-trump-and-putin-meet-next-584' label='Japan': YES=5123559650156483... NO=2111958235260371...
+🔀 [Arb/Oddpool] 📊 Scored pair='trump-putin-next-meeting-location-2029_japan': score=$0.0000 net_cents=0.00 size=$2722 time_factor=1.0 days=83.1 | poly_liq=$9555 venue2_liq=$2722
+🔀 [Arb/Oddpool] ✅ pair='trump-putin-next-meeting-location-2029_japan' edge=0.00¢ poly=0.01 venue2(opinion/NO)=0.99 days=83.1 token=resolved no_token=set title='Trump and Putin Next Meeting Location 20'
+📊 [Arb/Polymarket] 📖 get_best_prices(6796353856458949...): best_ask=0.992 best_bid=0.99 neg_risk=False last_trade=0.010 asks=8 bids=76
+🔀 [Arb/Oddpool] ✅ Token ask validated (YES correct): YES ask=0.0100 Δ=0.0000 | NO ask=0.992 Δ=0.9820 | expected=0.0100 slug='jerome-powell-out-as-fed-chair-by'
+🔀 [Arb/Oddpool] ✅ Tokens resolved slug='jerome-powell-out-as-fed-chair-by' label='May 14': YES=1569944067424179... NO=6796353856458949...
+🔀 [Arb/Oddpool] 📊 Scored pair='jerome-powell-out-fed-chair_may_14': score=$6.0923 net_cents=0.10 size=$6092 time_factor=1.0 days=36.1 | poly_liq=$43809 venue2_liq=$6092
+🔀 [Arb/Oddpool] ✅ pair='jerome-powell-out-fed-chair_may_14' edge=0.10¢ poly=0.01 venue2(opinion/NO)=0.99 days=36.1 token=resolved no_token=set title='Jerome Powell Out as Fed Chair'
+🔀 [Arb/Oddpool] Normalized 173/181 valid opportunities (sorted by score = annualized_return × confidence × fillable_size)
+🔀 [Arb/Oddpool] 🏆 Top opportunity: pair='btc-max-2026_value_above_120k' score=2198.3 AR=0.00× net_edge=14.90% conf=0.00 fill=$29311 days=268.3
+Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+AttributeError: 'ArbOpportunity' object has no attribute 'poly_yes_token_id'. Did you mean: 'poly_yes_token'?
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# 

@@ -1,0 +1,69 @@
+We investigated why Opinion requests were still getting 403/geoblocked even though a residential proxy was configured.
+
+Findings:
+
+1. The proxy itself is working.
+   Manual curl through the proxy succeeds against Opinion OpenAPI:
+
+   * proxied request to `https://proxy.opinion.trade:8443/openapi/market?limit=1`
+   * response is HTTP 200 with valid market data
+
+2. The proxy also works from Python when explicitly loaded from `.env`.
+   We ran:
+
+   * `load_dotenv("/root/PolyNotifyBot/.env")`
+   * `requests.get("https://api.ipify.org?format=json", proxies=...)`
+   * result IP was `45.202.213.98`
+   * `requests.get("https://proxy.opinion.trade:8443/openapi/market?limit=1", headers={"apikey": ...}, proxies=...)`
+   * response was HTTP 200 with valid Opinion data
+
+3. Earlier failure was because `.env` was not in the shell environment.
+   When we tried:
+
+   * `os.environ["OPINION_PROXY_URL"]`
+     it raised:
+   * `KeyError: 'OPINION_PROXY_URL'`
+     This showed that having the variable in `.env` does not mean it is present in the running shell or service environment.
+
+4. `load_dotenv()` without an explicit path failed in heredoc mode.
+   Running `load_dotenv()` caused:
+
+   * `AssertionError` inside `find_dotenv()`
+     Using an explicit path fixed it:
+   * `load_dotenv("/root/PolyNotifyBot/.env")`
+
+5. Current conclusion:
+   The issue is probably not the proxy provider.
+   The likely problem is one of:
+
+   * the bot/service is not loading `.env` before Opinion code runs
+   * or `opinion_clob_sdk` is bypassing the proxied `requests` path for some calls
+   * or both
+
+6. Important code detail:
+   `opinion_clob.py` reads `OPINION_PROXY_URL` at import time:
+
+   * `_opinion_clob_proxy = os.environ.get("OPINION_PROXY_URL", "")`
+     So if `.env` is not loaded before this module is imported, startup state is already wrong.
+
+7. Strongest current hypothesis:
+   Manual proxied curl works.
+   Manual Python with explicit `load_dotenv("/root/PolyNotifyBot/.env")` works.
+   Therefore 403/geoblock in the bot is most likely due to environment loading/startup order or SDK transport behavior, not a bad proxy.
+
+Recommended next checks/fixes:
+
+A. Ensure systemd/service loads the env file explicitly:
+
+* add `EnvironmentFile=/root/PolyNotifyBot/.env` to the service
+* restart service after reload
+
+B. Ensure app startup loads dotenv before importing modules that read env at import time:
+
+* `from dotenv import load_dotenv`
+* `load_dotenv("/root/PolyNotifyBot/.env")`
+
+C. Verify whether `opinion_clob_sdk` itself still bypasses the proxy on balance/order calls by testing SDK calls in the same explicit dotenv-loaded context.
+
+Bottom line:
+The proxy is confirmed good. The remaining problem is almost certainly in how the bot process loads env variables and/or how the Opinion SDK performs its HTTP calls.
