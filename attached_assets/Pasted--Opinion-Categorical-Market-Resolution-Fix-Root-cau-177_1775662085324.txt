@@ -1,0 +1,185 @@
+ Opinion Categorical Market Resolution Fix
+# ==========================================
+#
+# Root cause: resolve_tradable_market tried /market/{id} (binary) FIRST.
+# For categorical parents like market 340, this returns errno=10200 
+# "Topic ID does not exist" — wasting a round-trip. Then Path 2 
+# (/market/categorical/{id}) does work and returns children, BUT:
+#   - It didn't filter out Resolved children
+#   - The outcome_hint scoring was ambiguous for generic hints like "yes"
+#   - The Oddpool label field ("↑ 120,000") was never used for matching
+#
+# 3 Fixes across 4 files:
+ 
+# ═══════════════════════════════════════════════════════════════════════
+# FILE 1: bot/arb_monitor/adapters/opinion.py  [FULL REPLACEMENT]
+# ═══════════════════════════════════════════════════════════════════════
+# Replace entirely with the new opinion.py provided.
+# Changes:
+#   - resolve_tradable_market: categorical endpoint tried FIRST
+#   - resolve_tradable_market: new label_hint parameter 
+#   - resolve_tradable_market: Resolved children filtered out
+#   - _score_child_by_hint: exact title match scores +10
+#   - errno check added to Path 1 binary (was silently parsing null result)
+ 
+ 
+# ═══════════════════════════════════════════════════════════════════════
+# FILE 2: bot/arb_monitor/core/arb_executor.py  [4 SURGICAL CHANGES]
+# ═══════════════════════════════════════════════════════════════════════
+ 
+# --- Change 2a: _opinion_resolve_tokens signature ---
+# FIND:
+#     def _opinion_resolve_tokens(
+#         market_id: str,
+#         outcome_hint: str = "",
+#     ) -> Optional[tuple[str, str, str]]:
+# REPLACE WITH:
+#     def _opinion_resolve_tokens(
+#         market_id: str,
+#         outcome_hint: str = "",
+#         label_hint: str = "",
+#     ) -> Optional[tuple[str, str, str]]:
+ 
+# --- Change 2b: resolve_tradable_market call inside _opinion_resolve_tokens ---
+# FIND:
+#     resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint)
+# REPLACE WITH:
+#     resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint, label_hint=label_hint)
+ 
+# --- Change 2c: _opinion_get_best_ask signature ---
+# FIND:
+#     def _opinion_get_best_ask(
+#         market_id: str,
+#         side: str = "YES",
+#         outcome_hint: str = "",
+#     ) -> Optional[float]:
+# REPLACE WITH:
+#     def _opinion_get_best_ask(
+#         market_id: str,
+#         side: str = "YES",
+#         outcome_hint: str = "",
+#         label_hint: str = "",
+#     ) -> Optional[float]:
+# AND inside _opinion_get_best_ask, FIND:
+#         resolved = _opinion_resolve_tokens(market_id, outcome_hint=outcome_hint)
+# REPLACE WITH:
+#         resolved = _opinion_resolve_tokens(market_id, outcome_hint=outcome_hint, label_hint=label_hint)
+ 
+# --- Change 2d: execute_arb pre-flight check ---
+# FIND (around the "Opinion pre-flight" section):
+#     if venue2 == "opinion" and opinion_market_id:
+#         _pre_resolved = _opinion_resolve_tokens(opinion_market_id, outcome_hint=outcome_key)
+# REPLACE WITH:
+#     if venue2 == "opinion" and opinion_market_id:
+#         _opinion_label = getattr(opportunity, "kalshi_title", "")
+#         _pre_resolved = _opinion_resolve_tokens(opinion_market_id, outcome_hint=outcome_key, label_hint=_opinion_label)
+ 
+ 
+# ═══════════════════════════════════════════════════════════════════════
+# FILE 3: bot/arb_monitor/adapters/opinion_clob.py  [2 SURGICAL CHANGES]
+# ═══════════════════════════════════════════════════════════════════════
+ 
+# --- Change 3a: place_order signature ---
+# FIND:
+#     def place_order(
+#         market_id: str,
+#         side: str,
+#         price: float,
+#         size_usdc: float,
+#         contract_count: int,
+#         outcome_hint: str = "",
+#     ) -> tuple[bool, str, str]:
+# REPLACE WITH:
+#     def place_order(
+#         market_id: str,
+#         side: str,
+#         price: float,
+#         size_usdc: float,
+#         contract_count: int,
+#         outcome_hint: str = "",
+#         label_hint: str = "",
+#     ) -> tuple[bool, str, str]:
+ 
+# --- Change 3b: resolve_tradable_market call inside place_order ---
+# FIND:
+#     resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint)
+# REPLACE WITH:
+#     resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint, label_hint=label_hint)
+ 
+ 
+# ═══════════════════════════════════════════════════════════════════════
+# FILE 4: bot/arb_monitor/core/arb_execution_loop.py  [1 SURGICAL CHANGE]
+# ═══════════════════════════════════════════════════════════════════════
+ 
+# --- Change 4a: OpinionPreWarm _opinion_resolve_tokens call ---
+# FIND:
+#                 _pre = _opinion_resolve_tokens(_mid, outcome_hint=_hint)
+# REPLACE WITH:
+#                 _label = getattr(_opp, "kalshi_title", "")
+#                 _pre = _opinion_resolve_tokens(_mid, outcome_hint=_hint, label_hint=_label)
+ 
+ 
+# ═══════════════════════════════════════════════════════════════════════
+# OPTIONAL FILE 5: executor _place_opinion_order call
+# ═══════════════════════════════════════════════════════════════════════
+# In execute_arb, the _place_opinion_order call should also pass label_hint.
+# FIND (in execute_arb, inside _run_leg2):
+#             return _place_opinion_order(
+#                 market_id=opinion_market_id,
+#                 side=opinion_side,
+#                 price=live_kalshi_ask,
+#                 size_usdc=leg2_usdc,
+#                 contract_count=contract_count,
+#                 outcome_hint=outcome_key,
+#             )
+# REPLACE WITH:
+#             return _place_opinion_order(
+#                 market_id=opinion_market_id,
+#                 side=opinion_side,
+#                 price=live_kalshi_ask,
+#                 size_usdc=leg2_usdc,
+#                 contract_count=contract_count,
+#                 outcome_hint=outcome_key,
+#                 label_hint=getattr(opportunity, "kalshi_title", ""),
+#             )
+# AND update _place_opinion_order signature to accept label_hint:
+# FIND:
+#     def _place_opinion_order(
+#         market_id: str,
+#         side: str,
+#         price: float,
+#         size_usdc: float,
+#         contract_count: int,
+#         outcome_hint: str = "",
+#     ) -> tuple[bool, str, str]:
+# REPLACE WITH:
+#     def _place_opinion_order(
+#         market_id: str,
+#         side: str,
+#         price: float,
+#         size_usdc: float,
+#         contract_count: int,
+#         outcome_hint: str = "",
+#         label_hint: str = "",
+#     ) -> tuple[bool, str, str]:
+# AND its internal call:
+# FIND:
+#         return opinion_place_order(
+#             market_id=market_id,
+#             side=side,
+#             price=price,
+#             size_usdc=size_usdc,
+#             contract_count=contract_count,
+#             outcome_hint=outcome_hint,
+#         )
+# REPLACE WITH:
+#         return opinion_place_order(
+#             market_id=market_id,
+#             side=side,
+#             price=price,
+#             size_usdc=size_usdc,
+#             contract_count=contract_count,
+#             outcome_hint=outcome_hint,
+#             label_hint=label_hint,
+#         )
+ 

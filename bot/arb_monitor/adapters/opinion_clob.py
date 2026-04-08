@@ -319,6 +319,7 @@ def place_order(
     size_usdc: float,
     contract_count: int,
     outcome_hint: str = "",
+    label_hint: str = "",
 ) -> tuple[bool, str, str]:
     """Place a limit buy order on Opinion Labs CLOB.
 
@@ -344,7 +345,7 @@ def place_order(
     # For a binary market: child_market_id == market_id.
     # For a categorical parent (e.g. 340): picks the correct child via outcome_hint.
     from ..adapters.opinion import resolve_tradable_market
-    resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint)
+    resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint, label_hint=label_hint)
     if not resolved:
         err = (
             f"Cannot resolve tradable market for Opinion market_id={market_id!r} "

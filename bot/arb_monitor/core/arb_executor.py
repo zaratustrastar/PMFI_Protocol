@@ -436,6 +436,7 @@ def _place_opinion_order(
     size_usdc: float,
     contract_count: int,
     outcome_hint: str = "",
+    label_hint: str = "",
 ) -> tuple[bool, str, str]:
     """Place a limit buy order on Opinion Labs via the CLOB client.
 
@@ -448,6 +449,7 @@ def _place_opinion_order(
     Args:
         market_id:    Opinion market ID (may be categorical parent, e.g. "340").
         outcome_hint: Oddpool outcome_key for categorical child selection.
+        label_hint:   Oddpool label field for exact child title matching.
 
     Returns (ok, order_id, error_msg). Never raises.
     """
@@ -460,6 +462,7 @@ def _place_opinion_order(
             size_usdc=size_usdc,
             contract_count=contract_count,
             outcome_hint=outcome_hint,
+            label_hint=label_hint,
         )
     except Exception as e:
         err = str(e)
@@ -541,6 +544,7 @@ _OPINION_TOKEN_CACHE_TTL = 1800  # 30 minutes
 def _opinion_resolve_tokens(
     market_id: str,
     outcome_hint: str = "",
+    label_hint: str = "",
 ) -> Optional[tuple[str, str, str]]:
     """Return (child_market_id, yes_token_id, no_token_id) for an Opinion market.
 
@@ -553,6 +557,7 @@ def _opinion_resolve_tokens(
         market_id:    Opinion market ID (may be categorical parent like "340").
         outcome_hint: Oddpool outcome_key (e.g. "value_above_120k") to select
                       the correct child from a categorical parent.
+        label_hint:   Oddpool label field (e.g. "↑ 120,000") for exact title matching.
     """
     from ..adapters.opinion import resolve_tradable_market
     now = time.time()
@@ -562,7 +567,7 @@ def _opinion_resolve_tokens(
         resolved, cached_at = cached
         if now - cached_at < _OPINION_TOKEN_CACHE_TTL:
             return resolved
-    resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint)
+    resolved = resolve_tradable_market(market_id, outcome_hint=outcome_hint, label_hint=label_hint)
     if resolved:
         _OPINION_TOKEN_CACHE[_cache_key] = (resolved, now)
     return resolved
@@ -572,6 +577,7 @@ def _opinion_get_best_ask(
     market_id: str,
     side: str = "YES",
     outcome_hint: str = "",
+    label_hint: str = "",
 ) -> Optional[float]:
     """Fetch the best ask for the given side of an Opinion Labs market.
 
@@ -589,7 +595,7 @@ def _opinion_get_best_ask(
     if not market_id:
         return None
     try:
-        resolved = _opinion_resolve_tokens(market_id, outcome_hint=outcome_hint)
+        resolved = _opinion_resolve_tokens(market_id, outcome_hint=outcome_hint, label_hint=label_hint)
         if not resolved:
             log(f"⚠️ [OPINION] could not resolve tradable market for marketId={market_id!r}")
             return None
@@ -1033,7 +1039,8 @@ def execute_arb(
     # token causes a clean abort with no capital moved.
     # The resolved child is cached and reused by the leg-2 placement below.
     if venue2 == "opinion" and opinion_market_id:
-        _pre_resolved = _opinion_resolve_tokens(opinion_market_id, outcome_hint=outcome_key)
+        _opinion_label = getattr(opportunity, "label", "") or ""
+        _pre_resolved = _opinion_resolve_tokens(opinion_market_id, outcome_hint=outcome_key, label_hint=_opinion_label)
         if not _pre_resolved:
             result.error = (
                 f"opinion_token_unresolvable: parent={opinion_market_id!r} "
@@ -1106,6 +1113,7 @@ def execute_arb(
                 size_usdc=leg2_usdc,
                 contract_count=contract_count,
                 outcome_hint=outcome_key,
+                label_hint=getattr(opportunity, "label", "") or "",
             )
         return _place_kalshi_order(
             ticker=kalshi_ticker,

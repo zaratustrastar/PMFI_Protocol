@@ -394,25 +394,35 @@ def lookup_token_ids_by_market_id(market_id: str) -> Optional[tuple[str, str]]:
     return None
 
 
-def _score_child_by_hint(child_title: str, outcome_hint: str) -> int:
-    """Score a categorical child market title against the outcome_hint string.
+def _score_child_by_hint(child_title: str, outcome_hint: str, label_hint: str = "") -> int:
+    """Score a categorical child market title against the outcome_hint and label_hint.
 
     Higher score = better match. Used to pick the right child from a categorical market.
 
-    Handles three match classes:
-      1. Numeric: "120k" / "120000" matches "↑ 120,000" → scores 4-5
-      2. Direction: hint containing above/up/yes/more matches "↑"; below/down/no/less → "↓"
-      3. Token overlap: lowercase word tokens shared between hint and title → +1 per token
+    Match classes (highest → lowest priority):
+      0. Exact label match: label_hint == child_title (case-insensitive) → +10
+      1. Numeric: "120k" / "120000" matches "↑ 120,000" → +5 / +3
+      2. Direction: above/up/yes/more → prefer "↑"; below/down/no/less → prefer "↓" → +2
+      3. Token overlap: shared lowercase words between hint and title → +1 per token
 
-    E.g. outcome_hint="value_above_120k", child_title="↑ 120,000"  → score ≥ 5
+    E.g. label_hint="↑ 120,000", child_title="↑ 120,000"  → score ≥ 10 (exact)
+         outcome_hint="value_above_120k", child_title="↑ 120,000"  → score ≥ 7
          outcome_hint="andy_jassy_amazon", child_title="Andy Jassy" → score ≥ 2
          outcome_hint="yes",               child_title="↑ Yes"      → score ≥ 2
     """
-    if not outcome_hint:
+    if not outcome_hint and not label_hint:
         return 0
 
     score = 0
-    title_lower = child_title.lower()
+    title_lower = child_title.lower().strip()
+
+    # ── 0. Exact label match (Oddpool label field == child title) ─────────────
+    if label_hint and label_hint.lower().strip() == title_lower:
+        score += 10
+
+    if not outcome_hint:
+        return score
+
     hint_lower = outcome_hint.lower()
 
     # ── 1. Numeric matching ───────────────────────────────────────────────────
@@ -427,7 +437,7 @@ def _score_child_by_hint(child_title: str, outcome_hint: str) -> int:
         score += 3    # partial overlap on first 3 digits
 
     # ── 2. Direction keyword matching ─────────────────────────────────────────
-    _UP_WORDS = ("above", "up", "higher", "more", "over", "exceed", "yes")
+    _UP_WORDS   = ("above", "up", "higher", "more", "over", "exceed", "yes")
     _DOWN_WORDS = ("below", "down", "lower", "less", "under", "no")
     hint_has_up   = any(w in hint_lower for w in _UP_WORDS)
     hint_has_down = any(w in hint_lower for w in _DOWN_WORDS)
@@ -440,11 +450,11 @@ def _score_child_by_hint(child_title: str, outcome_hint: str) -> int:
         score += 2
 
     # ── 3. Word token overlap ─────────────────────────────────────────────────
-    # Split both hint ("andy_jassy_amazon") and title ("Andy Jassy") into tokens
-    hint_tokens  = set(re.split(r"[_\s\-/]+", hint_lower)) - {"", "the", "a", "an", "of", "in"}
-    title_tokens = set(re.split(r"[_\s\-/,\.]+", title_lower)) - {"", "the", "a", "an", "of", "in"}
+    _STOPWORDS = {"", "the", "a", "an", "of", "in", "to", "is", "or"}
+    hint_tokens  = set(re.split(r"[_\s\-/]+", hint_lower)) - _STOPWORDS
+    title_tokens = set(re.split(r"[_\s\-/,\.]+", title_lower)) - _STOPWORDS
     shared = hint_tokens & title_tokens
-    score += len(shared)   # +1 per shared word (handles names, tickers, etc.)
+    score += len(shared)
 
     return score
 
@@ -452,30 +462,30 @@ def _score_child_by_hint(child_title: str, outcome_hint: str) -> int:
 def resolve_tradable_market(
     market_id: str,
     outcome_hint: str = "",
+    label_hint: str = "",
 ) -> Optional[tuple[str, str, str]]:
-    """Resolve an Opinion market_id to a tradable child market.
+    """Resolve an Opinion market_id to a tradable (non-resolved) child market.
 
     Returns (child_market_id, yes_token_id, no_token_id) or None.
 
     For a binary market:  child_market_id == market_id.
     For a categorical parent (e.g. market_id=340 "BTC max 2026"):
-        - Calls GET /market/categorical/{market_id}
-        - Parses childMarkets[], each with marketId, marketTitle, yesTokenId, noTokenId
-        - Picks the best child using outcome_hint scoring (e.g. "value_above_120k" → child "↑ 120,000")
-        - Caches child under parent ID for future calls (30-min TTL handled by executor cache)
+        - Calls GET /market/categorical/{market_id} FIRST (avoids wasted binary round-trip)
+        - Filters out children with statusEnum=="Resolved" (cannot trade settled markets)
+        - Picks the best child using label_hint exact match (+10) then outcome_hint scoring
+        - Falls back to GET /market/{market_id} (binary) if categorical endpoint errors
 
     Args:
         market_id:    Opinion market ID string (e.g. "340").
-        outcome_hint: Oddpool outcome_key (e.g. "value_above_120k") — used to select
-                      the correct child market from a categorical parent.
+        outcome_hint: Oddpool outcome_key (e.g. "value_above_120k") for child selection.
+        label_hint:   Oddpool label field (e.g. "↑ 120,000") — exact title match (+10 pts).
     """
     if not market_id or not OPINION_API_KEY:
         log(f"⚠️ resolve_tradable_market: skipped — "
             f"{'OPINION_API_KEY not set' if not OPINION_API_KEY else 'empty market_id'}")
         return None
 
-    # ── Check resolved cache: keyed by (market_id, outcome_hint) so different ──
-    # outcome_hints for the same categorical parent never share a cached child.
+    # ── Check resolved cache: keyed by (market_id, outcome_hint) ─────────────
     _resolve_cache_key = (str(market_id), outcome_hint)
     cached_resolved = _RESOLVED_MARKET_CACHE.get(_resolve_cache_key)
     if cached_resolved:
@@ -493,105 +503,111 @@ def resolve_tradable_market(
         return (str(market_id), yes, no)
 
     log(f"🔍 resolve_tradable_market: marketId={market_id!r} outcome_hint={outcome_hint!r} "
-        f"— not in cache, trying live API")
+        f"label_hint={label_hint!r} — not in cache, trying live API")
 
     try:
-        # ── Path 1: direct binary market endpoint ─────────────────────────────
-        url_binary = f"{OPINION_BASE_URL}/market/{market_id}"
-        log(f"📡 resolve_tradable_market path 1 (binary): GET {url_binary}")
+        # ── Path 1: categorical endpoint FIRST ────────────────────────────────
+        # Categorical parents (which make up most Oddpool opportunities) return
+        # errno=10200 / result:null from /market/{id}, wasting one full round-trip.
+        # Trying /market/categorical/{id} first is always correct: binary markets
+        # return an errno or 404, and we fall through to the binary path below.
+        url_cat = f"{OPINION_BASE_URL}/market/categorical/{market_id}"
+        log(f"📡 resolve_tradable_market path 1 (categorical): GET {url_cat}")
         r1 = http_client.opinion_get(
-            url_binary, venue="opinion", headers=_headers(), timeout=10,
+            url_cat, venue="opinion", headers=_headers(), timeout=10,
         )
         if r1 is not None and r1.status_code == 200:
             try:
                 d1 = r1.json()
-                result1 = d1.get("result", {})
-                if isinstance(result1, dict) and "data" in result1:
-                    result1 = result1["data"]
-                if isinstance(result1, dict):
-                    yes = result1.get("yesTokenId", "")
-                    no  = result1.get("noTokenId", "")
-                    log(f"📡 path 1: yesTokenId={yes!r} noTokenId={no!r}")
-                    if yes and no:
-                        _MARKET_TOKEN_CACHE[str(market_id)] = (yes, no)
-                        log(f"✅ resolve_tradable_market (binary /market/{{id}}): "
-                            f"market={market_id!r} YES={yes[:12]}... NO={no[:12]}...")
-                        return (str(market_id), yes, no)
+                # Reject if the API returned an application-level error code
+                errno1 = d1.get("errno", d1.get("code"))
+                if errno1 is not None and errno1 != 0:
+                    log(f"⚠️ path 1 (categorical) errno={errno1} — not a categorical parent, falling through")
+                else:
+                    log(f"📡 path 1 raw top-level keys={list(d1.keys()) if isinstance(d1, dict) else type(d1).__name__!r}")
+                    result1 = d1.get("result") or {}
+                    children = (
+                        (result1.get("data") or {}).get("childMarkets")
+                        or result1.get("childMarkets")
+                        or (d1.get("data") or {}).get("childMarkets")
+                        or d1.get("childMarkets")
+                        or []
+                    )
+                    log(f"📡 path 1 (categorical): {len(children)} total children")
+                    valid_children = []
+                    for child in children:
+                        cid    = str(child.get("marketId", ""))
+                        title  = child.get("marketTitle", "") or child.get("title", "") or ""
+                        yes    = child.get("yesTokenId", "")
+                        no     = child.get("noTokenId", "")
+                        status = (child.get("statusEnum", "") or "").lower()
+                        if status == "resolved":
+                            log(f"📡   child marketId={cid!r} title={title!r} SKIPPED (Resolved)")
+                            continue
+                        log(f"📡   child marketId={cid!r} title={title!r} status={status!r} "
+                            f"yes={yes[:12] if yes else '(none)'}... "
+                            f"no={no[:12] if no else '(none)'}...")
+                        if cid and yes and no:
+                            _MARKET_TOKEN_CACHE[cid] = (yes, no)
+                            sc = _score_child_by_hint(title, outcome_hint, label_hint=label_hint)
+                            valid_children.append({
+                                "child_id": cid, "title": title, "yes": yes, "no": no,
+                                "score": sc,
+                            })
+                    if valid_children:
+                        best = max(valid_children, key=lambda c: c["score"])
+                        best_score = best["score"]
+                        if best_score == 0 and (outcome_hint or label_hint) and len(valid_children) > 1:
+                            log(
+                                f"❌ path 1 (categorical): {len(valid_children)} active children "
+                                f"but all scored 0 for hint={outcome_hint!r} label={label_hint!r} — "
+                                f"cannot safely pick; children={[c['title'] for c in valid_children]!r}"
+                            )
+                            return None
+                        log(f"✅ resolve_tradable_market (categorical): parent={market_id!r} → "
+                            f"child={best['child_id']!r} title={best['title']!r} "
+                            f"score={best_score} YES={best['yes'][:12]}... NO={best['no'][:12]}...")
+                        resolved = (best["child_id"], best["yes"], best["no"])
+                        _RESOLVED_MARKET_CACHE[_resolve_cache_key] = resolved
+                        return resolved
+                    elif children:
+                        log(f"⚠️ path 1 (categorical): all {len(children)} children are Resolved — no tradable child")
+                        return None
+                    # children list was empty → not actually a categorical market, fall through
             except Exception as _je:
-                log(f"⚠️ path 1 JSON parse error: {_je}")
+                log(f"⚠️ path 1 (categorical) JSON parse error: {_je}")
         else:
-            log(f"⚠️ path 1 status={getattr(r1, 'status_code', None)}")
+            log(f"⚠️ path 1 (categorical) status={getattr(r1, 'status_code', None)} — trying binary endpoint")
 
-        # ── Path 2: categorical market endpoint → childMarkets ────────────────
-        url_cat = f"{OPINION_BASE_URL}/market/categorical/{market_id}"
-        log(f"📡 resolve_tradable_market path 2 (categorical): GET {url_cat}")
+        # ── Path 2: binary market endpoint ────────────────────────────────────
+        url_binary = f"{OPINION_BASE_URL}/market/{market_id}"
+        log(f"📡 resolve_tradable_market path 2 (binary): GET {url_binary}")
         r2 = http_client.opinion_get(
-            url_cat, venue="opinion", headers=_headers(), timeout=10,
+            url_binary, venue="opinion", headers=_headers(), timeout=10,
         )
         if r2 is not None and r2.status_code == 200:
             try:
                 d2 = r2.json()
-                log(f"📡 path 2 raw top-level keys={list(d2.keys()) if isinstance(d2, dict) else type(d2).__name__!r}")
-                # The API may nest childMarkets differently across versions — try all known shapes.
-                result2 = d2.get("result") or {}
-                children = (
-                    # Shape A: result.data.childMarkets
-                    (result2.get("data") or {}).get("childMarkets")
-                    # Shape B: result.childMarkets
-                    or result2.get("childMarkets")
-                    # Shape C: data.childMarkets
-                    or (d2.get("data") or {}).get("childMarkets")
-                    # Shape D: top-level childMarkets
-                    or d2.get("childMarkets")
-                    or []
-                )
-                log(f"📡 path 2 (categorical): {len(children)} child markets found")
-                valid_children = []
-                for child in children:
-                    cid   = str(child.get("marketId", ""))
-                    title = child.get("marketTitle", "") or child.get("title", "") or ""
-                    yes   = child.get("yesTokenId", "")
-                    no    = child.get("noTokenId", "")
-                    log(f"📡   child marketId={cid!r} title={title!r} "
-                        f"yes={yes[:12] if yes else '(none)'}... "
-                        f"no={no[:12] if no else '(none)'}...")
-                    if cid and yes and no:
-                        # Cache each child individually so future lookups are instant.
-                        _MARKET_TOKEN_CACHE[cid] = (yes, no)
-                        sc = _score_child_by_hint(title, outcome_hint)
-                        valid_children.append({
-                            "child_id": cid, "title": title, "yes": yes, "no": no,
-                            "score": sc,
-                        })
-                if not valid_children:
-                    log(f"⚠️ path 2: no child markets with valid token pairs for marketId={market_id!r}")
+                errno2 = d2.get("errno", d2.get("code"))
+                if errno2 is not None and errno2 != 0:
+                    log(f"⚠️ path 2 (binary) errno={errno2} msg={d2.get('errmsg', d2.get('msg'))!r} — market not found")
                 else:
-                    # Score children against outcome_hint and pick best.
-                    # If all scores are 0 with 2+ children we genuinely cannot tell
-                    # which outcome to trade — return None so the executor aborts
-                    # cleanly rather than placing an order on the wrong child.
-                    # Exception: exactly 1 valid child means there is no ambiguity.
-                    best = max(valid_children, key=lambda c: c["score"])
-                    best_score = best["score"]
-                    if best_score == 0 and outcome_hint and len(valid_children) > 1:
-                        log(
-                            f"❌ path 2: {len(valid_children)} children found but all scored 0 "
-                            f"for hint={outcome_hint!r} — cannot safely pick a child; "
-                            f"children={[c['title'] for c in valid_children]!r}"
-                        )
-                        return None
-                    log(f"✅ resolve_tradable_market (categorical): parent={market_id!r} → "
-                        f"child={best['child_id']!r} title={best['title']!r} "
-                        f"score={best_score} YES={best['yes'][:12]}... NO={best['no'][:12]}...")
-                    resolved = (best["child_id"], best["yes"], best["no"])
-                    # Key by (market_id, outcome_hint) — not just market_id — so
-                    # different outcomes of the same categorical parent don't collide.
-                    _RESOLVED_MARKET_CACHE[(str(market_id), outcome_hint)] = resolved
-                    return resolved
+                    result2 = d2.get("result", {})
+                    if isinstance(result2, dict) and "data" in result2:
+                        result2 = result2["data"]
+                    if isinstance(result2, dict):
+                        yes = result2.get("yesTokenId", "")
+                        no  = result2.get("noTokenId", "")
+                        log(f"📡 path 2 (binary): yesTokenId={yes!r} noTokenId={no!r}")
+                        if yes and no:
+                            _MARKET_TOKEN_CACHE[str(market_id)] = (yes, no)
+                            log(f"✅ resolve_tradable_market (binary): "
+                                f"market={market_id!r} YES={yes[:12]}... NO={no[:12]}...")
+                            return (str(market_id), yes, no)
             except Exception as _je:
-                log(f"⚠️ path 2 JSON parse error: {_je} | raw={r2.text[:300]!r}")
+                log(f"⚠️ path 2 (binary) JSON parse error: {_je}")
         else:
-            log(f"⚠️ path 2 (categorical) status={getattr(r2, 'status_code', None)}")
+            log(f"⚠️ path 2 (binary) status={getattr(r2, 'status_code', None)}")
 
         # ── Path 3: list endpoint fallback ────────────────────────────────────
         url_list = f"{OPINION_BASE_URL}/market"

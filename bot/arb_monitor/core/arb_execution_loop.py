@@ -259,7 +259,8 @@ def _execution_cycle():
                 log(f"🔍 [OpinionPreWarm] Skipping {_opp.pair_id} — in skip cache")
                 continue
             try:
-                _pre = _opinion_resolve_tokens(_mid, outcome_hint=_hint)
+                _label = getattr(_opp, "label", "") or ""
+                _pre = _opinion_resolve_tokens(_mid, outcome_hint=_hint, label_hint=_label)
                 if _pre:
                     log(f"✅ [OpinionPreWarm] {_opp.pair_id}: parent={_mid!r} → child={_pre[0]!r}")
                     # If this pair was previously skip-cached (failed last time), clear
