@@ -463,7 +463,7 @@ def resolve_market_ticker(
         if fallback_ticker is None:
             fallback_ticker = t
         subtitle = ((m.get("subtitle") or m.get("title") or "")).lower()
-        if outcome_lower in subtitle:
+        if outcome_lower.replace("_", " ") in subtitle:
             best_ticker = t
             break
 
