@@ -274,11 +274,56 @@ def normalize_market(market: dict) -> NormalizedMarket:
 # the resolver picks different markets for "yes" vs "no" outcomes. Caching only
 # by event_ticker would let the first outcome's selection poison later queries.
 # Value: (market_ticker: str, cached_at: float). TTL: 10 minutes.
-_MARKET_TICKER_CACHE: dict[tuple[str, str], tuple[str, float]] = {}
+_MARKET_TICKER_CACHE: dict[tuple[str, str, str], tuple[str, float]] = {}
 _MARKET_TICKER_CACHE_TTL = 600  # seconds
 
 
-def resolve_market_ticker(event_ticker: str, outcome_key: str = "yes") -> Optional[str]:
+def _kalshi_label_match_score(label: str, market: dict) -> float:
+    """Score how well a Kalshi market's subtitle/title matches a candidate label.
+
+    Returns 0.0–1.0. Used by resolve_market_ticker to pick the correct
+    sub-market on multi-candidate events (e.g. "Flávio Bolsonaro" within
+    BRAZIL-PRES-2026 which has one market per candidate).
+
+    Mirrors the same logic as polymarket.py::_label_match_score so both sides
+    use the same matching quality.
+    """
+    if not label:
+        return 0.0
+    label_n = label.lower().replace("_", " ").replace("-", " ").strip()
+    label_parts = set(label_n.split())
+
+    candidates = [
+        (market.get("subtitle") or ""),
+        (market.get("title") or ""),
+        (market.get("sub_title") or ""),
+    ]
+    best = 0.0
+    for candidate in candidates:
+        if not candidate:
+            continue
+        c = candidate.lower()
+        if label_n in c:
+            best = max(best, 1.0)
+            continue
+        c_parts = set(c.replace("-", " ").replace("_", " ").split())
+        overlap = label_parts & c_parts
+        if overlap:
+            score = len(overlap) / max(len(label_parts), 1)
+            for lp in label_parts:
+                if len(lp) >= 3:
+                    for cp in c_parts:
+                        if lp in cp or cp in lp:
+                            score = max(score, 0.5)
+            best = max(best, score)
+    return best
+
+
+def resolve_market_ticker(
+    event_ticker: str,
+    outcome_key: str = "yes",
+    label_hint: str = "",
+) -> Optional[str]:
     """Resolve a Kalshi event ticker to a specific market-level ticker.
 
     Oddpool provides event-level tickers (e.g. "KXBTC-25FEB21") but Kalshi's
@@ -288,7 +333,12 @@ def resolve_market_ticker(event_ticker: str, outcome_key: str = "yes") -> Option
 
     Args:
         event_ticker: Kalshi event ticker from Oddpool (e.g. "KXBTC-25FEB21")
-        outcome_key:  "yes" or "no" — used as a tie-breaker when multiple markets exist
+        outcome_key:  "yes" or "no" — used as a fallback tie-breaker when label_hint
+                      is absent and multiple markets exist
+        label_hint:   candidate name from the opportunity (e.g. "Flávio Bolsonaro").
+                      When provided, sub-market selection uses label-aware scoring
+                      instead of naive outcome_key substring matching so the correct
+                      candidate is targeted on multi-candidate events.
 
     Returns:
         A market-level ticker string (e.g. "KXBTC-25FEB21-T100500"), or None on failure.
@@ -310,21 +360,23 @@ def resolve_market_ticker(event_ticker: str, outcome_key: str = "yes") -> Option
         log(f"✅ resolve_market_ticker: {event_ticker!r} looks like market ticker — using as-is")
         return event_ticker
 
-    # Cache lookup — keyed by (event_ticker, outcome_key) to prevent cross-side contamination
-    cache_key = (event_ticker, (outcome_key or "yes").lower())
+    # Cache lookup — include label_hint in key so different candidates on the same event
+    # (e.g. "Bolsonaro-No" vs "Rebelo-No") are cached independently.
+    label_hint_key = (label_hint or "").lower().strip()
+    cache_key = (event_ticker, (outcome_key or "yes").lower(), label_hint_key)
     now = time.time()
     cached = _MARKET_TICKER_CACHE.get(cache_key)
     if cached is not None:
         ticker_val, cached_at = cached
         if now - cached_at < _MARKET_TICKER_CACHE_TTL:
-            log(f"✅ resolve_market_ticker: cache hit {event_ticker!r}[{outcome_key}] → {ticker_val!r}")
+            log(f"✅ resolve_market_ticker: cache hit {event_ticker!r}[{outcome_key},{label_hint!r}] → {ticker_val!r}")
             return ticker_val
         else:
-            log(f"♻️ resolve_market_ticker: cache expired for {event_ticker!r}[{outcome_key}], re-fetching")
+            log(f"♻️ resolve_market_ticker: cache expired for {event_ticker!r}[{outcome_key},{label_hint!r}], re-fetching")
 
     url = f"{KALSHI_BASE_URL}/markets"
     params = {"event_ticker": event_ticker, "status": "open", "limit": 20}
-    log(f"🔍 resolve_market_ticker: fetching markets for event {event_ticker!r}")
+    log(f"🔍 resolve_market_ticker: fetching markets for event {event_ticker!r} label_hint={label_hint!r}")
     resp = http_client.get(url, venue="kalshi", headers=_headers(), params=params, timeout=10, bypass_proxy=True)
     if resp is None or resp.status_code != 200:
         log(f"⚠️ resolve_market_ticker: HTTP {resp.status_code if resp else 'None'} for {event_ticker!r}")
@@ -349,13 +401,9 @@ def resolve_market_ticker(event_ticker: str, outcome_key: str = "yes") -> Option
             _MARKET_TICKER_CACHE[cache_key] = (ticker, now)
             return ticker
 
-    # Multiple markets under the event — try to pick the one aligned with outcome_key.
-    # Kalshi markets have a "subtitle" or "title" that describes the specific outcome.
-    # outcome_key is "yes"/"no"; on multi-market events we look for keywords.
-    # Fallback: return the first open market with a live price.
-    outcome_lower = (outcome_key or "yes").lower()
-    best_ticker = None
-    fallback_ticker = None
+    # Multiple markets under the event.
+    # Build candidate list of (ticker, status, score) for open markets only.
+    open_markets = []
     for m in markets:
         t = m.get("ticker", "")
         if not t:
@@ -363,6 +411,50 @@ def resolve_market_ticker(event_ticker: str, outcome_key: str = "yes") -> Option
         status = m.get("status", "")
         if status and status.lower() not in ("open", "active"):
             continue
+        open_markets.append(m)
+
+    if not open_markets:
+        log(f"⚠️ resolve_market_ticker: no open markets in list for {event_ticker!r}")
+        return None
+
+    # ── Label-aware selection (preferred when label_hint is provided) ──────────
+    # Score each sub-market against the candidate name. This correctly handles
+    # multi-candidate events (e.g. each candidate gets their own sub-market on
+    # Kalshi) where outcome_key "yes"/"no" is meaningless for disambiguation.
+    if label_hint_key:
+        best_ticker = None
+        best_score = 0.0
+        for m in open_markets:
+            score = _kalshi_label_match_score(label_hint, m)
+            log(
+                f"   label_score({label_hint!r}, {m.get('ticker')!r}) "
+                f"subtitle={m.get('subtitle')!r} → {score:.3f}"
+            )
+            if score > best_score:
+                best_score = score
+                best_ticker = m.get("ticker", "")
+
+        if best_ticker and best_score > 0.0:
+            log(
+                f"✅ resolve_market_ticker: {event_ticker!r} → {best_ticker!r} "
+                f"(label_match={best_score:.3f}, label_hint={label_hint!r}, "
+                f"outcome_key={outcome_key!r}, {len(open_markets)} open markets)"
+            )
+            _MARKET_TICKER_CACHE[cache_key] = (best_ticker, now)
+            return best_ticker
+
+        log(
+            f"⚠️ resolve_market_ticker: label_hint={label_hint!r} matched nothing "
+            f"on {event_ticker!r} — falling back to outcome_key matching"
+        )
+
+    # ── Fallback: outcome_key substring in subtitle (original logic) ───────────
+    # Used for binary events with no label_hint, or when label matching fails.
+    outcome_lower = (outcome_key or "yes").lower()
+    best_ticker = None
+    fallback_ticker = None
+    for m in open_markets:
+        t = m.get("ticker", "")
         if fallback_ticker is None:
             fallback_ticker = t
         subtitle = ((m.get("subtitle") or m.get("title") or "")).lower()
@@ -374,7 +466,7 @@ def resolve_market_ticker(event_ticker: str, outcome_key: str = "yes") -> Option
     if chosen:
         log(
             f"✅ resolve_market_ticker: {event_ticker!r} → {chosen!r} "
-            f"(from {len(markets)} markets, outcome_key={outcome_key!r}, "
+            f"(from {len(open_markets)} open markets, outcome_key={outcome_key!r}, "
             f"{'matched subtitle' if best_ticker else 'fallback to first'})"
         )
         _MARKET_TICKER_CACHE[cache_key] = (chosen, now)

@@ -809,7 +809,11 @@ def execute_arb(
     # Oddpool supplies event tickers; Kalshi's price/orderbook APIs need market tickers.
     # Falls back to the original event ticker on failure (will hit Oddpool fallback path).
     if venue2 != "opinion" and kalshi_event_ticker:
-        resolved_market_ticker = kalshi_resolve_market_ticker(kalshi_event_ticker, outcome_key)
+        resolved_market_ticker = kalshi_resolve_market_ticker(
+            kalshi_event_ticker,
+            outcome_key,
+            label_hint=getattr(opportunity, "kalshi_title", "") or "",
+        )
         if resolved_market_ticker:
             kalshi_ticker = resolved_market_ticker
             log(f"🎯 Kalshi event→market: {kalshi_event_ticker!r} → {kalshi_ticker!r}")

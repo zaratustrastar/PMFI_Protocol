@@ -1,0 +1,52 @@
+## The Bug
+
+`resolve_market_ticker()` in `kalshi.py` is responsible for turning an event-level ticker (e.g. `BRAZIL-PRES-2026`) into a specific market-level ticker (e.g. `BRAZIL-PRES-2026-BOLSONARO`). The problem is in how it picks among multiple sub-markets.
+
+When the event has multiple candidates, the selection logic does this:
+
+```python
+subtitle = ((m.get("subtitle") or m.get("title") or "")).lower()
+if outcome_lower in subtitle:
+    best_ticker = t
+    break
+```
+
+`outcome_lower` is just `"yes"` or `"no"`. It searches every candidate's subtitle for the string "no" — which either matches randomly (any subtitle containing "no" as part of a word) or falls through to `fallback_ticker`, which is simply the first open market in the list. That's how you ended up buying "Yes, Aldo Rebelo" instead of targeting "Flávio Bolsonaro - No".
+
+The function has zero awareness of which candidate the opportunity is actually about. It was designed for binary events (one market per event) and silently breaks on multi-candidate events.
+
+## What To Fix
+
+**Three changes, all small:**
+
+**1. `kalshi.py` — add a `label_hint` parameter to `resolve_market_ticker()`**
+
+Add `label_hint: str = ""` as a third parameter. This carries the candidate name from the opportunity (e.g. "Flávio Bolsonaro").
+
+**2. `kalshi.py` — rewrite the multi-market selection block**
+
+Replace the current subtitle-matching loop with label-aware scoring. When `label_hint` is provided, score each sub-market's subtitle/title against it using substring and word-overlap matching (the same approach `polymarket.py` already uses in `_label_match_score`). Only fall back to the old `outcome_key`-in-subtitle check when no `label_hint` is provided.
+
+**3. `arb_executor.py` — pass the candidate name into the resolver**
+
+In `execute_arb()`, the line that calls the resolver currently reads:
+
+```python
+resolved_market_ticker = kalshi_resolve_market_ticker(kalshi_event_ticker, outcome_key)
+```
+
+Change it to also pass the opportunity's title so the resolver knows which candidate to match:
+
+```python
+resolved_market_ticker = kalshi_resolve_market_ticker(
+    kalshi_event_ticker,
+    outcome_key,
+    label_hint=getattr(opportunity, "kalshi_title", "") or "",
+)
+```
+
+**4. `kalshi.py` — include `label_hint` in the cache key**
+
+The current cache key is `(event_ticker, outcome_key)`. Two different candidates on the same event with the same side (e.g. both "no" on Bolsonaro and "no" on Rebelo) would collide. Change the cache key to `(event_ticker, outcome_key, label_hint.lower().strip())` so each candidate is cached independently.
+
+That's it — the Polymarket side already handles this correctly via `_label_match_score` and `_pick_best_market`. The Kalshi side just never had equivalent logic.
