@@ -300,8 +300,10 @@ def _execution_cycle():
     depth_unavailable = 0    # aborted: could not fetch orderbook to verify depth
 
     # Errors where NO capital was moved — safe to skip to next opportunity.
-    # Everything else (funding_failed, leg1_failed, leg2_failed, success) means
-    # capital was committed and we must stop the cycle to avoid scatter-shot deposits.
+    # Everything else (funding_failed, leg1_failed, leg2_failed) means capital
+    # was committed and we must stop the cycle to avoid scatter-shot deposits.
+    # NOTE: "funding_insufficient" is the pre-TX servicer gate (no money moved),
+    # distinct from "funding_failed" which fires after a deposit TX was sent.
     _PRE_FUNDING_ERRORS = (
         "depth_insufficient",
         "depth_unavailable",
@@ -316,6 +318,7 @@ def _execution_cycle():
         "trade_too_small",
         "cannot_compute_contracts",
         "opinion_token_unresolvable",  # categorical parent → child resolution failed
+        "funding_insufficient",        # servicer pre-check refused before any TX sent
     )
 
     # ── Liquidity budget: caps total new deployment this cycle ────────────────

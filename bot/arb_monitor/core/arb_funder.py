@@ -832,9 +832,12 @@ def fund_both_legs_for_trade(
 
     required = total_gap + ARB_SAFETY_BUFFER_USDC
     if servicer_usdc < required:
+        # Use "funding_insufficient" prefix (not "funding_failed") so the caller
+        # can distinguish: this gate fires BEFORE any TX is sent, so no capital
+        # was moved and the execution cycle can safely continue to the next pair.
         msg = (
-            f"fund_both_legs: servicer has {servicer_usdc:.4f} USDC — "
-            f"insufficient for gaps ({poly_gap:.4f} + {venue2_gap:.4f}) + "
+            f"funding_insufficient: servicer has {servicer_usdc:.4f} USDC — "
+            f"pre-check refused before any TX: gaps ({poly_gap:.4f} + {venue2_gap:.4f}) + "
             f"safety_buffer ({ARB_SAFETY_BUFFER_USDC:.2f}) = {required:.4f} needed"
         )
         log(f"❌ {msg}")

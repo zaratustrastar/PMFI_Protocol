@@ -1222,6 +1222,23 @@ def execute_arb(
         # Re-derive leg costs from the (possibly scaled-down) contract_count
         leg1_usdc = contract_count * live_poly_ask
         leg2_usdc = contract_count * live_kalshi_ask
+
+        # ── Poly minimum marketable order size guard ───────────────────────
+        # Polymarket rejects FOK orders below $1.00 total value regardless of
+        # contract count. After balance-fit scaling the Poly leg can fall below
+        # this threshold (e.g. 2 contracts × $0.094 = $0.188). Catching this
+        # here as trade_too_small (a pre-funding error) prevents the Kalshi leg
+        # from firing and then needing an auto-cancel, and avoids pair suppression.
+        _poly_order_min = VENUE_MIN_DEPOSIT.get("polymarket", 1.0)
+        if leg1_usdc < _poly_order_min:
+            result.error = (
+                f"trade_too_small: poly_leg={leg1_usdc:.4f} USDC < "
+                f"poly_min_order={_poly_order_min:.2f} after balance-fit scaling "
+                f"({contract_count} contracts × {live_poly_ask:.4f})"
+            )
+            log(f"❌ {result.error}")
+            return result
+
     except Exception as _bfe:
         log(f"⚠️ Balance-fit check failed (non-fatal, proceeding with original size): {_bfe}")
 
