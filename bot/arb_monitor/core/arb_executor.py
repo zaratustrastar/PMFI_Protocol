@@ -10,6 +10,7 @@ Security principles:
 
 import time
 import os
+import math
 from typing import Optional
 
 # ── Route Polymarket CLOB through residential proxy (bypasses geoblock) ──────
@@ -206,7 +207,10 @@ def _place_poly_order(
         tick_size = client.get_tick_size(token_id)
         neg_risk  = client.get_neg_risk(token_id)
 
-        px       = round(float(price), 3)
+        # Polymarket enforces 2-decimal maker price. Ceiling-round so the limit
+        # sits at or above all asks — FOK sweeps levels ≤ px at their actual prices.
+        # e.g. 0.374 → 0.38 (fills at 0.373, 0.374 etc; limit doesn't raise cost).
+        px       = math.ceil(float(price) * 100) / 100
         size_val = int(contract_count)
 
         log(
