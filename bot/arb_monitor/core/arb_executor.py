@@ -75,13 +75,11 @@ _KALSHI_SESSION.trust_env = False
 from ..adapters.polymarket import (
     get_best_prices as poly_get_best_prices,
     fetch_orderbook as poly_fetch_orderbook,
-    compute_fillable_contracts as poly_compute_fillable,
     extract_asks as poly_extract_asks,
 )
 from ..adapters.kalshi import (
     get_best_prices as kalshi_get_best_prices,
     fetch_orderbook_depth as kalshi_fetch_orderbook_depth,
-    compute_kalshi_fillable_contracts,
     resolve_market_ticker as kalshi_resolve_market_ticker,
     extract_asks as kalshi_extract_asks,
 )
@@ -92,7 +90,6 @@ from ..adapters.opinion import (
 from ..adapters.oddpool import ArbOpportunity
 from ..config import (
     ARB_MIN_EDGE_PCT,
-    ARB_SLIPPAGE_GUARD_BPS,
     ARB_MAX_PAIR_USDC,
     ARB_VWAP_SAFETY_BUFFER_PCT,
     ARB_MIN_CONTRACTS,
@@ -1267,7 +1264,7 @@ def execute_arb(
                 size_usdc=leg2_usdc,
                 contract_count=contract_count,
                 outcome_hint=outcome_key,
-                label_hint=getattr(opportunity, "label", "") or "",
+                label_hint=getattr(opportunity, "kalshi_title", "") or "",
             )
         return _place_kalshi_order(
             ticker=kalshi_ticker,
