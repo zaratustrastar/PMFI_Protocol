@@ -326,8 +326,54 @@ def _place_kalshi_order(
         if resp.status_code in (200, 201):
             data = resp.json()
             order_id = data.get("order", {}).get("order_id", "")
-            log(f"✅ [KALSHI] Order placed: orderId={order_id}")
-            return True, order_id, ""
+            if not order_id:
+                err = "no order_id in Kalshi placement response"
+                log(f"❌ [KALSHI] {err}")
+                return False, "", err
+            log(f"🔍 [KALSHI] Order accepted (id={order_id}), polling for fill confirmation...")
+            # HTTP 200 only means the order was queued — it may sit in the book
+            # unfilled until its 30 s TTL expires.  Poll to confirm actual fill.
+            poll_url = f"{KALSHI_BASE_URL}/portfolio/orders/{order_id}"
+            for poll_attempt in range(5):
+                time.sleep(3)
+                try:
+                    poll_headers = get_kalshi_headers("GET", poll_url)
+                    if not poll_headers:
+                        log(f"⚠️ [KALSHI] Auth failed during fill poll #{poll_attempt + 1}")
+                        continue
+                    pr = _KALSHI_SESSION.get(poll_url, headers=poll_headers, timeout=8)
+                    if pr.status_code != 200:
+                        log(f"⚠️ [KALSHI] Fill poll HTTP {pr.status_code} on attempt #{poll_attempt + 1}")
+                        continue
+                    pdata = pr.json()
+                    order_obj   = pdata.get("order") or pdata
+                    status      = order_obj.get("status", "")
+                    qty_matched = int(order_obj.get("quantity_matched") or 0)
+                    log(
+                        f"🔄 [KALSHI] Fill poll #{poll_attempt + 1}: "
+                        f"status={status!r} qty_matched={qty_matched} target={contracts}"
+                    )
+                    if status in ("executed", "filled", "matched") or (
+                        qty_matched >= contracts > 0
+                    ):
+                        log(f"✅ [KALSHI] Order confirmed filled: orderId={order_id}")
+                        return True, order_id, ""
+                    if status in ("cancelled", "canceled", "expired"):
+                        log(f"⚠️ [KALSHI] Order {status!r} before fill — triggering unwind")
+                        return False, order_id, f"kalshi_order_{status}: orderId={order_id}"
+                except Exception as pe:
+                    log(f"⚠️ [KALSHI] Fill poll error #{poll_attempt + 1}: {pe}")
+            # Poll window exhausted (15 s).  Cancel whatever remains and fail so
+            # the caller can unwind the already-placed Polymarket leg.
+            log(f"⚠️ [KALSHI] Order {order_id!r} did not fill in 15 s — cancelling and failing")
+            try:
+                del_headers = get_kalshi_headers("DELETE", poll_url)
+                if del_headers:
+                    _KALSHI_SESSION.delete(poll_url, headers=del_headers, timeout=8)
+                    log(f"🗑️ [KALSHI] Cancellation sent for unfilled order {order_id!r}")
+            except Exception as ce:
+                log(f"⚠️ [KALSHI] Cancel attempt failed: {ce}")
+            return False, order_id, f"kalshi_order_unfilled: orderId={order_id} timeout after 15s"
         else:
             err = f"HTTP {resp.status_code}: {resp.text[:200]}"
             log(f"❌ [KALSHI] {err}")
@@ -359,13 +405,36 @@ def _unwind_poly_leg(
         log("⚠️ POLY_PRIVATE_KEY not set — cannot unwind. Manual intervention needed.")
         return False
 
+    def _make_poly_client_for_unwind():
+        """Build a fully-authenticated ClobClient for unwind operations."""
+        from py_clob_client.client import ClobClient
+        from py_clob_client.clob_types import ApiCreds
+        clob_url            = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+        chain_id            = int(os.environ.get("POLY_CHAIN_ID", "137"))
+        poly_api_key        = os.environ.get("POLY_API_KEY", "")
+        poly_api_secret     = os.environ.get("POLY_API_SECRET", "")
+        poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
+        poly_proxy_address  = os.environ.get("POLY_PROXY_ADDRESS", "") or None
+        if poly_api_key and poly_api_secret and poly_api_passphrase:
+            creds = ApiCreds(
+                api_key=poly_api_key,
+                api_secret=poly_api_secret,
+                api_passphrase=poly_api_passphrase,
+            )
+            log(f"🔑 [POLY/UNWIND] Using L2-authenticated ClobClient (funder={poly_proxy_address})")
+            return ClobClient(
+                clob_url, key=poly_private_key, chain_id=chain_id,
+                creds=creds, signature_type=2, funder=poly_proxy_address,
+            )
+        log("⚠️ [POLY/UNWIND] L2 API credentials missing — cancel/sell may fail auth")
+        return ClobClient(
+            clob_url, key=poly_private_key, chain_id=chain_id,
+            signature_type=2, funder=poly_proxy_address,
+        )
+
     cancel_ok = False
     try:
-        from py_clob_client.client import ClobClient
-        clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
-        chain_id           = int(os.environ.get("POLY_CHAIN_ID", "137"))
-        poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
-        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id, signature_type=2, funder=poly_proxy_address)
+        client = _make_poly_client_for_unwind()
         resp = client.cancel(order_id=order_id)
         log(f"✅ [POLY] Cancel response: {resp}")
         cancel_ok = True
@@ -382,13 +451,9 @@ def _unwind_poly_leg(
 
     log(f"📤 [POLY] Placing offset SELL to unwind filled position: token={token_id[:16]}... size_usdc={filled_size_usdc}")
     try:
-        from py_clob_client.client import ClobClient
         from py_clob_client.clob_types import OrderArgs, OrderType
 
-        clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
-        chain_id           = int(os.environ.get("POLY_CHAIN_ID", "137"))
-        poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
-        client = ClobClient(clob_url, key=poly_private_key, chain_id=chain_id, signature_type=2, funder=poly_proxy_address)
+        client = _make_poly_client_for_unwind()
 
         from ..adapters.polymarket import get_best_prices as poly_prices_fn
         prices = poly_prices_fn(token_id)

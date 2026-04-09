@@ -617,12 +617,15 @@ def get_best_prices(ticker: str, debug: bool = False) -> dict:
                 ob = fetch_orderbook_depth(ticker, depth=1)
                 if ob:
                     fp = ob.get("orderbook_fp", {})
-                    yes_lvls = fp.get("yes_dollars") or []
-                    no_lvls  = fp.get("no_dollars") or []
-                    if yes_lvls:
-                        yes_best_ask = _to_dollars(yes_lvls[0][0])
-                    if no_lvls:
-                        no_best_ask = _to_dollars(no_lvls[0][0])
+                    # Kalshi only returns BIDS. YES asks = NO bids flipped. NO asks = YES bids flipped.
+                    no_bid_lvls  = fp.get("no_dollars") or []   # NO bids → derive YES asks
+                    yes_bid_lvls = fp.get("yes_dollars") or []  # YES bids → derive NO asks
+                    if no_bid_lvls:
+                        best_no_bid  = max(float(l[0]) for l in no_bid_lvls)
+                        yes_best_ask = round(1.0 - best_no_bid, 6)
+                    if yes_bid_lvls:
+                        best_yes_bid = max(float(l[0]) for l in yes_bid_lvls)
+                        no_best_ask  = round(1.0 - best_yes_bid, 6)
                     result["yes_best_ask"] = yes_best_ask
                     result["no_best_ask"]  = no_best_ask
                     result["best_ask"]     = yes_best_ask
@@ -707,14 +710,16 @@ def compute_kalshi_fillable_contracts(
         #   Each level: {"price": cents_int, "delta": qty_int}
         fp = orderbook.get("orderbook_fp")
         if fp is not None:
-            # New Elections API format
-            fp_key = "yes_dollars" if side.upper() == "YES" else "no_dollars"
+            # New Elections API format.
+            # Kalshi only returns BIDS. YES asks = NO bids flipped. NO asks = YES bids flipped.
+            fp_key = "no_dollars" if side.upper() == "YES" else "yes_dollars"
             raw_levels = fp.get(fp_key) or []
             use_fp_format = True
         else:
-            # Legacy format
+            # Legacy format.
+            # YES asks = NO bids flipped; NO asks = YES bids flipped.
             book = orderbook.get("orderbook", orderbook)
-            key = "yes" if side.upper() == "YES" else "no"
+            key = "no" if side.upper() == "YES" else "yes"
             raw_levels = book.get(key, [])
             use_fp_format = False
     except Exception as e:
@@ -725,23 +730,27 @@ def compute_kalshi_fillable_contracts(
     usdc_cost = 0.0
 
     if use_fp_format:
-        # Elections API: each level is [price_str, usdc_amount_str]
-        # price is already in dollars; usdc_amount is the dollar value at that level.
-        # contracts = floor(usdc_amount / price) — Kalshi nominal is $1 per contract.
+        # Elections API: each level is [bid_price_str (dollars), usdc_amount_str].
+        # raw_levels are opposite-side BIDS (see fp_key selection above).
+        # Ask price = 1 - bid_price.  Qty uses original bid price (contracts don't change on flip).
         parsed_levels: list[tuple[float, int]] = []
         for level in raw_levels:
             try:
-                price_dollars = float(level[0])
-                usdc_amount   = float(level[1])
-                if price_dollars <= 0:
+                bid_price_dollars = float(level[0])
+                usdc_amount       = float(level[1])
+                if bid_price_dollars <= 0:
                     continue
-                qty = int(usdc_amount / price_dollars)
-                parsed_levels.append((price_dollars, qty))
+                ask_price_dollars = 1.0 - bid_price_dollars
+                if ask_price_dollars <= 0:
+                    continue
+                qty = int(usdc_amount / bid_price_dollars)
+                parsed_levels.append((ask_price_dollars, qty))
             except (ValueError, TypeError, IndexError):
                 continue
-        log(f"📐 [Kalshi/{side}] Elections API (orderbook_fp): {len(parsed_levels)} levels parsed from {fp_key}")
+        log(f"📐 [Kalshi/{side}] Elections API (orderbook_fp): {len(parsed_levels)} levels parsed from {fp_key} (bid-flipped)")
     else:
-        # Legacy API: each level is {"price": <cents>, "delta": <qty>}
+        # Legacy API: each level is {"price": <cents>, "delta": <qty>}.
+        # raw_levels are opposite-side BIDS. Ask price = 1 - bid_price.
         if raw_levels:
             sample = raw_levels[0]
             if not isinstance(sample, dict) or "price" not in sample or "delta" not in sample:
@@ -753,9 +762,12 @@ def compute_kalshi_fillable_contracts(
         parsed_levels = []
         for level in raw_levels:
             try:
-                price_cents = float(level.get("price", 0))
-                qty = int(level.get("delta", 0))
-                parsed_levels.append((price_cents / 100.0, qty))
+                bid_price_cents   = float(level.get("price", 0))
+                qty               = int(level.get("delta", 0))
+                bid_price_dollars = bid_price_cents / 100.0
+                ask_price_dollars = 1.0 - bid_price_dollars
+                if bid_price_dollars > 0 and ask_price_dollars > 0:
+                    parsed_levels.append((ask_price_dollars, qty))
             except (ValueError, TypeError):
                 continue
 
@@ -790,27 +802,33 @@ def extract_asks(book: dict, side: str = "YES") -> list[tuple[float, float]]:
     fp = book.get("orderbook_fp")
 
     if fp is not None:
-        fp_key = "yes_dollars" if side.upper() == "YES" else "no_dollars"
+        # Kalshi only returns BIDS. YES asks = NO bids flipped. NO asks = YES bids flipped.
+        # Ask price = 1 - bid_price.  Qty uses original bid price (contracts unchanged by flip).
+        fp_key = "no_dollars" if side.upper() == "YES" else "yes_dollars"
         for level in (fp.get(fp_key) or []):
             try:
-                price_dollars = float(level[0])
-                usdc_amount   = float(level[1])
-                if price_dollars <= 0:
+                bid_price_dollars = float(level[0])
+                usdc_amount       = float(level[1])
+                ask_price_dollars = 1.0 - bid_price_dollars
+                if bid_price_dollars <= 0 or ask_price_dollars <= 0:
                     continue
-                qty = int(usdc_amount / price_dollars)
+                qty = int(usdc_amount / bid_price_dollars)
                 if qty > 0:
-                    levels.append((price_dollars, float(qty)))
+                    levels.append((ask_price_dollars, float(qty)))
             except (ValueError, TypeError, IndexError):
                 continue
     else:
         ob = book.get("orderbook", book)
-        key = "yes" if side.upper() == "YES" else "no"
+        # YES asks = NO bids flipped; NO asks = YES bids flipped.
+        key = "no" if side.upper() == "YES" else "yes"
         for level in ob.get(key, []):
             try:
-                price_cents = float(level.get("price", 0))
-                qty = int(level.get("delta", 0))
-                if qty > 0:
-                    levels.append((price_cents / 100.0, float(qty)))
+                bid_price_cents   = float(level.get("price", 0))
+                qty               = int(level.get("delta", 0))
+                bid_price_dollars = bid_price_cents / 100.0
+                ask_price_dollars = 1.0 - bid_price_dollars
+                if qty > 0 and bid_price_dollars > 0 and ask_price_dollars > 0:
+                    levels.append((ask_price_dollars, float(qty)))
             except (ValueError, TypeError):
                 continue
 
