@@ -206,7 +206,7 @@ def _place_poly_order(
         tick_size = client.get_tick_size(token_id)
         neg_risk  = client.get_neg_risk(token_id)
 
-        px       = round(float(price), 2)
+        px       = round(float(price), 3)
         size_val = int(contract_count)
 
         log(
