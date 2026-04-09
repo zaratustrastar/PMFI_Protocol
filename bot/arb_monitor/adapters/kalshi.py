@@ -679,6 +679,48 @@ def compute_kalshi_fillable_contracts(
     return contracts, usdc_cost
 
 
+def extract_asks(book: dict, side: str = "YES") -> list[tuple[float, float]]:
+    """Normalize a Kalshi orderbook to sorted (price, size) ask tuples.
+
+    Handles both Elections API (orderbook_fp with yes_dollars/no_dollars) and
+    legacy format (orderbook.yes / orderbook.no with {price, delta} entries).
+    Returns levels sorted ascending by price, ready for compute_fill_vwap_for_contracts.
+    """
+    if not book:
+        return []
+
+    levels: list[tuple[float, float]] = []
+    fp = book.get("orderbook_fp")
+
+    if fp is not None:
+        fp_key = "yes_dollars" if side.upper() == "YES" else "no_dollars"
+        for level in (fp.get(fp_key) or []):
+            try:
+                price_dollars = float(level[0])
+                usdc_amount   = float(level[1])
+                if price_dollars <= 0:
+                    continue
+                qty = int(usdc_amount / price_dollars)
+                if qty > 0:
+                    levels.append((price_dollars, float(qty)))
+            except (ValueError, TypeError, IndexError):
+                continue
+    else:
+        ob = book.get("orderbook", book)
+        key = "yes" if side.upper() == "YES" else "no"
+        for level in ob.get(key, []):
+            try:
+                price_cents = float(level.get("price", 0))
+                qty = int(level.get("delta", 0))
+                if qty > 0:
+                    levels.append((price_cents / 100.0, float(qty)))
+            except (ValueError, TypeError):
+                continue
+
+    levels.sort(key=lambda x: x[0])
+    return levels
+
+
 def get_kalshi_markets() -> list[NormalizedMarket]:
     from ..core.filters import filter_by_expiry
     raw = fetch_all_active_markets()

@@ -953,6 +953,26 @@ def compute_fillable_contracts(book: dict, max_fill_price: float) -> tuple[int, 
     return contracts, usdc_cost
 
 
+def extract_asks(book: dict) -> list[tuple[float, float]]:
+    """Normalize a Polymarket CLOB orderbook to sorted (price, size) ask tuples.
+
+    Returns levels sorted ascending by price, ready for compute_fill_vwap_for_contracts.
+    Each size value is in whole contracts (Polymarket trades whole-number contracts).
+    """
+    raw = book.get("asks", []) if book else []
+    levels: list[tuple[float, float]] = []
+    for level in raw:
+        try:
+            price = float(level.get("price", 0))
+            size  = float(level.get("size", 0))
+            if price > 0 and size > 0:
+                levels.append((price, size))
+        except (ValueError, TypeError):
+            continue
+    levels.sort(key=lambda x: x[0])
+    return levels
+
+
 def get_best_prices(token_id: str) -> dict:
     if not token_id:
         log("⚠️ poly_orderbook_missing: no token_id provided")

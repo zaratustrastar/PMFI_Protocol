@@ -76,18 +76,29 @@ from ..adapters.polymarket import (
     get_best_prices as poly_get_best_prices,
     fetch_orderbook as poly_fetch_orderbook,
     compute_fillable_contracts as poly_compute_fillable,
+    extract_asks as poly_extract_asks,
 )
 from ..adapters.kalshi import (
     get_best_prices as kalshi_get_best_prices,
     fetch_orderbook_depth as kalshi_fetch_orderbook_depth,
     compute_kalshi_fillable_contracts,
     resolve_market_ticker as kalshi_resolve_market_ticker,
+    extract_asks as kalshi_extract_asks,
+)
+from ..adapters.opinion import (
+    fetch_orderbook as opinion_fetch_orderbook,
+    extract_asks as opinion_extract_asks,
 )
 from ..adapters.oddpool import ArbOpportunity
 from ..config import (
     ARB_MIN_EDGE_PCT,
     ARB_SLIPPAGE_GUARD_BPS,
     ARB_MAX_PAIR_USDC,
+    ARB_VWAP_SAFETY_BUFFER_PCT,
+    ARB_MIN_CONTRACTS,
+    ARB_POLY_FEE_PCT,
+    ARB_KALSHI_FEE_PCT,
+    ARB_OPINION_FEE_PCT,
 )
 
 
@@ -530,6 +541,54 @@ def _cancel_leg2_order(
         return False
 
 
+# ── VWAP helper ──────────────────────────────────────────────────────────────
+
+def compute_fill_vwap_for_contracts(
+    asks: list[tuple[float, float]],
+    target_contracts: int,
+) -> tuple[Optional[float], int, bool]:
+    """Walk the ask ladder and compute VWAP for filling target_contracts.
+
+    The natural execution unit for cross-venue arb is contracts (shares), not
+    USDC, because both legs must cover exactly the same number of contracts.
+    Walking to a contract count rather than a spend target guarantees matched
+    share counts between venues regardless of price asymmetry.
+
+    Args:
+        asks:             Sorted list of (price, size) tuples, ascending by price.
+                          Each size entry is the number of contracts at that level.
+        target_contracts: How many contracts we want to fill.
+
+    Returns:
+        (vwap, filled_contracts, has_full_depth)
+            vwap             — weighted average price paid per contract (None if book empty)
+            filled_contracts — contracts actually filled (≤ target_contracts)
+            has_full_depth   — True when the book supplied the full target_contracts
+    """
+    if not asks or target_contracts <= 0:
+        return None, 0, False
+
+    total_cost = 0.0
+    filled = 0
+    remaining = target_contracts
+
+    for price, size in asks:
+        if remaining <= 0:
+            break
+        take = min(int(size), remaining)
+        if take <= 0:
+            continue
+        total_cost += take * price
+        filled += take
+        remaining -= take
+
+    if filled == 0:
+        return None, 0, False
+
+    vwap = total_cost / filled
+    return vwap, filled, filled >= target_contracts
+
+
 # ── Opinion market_id → resolved tradable market cache ───────────────────────
 # Caches (child_market_id, yes_token_id, no_token_id) keyed by parent market_id.
 # For binary markets: child_market_id == market_id.
@@ -702,263 +761,264 @@ def execute_arb(
     else:
         kalshi_ticker = kalshi_event_ticker
 
-    log(
-        f"📊 Re-checking live prices for poly={poly_token_for_price[:16]}... "
-        f"(side={'NO' if buying_poly_no else 'YES'}) "
-        f"venue2={venue2} "
-        f"{'kalshi=' + kalshi_ticker if venue2 != 'opinion' else 'opinion=' + opinion_market_id}"
-    )
-    poly_prices = poly_get_best_prices(poly_token_for_price)
-    live_poly_ask = poly_prices.get("best_ask")
+    # ── Early Opinion token resolution ────────────────────────────────────────
+    # Must happen BEFORE the parallel book fetch so the child token ID is known.
+    # Uses the 30-min module-level cache — a warm hit costs microseconds.
+    leg2_venue_label = venue2  # "kalshi" or "opinion"
+    _opinion_label: str = getattr(opportunity, "kalshi_title", "") or ""
+    _opinion_child_book_token: str = ""  # set below for Opinion; token ID to fetch OB from
 
-    # Fetch live leg-2 ask based on venue.
-    # Use the correct side's ask price:
-    #   kalshi_side=="YES" → buying YES on venue2 → use yes_best_ask
-    #   kalshi_side=="NO"  → buying NO  on venue2 → use no_best_ask
-    if venue2 == "opinion":
-        # Opinion's proxy API returns errno=10200 / result=null for all market IDs
-        # supplied by Oddpool (IDs ~100-500 range don't exist on the proxy endpoint).
-        # However:
-        #   1. Oddpool's /arbitrage/current response already contains fresh Opinion
-        #      yes_ask/no_ask prices — these are the same prices shown on Oddpool's
-        #      own live dashboard, so they are authoritative and current.
-        #   2. _place_opinion_order() posts to Opinion's /orders endpoint using
-        #      market_id directly — no token IDs required for order placement.
-        # Therefore we use the Oddpool-provided price as the live Opinion ask and
-        # skip the independent token-based orderbook re-fetch entirely.
-        live_kalshi_ask = opportunity.kalshi_yes_ask  # Oddpool's live Opinion price
-        log(
-            f"ℹ️ [OPINION] Using Oddpool-provided price as live Opinion ask="
-            f"{live_kalshi_ask:.4f} (token-based re-fetch skipped — proxy API "
-            f"does not resolve opinion_market_id={opinion_market_id!r})"
+    if venue2 == "opinion" and opinion_market_id:
+        _pre_resolved = _opinion_resolve_tokens(
+            opinion_market_id, outcome_hint=outcome_key, label_hint=_opinion_label
         )
-        leg2_venue_label = "opinion"
-    else:
-        kalshi_prices = kalshi_get_best_prices(kalshi_ticker)
-        if kalshi_side == "YES":
-            live_kalshi_ask = kalshi_prices.get("yes_best_ask")
-        else:
-            live_kalshi_ask = kalshi_prices.get("no_best_ask")
-        leg2_venue_label = "kalshi"
-        log(
-            f"📊 Kalshi prices: yes_ask={kalshi_prices.get('yes_best_ask')} "
-            f"no_ask={kalshi_prices.get('no_best_ask')} "
-            f"→ using {'YES' if kalshi_side == 'YES' else 'NO'} ask={live_kalshi_ask}"
-        )
-
-    result.live_poly_ask = live_poly_ask
-    result.live_kalshi_ask = live_kalshi_ask
-
-    # ── Side-aware quoted price aliases ───────────────────────────────────────
-    # opportunity.poly_yes_ask / kalshi_yes_ask are historical names; Oddpool
-    # already stores "what we pay on each leg" (side-corrected).  We alias here
-    # so every downstream comparison explicitly names what it is comparing.
-    #   buying_poly_no==False → poly_yes_ask IS the YES ask  → quoted_poly_ask = YES ask
-    #   buying_poly_no==True  → poly_yes_ask IS the NO  ask  → quoted_poly_ask = NO  ask
-    #   kalshi_side=="NO"     → kalshi_yes_ask IS the NO  ask → quoted_venue2_ask = NO  ask
-    #   kalshi_side=="YES"    → kalshi_yes_ask IS the YES ask → quoted_venue2_ask = YES ask
-    quoted_poly_ask   = opportunity.poly_yes_ask    # our Poly leg cost (side-corrected by Oddpool)
-    quoted_venue2_ask = opportunity.kalshi_yes_ask  # our venue2 leg cost (side-corrected by Oddpool)
-
-    # ── Primary edge gate: trust Oddpool's net_edge_pct ──────────────────────
-    # Oddpool's net_cents already deducts platform fees, slippage allowance, and
-    # risk buffer. It is the authoritative source for whether an opportunity is
-    # profitable — recalculating edge from raw live prices is WRONG because Poly
-    # and venue2 (Kalshi/Opinion) often have dramatically different probability
-    # views on the same outcome (e.g. Poly says Maduro wins 0.1%, Kalshi says 92%).
-    # Using (1 - poly_ask - venue2_ask) in those cases produces a deeply negative
-    # number even when the arb is genuine — Oddpool prices the opportunity based
-    # on the COMPLEMENTARY relationship (buy YES on one venue, NO on the other).
-    #
-    # The correct guard is:
-    #   1. Primary: Oddpool's net_edge_pct (guaranteed-profit signal)
-    #   2. Slippage check: live price must not be WORSE than Oddpool's quoted price
-    #      by more than ARB_SLIPPAGE_GUARD_BPS — this catches cases where the
-    #      market moved after Oddpool priced the opportunity.
-    opp_net_edge = getattr(opportunity, "net_edge_pct", 0.0)
-    log(
-        f"📊 Oddpool net_edge={opp_net_edge:.4f} | min_edge={min_edge_pct:.4f} | "
-        f"live poly_ask={live_poly_ask} {leg2_venue_label}_ask={live_kalshi_ask}"
-    )
-
-    if opp_net_edge < min_edge_pct:
-        result.error = (
-            f"oddpool_edge_too_thin: net_edge={opp_net_edge:.4f} < "
-            f"min_edge={min_edge_pct:.4f}. Oddpool says not profitable after fees."
-        )
-        log(f"❌ {result.error}")
-        return result
-
-    # ── Slippage check against Oddpool quoted prices ──────────────────────────
-    # If live prices are available, verify neither leg has moved adversely since
-    # Oddpool priced this opportunity. We only reject on ADVERSE slippage (price
-    # rose beyond the Oddpool quote) — if the price improved (cheaper than quoted)
-    # we proceed; that's strictly better for us.
-    slippage_bps = ARB_SLIPPAGE_GUARD_BPS / 10000
-
-    if live_poly_ask is not None:
-        poly_slippage = live_poly_ask - quoted_poly_ask
-        if poly_slippage > slippage_bps:
+        if not _pre_resolved:
             result.error = (
-                f"poly_slippage_exceeded: live={live_poly_ask:.4f} "
-                f"quote={quoted_poly_ask:.4f} "
-                f"slippage={poly_slippage:.4f} > {slippage_bps:.4f}"
+                f"opinion_token_unresolvable: parent={opinion_market_id!r} "
+                f"outcome={outcome_key!r} — no tradable child market found; "
+                "skipping to avoid certain leg-2 failure"
             )
             log(f"❌ {result.error}")
             return result
-        log(f"✅ Poly slippage OK: live={live_poly_ask:.4f} quote={quoted_poly_ask:.4f} slippage={poly_slippage:+.4f}")
+        _pre_child_id, _pre_yes_token, _pre_no_token = _pre_resolved
+        _opinion_child_book_token = (
+            _pre_yes_token if opinion_side == "YES" else _pre_no_token
+        )
+        log(
+            f"✅ [OPINION] Token resolved: parent={opinion_market_id!r} "
+            f"→ child={_pre_child_id!r} token={_opinion_child_book_token[:16]}... side={opinion_side}"
+        )
+
+    # ── Parallel orderbook fetch: both legs simultaneously ────────────────────
+    log(
+        f"📊 Fetching live orderbooks in parallel: "
+        f"poly={poly_token_for_price[:16]}... (side={'NO' if buying_poly_no else 'YES'}) | "
+        f"{'kalshi=' + kalshi_ticker if venue2 != 'opinion' else 'opinion=' + opinion_market_id}"
+    )
+
+    import concurrent.futures as _cf_fetch
+
+    def _fetch_poly_book() -> Optional[dict]:
+        return poly_fetch_orderbook(poly_token_for_price)
+
+    def _fetch_venue2_book() -> Optional[dict]:
+        if venue2 == "opinion":
+            if not _opinion_child_book_token:
+                return None
+            return opinion_fetch_orderbook(_opinion_child_book_token)
+        else:
+            return kalshi_fetch_orderbook_depth(kalshi_ticker)
+
+    poly_book: Optional[dict] = None
+    venue2_book: Optional[dict] = None
+
+    with _cf_fetch.ThreadPoolExecutor(max_workers=2) as _pool:
+        _poly_fut  = _pool.submit(_fetch_poly_book)
+        _v2_fut    = _pool.submit(_fetch_venue2_book)
+        try:
+            poly_book = _poly_fut.result(timeout=15)
+        except Exception as _pe:
+            log(f"⚠️ Poly orderbook fetch error: {_pe}")
+        try:
+            venue2_book = _v2_fut.result(timeout=15)
+        except Exception as _v2e:
+            log(f"⚠️ {leg2_venue_label} orderbook fetch error: {_v2e}")
+
+    # ── Normalize raw books to sorted (price, size) ask tuples ───────────────
+    _poly_asks: list[tuple[float, float]] = (
+        poly_extract_asks(poly_book) if poly_book else []
+    )
+
+    if venue2 == "opinion":
+        _v2_asks: list[tuple[float, float]] = (
+            opinion_extract_asks(venue2_book) if venue2_book else []
+        )
     else:
-        # Poly price unavailable — abort. The executor needs at least Poly live
-        # price since that's the leg we control directly.
+        _v2_asks = (
+            kalshi_extract_asks(venue2_book, side=kalshi_side) if venue2_book else []
+        )
+
+    log(
+        f"📖 Books loaded: poly={len(_poly_asks)} levels | "
+        f"{leg2_venue_label}={len(_v2_asks)} levels"
+    )
+
+    # ── Derive best ask from book (fallback to REST/Oddpool) ─────────────────
+    # Used only for initial target_contracts estimate — VWAP replaces this for gating.
+    live_poly_ask: Optional[float] = (
+        _poly_asks[0][0] if _poly_asks else None
+    )
+    if live_poly_ask is None:
+        _pp = poly_get_best_prices(poly_token_for_price)
+        live_poly_ask = _pp.get("best_ask")
+        log(f"⚠️ Poly book empty — falling back to REST best_ask={live_poly_ask}")
+
+    if live_poly_ask is None:
         result.error = "poly_orderbook_missing: could not fetch live Polymarket ask"
         log(f"❌ {result.error}")
         return result
 
+    live_kalshi_ask: Optional[float] = (
+        _v2_asks[0][0] if _v2_asks else None
+    )
+    _stale_limit = int(os.environ.get("ARB_STALE_QUOTE_SECONDS", "300"))
+    _opp_age = time.time() - getattr(opportunity, "fetched_at", 0)
+
     if live_kalshi_ask is None:
-        # Venue2 live price unavailable — fall back to Oddpool-quoted price with a
-        # freshness guard. Oddpool updates prices every second; if the opportunity
-        # was fetched within the last ARB_STALE_QUOTE_SECONDS seconds the quote is
-        # reliable enough to proceed (default 300s to cover full cycle length).
-        stale_limit = int(os.environ.get("ARB_STALE_QUOTE_SECONDS", "300"))
-        opp_age = time.time() - getattr(opportunity, "fetched_at", 0)
-        if opp_age > stale_limit:
+        if venue2 == "opinion":
+            # Try dedicated best-ask fetch (hits cache → orderbook internally)
+            live_kalshi_ask = _opinion_get_best_ask(
+                opinion_market_id, side=opinion_side,
+                outcome_hint=outcome_key, label_hint=_opinion_label,
+            )
+            if live_kalshi_ask is not None:
+                log(f"⚠️ [OPINION] Book empty — fallback to _opinion_get_best_ask: {live_kalshi_ask:.4f}")
+        else:
+            _kp = kalshi_get_best_prices(kalshi_ticker)
+            if kalshi_side == "YES":
+                live_kalshi_ask = _kp.get("yes_best_ask")
+            else:
+                live_kalshi_ask = _kp.get("no_best_ask")
+            if live_kalshi_ask is not None:
+                log(f"⚠️ Kalshi book empty — fallback to REST best_ask={live_kalshi_ask}")
+
+    if live_kalshi_ask is None:
+        # Final fallback: Oddpool quote (with staleness guard)
+        if _opp_age > _stale_limit:
             result.error = (
-                f"{leg2_venue_label}_orderbook_missing: live fetch failed and "
-                f"Oddpool quote is stale ({opp_age:.0f}s old > {stale_limit}s limit)"
+                f"{leg2_venue_label}_orderbook_missing: all live fetches failed and "
+                f"Oddpool quote is stale ({_opp_age:.0f}s > {_stale_limit}s limit)"
             )
             log(f"❌ {result.error}")
             return result
-        live_kalshi_ask = quoted_venue2_ask  # side-aware fallback from Oddpool quote
+        live_kalshi_ask = opportunity.kalshi_yes_ask
         log(
-            f"⚠️ {leg2_venue_label} live orderbook unavailable — using Oddpool "
-            f"quoted price {live_kalshi_ask:.4f} (opp_age={opp_age:.0f}s) — skipping slippage check"
+            f"⚠️ [{leg2_venue_label.upper()}] All live fetches failed — using stale Oddpool quote "
+            f"{live_kalshi_ask:.4f} (age={_opp_age:.0f}s) [FALLBACK]"
         )
-        result.live_kalshi_ask = live_kalshi_ask
-    else:
-        leg2_slippage = live_kalshi_ask - quoted_venue2_ask
-        if leg2_slippage > slippage_bps:
-            result.error = (
-                f"{leg2_venue_label}_slippage_exceeded: live={live_kalshi_ask:.4f} "
-                f"quote={quoted_venue2_ask:.4f} "
-                f"slippage={leg2_slippage:.4f} > {slippage_bps:.4f}"
-            )
-            log(f"❌ {result.error}")
-            return result
-        log(f"✅ {leg2_venue_label} slippage OK: live={live_kalshi_ask:.4f} quote={quoted_venue2_ask:.4f} slippage={leg2_slippage:+.4f}")
 
-    # Store computed live edge for logging/DB (informational only — not used for gating)
-    live_edge = 1.0 - live_poly_ask - live_kalshi_ask
-    result.live_edge = live_edge
-    log(f"📐 Live spread (informational): {live_edge:.4f} | Oddpool net_edge={opp_net_edge:.2f}% — proceeding to size")
+    result.live_poly_ask = live_poly_ask
+    result.live_kalshi_ask = live_kalshi_ask
+    opp_net_edge = getattr(opportunity, "net_edge_pct", 0.0)
+    log(
+        f"📊 Best asks: poly={live_poly_ask:.4f} {leg2_venue_label}={live_kalshi_ask:.4f} | "
+        f"Oddpool net_edge={opp_net_edge:.4f}% (reference only)"
+    )
 
-    # ── Budget sizing (computed before depth check so fallbacks can reference it) ──
-    # Size from the TOTAL budget across both legs using combined cost per contract.
-    # This maximizes contract count from available capital regardless of the price split.
-    #
-    # Example: poly_ask=0.76, venue2_ask=0.24, total_budget=$17
-    #   combined = 0.76 + 0.24 = 1.00
-    #   contracts = int(17 / 1.00) = 17 → leg1=$12.92, leg2=$4.08 → total=$17
-    #
-    # Old (wrong): half_budget = total/2; contracts = int(half_budget/max_ask)
-    #   → int(8.5/0.76) = 11 → total=$11 (35% of budget wasted on 76/24 splits)
+    # ── Initial target_contracts from best-ask estimate ───────────────────────
+    # Both legs must fill EXACTLY the same number of contracts — the natural
+    # execution unit is contracts, not USDC.  USDC cost is downstream of this.
     total_budget = min(size_usdc, ARB_MAX_PAIR_USDC)
-    combined_cost_per_contract = live_poly_ask + live_kalshi_ask
-
-    if combined_cost_per_contract <= 0:
-        result.error = "cannot_compute_contracts: combined leg cost is zero"
+    combined_best_ask = live_poly_ask + live_kalshi_ask
+    if combined_best_ask <= 0:
+        result.error = "cannot_compute_contracts: combined best-ask is zero"
         log(f"❌ {result.error}")
         return result
 
-    budget_contract_count = int(total_budget / combined_cost_per_contract)
-
-    # ── Order book depth cap ──────────────────────────────────────────────────
-    # The slippage guard above only verifies the TOP of book is within edge.
-    # If the book is thin, filling our full budget walks into unfavourable prices,
-    # erasing the arb edge. We cap contract_count by actual book depth.
-    #
-    # max_fill_price per leg: highest price we can pay on that leg and still retain
-    # at least min_edge_pct edge on the combined position.
-    #   poly  leg: max = 1.0 - live_leg2_ask - min_edge_pct
-    #   leg-2 leg: max = 1.0 - live_poly_ask  - min_edge_pct
-    max_poly_fill_price = max(0.0, 1.0 - live_kalshi_ask - min_edge_pct)
-    max_leg2_fill_price = max(0.0, 1.0 - live_poly_ask - min_edge_pct)
-
-    # Polymarket: fetch full book and walk it.
-    # Fail policy: FAIL-OPEN — fall back to top-of-book ask_size when full book unavailable.
-    # Product rationale: Poly's CLOB is highly available and ask_size is a reliable
-    # conservative proxy for top-level capacity; blocking a valid trade on a transient
-    # CLOB latency is a worse outcome than a slightly under-verified size estimate.
-    # This is an explicit asymmetry vs Kalshi (which FAIL-CLOSEs on depth unavailability).
-    # If your risk tolerance requires strict full-ladder verification on both legs,
-    # change the else branch to: `result.error = "poly_depth_unavailable: ..."; return result`.
-    poly_book = poly_fetch_orderbook(poly_token_for_price)
-    if poly_book:
-        poly_fillable, poly_depth_usdc = poly_compute_fillable(poly_book, max_poly_fill_price)
-    else:
-        poly_fillable = int(poly_prices.get("ask_size") or 0)
-        poly_depth_usdc = poly_fillable * live_poly_ask
-        log(f"⚠️ Poly full book unavailable (fail-open), using ask_size={poly_fillable} as depth floor")
-
-    # Leg-2 depth
-    if venue2 == "kalshi":
-        kalshi_book = kalshi_fetch_orderbook_depth(kalshi_ticker)
-        if kalshi_book:
-            kalshi_side_for_depth = opportunity.kalshi_side  # "YES" or "NO"
-            leg2_fillable, leg2_depth_usdc = compute_kalshi_fillable_contracts(
-                kalshi_book, kalshi_side_for_depth, max_leg2_fill_price
-            )
-        else:
-            # Kalshi depth API unavailable (404/500). Use a conservative 10-contract
-            # cap rather than aborting — this limits per-trade exposure to a small
-            # fixed size while still allowing the arb to execute. The Poly-side depth
-            # cap and budget cap remain as additional guards. This avoids blocking 100%
-            # of opportunities when Kalshi's API has transient issues.
-            _fallback_cap = 10
-            leg2_fillable = _fallback_cap
-            leg2_depth_usdc = 0.0
-            log(
-                f"⚠️ Kalshi depth API unavailable for {kalshi_ticker} — "
-                f"using conservative {_fallback_cap}-contract fallback cap"
-            )
-    else:
-        # Opinion Labs: no orderbook depth API; Poly-side depth still applied.
-        # leg2_fillable is effectively unconstrained — the Poly depth cap and
-        # budget cap remain the binding constraints.
-        leg2_fillable = budget_contract_count
-        leg2_depth_usdc = 0.0
-        log(f"ℹ️ Opinion Labs depth API not available — leg-2 capped at budget ({budget_contract_count} contracts)")
+    target_contracts = int(total_budget / combined_best_ask)
+    if target_contracts < 1:
+        result.error = (
+            f"trade_too_small: budget={total_budget:.2f} / "
+            f"combined_best_ask={combined_best_ask:.4f} < 1 contract"
+        )
+        log(f"❌ {result.error}")
+        return result
 
     log(
-        f"📏 Depth summary: "
-        f"depth_poly={poly_fillable} contracts/${poly_depth_usdc:.2f} (max_fill={max_poly_fill_price:.4f}) | "
-        f"depth_leg2={leg2_fillable} contracts/${leg2_depth_usdc:.2f} (max_fill={max_leg2_fill_price:.4f})"
+        f"📊 VWAP gate: target_contracts={target_contracts} "
+        f"budget=${total_budget:.2f} combined_best_ask={combined_best_ask:.4f}"
     )
-    # ─────────────────────────────────────────────────────────────────────────
 
-    # Integer contract count ensures both legs are exactly matched (no directional residual).
-    # Cap to the minimum of budget-derived count and the depth-limited fillable count so
-    # we never attempt to fill more contracts than the books can absorb at a profitable price.
-    depth_limited_count = min(poly_fillable, leg2_fillable)
-    contract_count = min(budget_contract_count, depth_limited_count)
+    # ── VWAP computation for target_contracts ─────────────────────────────────
+    # Walk each book to exactly target_contracts — matched contract counts guaranteed.
+    poly_vwap, poly_filled, poly_depth_ok = compute_fill_vwap_for_contracts(
+        _poly_asks, target_contracts
+    )
+    v2_vwap,   v2_filled,   v2_depth_ok   = compute_fill_vwap_for_contracts(
+        _v2_asks, target_contracts
+    )
 
     log(
-        f"📐 Contract sizing: budget_derived={budget_contract_count} "
-        f"depth_limited={depth_limited_count} → final={contract_count}"
+        f"📊 VWAP result: "
+        f"poly_vwap={poly_vwap} ({poly_filled}/{target_contracts} contracts, depth_ok={poly_depth_ok}) | "
+        f"{leg2_venue_label}_vwap={v2_vwap} ({v2_filled}/{target_contracts} contracts, depth_ok={v2_depth_ok})"
+    )
+
+    # Fall back to best-ask as VWAP estimate when book is unavailable
+    if poly_vwap is None:
+        log(f"⚠️ Poly VWAP unavailable (empty book) — using best_ask={live_poly_ask:.4f} as VWAP estimate")
+        poly_vwap = live_poly_ask
+        poly_filled = target_contracts
+    if v2_vwap is None:
+        log(f"⚠️ {leg2_venue_label} VWAP unavailable (empty book) — using best_ask={live_kalshi_ask:.4f} as VWAP estimate")
+        v2_vwap = live_kalshi_ask
+        v2_filled = target_contracts
+
+    matched_contracts = min(poly_filled, v2_filled)
+    log(f"📊 Matched contracts: {matched_contracts} (poly_filled={poly_filled} v2_filled={v2_filled})")
+
+    # ── VWAP profitability gate ────────────────────────────────────────────────
+    # Net edge using the actual fill prices (with market impact), not best-ask.
+    fee_pct = ARB_POLY_FEE_PCT + (
+        ARB_KALSHI_FEE_PCT if venue2 == "kalshi" else ARB_OPINION_FEE_PCT
+    )
+    gross_edge_pct = (1.0 - poly_vwap - v2_vwap) * 100.0
+    net_edge_pct   = gross_edge_pct - fee_pct
+    required_edge  = min_edge_pct * 100.0 + ARB_VWAP_SAFETY_BUFFER_PCT
+
+    log(
+        f"📐 VWAP profitability: poly_vwap={poly_vwap:.4f} {leg2_venue_label}_vwap={v2_vwap:.4f} "
+        f"gross_edge={gross_edge_pct:.4f}% fee={fee_pct:.4f}% "
+        f"net_edge={net_edge_pct:.4f}% required={required_edge:.4f}%"
+    )
+
+    if net_edge_pct < required_edge:
+        result.error = (
+            f"vwap_edge_insufficient: net_edge={net_edge_pct:.4f}% < "
+            f"required={required_edge:.4f}% "
+            f"(poly_vwap={poly_vwap:.4f} {leg2_venue_label}_vwap={v2_vwap:.4f} "
+            f"matched={matched_contracts} contracts). "
+            f"Market depth erases arb edge at this size."
+        )
+        log(f"❌ {result.error}")
+        return result
+
+    if matched_contracts < ARB_MIN_CONTRACTS:
+        result.error = (
+            f"depth_insufficient: matched_contracts={matched_contracts} < "
+            f"ARB_MIN_CONTRACTS={ARB_MIN_CONTRACTS}. "
+            f"poly_filled={poly_filled} {leg2_venue_label}_filled={v2_filled} "
+            f"at target={target_contracts}. Market too thin at this size."
+        )
+        log(f"❌ {result.error}")
+        return result
+
+    log(
+        f"✅ VWAP gate passed: net_edge={net_edge_pct:.4f}% ≥ required={required_edge:.4f}% — "
+        f"{matched_contracts} contracts @ poly={poly_vwap:.4f} / {leg2_venue_label}={v2_vwap:.4f}"
+    )
+
+    # VWAP prices replace best-ask for all downstream sizing (balance-fit etc.)
+    live_poly_ask   = poly_vwap
+    live_kalshi_ask = v2_vwap
+    result.live_poly_ask   = live_poly_ask
+    result.live_kalshi_ask = live_kalshi_ask
+    result.live_edge = 1.0 - live_poly_ask - live_kalshi_ask
+
+    # Re-cap contract_count to budget at VWAP prices (market impact may raise cost above best-ask estimate)
+    budget_at_vwap = int(total_budget / (live_poly_ask + live_kalshi_ask))
+    contract_count = min(matched_contracts, budget_at_vwap)
+
+    log(
+        f"📐 Contract sizing: matched={matched_contracts} "
+        f"budget_at_vwap={budget_at_vwap} → final={contract_count}"
     )
 
     if contract_count < 1:
-        if budget_contract_count < 1:
-            result.error = (
-                f"trade_too_small: budget={total_budget:.2f} / "
-                f"combined_cost={combined_cost_per_contract:.4f} "
-                f"= {total_budget/combined_cost_per_contract:.4f} contracts < 1 minimum"
-            )
-        else:
-            result.error = (
-                f"depth_insufficient: poly_fillable={poly_fillable} "
-                f"leg2_fillable={leg2_fillable} — no contracts available at profitable prices. "
-                f"Headline edge exists but market is too thin at this size."
-            )
+        result.error = (
+            f"trade_too_small_at_vwap: budget={total_budget:.2f} / "
+            f"vwap_combined={live_poly_ask + live_kalshi_ask:.4f} < 1 contract"
+        )
         log(f"❌ {result.error}")
         return result
 
@@ -1031,26 +1091,6 @@ def execute_arb(
         f"leg1_usdc={leg1_usdc:.4f} leg2_usdc={leg2_usdc:.4f} "
         f"total_cost={leg1_usdc + leg2_usdc:.4f}"
     )
-
-    # ── Opinion pre-flight: confirm tradable child is resolvable BEFORE funding ─
-    # Categorical parents (e.g. 340) must resolve to a specific child market
-    # (e.g. 5517 "↑ 120,000") before any order can be placed.
-    # This check runs BEFORE fund_both_legs_for_trade so that an unresolvable
-    # token causes a clean abort with no capital moved.
-    # The resolved child is cached and reused by the leg-2 placement below.
-    if venue2 == "opinion" and opinion_market_id:
-        _opinion_label = getattr(opportunity, "label", "") or ""
-        _pre_resolved = _opinion_resolve_tokens(opinion_market_id, outcome_hint=outcome_key, label_hint=_opinion_label)
-        if not _pre_resolved:
-            result.error = (
-                f"opinion_token_unresolvable: parent={opinion_market_id!r} "
-                f"outcome={outcome_key!r} — no tradable child market found; "
-                "skipping to avoid certain leg-2 failure"
-            )
-            log(f"❌ {result.error}")
-            return result
-        _pre_child_id = _pre_resolved[0]
-        log(f"✅ [OPINION] Pre-flight: parent={opinion_market_id!r} → child={_pre_child_id!r} — token pair verified")
 
     # ── Simultaneous funding: deposit BOTH legs in one nonce sequence ────────
     # Sends poly_deposit_tx and venue2_deposit_tx without waiting between them,

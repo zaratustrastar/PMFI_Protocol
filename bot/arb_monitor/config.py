@@ -69,17 +69,26 @@ ARB_MIN_EDGE_PCT = float(os.environ.get("ARB_MIN_EDGE_PCT", "0.025"))
 # annualized_return ≈ 0, confidence = 0, or fillable_size = 0 — none worth executing.
 # Set ARB_MIN_SCORE=0 to disable this guard entirely.
 ARB_MIN_SCORE = float(os.environ.get("ARB_MIN_SCORE", "1.0"))
-# EXECUTION-TIME staleness guard (basis points).
-# Aborts a trade when the live CLOB ask has moved more than N bps worse than
-# Oddpool's quoted price since the opportunity was scored.
-# This is NOT a scoring cost — the scorer must NOT subtract it from net_cents.
-# Oddpool's net_cents is already fee-adjusted; subtracting 200 bps on top would
-# drive every opportunity to a negative net_edge and zero score.
-# 50 bps (0.5%) was too tight — blocked valid opportunities where Oddpool's
-# data was 1-2% stale (e.g. dem-nominee markets with 1.3% drift).
-# 200 bps (2%) tolerates minor staleness while protecting against large moves.
-# Override: set ARB_SLIPPAGE_GUARD_BPS=50 in .env to restore original behavior.
+# EXECUTION-TIME staleness guard (basis points). Kept as a constant for backward-compat
+# imports; no longer used as the execution gate (replaced by VWAP profitability check).
 ARB_SLIPPAGE_GUARD_BPS = int(os.environ.get("ARB_SLIPPAGE_GUARD_BPS", "200"))
+
+# ── VWAP execution gate ────────────────────────────────────────────────────────
+# Extra edge buffer (%) on top of ARB_MIN_EDGE_PCT required at VWAP prices.
+# 0.5% default gives a half-point cushion above the minimum to absorb residual
+# execution risk not captured by walking the book (e.g. partial fills, spread).
+ARB_VWAP_SAFETY_BUFFER_PCT = float(os.environ.get("ARB_VWAP_SAFETY_BUFFER_PCT", "0.5"))
+
+# Minimum matched contract count required for execution.  If either book
+# cannot supply this many contracts at profitable VWAP, the trade is skipped.
+ARB_MIN_CONTRACTS = int(os.environ.get("ARB_MIN_CONTRACTS", "5"))
+
+# Per-venue taker fee (%) added to combined VWAP cost when computing net edge.
+# Polymarket CLOB: 0 taker fee. Kalshi / Opinion: fees are embedded in ask prices.
+# Configurable in case a venue introduces fees or you want extra conservatism.
+ARB_POLY_FEE_PCT    = float(os.environ.get("ARB_POLY_FEE_PCT",    "0.0"))
+ARB_KALSHI_FEE_PCT  = float(os.environ.get("ARB_KALSHI_FEE_PCT",  "0.0"))
+ARB_OPINION_FEE_PCT = float(os.environ.get("ARB_OPINION_FEE_PCT", "0.0"))
 ARB_MAX_PAIR_USDC = float(os.environ.get("ARB_MAX_PAIR_USDC", "500"))
 ARB_MAX_DEPLOYED_USDC = float(os.environ.get("ARB_MAX_DEPLOYED_USDC", "10000"))
 

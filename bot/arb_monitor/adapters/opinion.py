@@ -670,6 +670,32 @@ def fetch_orderbook(token_id: str) -> Optional[dict]:
         return None
 
 
+def extract_asks(book: dict) -> list[tuple[float, float]]:
+    """Normalize an Opinion Labs CLOB orderbook to sorted (price, size) ask tuples.
+
+    Opinion prices may arrive as cents (>1) or dollars (≤1); we normalise to dollars.
+    Returns levels sorted ascending by price, ready for compute_fill_vwap_for_contracts.
+    """
+    if not book:
+        return []
+    raw = book.get("asks", [])
+    levels: list[tuple[float, float]] = []
+    for level in raw:
+        try:
+            raw_price = level.get("price") or level.get("yes_price")
+            size      = float(level.get("size", 0))
+            if raw_price is None or size <= 0:
+                continue
+            fp = float(raw_price)
+            price = fp / 100.0 if fp > 1 else fp
+            if price > 0:
+                levels.append((price, size))
+        except (ValueError, TypeError):
+            continue
+    levels.sort(key=lambda x: x[0])
+    return levels
+
+
 def get_best_prices(yes_token_id: str, no_token_id: str) -> dict:
     empty = {
         "yes_best_bid": None, "yes_best_ask": None,
