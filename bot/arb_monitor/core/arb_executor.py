@@ -1269,7 +1269,13 @@ def execute_arb(
             poll_interval=_poll_secs,
         )
         if not funded:
-            result.error = f"funding_failed: {fund_err}"
+            # Preserve the "funding_insufficient" prefix when the funder's pre-TX
+            # gate refused (no capital moved). Only wrap with "funding_failed:" for
+            # actual deposit-attempt failures (where capital may be in-flight).
+            if fund_err.startswith("funding_insufficient"):
+                result.error = fund_err
+            else:
+                result.error = f"funding_failed: {fund_err}"
             log(f"❌ {result.error}")
             return result
         log(f"✅ Both legs funded — proceeding to order placement")
