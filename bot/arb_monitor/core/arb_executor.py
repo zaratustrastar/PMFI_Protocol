@@ -966,34 +966,12 @@ def execute_arb(
         return result
 
     matched_contracts = min(poly_filled, v2_filled)
-    log(f"📊 Matched contracts: {matched_contracts} (poly_filled={poly_filled} {leg2_venue_label}_filled={v2_filled})")
-
-    # ── VWAP profitability gate ────────────────────────────────────────────────
-    # Net edge using the actual fill prices (with market impact), not best-ask.
-    fee_pct = ARB_POLY_FEE_PCT + (
-        ARB_KALSHI_FEE_PCT if venue2 == "kalshi" else ARB_OPINION_FEE_PCT
-    )
-    gross_edge_pct = (1.0 - poly_vwap - v2_vwap) * 100.0
-    net_edge_pct   = gross_edge_pct - fee_pct
-    required_edge  = min_edge_pct * 100.0 + ARB_VWAP_SAFETY_BUFFER_PCT
-
     log(
-        f"📐 VWAP profitability: poly_vwap={poly_vwap:.4f} {leg2_venue_label}_vwap={v2_vwap:.4f} "
-        f"gross_edge={gross_edge_pct:.4f}% fee={fee_pct:.4f}% "
-        f"net_edge={net_edge_pct:.4f}% required={required_edge:.4f}%"
+        f"📊 Matched contracts: {matched_contracts} "
+        f"(poly_filled={poly_filled}/{target_contracts} {leg2_venue_label}_filled={v2_filled}/{target_contracts})"
     )
 
-    if net_edge_pct < required_edge:
-        result.error = (
-            f"vwap_edge_insufficient: net_edge={net_edge_pct:.4f}% < "
-            f"required={required_edge:.4f}% "
-            f"(poly_vwap={poly_vwap:.4f} {leg2_venue_label}_vwap={v2_vwap:.4f} "
-            f"matched={matched_contracts} contracts). "
-            f"Market depth erases arb edge at this size."
-        )
-        log(f"❌ {result.error}")
-        return result
-
+    # Early depth check before re-computing VWAP at matched size
     if matched_contracts < ARB_MIN_CONTRACTS:
         result.error = (
             f"depth_insufficient: matched_contracts={matched_contracts} < "
@@ -1004,14 +982,64 @@ def execute_arb(
         log(f"❌ {result.error}")
         return result
 
+    # ── Re-compute VWAP at exactly matched_contracts ───────────────────────────
+    # When one leg partially fills (e.g. poly fills 100 but v2 only 60), the
+    # initial VWAP for the deeper leg was computed at 100 contracts — not what
+    # we will actually execute.  Recomputing at exactly matched_contracts gives
+    # the correct average execution price for the actual trade size on both legs.
+    matched_poly_vwap, _, _ = compute_fill_vwap_for_contracts(_poly_asks, matched_contracts)
+    matched_v2_vwap,   _, _ = compute_fill_vwap_for_contracts(_v2_asks,   matched_contracts)
+
+    # Both should be non-None since matched_contracts ≤ poly_filled and ≤ v2_filled
+    if matched_poly_vwap is None or matched_v2_vwap is None:
+        result.error = (
+            f"vwap_recompute_failed: unexpected None at matched_contracts={matched_contracts} "
+            f"(poly={matched_poly_vwap} {leg2_venue_label}={matched_v2_vwap})"
+        )
+        log(f"❌ {result.error}")
+        return result
+
     log(
-        f"✅ VWAP gate passed: net_edge={net_edge_pct:.4f}% ≥ required={required_edge:.4f}% — "
-        f"{matched_contracts} contracts @ poly={poly_vwap:.4f} / {leg2_venue_label}={v2_vwap:.4f}"
+        f"📊 VWAP @ matched size ({matched_contracts} contracts): "
+        f"poly={matched_poly_vwap:.4f} {leg2_venue_label}={matched_v2_vwap:.4f} "
+        f"(initial @ target: poly={poly_vwap:.4f} {leg2_venue_label}={v2_vwap:.4f})"
     )
 
-    # VWAP prices replace best-ask for all downstream sizing (balance-fit etc.)
-    live_poly_ask   = poly_vwap
-    live_kalshi_ask = v2_vwap
+    # ── VWAP profitability gate ────────────────────────────────────────────────
+    # Use matched-size VWAPs — these reflect actual execution prices for both legs.
+    fee_pct = ARB_POLY_FEE_PCT + (
+        ARB_KALSHI_FEE_PCT if venue2 == "kalshi" else ARB_OPINION_FEE_PCT
+    )
+    gross_edge_pct = (1.0 - matched_poly_vwap - matched_v2_vwap) * 100.0
+    net_edge_pct   = gross_edge_pct - fee_pct
+    required_edge  = min_edge_pct * 100.0 + ARB_VWAP_SAFETY_BUFFER_PCT
+
+    log(
+        f"📐 VWAP profitability @ {matched_contracts} contracts: "
+        f"poly_vwap={matched_poly_vwap:.4f} {leg2_venue_label}_vwap={matched_v2_vwap:.4f} "
+        f"gross_edge={gross_edge_pct:.4f}% fee={fee_pct:.4f}% "
+        f"net_edge={net_edge_pct:.4f}% required={required_edge:.4f}%"
+    )
+
+    if net_edge_pct < required_edge:
+        result.error = (
+            f"vwap_edge_insufficient: net_edge={net_edge_pct:.4f}% < "
+            f"required={required_edge:.4f}% "
+            f"(poly_vwap={matched_poly_vwap:.4f} {leg2_venue_label}_vwap={matched_v2_vwap:.4f} "
+            f"matched={matched_contracts} contracts). "
+            f"Market depth erases arb edge at this size."
+        )
+        log(f"❌ {result.error}")
+        return result
+
+    log(
+        f"✅ VWAP gate passed: net_edge={net_edge_pct:.4f}% ≥ required={required_edge:.4f}% — "
+        f"{matched_contracts} contracts @ poly={matched_poly_vwap:.4f} / {leg2_venue_label}={matched_v2_vwap:.4f}"
+    )
+
+    # Matched-size VWAP prices replace best-ask for all downstream sizing
+    live_poly_ask   = matched_poly_vwap
+    live_kalshi_ask = matched_v2_vwap
     result.live_poly_ask   = live_poly_ask
     result.live_kalshi_ask = live_kalshi_ask
     result.live_edge = 1.0 - live_poly_ask - live_kalshi_ask
@@ -1029,6 +1057,17 @@ def execute_arb(
         result.error = (
             f"trade_too_small_at_vwap: budget={total_budget:.2f} / "
             f"vwap_combined={live_poly_ask + live_kalshi_ask:.4f} < 1 contract"
+        )
+        log(f"❌ {result.error}")
+        return result
+
+    # Enforce minimum contract threshold on final executable count
+    # (budget cap after VWAP re-pricing can reduce count below the depth minimum)
+    if contract_count < ARB_MIN_CONTRACTS:
+        result.error = (
+            f"final_count_below_minimum: contract_count={contract_count} < "
+            f"ARB_MIN_CONTRACTS={ARB_MIN_CONTRACTS} after budget cap "
+            f"(matched={matched_contracts} budget_at_vwap={budget_at_vwap})"
         )
         log(f"❌ {result.error}")
         return result
