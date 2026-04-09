@@ -437,6 +437,17 @@ def resolve_market_ticker(
         log(f"⚠️ resolve_market_ticker: no open markets in list for {event_ticker!r}")
         return None
 
+    # Diagnostic: dump every open sub-market so we can confirm the target is present
+    log(
+        f"🗂️ resolve_market_ticker: {len(open_markets)} open markets for {event_ticker!r} "
+        f"(label_hint={label_hint!r}):"
+    )
+    for _m in open_markets:
+        log(
+            f"   → {_m.get('ticker')!r}  subtitle={_m.get('subtitle')!r}  "
+            f"title={_m.get('title')!r}  status={_m.get('status')!r}"
+        )
+
     # ── Label-aware selection (preferred when label_hint is provided) ──────────
     # Score each sub-market against the candidate name. This correctly handles
     # multi-candidate events (e.g. each candidate gets their own sub-market on

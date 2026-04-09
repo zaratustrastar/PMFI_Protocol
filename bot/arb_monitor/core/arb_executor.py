@@ -437,7 +437,20 @@ def _unwind_poly_leg(
         client = _make_poly_client_for_unwind()
         resp = client.cancel(order_id=order_id)
         log(f"✅ [POLY] Cancel response: {resp}")
-        cancel_ok = True
+        # cancel() returns {"canceled": [...], "not_canceled": {...}}
+        # An order that already matched appears in not_canceled — do NOT treat that as success.
+        canceled_ids = resp.get("canceled") or [] if isinstance(resp, dict) else []
+        not_canceled = resp.get("not_canceled") or {} if isinstance(resp, dict) else {}
+        if order_id in canceled_ids:
+            cancel_ok = True
+            log(f"✅ [POLY] Order {order_id} successfully canceled")
+        elif order_id in not_canceled:
+            reason = not_canceled[order_id]
+            log(f"⚠️ [POLY] Order {order_id} NOT canceled: {reason!r} — will attempt offset sell")
+        else:
+            # Unexpected response shape — assume cancel worked if no error
+            cancel_ok = True
+            log(f"⚠️ [POLY] Unexpected cancel response shape; assuming canceled: {resp}")
     except Exception as e:
         log(f"⚠️ [POLY] Cancel failed (order may already be filled): {e}")
 
