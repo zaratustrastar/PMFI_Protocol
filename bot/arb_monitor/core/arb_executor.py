@@ -589,6 +589,43 @@ def compute_fill_vwap_for_contracts(
     return vwap, filled, filled >= target_contracts
 
 
+def compute_marginal_ask(
+    asks: list[tuple[float, float]],
+    n_contracts: int,
+) -> Optional[float]:
+    """Return the worst (highest) ask price needed to fill exactly n_contracts.
+
+    This is the limit price that guarantees a full fill of n_contracts — any
+    order placed at this price will consume every level up to and including the
+    marginal level.  Placing at VWAP instead would leave the deepest levels
+    unfilled since VWAP < marginal_ask when depth > 1 level.
+
+    Args:
+        asks:        Sorted (price, size) list, ascending by price.
+        n_contracts: Number of contracts we want to fill.
+
+    Returns:
+        The marginal ask price, or None if the book cannot supply n_contracts
+        (in which case it returns the worst available price for partial fills).
+    """
+    if not asks or n_contracts <= 0:
+        return None
+
+    remaining = n_contracts
+    last_price: Optional[float] = None
+
+    for price, size in asks:
+        take = min(int(size), remaining)
+        if take <= 0:
+            continue
+        last_price = price
+        remaining -= take
+        if remaining <= 0:
+            break
+
+    return last_price  # None only if asks was empty
+
+
 # ── Opinion market_id → resolved tradable market cache ───────────────────────
 # Caches (child_market_id, yes_token_id, no_token_id) keyed by parent market_id.
 # For binary markets: child_market_id == market_id.
@@ -1034,45 +1071,72 @@ def execute_arb(
 
     log(
         f"✅ VWAP gate passed: net_edge={net_edge_pct:.4f}% ≥ required={required_edge:.4f}% — "
-        f"{matched_contracts} contracts @ poly={matched_poly_vwap:.4f} / {leg2_venue_label}={matched_v2_vwap:.4f}"
+        f"{matched_contracts} contracts @ poly_vwap={matched_poly_vwap:.4f} / {leg2_venue_label}_vwap={matched_v2_vwap:.4f}"
     )
 
-    # Matched-size VWAP prices replace best-ask for all downstream sizing
-    live_poly_ask   = matched_poly_vwap
-    live_kalshi_ask = matched_v2_vwap
+    # ── Compute marginal ask (execution limit price) ───────────────────────────
+    # VWAP is the average fill price — NOT the execution limit price.
+    # Placing orders at VWAP would leave levels above VWAP unfilled (partial fill).
+    # The marginal ask is the worst level we'd consume to fill matched_contracts —
+    # using this as the limit price guarantees the full fill.
+    # Example: book [(0.14, 50), (0.15, 30)], target=80:
+    #   VWAP = 0.1437 → placing at 0.1437 misses 0.15 level → only 50 fill
+    #   marginal = 0.15  → placing at 0.15 fills all 80 contracts ✓
+    poly_marginal_ask = compute_marginal_ask(_poly_asks, matched_contracts)
+    v2_marginal_ask   = compute_marginal_ask(_v2_asks,   matched_contracts)
+
+    if poly_marginal_ask is None or v2_marginal_ask is None:
+        result.error = (
+            f"marginal_ask_unavailable: poly={poly_marginal_ask} "
+            f"{leg2_venue_label}={v2_marginal_ask} at matched={matched_contracts}"
+        )
+        log(f"❌ {result.error}")
+        return result
+
+    log(
+        f"📊 Execution prices (marginal ask @ {matched_contracts} contracts): "
+        f"poly={poly_marginal_ask:.4f} {leg2_venue_label}={v2_marginal_ask:.4f} "
+        f"(vs vwap: poly={matched_poly_vwap:.4f} {leg2_venue_label}={matched_v2_vwap:.4f})"
+    )
+
+    # Execution prices: marginal ask (for order placement and USDC sizing)
+    # Gate prices: matched-size VWAP (reported in result for diagnostics only)
+    live_poly_ask   = poly_marginal_ask
+    live_kalshi_ask = v2_marginal_ask
     result.live_poly_ask   = live_poly_ask
     result.live_kalshi_ask = live_kalshi_ask
-    result.live_edge = 1.0 - live_poly_ask - live_kalshi_ask
+    # live_edge uses VWAP (more conservative / realistic for the full fill)
+    result.live_edge = 1.0 - matched_poly_vwap - matched_v2_vwap
 
-    # Re-cap contract_count to budget at VWAP prices (market impact may raise cost above best-ask estimate)
-    budget_at_vwap = int(total_budget / (live_poly_ask + live_kalshi_ask))
-    contract_count = min(matched_contracts, budget_at_vwap)
+    # Re-cap contract_count to budget at marginal ask prices (worst-case USDC cost)
+    budget_at_marginal = int(total_budget / (live_poly_ask + live_kalshi_ask))
+    contract_count = min(matched_contracts, budget_at_marginal)
 
     log(
         f"📐 Contract sizing: matched={matched_contracts} "
-        f"budget_at_vwap={budget_at_vwap} → final={contract_count}"
+        f"budget_at_marginal={budget_at_marginal} → final={contract_count}"
     )
 
     if contract_count < 1:
         result.error = (
-            f"trade_too_small_at_vwap: budget={total_budget:.2f} / "
-            f"vwap_combined={live_poly_ask + live_kalshi_ask:.4f} < 1 contract"
+            f"trade_too_small_at_marginal: budget={total_budget:.2f} / "
+            f"marginal_combined={live_poly_ask + live_kalshi_ask:.4f} < 1 contract"
         )
         log(f"❌ {result.error}")
         return result
 
     # Enforce minimum contract threshold on final executable count
-    # (budget cap after VWAP re-pricing can reduce count below the depth minimum)
+    # (budget cap after marginal-ask repricing can reduce count below the depth minimum)
     if contract_count < ARB_MIN_CONTRACTS:
         result.error = (
             f"final_count_below_minimum: contract_count={contract_count} < "
             f"ARB_MIN_CONTRACTS={ARB_MIN_CONTRACTS} after budget cap "
-            f"(matched={matched_contracts} budget_at_vwap={budget_at_vwap})"
+            f"(matched={matched_contracts} budget_at_marginal={budget_at_marginal})"
         )
         log(f"❌ {result.error}")
         return result
 
-    # Derive exact USDC cost per leg from the matched integer contract count
+    # Derive exact USDC cost per leg from the final contract count at marginal ask
     leg1_usdc = contract_count * live_poly_ask
     leg2_usdc = contract_count * live_kalshi_ask
 
