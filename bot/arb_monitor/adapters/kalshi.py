@@ -348,6 +348,11 @@ def resolve_market_ticker(
     if not event_ticker:
         return None
 
+    log(
+        f"🔍 resolve_market_ticker: event={event_ticker!r} outcome={outcome_key!r} "
+        f"label_hint={label_hint!r}"
+    )
+
     # Fast path: if the caller already has a market-level ticker it may pass directly.
     # Market tickers have the form EVENT_TICKER + "-" + STRIKE (e.g. "-T100500").
     # We detect this by checking whether the last segment looks like a strike suffix.
