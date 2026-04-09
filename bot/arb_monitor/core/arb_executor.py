@@ -944,18 +944,29 @@ def execute_arb(
         f"{leg2_venue_label}_vwap={v2_vwap} ({v2_filled}/{target_contracts} contracts, depth_ok={v2_depth_ok})"
     )
 
-    # Fall back to best-ask as VWAP estimate when book is unavailable
+    # FAIL CLOSED when books yield no fillable contracts.
+    # Oddpool quotes are only used above for target_contracts estimation — they must
+    # NOT substitute for live orderbook walking in the profitability gate.
     if poly_vwap is None:
-        log(f"⚠️ Poly VWAP unavailable (empty book) — using best_ask={live_poly_ask:.4f} as VWAP estimate")
-        poly_vwap = live_poly_ask
-        poly_filled = target_contracts
+        result.error = (
+            f"poly_orderbook_missing_for_vwap: book has 0 fillable contracts "
+            f"at target={target_contracts}. Cannot verify profitability without live depth. "
+            f"poly_book_levels={len(_poly_asks)}"
+        )
+        log(f"❌ {result.error}")
+        return result
+
     if v2_vwap is None:
-        log(f"⚠️ {leg2_venue_label} VWAP unavailable (empty book) — using best_ask={live_kalshi_ask:.4f} as VWAP estimate")
-        v2_vwap = live_kalshi_ask
-        v2_filled = target_contracts
+        result.error = (
+            f"{leg2_venue_label}_orderbook_missing_for_vwap: book has 0 fillable contracts "
+            f"at target={target_contracts}. Cannot verify profitability without live depth. "
+            f"{leg2_venue_label}_book_levels={len(_v2_asks)}"
+        )
+        log(f"❌ {result.error}")
+        return result
 
     matched_contracts = min(poly_filled, v2_filled)
-    log(f"📊 Matched contracts: {matched_contracts} (poly_filled={poly_filled} v2_filled={v2_filled})")
+    log(f"📊 Matched contracts: {matched_contracts} (poly_filled={poly_filled} {leg2_venue_label}_filled={v2_filled})")
 
     # ── VWAP profitability gate ────────────────────────────────────────────────
     # Net edge using the actual fill prices (with market impact), not best-ask.
