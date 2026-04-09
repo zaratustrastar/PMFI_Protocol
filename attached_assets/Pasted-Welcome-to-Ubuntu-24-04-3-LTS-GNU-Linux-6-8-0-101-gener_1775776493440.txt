@@ -1,0 +1,427 @@
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-101-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Thu Apr  9 22:56:30 UTC 2026
+
+  System load:  0.27               Processes:             135
+  Usage of /:   80.6% of 23.17GB   Users logged in:       1
+  Memory usage: 18%                IPv4 address for eth0: 147.182.206.35
+  Swap usage:   9%                 IPv4 address for eth0: 10.48.0.5
+
+Expanded Security Maintenance for Applications is not enabled.
+
+57 updates can be applied immediately.
+2 of these updates are standard security updates.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+
+*** System restart required ***
+Last login: Thu Apr  9 22:55:25 2026 from 198.211.111.194
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~# cd ~/PolyNotifyBot
+git pull
+sudo systemctl restart psniper-bot
+remote: Enumerating objects: 15, done.
+remote: Counting objects: 100% (15/15), done.
+remote: Compressing objects: 100% (1/1), done.
+remote: Total 8 (delta 7), reused 8 (delta 7), pack-reused 0 (from 0)
+Unpacking objects: 100% (8/8), 2.94 KiB | 335.00 KiB/s, done.
+From https://github.com/zaratustrastar/PolyNotifyBot
+   c547ce4..0b84e9f  main       -> origin/main
+Updating c547ce4..0b84e9f
+Fast-forward
+ bot/arb_monitor/adapters/kalshi.py   | 86 ++++++++++++++++++++++++++++++++++++++++++++++++++++----------------------------------
+ bot/arb_monitor/core/arb_executor.py | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++------------
+ 2 files changed, 129 insertions(+), 46 deletions(-)
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "\[ArbExecLoop\]|\[ArbFunder\]|\[Arb/Executor\]"
+Apr 09 22:59:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ⚠️ No Poly CLOB proxy configured (PROXY_URL / POLY_CLOB_PROXY_URL)
+Apr 09 22:59:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: [proxychains] Strict chain  ...  79.101.2.122:49541 🔁 [ArbExecLoop] 🟢 Arb execution loop started
+Apr 09 22:59:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 09 22:59:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 🚀 Execution loop daemon thread started (poll_interval=30s)
+Apr 09 23:00:48 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=0.68 under_pressure=False unwind_needed=False
+Apr 09 23:00:48 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-09T23:00:46Z
+Apr 09 23:00:48 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 09 23:00:58 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775775399, cooldown=60s) — calling
+Apr 09 23:00:58 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=5148
+Apr 09 23:00:58 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 📤 TX nonce=5148 → 0x7037f8ee685bef1a2e2020cea2222e2a375c166401faad08adfc9f0239dc2ab9
+Apr 09 23:00:58 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] ✅ tend() sent: tx=0x7037f8ee685bef1a2e2020cea2222e2a375c166401faad08adfc9f0239dc2ab9
+Apr 09 23:01:08 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💼 Servicer [2026-04-09T23:00:46Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=1.6823 ETH=0.008101 safety_buffer=1.0 gas_reserve=0.0010 ETH
+Apr 09 23:01:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=1.68 deployable=0.68 under_pressure=False
+Apr 09 23:01:25 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 09 23:01:25 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.6823 USDC in servicer wallet
+Apr 09 23:01:25 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3402136', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913115679940', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913119559938', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 09 23:01:25 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.402136 USDC (raw=3402136)
+Apr 09 23:01:25 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔍 sig_type=0 (EOA) response: {'balance': '0', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '0', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '0', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '0'}}
+Apr 09 23:01:25 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+Apr 09 23:01:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Kalshi balance: 4.7300 USDC
+Apr 09 23:01:39 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 Platform balances: poly=3.4021 kalshi=4.7300 opinion=9.0559 USDC
+Apr 09 23:02:50 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 📊 189 opportunities fetched, sorted by score desc
+Apr 09 23:02:50 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 🔍 [OpinionPreWarm] Resolving tokens for 81 Opinion opportunities (budget=30s)...
+Apr 09 23:02:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] openai-ipo-closing-market-cap_ipo_500_750b: parent='152' → child='2376'
+Apr 09 23:02:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_hou: could not resolve parent='103' hint='hou'
+Apr 09 23:02:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_cle: could not resolve parent='103' hint='cle'
+Apr 09 23:02:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_8: parent='78' → child='1353'
+Apr 09 23:02:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_gretchen_whitmer: parent='380' → child='6812'
+Apr 09 23:02:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_gretchen_whitmer: parent='380' → child='6812'
+Apr 09 23:02:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] uk-prime-minister-2026_nigel_farage: parent='382' → child='6844'
+Apr 09 23:02:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_united: parent='80' → child='1367'
+Apr 09 23:02:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] stanley-cup-2026_colorado_avalanche: parent='345' → child='5566'
+Apr 09 23:02:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_city: parent='80' → child='1365'
+Apr 09 23:03:02 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-mvp-2026_shai_gilgeous_alexander: parent='115' → child='2089'
+Apr 09 23:03:02 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] la-liga-winner-2026_real_madrid: parent='82' → child='1378'
+Apr 09 23:03:02 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_sex: parent='169' → child='2568'
+Apr 09 23:03:02 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_gsw: could not resolve parent='103' hint='gsw'
+Apr 09 23:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_sx: parent='169' → child='2569'
+Apr 09 23:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] satoshi-move-btc-2026_satoshi_move_btc_2026_yes: parent='3365' → child='3365'
+Apr 09 23:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] acquisitions-before-2027_nebius_group: parent='337' → child='5345'
+Apr 09 23:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] la-liga-winner-2026_real_madrid: parent='82' → child='1378'
+Apr 09 23:03:05 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] hottest-years-2026_number_1: parent='378' → child='6754'
+Apr 09 23:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_spac: parent='169' → child='2574'
+Apr 09 23:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_den: could not resolve parent='103' hint='den'
+Apr 09 23:03:08 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_park_ju_min: parent='131' → child='2185'
+Apr 09 23:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] uk-prime-minister-2026_rupert_lowe: parent='382' → child='6841'
+Apr 09 23:03:10 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_4t: parent='204' → child='3085'
+Apr 09 23:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lpl-2026-season-winner_lgd_gaming: parent='212' → child='3187'
+Apr 09 23:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_hou: could not resolve parent='103' hint='hou'
+Apr 09 23:03:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] balance-of-power-2026-midterms_d_senate_r_house: parent='390' → child='7352'
+Apr 09 23:03:17 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_star: parent='169' → child='2573'
+Apr 09 23:03:17 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] trump-out-president-before-2027_trump_out_before_2027: parent='3062' → child='3062'
+Apr 09 23:03:17 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] largest-company-end-of-june-2026_amazon: parent='351' → child='5809'
+Apr 09 23:03:17 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_6t: parent='204' → child='3086'
+Apr 09 23:03:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_lal: could not resolve parent='103' hint='lal'
+Apr 09 23:03:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1t: parent='204' → child='3083'
+Apr 09 23:03:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⏱️ [OpinionPreWarm] Time budget exhausted after 27 resolved, 54 deferred to pre-flight
+Apr 09 23:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 trump-admin-departures-2026_kash_patel: size_usdc=34193.60 capped to opp_total_available=8.81 USDC (servicer=0.68 + poly=3.40 + kalshi=4.73)
+Apr 09 23:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=trump-admin-departures-2026_kash_patel venue2=kalshi | score=1367.7 AR=0.00× net_edge=7.90% conf=0.00 | days=265.04d size=$8.81
+Apr 09 23:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 🔍 Starting execution for pair trump-admin-departures-2026_kash_patel (venue2=kalshi)
+Apr 09 23:03:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 7085696445100036... for price check
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXTRUMPADMINLEAVE-26DEC31' → 'KXTRUMPADMINLEAVE-26DEC31-RSCO'
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Fetching live orderbooks in parallel: poly=7085696445100036... (side=YES) | kalshi=KXTRUMPADMINLEAVE-26DEC31-RSCO
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📖 Books loaded: poly=25 levels | kalshi=25 levels
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Best asks: poly=0.6300 kalshi=0.7700 | Oddpool net_edge=7.9000% (reference only)
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP gate: target_contracts=6 budget=$8.81 combined_best_ask=1.4000
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP result: poly_vwap=0.63 (6/6 contracts, depth_ok=True) | kalshi_vwap=0.77 (6/6 contracts, depth_ok=True)
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Matched contracts: 6 (poly_filled=6/6 kalshi_filled=6/6)
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP @ matched size (6 contracts): poly=0.6300 kalshi=0.7700 (initial @ target: poly=0.6300 kalshi=0.7700)
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📐 VWAP profitability @ 6 contracts: poly_vwap=0.6300 kalshi_vwap=0.7700 gross_edge=-40.0000% fee=0.0000% net_edge=-40.0000% required=0.8000%
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ❌ vwap_edge_insufficient: net_edge=-40.0000% < required=0.8000% (poly_vwap=0.6300 kalshi_vwap=0.7700 matched=6 contracts). Market depth erases arb edge at this size.
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ❌ trump-admin-departures-2026_kash_patel: execution stopped cycle — vwap_edge_insufficient: net_edge=-40.0000% < required=0.8000% (poly_vwap=0.6300 kalshi_vwap=0.7700 matched=6 contracts). Market depth erases arb edge at this size. unwound=False — pair suppressed for 300s
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=1 skipped_display_only=0 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=0 skipped_opinion_token=0 depth_insufficient=0 depth_unavailable=0
+Apr 09 23:03:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 09 23:04:09 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 09 23:04:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=0.68 under_pressure=False unwind_needed=False
+Apr 09 23:04:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-09T23:04:56Z
+Apr 09 23:04:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 09 23:05:09 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775775659, cooldown=60s) — calling
+Apr 09 23:05:09 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=5149
+Apr 09 23:05:09 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 📤 TX nonce=5149 → 0x4cb16c5342e0e1a351cffb7e9729a2b15e88cd37999870cec7e3ccee60d8c92a
+Apr 09 23:05:09 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] ✅ tend() sent: tx=0x4cb16c5342e0e1a351cffb7e9729a2b15e88cd37999870cec7e3ccee60d8c92a
+Apr 09 23:05:14 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💼 Servicer [2026-04-09T23:04:56Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=1.6823 ETH=0.008101 safety_buffer=1.0 gas_reserve=0.0010 ETH
+Apr 09 23:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=1.68 deployable=0.68 under_pressure=False
+Apr 09 23:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 09 23:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.6823 USDC in servicer wallet
+Apr 09 23:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3402136', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913115679940', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913119559938', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 09 23:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.402136 USDC (raw=3402136)
+Apr 09 23:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔍 sig_type=0 (EOA) response: {'balance': '0', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '0', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '0', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '0'}}
+Apr 09 23:05:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+Apr 09 23:05:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Kalshi balance: 4.7300 USDC
+Apr 09 23:05:43 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: [proxychains] Strict chain  ...  79.101.2.122:49541  ...  feeds.oddpool.com:443 🔁 [ArbExecLoop] 💼 Platform balances: poly=3.4021 kalshi=4.7300 opinion=9.0559 USDC
+Apr 09 23:06:11 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 📊 187 opportunities fetched, sorted by score desc
+Apr 09 23:06:11 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 🔍 [OpinionPreWarm] Resolving tokens for 81 Opinion opportunities (budget=30s)...
+Apr 09 23:06:11 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] openai-ipo-closing-market-cap_ipo_500_750b: parent='152' → child='2376'
+Apr 09 23:06:16 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_hou: could not resolve parent='103' hint='hou'
+Apr 09 23:06:16 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_cle: could not resolve parent='103' hint='cle'
+Apr 09 23:06:16 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_8: parent='78' → child='1353'
+Apr 09 23:06:16 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_gretchen_whitmer: parent='380' → child='6812'
+Apr 09 23:06:16 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_gretchen_whitmer: parent='380' → child='6812'
+Apr 09 23:06:16 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] uk-prime-minister-2026_nigel_farage: parent='382' → child='6844'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] stanley-cup-2026_colorado_avalanche: parent='345' → child='5566'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_united: parent='80' → child='1367'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_city: parent='80' → child='1365'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-mvp-2026_shai_gilgeous_alexander: parent='115' → child='2089'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] la-liga-winner-2026_real_madrid: parent='82' → child='1378'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_sex: parent='169' → child='2568'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_gsw: could not resolve parent='103' hint='gsw'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_sx: parent='169' → child='2569'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] satoshi-move-btc-2026_satoshi_move_btc_2026_yes: parent='3365' → child='3365'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] acquisitions-before-2027_nebius_group: parent='337' → child='5345'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] la-liga-winner-2026_real_madrid: parent='82' → child='1378'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] hottest-years-2026_number_1: parent='378' → child='6754'
+Apr 09 23:06:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_spac: parent='169' → child='2574'
+Apr 09 23:06:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_den: could not resolve parent='103' hint='den'
+Apr 09 23:06:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_park_ju_min: parent='131' → child='2185'
+Apr 09 23:06:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] uk-prime-minister-2026_rupert_lowe: parent='382' → child='6841'
+Apr 09 23:06:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_4t: parent='204' → child='3085'
+Apr 09 23:06:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lpl-2026-season-winner_lgd_gaming: parent='212' → child='3187'
+Apr 09 23:06:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_hou: could not resolve parent='103' hint='hou'
+Apr 09 23:06:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] balance-of-power-2026-midterms_d_senate_r_house: parent='390' → child='7352'
+Apr 09 23:06:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fomc-2026-04-29_hike_25bps: parent='153' → child='2384'
+Apr 09 23:06:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_star: parent='169' → child='2573'
+Apr 09 23:06:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] trump-out-president-before-2027_trump_out_before_2027: parent='3062' → child='3062'
+Apr 09 23:06:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] largest-company-end-of-june-2026_amazon: parent='351' → child='5809'
+Apr 09 23:06:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_6t: parent='204' → child='3086'
+Apr 09 23:06:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_lal: could not resolve parent='103' hint='lal'
+Apr 09 23:06:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1t: parent='204' → child='3083'
+Apr 09 23:06:24 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_2t: parent='204' → child='3084'
+Apr 09 23:06:24 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_na_kyung_won: parent='131' → child='2186'
+Apr 09 23:06:24 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_city: parent='80' → child='1365'
+Apr 09 23:06:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] inflation-2026_above_10p: parent='344' → child='5563'
+Apr 09 23:06:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lck-2026-winner_kt_rolster: parent='213' → child='3192'
+Apr 09 23:06:31 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] james-bond-actor_tom_hardy: parent='389' → child='7348'
+Apr 09 23:06:31 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_okc: could not resolve parent='103' hint='okc'
+Apr 09 23:06:31 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-worlds-2026-winning-region_lcp_asia_pacific: parent='360' → child='6146'
+Apr 09 23:06:31 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_6: parent='78' → child='1351'
+Apr 09 23:06:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-mvp-2026_victor_wembanyama: parent='115' → child='3178'
+Apr 09 23:06:34 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_nyk: could not resolve parent='103' hint='nyk'
+Apr 09 23:06:36 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] ipos-before-2027_cerebras: parent='163' → child='6284'
+Apr 09 23:06:36 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] james-bond-actor_pierce_brosnan: parent='389' → child='7350'
+Apr 09 23:06:36 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_chong_won_oh: parent='131' → child='2184'
+Apr 09 23:06:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] discord-ipo-closing-market-cap_ipo_20_25b: parent='190' → child='2980'
+Apr 09 23:06:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lpl-2026-season-winner_oh_my_god: parent='212' → child='3186'
+Apr 09 23:06:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] ceos-out-2027_sundar_pichai_google: parent='193' → child='3003'
+Apr 09 23:06:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⏱️ [OpinionPreWarm] Time budget exhausted after 43 resolved, 38 deferred to pre-flight
+Apr 09 23:06:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⏭ Skipping trump-admin-departures-2026_kash_patel: failed 190s ago (cooldown=300s, retry in 109s)
+Apr 09 23:06:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 president-2028_marco_rubio: size_usdc=100000.00 capped to opp_total_available=8.81 USDC (servicer=0.68 + poly=3.40 + kalshi=4.73)
+Apr 09 23:06:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=president-2028_marco_rubio venue2=kalshi | score=1300.0 AR=0.00× net_edge=2.50% conf=0.00 | days=941.83d size=$8.81
+Apr 09 23:06:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 🔍 Starting execution for pair president-2028_marco_rubio (venue2=kalshi)
+Apr 09 23:06:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 1117161890585731... for price check
+Apr 09 23:06:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXPRESPERSON-28' → 'KXPRESPERSON-28-TCAR'
+Apr 09 23:06:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Fetching live orderbooks in parallel: poly=1117161890585731... (side=YES) | kalshi=KXPRESPERSON-28-TCAR
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📖 Books loaded: poly=143 levels | kalshi=9 levels
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Best asks: poly=0.0940 kalshi=0.9880 | Oddpool net_edge=2.5000% (reference only)
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP gate: target_contracts=8 budget=$8.81 combined_best_ask=1.0820
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP result: poly_vwap=0.094 (8/8 contracts, depth_ok=True) | kalshi_vwap=0.988 (8/8 contracts, depth_ok=True)
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Matched contracts: 8 (poly_filled=8/8 kalshi_filled=8/8)
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP @ matched size (8 contracts): poly=0.0940 kalshi=0.9880 (initial @ target: poly=0.0940 kalshi=0.9880)
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📐 VWAP profitability @ 8 contracts: poly_vwap=0.0940 kalshi_vwap=0.9880 gross_edge=-8.2000% fee=0.0000% net_edge=-8.2000% required=0.8000%
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ❌ vwap_edge_insufficient: net_edge=-8.2000% < required=0.8000% (poly_vwap=0.0940 kalshi_vwap=0.9880 matched=8 contracts). Market depth erases arb edge at this size.
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ❌ president-2028_marco_rubio: execution stopped cycle — vwap_edge_insufficient: net_edge=-8.2000% < required=0.8000% (poly_vwap=0.0940 kalshi_vwap=0.9880 matched=8 contracts). Market depth erases arb edge at this size. unwound=False — pair suppressed for 300s
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=1 skipped_display_only=0 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=1 skipped_opinion_token=0 depth_insufficient=0 depth_unavailable=0
+Apr 09 23:06:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 09 23:07:20 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 09 23:08:16 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=0.68 under_pressure=False unwind_needed=False
+Apr 09 23:08:16 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-09T23:08:14Z
+Apr 09 23:08:16 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 09 23:08:25 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775775909, cooldown=60s) — calling
+Apr 09 23:08:25 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=5150
+Apr 09 23:08:33 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 📤 TX nonce=5150 → 0xec0f15ab607136ff3b71230b8b8ad9edb63a413760f62a61e4d589035987fa16
+Apr 09 23:08:33 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] ✅ tend() sent: tx=0xec0f15ab607136ff3b71230b8b8ad9edb63a413760f62a61e4d589035987fa16
+Apr 09 23:08:33 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💼 Servicer [2026-04-09T23:08:14Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=1.6823 ETH=0.008100 safety_buffer=1.0 gas_reserve=0.0010 ETH
+Apr 09 23:08:50 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=1.68 deployable=0.68 under_pressure=False
+Apr 09 23:08:50 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 09 23:08:50 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.6823 USDC in servicer wallet
+Apr 09 23:08:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3402136', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913115679940', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913119559938', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 09 23:08:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.402136 USDC (raw=3402136)
+Apr 09 23:08:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔍 sig_type=0 (EOA) response: {'balance': '0', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '0', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '0', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '0'}}
+Apr 09 23:08:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+Apr 09 23:08:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Kalshi balance: 4.7300 USDC
+Apr 09 23:09:05 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 Platform balances: poly=3.4021 kalshi=4.7300 opinion=9.0559 USDC
+Apr 09 23:09:23 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 📊 185 opportunities fetched, sorted by score desc
+Apr 09 23:09:23 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 🔍 [OpinionPreWarm] Resolving tokens for 81 Opinion opportunities (budget=30s)...
+Apr 09 23:09:23 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] openai-ipo-closing-market-cap_ipo_500_750b: parent='152' → child='2376'
+Apr 09 23:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_hou: could not resolve parent='103' hint='hou'
+Apr 09 23:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_cle: could not resolve parent='103' hint='cle'
+Apr 09 23:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_8: parent='78' → child='1353'
+Apr 09 23:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_gretchen_whitmer: parent='380' → child='6812'
+Apr 09 23:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_gretchen_whitmer: parent='380' → child='6812'
+Apr 09 23:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] uk-prime-minister-2026_nigel_farage: parent='382' → child='6844'
+Apr 09 23:09:33 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] stanley-cup-2026_colorado_avalanche: parent='345' → child='5566'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_united: parent='80' → child='1367'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_city: parent='80' → child='1365'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-mvp-2026_shai_gilgeous_alexander: parent='115' → child='2089'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] la-liga-winner-2026_real_madrid: parent='82' → child='1378'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_sex: parent='169' → child='2568'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_gsw: could not resolve parent='103' hint='gsw'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_sx: parent='169' → child='2569'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] satoshi-move-btc-2026_satoshi_move_btc_2026_yes: parent='3365' → child='3365'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] acquisitions-before-2027_nebius_group: parent='337' → child='5345'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] la-liga-winner-2026_real_madrid: parent='82' → child='1378'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] hottest-years-2026_number_1: parent='378' → child='6754'
+Apr 09 23:09:35 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_spac: parent='169' → child='2574'
+Apr 09 23:09:37 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_den: could not resolve parent='103' hint='den'
+Apr 09 23:09:37 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_4t: parent='204' → child='3085'
+Apr 09 23:09:37 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_park_ju_min: parent='131' → child='2185'
+Apr 09 23:09:37 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] uk-prime-minister-2026_rupert_lowe: parent='382' → child='6841'
+Apr 09 23:09:37 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lpl-2026-season-winner_lgd_gaming: parent='212' → child='3187'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_hou: could not resolve parent='103' hint='hou'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] balance-of-power-2026-midterms_d_senate_r_house: parent='390' → child='7352'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fomc-2026-04-29_hike_25bps: parent='153' → child='2384'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_star: parent='169' → child='2573'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] trump-out-president-before-2027_trump_out_before_2027: parent='3062' → child='3062'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] largest-company-end-of-june-2026_amazon: parent='351' → child='5809'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_6t: parent='204' → child='3086'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_2t: parent='204' → child='3084'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_lal: could not resolve parent='103' hint='lal'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1t: parent='204' → child='3083'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_na_kyung_won: parent='131' → child='2186'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_city: parent='80' → child='1365'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] inflation-2026_above_10p: parent='344' → child='5563'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lck-2026-winner_kt_rolster: parent='213' → child='3192'
+Apr 09 23:09:38 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] james-bond-actor_tom_hardy: parent='389' → child='7348'
+Apr 09 23:09:40 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_okc: could not resolve parent='103' hint='okc'
+Apr 09 23:09:40 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-worlds-2026-winning-region_lcp_asia_pacific: parent='360' → child='6146'
+Apr 09 23:09:40 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_6: parent='78' → child='1351'
+Apr 09 23:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_nyk: could not resolve parent='103' hint='nyk'
+Apr 09 23:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] ipos-before-2027_cerebras: parent='163' → child='6284'
+Apr 09 23:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] james-bond-actor_pierce_brosnan: parent='389' → child='7350'
+Apr 09 23:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_chong_won_oh: parent='131' → child='2184'
+Apr 09 23:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] discord-ipo-closing-market-cap_ipo_20_25b: parent='190' → child='2980'
+Apr 09 23:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-mvp-2026_victor_wembanyama: parent='115' → child='3178'
+Apr 09 23:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lpl-2026-season-winner_oh_my_god: parent='212' → child='3186'
+Apr 09 23:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] ceos-out-2027_sundar_pichai_google: parent='193' → child='3003'
+Apr 09 23:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_7: parent='78' → child='1352'
+Apr 09 23:09:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_mars: parent='169' → child='2572'
+Apr 09 23:09:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] stanley-cup-2026_dallas_stars: parent='345' → child='5573'
+Apr 09 23:09:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-mvp-2026_victor_wembanyama: parent='115' → child='3178'
+Apr 09 23:09:46 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] discord-ipo-closing-market-cap_ipo_under_15b: parent='190' → child='2978'
+Apr 09 23:09:48 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_jb_pritzker: parent='380' → child='6811'
+Apr 09 23:09:48 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_jeon_hyun_heui: parent='131' → child='2187'
+Apr 09 23:09:48 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] balance-of-power-2026-midterms_other: parent='390' → child='7355'
+Apr 09 23:09:49 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_space: parent='169' → child='2571'
+Apr 09 23:09:49 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] trump-endorsement-jd-vance-2027_will_trump_endorse_jd_vance_for_president_before_2027: parent='3055' → child='3055'
+Apr 09 23:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-playoffs-teams_toronto_raptors: parent='371' → child='6345'
+Apr 09 23:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_4: parent='78' → child='1349'
+Apr 09 23:09:55 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⏱️ [OpinionPreWarm] Time budget exhausted after 55 resolved, 26 deferred to pre-flight
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 trump-admin-departures-2026_kash_patel: size_usdc=34193.60 capped to opp_total_available=8.81 USDC (servicer=0.68 + poly=3.40 + kalshi=4.73)
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=trump-admin-departures-2026_kash_patel venue2=kalshi | score=1367.7 AR=0.00× net_edge=7.90% conf=0.00 | days=265.04d size=$8.81
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 🔍 Starting execution for pair trump-admin-departures-2026_kash_patel (venue2=kalshi)
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 7085696445100036... for price check
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXTRUMPADMINLEAVE-26DEC31' → 'KXTRUMPADMINLEAVE-26DEC31-RSCO'
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Fetching live orderbooks in parallel: poly=7085696445100036... (side=YES) | kalshi=KXTRUMPADMINLEAVE-26DEC31-RSCO
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📖 Books loaded: poly=25 levels | kalshi=25 levels
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Best asks: poly=0.6300 kalshi=0.7700 | Oddpool net_edge=7.9000% (reference only)
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP gate: target_contracts=6 budget=$8.81 combined_best_ask=1.4000
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP result: poly_vwap=0.63 (6/6 contracts, depth_ok=True) | kalshi_vwap=0.77 (6/6 contracts, depth_ok=True)
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Matched contracts: 6 (poly_filled=6/6 kalshi_filled=6/6)
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP @ matched size (6 contracts): poly=0.6300 kalshi=0.7700 (initial @ target: poly=0.6300 kalshi=0.7700)
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📐 VWAP profitability @ 6 contracts: poly_vwap=0.6300 kalshi_vwap=0.7700 gross_edge=-40.0000% fee=0.0000% net_edge=-40.0000% required=0.8000%
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ❌ vwap_edge_insufficient: net_edge=-40.0000% < required=0.8000% (poly_vwap=0.6300 kalshi_vwap=0.7700 matched=6 contracts). Market depth erases arb edge at this size.
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ❌ trump-admin-departures-2026_kash_patel: execution stopped cycle — vwap_edge_insufficient: net_edge=-40.0000% < required=0.8000% (poly_vwap=0.6300 kalshi_vwap=0.7700 matched=6 contracts). Market depth erases arb edge at this size. unwound=False — pair suppressed for 300s
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=1 skipped_display_only=0 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=0 skipped_opinion_token=0 depth_insufficient=0 depth_unavailable=0
+Apr 09 23:09:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 09 23:10:32 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 09 23:11:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=0.68 under_pressure=False unwind_needed=False
+Apr 09 23:11:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-09T23:11:26Z
+Apr 09 23:11:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 09 23:11:41 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775776109, cooldown=60s) — calling
+Apr 09 23:11:41 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=5151
+Apr 09 23:11:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 📤 TX nonce=5151 → 0x42decf550b5c5c70ea2a20293baa5216bc1449cdf2e162f57d88e822f3a18462
+Apr 09 23:11:44 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] ✅ tend() sent: tx=0x42decf550b5c5c70ea2a20293baa5216bc1449cdf2e162f57d88e822f3a18462
+Apr 09 23:11:50 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💼 Servicer [2026-04-09T23:11:26Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=1.6823 ETH=0.008100 safety_buffer=1.0 gas_reserve=0.0010 ETH
+Apr 09 23:12:10 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=1.68 deployable=0.68 under_pressure=False
+Apr 09 23:12:10 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 09 23:12:10 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.6823 USDC in servicer wallet
+Apr 09 23:12:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔍 [POLY] sig_type=2 (GNOSIS_SAFE) response: {'balance': '3402136', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '115792089237316195423570985008687907853269984665640564039457584007913115679940', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '115792089237316195423570985008687907853269984665640564039457584007913119559938', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '115792089237316195423570985008687907853269984665640564039457584007913129639935'}}
+Apr 09 23:12:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Poly balance (proxy): 3.402136 USDC (raw=3402136)
+Apr 09 23:12:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 🔍 sig_type=0 (EOA) response: {'balance': '0', 'allowances': {'0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E': '0', '0xC5d563A36AE78145C45a50134d48A1215220f80a': '0', '0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296': '0'}}
+Apr 09 23:12:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Poly balance (EOA): 0.000000 USDC (raw=0)
+Apr 09 23:12:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 💸 [ArbFunder] 💰 Kalshi balance: 4.7300 USDC
+Apr 09 23:12:21 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: [proxychains] Strict chain  ...  79.101.2.122:49541  ...  feeds.oddpool.com:443 🔁 [ArbExecLoop] 💼 Platform balances: poly=3.4021 kalshi=4.7300 opinion=9.0559 USDC
+Apr 09 23:12:47 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 📊 189 opportunities fetched, sorted by score desc
+Apr 09 23:12:47 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 🔍 [OpinionPreWarm] Resolving tokens for 84 Opinion opportunities (budget=30s)...
+Apr 09 23:12:47 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] openai-ipo-closing-market-cap_ipo_500_750b: parent='152' → child='2376'
+Apr 09 23:12:49 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_hou: could not resolve parent='103' hint='hou'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_cle: could not resolve parent='103' hint='cle'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_8: parent='78' → child='1353'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_gretchen_whitmer: parent='380' → child='6812'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_gretchen_whitmer: parent='380' → child='6812'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] uk-prime-minister-2026_nigel_farage: parent='382' → child='6844'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] stanley-cup-2026_colorado_avalanche: parent='345' → child='5566'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_united: parent='80' → child='1367'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_city: parent='80' → child='1365'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-mvp-2026_shai_gilgeous_alexander: parent='115' → child='2089'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] la-liga-winner-2026_real_madrid: parent='82' → child='1378'
+Apr 09 23:12:52 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_sex: parent='169' → child='2568'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_gsw: could not resolve parent='103' hint='gsw'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_sx: parent='169' → child='2569'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] satoshi-move-btc-2026_satoshi_move_btc_2026_yes: parent='3365' → child='3365'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] acquisitions-before-2027_nebius_group: parent='337' → child='5345'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] la-liga-winner-2026_real_madrid: parent='82' → child='1378'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] hottest-years-2026_number_1: parent='378' → child='6754'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_spac: parent='169' → child='2574'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_den: could not resolve parent='103' hint='den'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_park_ju_min: parent='131' → child='2185'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_4t: parent='204' → child='3085'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] uk-prime-minister-2026_rupert_lowe: parent='382' → child='6841'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lpl-2026-season-winner_lgd_gaming: parent='212' → child='3187'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_hou: could not resolve parent='103' hint='hou'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] balance-of-power-2026-midterms_d_senate_r_house: parent='390' → child='7352'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fomc-2026-04-29_hike_25bps: parent='153' → child='2384'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_star: parent='169' → child='2573'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] trump-out-president-before-2027_trump_out_before_2027: parent='3062' → child='3062'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] largest-company-end-of-june-2026_amazon: parent='351' → child='5809'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_6t: parent='204' → child='3086'
+Apr 09 23:12:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1_2t: parent='204' → child='3084'
+Apr 09 23:12:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_lal: could not resolve parent='103' hint='lal'
+Apr 09 23:12:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] space-x-ipo-closing-market-cap-above_above_1t: parent='204' → child='3083'
+Apr 09 23:12:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_na_kyung_won: parent='131' → child='2186'
+Apr 09 23:12:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] english-premier-league-winner-2026_man_city: parent='80' → child='1365'
+Apr 09 23:12:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] inflation-2026_above_10p: parent='344' → child='5563'
+Apr 09 23:12:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lck-2026-winner_kt_rolster: parent='213' → child='3192'
+Apr 09 23:12:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] james-bond-actor_tom_hardy: parent='389' → child='7348'
+Apr 09 23:12:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_okc: could not resolve parent='103' hint='okc'
+Apr 09 23:12:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-worlds-2026-winning-region_lcp_asia_pacific: parent='360' → child='6146'
+Apr 09 23:12:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_6: parent='78' → child='1351'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚠️ [OpinionPreWarm] nba-champion-2026_nyk: could not resolve parent='103' hint='nyk'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] ipos-before-2027_cerebras: parent='163' → child='6284'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] james-bond-actor_pierce_brosnan: parent='389' → child='7350'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_chong_won_oh: parent='131' → child='2184'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] discord-ipo-closing-market-cap_ipo_20_25b: parent='190' → child='2980'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-mvp-2026_victor_wembanyama: parent='115' → child='3178'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lpl-2026-season-winner_oh_my_god: parent='212' → child='3186'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] ceos-out-2027_sundar_pichai_google: parent='193' → child='3003'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_7: parent='78' → child='1352'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_mars: parent='169' → child='2572'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-mvp-2026_victor_wembanyama: parent='115' → child='3178'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] discord-ipo-closing-market-cap_ipo_under_15b: parent='190' → child='2978'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_jb_pritzker: parent='380' → child='6811'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] stanley-cup-2026_dallas_stars: parent='345' → child='5573'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] seoul-mayor-election-winner-2026_jeon_hyun_heui: parent='131' → child='2187'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] balance-of-power-2026-midterms_other: parent='390' → child='7355'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] spacex-ticker-prediction_space: parent='169' → child='2571'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] trump-endorsement-jd-vance-2027_will_trump_endorse_jd_vance_for_president_before_2027: parent='3055' → child='3055'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_jon_ossoff: parent='380' → child='6808'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_4: parent='78' → child='1349'
+Apr 09 23:12:59 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] human-moon-landing-2026_human_moon_landing_2026: parent='6736' → child='6736'
+Apr 09 23:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] trump-putin-next-meeting-location-2029_japan: parent='386' → child='7310'
+Apr 09 23:13:01 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] largest-company-end-of-june-2026_tesla: parent='351' → child='5808'
+Apr 09 23:13:04 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lpl-2026-season-winner_lng_esports: parent='212' → child='3184'
+Apr 09 23:13:04 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_6: parent='78' → child='1351'
+Apr 09 23:13:07 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] dem-nominee-2028_gavin_newsom: parent='380' → child='6804'
+Apr 09 23:13:07 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] tiktok-acquirer_meta: parent='159' → child='2469'
+Apr 09 23:13:07 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_0: parent='78' → child='1345'
+Apr 09 23:13:07 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] nba-playoffs-teams_toronto_raptors: parent='371' → child='6345'
+Apr 09 23:13:07 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] lol-lpl-2026-season-winner_edward_gaming: parent='212' → child='3185'
+Apr 09 23:13:07 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fed-rate-cuts-2026_cuts_4: parent='78' → child='1349'
+Apr 09 23:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] uk-prime-minister-2026_ed_miliband: parent='382' → child='6840'
+Apr 09 23:13:10 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] acquisitions-before-2027_gitlab: parent='337' → child='5344'
+Apr 09 23:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] balance-of-power-2026-midterms_democrats_sweep: parent='390' → child='7351'
+Apr 09 23:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] fomc-2026-04-29_cut_25bps: parent='153' → child='2384'
+Apr 09 23:13:12 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] gop-nominee-2028_jd_vance: parent='381' → child='6818'
+Apr 09 23:13:15 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] gop-nominee-2028_ron_desantis: parent='381' → child='6821'
+Apr 09 23:13:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ✅ [OpinionPreWarm] gop-nominee-2028_thomas_massie: parent='381' → child='6827'
+Apr 09 23:13:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⏱️ [OpinionPreWarm] Time budget exhausted after 73 resolved, 11 deferred to pre-flight
+Apr 09 23:13:18 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⏭ Skipping trump-admin-departures-2026_kash_patel: failed 199s ago (cooldown=300s, retry in 100s)
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 president-2028_marco_rubio: size_usdc=100000.00 capped to opp_total_available=8.81 USDC (servicer=0.68 + poly=3.40 + kalshi=4.73)
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=president-2028_marco_rubio venue2=kalshi | score=1300.0 AR=0.00× net_edge=2.50% conf=0.00 | days=941.82d size=$8.81
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 🔍 Starting execution for pair president-2028_marco_rubio (venue2=kalshi)
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 1117161890585731... for price check
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXPRESPERSON-28' → 'KXPRESPERSON-28-TCAR'
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Fetching live orderbooks in parallel: poly=1117161890585731... (side=YES) | kalshi=KXPRESPERSON-28-TCAR
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📖 Books loaded: poly=144 levels | kalshi=9 levels
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Best asks: poly=0.0940 kalshi=0.9880 | Oddpool net_edge=2.5000% (reference only)
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP gate: target_contracts=8 budget=$8.81 combined_best_ask=1.0820
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP result: poly_vwap=0.094 (8/8 contracts, depth_ok=True) | kalshi_vwap=0.988 (8/8 contracts, depth_ok=True)
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Matched contracts: 8 (poly_filled=8/8 kalshi_filled=8/8)
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP @ matched size (8 contracts): poly=0.0940 kalshi=0.9880 (initial @ target: poly=0.0940 kalshi=0.9880)
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📐 VWAP profitability @ 8 contracts: poly_vwap=0.0940 kalshi_vwap=0.9880 gross_edge=-8.2000% fee=0.0000% net_edge=-8.2000% required=0.8000%
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ❌ vwap_edge_insufficient: net_edge=-8.2000% < required=0.8000% (poly_vwap=0.0940 kalshi_vwap=0.9880 matched=8 contracts). Market depth erases arb edge at this size.
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ❌ president-2028_marco_rubio: execution stopped cycle — vwap_edge_insufficient: net_edge=-8.2000% < required=0.8000% (poly_vwap=0.0940 kalshi_vwap=0.9880 matched=8 contracts). Market depth erases arb edge at this size. unwound=False — pair suppressed for 300s
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚡ Cycle complete: executed=1 skipped_display_only=0 skipped_thin_edge=0 skipped_expiry=0 skipped_caps=1 skipped_opinion_token=0 depth_insufficient=0 depth_unavailable=0
+Apr 09 23:13:26 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 😴 Sleeping 30s until next cycle...
+Apr 09 23:13:53 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle

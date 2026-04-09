@@ -380,19 +380,34 @@ def resolve_market_ticker(
             log(f"♻️ resolve_market_ticker: cache expired for {event_ticker!r}[{outcome_key},{label_hint!r}], re-fetching")
 
     url = f"{KALSHI_BASE_URL}/markets"
-    params = {"event_ticker": event_ticker, "status": "open", "limit": 20}
-    log(f"🔍 resolve_market_ticker: fetching markets for event {event_ticker!r} label_hint={label_hint!r}")
-    resp = http_client.get(url, venue="kalshi", headers=_headers(), params=params, timeout=10, bypass_proxy=True)
-    if resp is None or resp.status_code != 200:
-        log(f"⚠️ resolve_market_ticker: HTTP {resp.status_code if resp else 'None'} for {event_ticker!r}")
-        return None
-
-    try:
-        data = resp.json()
-        markets = data.get("markets", [])
-    except Exception as e:
-        log(f"⚠️ resolve_market_ticker: parse error for {event_ticker!r}: {e}")
-        return None
+    log(f"🔍 resolve_market_ticker: fetching ALL markets for event {event_ticker!r} label_hint={label_hint!r}")
+    markets: list = []
+    cursor: Optional[str] = None
+    page = 0
+    while True:
+        page += 1
+        params: dict = {"event_ticker": event_ticker, "status": "open", "limit": 200}
+        if cursor:
+            params["cursor"] = cursor
+        resp = http_client.get(url, venue="kalshi", headers=_headers(), params=params, timeout=10, bypass_proxy=True)
+        if resp is None or resp.status_code != 200:
+            log(f"⚠️ resolve_market_ticker: HTTP {resp.status_code if resp else 'None'} for {event_ticker!r} (page {page})")
+            if page == 1:
+                return None
+            break
+        try:
+            data = resp.json()
+        except Exception as e:
+            log(f"⚠️ resolve_market_ticker: parse error for {event_ticker!r} (page {page}): {e}")
+            if page == 1:
+                return None
+            break
+        batch = data.get("markets", [])
+        markets.extend(batch)
+        log(f"🔍 resolve_market_ticker: page {page} fetched {len(batch)} markets (total so far: {len(markets)})")
+        cursor = data.get("cursor") or None
+        if not cursor or len(batch) < 200:
+            break
 
     if not markets:
         log(f"⚠️ resolve_market_ticker: no open markets found for event {event_ticker!r}")
