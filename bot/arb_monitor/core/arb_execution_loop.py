@@ -48,6 +48,15 @@ ARB_MIN_DAYS_TO_EXPIRY = ARB_MIN_HOURS_TO_EXPIRY / 24.0
 _OPINION_SKIP_CACHE: dict[tuple[str, str], float] = {}
 _OPINION_SKIP_TTL = 1800  # 30 minutes
 
+# ── Per-pair failure cooldown ─────────────────────────────────────────────────
+# After a pair fails with capital committed (leg failure / post-order network
+# error), suppress retrying the same pair for _PAIR_FAIL_TTL seconds.
+# This prevents the bot from hammering the same top-ranked opportunity every
+# cycle when the underlying issue (e.g. proxy flap, stale order book) is
+# transient rather than permanent.
+_PAIR_FAIL_CACHE: dict[str, float] = {}
+_PAIR_FAIL_TTL = int(os.environ.get("ARB_PAIR_FAIL_COOLDOWN_SECS", "300"))  # 5 minutes
+
 
 def log(msg: str):
     print(f"🔁 [ArbExecLoop] {msg}")
@@ -355,6 +364,17 @@ def _execution_cycle():
                 )
                 continue
 
+        # ── Per-pair failure cooldown: skip pairs that recently failed with capital committed ──
+        _fail_ts = _PAIR_FAIL_CACHE.get(opp.pair_id, 0.0)
+        if _fail_ts > 0 and time.time() < _fail_ts + _PAIR_FAIL_TTL:
+            _fail_remaining = int(_fail_ts + _PAIR_FAIL_TTL - time.time())
+            log(
+                f"⏭ Skipping {opp.pair_id}: failed {int(time.time() - _fail_ts)}s ago "
+                f"(cooldown={_PAIR_FAIL_TTL}s, retry in {_fail_remaining}s)"
+            )
+            skipped_caps += 1
+            continue
+
         # ── Expiry guard: don't enter markets closing too soon ─────────────
         if opp.days_to_expiry < ARB_MIN_DAYS_TO_EXPIRY:
             skipped_expiry += 1
@@ -476,9 +496,13 @@ def _execution_cycle():
             # Capital was committed (funding attempt, leg failure, post-fill unwind).
             # Stop the cycle — attempting more trades risks scattering capital across
             # multiple venues without completing any trade cleanly.
+            # Cache the pair so it is skipped for _PAIR_FAIL_TTL seconds — prevents
+            # the same opportunity dominating the top of the ranked list every cycle
+            # when the root cause (e.g. proxy flap) is transient.
+            _PAIR_FAIL_CACHE[opp.pair_id] = time.time()
             log(
                 f"❌ {opp.pair_id}: execution stopped cycle — {err} "
-                f"unwound={result.unwound}"
+                f"unwound={result.unwound} — pair suppressed for {_PAIR_FAIL_TTL}s"
             )
             break
 

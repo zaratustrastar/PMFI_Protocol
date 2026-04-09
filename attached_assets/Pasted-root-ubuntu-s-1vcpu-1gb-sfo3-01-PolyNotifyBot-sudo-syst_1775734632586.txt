@@ -1,0 +1,20 @@
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo systemctl restart psniper-bot
+root@ubuntu-s-1vcpu-1gb-sfo3-01:~/PolyNotifyBot# sudo journalctl -u psniper-bot -f | grep -E "\[ArbExecLoop\]|\[ArbFunder\]|\[Arb/Executor\]"
+Apr 09 11:35:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: ⚡ [Arb/Executor] 🌐 Poly CLOB proxy ACTIVE (monkey-patched): socks5://<redacted>@79.101.2.122:49541
+Apr 09 11:35:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: [proxychains] Strict chain  ...  79.101.2.122:49541 🔁 [ArbExecLoop] 🟢 Arb execution loop started
+Apr 09 11:35:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 🔁 [ArbExecLoop] ⚡ Starting execution cycle
+Apr 09 11:35:13 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 🔁 [ArbExecLoop] 🚀 Execution loop daemon thread started (poll_interval=30s)
+Apr 09 11:36:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 🔁 [ArbExecLoop] 📊 Cycle liquidity: idle=0.00 required=1.00 pending_redeem=0.00 deployable=0.68 under_pressure=False unwind_needed=False
+Apr 09 11:36:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] 💓 [tend tick] starting — 2026-04-09T11:36:07Z
+Apr 09 11:36:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] 🔄 tend() check — vault=0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC servicer=0xEdae94A822582324f19c89a057d694d833E6A6F0
+Apr 09 11:36:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] 🔄 tend() cooldown elapsed (last=1775734259, cooldown=60s) — calling
+Apr 09 11:36:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] 🔢 NonceTracker: sender=0xEdae94A822582324f19c89a057d694d833E6A6F0 pending_nonce=4961
+Apr 09 11:36:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] 📤 TX nonce=4961 → 0xa78bf1d88f7297588fc17dab8451edb43b257d153ef4a9cb3496bf8c721ebc69
+Apr 09 11:36:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] ✅ tend() sent: tx=0xa78bf1d88f7297588fc17dab8451edb43b257d153ef4a9cb3496bf8c721ebc69
+Apr 09 11:36:28 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] 💼 Servicer [2026-04-09T11:36:07Z]: address=0xEdae94A822582324f19c89a057d694d833E6A6F0 USDC=1.6823 ETH=0.008190 safety_buffer=1.0 gas_reserve=0.0010 ETH
+Apr 09 11:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] 📊 Vault liquidity: idle=0.00 required_idle=1.00 pending_redeem=0.00 servicer=1.68 deployable=0.68 under_pressure=False
+Apr 09 11:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] 💼 Servicer deployable: 1.6823 USDC total − 1.00 safety_buffer = 0.6823 deployable
+Apr 09 11:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 🔁 [ArbExecLoop] 💼 Cycle deployable capital: 0.6823 USDC in servicer wallet
+Apr 09 11:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] ⚠️ [POLY] update_balance_allowance failed (non-fatal): PolyApiException[status_code=None, error_message=Request exception!]
+Apr 09 11:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] ⚠️ Poly balance read error: PolyApiException[status_code=None, error_message=Request exception!]
+Apr 09 11:36:54 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[622237]: 💸 [ArbFunder] 💰 Kalshi balance: 5.6000 USDC

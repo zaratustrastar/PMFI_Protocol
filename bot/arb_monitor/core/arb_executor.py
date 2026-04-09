@@ -225,8 +225,32 @@ def _place_poly_order(
             PartialCreateOrderOptions(tick_size=tick_size, neg_risk=neg_risk),
         )
         log("🧾 [POLY] Signed order built — posting FOK")
-        resp = client.post_order(signed_order, OrderType.FOK)
-        log(f"📡 [POLY] post_order response: {resp}")
+
+        # Retry the POST on transient network errors (status_code=None / "Request exception").
+        # The signed_order is already built — safe to reuse across retries.
+        # Non-network errors (order rejections with an actual HTTP status) are not retried.
+        _max_attempts = 3
+        _retry_delay  = 2.0  # seconds between retries
+        for _attempt in range(1, _max_attempts + 1):
+            try:
+                resp = client.post_order(signed_order, OrderType.FOK)
+                log(f"📡 [POLY] post_order response (attempt {_attempt}): {resp}")
+                break  # success — exit retry loop
+            except Exception as _post_exc:
+                _post_err = str(_post_exc)
+                if "Request exception" in _post_err and _attempt < _max_attempts:
+                    log(
+                        f"⚠️ [POLY] Network error on attempt {_attempt}/{_max_attempts} "
+                        f"— retrying in {_retry_delay}s: {_post_err}"
+                    )
+                    time.sleep(_retry_delay)
+                    continue
+                # Non-retriable error or final attempt exhausted
+                log(f"❌ [POLY] Order error (attempt {_attempt}/{_max_attempts}): {_post_err}")
+                return False, "", _post_err
+        else:
+            # Should not reach here (break exits the loop on success), but guard anyway
+            return False, "", "poly_post_order: all retries exhausted"
 
         order_id = resp.get("orderID", "") or resp.get("orderId", "")
         if resp.get("status") in ("matched", "filled", "live"):
