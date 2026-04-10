@@ -309,6 +309,11 @@ def _place_kalshi_order(
             contracts = int(contract_count)
         else:
             contracts = int(size_usdc / price) if price > 0 else 0
+        # IOC: 5-second expiry so the order either fills immediately or dies fast.
+        # This prevents the order resting in the book while the already-placed
+        # Polymarket FOK leg waits — stale limit orders were the primary cause
+        # of Poly fills with no Kalshi counterpart.
+        ioc_expiry = int(time.time()) + 5
         payload = {
             "ticker": ticker,
             "client_order_id": f"arb_{int(time.time())}",
@@ -318,9 +323,10 @@ def _place_kalshi_order(
             "count": contracts,
             "yes_price": int(price * 100) if side == "YES" else None,
             "no_price": int(price * 100) if side == "NO" else None,
-            "expiration_ts": int(time.time()) + 30,
+            "expiration_ts": ioc_expiry,
         }
         payload = {k: v for k, v in payload.items() if v is not None}
+        log(f"📤 [KALSHI] IOC order: expiry=+5s price={int(price*100)}¢ count={contracts}")
         # Use _KALSHI_SESSION (trust_env=False) to bypass proxy — Kalshi must be direct
         resp = _KALSHI_SESSION.post(url, json=payload, headers=headers, timeout=10)
         if resp.status_code in (200, 201):
@@ -330,12 +336,12 @@ def _place_kalshi_order(
                 err = "no order_id in Kalshi placement response"
                 log(f"❌ [KALSHI] {err}")
                 return False, "", err
-            log(f"🔍 [KALSHI] Order accepted (id={order_id}), polling for fill confirmation...")
-            # HTTP 200 only means the order was queued — it may sit in the book
-            # unfilled until its 30 s TTL expires.  Poll to confirm actual fill.
+            log(f"🔍 [KALSHI] IOC order accepted (id={order_id}), polling for fill (3×2s = 6s max)...")
+            # IOC: poll quickly — if it doesn't fill within the 5s expiry it will
+            # cancel itself; 3 polls × 2s = 6s covers the expiry window cleanly.
             poll_url = f"{KALSHI_BASE_URL}/portfolio/orders/{order_id}"
-            for poll_attempt in range(5):
-                time.sleep(3)
+            for poll_attempt in range(3):
+                time.sleep(2)
                 try:
                     poll_headers = get_kalshi_headers("GET", poll_url)
                     if not poll_headers:
@@ -359,21 +365,21 @@ def _place_kalshi_order(
                         log(f"✅ [KALSHI] Order confirmed filled: orderId={order_id}")
                         return True, order_id, ""
                     if status in ("cancelled", "canceled", "expired"):
-                        log(f"⚠️ [KALSHI] Order {status!r} before fill — triggering unwind")
+                        log(f"⚠️ [KALSHI] Order {status!r} before fill — IOC expired, triggering unwind")
                         return False, order_id, f"kalshi_order_{status}: orderId={order_id}"
                 except Exception as pe:
                     log(f"⚠️ [KALSHI] Fill poll error #{poll_attempt + 1}: {pe}")
-            # Poll window exhausted (15 s).  Cancel whatever remains and fail so
-            # the caller can unwind the already-placed Polymarket leg.
-            log(f"⚠️ [KALSHI] Order {order_id!r} did not fill in 15 s — cancelling and failing")
+            # Poll window exhausted (6s).  IOC should have auto-cancelled by now;
+            # send an explicit cancel as belt-and-suspenders, then fail the leg.
+            log(f"⚠️ [KALSHI] IOC order {order_id!r} did not fill in 6s — cancelling and failing")
             try:
                 del_headers = get_kalshi_headers("DELETE", poll_url)
                 if del_headers:
                     _KALSHI_SESSION.delete(poll_url, headers=del_headers, timeout=8)
-                    log(f"🗑️ [KALSHI] Cancellation sent for unfilled order {order_id!r}")
+                    log(f"🗑️ [KALSHI] Cancellation sent for unfilled IOC order {order_id!r}")
             except Exception as ce:
                 log(f"⚠️ [KALSHI] Cancel attempt failed: {ce}")
-            return False, order_id, f"kalshi_order_unfilled: orderId={order_id} timeout after 15s"
+            return False, order_id, f"kalshi_order_unfilled: orderId={order_id} IOC expired after 6s"
         else:
             err = f"HTTP {resp.status_code}: {resp.text[:200]}"
             log(f"❌ [KALSHI] {err}")
@@ -1363,6 +1369,38 @@ def execute_arb(
         log(f"✅ Both legs funded — proceeding to order placement")
     except Exception as _fe:
         log(f"⚠️ fund_both_legs_for_trade raised ({_fe}) — attempting trade with existing platform balance")
+
+    # ── Pre-placement price refresh (stale quote guard) ───────────────────────
+    # The VWAP gate ran earlier, but funding + sizing can add 10-20s of latency.
+    # Re-fetch the Kalshi best ask right now and abort (or update) if it moved.
+    if venue2 == "kalshi":
+        try:
+            _fresh_kp = kalshi_get_best_prices(kalshi_ticker)
+            _fresh_kalshi = _fresh_kp.get("no_best_ask") if kalshi_side == "NO" else _fresh_kp.get("yes_best_ask")
+            if _fresh_kalshi is not None:
+                _drift = abs(_fresh_kalshi - live_kalshi_ask)
+                if _drift > 0.005:
+                    log(
+                        f"⚠️ [PriceRefresh] Kalshi ask drifted {_drift:.4f}: "
+                        f"{live_kalshi_ask:.4f} → {_fresh_kalshi:.4f} — updating"
+                    )
+                    live_kalshi_ask = _fresh_kalshi
+                    result.live_kalshi_ask = live_kalshi_ask
+                    # Re-check combined cost: if combined >= 1.0 the arb is gone
+                    _combined_fresh = live_poly_ask + live_kalshi_ask
+                    if _combined_fresh >= 1.0:
+                        result.error = (
+                            f"vwap_edge_gone_on_refresh: combined={_combined_fresh:.4f} ≥ 1.0 "
+                            f"after price refresh (poly={live_poly_ask:.4f} kalshi={live_kalshi_ask:.4f})"
+                        )
+                        log(f"❌ {result.error}")
+                        return result
+                else:
+                    log(f"✅ [PriceRefresh] Kalshi ask stable: {live_kalshi_ask:.4f} (drift={_drift:.4f})")
+            else:
+                log(f"⚠️ [PriceRefresh] Kalshi re-fetch returned None — proceeding with cached {live_kalshi_ask:.4f}")
+        except Exception as _pr_err:
+            log(f"⚠️ [PriceRefresh] Kalshi re-fetch failed ({_pr_err}) — proceeding with cached price")
 
     # ── Fire BOTH legs SIMULTANEOUSLY via ThreadPoolExecutor ─────────────────
     # Per the reference pipeline: submit both orders at the same time so that
