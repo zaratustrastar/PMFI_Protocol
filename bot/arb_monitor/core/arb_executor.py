@@ -1373,6 +1373,8 @@ def execute_arb(
     # ── Pre-placement price refresh (stale quote guard) ───────────────────────
     # The VWAP gate ran earlier, but funding + sizing can add 10-20s of latency.
     # Re-fetch the Kalshi best ask right now and abort (or update) if it moved.
+    # CRITICAL: if the price moved, recompute leg2_usdc and contract_count to
+    # avoid insufficient_balance errors on Kalshi from using the old sized amount.
     if venue2 == "kalshi":
         try:
             _fresh_kp = kalshi_get_best_prices(kalshi_ticker)
@@ -1395,6 +1397,33 @@ def execute_arb(
                         )
                         log(f"❌ {result.error}")
                         return result
+                    # Recompute leg2_usdc at the new price — use _v2_bal from the
+                    # balance-fit block above. Fall back to leg2_usdc if the
+                    # balance-fit block threw and _v2_bal was never set.
+                    _new_leg2 = contract_count * live_kalshi_ask
+                    _kalshi_bal_now = locals().get("_v2_bal", leg2_usdc)
+                    if _new_leg2 > _kalshi_bal_now:
+                        # Scale down to what Kalshi can cover at the new price
+                        _max_contracts_kalshi = int(_kalshi_bal_now / live_kalshi_ask) if live_kalshi_ask > 0 else 0
+                        if _max_contracts_kalshi < 1:
+                            result.error = (
+                                f"insufficient_balance_after_refresh: kalshi needs "
+                                f"{_new_leg2:.2f} but only has {_kalshi_bal_now:.2f} "
+                                f"(price moved to {live_kalshi_ask:.4f}, 0 contracts fit)"
+                            )
+                            log(f"❌ {result.error}")
+                            return result
+                        log(
+                            f"⬇️ [PriceRefresh] Scaling {contract_count}→{_max_contracts_kalshi} "
+                            f"contracts (kalshi_bal={_kalshi_bal_now:.2f} / new_price={live_kalshi_ask:.4f})"
+                        )
+                        contract_count = _max_contracts_kalshi
+                    leg1_usdc = contract_count * live_poly_ask
+                    leg2_usdc = contract_count * live_kalshi_ask
+                    log(
+                        f"📐 [PriceRefresh] Resized: {contract_count} contracts, "
+                        f"leg1={leg1_usdc:.4f} leg2={leg2_usdc:.4f} total={leg1_usdc+leg2_usdc:.4f}"
+                    )
                 else:
                     log(f"✅ [PriceRefresh] Kalshi ask stable: {live_kalshi_ask:.4f} (drift={_drift:.4f})")
             else:

@@ -1,0 +1,353 @@
+#!/usr/bin/env python3
+"""
+FIX SUMMARY — 3 changes across 2 files:
+
+FILE 1: bot/arb_monitor/adapters/kalshi.py
+  - Revert extract_asks(): restore flip (YES asks = flip NO bids, NO asks = flip YES bids)
+  - Revert compute_kalshi_fillable_contracts(): same flip restoration
+  - Revert get_best_prices() orderbook fallback: same flip restoration
+
+FILE 2: bot/arb_monitor/core/arb_executor.py
+  - Fix price refresh block: after updating live_kalshi_ask, recompute leg2_usdc,
+    contract_count, and re-check Kalshi balance before firing orders.
+
+Apply with:
+  cd ~/PolyNotifyBot
+  python3 apply_fixes.py
+  git add -A && git commit -m "fix: revert kalshi flip + recompute after price refresh"
+  git push && sudo systemctl restart psniper-bot
+"""
+
+import re, sys, os
+
+def patch_file(filepath, replacements):
+    """Apply a list of (old, new) string replacements to a file."""
+    with open(filepath, 'r') as f:
+        content = f.read()
+    
+    for old, new in replacements:
+        if old not in content:
+            print(f"  ⚠️  Pattern not found in {filepath}:")
+            print(f"      {old[:80]}...")
+            sys.exit(1)
+        count = content.count(old)
+        if count > 1:
+            print(f"  ⚠️  Pattern appears {count} times in {filepath} (expected 1):")
+            print(f"      {old[:80]}...")
+            sys.exit(1)
+        content = content.replace(old, new)
+        print(f"  ✅ Patched: {old[:60].strip()}...")
+    
+    with open(filepath, 'w') as f:
+        f.write(content)
+    print(f"  📝 Saved {filepath}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FIX 1: kalshi.py — revert extract_asks() back to flip logic
+# ═══════════════════════════════════════════════════════════════════════════════
+KALSHI_PATH = os.path.expanduser("~/PolyNotifyBot/bot/arb_monitor/adapters/kalshi.py")
+
+kalshi_fixes = []
+
+# 1a. extract_asks() — Elections API branch
+kalshi_fixes.append((
+    '''    if fp is not None:
+        # Elections API: yes_dollars = YES asks, no_dollars = NO asks.
+        # Use same-side data directly — no cross-flip needed.
+        fp_key = "yes_dollars" if side.upper() == "YES" else "no_dollars"
+        for level in (fp.get(fp_key) or []):
+            try:
+                ask_price_dollars = float(level[0])
+                usdc_amount       = float(level[1])
+                if ask_price_dollars <= 0 or ask_price_dollars > 1.0:
+                    continue
+                qty = int(usdc_amount / ask_price_dollars)
+                if qty > 0:
+                    levels.append((ask_price_dollars, float(qty)))
+            except (ValueError, TypeError, IndexError):
+                continue''',
+
+    '''    if fp is not None:
+        # Elections API: yes_dollars = YES BIDS, no_dollars = NO BIDS.
+        # YES asks = flip NO bids (1 - bid_price); NO asks = flip YES bids.
+        fp_key = "no_dollars" if side.upper() == "YES" else "yes_dollars"
+        for level in (fp.get(fp_key) or []):
+            try:
+                bid_price_dollars = float(level[0])
+                usdc_amount       = float(level[1])
+                if bid_price_dollars <= 0:
+                    continue
+                ask_price_dollars = 1.0 - bid_price_dollars
+                if ask_price_dollars <= 0 or ask_price_dollars > 1.0:
+                    continue
+                qty = int(usdc_amount / bid_price_dollars)
+                if qty > 0:
+                    levels.append((ask_price_dollars, float(qty)))
+            except (ValueError, TypeError, IndexError):
+                continue'''))
+
+# 1b. extract_asks() — Legacy branch
+kalshi_fixes.append((
+    '''        ob = book.get("orderbook", book)
+        # Legacy format: yes = YES asks, no = NO asks — use same side directly.
+        key = "yes" if side.upper() == "YES" else "no"
+        for level in ob.get(key, []):
+            try:
+                ask_price_cents   = float(level.get("price", 0))
+                qty               = int(level.get("delta", 0))
+                ask_price_dollars = ask_price_cents / 100.0
+                if qty > 0 and 0 < ask_price_dollars <= 1.0:
+                    levels.append((ask_price_dollars, float(qty)))''',
+
+    '''        ob = book.get("orderbook", book)
+        # Legacy format: yes = YES BIDS, no = NO BIDS — flip to get asks.
+        # YES asks = flip NO bids; NO asks = flip YES bids.
+        key = "no" if side.upper() == "YES" else "yes"
+        for level in ob.get(key, []):
+            try:
+                bid_price_cents   = float(level.get("price", 0))
+                qty               = int(level.get("delta", 0))
+                bid_price_dollars = bid_price_cents / 100.0
+                ask_price_dollars = 1.0 - bid_price_dollars
+                if qty > 0 and 0 < ask_price_dollars <= 1.0:
+                    levels.append((ask_price_dollars, float(qty)))'''))
+
+# 1c. compute_kalshi_fillable_contracts() — Elections API branch
+kalshi_fixes.append((
+    '''        fp = orderbook.get("orderbook_fp")
+        if fp is not None:
+            # New Elections API format: yes_dollars = YES asks, no_dollars = NO asks.
+            fp_key = "yes_dollars" if side.upper() == "YES" else "no_dollars"
+            raw_levels = fp.get(fp_key) or []
+            use_fp_format = True
+        else:
+            # Legacy format: yes = YES asks, no = NO asks.
+            book = orderbook.get("orderbook", orderbook)
+            key = "yes" if side.upper() == "YES" else "no"''',
+
+    '''        fp = orderbook.get("orderbook_fp")
+        if fp is not None:
+            # New Elections API format: yes_dollars = YES BIDS, no_dollars = NO BIDS.
+            # YES asks = flip NO bids; NO asks = flip YES bids.
+            fp_key = "no_dollars" if side.upper() == "YES" else "yes_dollars"
+            raw_levels = fp.get(fp_key) or []
+            use_fp_format = True
+        else:
+            # Legacy format: yes = YES BIDS, no = NO BIDS — flip to get asks.
+            book = orderbook.get("orderbook", orderbook)
+            key = "no" if side.upper() == "YES" else "yes"'''))
+
+# 1d. compute_kalshi_fillable_contracts() — Elections API parsed_levels
+kalshi_fixes.append((
+    '''    if use_fp_format:
+        # Elections API: each level is [ask_price_str (dollars), usdc_amount_str].
+        # yes_dollars/no_dollars are same-side asks — use price directly, no flip.
+        parsed_levels: list[tuple[float, int]] = []
+        for level in raw_levels:
+            try:
+                ask_price_dollars = float(level[0])
+                usdc_amount       = float(level[1])
+                if ask_price_dollars <= 0 or ask_price_dollars > 1.0:
+                    continue
+                qty = int(usdc_amount / ask_price_dollars)
+                parsed_levels.append((ask_price_dollars, qty))
+            except (ValueError, TypeError, IndexError):
+                continue
+        log(f"📐 [Kalshi/{side}] Elections API (orderbook_fp): {len(parsed_levels)} levels parsed from {fp_key} (direct ask)")''',
+
+    '''    if use_fp_format:
+        # Elections API: each level is [bid_price_str (dollars), usdc_amount_str].
+        # These are opposite-side BIDS — flip to get asks: ask = 1 - bid.
+        parsed_levels: list[tuple[float, int]] = []
+        for level in raw_levels:
+            try:
+                bid_price_dollars = float(level[0])
+                usdc_amount       = float(level[1])
+                if bid_price_dollars <= 0:
+                    continue
+                ask_price_dollars = 1.0 - bid_price_dollars
+                if ask_price_dollars <= 0 or ask_price_dollars > 1.0:
+                    continue
+                qty = int(usdc_amount / bid_price_dollars)
+                parsed_levels.append((ask_price_dollars, qty))
+            except (ValueError, TypeError, IndexError):
+                continue
+        log(f"📐 [Kalshi/{side}] Elections API (orderbook_fp): {len(parsed_levels)} levels parsed from {fp_key} (bid-flipped)")'''))
+
+# 1e. compute_kalshi_fillable_contracts() — Legacy parsed_levels
+kalshi_fixes.append((
+    '''        parsed_levels = []
+        for level in raw_levels:
+            try:
+                ask_price_cents   = float(level.get("price", 0))
+                qty               = int(level.get("delta", 0))
+                ask_price_dollars = ask_price_cents / 100.0
+                if ask_price_dollars > 0 and ask_price_dollars <= 1.0:
+                    parsed_levels.append((ask_price_dollars, qty))''',
+
+    '''        parsed_levels = []
+        for level in raw_levels:
+            try:
+                bid_price_cents   = float(level.get("price", 0))
+                qty               = int(level.get("delta", 0))
+                bid_price_dollars = bid_price_cents / 100.0
+                ask_price_dollars = 1.0 - bid_price_dollars
+                if bid_price_dollars > 0 and ask_price_dollars > 0 and ask_price_dollars <= 1.0:
+                    parsed_levels.append((ask_price_dollars, qty))'''))
+
+# 1f. get_best_prices() orderbook fallback
+kalshi_fixes.append((
+    '''                    fp = ob.get("orderbook_fp", {})
+                    # Elections API: yes_dollars = YES asks, no_dollars = NO asks.
+                    # Use each side's own data directly — no cross-flip.
+                    yes_ask_lvls = fp.get("yes_dollars") or []
+                    no_ask_lvls  = fp.get("no_dollars") or []
+                    if yes_ask_lvls:
+                        yes_best_ask = round(min(float(l[0]) for l in yes_ask_lvls), 6)
+                    if no_ask_lvls:
+                        no_best_ask  = round(min(float(l[0]) for l in no_ask_lvls), 6)''',
+
+    '''                    fp = ob.get("orderbook_fp", {})
+                    # Elections API: yes_dollars = YES BIDS, no_dollars = NO BIDS.
+                    # YES asks = flip NO bids; NO asks = flip YES bids.
+                    no_bid_lvls  = fp.get("no_dollars") or []   # NO bids → derive YES asks
+                    yes_bid_lvls = fp.get("yes_dollars") or []  # YES bids → derive NO asks
+                    if no_bid_lvls:
+                        best_no_bid  = max(float(l[0]) for l in no_bid_lvls)
+                        yes_best_ask = round(1.0 - best_no_bid, 6)
+                    if yes_bid_lvls:
+                        best_yes_bid = max(float(l[0]) for l in yes_bid_lvls)
+                        no_best_ask  = round(1.0 - best_yes_bid, 6)'''))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FIX 2: arb_executor.py — recompute sizing after price refresh
+# ═══════════════════════════════════════════════════════════════════════════════
+EXECUTOR_PATH = os.path.expanduser("~/PolyNotifyBot/bot/arb_monitor/core/arb_executor.py")
+
+executor_fixes = []
+
+# Replace the price refresh block to recompute leg2_usdc and contract_count
+executor_fixes.append((
+    '''    # ── Pre-placement price refresh (stale quote guard) ───────────────────────
+    # The VWAP gate ran earlier, but funding + sizing can add 10-20s of latency.
+    # Re-fetch the Kalshi best ask right now and abort (or update) if it moved.
+    if venue2 == "kalshi":
+        try:
+            _fresh_kp = kalshi_get_best_prices(kalshi_ticker)
+            _fresh_kalshi = _fresh_kp.get("no_best_ask") if kalshi_side == "NO" else _fresh_kp.get("yes_best_ask")
+            if _fresh_kalshi is not None:
+                _drift = abs(_fresh_kalshi - live_kalshi_ask)
+                if _drift > 0.005:
+                    log(
+                        f"⚠️ [PriceRefresh] Kalshi ask drifted {_drift:.4f}: "
+                        f"{live_kalshi_ask:.4f} → {_fresh_kalshi:.4f} — updating"
+                    )
+                    live_kalshi_ask = _fresh_kalshi
+                    result.live_kalshi_ask = live_kalshi_ask
+                    # Re-check combined cost: if combined >= 1.0 the arb is gone
+                    _combined_fresh = live_poly_ask + live_kalshi_ask
+                    if _combined_fresh >= 1.0:
+                        result.error = (
+                            f"vwap_edge_gone_on_refresh: combined={_combined_fresh:.4f} ≥ 1.0 "
+                            f"after price refresh (poly={live_poly_ask:.4f} kalshi={live_kalshi_ask:.4f})"
+                        )
+                        log(f"❌ {result.error}")
+                        return result
+                else:
+                    log(f"✅ [PriceRefresh] Kalshi ask stable: {live_kalshi_ask:.4f} (drift={_drift:.4f})")
+            else:
+                log(f"⚠️ [PriceRefresh] Kalshi re-fetch returned None — proceeding with cached {live_kalshi_ask:.4f}")
+        except Exception as _pr_err:
+            log(f"⚠️ [PriceRefresh] Kalshi re-fetch failed ({_pr_err}) — proceeding with cached price")''',
+
+    '''    # ── Pre-placement price refresh (stale quote guard) ───────────────────────
+    # The VWAP gate ran earlier, but funding + sizing can add 10-20s of latency.
+    # Re-fetch the Kalshi best ask right now and abort (or update) if it moved.
+    # CRITICAL: if the price moved, we must recompute leg2_usdc and contract_count
+    # to avoid insufficient_balance errors on Kalshi.
+    if venue2 == "kalshi":
+        try:
+            _fresh_kp = kalshi_get_best_prices(kalshi_ticker)
+            _fresh_kalshi = _fresh_kp.get("no_best_ask") if kalshi_side == "NO" else _fresh_kp.get("yes_best_ask")
+            if _fresh_kalshi is not None:
+                _drift = abs(_fresh_kalshi - live_kalshi_ask)
+                if _drift > 0.005:
+                    log(
+                        f"⚠️ [PriceRefresh] Kalshi ask drifted {_drift:.4f}: "
+                        f"{live_kalshi_ask:.4f} → {_fresh_kalshi:.4f} — updating"
+                    )
+                    live_kalshi_ask = _fresh_kalshi
+                    result.live_kalshi_ask = live_kalshi_ask
+                    # Re-check combined cost: if combined >= 1.0 the arb is gone
+                    _combined_fresh = live_poly_ask + live_kalshi_ask
+                    if _combined_fresh >= 1.0:
+                        result.error = (
+                            f"vwap_edge_gone_on_refresh: combined={_combined_fresh:.4f} ≥ 1.0 "
+                            f"after price refresh (poly={live_poly_ask:.4f} kalshi={live_kalshi_ask:.4f})"
+                        )
+                        log(f"❌ {result.error}")
+                        return result
+                    # Recompute leg2_usdc and contract_count at the new price
+                    _new_leg2 = contract_count * live_kalshi_ask
+                    # Check if Kalshi balance can cover the new cost
+                    try:
+                        _kalshi_bal_now = _get_platform_balance("kalshi") if '_get_platform_balance' in dir() else _v2_bal
+                    except Exception:
+                        _kalshi_bal_now = _v2_bal  # fallback to last known
+                    if _new_leg2 > _kalshi_bal_now:
+                        # Scale down contract_count to fit Kalshi balance
+                        _max_contracts_kalshi = int(_kalshi_bal_now / live_kalshi_ask) if live_kalshi_ask > 0 else 0
+                        if _max_contracts_kalshi < 1:
+                            result.error = (
+                                f"insufficient_balance_after_refresh: kalshi needs "
+                                f"{_new_leg2:.2f} but only has {_kalshi_bal_now:.2f} "
+                                f"(price moved {live_kalshi_ask:.4f}, 0 contracts fit)"
+                            )
+                            log(f"❌ {result.error}")
+                            return result
+                        log(
+                            f"⬇️ [PriceRefresh] Scaling {contract_count}→{_max_contracts_kalshi} "
+                            f"contracts (kalshi_bal={_kalshi_bal_now:.2f} / new_price={live_kalshi_ask:.4f})"
+                        )
+                        contract_count = _max_contracts_kalshi
+                    leg1_usdc = contract_count * live_poly_ask
+                    leg2_usdc = contract_count * live_kalshi_ask
+                    log(
+                        f"📐 [PriceRefresh] Resized: {contract_count} contracts, "
+                        f"leg1={leg1_usdc:.4f} leg2={leg2_usdc:.4f} total={leg1_usdc+leg2_usdc:.4f}"
+                    )
+                else:
+                    log(f"✅ [PriceRefresh] Kalshi ask stable: {live_kalshi_ask:.4f} (drift={_drift:.4f})")
+            else:
+                log(f"⚠️ [PriceRefresh] Kalshi re-fetch returned None — proceeding with cached {live_kalshi_ask:.4f}")
+        except Exception as _pr_err:
+            log(f"⚠️ [PriceRefresh] Kalshi re-fetch failed ({_pr_err}) — proceeding with cached price")'''))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Apply
+# ═══════════════════════════════════════════════════════════════════════════════
+if __name__ == "__main__":
+    print("=" * 70)
+    print("Applying fixes...")
+    print("=" * 70)
+
+    print(f"\n📄 Patching {KALSHI_PATH}")
+    patch_file(KALSHI_PATH, kalshi_fixes)
+
+    print(f"\n📄 Patching {EXECUTOR_PATH}")
+    patch_file(EXECUTOR_PATH, executor_fixes)
+
+    print("\n" + "=" * 70)
+    print("✅ All fixes applied!")
+    print("=" * 70)
+    print("""
+Next steps:
+  cd ~/PolyNotifyBot
+  git diff  # review changes
+  git add -A && git commit -m "fix: revert kalshi bid-flip + recompute after price refresh"
+  git push && sudo systemctl restart psniper-bot
+  sudo journalctl -u psniper-bot -f | grep -E "\\[Arb/Executor\\]|\\[PriceRefresh\\]"
+""")
