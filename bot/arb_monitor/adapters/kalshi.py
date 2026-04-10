@@ -294,6 +294,8 @@ def _kalshi_label_match_score(label: str, market: dict) -> float:
     label_parts = set(label_n.split())
 
     candidates = [
+        (market.get("yes_sub_title") or ""),
+        (market.get("no_sub_title") or ""),
         (market.get("subtitle") or ""),
         (market.get("title") or ""),
         (market.get("sub_title") or ""),
@@ -444,8 +446,9 @@ def resolve_market_ticker(
     )
     for _m in open_markets:
         log(
-            f"   → {_m.get('ticker')!r}  subtitle={_m.get('subtitle')!r}  "
-            f"title={_m.get('title')!r}  status={_m.get('status')!r}"
+            f"   → {_m.get('ticker')!r}  yes_sub_title={_m.get('yes_sub_title')!r}  "
+            f"subtitle={_m.get('subtitle')!r}  title={_m.get('title')!r}  "
+            f"yes_bid={_m.get('yes_bid_dollars', _m.get('yes_bid'))!r}  status={_m.get('status')!r}"
         )
 
     # ── Label-aware selection (preferred when label_hint is provided) ──────────
@@ -459,16 +462,20 @@ def resolve_market_ticker(
             score = _kalshi_label_match_score(label_hint, m)
             log(
                 f"   label_score({label_hint!r}, {m.get('ticker')!r}) "
-                f"subtitle={m.get('subtitle')!r} → {score:.3f}"
+                f"yes_sub_title={m.get('yes_sub_title')!r} subtitle={m.get('subtitle')!r} → {score:.3f}"
             )
             if score > best_score:
                 best_score = score
                 best_ticker = m.get("ticker", "")
 
         if best_ticker and best_score > 0.0:
+            _matched_m = next((m for m in open_markets if m.get("ticker") == best_ticker), {})
+            _matched_yes_bid = _matched_m.get("yes_bid_dollars") or _matched_m.get("yes_bid")
             log(
                 f"✅ resolve_market_ticker: {event_ticker!r} → {best_ticker!r} "
                 f"(label_match={best_score:.3f}, label_hint={label_hint!r}, "
+                f"yes_sub_title={_matched_m.get('yes_sub_title')!r}, "
+                f"yes_bid={_matched_yes_bid!r}, "
                 f"outcome_key={outcome_key!r}, {len(open_markets)} open markets)"
             )
             _MARKET_TICKER_CACHE[cache_key] = (best_ticker, now)

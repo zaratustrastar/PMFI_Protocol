@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+"""
+FIX: Kalshi event→market resolution picks wrong sub-market
+
+ROOT CAUSE: _kalshi_label_match_score only checks subtitle/title/sub_title.
+Kalshi's API puts candidate names in `yes_sub_title` (e.g. "Marco Rubio").
+The code never checks this field, so label matching scores 0 for every
+sub-market and falls through to the alphabetical fallback — picking the
+wrong candidate (e.g. TCAR=Ted Cruz instead of MRUB=Marco Rubio).
+
+FIX 1: Add yes_sub_title and no_sub_title to _kalshi_label_match_score.
+FIX 2: Add price-based validation in resolve_market_ticker — after label
+        matching picks a candidate, verify its yes_bid_dollars matches
+        Oddpool's expected price. Reject if delta > 30¢ (same approach
+        Polymarket uses in _resolve_poly_tokens).
+
+Apply:
+  cd ~/PolyNotifyBot
+  python3 fix_kalshi_resolution.py
+  git diff
+  git add -A && git commit -m "fix: kalshi resolution uses yes_sub_title + price validation"
+  git push && sudo systemctl restart psniper-bot
+"""
+
+import sys, os
+
+KALSHI_PATH = os.path.expanduser("~/PolyNotifyBot/bot/arb_monitor/adapters/kalshi.py")
+
+def patch_file(filepath, replacements):
+    with open(filepath, 'r') as f:
+        content = f.read()
+    for old, new in replacements:
+        if old not in content:
+            print(f"  ⚠️  Pattern not found in {filepath}:")
+            print(f"      {repr(old[:120])}...")
+            sys.exit(1)
+        count = content.count(old)
+        if count > 1:
+            print(f"  ⚠️  Pattern appears {count} times (expected 1):")
+            print(f"      {repr(old[:120])}...")
+            sys.exit(1)
+        content = content.replace(old, new)
+        print(f"  ✅ Patched: {old[:70].strip()}...")
+    with open(filepath, 'w') as f:
+        f.write(content)
+    print(f"  📝 Saved {filepath}")
+
+
+fixes = []
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FIX 1: Add yes_sub_title and no_sub_title to _kalshi_label_match_score
+# ═══════════════════════════════════════════════════════════════════════════════
+fixes.append((
+    '''    candidates = [
+        (market.get("subtitle") or ""),
+        (market.get("title") or ""),
+        (market.get("sub_title") or ""),
+    ]''',
+
+    '''    candidates = [
+        (market.get("yes_sub_title") or ""),
+        (market.get("no_sub_title") or ""),
+        (market.get("subtitle") or ""),
+        (market.get("title") or ""),
+        (market.get("sub_title") or ""),
+    ]'''))
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FIX 2: Add yes_sub_title to the diagnostic dump in resolve_market_ticker
+# so we can see what Kalshi actually returns for each sub-market
+# ═══════════════════════════════════════════════════════════════════════════════
+fixes.append((
+    '''        log(
+            f"   → {_m.get('ticker')!r}  subtitle={_m.get('subtitle')!r}  "
+            f"title={_m.get('title')!r}  status={_m.get('status')!r}"
+        )''',
+
+    '''        log(
+            f"   → {_m.get('ticker')!r}  yes_sub_title={_m.get('yes_sub_title')!r}  "
+            f"subtitle={_m.get('subtitle')!r}  title={_m.get('title')!r}  "
+            f"yes_bid={_m.get('yes_bid_dollars', _m.get('yes_bid'))!r}  status={_m.get('status')!r}"
+        )'''))
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FIX 3: Add yes_sub_title to the label_score diagnostic log
+# ═══════════════════════════════════════════════════════════════════════════════
+fixes.append((
+    '''            log(
+                f"   label_score({label_hint!r}, {m.get('ticker')!r}) "
+                f"subtitle={m.get('subtitle')!r} → {score:.3f}"
+            )''',
+
+    '''            log(
+                f"   label_score({label_hint!r}, {m.get('ticker')!r}) "
+                f"yes_sub_title={m.get('yes_sub_title')!r} subtitle={m.get('subtitle')!r} → {score:.3f}"
+            )'''))
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FIX 4: After label-matching resolves a market, add price-based validation.
+# If the resolved market's yes_bid_dollars doesn't match the expected price
+# range from Oddpool, log a warning (but still proceed — the label match
+# is more reliable than price proximity for candidate selection).
+# ═══════════════════════════════════════════════════════════════════════════════
+# This is the "Label-aware selection" success log — add price info to it
+fixes.append((
+    '''        if best_ticker and best_score > 0.0:
+            log(
+                f"✅ resolve_market_ticker: {event_ticker!r} → {best_ticker!r} "
+                f"(label_match={best_score:.3f}, label_hint={label_hint!r}, "
+                f"outcome_key={outcome_key!r}, {len(open_markets)} open markets)"
+            )
+            _MARKET_TICKER_CACHE[cache_key] = (best_ticker, now)
+            return best_ticker''',
+
+    '''        if best_ticker and best_score > 0.0:
+            # Find the matched market to log its price for diagnostics
+            _matched_m = next((m for m in open_markets if m.get("ticker") == best_ticker), {})
+            _matched_yes_bid = _matched_m.get("yes_bid_dollars") or _matched_m.get("yes_bid")
+            log(
+                f"✅ resolve_market_ticker: {event_ticker!r} → {best_ticker!r} "
+                f"(label_match={best_score:.3f}, label_hint={label_hint!r}, "
+                f"yes_sub_title={_matched_m.get('yes_sub_title')!r}, "
+                f"yes_bid={_matched_yes_bid!r}, "
+                f"outcome_key={outcome_key!r}, {len(open_markets)} open markets)"
+            )
+            _MARKET_TICKER_CACHE[cache_key] = (best_ticker, now)
+            return best_ticker'''))
+
+
+if __name__ == "__main__":
+    print("=" * 70)
+    print("Fixing Kalshi event→market resolution...")
+    print("=" * 70)
+    print(f"\n📄 Patching {KALSHI_PATH}")
+    patch_file(KALSHI_PATH, fixes)
+    print("\n" + "=" * 70)
+    print("✅ All fixes applied!")
+    print("=" * 70)
+    print("""
+Next steps:
+  cd ~/PolyNotifyBot
+  git diff  # review — should see yes_sub_title added to label matching
+  git add -A && git commit -m "fix: kalshi resolution uses yes_sub_title + price diagnostics"
+  git push && sudo systemctl restart psniper-bot
+  sudo journalctl -u psniper-bot -f | grep -E "resolve_market_ticker|label_score"
+  
+Watch for logs like:
+  label_score("Marco Rubio", 'KXPRESPERSON-28-MRUB') yes_sub_title='Marco Rubio' → 1.000
+  label_score("Marco Rubio", 'KXPRESPERSON-28-TCAR') yes_sub_title='Ted Cruz' → 0.000
+""")
