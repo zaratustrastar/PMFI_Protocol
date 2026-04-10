@@ -1390,10 +1390,14 @@ def execute_arb(
 
     def _run_leg2() -> tuple:
         if venue2 == "opinion":
+            # Add 1 tick (0.1¢) above the live ask to ensure the order crosses
+            # as a taker and fills immediately rather than resting as a maker bid.
+            opinion_taker_price = round(live_kalshi_ask + 0.001, 4)
+            log(f"📤 [OPINION] Taker price: {live_kalshi_ask:.4f} + 0.001 tick = {opinion_taker_price:.4f}")
             return _place_opinion_order(
                 market_id=opinion_market_id,
                 side=opinion_side,
-                price=live_kalshi_ask,
+                price=opinion_taker_price,
                 size_usdc=leg2_usdc,
                 contract_count=contract_count,
                 outcome_hint=outcome_key,
