@@ -1,0 +1,15 @@
+Apr 09 23:30:50 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 💼 president-2028_marco_rubio: size_usdc=100000.00 capped to opp_total_available=5.77 USDC (servicer=0.68 + poly=0.36 + kalshi=4.73)
+Apr 09 23:30:50 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] 🚀 Executing pair_id=president-2028_marco_rubio venue2=kalshi | score=1300.0 AR=0.00× net_edge=2.50% conf=0.00 | days=941.81d size=$5.77
+Apr 09 23:30:50 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 🔍 Starting execution for pair president-2028_marco_rubio (venue2=kalshi)
+Apr 09 23:30:50 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ↔️ kalshi_side=NO → buying YES on Poly. Using YES token 1117161890585731... for price check
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 🎯 Kalshi event→market: 'KXPRESPERSON-28' → 'KXPRESPERSON-28-TCAR'
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Fetching live orderbooks in parallel: poly=1117161890585731... (side=YES) | kalshi=KXPRESPERSON-28-TCAR
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📖 Books loaded: poly=144 levels | kalshi=9 levels
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Best asks: poly=0.0940 kalshi=0.9880 | Oddpool net_edge=2.5000% (reference only)
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP gate: target_contracts=5 budget=$5.77 combined_best_ask=1.0820
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP result: poly_vwap=0.094 (5/5 contracts, depth_ok=True) | kalshi_vwap=0.9879999999999999 (5/5 contracts, depth_ok=True)
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 Matched contracts: 5 (poly_filled=5/5 kalshi_filled=5/5)
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📊 VWAP @ matched size (5 contracts): poly=0.0940 kalshi=0.9880 (initial @ target: poly=0.0940 kalshi=0.9880)
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] 📐 VWAP profitability @ 5 contracts: poly_vwap=0.0940 kalshi_vwap=0.9880 gross_edge=-8.2000% fee=0.0000% net_edge=-8.2000% required=0.8000%
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: ⚡ [Arb/Executor] ❌ vwap_edge_insufficient: net_edge=-8.2000% < required=0.8000% (poly_vwap=0.0940 kalshi_vwap=0.9880 matched=5 contracts). Market depth erases arb edge at this size.
+Apr 09 23:30:56 ubuntu-s-1vcpu-1gb-sfo3-01 proxychains4[662114]: 🔁 [ArbExecLoop] ❌ president-2028_marco_rubio: execution stopped cycle — vwap_edge_insufficient: net_edge=-8.2000% < required=0.8000% (poly_vwap=0.0940 kalshi_vwap=0.9880 matched=5 contracts). Market depth erases arb edge at this size. unwound=False — pair suppressed for 300s

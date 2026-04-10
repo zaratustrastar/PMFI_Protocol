@@ -339,6 +339,13 @@ def _execution_cycle():
             skipped_caps += len(opportunities) - executed - skipped_thin - skipped_expiry - skipped_display
             break
 
+        # ── Venue filter: only execute Polymarket × Opinion pairs for now.
+        #    Kalshi code is preserved and will be re-enabled in a future release. ──
+        if getattr(opp, "venue2", "kalshi") == "kalshi":
+            log(f"⏭ Skipping {opp.pair_id}: Kalshi execution temporarily disabled (Opinion-only mode)")
+            skipped_display += 1
+            continue
+
         # ── Display-only guard: skip markets whose Poly token ID is not yet resolved ──
         if getattr(opp, "is_display_only", True):
             skipped_display += 1
