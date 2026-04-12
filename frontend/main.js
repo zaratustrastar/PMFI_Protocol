@@ -13,21 +13,14 @@ const ARB_VAULT_V2_ADDRESS  = window.PSNIPER_CONFIG?.ARB_VAULT_V2_ADDRESS || "";
 // ── pARB vault allowlist ──────────────────────────────────────────────────────
 // Only wallets in this list can see and interact with the pARBITRAGE vault.
 // To open the vault to everyone, set this to an empty array: []
-const ARB_ALLOWED_WALLETS = [
-    '0xEdae94A822582324f19c89a057d694d833E6A6F0',
-    '0x59D0461ec7C4688dd3DAab7Ea903d93d109dB9E0',
-    '0xa403d02015aa533662F03970A2F2259331358AdF',
-].map(a => a.toLowerCase());
-
-function _isArbAllowed(addr) {
-    if (!ARB_ALLOWED_WALLETS.length) return true;
-    return !!addr && ARB_ALLOWED_WALLETS.includes(addr.toLowerCase());
+function _isArbAllowed(_addr) {
+    return true;
 }
 
-function _updateArbVaultVisibility(addr) {
+function _updateArbVaultVisibility(_addr) {
     const card = document.getElementById('arbVaultCard');
     if (!card) return;
-    card.style.display = _isArbAllowed(addr) ? '' : 'none';
+    card.style.display = '';
 }
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_DECIMALS = 6;
@@ -255,6 +248,12 @@ function initInviteGate() {
         codeInput.value = '';
         gateWalletAddress = null;
     });
+}
+
+// Invite gate disabled — app is open to everyone
+function initInviteGate() {
+    const gate = document.getElementById('inviteGate');
+    if (gate) gate.classList.add('hidden');
 }
 
 // Initialize gate on load

@@ -520,27 +520,9 @@ const server = http.createServer(async (req, res) => {
       return handleCheckAccess(req, res);
     }
     
-    // Admin endpoints (require authentication)
+    // Admin endpoints — disabled
     if (req.url.startsWith('/api/admin/')) {
-      if (!verifyAdmin(req)) {
-        return sendJSON(res, 401, { error: 'Unauthorized. Admin token required.' });
-      }
-      
-      if (req.method === 'POST' && req.url === '/api/admin/codes/generate') {
-        return handleAdminGenerate(req, res);
-      }
-      if (req.method === 'GET' && req.url === '/api/admin/codes') {
-        return handleAdminList(req, res);
-      }
-      if (req.method === 'POST' && req.url === '/api/admin/codes/revoke') {
-        return handleAdminRevoke(req, res);
-      }
-      if (req.method === 'GET' && req.url === '/api/admin/codes/export') {
-        return handleAdminExport(req, res);
-      }
-      if (req.method === 'GET' && req.url === '/api/admin/stats') {
-        return handleAdminStats(req, res);
-      }
+      return sendJSON(res, 404, { error: 'Not found.' });
     }
     
     return sendJSON(res, 404, { error: 'API endpoint not found' });
@@ -550,9 +532,11 @@ const server = http.createServer(async (req, res) => {
   let urlPath = req.url.split('?')[0]; // Remove query string
   urlPath = urlPath === '/' ? 'index.html' : urlPath.replace(/^\//, '');
   
-  // Serve admin.html for /admin route
-  if (urlPath === 'admin') {
-    urlPath = 'admin.html';
+  // Admin panel disabled
+  if (urlPath === 'admin' || urlPath === 'admin.html') {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not found.');
+    return;
   }
   
   const filePath = path.join(__dirname, urlPath);
