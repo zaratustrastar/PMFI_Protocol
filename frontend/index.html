@@ -974,42 +974,8 @@
         <!-- Home Panel -->
         <div class="web-tab-panel active" id="webPanelHome">
             <div class="cards-grid">
-                <div class="card">
-                    <div class="vault-header">
-                        <span class="vault-name">pSNIPER</span>
-                    </div>
-                    
-                    <div id="userStats" class="user-stats hidden">
-                        <div class="user-stat">
-                            <div class="user-stat-label">Position</div>
-                            <div class="user-stat-value" id="positionValue">$0.00</div>
-                        </div>
-                        <div class="user-stat">
-                            <div class="user-stat-label">pSNIPER</div>
-                            <div class="user-stat-value" id="sharesBalance">0.00</div>
-                        </div>
-                    </div>
-                    
-                    <div class="action-buttons">
-                        <button id="openDepositBtn" class="deposit-btn" disabled>Deposit</button>
-                        <button id="openWithdrawBtn" class="withdraw-btn">Withdraw</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="stats-card-title">Stats</div>
-                    <div class="big-stat">
-                        <div class="big-stat-label">Total Value Locked</div>
-                        <div class="big-stat-value" id="tvlValue">$0.00</div>
-                    </div>
-                    <div class="big-stat">
-                        <div class="big-stat-label">pSNIPER Price</div>
-                        <div class="big-stat-value" id="statsSharePrice">$1.00</div>
-                    </div>
-                </div>
-
-                <!-- pARBITRAGE Vault Card — same grid column width as pSNIPER -->
-                <div class="card" id="arbVaultCard" style="display:none">
+                <!-- pARBITRAGE Vault Card — shown first -->
+                <div class="card" id="arbVaultCard">
                     <div class="vault-header">
                         <span class="vault-name">pARBITRAGE</span>
                         <span class="teaser-live-badge"><span class="teaser-live-dot"></span>Live</span>
@@ -1035,6 +1001,40 @@
                         <button id="openArbWithdrawBtn" class="withdraw-btn">Withdraw</button>
                     </div>
                     <div id="arbPendingRequests" class="hidden" style="margin-top:12px;"></div>
+                </div>
+
+                <div class="card">
+                    <div class="vault-header">
+                        <span class="vault-name">pSNIPER</span>
+                    </div>
+                    
+                    <div id="userStats" class="user-stats hidden">
+                        <div class="user-stat">
+                            <div class="user-stat-label">Position</div>
+                            <div class="user-stat-value" id="positionValue">$0.00</div>
+                        </div>
+                        <div class="user-stat">
+                            <div class="user-stat-label">pSNIPER</div>
+                            <div class="user-stat-value" id="sharesBalance">0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="openDepositBtn" class="deposit-btn" disabled style="display:none">Deposit</button>
+                        <button id="openWithdrawBtn" class="withdraw-btn">Withdraw</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="stats-card-title">Stats</div>
+                    <div class="big-stat">
+                        <div class="big-stat-label">Total Value Locked</div>
+                        <div class="big-stat-value" id="tvlValue">$0.00</div>
+                    </div>
+                    <div class="big-stat">
+                        <div class="big-stat-label">pSNIPER Price</div>
+                        <div class="big-stat-value" id="statsSharePrice">$1.00</div>
+                    </div>
                 </div>
             </div>
             

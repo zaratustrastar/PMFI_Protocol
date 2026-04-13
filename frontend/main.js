@@ -734,7 +734,6 @@ async function connectWallet() {
         connectBtn.classList.add("connected");
         connectBtn.disabled = false;
 
-        openDepositBtn.disabled = false;
         const _arbDepBtn = document.getElementById('openArbDepositBtn');
         if (_arbDepBtn && ARB_VAULT_V2_ADDRESS) _arbDepBtn.disabled = false;
 
