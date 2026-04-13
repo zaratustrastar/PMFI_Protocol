@@ -1,8 +1,6 @@
 # Overview
 
-**Brand: PMFI** (formerly PredictFi — all user-facing labels now use PMFI).
-
-This project consists of three primary systems under the PMFI brand: the **pSNIPER Vault (V7.5)** for secure NAV-based share pricing using actual liquid asset values with withdrawal exclusion, the **pARB Vault (V1)** for cross-venue arbitrage (Polymarket × Kalshi × Opinion Labs) using the Oddpool API, and an **Automated Polymarket Trading Bot**. The vaults calculate NAV from real position values; pARB uses guaranteed-spread arb with liquid NAV priced from order-book bids. The trading bot provides fully automated market monitoring, Telegram notifications, and strategic trading for efficient Polymarket participation.
+This project, operating under the PMFI brand, encompasses three main systems: the **pSNIPER Vault (V7.5)**, the **pARB Vault (V2)**, and an **Automated Polymarket Trading Bot**. The pSNIPER Vault provides secure, NAV-based share pricing using actual liquid asset values with withdrawal exclusion. The pARB Vault facilitates cross-venue arbitrage across Polymarket, Kalshi, and Opinion Labs using the Oddpool API, with liquid NAV derived from order-book bids. The Automated Polymarket Trading Bot offers fully automated market monitoring, Telegram notifications, and strategic trading to optimize participation on Polymarket. The overarching goal is to enhance efficiency, accuracy, and profitability in decentralized prediction markets.
 
 # User Preferences
 
@@ -10,184 +8,51 @@ Preferred communication style: Simple, everyday language.
 
 # System Architecture
 
+## Core Framework and Workflow
+
+The application is built on the Mastra Framework, an AI-powered TypeScript framework designed for agent orchestration with LLMs. It utilizes a graph-based workflow engine for deterministic multi-step processes, a tool system for external interactions, and a three-tier memory management system (Conversation History, Semantic Recall, Working Memory). It supports multi-agent coordination and unified model routing. Workflows feature input/output validation (Zod), sequential and parallel execution, branching, and robust error handling with suspend/resume capabilities. Inngest provides durable workflow execution, step memoization, real-time monitoring, and a publish-subscribe event system. The system supports real-time streaming for incremental response generation and triggers via webhooks (Slack, Telegram) and cron workflows.
+
 ## pSNIPER Vault (V7.5)
 
-The vault calculates NAV using **ACTUAL LIQUID VALUE** with **withdrawal exclusion**.
+The vault calculates Net Asset Value (NAV) based on actual liquid asset values, explicitly excluding pending withdrawals. This ensures that remaining liquidity providers see accurate pricing. Key features include an adjustment for funds in withdrawal bridge transit to prevent double-counting, a minimum withdrawal amount of $5, and the use of position liquidation values (mark-to-market) rather than cost basis for NAV calculations. The current contract is deployed on Base Mainnet.
 
-**V7.5.1 CHANGE (Feb 2026)**: Fixed double-subtraction during withdrawal bridge transit.
-- Problem: When servicer bridges USDC from Polygon to Base, funds disappear from totalAssets
-  (cash left PM) while usdcLocked exclusion also subtracts them → double-count → temporary depeg
-- Fix: `effective_exclusion = max(0, usdcLocked - withdrawal_bridge_in_transit)`
-  where `withdrawal_bridge_in_transit` = funds already debited from Polygon, not yet on Base
-- Reads servicer's `withdrawal_state.json` for pending bridge amounts
-- Observability: NAV breakdown now shows `usdc_locked_total`, `bridge_in_transit`, `effective_exclusion`
-- **$5 minimum withdrawal** enforced on both web app and mini app frontends
+## pARB Vault (V2)
 
-**V7.5 (still in effect)**: Pending withdrawals excluded from NAV calculation.
-- When `requestWithdraw()` is confirmed, shares transfer to vault and `usdcLocked` is recorded
-- These are "spoken for" - excluded from both asset and supply sides of NAV
-- `effective_assets = totalAssets - effective_exclusion` (adjusted for in-transit bridges)
-- `effective_supply = totalSupply - totalPendingShares`
-- `NAV = effective_assets / effective_supply`
-- **Result**: Remaining LPs see accurate pricing regardless of withdrawal pipeline stage
-
-**V7.4 (still in effect)**: NAV reflects actual position values, not expected deposits.
-- `totalAssets = pmCash + positionsLiqValue + vaultBuffer + inFlight` (ACTUAL values only)
-- `pendingCredit = 0` for NAV purposes (calculated separately for monitoring bridging delays)
-
-**Safety Valves**:
-- Only `maxPendingAge` on in-flight funds (actual bridging delays)
-- Removed `maxPendingRatio` since pendingCredit is no longer in NAV
-
-**Previous Fixes (still in effect)**:
-- Uses on-chain `expectedAssets` for reference (not cumulative `totalForwarded`)
-- Uses position **liquidation value** (mark-to-market) instead of cost basis
-- **Reserved excluded from NAV math** - Polygon balanceOf is the source of truth for cash
-- Withdrawal servicer reads actual `usdcLocked` from pending requests (V7.3.3 fix)
-
-**Current Contract**: `0x17C27001929E75D1eBd5FdeE6E986EA5a91de0D1` (Base Mainnet, V7.5)
-
-## pARB Vault (V2) — Architecture (current)
-
-Cross-venue arb vault trading Polymarket × Kalshi × Opinion Labs via Oddpool API.
-V2 is an async Yearn-style vault: no live NAV required for user flows.
-
-**Contract** (`contracts/PMFIArbVaultV2.sol`):
-- `requestDeposit(assets, receiver)` → queued; `claimDeposit(requestId, receiver)` after `report()`
-- `requestRedeem(shares, receiver)` → queued; `claimRedeem(requestId, receiver)` after report + liquidity
-- `tend()` — permissionless; refills 10% idle buffer from strategy
-- `report(reportData, sig)` — keeper-only; updates `officialPPS`, processes queues, 20% perf fee (dilution), loss carryforward high-water-mark
-- Domain salt: `keccak256("PMFIArbVaultV2.v1")`
-
-**Reporter** (`bot/arb_monitor/core/arb_reporter.py`):
-- Signs `ReportDataV2` with `ARB_NAV_SIGNER_PRIVATE_KEY`
-- Conservative `reportedAssets`: cash only (no position marks), 95% haircut
-- Sweeps servicer USDC to vault when redemptions pending
-- Runs via `run_reporter_tick()` in execution loop each cycle
-
-**NAV Oracle** (`bot/arb_monitor/core/arb_nav.py`):
-- Tracks cash on all 3 platforms: `poly_cash` (`POLY_API_KEY`), `kalshi_cash` (RSA auth), `opinion_cash` (`OPINION_API_KEY`)
-- Open position liquid value from orderbook bids (not cost basis)
-- `totalAssets = poly_cash + kalshi_cash + opinion_cash + open_positions + settled_pnl`
-- Separate from pSNIPER oracle (`ORACLE_PRIVATE_KEY`, domain `PredictFiSniperVaultV7.v7`)
-
-**Key env vars** (pARB V2, separate from pSNIPER):
-- `ARB_VAULT_V2_ADDRESS` — deployed V2 contract address on Base (activates V2; unset = silent skip)
-- `POLY_API_KEY` — pARB's Polymarket API key (not `POLYMARKET_API_KEY` which is pSNIPER's)
-- `POLY_PRIVATE_KEY` — pARB trading wallet private key
-- `POLY_PROXY_ADDRESS` — pARB Polymarket proxy wallet (`0x29832cb67586d80894Dff3194927c9f73Fbf004f`); distinct from pSNIPER's `POLYMARKET_PROXY_ADDRESS`
-- `ARB_NAV_SIGNER_PRIVATE_KEY` — signs report payloads for V2 contract
-- `KALSHI_API_KEY_ID` + `KALSHI_PRIVATE_KEY_PATH` — Kalshi RSA auth
-- `OPINION_API_KEY` — Opinion Labs API key (market data + CLOB auth header)
-- `OPINION_PRIVATE_KEY` — signer wallet private key for signing Opinion CLOB orders
-- `OPINION_PORTFOLIO_ADDRESS` — multi-sig/portfolio wallet address that holds Opinion funds
-- `OPINION_CLOB_HOST` — Opinion CLOB host (default: https://proxy.opinion.trade:8443, no /openapi suffix)
-- `OPINION_RPC_URL` — BSC JSON-RPC endpoint (default: https://bsc-dataseed.binance.org)
-
-**Opinion Integration Architecture** (`bot/arb_monitor/adapters/`):
-- `opinion.py` — market discovery and orderbook data via OpenAPI only; fixed pagination to `page` param (was `offset`); fixed `/market/{id}` parsing to unwrap `result.data`
-- `opinion_clob.py` — official CLOB SDK client (`opinion_clob_sdk` PyPI package); singleton `Client(host, apikey, chain_id, rpc_url, private_key, multi_sig_addr)`; `get_balance()` via `client.get_my_balances()`; `place_order()` via `client.place_order(PlaceOrderDataInput(...))`
-- Opinion uses **USDT on BSC** (chain_id=56) as quote/collateral token, NOT USDC
-- CLOB host is `https://proxy.opinion.trade:8443` (no `/openapi` suffix)
-- `arb_nav.py::_get_opinion_cash()` also updated to use CLOB SDK (was probing broken OpenAPI endpoints)
-
-**Frontend** (`frontend/main.js`):
-- Auto-routes to V2 when `ARB_VAULT_V2_ADDRESS` is set in `window.PSNIPER_CONFIG`
-- V1 code retained as fallback if only `ARB_VAULT_ADDRESS` is set
-- New functions: `handleArbClaimDeposit(requestId)`, `handleArbClaimRedeem(requestId)`, `loadArbPendingRequests()`
-- HTML requires `<div id="arbPendingRequests" class="hidden"></div>` in pARB section
-
-**Execution** (`bot/arb_monitor/core/arb_execution_loop.py`):
-- Sorted by `pnl_velocity = gross_edge_pct / max(days_to_expiry, 0.5)` descending
-- Oddpool slugs resolved to real Polymarket CLOB token IDs via Gamma API (60-min cache)
-- `is_display_only=False` when token resolved → execution enabled; `True` → skipped with retry
-- Per-pair cap (`ARB_MAX_PAIR_USDC`) and total cap (`ARB_MAX_DEPLOYED_USDC`) enforced
-- Live price re-check + slippage guard (50 bps) before every trade
-- Auto-unwind leg 1 if leg 2 fails (Kalshi or Opinion)
-- `run_reporter_tick()` called at top of each cycle; `run_tend_tick()` called next (tend only, no float maintenance); `fund_both_legs_for_trade()` called from executor when a specific trade is selected
-
-**Current V2 Contract**: `0x9A1dcC11870ff45382E5fe422Cf393Fa81345dEC` (Base Mainnet) — set `ARB_VAULT_V2_ADDRESS` to this in VPS `.env`
-**Legacy V1 Contract**: `0x10f67BA7aB746a0DC8A48f0D74aA3a962328E689` — stays live until all V1 holders redeem
+This is an asynchronous, Yearn-style vault designed for cross-venue arbitrage. It integrates with Polymarket, Kalshi, and Opinion Labs via the Oddpool API. The vault's contract handles deposit and redemption requests via queuing, features a permissionless `tend()` function to refill idle buffers, and uses a keeper-only `report()` function for updating the official Price Per Share (PPS) and processing queues, applying a performance fee based on a high-water mark mechanism. A dedicated NAV Oracle tracks cash across all three platforms and calculates open position liquid values from orderbook bids. The execution logic prioritizes trades by P&L velocity, uses Polymarket CLOB token IDs, enforces per-pair and total capital caps, includes live price re-checks with slippage guards, and auto-unwinds trades if a leg fails. The current V2 contract is deployed on Base Mainnet.
 
 ## Polymarket Trading Bot
 
-This system automates Polymarket monitoring and trading.
-
-**1. Market Monitoring (Mastra Workflow)**: A cron-triggered workflow (every minute) fetches new Polymarket markets, posts them to Telegram, and queues relevant markets for trading in a PostgreSQL database.
-
-**Market Filtering (Jan 2026 v2 - Reduced False Positives)**:
-- **Up/Down Markets**: Filters out short-term markets with keywords like "up or down", "15m", "1h", etc.
-- **Duration Filter**: Skips markets that close within 15 hours
-- **Crypto/Stock Markets**: Improved hybrid NLP scoring with reduced false positives:
-  - **Safe tickers** (+3 pts): BTC, ETH, AAPL, NASDAQ, TSLA, etc. - match with word boundaries
-  - **Risky tickers** (sol, ada, dot, link, near, atom, uni, meta, apple, amazon, google): Only count if:
-    - $TOKEN format (e.g., $SOL)
-    - Full name present (e.g., "sol" + "solana")
-    - Hard-finance keyword present
-  - **Hard-finance keywords** (+2 pts): etf, sec, futures, halving, approval, market cap, ath
-  - **Soft keywords** (+2 pts, only if ticker hit): price, trading, breakout, resistance, support
-  - **Tags** (+2 pts): crypto, stocks, defi, finance
-  - **Exclusion rule**: Require `ticker_score > 0 AND total_score >= 5`
-- **Defense-in-depth**: Both market_monitor.py and auto_trader.py apply same filter logic
-
-**4. XP / Tasks / Referral System (Feb 2026)**:
-- Database tables: `xp_users` (fid PK, username, wallet, referrer_fid), `xp_events` (idempotent via unique_key), `referral_earnings` (unique per referrer+referee+source)
-- Tasks: follow_fc (100 XP, verified), deposit_10 (500 XP, verified), invite (250 XP, verified), follow_x (100 XP, manual/PENDING_REVIEW, locked until first 3 completed)
-- Referral: 10% of all referee XP awarded to referrer automatically; link format `?ref=<fid>`
-- Endpoints: POST /api/me, POST /api/referral/attach, GET /api/state?fid=, GET /api/leaderboard?scope=all|weekly
-- Helper: `award_xp(fid, type, xp, meta, unique_key)` — idempotent, auto-generates unique_key if missing, auto-awards referral bonus in same transaction
-
-**2. Trading Job Worker (Python)**: A continuous worker polls the `trading_jobs` queue, places laddered buy orders (1¢-3¢ on YES/NO tokens) for new markets, and updates job status. This component requires a residential IP due to Cloudflare blocking datacenter IPs.
-
-**3. Order Monitor (Python)**: Continuously monitors all active orders. It auto-cancels stale orders (>12 hours) to free up capital, places laddered sell orders upon fill, and sends Telegram notifications when sells execute. This also requires a residential IP.
-
-**Sell Ladder Strategy (Feb 2026 Update)**:
-- Minimum 25 shares accumulated before any sell orders are placed (`MIN_SHARES_FOR_SELL_LADDER`)
-- Reserve 10% of position for resolution (no orders placed, wait for market to resolve)
-- Tier 1: 33% of position @ 3x (200% profit)
-- Tier 2: 27% of position @ 4x (300% profit)
-- Tier 3: 30% of position @ 8x (700% profit)
-- **Incremental fills**: If new shares are bought after sells are placed, additional sell orders are placed for the delta (must also meet 25-share threshold)
-- Tracks `shares_with_sells` in `accumulated_fills` DB table to detect new fills
-- Configuration in `trading_bot/config.py` via `SELL_LADDER_CONFIG`, `SELL_RESERVE_RATIO`, and `MIN_SHARES_FOR_SELL_LADDER`
-
-## Core Framework (Mastra)
-
-The application is built on the Mastra Framework, an AI-powered TypeScript framework providing agent orchestration with LLMs, a graph-based workflow engine for deterministic multi-step processes, a tool system for external interactions, and a three-tier memory management system (Conversation History, Semantic Recall, Working Memory). It supports multi-agent coordination through routing agents and unified model routing for various LLM providers.
-
-## Workflow Architecture
-
-Mastra's graph-based workflows enable deterministic execution with input/output validation (Zod), sequential (`.then()`) and parallel (`.parallel()`) execution, branching (`.map()`), and robust error handling. Workflows support suspend/resume capabilities for human-in-the-loop, external waiting, and event-driven processes. Inngest provides durable workflow execution, step memoization, real-time monitoring, and a publish-subscribe event system.
-
-## Streaming and Triggers
-
-The system supports real-time streaming for incremental response generation from agents and workflows, including text deltas, tool events, and workflow progress. Triggers include webhook integrations (Slack, Telegram) and cron workflows via Inngest for scheduled tasks. Custom API routes are supported for webhook handlers.
+This system automates market monitoring and strategic trading on Polymarket. A cron-triggered workflow identifies new markets, posts them to Telegram, and queues relevant ones for trading. Market filtering is sophisticated, focusing on crypto/stock markets and employing NLP scoring to reduce false positives, considering safe/risky tickers, hard-finance keywords, and specific tags. A continuous worker places laddered buy orders (1¢-3¢) for new markets, requiring a residential IP. An order monitor continuously tracks active orders, auto-cancels stale ones, places laddered sell orders upon fill, and sends Telegram notifications. The sell strategy requires a minimum of 25 shares before placing orders, reserves 10% of the position for resolution, and uses a three-tiered laddered selling approach for the remaining shares.
 
 ## Replit-Specific Architecture
 
-A custom Replit Playground UI offers user interaction and workflow graph visualization. The project uses Mastra's deployer for Replit infrastructure, with OpenTelemetry for observability and a custom build system.
+A custom Replit Playground UI provides user interaction and workflow graph visualization. The project leverages Mastra's deployer for Replit infrastructure, incorporates OpenTelemetry for observability, and utilizes a custom build system.
 
 # External Dependencies
 
 ## AI Model Providers
 
--   **OpenAI**: Primary LLM provider (`@ai-sdk/openai`, `openai` SDK).
+-   **OpenAI**: Primary LLM provider.
 -   **Anthropic, Google, xAI**: Supported via Mastra's unified routing.
--   **OpenRouter**: For accessing multiple models through a single gateway.
--   **Vercel AI SDK**: Core AI abstractions (`ai` package v4.x).
+-   **OpenRouter**: For accessing multiple models.
+-   **Vercel AI SDK**: Core AI abstractions.
 
 ## Databases and Storage
 
--   **LibSQL**: Primary local/embedded database with vector support (`@mastra/libsql`).
--   **PostgreSQL**: Production storage with `pgvector` extension (`@mastra/pg`).
+-   **LibSQL**: Primary local/embedded database with vector support.
+-   **PostgreSQL**: Production storage with `pgvector` extension.
 -   **Vector Databases**: For semantic recall (LibSQL, Postgres with pgvector, or Upstash Vector).
 
 ## External Services
 
--   **Inngest**: Workflow orchestration for durable execution (`inngest`, `inngest-cli`, `@mastra/inngest`, `@inngest/realtime`).
--   **Slack**: Bot integration (`@slack/web-api`).
+-   **Inngest**: Workflow orchestration for durable execution.
+-   **Slack**: Bot integration.
 -   **Telegram**: Bot webhook integration.
--   **Exa**: Search API integration (`exa-js`).
+-   **Exa**: Search API integration.
+-   **Oddpool API**: For pARB vault arbitrage data.
+-   **Polymarket API**: For market data and trading.
+-   **Kalshi API**: For market data and trading (RSA authenticated).
+-   **Opinion Labs API**: For market data and CLOB access.
 
 ## Core Libraries
 

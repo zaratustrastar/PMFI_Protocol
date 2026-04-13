@@ -44,7 +44,7 @@
       {"name": "_totalSupply",            "type": "uint256"},
       {"name": "_idleBalance",            "type": "uint256"},
       {"name": "_lastReportedBacking",    "type": "uint256"},
-      {"name": "_lossCarryforward",       "type": "uint256"},
+      {"name": "_highWaterMarkAssets",     "type": "uint256"},
       {"name": "_pendingDepositAssets",   "type": "uint256"},
       {"name": "_claimableRedeemAssets",  "type": "uint256"},
       {"name": "_pendingRedeemShares",    "type": "uint256"},
@@ -200,7 +200,7 @@
     "inputs": [
       {"name": "reportedAssets",    "type": "uint256", "indexed": false},
       {"name": "backingAssetsNow",  "type": "uint256", "indexed": false},
-      {"name": "periodPnl",         "type": "int256",  "indexed": false},
+      {"name": "profitAboveHWM",    "type": "int256",  "indexed": false},
       {"name": "feeShares",         "type": "uint256", "indexed": false},
       {"name": "feeAssets",         "type": "uint256", "indexed": false},
       {"name": "newPPS",            "type": "uint256", "indexed": false},

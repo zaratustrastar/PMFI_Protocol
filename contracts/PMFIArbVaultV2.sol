@@ -46,14 +46,15 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
  *
  *  A. snapshot conservative reportedAssets (from signed input)
  *  B. compute backingAssetsNow = reportedAssets − pendingDeposits − claimableRedeems
- *  C. periodPnl = backingAssetsNow − lastReportedBackingAssets
- *  D. performance fee: 20% of profit above lossCarryforward
+ *  C. compute profitAboveHWM = backingAssetsNow − highWaterMarkAssets (0 if below HWM)
+ *  D. performance fee: 20% of profit above high-water-mark (no fee on losses or recovery)
  *  E. mint fee shares to feeRecipient (dilution mechanism)
  *  F. update officialPPS
  *  G. process pending deposit requests → CLAIMABLE at newPPS
  *  H. process pending redeem requests → CLAIMABLE if idle liquidity allows (FIFO)
- *  I. update lastReportedBackingAssets
- *  J. emit Reported event
+ *  I. adjust highWaterMarkAssets for capital flows (deposits raise it, redeems lower it)
+ *  J. update lastReportedBackingAssets (informational only)
+ *  K. emit Reported event
  *
  * ═══════════════════════════════════════════════════════════════
  * INVARIANTS
@@ -63,8 +64,8 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
  *  2. totalClaimableRedeemAssets <= usdc.balanceOf(address(this))
  *  3. totalPendingRedeemShares == balanceOf(address(this))  [shares held in vault]
  *  4. tend() never changes officialPPS or processes requests
- *  5. report() is the only function that updates officialPPS
- *  6. lossCarryforward is monotonically decreasing on profit, never negative
+ *  5. report() is the only function that updates officialPPS and highWaterMarkAssets
+ *  6. highWaterMarkAssets rises only when backingAssetsNow exceeds it (after fee)
  *  7. officialPPS is monotonically non-decreasing except during loss periods
  *  8. processed request conversion rates are immutable after CLAIMABLE
  *  9. idleBalance = usdc.balanceOf(this) − totalPendingDepositAssets − totalClaimableRedeemAssets
@@ -76,8 +77,12 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
  *  - V1 shares (pARB V1) cannot be migrated on-chain automatically
  *  - Operators must:
  *    1. Pause V1 deposits, process all pending V1 claims
- *    2. Deploy V2, seed with initial report (reportedAssets = 0 for clean start)
- *    3. V1 shareholders redeem from V1; re-deposit into V2 if desired
+ *    2. Deploy V2 — highWaterMarkAssets starts at 0
+ *    3. Accept first real deposits; first funded report() initialises HWM correctly
+ *    4. V1 shareholders redeem from V1; re-deposit into V2 if desired
+ *  - Do NOT submit an empty/test report() before real USDC is in the vault.
+ *    Any report with reportedAssets > 0 while highWaterMarkAssets == 0 would
+ *    trigger a performance fee on capital that represents no real profit.
  *  - V2 uses domain salt "PMFIArbVaultV2.v1" (isolated from V1 sigs)
  */
 contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
@@ -108,9 +113,9 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
     /// @dev Bootstrap shares permanently locked at dead address on deployment.
     ///      Ensures totalSupply() > 0 at all times, preventing share-price inflation attacks
     ///      where a first depositor manipulates PPS by donating USDC before any shares exist.
-    ///      Value: 1000 shares (1000e18 raw). Cost to attacker to grief with dead-share dilution
-    ///      equals the dead-share fraction of reported assets — negligible in practice.
-    uint256 public constant BOOTSTRAP_SHARES = 1000e18;
+    ///      Value: 1 share (1e18 raw) — sufficient to block the attack while keeping
+    ///      dilution negligible at any realistic TVL.
+    uint256 public constant BOOTSTRAP_SHARES = 1e18;
     address public constant DEAD_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
     // ═══════════════════════════════════════════
@@ -139,8 +144,8 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
     // ═══════════════════════════════════════════
 
     uint256 public officialPPS;                  // USDC-per-1e18-shares (6 dec precision)
-    uint256 public lastReportedBackingAssets;    // backing for outstanding shares, last report
-    uint256 public lossCarryforward;             // unrecovered losses before fee can apply (6 dec)
+    uint256 public lastReportedBackingAssets;    // informational: backing snapshot after last report (6 dec)
+    uint256 public highWaterMarkAssets;          // highest net backing ever achieved; fee only above this (6 dec)
     uint256 public lastReportNonce;
     uint256 public lastReportTimestamp;
     uint256 public lastTendTimestamp;
@@ -209,7 +214,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
     event Reported(
         uint256 reportedAssets,
         uint256 backingAssetsNow,
-        int256  periodPnl,
+        int256  profitAboveHWM,
         uint256 feeShares,
         uint256 feeAssets,
         uint256 newPPS,
@@ -586,27 +591,19 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
             ? reportedAssets - deductions
             : 0;
 
-        // ── C. Compute periodPnl ──────────────────────────────────────────
-        int256 periodPnl = int256(backingAssetsNow) - int256(lastReportedBackingAssets);
+        // ── C. Compute profit above high-water-mark ───────────────────────
+        // Fee only fires when backingAssetsNow strictly exceeds the prior HWM.
+        // No fee during losses or recovery below the previous peak.
+        int256 profitAboveHWM = backingAssetsNow >= highWaterMarkAssets
+            ? int256(backingAssetsNow - highWaterMarkAssets)
+            : -int256(highWaterMarkAssets - backingAssetsNow);
 
-        // ── D. Performance fee (high-water-mark style, realized only) ─────
         uint256 feeAssets = 0;
-        if (periodPnl < 0) {
-            // Loss period: accumulate to carryforward, no fee
-            lossCarryforward += uint256(-periodPnl);
-        } else if (periodPnl > 0) {
-            uint256 profit = uint256(periodPnl);
-            // Recover prior losses first
-            uint256 profitAfterLoss = profit > lossCarryforward
-                ? profit - lossCarryforward
-                : 0;
-            feeAssets = (profitAfterLoss * PERF_FEE_BPS) / 10000;
-            lossCarryforward = lossCarryforward > profit
-                ? lossCarryforward - profit
-                : 0;
+        if (profitAboveHWM > 0) {
+            feeAssets = (uint256(profitAboveHWM) * PERF_FEE_BPS) / 10000;
         }
 
-        // ── E. Mint fee shares via dilution ───────────────────────────────
+        // ── D. Mint fee shares via dilution ───────────────────────────────
         // Fee is realized as new shares minted to feeRecipient.
         // Existing shareholders bear cost proportional to their profit.
         // feeShares formula gives feeRecipient exactly feeAssets worth of value:
@@ -621,7 +618,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
             }
         }
 
-        // ── F. Update officialPPS ──────────────────────────────────────────
+        // ── E. Update officialPPS ─────────────────────────────────────────
         // newPPS = (backingAssetsNow − feeAssets) / outstandingShares (before fee dilution)
         // After fee share minting, per-share backing is correctly newPPS for all holders.
         uint256 netBacking = backingAssetsNow > feeAssets
@@ -633,15 +630,34 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
         if (newPPS == 0) newPPS = INITIAL_PPS;
         officialPPS = newPPS;
 
-        // ── G. Process pending deposit requests ───────────────────────────
-        uint256 depositsProcessed = _processDepositRequests(newPPS, maxDeposits);
+        // ── F. Process pending deposit requests ───────────────────────────
+        (uint256 depositsProcessed, uint256 depositAssetsProcessed) =
+            _processDepositRequests(newPPS, maxDeposits);
 
-        // ── H. Process pending redeem requests ────────────────────────────
-        uint256 redeemsProcessed = _processRedeemRequests(maxRedeems);
+        // ── G. Process pending redeem requests ────────────────────────────
+        (uint256 redeemsProcessed, uint256 redeemAssetsProcessed) =
+            _processRedeemRequests(maxRedeems);
 
-        // ── I. Update lastReportedBackingAssets ───────────────────────────
+        // ── H. Adjust high-water-mark for capital flows ───────────────────
+        // After a profitable report, HWM rises to netBacking (the post-fee backing level).
+        // Deposits raise HWM: new capital coming in is not profit, so the bar rises too.
+        // Redeems lower HWM: capital that left no longer counts toward the high-water line.
+        // This ensures the fee only captures genuine profit, not deposit inflows or
+        // re-earned capital that left via redemptions.
+        uint256 newHWM = netBacking;                          // post-fee backing this period
+        newHWM += depositAssetsProcessed;                     // capital in → raise bar
+        newHWM = newHWM > redeemAssetsProcessed              // capital out → lower bar
+            ? newHWM - redeemAssetsProcessed
+            : 0;
+        // Never let HWM fall below prior HWM due to redeems alone (protect existing holders)
+        if (newHWM < highWaterMarkAssets && redeemAssetsProcessed == 0) {
+            newHWM = highWaterMarkAssets;
+        }
+        highWaterMarkAssets = newHWM;
+
+        // ── I. Update lastReportedBackingAssets (informational) ───────────
         // Recompute after request processing side-effects on totalPendingDepositAssets
-        // and totalClaimableRedeemAssets.
+        // and totalClaimableRedeemAssets. Used for vault cap checks and tend() target.
         uint256 newDeductions = totalPendingDepositAssets + totalClaimableRedeemAssets;
         lastReportedBackingAssets = reportedAssets > newDeductions
             ? reportedAssets - newDeductions
@@ -651,7 +667,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
         emit Reported(
             reportedAssets,
             backingAssetsNow,
-            periodPnl,
+            profitAboveHWM,
             feeShares,
             feeAssets,
             newPPS,
@@ -678,7 +694,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
 
     function _processDepositRequests(uint256 pps, uint256 maxCount)
         internal
-        returns (uint256 processed)
+        returns (uint256 processed, uint256 assetsProcessed)
     {
         uint256 len   = depositRequests.length;
         uint256 limit = maxCount == 0 || maxCount > MAX_REQUESTS_PER_REPORT
@@ -691,6 +707,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
                 req.status       = RequestStatus.CLAIMABLE;
                 req.processedPPS = pps;
                 totalPendingDepositAssets -= req.assets;
+                assetsProcessed += req.assets;
                 processed++;
             }
         }
@@ -707,7 +724,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
 
     function _processRedeemRequests(uint256 maxCount)
         internal
-        returns (uint256 processed)
+        returns (uint256 processed, uint256 assetsProcessed)
     {
         uint256 availableLiquidity = _idleBalance();
         uint256 len   = redeemRequests.length;
@@ -734,6 +751,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
             totalPendingRedeemShares   -= req.shares;
             totalClaimableRedeemAssets += needed;
             availableLiquidity         -= needed;
+            assetsProcessed            += needed;
             nextRedeemToProcess         = i + 1;
             processed++;
         }
@@ -846,7 +864,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
         uint256 _totalSupply,
         uint256 _idleBal,
         uint256 _lastReportedBacking,
-        uint256 _lossCarryforward,
+        uint256 _highWaterMarkAssets,
         uint256 _pendingDepositAssets,
         uint256 _claimableRedeemAssets,
         uint256 _pendingRedeemShares,
@@ -860,7 +878,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
             totalSupply(),
             _idleBalance(),
             lastReportedBackingAssets,
-            lossCarryforward,
+            highWaterMarkAssets,
             totalPendingDepositAssets,
             totalClaimableRedeemAssets,
             totalPendingRedeemShares,

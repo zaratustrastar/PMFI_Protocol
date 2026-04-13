@@ -633,7 +633,7 @@ async function loadArbVaultStats() {
         const c = new ethers.Contract(ARB_VAULT_V2_ADDRESS, ARB_VAULT_V2_ABI, provider);
         const vs = await c.getVaultState();
         // vs[0]=officialPPS, vs[1]=totalSupply, vs[2]=idleBalance,
-        // vs[3]=lastReportedBacking, vs[4]=lossCarryforward,
+        // vs[3]=lastReportedBacking, vs[4]=highWaterMarkAssets,
         // vs[5]=pendingDepositAssets, vs[6]=claimableRedeemAssets,
         // vs[7]=pendingRedeemShares
         const pps          = Number(vs[0]) / 1e6;

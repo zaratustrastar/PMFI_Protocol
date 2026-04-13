@@ -1,0 +1,74 @@
+Concretely, here is the exact edit plan
+A. Storage
+
+Replace:
+
+uint256 public lastReportedBackingAssets;
+uint256 public lossCarryforward;
+
+with:
+
+uint256 public lastReportedBackingAssets; // optional informational metric
+uint256 public highWaterMarkAssets;
+B. report()
+
+Remove this whole block:
+
+int256 periodPnl = int256(backingAssetsNow) - int256(lastReportedBackingAssets);
+
+uint256 feeAssets = 0;
+if (periodPnl < 0) {
+    lossCarryforward += uint256(-periodPnl);
+} else if (periodPnl > 0) {
+    uint256 profit = uint256(periodPnl);
+    uint256 profitAfterLoss = profit > lossCarryforward
+        ? profit - lossCarryforward
+        : 0;
+    feeAssets = (profitAfterLoss * PERF_FEE_BPS) / 10000;
+    lossCarryforward = lossCarryforward > profit
+        ? lossCarryforward - profit
+        : 0;
+}
+
+Replace with HWM logic.
+
+C. Change internal processors to return processed asset totals
+function _processDepositRequests(uint256 pps, uint256 maxCount)
+    internal
+    returns (uint256 processed, uint256 assetsProcessed)
+
+function _processRedeemRequests(uint256 maxCount)
+    internal
+    returns (uint256 processed, uint256 assetsProcessed)
+D. After queue processing in report(), adjust HWM
+highWaterMarkAssets += depositAssetsProcessed;
+
+highWaterMarkAssets = highWaterMarkAssets > redeemAssetsProcessed
+    ? highWaterMarkAssets - redeemAssetsProcessed
+    : 0;
+E. Keep lastReportedBackingAssets only as informational snapshot
+
+At the end:
+
+lastReportedBackingAssets = reportedAssets > (totalPendingDepositAssets + totalClaimableRedeemAssets)
+    ? reportedAssets - (totalPendingDepositAssets + totalClaimableRedeemAssets)
+    : 0;
+
+That is fine for UI/reporting, just not for fee logic.
+
+One more thing I would strongly change
+
+This comment in the migration block is now bad:
+
+Deploy V2, seed with initial report (reportedAssets = 0 for clean start)
+
+I would remove or rewrite that.
+
+Because with a real HWM design, the clean start should be:
+
+deploy with highWaterMarkAssets = 0
+accept first deposits
+first funded report() initializes HWM
+do not intentionally seed with empty report as meaningful accounting
+
+That wording caused part of the confusion in the first place.
