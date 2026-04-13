@@ -437,32 +437,47 @@ def place_order(
 
         log(f"✅ Opinion order placed: orderId={order_id}")
 
-        # ── IOC enforcement: poll balance to confirm fill within 9s ──────────
+        # ── IOC enforcement: poll get_order_by_id() to confirm fill within 9s ──
         # Opinion has no native IOC/FOK order type. We enforce time-bounding by
-        # polling the post-order balance 3×3s. If the balance hasn't dropped by
-        # ≥90% of the expected cost, the order is resting — cancel it immediately.
+        # polling the order status directly (3×3s = 9s window).
+        # get_order_by_id() gives deterministic status + exact filled_amount —
+        # no balance heuristics, no false positives from concurrent activity.
         if order_id:
-            _fill_threshold = size_usdc * 0.90
             log(
-                f"🔍 [IOC-poll] Polling Opinion fill for {order_id!r}: "
-                f"3×3s, need {_fill_threshold:.4f} USDT drop (90% of {size_usdc:.4f})"
+                f"🔍 [IOC-poll] Polling order status for {order_id!r}: "
+                f"3×3s, expect {contract_count} contracts (maker_amount≈{size_usdc:.4f} USDT)"
             )
             _filled = False
+            _last_status = "unknown"
             for _attempt in range(3):
                 time.sleep(3)
-                _bal_now = get_balance()
-                _dropped_now = balance_before - _bal_now
-                log(
-                    f"🔍 [IOC-poll] Attempt {_attempt + 1}/3: "
-                    f"balance={_bal_now:.4f} dropped={_dropped_now:.4f} need={_fill_threshold:.4f}"
-                )
-                if _dropped_now >= _fill_threshold:
-                    log(f"✅ [IOC-poll] Fill confirmed on attempt {_attempt + 1}: dropped={_dropped_now:.4f}")
-                    _filled = True
-                    break
+                try:
+                    def _query_order(oid=order_id):
+                        return client.get_order_by_id(order_id=oid)
+                    _qr = _run_with_timeout(_query_order, 10, "get_order_by_id")
+                    _odata = getattr(getattr(_qr, "result", None), "data", None)
+                    _last_status = getattr(_odata, "status", "unknown") if _odata else "unknown"
+                    _filled_amt = float(getattr(_odata, "filled_amount", 0) or 0)
+                    _maker_amt  = float(getattr(_odata, "maker_amount", size_usdc) or size_usdc)
+                    log(
+                        f"🔍 [IOC-poll] Attempt {_attempt + 1}/3: "
+                        f"status={_last_status!r} filled={_filled_amt:.4f}/{_maker_amt:.4f}"
+                    )
+                    if _last_status == "filled" and _filled_amt >= _maker_amt * 0.90:
+                        log(f"✅ [IOC-poll] Fill confirmed (attempt {_attempt + 1}): filled={_filled_amt:.4f}")
+                        _filled = True
+                        break
+                    if _last_status == "cancelled":
+                        log(f"⚠️ [IOC-poll] Order already cancelled by exchange on attempt {_attempt + 1}")
+                        return False, "", f"opinion_order_cancelled_by_exchange: order {order_id!r}"
+                except Exception as _qe:
+                    log(f"⚠️ [IOC-poll] get_order_by_id attempt {_attempt + 1} failed: {_qe}")
 
             if not _filled:
-                log(f"⏱️ [IOC-poll] Order {order_id!r} not filled within 9s — cancelling to prevent resting exposure")
+                log(
+                    f"⏱️ [IOC-poll] Order {order_id!r} not filled within 9s "
+                    f"(last_status={_last_status!r}) — cancelling to prevent resting exposure"
+                )
                 try:
                     def _do_cancel(oid=order_id):
                         return client.cancel_order(oid)
@@ -470,7 +485,7 @@ def place_order(
                     log(f"🗑️ [IOC-poll] Cancel result: {_cr}")
                 except Exception as _ce:
                     log(f"⚠️ [IOC-poll] Cancel failed: {_ce} — order may rest in book (flag for manual review)")
-                return False, "", f"opinion_ioc_not_filled: order {order_id!r} did not fill within 9s and was cancelled"
+                return False, "", f"opinion_ioc_not_filled: order {order_id!r} status={_last_status!r} after 9s, cancelled"
 
         return True, order_id, ""
 
@@ -478,26 +493,35 @@ def place_order(
         err = str(exc)
         log(f"⏱️  place_order() timed out: {err}")
         # BSC transactions submitted through proxychains can confirm on-chain but the
-        # SDK receipt poll may exceed our timeout. Verify by checking if the balance
-        # dropped by at least 90% of the expected cost — if so, the order filled.
-        import time as _time
-        log("🔍 [timeout-verify] Waiting 8s then checking Opinion balance for silent fill...")
-        _time.sleep(8)
-        balance_after = get_balance()
-        dropped = balance_before - balance_after
-        threshold = size_usdc * 0.90  # 90% — tight enough to avoid false-positives from other activity
-        log(
-            f"🔍 [timeout-verify] balance_before={balance_before:.4f} "
-            f"balance_after={balance_after:.4f} dropped={dropped:.4f} "
-            f"threshold(90%*cost)={threshold:.4f}"
-        )
-        if dropped >= threshold:
-            log(
-                f"✅ [timeout-verify] Balance dropped {dropped:.4f} >= {threshold:.4f} — "
-                f"BSC tx confirmed despite SDK timeout. Treating as filled."
-            )
-            return True, "timeout-confirmed", ""
-        log(f"⏱️  [timeout-verify] Drop {dropped:.4f} < threshold {threshold:.4f} — treating as failed: {err}")
+        # SDK receipt poll may exceed our timeout.  Use get_order_by_id() after a short
+        # wait — if the BSC tx confirmed, the order will show status="filled" with exact
+        # filled_amount.  This is deterministic and has no false positives.
+        log("🔍 [timeout-verify] Waiting 8s then querying order status for silent fill...")
+        time.sleep(8)
+        # We may not have an order_id if the SDK timed out before returning one.
+        # In that case we cannot query by ID — fall through to failure.
+        _to_order_id = locals().get("order_id", "")
+        if _to_order_id and _to_order_id != "timeout-confirmed":
+            try:
+                def _query_timeout(oid=_to_order_id):
+                    return client.get_order_by_id(order_id=oid)
+                _tqr = _run_with_timeout(_query_timeout, 10, "timeout_get_order_by_id")
+                _tdata = getattr(getattr(_tqr, "result", None), "data", None)
+                _tstatus = getattr(_tdata, "status", "unknown") if _tdata else "unknown"
+                _t_filled = float(getattr(_tdata, "filled_amount", 0) or 0)
+                _t_maker  = float(getattr(_tdata, "maker_amount", size_usdc) or size_usdc)
+                log(
+                    f"🔍 [timeout-verify] order status={_tstatus!r} "
+                    f"filled={_t_filled:.4f}/{_t_maker:.4f}"
+                )
+                if _tstatus == "filled" and _t_filled >= _t_maker * 0.90:
+                    log(f"✅ [timeout-verify] Order confirmed filled via get_order_by_id despite SDK timeout")
+                    return True, _to_order_id, ""
+                log(f"⏱️  [timeout-verify] Order not filled (status={_tstatus!r}) — treating as failed")
+            except Exception as _tqe:
+                log(f"⚠️ [timeout-verify] get_order_by_id failed: {_tqe} — treating as failed")
+        else:
+            log("⚠️ [timeout-verify] No order_id available to query — treating as failed")
         return False, "", err
     except Exception as exc:
         err = str(exc)
