@@ -829,9 +829,12 @@ async function getSignedNav(retryCount = 0) {
     } catch (error) {
         clearTimeout(timeoutId);
         
-        if (error.name === 'AbortError' && retryCount < 1) {
-            console.log("Oracle slow, retrying...");
-            return getSignedNav(retryCount + 1);
+        if (error.name === 'AbortError') {
+            if (retryCount < 1) {
+                console.log("Oracle slow, retrying...");
+                return getSignedNav(retryCount + 1);
+            }
+            throw new Error("Price server did not respond in time. Please ensure the VPS bot is running and accessible.");
         }
         
         throw error;
