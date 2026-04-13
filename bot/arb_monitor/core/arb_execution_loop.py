@@ -378,6 +378,20 @@ def _execution_cycle():
             skipped_caps += 1
             continue
 
+        # ── Quote staleness guard: skip if Oddpool data is too old ───────────
+        # fetched_at is set when the opportunity was normalised from Oddpool.
+        # If the quote is older than _STALE_QUOTE_SECS, the price/depth data
+        # may no longer be valid — the VWAP gate uses live orderbook re-fetches
+        # for Kalshi/Opinion, but the Oddpool edge signal itself could be stale.
+        _STALE_QUOTE_SECS = int(os.environ.get("ARB_STALE_QUOTE_SECONDS", "120"))
+        _opp_age = time.time() - getattr(opp, "fetched_at", 0.0)
+        if _opp_age > _STALE_QUOTE_SECS:
+            log(
+                f"⏭ Skipping {opp.pair_id}: Oddpool quote is {_opp_age:.0f}s old "
+                f"(max={_STALE_QUOTE_SECS}s) — re-fetch needed"
+            )
+            continue
+
         # ── Expiry guard: don't enter markets closing too soon ─────────────
         if opp.days_to_expiry < ARB_MIN_DAYS_TO_EXPIRY:
             skipped_expiry += 1

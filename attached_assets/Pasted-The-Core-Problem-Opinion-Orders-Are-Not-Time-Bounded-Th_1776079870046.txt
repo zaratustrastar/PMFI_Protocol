@@ -1,0 +1,35 @@
+The Core Problem: Opinion Orders Are Not Time-Bounded
+The most critical gap is in opinion_clob.py. Compare how Kalshi and Opinion orders are placed:
+Kalshi (in arb_executor.py, _place_kalshi_order): gets a 5-second IOC expiry that auto-cancels if unfilled:
+pythonioc_expiry = int(time.time()) + 5
+payload = { ..., "expiration_ts": ioc_expiry }
+Opinion (in opinion_clob.py, place_order): has no expiration at all — it's a naked limit order that rests indefinitely:
+pythonorder = PlaceOrderDataInput(
+    marketId=int(child_market_id),
+    tokenId=token_id,
+    side=OrderSide.BUY,
+    orderType=LIMIT_ORDER,
+    price=str(round(price, 4)),
+    makerAmountInQuoteToken=round(size_usdc, 6),
+)
+So if the Opinion order doesn't immediately fill as a taker, it sits in the book forever — while the Polymarket FOK leg either fills or dies instantly.
+The Taker Price Makes This Worse
+In arb_executor.py line where Opinion orders are placed:
+pythonopinion_taker_price = round(live_kalshi_ask + 0.001, 4)
+This intentionally places the order above the ask to ensure it crosses as a taker. But this means the order cannot be cheaply cancelled if it fills — you've already committed to paying above-market. And if the ask moved between the book fetch and order placement, your "taker" price might now be a resting maker bid that fills later when you no longer want it.
+The Cancel Path for Opinion Is Broken
+When leg 1 (Poly) fails but leg 2 (Opinion) succeeded, _cancel_leg2_order tries to cancel the Opinion order:
+pythonelif venue2 == "opinion":
+    from ..adapters.opinion_clob import get_client as opinion_get_client
+    client = opinion_get_client()
+But opinion_clob.py exposes _get_client() (private, with underscore), not get_client. This import would raise an ImportError, meaning Opinion leg-2 cancellation silently fails. The code catches the exception and returns False, logging it as needing manual intervention — but the order is already filled or resting.
+The Timeout Fill Detection Is Too Loose
+In opinion_clob.py, when place_order times out (the SDK hangs waiting for BSC confirmation), it uses a balance-drop heuristic:
+pythondropped = balance_before - balance_after
+threshold = size_usdc * 0.50  # 50% threshold!
+if dropped >= threshold:
+    return True, "timeout-confirmed", ""
+A 50% balance drop is treated as a confirmed fill. This could false-positive if another process touched the balance, or if a partial fill occurred. The returned order_id="timeout-confirmed" is then passed to the cancel function — which can't cancel a non-existent order ID.
+Stale Opportunities Recycled Across Cycles
+The _PAIR_FAIL_CACHE in arb_execution_loop.py only suppresses a failed pair for 5 minutes (default _PAIR_FAIL_TTL = 300). But pre-funding errors like opinion_token_unresolvable skip this cache entirely — they just continue to the next opportunity. If Oddpool keeps returning the same stale opportunity every 30-second cycle, and the price conditions are technically still "valid" per the VWAP gate (which uses fresh book data), the bot will keep attempting the trade.
+The fetched_at staleness guard (ARB_STALE_QUOTE_SECONDS = 300) only applies to the fallback path when live orderbook data is unavailable — it doesn't gate the primary execution path at all.

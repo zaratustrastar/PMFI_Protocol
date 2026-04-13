@@ -436,6 +436,42 @@ def place_order(
                 )
 
         log(f"✅ Opinion order placed: orderId={order_id}")
+
+        # ── IOC enforcement: poll balance to confirm fill within 9s ──────────
+        # Opinion has no native IOC/FOK order type. We enforce time-bounding by
+        # polling the post-order balance 3×3s. If the balance hasn't dropped by
+        # ≥90% of the expected cost, the order is resting — cancel it immediately.
+        if order_id:
+            _fill_threshold = size_usdc * 0.90
+            log(
+                f"🔍 [IOC-poll] Polling Opinion fill for {order_id!r}: "
+                f"3×3s, need {_fill_threshold:.4f} USDT drop (90% of {size_usdc:.4f})"
+            )
+            _filled = False
+            for _attempt in range(3):
+                time.sleep(3)
+                _bal_now = get_balance()
+                _dropped_now = balance_before - _bal_now
+                log(
+                    f"🔍 [IOC-poll] Attempt {_attempt + 1}/3: "
+                    f"balance={_bal_now:.4f} dropped={_dropped_now:.4f} need={_fill_threshold:.4f}"
+                )
+                if _dropped_now >= _fill_threshold:
+                    log(f"✅ [IOC-poll] Fill confirmed on attempt {_attempt + 1}: dropped={_dropped_now:.4f}")
+                    _filled = True
+                    break
+
+            if not _filled:
+                log(f"⏱️ [IOC-poll] Order {order_id!r} not filled within 9s — cancelling to prevent resting exposure")
+                try:
+                    def _do_cancel(oid=order_id):
+                        return client.cancel_order(oid)
+                    _cr = _run_with_timeout(_do_cancel, 10, "cancel_unfilled_opinion_order")
+                    log(f"🗑️ [IOC-poll] Cancel result: {_cr}")
+                except Exception as _ce:
+                    log(f"⚠️ [IOC-poll] Cancel failed: {_ce} — order may rest in book (flag for manual review)")
+                return False, "", f"opinion_ioc_not_filled: order {order_id!r} did not fill within 9s and was cancelled"
+
         return True, order_id, ""
 
     except TimeoutError as exc:
@@ -443,17 +479,17 @@ def place_order(
         log(f"⏱️  place_order() timed out: {err}")
         # BSC transactions submitted through proxychains can confirm on-chain but the
         # SDK receipt poll may exceed our timeout. Verify by checking if the balance
-        # dropped by at least 50% of the expected cost — if so, the order filled.
+        # dropped by at least 90% of the expected cost — if so, the order filled.
         import time as _time
         log("🔍 [timeout-verify] Waiting 8s then checking Opinion balance for silent fill...")
         _time.sleep(8)
         balance_after = get_balance()
         dropped = balance_before - balance_after
-        threshold = size_usdc * 0.50
+        threshold = size_usdc * 0.90  # 90% — tight enough to avoid false-positives from other activity
         log(
             f"🔍 [timeout-verify] balance_before={balance_before:.4f} "
             f"balance_after={balance_after:.4f} dropped={dropped:.4f} "
-            f"threshold(50%*cost)={threshold:.4f}"
+            f"threshold(90%*cost)={threshold:.4f}"
         )
         if dropped >= threshold:
             log(
@@ -467,3 +503,7 @@ def place_order(
         err = str(exc)
         log(f"❌ place_order() exception: {err}")
         return False, "", err
+
+
+# ── Public alias so arb_executor._cancel_leg2_order can import get_client ────
+get_client = _get_client
