@@ -375,22 +375,9 @@
     <!-- Stats Row -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">Total Value Locked</div>
-            <div class="stat-value" id="tvl-value">—</div>
-            <div class="stat-sub" id="nav-updated">Loading...</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">pARB Share Price</div>
-            <div class="nav-display">
-                <div class="stat-value nav-price" id="nav-price">—</div>
-                <div class="nav-unit">USDC</div>
-            </div>
-            <div class="stat-sub">Per pARB token</div>
-        </div>
-        <div class="stat-card">
             <div class="stat-label">Average APR</div>
             <div class="stat-value stat-up" id="stat-apr">—</div>
-            <div class="stat-sub">Annualised return</div>
+            <div class="stat-sub" id="nav-updated">Annualised return</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Average APY</div>
@@ -668,30 +655,26 @@ async function loadSharePrice() {
             "function officialPPS() view returns (uint256)"
         ];
         const contract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, provider);
+        let pps = 0;
         try {
             const ppsRaw = await contract.officialPPS();
-            const pps = Number(ppsRaw) / 1e6;
-            if (pps > 0) {
-                currentNavUsd = pps;
-                const display = pps.toFixed(6);
-                document.getElementById('nav-price').textContent = display;
-                document.getElementById('deposit-nav').textContent = '$' + display;
-                document.getElementById('withdraw-nav').textContent = '$' + display;
-                return;
-            }
+            pps = Number(ppsRaw) / 1e6;
         } catch (_) {}
-        // fallback: compute from totalSupply + NAV
-        const resp = await fetch(`${API_BASE}/api/arb-vault/nav`);
-        const data = await resp.json();
-        const totalAssets = data.total_assets_usdc || 0;
-        const supplyRaw = await contract.totalSupply();
-        const supply = Number(supplyRaw) / 1e18;
-        const pps = supply > 0 ? totalAssets / supply : 1.0;
-        currentNavUsd = pps;
-        const display = pps.toFixed(6);
-        document.getElementById('nav-price').textContent = display;
-        document.getElementById('deposit-nav').textContent = '$' + display;
-        document.getElementById('withdraw-nav').textContent = '$' + display;
+        if (!pps) {
+            // fallback: compute from totalSupply + NAV
+            const resp = await fetch(`${API_BASE}/api/arb-vault/nav`);
+            const data = await resp.json();
+            const totalAssets = data.total_assets_usdc || 0;
+            const supplyRaw = await contract.totalSupply();
+            const supply = Number(supplyRaw) / 1e18;
+            pps = supply > 0 ? totalAssets / supply : 1.0;
+        }
+        if (pps > 0) {
+            currentNavUsd = pps;
+            const display = pps.toFixed(6);
+            document.getElementById('deposit-nav').textContent = '$' + display;
+            document.getElementById('withdraw-nav').textContent = '$' + display;
+        }
     } catch (_) {}
 }
 
@@ -703,29 +686,20 @@ async function loadNav() {
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
 
-        const tvl = data.tvl_usdc || data.total_assets_usdc || 0;
         const openVal = data.open_positions_value || 0;
         const settledPnl = data.settled_pnl || 0;
 
-        document.getElementById('tvl-value').textContent = fmt$(tvl);
         document.getElementById('deployed-capital').textContent = fmt$(openVal);
         document.getElementById('settled-pnl').textContent = fmt$(settledPnl);
 
-        if (data.apr !== null && data.apr !== undefined) {
-            document.getElementById('stat-apr').textContent = data.apr.toFixed(1) + '%';
-        } else {
-            document.getElementById('stat-apr').textContent = '—';
-        }
-        if (data.apy !== null && data.apy !== undefined) {
-            document.getElementById('stat-apy').textContent = data.apy.toFixed(1) + '%';
-        } else {
-            document.getElementById('stat-apy').textContent = '—';
-        }
+        document.getElementById('stat-apr').textContent =
+            (data.apr != null) ? data.apr.toFixed(1) + '%' : '—';
+        document.getElementById('stat-apy').textContent =
+            (data.apy != null) ? data.apy.toFixed(1) + '%' : '—';
 
         if (!currentNavUsd) {
             currentNavUsd = data.share_price || 1.0;
             const display = currentNavUsd.toFixed(6);
-            document.getElementById('nav-price').textContent = display;
             document.getElementById('deposit-nav').textContent = '$' + display;
             document.getElementById('withdraw-nav').textContent = '$' + display;
         }
@@ -735,7 +709,6 @@ async function loadNav() {
             'Updated ' + ts.toLocaleTimeString();
 
     } catch (e) {
-        document.getElementById('tvl-value').textContent = '—';
         document.getElementById('nav-updated').textContent = 'Unavailable';
     }
 }
