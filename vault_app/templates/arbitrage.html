@@ -375,12 +375,27 @@
     <!-- Stats Row -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">pARB NAV / share</div>
+            <div class="stat-label">Total Value Locked</div>
+            <div class="stat-value" id="tvl-value">—</div>
+            <div class="stat-sub" id="nav-updated">Loading...</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">pARB Share Price</div>
             <div class="nav-display">
                 <div class="stat-value nav-price" id="nav-price">—</div>
                 <div class="nav-unit">USDC</div>
             </div>
-            <div class="stat-sub" id="nav-updated">Loading...</div>
+            <div class="stat-sub">Per pARB token</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Average APR</div>
+            <div class="stat-value stat-up" id="stat-apr">—</div>
+            <div class="stat-sub">Annualised return</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Average APY</div>
+            <div class="stat-value stat-up" id="stat-apy">—</div>
+            <div class="stat-sub">Compounded annually</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Deployed Capital</div>
@@ -391,16 +406,6 @@
             <div class="stat-label">Settled PnL</div>
             <div class="stat-value stat-up" id="settled-pnl">—</div>
             <div class="stat-sub">Cumulative realized</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Estimated APY</div>
-            <div class="stat-value stat-up" id="est-apy">—</div>
-            <div class="stat-sub">Based on velocity</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Live Opportunities</div>
-            <div class="stat-value" id="opp-count">—</div>
-            <div class="stat-sub"><span class="dot dot-green"></span>Oddpool powered</div>
         </div>
     </div>
 
@@ -447,16 +452,17 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Pair</th>
+                                <th>Market</th>
+                                <th>Platforms</th>
+                                <th>Edge %</th>
+                                <th>Avg Price Paid</th>
                                 <th>Contracts</th>
-                                <th>Cost Basis</th>
-                                <th>Liquid Value</th>
-                                <th>Expected Payout</th>
-                                <th>Days Left</th>
+                                <th>Unrealized PnL</th>
+                                <th>Expiry</th>
                             </tr>
                         </thead>
                         <tbody id="pos-table-body">
-                            <tr><td colspan="6" class="loading">Loading positions...</td></tr>
+                            <tr><td colspan="7" class="loading">Loading positions...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -476,15 +482,17 @@
                         <thead>
                             <tr>
                                 <th>Market</th>
-                                <th>Venue</th>
-                                <th>Edge</th>
+                                <th>Platforms</th>
+                                <th>Edge %</th>
+                                <th>Avg Price</th>
+                                <th>Contracts</th>
                                 <th>Cost</th>
-                                <th>Expected Profit</th>
-                                <th>Expires / Status</th>
+                                <th>PnL / Profit</th>
+                                <th>Expiry / Status</th>
                             </tr>
                         </thead>
                         <tbody id="history-table-body">
-                            <tr><td colspan="6" class="loading">Loading trade history...</td></tr>
+                            <tr><td colspan="8" class="loading">Loading trade history...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -610,6 +618,12 @@ let provider = null;
 let signer = null;
 let activeTab = 'deposit';
 
+// ─── Helpers ──────────────────────────────────────────────────────────────
+
+function fmt$(n) { return '$' + Number(n || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+function fmtPct(n) { return (n >= 0 ? '+' : '') + Number(n || 0).toFixed(2) + '%'; }
+function edgeClass(pct) { return pct >= 5 ? 'edge-high' : pct >= 2.5 ? 'edge-medium' : 'edge-low'; }
+
 // ─── Wallet ───────────────────────────────────────────────────────────────
 
 async function connectWallet() {
@@ -627,6 +641,7 @@ async function connectWallet() {
         document.getElementById('connect-btn').textContent = 'Connected';
         document.getElementById('connect-btn').disabled = true;
         loadUserBalance();
+        loadSharePrice();
     } catch (e) {
         showStatus('Wallet connection failed: ' + e.message, 'error');
     }
@@ -645,56 +660,83 @@ async function loadUserBalance() {
     }
 }
 
-// ─── NAV ──────────────────────────────────────────────────────────────────
+async function loadSharePrice() {
+    if (!VAULT_ADDRESS || VAULT_ADDRESS === 'None' || !provider) return;
+    try {
+        const VAULT_ABI = [
+            "function totalSupply() view returns (uint256)",
+            "function officialPPS() view returns (uint256)"
+        ];
+        const contract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, provider);
+        try {
+            const ppsRaw = await contract.officialPPS();
+            const pps = Number(ppsRaw) / 1e6;
+            if (pps > 0) {
+                currentNavUsd = pps;
+                const display = pps.toFixed(6);
+                document.getElementById('nav-price').textContent = display;
+                document.getElementById('deposit-nav').textContent = '$' + display;
+                document.getElementById('withdraw-nav').textContent = '$' + display;
+                return;
+            }
+        } catch (_) {}
+        // fallback: compute from totalSupply + NAV
+        const resp = await fetch(`${API_BASE}/api/arb-vault/nav`);
+        const data = await resp.json();
+        const totalAssets = data.total_assets_usdc || 0;
+        const supplyRaw = await contract.totalSupply();
+        const supply = Number(supplyRaw) / 1e18;
+        const pps = supply > 0 ? totalAssets / supply : 1.0;
+        currentNavUsd = pps;
+        const display = pps.toFixed(6);
+        document.getElementById('nav-price').textContent = display;
+        document.getElementById('deposit-nav').textContent = '$' + display;
+        document.getElementById('withdraw-nav').textContent = '$' + display;
+    } catch (_) {}
+}
+
+// ─── NAV / TVL / APR / APY ────────────────────────────────────────────────
 
 async function loadNav() {
     try {
         const resp = await fetch(`${API_BASE}/api/arb-vault/nav`);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
-        const totalAssets = data.total_assets_usdc || 0;
-        const settledPnl = data.settled_pnl || 0;
-        const openVal = data.open_positions_value || 0;
 
-        // NAV/share = totalAssets / totalSupply, read from contract if connected
-        // If contract not deployed or wallet not connected, fallback to $1.00 (initial NAV)
-        let navPerShare = 1.0;
-        if (VAULT_ADDRESS && VAULT_ADDRESS !== 'None' && provider) {
-            try {
-                const pARB_ABI = [
-                    "function totalSupply() view returns (uint256)"
-                ];
-                const contract = new ethers.Contract(VAULT_ADDRESS, pARB_ABI, provider);
-                const totalSupplyWei = await contract.totalSupply();
-                const totalSupply = Number(totalSupplyWei) / 1e18;
-                if (totalSupply > 0) {
-                    navPerShare = totalAssets / totalSupply;
-                } else {
-                    navPerShare = 1.0;
-                }
-            } catch (_) {
-                navPerShare = totalAssets > 0 ? 1.0 : 1.0;
-            }
+        const tvl = data.tvl_usdc || data.total_assets_usdc || 0;
+        const openVal = data.open_positions_value || 0;
+        const settledPnl = data.settled_pnl || 0;
+
+        document.getElementById('tvl-value').textContent = fmt$(tvl);
+        document.getElementById('deployed-capital').textContent = fmt$(openVal);
+        document.getElementById('settled-pnl').textContent = fmt$(settledPnl);
+
+        if (data.apr !== null && data.apr !== undefined) {
+            document.getElementById('stat-apr').textContent = data.apr.toFixed(1) + '%';
+        } else {
+            document.getElementById('stat-apr').textContent = '—';
+        }
+        if (data.apy !== null && data.apy !== undefined) {
+            document.getElementById('stat-apy').textContent = data.apy.toFixed(1) + '%';
+        } else {
+            document.getElementById('stat-apy').textContent = '—';
         }
 
-        const navDisplay = navPerShare.toFixed(6);
-        document.getElementById('nav-price').textContent = navDisplay;
-        currentNavUsd = navPerShare;
+        if (!currentNavUsd) {
+            currentNavUsd = data.share_price || 1.0;
+            const display = currentNavUsd.toFixed(6);
+            document.getElementById('nav-price').textContent = display;
+            document.getElementById('deposit-nav').textContent = '$' + display;
+            document.getElementById('withdraw-nav').textContent = '$' + display;
+        }
 
-        document.getElementById('deposit-nav').textContent = '$' + navDisplay;
-        document.getElementById('withdraw-nav').textContent = '$' + navDisplay;
-
-        document.getElementById('settled-pnl').textContent =
-            '$' + settledPnl.toFixed(2);
-        document.getElementById('deployed-capital').textContent =
-            '$' + openVal.toFixed(2);
-
-        const ts = new Date(data.timestamp * 1000);
+        const ts = data.timestamp ? new Date(data.timestamp * 1000) : new Date();
         document.getElementById('nav-updated').textContent =
             'Updated ' + ts.toLocaleTimeString();
+
     } catch (e) {
-        document.getElementById('nav-price').textContent = '—';
-        document.getElementById('nav-updated').textContent = 'NAV unavailable';
+        document.getElementById('tvl-value').textContent = '—';
+        document.getElementById('nav-updated').textContent = 'Unavailable';
     }
 }
 
@@ -708,7 +750,6 @@ async function loadOpportunities() {
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
         const opps = data.opportunities || [];
-        document.getElementById('opp-count').textContent = opps.length;
         document.getElementById('opp-badge').textContent = `${opps.length} live`;
 
         if (opps.length === 0) {
@@ -718,37 +759,35 @@ async function loadOpportunities() {
                     <div class="empty-icon">🔍</div>
                     <div class="empty-title">No opportunities right now</div>
                     <div class="empty-sub">Oddpool is scanning — check back in 30s</div>
-                </div>
-                </td></tr>`;
-            estimateApy([]);
+                </div></td></tr>`;
             return;
         }
 
         const rows = opps.map(opp => {
-            const edgePct = (opp.gross_edge_pct * 100).toFixed(2);
-            const pnlDay = (opp.pnl_velocity * 100).toFixed(2);
-            const days = opp.days_to_expiry.toFixed(1);
+            const rawEdge = opp.gross_edge_pct || opp.edge_pct || 0;
+            const edgePct = (rawEdge * 100).toFixed(2);
+            const rawVel = opp.pnl_velocity || 0;
+            const pnlDay = (rawVel * 100).toFixed(3);
+            const days = (opp.days_to_expiry || 0).toFixed(1);
             const expiry = opp.expiry_ts
                 ? new Date(opp.expiry_ts * 1000).toLocaleDateString()
                 : '—';
-            const edgeClass = opp.gross_edge_pct >= 0.05 ? 'edge-high'
-                : opp.gross_edge_pct >= 0.025 ? 'edge-medium' : 'edge-low';
+            const cls = edgeClass(parseFloat(edgePct));
             const title = opp.poly_title || opp.pair_id || '—';
-            const subtitle = opp.kalshi_title ? opp.kalshi_title : '';
+            const subtitle = opp.kalshi_title || '';
 
             return `<tr>
                 <td>
                     <div class="pair-title" title="${title}">${title}</div>
                     ${subtitle ? `<div class="pair-subtitle">${subtitle}</div>` : ''}
                 </td>
-                <td><span class="edge-badge ${edgeClass}">${edgePct}%</span></td>
+                <td><span class="edge-badge ${cls}">${edgePct}%</span></td>
                 <td>${days}d</td>
                 <td>${pnlDay}%/d</td>
                 <td>${expiry}</td>
             </tr>`;
         }).join('');
         document.getElementById('opp-table-body').innerHTML = rows;
-        estimateApy(opps);
     } catch (e) {
         document.getElementById('opp-table-body').innerHTML =
             `<tr><td colspan="5" class="empty-state"><div class="empty-icon">⚠️</div>
@@ -757,22 +796,12 @@ async function loadOpportunities() {
     }
 }
 
-function estimateApy(opps) {
-    if (!opps.length) {
-        document.getElementById('est-apy').textContent = '—';
-        return;
-    }
-    const avgVelocity = opps.reduce((s, o) => s + o.pnl_velocity, 0) / opps.length;
-    const apy = (avgVelocity * 365 * 100).toFixed(1);
-    document.getElementById('est-apy').textContent = apy + '%';
-}
-
-// ─── Positions ────────────────────────────────────────────────────────────
+// ─── Open Positions ───────────────────────────────────────────────────────
 
 async function loadPositions() {
+    const tbody = document.getElementById('pos-table-body');
     try {
-        document.getElementById('pos-table-body').innerHTML =
-            '<tr><td colspan="5" class="loading">Loading...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="loading">Loading...</td></tr>';
         const resp = await fetch(`${API_BASE}/api/arb-vault/positions`);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
@@ -780,53 +809,139 @@ async function loadPositions() {
         document.getElementById('pos-badge').textContent = positions.length + ' open';
 
         if (positions.length === 0) {
-            document.getElementById('pos-table-body').innerHTML = `
-                <tr><td colspan="5">
+            tbody.innerHTML = `<tr><td colspan="7">
                 <div class="empty-state">
                     <div class="empty-icon">📊</div>
                     <div class="empty-title">No open positions</div>
-                    <div class="empty-sub">Positions will appear here once trades are executed</div>
-                </div>
-                </td></tr>`;
+                    <div class="empty-sub">Positions appear here once trades are executed</div>
+                </div></td></tr>`;
             return;
         }
 
-        const now = Date.now() / 1000;
         const rows = positions.map(pos => {
-            const costBasis = '$' + (pos.cost_basis_usdc || 0).toFixed(2);
-            const liquidVal = '$' + (pos.total_liquid_value || 0).toFixed(2);
-            const daysLeft = pos.expiry_ts > now
-                ? ((pos.expiry_ts - now) / 86400).toFixed(1) + 'd'
-                : 'Expired';
-            const title = pos.poly_title || pos.pair_id || '—';
-            const contracts = (pos.shares || 0).toFixed(0);
-            // True arb: Poly YES + Kalshi complementary side → guaranteed $1 per contract regardless of outcome
-            // (one leg always pays $1, the other always pays $0 — net is always $1 × contracts)
-            const contractsInt = Math.round(pos.shares || 0);
-            const expectedPayout = '$' + (contractsInt * 1.0).toFixed(2);
-            const expectedProfit = '$' + Math.max(0, contractsInt * 1.0 - (pos.cost_basis_usdc || 0)).toFixed(2);
-            const kalshiSide = pos.kalshi_side || 'YES';
-            const legLabel = kalshiSide === 'NO'
-                ? 'Poly YES / Kalshi NO'
-                : 'Poly YES / Kalshi YES';
+            const market = (pos.market || pos.pair_id || '—');
+            const platform = pos.platform_label || 'Polymarket × Kalshi';
+            const edge = pos.edge_pct || 0;
+            const cls = edgeClass(edge);
+            const avgPrice = (pos.avg_price_per_pair || 0).toFixed(4);
+            const contracts = Math.round(pos.shares || 0).toLocaleString();
+            const pnl = pos.unrealized_pnl || 0;
+            const pnlColor = pnl >= 0 ? '#22c55e' : '#ef4444';
+            const pnlStr = (pnl >= 0 ? '+' : '') + fmt$(pnl);
+
+            const expiryTs = pos.expiry_ts || 0;
+            let expiryLabel = '—';
+            if (expiryTs > 0) {
+                const expiryDate = new Date(expiryTs * 1000).toLocaleDateString();
+                const dLeft = pos.days_left || 0;
+                expiryLabel = dLeft > 0
+                    ? `${expiryDate}<br><small style="opacity:0.55;">${dLeft.toFixed(1)}d left</small>`
+                    : `${expiryDate}<br><small style="color:#ef4444;">Expired</small>`;
+            }
+
+            const side = pos.kalshi_side || 'YES';
+            const sideLabel = side === 'NO' ? 'Poly YES / Kalshi NO' : 'Poly YES / Kalshi YES';
+            const ticker = pos.kalshi_ticker ? ` · ${pos.kalshi_ticker}` : '';
 
             return `<tr>
                 <td>
-                    <div class="pair-title" title="${title}">${title}</div>
-                    <div class="pair-subtitle">${legLabel} · ${pos.kalshi_ticker || ''}</div>
+                    <div class="pair-title" title="${market}">${market.slice(0, 55)}</div>
+                    <div class="pair-subtitle">${sideLabel}${ticker}</div>
                 </td>
+                <td><small>${platform}</small></td>
+                <td><span class="edge-badge ${cls}">${fmtPct(edge)}</span></td>
+                <td style="font-variant-numeric: tabular-nums;">${avgPrice} USDC</td>
                 <td>${contracts}</td>
-                <td>${costBasis}</td>
-                <td>${liquidVal}</td>
-                <td title="True arb: guaranteed $1 per contract; expected profit ${expectedProfit}">${expectedPayout}</td>
-                <td>${daysLeft}</td>
+                <td style="color:${pnlColor}; font-weight:500;">${pnlStr}</td>
+                <td>${expiryLabel}</td>
             </tr>`;
         }).join('');
-        document.getElementById('pos-table-body').innerHTML = rows;
+        tbody.innerHTML = rows;
     } catch (e) {
-        document.getElementById('pos-table-body').innerHTML =
-            `<tr><td colspan="6" class="empty-state"><div class="empty-icon">⚠️</div>
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">
+            <div class="empty-icon">⚠️</div>
             <div class="empty-title">Error loading positions</div>
+            <div class="empty-sub">${e.message}</div></td></tr>`;
+    }
+}
+
+// ─── Trade History ────────────────────────────────────────────────────────
+
+async function loadTradeHistory() {
+    const tbody = document.getElementById('history-table-body');
+    try {
+        tbody.innerHTML = '<tr><td colspan="8" class="loading">Loading...</td></tr>';
+        const resp = await fetch(`${API_BASE}/api/arb-vault/trade-history`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        const trades = data.trades || [];
+        document.getElementById('history-badge').textContent = trades.length + ' trades';
+
+        if (trades.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8">
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <div class="empty-title">No trades yet</div>
+                    <div class="empty-sub">Executed arbitrage trades will appear here</div>
+                </div></td></tr>`;
+            return;
+        }
+
+        const rows = trades.map(t => {
+            const title = (t.title || t.pair_id || '—').slice(0, 52);
+            const platform = t.platform_label || t.leg_label || '—';
+            const edge = t.edge_pct || 0;
+            const cls = edgeClass(edge);
+            const avgPrice = (t.avg_price_per_pair || 0).toFixed(4);
+            const contracts = Math.round(t.shares || 0).toLocaleString();
+            const cost = fmt$(t.cost_usdc);
+
+            let pnlCell = '';
+            if (t.status === 'settled') {
+                const pnl = t.settled_pnl || 0;
+                const pnlColor = pnl >= 0 ? '#22c55e' : '#ef4444';
+                const sign = pnl >= 0 ? '+' : '';
+                pnlCell = `<span style="color:${pnlColor}; font-weight:500;">${sign}${fmt$(pnl)}</span>
+                            <br><small style="opacity:0.5;">Settled</small>`;
+            } else {
+                const expectedProfit = t.expected_profit || 0;
+                pnlCell = `<span style="color:#60a5fa;">${fmt$(expectedProfit)}</span>
+                            <br><small style="opacity:0.5;">Expected</small>`;
+            }
+
+            let expiryCell = '';
+            if (t.status === 'settled') {
+                const settledDate = t.settled_at
+                    ? new Date(t.settled_at).toLocaleDateString() : '—';
+                expiryCell = `<span style="color:#22c55e;">✓ Settled</span>
+                              <br><small style="opacity:0.5;">${settledDate}</small>`;
+            } else {
+                const expiryDate = t.expiry_ts > 0
+                    ? new Date(t.expiry_ts * 1000).toLocaleDateString() : '—';
+                const dLeft = t.days_left || 0;
+                expiryCell = `<span style="color:#60a5fa;">Open</span>
+                              <br><small style="opacity:0.5;">${expiryDate} · ${dLeft.toFixed(1)}d</small>`;
+            }
+
+            return `<tr>
+                <td>
+                    <div class="pair-title" title="${t.title || ''}">${title}</div>
+                    <div class="pair-subtitle">${t.kalshi_ticker || ''}</div>
+                </td>
+                <td><small style="opacity:0.7;">${platform}</small></td>
+                <td><span class="edge-badge ${cls}">${fmtPct(edge)}</span></td>
+                <td style="font-variant-numeric:tabular-nums;">${avgPrice}</td>
+                <td>${contracts}</td>
+                <td>${cost}</td>
+                <td>${pnlCell}</td>
+                <td>${expiryCell}</td>
+            </tr>`;
+        }).join('');
+        tbody.innerHTML = rows;
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <div class="empty-title">Error loading history</div>
             <div class="empty-sub">${e.message}</div></td></tr>`;
     }
 }
@@ -845,26 +960,23 @@ function switchTab(tab) {
 document.getElementById('deposit-amount').addEventListener('input', function() {
     const amount = parseFloat(this.value) || 0;
     if (currentNavUsd && currentNavUsd > 0) {
-        const shares = (amount / currentNavUsd).toFixed(4);
-        document.getElementById('deposit-shares-preview').textContent = shares + ' pARB';
+        document.getElementById('deposit-shares-preview').textContent =
+            (amount / currentNavUsd).toFixed(4) + ' pARB';
     }
 });
 
 document.getElementById('withdraw-shares').addEventListener('input', function() {
     const shares = parseFloat(this.value) || 0;
     if (currentNavUsd && currentNavUsd > 0) {
-        const usdc = (shares * currentNavUsd).toFixed(2);
-        document.getElementById('withdraw-usdc-preview').textContent = '$' + usdc;
+        document.getElementById('withdraw-usdc-preview').textContent =
+            '$' + (shares * currentNavUsd).toFixed(2);
     }
 });
 
-function setMaxDeposit() {
-    showStatus('Connect wallet to see your USDC balance.', 'info');
-}
+function setMaxDeposit() { showStatus('Connect wallet to see your USDC balance.', 'info'); }
 
 function setMaxWithdraw() {
-    const userShares = document.getElementById('user-shares').textContent;
-    const match = userShares.match(/[\d.]+/);
+    const match = document.getElementById('user-shares').textContent.match(/[\d.]+/);
     if (match) {
         document.getElementById('withdraw-shares').value = match[0];
         document.getElementById('withdraw-shares').dispatchEvent(new Event('input'));
@@ -878,35 +990,23 @@ async function executeDeposit() {
     if (!VAULT_ADDRESS || VAULT_ADDRESS === 'None') {
         showStatus('Vault contract not deployed yet.', 'error'); return;
     }
-
     showStatus('Fetching NAV from oracle...', 'info');
     try {
         const navResp = await fetch(`${API_BASE}/api/arb-vault/nav`);
         if (!navResp.ok) throw new Error('Could not fetch NAV from oracle');
         const navData = await navResp.json();
-
         if (!navData.signature) {
-            showStatus('NAV oracle signature not available. Ensure ARB_NAV_SIGNER_PRIVATE_KEY is set.', 'error');
-            return;
+            showStatus('NAV oracle signature not available.', 'error'); return;
         }
-
-        const USDC_ABI = [
-            "function approve(address spender, uint256 amount) returns (bool)",
-            "function allowance(address owner, address spender) view returns (uint256)"
-        ];
         const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-        const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
+        const usdcContract = new ethers.Contract(USDC_ADDRESS,
+            ["function approve(address,uint256) returns (bool)"], signer);
         const amountWei = BigInt(Math.floor(amount * 1e6));
-
         showStatus('Approving USDC spend...', 'info');
-        const approveTx = await usdcContract.approve(VAULT_ADDRESS, amountWei);
-        await approveTx.wait();
+        await (await usdcContract.approve(VAULT_ADDRESS, amountWei)).wait();
 
-        const VAULT_ABI = [
-            "function deposit(uint256 usdcAmount, tuple(uint256 totalAssets, uint256 polyCash, uint256 kalshiCash, uint256 openPositionsValue, uint256 settledPnl, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) external"
-        ];
+        const VAULT_ABI = ["function deposit(uint256,tuple(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),bytes) external"];
         const vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
-
         const navTuple = [
             BigInt(Math.round(navData.total_assets_usdc * 1e6)),
             BigInt(Math.round(navData.poly_cash * 1e6)),
@@ -917,17 +1017,13 @@ async function executeDeposit() {
             BigInt(navData.deadline),
             BigInt(navData.round_id),
         ];
-
-        showStatus('Submitting deposit transaction...', 'info');
+        showStatus('Submitting deposit...', 'info');
         const tx = await vaultContract.deposit(amountWei, navTuple, navData.signature);
         showStatus('Waiting for confirmation...', 'info');
         await tx.wait();
-        showStatus(`Deposit successful! TX: ${tx.hash.slice(0,12)}...`, 'success');
-        loadUserBalance();
-        loadNav();
-    } catch (e) {
-        showStatus('Deposit failed: ' + e.message, 'error');
-    }
+        showStatus(`Deposit successful! TX: ${tx.hash.slice(0,14)}...`, 'success');
+        loadUserBalance(); loadNav();
+    } catch (e) { showStatus('Deposit failed: ' + e.message, 'error'); }
 }
 
 async function executeWithdraw() {
@@ -937,23 +1033,16 @@ async function executeWithdraw() {
     if (!VAULT_ADDRESS || VAULT_ADDRESS === 'None') {
         showStatus('Vault contract not deployed yet.', 'error'); return;
     }
-
     showStatus('Fetching NAV from oracle...', 'info');
     try {
         const navResp = await fetch(`${API_BASE}/api/arb-vault/nav`);
         if (!navResp.ok) throw new Error('Could not fetch NAV from oracle');
         const navData = await navResp.json();
-
         if (!navData.signature) {
-            showStatus('NAV oracle signature not available.', 'error');
-            return;
+            showStatus('NAV oracle signature not available.', 'error'); return;
         }
-
-        const VAULT_ABI = [
-            "function requestWithdraw(uint256 shareAmount, tuple(uint256 totalAssets, uint256 polyCash, uint256 kalshiCash, uint256 openPositionsValue, uint256 settledPnl, uint256 timestamp, uint256 deadline, uint256 roundId) navData, bytes signature) external returns (uint256)"
-        ];
+        const VAULT_ABI = ["function requestWithdraw(uint256,tuple(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),bytes) external returns (uint256)"];
         const vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
-
         const sharesWei = BigInt(Math.round(shares * 1e18));
         const navTuple = [
             BigInt(Math.round(navData.total_assets_usdc * 1e6)),
@@ -965,16 +1054,12 @@ async function executeWithdraw() {
             BigInt(navData.deadline),
             BigInt(navData.round_id),
         ];
-
         showStatus('Submitting withdrawal request...', 'info');
         const tx = await vaultContract.requestWithdraw(sharesWei, navTuple, navData.signature);
-        showStatus('Waiting for confirmation...', 'info');
         await tx.wait();
         showStatus('Withdrawal requested! Funds typically available within 7 days.', 'success');
         loadUserBalance();
-    } catch (e) {
-        showStatus('Withdrawal failed: ' + e.message, 'error');
-    }
+    } catch (e) { showStatus('Withdrawal failed: ' + e.message, 'error'); }
 }
 
 function showStatus(msg, type) {
@@ -984,82 +1069,13 @@ function showStatus(msg, type) {
     el.style.display = 'block';
 }
 
-// ─── Trade History ────────────────────────────────────────────────────────
-
-async function loadTradeHistory() {
-    const tbody = document.getElementById('history-table-body');
-    try {
-        tbody.innerHTML = '<tr><td colspan="6" class="loading">Loading...</td></tr>';
-        const resp = await fetch(`${API_BASE}/api/arb-vault/trade-history`);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const data = await resp.json();
-        const trades = data.trades || [];
-        document.getElementById('history-badge').textContent = trades.length + ' trades';
-
-        if (trades.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6">
-                <div class="empty-state">
-                    <div class="empty-icon">📋</div>
-                    <div class="empty-title">No trades yet</div>
-                    <div class="empty-sub">Executed arbitrage trades will appear here</div>
-                </div></td></tr>`;
-            return;
-        }
-
-        const now = Date.now() / 1000;
-        const rows = trades.map(t => {
-            const title = (t.title || t.pair_id || '—').slice(0, 55);
-            const edgePct = `+${(t.edge_pct || 0).toFixed(1)}%`;
-            const cost = '$' + (t.cost_usdc || 0).toFixed(2);
-            const profit = '$' + (t.expected_profit || 0).toFixed(2);
-            const legLabel = t.leg_label || '—';
-            let expiryCell = '';
-            let statusBadge = '';
-            if (t.status === 'settled') {
-                const pnl = (t.settled_pnl || 0);
-                statusBadge = pnl >= 0
-                    ? `<span style="color:#22c55e;">✓ Settled +$${pnl.toFixed(2)}</span>`
-                    : `<span style="color:#ef4444;">✗ Settled -$${Math.abs(pnl).toFixed(2)}</span>`;
-                expiryCell = statusBadge;
-            } else {
-                const daysLeft = t.days_left > 0
-                    ? t.days_left.toFixed(1) + 'd left'
-                    : 'Expired';
-                const expDate = t.expiry_ts > 0
-                    ? new Date(t.expiry_ts * 1000).toLocaleDateString()
-                    : '—';
-                expiryCell = `<span class="stat-up">${daysLeft}</span><br><small style="opacity:0.5;">${expDate}</small>`;
-                statusBadge = `<span style="color:#60a5fa;">Open</span>`;
-                expiryCell = `<span class="stat-up">${daysLeft}</span> ${statusBadge}<br><small style="opacity:0.5;">${expDate}</small>`;
-            }
-            return `<tr>
-                <td>
-                    <div class="pair-title" title="${t.title || ''}">${title}</div>
-                    <div class="pair-subtitle">${t.kalshi_ticker || ''}</div>
-                </td>
-                <td><small style="opacity:0.6;">${legLabel}</small></td>
-                <td class="stat-up">${edgePct}</td>
-                <td>${cost}</td>
-                <td class="stat-up">${profit}</td>
-                <td>${expiryCell}</td>
-            </tr>`;
-        }).join('');
-        tbody.innerHTML = rows;
-    } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
-            <div class="empty-icon">⚠️</div>
-            <div class="empty-title">Error loading history</div>
-            <div class="empty-sub">${e.message}</div></td></tr>`;
-    }
-}
-
 // ─── Init ─────────────────────────────────────────────────────────────────
 
 async function init() {
     await Promise.all([loadNav(), loadOpportunities(), loadPositions(), loadTradeHistory()]);
     setInterval(loadOpportunities, 30000);
     setInterval(loadNav, 60000);
-    setInterval(loadTradeHistory, 120000);
+    setInterval(() => { loadPositions(); loadTradeHistory(); }, 120000);
 }
 
 init();
