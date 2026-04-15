@@ -11,11 +11,15 @@ Responsibilities:
        Step 4 — log unwind recommendation (position unwind handled by trading bot)
        Step 5 — broader unwind alert if still undershooting
 
-reportedAssets formula (conservative — only clearly owned and withdrawable):
-    vault_idle_usdc + servicer_on_base + poly_cash + kalshi_cash + opinion_cash + settled_pnl
+reportedAssets formula:
+    vault_idle_usdc + servicer_on_base + poly_cash + kalshi_cash + opinion_cash
+    + open_position_value  (open arb positions @ $0.99/share, DB read only)
 
 Intentionally excluded:
-    open_positions_liquid_value (unrealised, mark-to-market — monitoring only)
+    settled_pnl — claimed proceeds already land in platform cash; adding separately
+                  would double-count the profit portion of settled positions.
+    haircut     — positions already priced conservatively at $0.99 (below $1 floor);
+                  cash balances are exact on-chain / API reads.
 
 Domain salt: "PMFIArbVaultV2.v1"  (isolated from V1 sigs and pSNIPER sigs)
 
@@ -227,30 +231,44 @@ def _read_usdc_balance(wallet: str) -> float:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def compute_reported_assets(vault_address: str) -> dict:
-    """Compute conservative reportedAssets for report().
+    """Compute reportedAssets for report().
 
-    Conservative = cash that is clearly owned and withdrawable.
-    Does NOT include open position mark-to-market values.
+    Formula:
+        vault_idle + servicer_on_base + poly_cash + kalshi_cash + opinion_cash
+        + open_position_value  (open arb positions @ $0.99/share)
+
+    Open position valuation: each arb pair = N contracts where one side resolves
+    to $1 and the other to $0, so the floor value is $1/pair. $0.99 shaves 1 cent
+    for conservatism — no live API calls needed, DB read only.
+
+    settled_pnl intentionally excluded: when a position settles and the winning
+    side is claimed from the platform, the full proceeds land in platform cash
+    (poly_cash / kalshi_cash / opinion_cash). Adding settled_pnl on top would
+    double-count the profit portion of those proceeds.
+
+    No haircut applied: positions are already conservatively priced at $0.99
+    (below the $1 guarantee), and cash balances are exact on-chain / API reads.
 
     Returns:
         {
-            "reported_assets_usdc": float,
-            "vault_idle_usdc": float,
-            "servicer_on_base": float,
-            "poly_cash": float,
-            "kalshi_cash": float,
-            "opinion_cash": float,
-            "settled_pnl": float,
-            "breakdown": {...},
+            "reported_assets_usdc":  float,
+            "vault_idle_usdc":       float,
+            "servicer_on_base":      float,
+            "poly_cash":             float,
+            "kalshi_cash":           float,
+            "opinion_cash":          float,
+            "open_position_value":   float,
+            "open_position_count":   int,
+            "raw_total_usdc":        float,
         }
     """
     from .arb_nav import (
         _get_servicer_balances,
         _get_servicer_wallet_usdc_on_base,
-        _get_settled_pnl,
+        _load_open_positions,
     )
 
-    log("Computing conservative reportedAssets...")
+    log("Computing reportedAssets (cash + open positions @ $0.99/share)...")
 
     # Vault idle USDC (in-contract, not yet deployed)
     vault_idle = 0.0
@@ -270,9 +288,15 @@ def compute_reported_assets(vault_address: str) -> dict:
     poly_cash, kalshi_cash, opinion_cash = _get_servicer_balances()
     log(f"  poly_cash={poly_cash:.4f} kalshi_cash={kalshi_cash:.4f} opinion_cash={opinion_cash:.4f}")
 
-    # Settled (realized) PnL only — not open position estimates
-    settled_pnl = _get_settled_pnl()
-    log(f"  settled_pnl={settled_pnl:.4f}")
+    # Open positions @ $0.99/share — DB read only, no live API calls.
+    # One leg resolves to $1, other to $0 → floor value = $1/pair; $0.99 is conservative.
+    # settled_pnl excluded: settled proceeds already land in platform cash balances.
+    open_positions = _load_open_positions()
+    open_position_value = sum(pos.shares * 0.99 for pos in open_positions)
+    log(
+        f"  open_positions={len(open_positions)} positions, "
+        f"value={open_position_value:.4f} USDC (@ $0.99/share)"
+    )
 
     raw_total = (
         vault_idle
@@ -280,25 +304,27 @@ def compute_reported_assets(vault_address: str) -> dict:
         + poly_cash
         + kalshi_cash
         + opinion_cash
-        + settled_pnl
+        + open_position_value
     )
 
-    # Apply conservative haircut to account for fees, latency, minor API errors
-    reported_assets = max(0.0, raw_total * REPORTED_ASSETS_HAIRCUT)
+    reported_assets = max(0.0, raw_total)
 
     log(
-        f"reportedAssets: raw={raw_total:.4f} → haircut({REPORTED_ASSETS_HAIRCUT:.0%})={reported_assets:.4f} USDC"
+        f"reportedAssets: vault_idle={vault_idle:.4f} + servicer={servicer_on_base:.4f} "
+        f"+ poly={poly_cash:.4f} + kalshi={kalshi_cash:.4f} + opinion={opinion_cash:.4f} "
+        f"+ positions={open_position_value:.4f} = {reported_assets:.4f} USDC"
     )
 
     return {
-        "reported_assets_usdc": round(reported_assets, 6),
-        "vault_idle_usdc":      round(vault_idle, 6),
-        "servicer_on_base":     round(servicer_on_base, 6),
-        "poly_cash":            round(poly_cash, 6),
-        "kalshi_cash":          round(kalshi_cash, 6),
-        "opinion_cash":         round(opinion_cash, 6),
-        "settled_pnl":          round(settled_pnl, 6),
-        "raw_total_usdc":       round(raw_total, 6),
+        "reported_assets_usdc":  round(reported_assets, 6),
+        "vault_idle_usdc":       round(vault_idle, 6),
+        "servicer_on_base":      round(servicer_on_base, 6),
+        "poly_cash":             round(poly_cash, 6),
+        "kalshi_cash":           round(kalshi_cash, 6),
+        "opinion_cash":          round(opinion_cash, 6),
+        "open_position_value":   round(open_position_value, 6),
+        "open_position_count":   len(open_positions),
+        "raw_total_usdc":        round(raw_total, 6),
     }
 
 
@@ -492,26 +518,34 @@ def _save_report_snapshot(payload: dict, tx_hash: str):
         cur  = conn.cursor()
         cur.execute("""
             CREATE TABLE IF NOT EXISTS arb_vault_reports (
-                id               SERIAL PRIMARY KEY,
-                reported_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                nonce            BIGINT NOT NULL,
-                reported_assets  NUMERIC(18,6) NOT NULL,
-                vault_idle_usdc  NUMERIC(18,6),
-                servicer_on_base NUMERIC(18,6),
-                poly_cash        NUMERIC(18,6),
-                kalshi_cash      NUMERIC(18,6),
-                opinion_cash     NUMERIC(18,6),
-                settled_pnl      NUMERIC(18,6),
-                signature        TEXT,
-                tx_hash          TEXT
+                id                   SERIAL PRIMARY KEY,
+                reported_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                nonce                BIGINT NOT NULL,
+                reported_assets      NUMERIC(18,6) NOT NULL,
+                vault_idle_usdc      NUMERIC(18,6),
+                servicer_on_base     NUMERIC(18,6),
+                poly_cash            NUMERIC(18,6),
+                kalshi_cash          NUMERIC(18,6),
+                opinion_cash         NUMERIC(18,6),
+                open_position_value  NUMERIC(18,6),
+                open_position_count  INTEGER,
+                signature            TEXT,
+                tx_hash              TEXT
             )
+        """)
+        cur.execute("""
+            ALTER TABLE arb_vault_reports
+                ADD COLUMN IF NOT EXISTS open_position_value NUMERIC(18,6),
+                ADD COLUMN IF NOT EXISTS open_position_count INTEGER
         """)
         bd = payload.get("breakdown", {})
         cur.execute("""
             INSERT INTO arb_vault_reports
                 (nonce, reported_assets, vault_idle_usdc, servicer_on_base,
-                 poly_cash, kalshi_cash, opinion_cash, settled_pnl, signature, tx_hash)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                 poly_cash, kalshi_cash, opinion_cash,
+                 open_position_value, open_position_count,
+                 signature, tx_hash)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
             payload["nonce"],
             payload["reported_assets_usdc"],
@@ -520,7 +554,8 @@ def _save_report_snapshot(payload: dict, tx_hash: str):
             bd.get("poly_cash"),
             bd.get("kalshi_cash"),
             bd.get("opinion_cash"),
-            bd.get("settled_pnl"),
+            bd.get("open_position_value"),
+            bd.get("open_position_count"),
             payload["signature"],
             tx_hash,
         ))

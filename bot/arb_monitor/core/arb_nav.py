@@ -1,14 +1,18 @@
 """Arb NAV Tracker - computes liquid NAV for pArbitrage vault positions.
 
 NAV = poly_cash + kalshi_cash + opinion_cash + servicer_on_base
-      + sum(open_positions_liquid_value) + sum(settled_pnl)
+      + open_positions_value  (@ $0.99/share — deterministic, no live API calls)
 
 servicer_on_base = USDC held by ARB_SERVICER_WALLET on Base, awaiting distribution
 to trading platforms. Folded into polyCash in the signed struct (no separate slot
 in the contract). Prevents NAV dip between deposit and platform distribution.
 
-Liquid value per position uses orderbook BIDS (not asks, not cost basis) to reflect
-real liquidation value: liquid_value = poly_yes_bid + kalshi_yes_bid per share.
+Open position valuation: each arb pair = N contracts where one side resolves to $1
+and the other to $0, so floor value = $1/pair. $0.99 shaves 1¢ for conservatism.
+
+settled_pnl intentionally excluded: when a position settles and the winning side is
+claimed from the platform, the full proceeds land in platform cash (poly_cash /
+kalshi_cash / opinion_cash). Adding settled_pnl on top double-counts the profit.
 
 Signing follows the same ABI-encoded struct hash pattern as the PMFI pARB Vault contract (PMFIArbVaultV1.sol):
   keccak256(abi.encode(NAV_TYPEHASH, totalAssets, polyCash, kalshiCash,
@@ -510,8 +514,15 @@ def _get_next_round_id() -> int:
 def compute_nav() -> dict:
     """Compute current vault NAV and return signed payload.
 
-    NAV = poly_cash + kalshi_cash + sum(open_positions_liquid_value) + sum(settled_pnl)
-    Uses actual orderbook bids for open positions (liquidation value, not cost basis).
+    NAV = poly_cash + kalshi_cash + opinion_cash + servicer_on_base
+          + open_positions_value  (@ $0.99/share, no live API calls)
+
+    Open position valuation: each arb pair = N contracts where one side resolves
+    to $1 and the other to $0, so floor value = $1/pair. $0.99 is conservative.
+
+    settled_pnl intentionally excluded: when a position settles and the winning
+    side is claimed, the full proceeds land in platform cash (poly_cash / kalshi_cash
+    / opinion_cash). Adding settled_pnl on top double-counts the profit portion.
 
     Returns a payload dict that the frontend can pass directly into deposit()/requestWithdraw()
     after restructuring into the ArbNavDataV1 tuple.
@@ -526,25 +537,19 @@ def compute_nav() -> dict:
     servicer_on_base = _get_servicer_wallet_usdc_on_base()
 
     positions = _load_open_positions()
-    position_values = []
-    total_liquid = 0.0
-
-    for pos in positions:
-        lv = fetch_position_liquid_value(pos)
-        position_values.append(lv)
-        total_liquid += lv.total_liquid_value
-
-    settled_pnl = _get_settled_pnl()
+    # Value each open position at $0.99/share — deterministic, no live API calls.
+    # One leg resolves to $1, the other to $0; $0.99 shaves 1¢ for conservatism.
+    open_positions_value = sum(pos.shares * 0.99 for pos in positions)
 
     total_assets = (
         poly_cash + kalshi_cash + opinion_cash
-        + servicer_on_base + total_liquid + settled_pnl
+        + servicer_on_base + open_positions_value
     )
 
     log(
         f"NAV breakdown: poly_cash={poly_cash:.4f}, kalshi_cash={kalshi_cash:.4f}, "
         f"opinion_cash={opinion_cash:.4f}, servicer_on_base={servicer_on_base:.4f}, "
-        f"open_positions={total_liquid:.4f}, settled_pnl={settled_pnl:.4f}, "
+        f"open_positions={open_positions_value:.4f} ({len(positions)} @ $0.99/share), "
         f"TOTAL={total_assets:.4f} USDC"
     )
 
@@ -561,8 +566,8 @@ def compute_nav() -> dict:
         total_assets_usdc=total_assets,
         poly_cash=poly_cash_for_struct,
         kalshi_cash=kalshi_cash,
-        open_positions_value=total_liquid,
-        settled_pnl=settled_pnl,
+        open_positions_value=open_positions_value,
+        settled_pnl=0.0,
         round_id=round_id,
         timestamp=timestamp,
         deadline=deadline,
@@ -574,8 +579,8 @@ def compute_nav() -> dict:
         total_assets_usdc=total_assets,
         poly_cash=poly_cash_for_struct,
         kalshi_cash=kalshi_cash,
-        open_positions_value=total_liquid,
-        settled_pnl=settled_pnl,
+        open_positions_value=open_positions_value,
+        settled_pnl=0.0,
         round_id=round_id,
         signature=signature or "",
     )
@@ -590,8 +595,9 @@ def compute_nav() -> dict:
         "servicer_on_base": round(servicer_on_base, 6),        # display breakdown only
         "kalshi_cash": round(kalshi_cash, 6),
         "opinion_cash": round(opinion_cash, 6),
-        "open_positions_value": round(total_liquid, 6),
-        "settled_pnl": round(settled_pnl, 6),
+        "open_positions_value": round(open_positions_value, 6),
+        "open_position_count": len(positions),
+        "settled_pnl": 0.0,
         "round_id": round_id,
         "timestamp": timestamp,
         "deadline": deadline,
@@ -600,15 +606,13 @@ def compute_nav() -> dict:
         "computed_in_ms": elapsed_ms,
         "open_positions": [
             {
-                "pair_id": lv.pair_id,
-                "shares": lv.shares,
-                "poly_yes_bid": lv.poly_yes_bid,
-                "kalshi_yes_bid": lv.kalshi_yes_bid,
-                "liquid_value_per_share": round(lv.liquid_value_per_share, 6),
-                "total_liquid_value": round(lv.total_liquid_value, 6),
-                "warning": lv.warning,
+                "pair_id": pos.pair_id,
+                "shares": pos.shares,
+                "value_per_share": 0.99,
+                "total_value": round(pos.shares * 0.99, 6),
+                "cost_basis_usdc": pos.cost_basis_usdc,
             }
-            for lv in position_values
+            for pos in positions
         ],
     }
 

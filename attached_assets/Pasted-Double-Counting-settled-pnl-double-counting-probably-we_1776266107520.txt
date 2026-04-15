@@ -1,0 +1,30 @@
+Double Counting
+
+settled_pnl double-counting? probably we do not need it all since we will count one leg  at 99c and other at 0c. 
+
+Looking at where settled_pnl appears:
+
+In arb_nav.py:
+
+python
+
+settled_pnl = _get_settled_pnl()  # SUM(settled_pnl_usdc) WHERE status='settled'
+total_assets = poly_cash + kalshi_cash + opinion_cash + servicer_on_base + total_liquid + settled_pnl
+
+And in arb_reporter.py:
+
+python
+
+settled_pnl = _get_settled_pnl()
+raw_total = vault_idle + servicer_on_base + poly_cash + kalshi_cash + opinion_cash + settled_pnl
+
+The double-counting risk: When a position is settled, the winnings are claimed from the platform and become platform cash (poly_cash, kalshi_cash, or opinion_cash). If the position is then marked status='settled' with settled_pnl_usdc = profit, that profit is counted both as platform cash AND as settled_pnl.
+
+Example: A position settles for $1.00 per share, cost basis was $0.95, profit = $0.05. After claiming, Polymarket balance increases by $1.00 (full claim amount). settled_pnl_usdc records $0.05. But poly_cash already includes the full $1.00 of claimed funds. So the $0.05 is double-counted.
+
+Actually, looking more carefully: settled_pnl_usdc likely records the profit (claim - cost basis), not the full claim amount. But the full claim amount is already in platform cash. So the NAV becomes: poly_cash (includes $1.00 claim) + settled_pnl ($0.05 profit) = $1.05, when the real value is $1.00. The cost basis ($0.95) was already counted when the position was opened (it reduced servicer/platform cash by $0.95). So after settlement, the net position should just be the $1.00 claim in platform cash — no separate settled_pnl addition.
+
+This is a confirmed double-counting bug. The fix: either (a) exclude settled_pnl from the NAV/reporter sum entirely (since claimed funds are already in platform cash), or (b) subtract cost_basis from settled positions to avoid counting the original investment twice — but this is complex. The cleanest fix is (a): remove settled_pnl from the sum, since claimed funds flow into platform balances automatically.
+
+Other potential double-counting but probably it won't happen because reporter function executes every hour: servicer_on_base + poly_cash could overlap if funds were just sent from servicer to Polymarket but haven't been deducted from the servicer balance yet (pending Base transaction). The nonce tracker and sequential TX pattern mitigate this, but there's a brief window where both balances could reflect the same USDC. 7. interesting that when i did deposit today i got 20 shares for 20 usdc however the pps was $0.0087 but actually contract logic is shares are minted at the officialPPS at the time report() processes the deposit
+
