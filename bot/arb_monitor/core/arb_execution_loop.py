@@ -40,6 +40,17 @@ from ..config import (
 ARB_MIN_HOURS_TO_EXPIRY = float(os.environ.get("ARB_MIN_HOURS_TO_EXPIRY", "0"))
 ARB_MIN_DAYS_TO_EXPIRY = ARB_MIN_HOURS_TO_EXPIRY / 24.0
 
+# ── Opinion confirmed-dead parent market blocklist ────────────────────────────
+# These parent IDs have been confirmed permanently unresolvable (no active child
+# outcomes, market closed/settled, or wrong categorical parent structure).
+# Opportunities whose opinion_market_id matches are skipped BEFORE any API call
+# or skip-cache lookup — they waste quota and log noise every single cycle.
+#
+# To add a new dead parent: append its integer/string ID here and redeploy.
+#   103 — NBA Champion (GSW, HOU, SAS, LAL, OKC) — season already settled
+#   360 — LoL CBLOL Brazil — tournament concluded
+_OPINION_DEAD_PARENT_IDS: set[str] = {"103", "360"}
+
 # ── Opinion skip cache ────────────────────────────────────────────────────────
 # Tracks (opinion_market_id, outcome_key) pairs that recently returned
 # "opinion_token_unresolvable". Keyed on the tuple — not just market_id —
@@ -347,6 +358,19 @@ def _execution_cycle():
                 f"(will retry on next Oddpool cycle)"
             )
             continue
+
+        # ── Opinion dead-parent blocklist: permanently skip known-dead markets ───
+        # These parent IDs are confirmed unresolvable (settled/closed/wrong structure).
+        # Checked BEFORE the skip-cache and before any API call to avoid wasted quota.
+        if getattr(opp, "venue2", "kalshi") == "opinion":
+            _dead_mid = str(getattr(opp, "opinion_market_id", ""))
+            if _dead_mid in _OPINION_DEAD_PARENT_IDS:
+                skipped_opinion_token += 1
+                log(
+                    f"🚫 Skipping {opp.pair_id}: Opinion parent_id={_dead_mid!r} is permanently "
+                    f"blocked (confirmed dead market — not in active resolution)"
+                )
+                continue
 
         # ── Opinion skip cache: skip (market_id, outcome_key) pairs that recently ──
         # returned opinion_token_unresolvable, keyed on the exact (parent, outcome)

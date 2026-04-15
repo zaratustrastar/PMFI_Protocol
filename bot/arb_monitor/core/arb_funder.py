@@ -828,6 +828,9 @@ def fund_both_legs_for_trade(
     # ── Step 4: Single combined capital gate ─────────────────────────────
     if poly_before >= poly_target and venue2_before >= venue2_target:
         log("✅ Both platforms already have sufficient balance — no deposit needed")
+        if ARB_DEPOSIT_WAIT_SECS > 0:
+            log(f"⏱ Post-funding settlement delay: {ARB_DEPOSIT_WAIT_SECS}s (ARB_DEPOSIT_WAIT_SECS)")
+            time.sleep(ARB_DEPOSIT_WAIT_SECS)
         return True, ""
 
     required = total_gap + ARB_SAFETY_BUFFER_USDC
@@ -891,18 +894,30 @@ def fund_both_legs_for_trade(
                 log(f"❌ {msg}")
                 return False, msg
 
-        # Wait for both platforms to confirm balance arrival
+        # Wait for both platforms to confirm balance arrival, then apply settlement delay.
+        # The delay is applied after confirmation so the exchange engine has fully
+        # credited the funds before orders are placed.
+        def _settle_and_return(ok: bool, err: str) -> tuple[bool, str]:
+            if ok and ARB_DEPOSIT_WAIT_SECS > 0:
+                log(f"⏱ Post-funding settlement delay: {ARB_DEPOSIT_WAIT_SECS}s (ARB_DEPOSIT_WAIT_SECS)")
+                time.sleep(ARB_DEPOSIT_WAIT_SECS)
+            return ok, err
+
         if poly_gap > 0 and venue2_gap > 0:
-            return _wait_for_both_balances(
+            return _settle_and_return(*_wait_for_both_balances(
                 "polymarket", poly_before + poly_gap,
                 "opinion", venue2_before + venue2_gap,
                 wait_timeout, poll_interval,
-            )
+            ))
         elif poly_gap > 0:
-            return _wait_for_balance("polymarket", poly_before + poly_gap, wait_timeout, poll_interval)
+            return _settle_and_return(*_wait_for_balance("polymarket", poly_before + poly_gap, wait_timeout, poll_interval))
         elif venue2_gap > 0:
-            return _wait_for_balance("opinion", venue2_before + venue2_gap, wait_timeout, poll_interval)
+            return _settle_and_return(*_wait_for_balance("opinion", venue2_before + venue2_gap, wait_timeout, poll_interval))
 
+        # Both gaps were 0 and opinion already had sufficient balance
+        if ARB_DEPOSIT_WAIT_SECS > 0:
+            log(f"⏱ Post-funding settlement delay: {ARB_DEPOSIT_WAIT_SECS}s (ARB_DEPOSIT_WAIT_SECS)")
+            time.sleep(ARB_DEPOSIT_WAIT_SECS)
         return True, ""
 
     # ── Step 5b: Poly + Kalshi — send BOTH TXs in one nonce sequence ─────
@@ -978,6 +993,9 @@ def fund_both_legs_for_trade(
                 f"✅ Both legs funded: poly={poly_now:.4f} kalshi={kalshi_now:.4f} "
                 f"— deposits confirmed, proceeding to execution"
             )
+            if ARB_DEPOSIT_WAIT_SECS > 0:
+                log(f"⏱ Post-funding settlement delay: {ARB_DEPOSIT_WAIT_SECS}s (ARB_DEPOSIT_WAIT_SECS)")
+                time.sleep(ARB_DEPOSIT_WAIT_SECS)
             return True, ""
 
         remaining = deadline - time.time()

@@ -104,17 +104,39 @@ def log(msg: str):
     print(f"⚡ [Arb/Executor] {msg}")
 
 
+_DB_CONNECT_RETRIES = 3
+_DB_CONNECT_BACKOFF = 2  # seconds between attempts
+
+
 def _get_db_conn():
-    """Get a database connection for logging executions."""
+    """Get a database connection for logging executions, with retry logic.
+
+    Attempts up to _DB_CONNECT_RETRIES times with _DB_CONNECT_BACKOFF seconds
+    between each attempt. Logs a loud ❌ DB DOWN alert if all retries fail so
+    execution failures are visible in logs rather than silently dropped.
+    """
     database_url = os.environ.get("DATABASE_URL", "")
     if not database_url:
         return None
-    try:
-        import psycopg2
-        return psycopg2.connect(database_url)
-    except Exception as e:
-        log(f"⚠️ DB connection error: {e}")
-        return None
+    import psycopg2
+    last_err = None
+    for attempt in range(1, _DB_CONNECT_RETRIES + 1):
+        try:
+            conn = psycopg2.connect(database_url)
+            if attempt > 1:
+                log(f"✅ [DB] Reconnected on attempt {attempt}")
+            return conn
+        except Exception as e:
+            last_err = e
+            if attempt < _DB_CONNECT_RETRIES:
+                log(f"⚠️ [DB] Connect attempt {attempt}/{_DB_CONNECT_RETRIES} failed: {e} — retrying in {_DB_CONNECT_BACKOFF}s")
+                time.sleep(_DB_CONNECT_BACKOFF)
+    log(
+        f"❌ DB DOWN — all {_DB_CONNECT_RETRIES} connection attempts failed. "
+        f"Last error: {last_err}. "
+        "Execution log will NOT be persisted this cycle."
+    )
+    return None
 
 
 def log_execution_to_db(

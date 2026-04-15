@@ -20,18 +20,42 @@ def log(msg: str):
     print(f"🗄️ [Arb/PositionsDB] {msg}")
 
 
+_DB_CONNECT_RETRIES = 3
+_DB_CONNECT_BACKOFF = 2  # seconds between attempts
+
+
 def get_db_conn():
-    """Get a database connection."""
+    """Get a database connection with retry logic.
+
+    Attempts up to _DB_CONNECT_RETRIES times with _DB_CONNECT_BACKOFF seconds
+    between each attempt. Emits a loud ❌ DB DOWN alert if all retries fail so
+    operators know state is being lost — callers receive None and must treat
+    their write/read as a no-op (same as before, but now it's obvious in logs).
+    """
     database_url = os.environ.get("DATABASE_URL", "")
     if not database_url:
-        log("⚠️ DATABASE_URL not set")
+        log("⚠️ DATABASE_URL not set — no DB connection possible")
         return None
-    try:
-        import psycopg2
-        return psycopg2.connect(database_url)
-    except Exception as e:
-        log(f"❌ DB connection error: {e}")
-        return None
+    import psycopg2
+    last_err = None
+    for attempt in range(1, _DB_CONNECT_RETRIES + 1):
+        try:
+            conn = psycopg2.connect(database_url)
+            if attempt > 1:
+                log(f"✅ DB reconnected on attempt {attempt}")
+            return conn
+        except Exception as e:
+            last_err = e
+            if attempt < _DB_CONNECT_RETRIES:
+                log(f"⚠️ DB connect attempt {attempt}/{_DB_CONNECT_RETRIES} failed: {e} — retrying in {_DB_CONNECT_BACKOFF}s")
+                time.sleep(_DB_CONNECT_BACKOFF)
+    log(
+        f"❌ DB DOWN — all {_DB_CONNECT_RETRIES} connection attempts failed. "
+        f"Last error: {last_err}. "
+        "Bot is running WITHOUT persistence — position state will be lost on restart. "
+        "Restart PostgreSQL and verify DATABASE_URL."
+    )
+    return None
 
 
 def init_arb_tables():
