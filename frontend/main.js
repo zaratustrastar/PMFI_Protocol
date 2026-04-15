@@ -676,6 +676,68 @@ async function loadArbVaultStats() {
     }
 }
 
+async function webLoadArbCardPositions() {
+    const el = document.getElementById('arbCardPositions');
+    if (!el) return;
+    try {
+        const resp = await fetch('/api/arb-vault/positions');
+        if (!resp.ok) { el.innerHTML = ''; return; }
+        const data = await resp.json();
+        const positions = (data.positions || []).filter(p => p.shares > 0);
+        if (positions.length === 0) { el.innerHTML = ''; return; }
+
+        const rows = positions.map(pos => {
+            const market = (pos.market || pos.pair_id || '—').replace(/\.\.\.$/, '');
+            const shortTitle = market.length > 50 ? market.slice(0, 50) + '…' : market;
+
+            const polySide  = pos.poly_side  || 'YES';
+            const kSide     = pos.kalshi_side_exec || pos.kalshi_side || 'NO';
+            const kLabel    = pos.venue2_label || 'Kalshi';
+
+            const polyShares  = Number(pos.poly_shares  || pos.shares || 0);
+            const kShares     = Number(pos.kalshi_shares || pos.shares || 0);
+            const polyPrice   = Number(pos.poly_price   || 0);
+            const kPrice      = Number(pos.kalshi_price || 0);
+            const edge        = Number(pos.edge_pct     || 0);
+            const edgeColor   = edge >= 3 ? '#7ee787' : edge >= 1 ? '#fbbf24' : '#9ca3af';
+            const expiry      = pos.expiry_ts > 0
+                ? new Date(pos.expiry_ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+                : '—';
+
+            return `<div style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.07);">
+                <div style="font-size:12px;color:rgba(255,255,255,0.85);margin-bottom:6px;font-weight:500;">${shortTitle}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;font-size:11px;">
+                    <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:6px 8px;">
+                        <div style="color:rgba(255,255,255,0.4);margin-bottom:2px;">POLY ${polySide}</div>
+                        <div style="font-weight:600;color:#fff;">${polyShares.toFixed(1)} shares</div>
+                        <div style="color:rgba(255,255,255,0.45);">@ ${(polyPrice * 100).toFixed(1)}¢</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:6px 8px;">
+                        <div style="color:rgba(255,255,255,0.4);margin-bottom:2px;">${kLabel.toUpperCase()} ${kSide}</div>
+                        <div style="font-weight:600;color:#fff;">${kShares.toFixed(1)} shares</div>
+                        <div style="color:rgba(255,255,255,0.45);">@ ${(kPrice * 100).toFixed(1)}¢</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px;">
+                        <span style="font-size:13px;font-weight:700;color:${edgeColor};">+${edge.toFixed(1)}%</span>
+                        <span style="font-size:10px;color:rgba(255,255,255,0.3);">edge</span>
+                        <span style="font-size:10px;color:rgba(255,255,255,0.25);">${expiry}</span>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        el.innerHTML = `
+            <div style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">
+                Open Pairs
+                <span style="font-weight:400;color:#7ee787;background:rgba(126,231,135,0.1);border-radius:8px;padding:1px 6px;margin-left:4px;">${positions.length}</span>
+            </div>
+            ${rows}`;
+    } catch (e) {
+        console.warn('[pARB] webLoadArbCardPositions error:', e);
+        el.innerHTML = '';
+    }
+}
+
 async function refreshAll() {
     await Promise.all([
         refreshVaultStats(),
@@ -683,6 +745,7 @@ async function refreshAll() {
         loadPendingWithdrawals(),
         refreshArbUserStats(),
         loadArbVaultStats(),
+        webLoadArbCardPositions(),
     ]);
 }
 
@@ -2428,6 +2491,7 @@ function webCopyCode(code, idx) {
 
         // Load pARB vault stats immediately (no wallet needed — read-only)
         loadArbVaultStats();
+        webLoadArbCardPositions();
         
         // Start price auto-refresh from VPS (if configured)
         startPriceAutoRefresh();

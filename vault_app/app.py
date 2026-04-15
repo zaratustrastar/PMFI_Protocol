@@ -271,15 +271,21 @@ def arb_positions():
                    p.shares, p.cost_basis_usdc, p.expiry_ts, p.status,
                    p.poly_title, p.kalshi_title, p.opened_at,
                    e_poly.venue  AS poly_venue,
-                   e_k.venue     AS venue2
+                   e_poly.price  AS poly_price,
+                   e_poly.size   AS poly_size,
+                   e_poly.side   AS poly_side,
+                   e_k.venue     AS venue2,
+                   e_k.price     AS k_price,
+                   e_k.size      AS k_size,
+                   e_k.side      AS k_side
             FROM arb_positions p
             LEFT JOIN LATERAL (
-                SELECT venue FROM arb_executions
+                SELECT venue, price, size, side FROM arb_executions
                 WHERE pair_id = p.pair_id AND leg = 1 AND success = true
                 ORDER BY id DESC LIMIT 1
             ) e_poly ON true
             LEFT JOIN LATERAL (
-                SELECT venue FROM arb_executions
+                SELECT venue, price, size, side FROM arb_executions
                 WHERE pair_id = p.pair_id AND leg = 2 AND success = true
                 ORDER BY id DESC LIMIT 1
             ) e_k ON true
@@ -317,6 +323,18 @@ def arb_positions():
             venue2 = r['venue2'] or ('kalshi' if r['kalshi_ticker'] else 'unknown')
             platform_label = f"{_venue_label(poly_venue)} × {_venue_label(venue2)}"
 
+            # Per-leg data from arb_executions
+            poly_price = float(r['poly_price'] or 0)
+            poly_size  = float(r['poly_size']  or 0)
+            poly_side  = r['poly_side'] or 'YES'
+            k_price    = float(r['k_price'] or 0)
+            k_size     = float(r['k_size']  or 0)
+            k_side     = r['k_side'] or (r['kalshi_side'] or 'NO')
+
+            # Edge: what's left of $1 after paying for both legs
+            edge_cents = 1.0 - poly_price - k_price
+            edge_pct_legs = edge_cents * 100  # %
+
             result.append({
                 "pair_id": r['pair_id'],
                 "market": r['poly_title'] or r['pair_id'] or '—',
@@ -329,7 +347,7 @@ def arb_positions():
                 "shares": shares,
                 "cost_basis_usdc": cost,
                 "avg_price_per_pair": round(avg_price_per_pair, 4),
-                "edge_pct": round(edge_pct, 2),
+                "edge_pct": round(edge_pct_legs if poly_price > 0 else edge_pct, 2),
                 "expected_payout": round(expected_payout, 2),
                 "unrealized_pnl": round(unrealized_pnl, 4),
                 "current_value": round(current_value, 2),
@@ -337,6 +355,14 @@ def arb_positions():
                 "days_left": round(days_left, 1),
                 "opened_at": r['opened_at'].isoformat() if r['opened_at'] else None,
                 "total_liquid_value": round(current_value, 2),
+                # Per-leg breakdown
+                "poly_price": round(poly_price, 4),
+                "poly_shares": round(poly_size, 2),
+                "poly_side": poly_side,
+                "kalshi_price": round(k_price, 4),
+                "kalshi_shares": round(k_size, 2),
+                "kalshi_side_exec": k_side,
+                "venue2_label": _venue_label(venue2),
             })
 
         return jsonify({"ok": True, "positions": result, "count": len(result)})
