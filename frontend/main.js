@@ -1117,6 +1117,25 @@ async function refreshArbUserStats() {
     }
 }
 
+// ── Shared Web3 error message parser ────────────────────────────────────────
+function _parseWeb3Error(e) {
+    const msg = e?.message || '';
+    const code = e?.code ?? e?.info?.error?.code;
+    // MetaMask RPC network failure (Failed to fetch / -32603)
+    if (code === -32603 || msg.includes('Failed to fetch') || msg.includes('could not coalesce')) {
+        return 'Network error — MetaMask could not reach Base. Please try again or switch to a different RPC in MetaMask settings.';
+    }
+    // User rejected
+    if (code === 4001 || code === 'ACTION_REJECTED' || msg.toLowerCase().includes('user rejected') || msg.toLowerCase().includes('user denied')) {
+        return 'Transaction cancelled.';
+    }
+    // Contract revert with readable reason
+    if (e?.reason) return e.reason;
+    // ethers.js v6 short message
+    if (e?.shortMessage) return e.shortMessage;
+    return msg || 'Transaction failed';
+}
+
 // ── V2 Deposit: requestDeposit → (wait for report) → claimDeposit ──────────
 
 async function handleArbDeposit() {
@@ -1145,14 +1164,14 @@ async function handleArbDeposit() {
             const allowance = await signerUsdc.allowance(userAddress, ARB_VAULT_V2_ADDRESS);
             if (allowance < amount) {
                 showStatus(statusEl, 'Approving USDC...', 'info');
-                const approveTx = await signerUsdc.approve(ARB_VAULT_V2_ADDRESS, amount);
+                const approveTx = await signerUsdc.approve(ARB_VAULT_V2_ADDRESS, amount, { gasLimit: 100000 });
                 showStatus(statusEl, 'Waiting for approval...', 'info');
                 await approveTx.wait();
             }
 
             showStatus(statusEl, 'Submitting deposit request...', 'info');
             const signerArb = _arbV2Contract(true);
-            const tx = await signerArb.requestDeposit(amount, userAddress);
+            const tx = await signerArb.requestDeposit(amount, userAddress, { gasLimit: 250000 });
             showStatus(statusEl, 'Confirming...', 'info');
             const receipt = await tx.wait();
 
@@ -1179,7 +1198,7 @@ async function handleArbDeposit() {
             }, 5000);
         } catch (e) {
             console.error('[pARB V2] deposit error:', e);
-            showStatus(statusEl, e.reason || e.message, 'error');
+            showStatus(statusEl, _parseWeb3Error(e), 'error');
         } finally {
             if (btn) btn.disabled = false;
         }
@@ -1210,7 +1229,7 @@ async function handleArbWithdrawRequest() {
             hideStatus(statusEl);
             showStatus(statusEl, 'Submitting redeem request...', 'info');
             const signerArb = _arbV2Contract(true);
-            const tx = await signerArb.requestRedeem(shareAmount, userAddress);
+            const tx = await signerArb.requestRedeem(shareAmount, userAddress, { gasLimit: 250000 });
             showStatus(statusEl, 'Confirming...', 'info');
             const receipt = await tx.wait();
 
@@ -1231,7 +1250,7 @@ async function handleArbWithdrawRequest() {
             setTimeout(() => { document.getElementById('arbWithdrawModal')?.classList.add('hidden'); hideStatus(statusEl); }, 5000);
         } catch (e) {
             console.error('[pARB V2] redeem error:', e);
-            showStatus(statusEl, e.reason || e.message, 'error');
+            showStatus(statusEl, _parseWeb3Error(e), 'error');
         } finally {
             if (btn) btn.disabled = false;
         }
@@ -1249,13 +1268,13 @@ async function handleArbClaimDeposit(requestId) {
         if (btn) btn.disabled = true;
         if (statusEl) statusEl.textContent = 'Claiming shares...';
         const signerArb = _arbV2Contract(true);
-        const tx = await signerArb.claimDeposit(BigInt(requestId), userAddress);
+        const tx = await signerArb.claimDeposit(BigInt(requestId), userAddress, { gasLimit: 200000 });
         await tx.wait();
         if (statusEl) statusEl.textContent = 'Shares claimed!';
         await refreshArbUserStats();
     } catch (e) {
         console.error('[pARB V2] claimDeposit error:', e);
-        if (statusEl) statusEl.textContent = e.reason || e.message;
+        if (statusEl) statusEl.textContent = _parseWeb3Error(e);
     } finally {
         if (btn) btn.disabled = false;
     }
@@ -1271,13 +1290,13 @@ async function handleArbClaimRedeem(requestId) {
         if (btn) btn.disabled = true;
         if (statusEl) statusEl.textContent = 'Claiming USDC...';
         const signerArb = _arbV2Contract(true);
-        const tx = await signerArb.claimRedeem(BigInt(requestId), userAddress);
+        const tx = await signerArb.claimRedeem(BigInt(requestId), userAddress, { gasLimit: 200000 });
         await tx.wait();
         if (statusEl) statusEl.textContent = 'USDC received!';
         await refreshArbUserStats();
     } catch (e) {
         console.error('[pARB V2] claimRedeem error:', e);
-        if (statusEl) statusEl.textContent = e.reason || e.message;
+        if (statusEl) statusEl.textContent = _parseWeb3Error(e);
     } finally {
         if (btn) btn.disabled = false;
     }
