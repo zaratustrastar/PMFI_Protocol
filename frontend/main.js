@@ -636,18 +636,11 @@ async function loadArbVaultStats() {
         // vs[3]=lastReportedBacking, vs[4]=highWaterMarkAssets,
         // vs[5]=pendingDepositAssets, vs[6]=claimableRedeemAssets,
         // vs[7]=pendingRedeemShares
-        const pps          = Number(vs[0]) / 1e6;
-        // TVL = officialPPS × totalSupply — this represents the total value of all
-        // outstanding shares at the current price per share, regardless of where the
-        // underlying capital is deployed (vault idle, servicer wallet, or on platforms).
-        // Previous formula used (idleBalance + lastReportedBacking) which drops to ~$1
-        // after tend() moves 90% of vault USDC to the servicer wallet.
-        // Use BigInt arithmetic: avoid float precision loss on large 1e18-unit values.
-        // tvlUsdc6 = pps_1e6 × totalSupply_1e18 / 1e18 → result in USDC×1e6 units.
+        const pps      = Number(vs[0]) / 1e6;
         const tvlUsdc6 = BigInt(vs[0]) * BigInt(vs[1]) / 1000000000000000000n;
         const tvl      = Number(tvlUsdc6) / 1e6;
-        const pendingIn    = Number(vs[5]) / 1e6;
-        const pendingOut   = (Number(vs[7]) / 1e18) * pps;
+        const pendingIn  = Number(vs[5]) / 1e6;
+        const pendingOut = (Number(vs[7]) / 1e18) * pps;
 
         const elPPS        = document.getElementById('arbStatPPS');
         const elTVL        = document.getElementById('arbStatTVL');
@@ -660,6 +653,26 @@ async function loadArbVaultStats() {
         if (elPendingOut) elPendingOut.textContent = pendingOut > 0 ? '$' + pendingOut.toFixed(2) : '—';
     } catch (e) {
         console.warn('[pARB V2] loadArbVaultStats error:', e);
+    }
+
+    // Fetch off-chain metrics (APR, APY, deployed capital, settled PnL)
+    try {
+        const navResp = await fetch('/api/arb-vault/nav');
+        if (navResp.ok) {
+            const d = await navResp.json();
+            const elAPR      = document.getElementById('arbStatAPR');
+            const elAPY      = document.getElementById('arbStatAPY');
+            const elDeployed = document.getElementById('arbStatDeployed');
+            const elSettled  = document.getElementById('arbStatSettledPnl');
+            if (elAPR)      elAPR.textContent      = d.apr  != null ? d.apr.toFixed(1)  + '%' : '—';
+            if (elAPY)      elAPY.textContent      = d.apy  != null ? d.apy.toFixed(1)  + '%' : '—';
+            if (elDeployed) elDeployed.textContent = d.open_positions_value != null
+                ? '$' + Number(d.open_positions_value).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—';
+            if (elSettled)  elSettled.textContent  = d.settled_pnl != null
+                ? '$' + Number(d.settled_pnl).toFixed(2) : '—';
+        }
+    } catch (e) {
+        console.warn('[pARB V2] loadArbVaultStats nav fetch error:', e);
     }
 }
 
@@ -1923,6 +1936,146 @@ async function webLoadArb() {
         arbRefreshTimer = setTimeout(() => {
             if (webActiveTab === 'arbitrage') webLoadArb();
         }, 60000);
+    }
+
+    // Load positions and trade history in parallel
+    await Promise.allSettled([webLoadArbPositions(), webLoadArbHistory()]);
+}
+
+async function webLoadArbPositions() {
+    const el = document.getElementById('webArbPositions');
+    if (!el) return;
+    try {
+        const resp = await fetch('/api/arb-vault/positions');
+        if (!resp.ok) { el.innerHTML = ''; return; }
+        const data = await resp.json();
+        const positions = data.positions || [];
+        if (positions.length === 0) { el.innerHTML = ''; return; }
+
+        const now = Date.now() / 1000;
+        const rows = positions.map(pos => {
+            const market = (pos.market || pos.pair_id || '—').slice(0, 52);
+            const platform = pos.platform_label || 'Poly × Kalshi';
+            const edge = Number(pos.edge_pct || 0).toFixed(1);
+            const avgPrice = Number(pos.avg_price_per_pair || 0).toFixed(4);
+            const contracts = Math.round(pos.shares || 0).toLocaleString();
+            const pnl = Number(pos.unrealized_pnl || 0);
+            const pnlColor = pnl >= 0 ? '#7ee787' : '#f87171';
+            const pnlStr = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
+            const dLeft = pos.days_left || 0;
+            const expiry = pos.expiry_ts > 0
+                ? new Date(pos.expiry_ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : '—';
+            return `<tr>
+                <td style="font-size:12px;color:rgba(255,255,255,0.85);max-width:200px;word-break:break-word;">${market}</td>
+                <td style="font-size:11px;color:rgba(255,255,255,0.4);">${platform}</td>
+                <td><span class="arb-badge opportunity">+${edge}%</span></td>
+                <td style="font-size:12px;font-variant-numeric:tabular-nums;">${avgPrice}</td>
+                <td style="font-size:12px;">${contracts}</td>
+                <td style="font-size:12px;color:${pnlColor};">${pnlStr}</td>
+                <td style="font-size:11px;color:rgba(255,255,255,0.4);">${expiry}${dLeft > 0 ? '<br>' + dLeft.toFixed(0) + 'd' : ''}</td>
+            </tr>`;
+        }).join('');
+
+        el.innerHTML = `
+        <div style="margin-top:20px;">
+            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:8px;">
+                Open Positions <span style="font-size:11px;font-weight:400;color:#7ee787;background:rgba(126,231,135,0.12);border-radius:10px;padding:2px 8px;margin-left:6px;">${positions.length} open</span>
+            </div>
+            <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Market</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Platforms</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Edge</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Avg Price</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Contracts</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Unrealized PnL</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Expiry</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+            </div>
+        </div>`;
+    } catch (e) {
+        console.warn('[pARB] webLoadArbPositions error:', e);
+        el.innerHTML = '';
+    }
+}
+
+async function webLoadArbHistory() {
+    const el = document.getElementById('webArbHistory');
+    if (!el) return;
+    try {
+        const resp = await fetch('/api/arb-vault/trade-history');
+        if (!resp.ok) { el.innerHTML = ''; return; }
+        const data = await resp.json();
+        const trades = data.trades || [];
+        if (trades.length === 0) { el.innerHTML = ''; return; }
+
+        const rows = trades.map(t => {
+            const title = (t.title || t.pair_id || '—').slice(0, 50);
+            const platform = t.platform_label || t.leg_label || '—';
+            const edge = Number(t.edge_pct || 0).toFixed(1);
+            const avgPrice = Number(t.avg_price_per_pair || 0).toFixed(4);
+            const contracts = Math.round(t.shares || 0).toLocaleString();
+            const cost = '$' + Number(t.cost_usdc || 0).toFixed(2);
+
+            let pnlCell, statusCell;
+            if (t.status === 'settled') {
+                const pnl = Number(t.settled_pnl || 0);
+                const pnlColor = pnl >= 0 ? '#7ee787' : '#f87171';
+                pnlCell = `<span style="color:${pnlColor};">${pnl >= 0 ? '+$' : '-$'}${Math.abs(pnl).toFixed(2)}</span>`;
+                statusCell = `<span style="color:#7ee787;font-size:11px;">✓ Settled</span>`;
+            } else {
+                const ep = Number(t.expected_profit || 0);
+                pnlCell = `<span style="color:#60a5fa;">$${ep.toFixed(2)}</span><br><span style="font-size:10px;color:rgba(255,255,255,0.3);">expected</span>`;
+                const dLeft = t.days_left || 0;
+                const expDate = t.expiry_ts > 0
+                    ? new Date(t.expiry_ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+                statusCell = `<span style="color:#60a5fa;font-size:11px;">Open</span><br><span style="font-size:10px;color:rgba(255,255,255,0.3);">${expDate}${dLeft > 0 ? ' · ' + dLeft.toFixed(0) + 'd' : ''}</span>`;
+            }
+
+            return `<tr style="border-top:1px solid rgba(255,255,255,0.04);">
+                <td style="padding:8px;font-size:12px;color:rgba(255,255,255,0.85);max-width:180px;word-break:break-word;">${title}</td>
+                <td style="padding:8px;font-size:11px;color:rgba(255,255,255,0.4);">${platform}</td>
+                <td style="padding:8px;"><span class="arb-badge opportunity">+${edge}%</span></td>
+                <td style="padding:8px;font-size:12px;font-variant-numeric:tabular-nums;">${avgPrice}</td>
+                <td style="padding:8px;font-size:12px;">${contracts}</td>
+                <td style="padding:8px;font-size:12px;">${cost}</td>
+                <td style="padding:8px;font-size:12px;">${pnlCell}</td>
+                <td style="padding:8px;font-size:11px;">${statusCell}</td>
+            </tr>`;
+        }).join('');
+
+        el.innerHTML = `
+        <div style="margin-top:16px;">
+            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:8px;">
+                Trade History <span style="font-size:11px;font-weight:400;color:rgba(255,255,255,0.35);background:rgba(255,255,255,0.06);border-radius:10px;padding:2px 8px;margin-left:6px;">${trades.length} trades</span>
+            </div>
+            <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Market</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Platforms</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Edge</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Avg Price</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Contracts</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Cost</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">PnL / Profit</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:10px;font-weight:500;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+            </div>
+        </div>`;
+    } catch (e) {
+        console.warn('[pARB] webLoadArbHistory error:', e);
+        el.innerHTML = '';
     }
 }
 

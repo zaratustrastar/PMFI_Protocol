@@ -980,11 +980,13 @@
                         <span class="vault-name">pARBITRAGE</span>
                         <span class="teaser-live-badge"><span class="teaser-live-dot"></span>Live</span>
                     </div>
-                    <div id="arbVaultStats" class="vault-stats-bar" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-bottom:10px;font-size:12px;">
+                    <div id="arbVaultStats" class="vault-stats-bar" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 12px;margin-bottom:10px;font-size:12px;">
                         <div><span style="opacity:.6">Share Price</span><br><strong id="arbStatPPS" style="font-size:14px;">—</strong></div>
                         <div><span style="opacity:.6">TVL</span><br><strong id="arbStatTVL" style="font-size:14px;">—</strong></div>
-                        <div><span style="opacity:.6">Pending In</span><br><span id="arbStatPendingIn" style="font-size:13px;">—</span></div>
-                        <div><span style="opacity:.6">Pending Out</span><br><span id="arbStatPendingOut" style="font-size:13px;">—</span></div>
+                        <div><span style="opacity:.6">APR</span><br><strong id="arbStatAPR" style="font-size:14px;color:#7ee787;">—</strong></div>
+                        <div><span style="opacity:.6">APY</span><br><strong id="arbStatAPY" style="font-size:14px;color:#7ee787;">—</strong></div>
+                        <div><span style="opacity:.6">Deployed</span><br><span id="arbStatDeployed" style="font-size:13px;">—</span></div>
+                        <div><span style="opacity:.6">Settled PnL</span><br><span id="arbStatSettledPnl" style="font-size:13px;color:#7ee787;">—</span></div>
                     </div>
                     <div id="arbUserStats" class="user-stats hidden">
                         <div class="user-stat">
@@ -1049,6 +1051,8 @@
         <div class="web-tab-panel" id="webPanelArbitrage">
             <div id="webArbStatus" class="web-arb-status"><span class="arb-dot"></span>Loading...</div>
             <div id="webArbOpportunities"></div>
+            <div id="webArbPositions"></div>
+            <div id="webArbHistory"></div>
         </div>
 
         <!-- Rankings Panel -->
