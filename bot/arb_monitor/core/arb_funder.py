@@ -833,21 +833,54 @@ def fund_both_legs_for_trade(
             time.sleep(ARB_DEPOSIT_WAIT_SECS)
         return True, ""
 
+    # ── Withdrawal reservation: earmark pending redemptions before checking ──
+    # Read the vault's pending_redeem_value so funds owed to redeemers are
+    # never consumed by a new trade. Without this, a race exists between the
+    # upstream liquidity check (which does account for pending_redeem_value)
+    # and this TX gate — if the servicer balance dropped between those two
+    # reads, redeemer funds could be sent to a trading platform.
+    pending_reservation = 0.0
+    vault_address = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
+    if vault_address:
+        try:
+            from .arb_reporter import _read_vault_state
+            vs = _read_vault_state(vault_address)
+            if vs["ok"] and vs["pending_redeem_shares"] > 0:
+                # pending_redeem_value = shares × officialPPS / 1e18 / 1e6
+                # official_pps is in USDC×1e6 per 1e18 shares (raw uint from contract)
+                pending_reservation = (
+                    vs["pending_redeem_shares"] * vs["official_pps"]
+                ) / 1e18 / 1e6
+                log(
+                    f"🔒 Withdrawal reservation: {pending_reservation:.4f} USDC earmarked "
+                    f"for {vs['pending_redeem_shares']} pending redeem shares "
+                    f"(PPS={vs['official_pps']/1e6:.6f})"
+                )
+        except Exception as _e:
+            log(f"⚠️ Could not read pending_redeem_value for reservation (non-fatal): {_e}")
+            # fail-open: proceed without reservation rather than blocking all trades
+
+    # Effective servicer USDC = total on-chain balance minus what's reserved for redeemers
+    effective_servicer = max(0.0, servicer_usdc - pending_reservation)
+
     required = total_gap + ARB_SAFETY_BUFFER_USDC
-    if servicer_usdc < required:
+    if effective_servicer < required:
         # Use "funding_insufficient" prefix (not "funding_failed") so the caller
         # can distinguish: this gate fires BEFORE any TX is sent, so no capital
         # was moved and the execution cycle can safely continue to the next pair.
         msg = (
-            f"funding_insufficient: servicer has {servicer_usdc:.4f} USDC — "
-            f"pre-check refused before any TX: gaps ({poly_gap:.4f} + {venue2_gap:.4f}) + "
-            f"safety_buffer ({ARB_SAFETY_BUFFER_USDC:.2f}) = {required:.4f} needed"
+            f"funding_insufficient: servicer has {servicer_usdc:.4f} USDC "
+            f"but {pending_reservation:.4f} reserved for pending redeems → "
+            f"effective={effective_servicer:.4f} < "
+            f"required={required:.4f} "
+            f"(gaps={poly_gap:.4f}+{venue2_gap:.4f} + buffer={ARB_SAFETY_BUFFER_USDC:.2f})"
         )
         log(f"❌ {msg}")
         return False, msg
 
     log(
-        f"✅ Capital check passed: servicer={servicer_usdc:.4f} >= "
+        f"✅ Capital check passed: servicer={servicer_usdc:.4f} "
+        f"− reservation={pending_reservation:.4f} → effective={effective_servicer:.4f} >= "
         f"required={required:.4f} (gaps={total_gap:.4f} + buffer={ARB_SAFETY_BUFFER_USDC:.2f})"
     )
 

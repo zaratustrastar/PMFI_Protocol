@@ -1,0 +1,62 @@
+Withdrawals
+
+Do we check pending withdrawals before buying?
+
+Yes, but with caveats. The arb_liquidity.py module computes:
+
+python
+
+shortfall = max(0.0, pending_redeem_value - idle_balance)
+under_pressure = shortfall > 0.0
+
+And in arb_execution_loop.py:
+
+python
+
+if liq.unwind_needed:
+    # TRADE DEPLOYMENT BLOCKED
+    return
+
+if liq.under_pressure:
+    # size capped to deployable_capital
+    liq_budget_remaining = liq.deployable_capital
+
+So deployment is either blocked entirely (when unwind is needed) or throttled to deployable_capital. However, deployable_capital is defined as:
+
+python
+
+deployable_capital = max(0.0, servicer_usdc - required_idle)
+
+Where required_idle = max(idle_target_bps * total_assets, pending_redeem_value + safety_buffer). This means pending redemptions do reduce available capital — but only indirectly through the required_idle calculation. There's no explicit reservation that earmarks specific USDC for pending redeemers.
+
+The risk: if servicer_usdc is $100, pending_redeem_value is $80, and safety_buffer is $5, then required_idle = $85 and deployable_capital = $15. But if between the liquidity check and the actual funding TX the servicer balance drops (e.g., a bridge fee), the deployment could consume funds meant for redeemers.
+
+Recommendation: Add an explicit withdrawal reservation in the funding gate. In fund_both_legs_for_trade(), after reading servicer balance, subtract pending_redeem_value before computing available capital.
+
+Priority for withdrawals (vault → signer → platforms)?
+
+The waterfall in arb_reporter.py follows this order:
+
+
+
+
+
+Vault idle cash (already there)
+
+
+
+Servicer cash on Base → swept via refillBuffer()
+
+
+
+Settled proceeds (folded into servicer cash)
+
+
+
+Platform cash → withdraw_from_platforms() (Step 3.5)
+
+
+
+Position unwind (logged only, not executed)
+
+So the priority is: vault first, then servicer wallet, then platform balances — which matches your requirement. But platform withdrawals (Step 3.5) take 5-30 minutes depending on the platform, so they're fire-and-forget with retry on the next cycle. 
