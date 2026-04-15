@@ -36,10 +36,10 @@ def get_db_conn():
     if not database_url:
         log("⚠️ DATABASE_URL not set — no DB connection possible")
         return None
-    import psycopg2
     last_err = None
     for attempt in range(1, _DB_CONNECT_RETRIES + 1):
         try:
+            import psycopg2
             conn = psycopg2.connect(database_url)
             if attempt > 1:
                 log(f"✅ DB reconnected on attempt {attempt}")

@@ -281,6 +281,11 @@ def _execution_cycle():
             _hint = getattr(_opp, "outcome_key", "")
             if not _mid:
                 continue
+            # Dead-parent blocklist: skip before any API call
+            if str(_mid) in _OPINION_DEAD_PARENT_IDS:
+                log(f"🚫 [OpinionPreWarm] Skipping {_opp.pair_id}: parent_id={_mid!r} is permanently blocked")
+                _prewarm_skipped += 1
+                continue
             _skip_key = (_mid, _hint)
             _skip_ts = _OPINION_SKIP_CACHE.get(_skip_key, 0.0)
             if _skip_ts > 0 and time.time() < _skip_ts + _OPINION_SKIP_TTL:
