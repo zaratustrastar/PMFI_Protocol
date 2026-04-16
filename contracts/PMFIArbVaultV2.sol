@@ -115,6 +115,8 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
     ///      where a first depositor manipulates PPS by donating USDC before any shares exist.
     ///      Value: 1 share (1e18 raw) — sufficient to block the attack while keeping
     ///      dilution negligible at any realistic TVL.
+    ///      IMPORTANT: balanceOf(DEAD_ADDRESS) is excluded from all PPS and TVL calculations
+    ///      so dead-wallet shares never dilute real depositors.
     uint256 public constant BOOTSTRAP_SHARES = 1e18;
     address public constant DEAD_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
@@ -608,7 +610,11 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
         // Existing shareholders bear cost proportional to their profit.
         // feeShares formula gives feeRecipient exactly feeAssets worth of value:
         //   feeShares = feeAssets × outstandingShares / (backingAssetsNow − feeAssets)
-        uint256 outstandingShares = totalSupply() - totalPendingRedeemShares;
+        //
+        // Dead-wallet bootstrap shares are excluded: they can never redeem so counting
+        // them here would dilute PPS for every real depositor. circulatingSupply()
+        // subtracts balanceOf(DEAD_ADDRESS) which only ever holds BOOTSTRAP_SHARES.
+        uint256 outstandingShares = totalSupply() - balanceOf(DEAD_ADDRESS) - totalPendingRedeemShares;
         uint256 feeShares = 0;
         if (feeAssets > 0 && outstandingShares > 0 && backingAssetsNow > feeAssets) {
             feeShares = (feeAssets * outstandingShares) / (backingAssetsNow - feeAssets);
@@ -620,6 +626,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
 
         // ── E. Update officialPPS ─────────────────────────────────────────
         // newPPS = (backingAssetsNow − feeAssets) / outstandingShares (before fee dilution)
+        // outstandingShares excludes dead-wallet bootstrap shares (they never redeem).
         // After fee share minting, per-share backing is correctly newPPS for all holders.
         uint256 netBacking = backingAssetsNow > feeAssets
             ? backingAssetsNow - feeAssets
@@ -825,6 +832,12 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
         assets = (shares * officialPPS) / NAV_PRECISION;
     }
 
+    /// @notice Total shares held by real depositors (excludes bootstrap shares locked at DEAD_ADDRESS).
+    ///         Use this for TVL and per-depositor value calculations instead of totalSupply().
+    function circulatingSupply() public view returns (uint256) {
+        return totalSupply() - balanceOf(DEAD_ADDRESS);
+    }
+
     function getDepositRequest(uint256 requestId) external view returns (
         address owner, address receiver, uint256 assets, uint256 submittedAt,
         RequestStatus status, uint256 processedPPS, uint256 estimatedShares
@@ -861,7 +874,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
 
     function getVaultState() external view returns (
         uint256 _officialPPS,
-        uint256 _totalSupply,
+        uint256 _circulatingSupply,
         uint256 _idleBal,
         uint256 _lastReportedBacking,
         uint256 _highWaterMarkAssets,
@@ -875,7 +888,7 @@ contract PMFIArbVaultV2 is ERC20, Ownable, ReentrancyGuard {
     ) {
         return (
             officialPPS,
-            totalSupply(),
+            circulatingSupply(),   // excludes DEAD_ADDRESS bootstrap shares
             _idleBalance(),
             lastReportedBackingAssets,
             highWaterMarkAssets,

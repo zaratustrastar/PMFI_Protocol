@@ -35,16 +35,23 @@
     "outputs": [{"name": "assets", "type": "uint256"}]
   },
   {
+    "name": "circulatingSupply",
+    "type": "function",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{"name": "", "type": "uint256"}]
+  },
+  {
     "name": "getVaultState",
     "type": "function",
     "stateMutability": "view",
     "inputs": [],
     "outputs": [
       {"name": "_officialPPS",           "type": "uint256"},
-      {"name": "_totalSupply",            "type": "uint256"},
+      {"name": "_circulatingSupply",      "type": "uint256"},
       {"name": "_idleBalance",            "type": "uint256"},
       {"name": "_lastReportedBacking",    "type": "uint256"},
-      {"name": "_highWaterMarkAssets",     "type": "uint256"},
+      {"name": "_highWaterMarkAssets",    "type": "uint256"},
       {"name": "_pendingDepositAssets",   "type": "uint256"},
       {"name": "_claimableRedeemAssets",  "type": "uint256"},
       {"name": "_pendingRedeemShares",    "type": "uint256"},
