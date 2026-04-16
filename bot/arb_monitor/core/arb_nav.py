@@ -583,6 +583,8 @@ def compute_nav() -> dict:
         settled_pnl=0.0,
         round_id=round_id,
         signature=signature or "",
+        opinion_cash=opinion_cash,
+        servicer_on_base=servicer_on_base,
     )
 
     payload = {
@@ -628,6 +630,8 @@ def _save_nav_snapshot(
     settled_pnl: float,
     round_id: int,
     signature: str,
+    opinion_cash: float = 0.0,
+    servicer_on_base: float = 0.0,
 ):
     """Persist NAV snapshot to arb_vault_nav table."""
     database_url = os.environ.get("DATABASE_URL", "")
@@ -638,22 +642,32 @@ def _save_nav_snapshot(
         conn = psycopg2.connect(database_url)
         cur = conn.cursor()
         cur.execute("""
+            ALTER TABLE arb_vault_nav
+                ADD COLUMN IF NOT EXISTS opinion_cash NUMERIC(20,6) NOT NULL DEFAULT 0,
+                ADD COLUMN IF NOT EXISTS servicer_on_base NUMERIC(20,6) NOT NULL DEFAULT 0
+        """)
+        cur.execute("""
             UPDATE arb_vault_nav
             SET total_assets_usdc=%s, poly_cash=%s, kalshi_cash=%s,
-                open_positions_value=%s, settled_pnl=%s, signature=%s
+                open_positions_value=%s, settled_pnl=%s, signature=%s,
+                opinion_cash=%s, servicer_on_base=%s
             WHERE round_id=%s
         """, (total_assets_usdc, poly_cash, kalshi_cash, open_positions_value,
-              settled_pnl, signature, round_id))
+              settled_pnl, signature, opinion_cash, servicer_on_base, round_id))
         if cur.rowcount == 0:
             cur.execute("""
                 INSERT INTO arb_vault_nav
                     (computed_at, total_assets_usdc, poly_cash, kalshi_cash,
-                     open_positions_value, settled_pnl, round_id, signature)
-                VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s)
+                     open_positions_value, settled_pnl, round_id, signature,
+                     opinion_cash, servicer_on_base)
+                VALUES (NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (total_assets_usdc, poly_cash, kalshi_cash, open_positions_value,
-                  settled_pnl, round_id, signature))
+                  settled_pnl, round_id, signature, opinion_cash, servicer_on_base))
         conn.commit()
         cur.close()
         conn.close()
+        log(f"✅ NAV snapshot saved: total={total_assets_usdc:.4f} poly={poly_cash:.4f} "
+            f"kalshi={kalshi_cash:.4f} opinion={opinion_cash:.4f} "
+            f"servicer={servicer_on_base:.4f} positions={open_positions_value:.4f}")
     except Exception as e:
         log(f"⚠️ Error saving NAV snapshot: {e}")

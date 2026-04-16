@@ -126,32 +126,76 @@ def serve_static(filename):
 
 # ── pARB API: NAV ─────────────────────────────────────────────────────────────
 
+def _live_open_positions_value(cur) -> float:
+    """Compute open positions value live from arb_positions table (shares * $0.99)."""
+    try:
+        cur.execute("""
+            SELECT COALESCE(SUM(shares), 0) AS total_shares
+            FROM arb_positions
+            WHERE status = 'open'
+        """)
+        row = cur.fetchone()
+        total_shares = float(row['total_shares']) if row else 0.0
+        value = total_shares * 0.99
+        return value
+    except Exception as e:
+        app.logger.warning(f"[arb_nav] live positions value error: {e}")
+        return 0.0
+
+
 @app.route('/api/arb-vault/nav')
 def arb_nav():
-    """Return latest NAV snapshot including TVL, share price, APR, APY."""
+    """Return latest NAV snapshot including TVL, share price, APR, APY.
+
+    open_positions_value is always recomputed live from arb_positions so
+    TVL reflects positions even when the stored snapshot predates the backfill.
+    opinion_cash and servicer_on_base are read from arb_vault_nav columns
+    added in the bot's _save_nav_snapshot() (ALTER TABLE IF NOT EXISTS).
+    """
     try:
         conn = _get_db()
         cur = conn.cursor()
 
+        # Ensure opinion_cash / servicer_on_base columns exist (added by bot on first report).
+        # Running this here too lets the Flask app start returning data even on a fresh DB.
+        for col, default in [("opinion_cash", "0"), ("servicer_on_base", "0")]:
+            try:
+                cur.execute(f"""
+                    ALTER TABLE arb_vault_nav
+                        ADD COLUMN IF NOT EXISTS {col} NUMERIC(20,6) NOT NULL DEFAULT {default}
+                """)
+                conn.commit()
+            except Exception:
+                conn.rollback()
+
         # Latest NAV snapshot
         cur.execute("""
             SELECT total_assets_usdc, poly_cash, kalshi_cash, open_positions_value,
-                   settled_pnl, round_id, signature, computed_at
+                   settled_pnl, round_id, signature, computed_at,
+                   COALESCE(opinion_cash, 0)      AS opinion_cash,
+                   COALESCE(servicer_on_base, 0)  AS servicer_on_base
             FROM arb_vault_nav
             ORDER BY id DESC
             LIMIT 1
         """)
         row = cur.fetchone()
 
+        # Live positions value — always recomputed so backfilled positions show immediately
+        live_positions_value = _live_open_positions_value(cur)
+
         if not row:
+            # No report snapshot yet — return best-effort zero data but include live positions
             conn.close()
             return jsonify({
                 "ok": False,
-                "total_assets_usdc": 0,
-                "tvl_usdc": 0,
+                "total_assets_usdc": live_positions_value,
+                "tvl_usdc": live_positions_value,
                 "poly_cash": 0,
                 "kalshi_cash": 0,
-                "open_positions_value": 0,
+                "opinion_cash": 0,
+                "servicer_on_base": 0,
+                "open_positions_value": live_positions_value,
+                "deployed": live_positions_value,
                 "settled_pnl": 0,
                 "share_price": 1.0,
                 "apr": None,
@@ -160,33 +204,47 @@ def arb_nav():
                 "deadline": int(time.time()) + 300,
                 "round_id": 0,
                 "signature": "",
-                "message": "No NAV data yet"
+                "message": "No NAV report yet — showing live positions only"
             })
 
-        total_assets = float(row['total_assets_usdc'])
+        # Snapshot exists — use stored cash figures, but override positions with live value
+        # so backfilled / newly-placed pairs show in TVL without needing a new report().
+        stored_poly_cash      = float(row['poly_cash'])
+        stored_kalshi_cash    = float(row['kalshi_cash'])
+        stored_opinion_cash   = float(row['opinion_cash'])
+        stored_servicer       = float(row['servicer_on_base'])
+        stored_positions      = float(row['open_positions_value'])
+
+        # poly_cash stored in the snapshot already includes opinion_cash + servicer_on_base
+        # (folded for ABI encoding). Back them out so we don't double-count.
+        poly_cash_only = stored_poly_cash - stored_opinion_cash - stored_servicer
+
+        # Recompute TVL using live positions to pick up any backfilled rows.
+        tvl_usdc = (
+            poly_cash_only
+            + stored_kalshi_cash
+            + stored_opinion_cash
+            + stored_servicer
+            + live_positions_value
+        )
+
         computed_ts = int(row['computed_at'].timestamp()) if row['computed_at'] else int(time.time())
 
-        # APR / APY from settled positions
         apr = _compute_apr(cur)
         apy = ((1 + apr / 100 / 365) ** 365 - 1) * 100 if apr else None
 
-        # Historical PPS rows for share price trend (last 30 rows)
-        cur.execute("""
-            SELECT total_assets_usdc, computed_at
-            FROM arb_vault_nav
-            ORDER BY id DESC
-            LIMIT 30
-        """)
-        history = cur.fetchall()
         conn.close()
 
         return jsonify({
             "ok": True,
-            "total_assets_usdc": total_assets,
-            "tvl_usdc": total_assets,
-            "poly_cash": float(row['poly_cash']),
-            "kalshi_cash": float(row['kalshi_cash']),
-            "open_positions_value": float(row['open_positions_value']),
+            "total_assets_usdc": tvl_usdc,
+            "tvl_usdc": tvl_usdc,
+            "poly_cash": poly_cash_only,
+            "kalshi_cash": stored_kalshi_cash,
+            "opinion_cash": stored_opinion_cash,
+            "servicer_on_base": stored_servicer,
+            "open_positions_value": live_positions_value,
+            "deployed": live_positions_value,
             "settled_pnl": float(row['settled_pnl']),
             "share_price": 1.0,
             "apr": round(apr, 2) if apr is not None else None,
@@ -200,7 +258,8 @@ def arb_nav():
     except Exception as e:
         return jsonify({"ok": False, "error": str(e), "total_assets_usdc": 0,
                         "tvl_usdc": 0, "poly_cash": 0, "kalshi_cash": 0,
-                        "open_positions_value": 0, "settled_pnl": 0,
+                        "opinion_cash": 0, "servicer_on_base": 0,
+                        "open_positions_value": 0, "deployed": 0, "settled_pnl": 0,
                         "share_price": 1.0, "apr": None, "apy": None,
                         "timestamp": int(time.time()), "deadline": int(time.time()) + 300,
                         "round_id": 0, "signature": ""})
