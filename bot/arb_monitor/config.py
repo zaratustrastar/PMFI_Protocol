@@ -89,6 +89,13 @@ ARB_MIN_CONTRACTS = int(os.environ.get("ARB_MIN_CONTRACTS", "5"))
 ARB_POLY_FEE_PCT    = float(os.environ.get("ARB_POLY_FEE_PCT",    "0.0"))
 ARB_KALSHI_FEE_PCT  = float(os.environ.get("ARB_KALSHI_FEE_PCT",  "0.0"))
 ARB_OPINION_FEE_PCT = float(os.environ.get("ARB_OPINION_FEE_PCT", "0.0"))
+
+# Flat per-contract cost pad for Kalshi (cents, applied on top of ask price).
+# Kalshi charges a taker fee per contract that is NOT reflected in the quoted ask.
+# This pad raises the effective cost so the profitability gate and contract sizing
+# both account for fees before approving or sizing a trade.
+# Default: 1.0 cent per contract ($0.01). Set ARB_KALSHI_PRICE_PAD_CENTS=0 to disable.
+KALSHI_PRICE_PAD_CENTS = float(os.environ.get("ARB_KALSHI_PRICE_PAD_CENTS", "1.0"))
 ARB_MAX_PAIR_USDC = float(os.environ.get("ARB_MAX_PAIR_USDC", "500"))
 ARB_MAX_DEPLOYED_USDC = float(os.environ.get("ARB_MAX_DEPLOYED_USDC", "10000"))
 

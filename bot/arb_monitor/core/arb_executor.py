@@ -97,6 +97,7 @@ from ..config import (
     ARB_POLY_FEE_PCT,
     ARB_KALSHI_FEE_PCT,
     ARB_OPINION_FEE_PCT,
+    KALSHI_PRICE_PAD_CENTS,
 )
 
 
@@ -1072,16 +1073,30 @@ def execute_arb(
     result.live_poly_ask = live_poly_ask
     result.live_kalshi_ask = live_kalshi_ask
     opp_net_edge = getattr(opportunity, "net_edge_pct", 0.0)
-    log(
-        f"📊 Best asks: poly={live_poly_ask:.4f} {leg2_venue_label}={live_kalshi_ask:.4f} | "
-        f"Oddpool net_edge={opp_net_edge:.4f}% (reference only)"
-    )
+
+    # Flat per-contract fee pad for Kalshi (default 1¢).  Applied to all cost and
+    # edge calculations so the gate and sizing account for taker fees before trading.
+    # The actual order price submitted to Kalshi is still live_kalshi_ask (the real
+    # market price); the pad is purely an accounting buffer in our math.
+    _kalshi_pad = (KALSHI_PRICE_PAD_CENTS / 100.0) if venue2 == "kalshi" else 0.0
+    if _kalshi_pad > 0:
+        log(
+            f"📊 Best asks: poly={live_poly_ask:.4f} {leg2_venue_label}={live_kalshi_ask:.4f} "
+            f"(+{KALSHI_PRICE_PAD_CENTS:.1f}¢ fee pad → eff={live_kalshi_ask + _kalshi_pad:.4f}) | "
+            f"Oddpool net_edge={opp_net_edge:.4f}% (reference only)"
+        )
+    else:
+        log(
+            f"📊 Best asks: poly={live_poly_ask:.4f} {leg2_venue_label}={live_kalshi_ask:.4f} | "
+            f"Oddpool net_edge={opp_net_edge:.4f}% (reference only)"
+        )
 
     # ── Initial target_contracts from best-ask estimate ───────────────────────
     # Both legs must fill EXACTLY the same number of contracts — the natural
     # execution unit is contracts, not USDC.  USDC cost is downstream of this.
+    # Kalshi fee pad is included so we size conservatively from the start.
     total_budget = min(size_usdc, ARB_MAX_PAIR_USDC)
-    combined_best_ask = live_poly_ask + live_kalshi_ask
+    combined_best_ask = live_poly_ask + live_kalshi_ask + _kalshi_pad
     if combined_best_ask <= 0:
         result.error = "cannot_compute_contracts: combined best-ask is zero"
         log(f"❌ {result.error}")
@@ -1179,16 +1194,20 @@ def execute_arb(
 
     # ── VWAP profitability gate ────────────────────────────────────────────────
     # Use matched-size VWAPs — these reflect actual execution prices for both legs.
+    # _kalshi_pad (flat ¢/contract fee) is added to the effective v2 cost so the
+    # gate rejects trades whose edge doesn't cover Kalshi taker fees.
     fee_pct = ARB_POLY_FEE_PCT + (
         ARB_KALSHI_FEE_PCT if venue2 == "kalshi" else ARB_OPINION_FEE_PCT
     )
-    gross_edge_pct = (1.0 - matched_poly_vwap - matched_v2_vwap) * 100.0
+    _eff_v2_vwap   = matched_v2_vwap + _kalshi_pad
+    gross_edge_pct = (1.0 - matched_poly_vwap - _eff_v2_vwap) * 100.0
     net_edge_pct   = gross_edge_pct - fee_pct
     required_edge  = min_edge_pct * 100.0 + ARB_VWAP_SAFETY_BUFFER_PCT
 
     log(
         f"📐 VWAP profitability @ {matched_contracts} contracts: "
         f"poly_vwap={matched_poly_vwap:.4f} {leg2_venue_label}_vwap={matched_v2_vwap:.4f} "
+        f"(+{_kalshi_pad*100:.2f}¢ pad → eff_v2_vwap={_eff_v2_vwap:.4f}) "
         f"gross_edge={gross_edge_pct:.4f}% fee={fee_pct:.4f}% "
         f"net_edge={net_edge_pct:.4f}% required={required_edge:.4f}%"
     )
@@ -1240,11 +1259,14 @@ def execute_arb(
     live_kalshi_ask = v2_marginal_ask
     result.live_poly_ask   = live_poly_ask
     result.live_kalshi_ask = live_kalshi_ask
-    # live_edge uses VWAP (more conservative / realistic for the full fill)
-    result.live_edge = 1.0 - matched_poly_vwap - matched_v2_vwap
+    # live_edge uses VWAP (more conservative / realistic for the full fill).
+    # _kalshi_pad is subtracted so reported edge reflects the true net profit
+    # after Kalshi taker fees.
+    result.live_edge = 1.0 - matched_poly_vwap - matched_v2_vwap - _kalshi_pad
 
-    # Re-cap contract_count to budget at marginal ask prices (worst-case USDC cost)
-    budget_at_marginal = int(total_budget / (live_poly_ask + live_kalshi_ask))
+    # Re-cap contract_count to budget at marginal ask prices (worst-case USDC cost).
+    # Include _kalshi_pad so we don't over-allocate capital before fees.
+    budget_at_marginal = int(total_budget / (live_poly_ask + live_kalshi_ask + _kalshi_pad))
     contract_count = min(matched_contracts, budget_at_marginal)
 
     log(
@@ -1410,12 +1432,12 @@ def execute_arb(
                     )
                     live_kalshi_ask = _fresh_kalshi
                     result.live_kalshi_ask = live_kalshi_ask
-                    # Re-check combined cost: if combined >= 1.0 the arb is gone
-                    _combined_fresh = live_poly_ask + live_kalshi_ask
+                    # Re-check combined cost (including fee pad): if combined >= 1.0 the arb is gone
+                    _combined_fresh = live_poly_ask + live_kalshi_ask + _kalshi_pad
                     if _combined_fresh >= 1.0:
                         result.error = (
                             f"vwap_edge_gone_on_refresh: combined={_combined_fresh:.4f} ≥ 1.0 "
-                            f"after price refresh (poly={live_poly_ask:.4f} kalshi={live_kalshi_ask:.4f})"
+                            f"after price refresh (poly={live_poly_ask:.4f} kalshi={live_kalshi_ask:.4f} pad={_kalshi_pad:.4f})"
                         )
                         log(f"❌ {result.error}")
                         return result
