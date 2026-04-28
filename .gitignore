@@ -6,3 +6,47 @@ dist
 *.db
 *.db-*
 .DS_Store
+# local secrets
+.env*
+kalshi_key.pem
+
+# python/cache/env
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# logs
+*.log
+nohup.out
+
+# backups/saves
+*.bak
+*.bak.*
+*.save
+*.save.*
+*.emergency_bad_state
+*.before_topnav_only_removal
+
+# local state
+data/
+bot/pending_credit_state.json
+bot/round_id_cache.json
+trading_bot/withdrawal_state.json
+
+# accidental files
+=*
+To
+
+# more backup patterns
+*.bak_*
+*.bak-*
+*.bak_*
+*.bak_20*
+*.bak_directsafe
+*.bak_poly*
+*.bak_proxy*
+*.bak_safe*
+*.bak_fix_*
+*.bak_manual
+*.bak_nav_*

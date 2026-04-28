@@ -644,6 +644,10 @@ def get_best_prices(ticker: str, debug: bool = False) -> dict:
         # endpoint and read the best ask from orderbook_fp.yes_dollars / no_dollars.
         # The new Elections API (/markets/{ticker}) no longer populates yes_ask/no_ask
         # in some response shapes, so this prevents silent all-None slippage checks.
+        if not ticker:
+            log("⚠️ [Kalshi] get_best_prices called with empty ticker — returning no prices")
+            return empty
+
         if yes_best_ask is None and no_best_ask is None:
             log(f"⚠️ [Kalshi] yes_ask/no_ask both None from market endpoint for {ticker!r} — fetching orderbook for best prices")
             try:
@@ -694,6 +698,10 @@ def fetch_orderbook_depth(ticker: str, depth: int = 25) -> Optional[dict]:
     Prices are in CENTS (0-100). delta is quantity of contracts at that level.
     Returns None on any error.
     """
+    if not ticker:
+        log("⚠️ [Kalshi] fetch_orderbook_depth called with empty ticker — skipping")
+        return None
+
     url = f"{KALSHI_BASE_URL}/markets/{ticker}/orderbook"
     # Use RSA auth when credentials are available (required by some API environments);
     # fall back to unauthenticated headers when not configured (public endpoint fallback).

@@ -34,7 +34,7 @@ def log(msg: str):
     print(f"📈 [Arb/NAV] {msg}")
 
 
-ARB_VAULT_DOMAIN_SALT = "PMFIArbVaultV1.v1"
+ARB_VAULT_DOMAIN_SALT = "PMFIArbVaultV2.v1"
 NAV_VALIDITY_WINDOW = 30  # 30-second deadline window (contract MAX_NAV_AGE = 30)
 
 
@@ -235,8 +235,9 @@ def _get_servicer_balances() -> tuple[float, float, float]:
     poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
     if poly_api_key:
         try:
-            from py_clob_client.client import ClobClient
-            from py_clob_client.clob_types import ApiCreds, BalanceAllowanceParams, AssetType
+            from .clob_compat import (
+                make_client, ApiCreds, BalanceAllowanceParams, AssetType, SDK_VERSION,
+            )
             clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
             private_key        = os.environ.get("POLY_PRIVATE_KEY", "")
             poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
@@ -245,8 +246,8 @@ def _get_servicer_balances() -> tuple[float, float, float]:
                 api_secret=poly_api_secret.strip(),
                 api_passphrase=poly_api_passphrase.strip(),
             )
-            client = ClobClient(
-                clob_url,
+            client = make_client(
+                host=clob_url,
                 key=private_key,
                 chain_id=137,
                 creds=creds,
@@ -264,7 +265,7 @@ def _get_servicer_balances() -> tuple[float, float, float]:
 
             # Diagnostic: also query sig_type=0 (EOA) to locate funds
             try:
-                client_eoa = ClobClient(clob_url, key=private_key, chain_id=137, creds=creds, signature_type=0)
+                client_eoa = make_client(host=clob_url, key=private_key, chain_id=137, creds=creds, signature_type=0)
                 result_eoa = client_eoa.get_balance_allowance(
                     BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
                 )
@@ -539,7 +540,7 @@ def compute_nav() -> dict:
     positions = _load_open_positions()
     # Value each open position at $0.99/share — deterministic, no live API calls.
     # One leg resolves to $1, the other to $0; $0.99 shaves 1¢ for conservatism.
-    open_positions_value = sum(pos.shares * 0.99 for pos in positions)
+    open_positions_value = sum(pos.cost_basis_usdc for pos in positions)
 
     total_assets = (
         poly_cash + kalshi_cash + opinion_cash

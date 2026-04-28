@@ -226,6 +226,9 @@ def upsert_position(
     poly_title: str = "",
     kalshi_title: str = "",
     kalshi_side: str = "YES",
+    poly_entry_price: float = 0.0,
+    kalshi_entry_price: float = 0.0,
+    poly_side: str = "YES",
 ) -> bool:
     """Create or update an arb position record.
 
@@ -243,14 +246,19 @@ def upsert_position(
         cur.execute("""
             INSERT INTO arb_positions
                 (pair_id, poly_yes_token, poly_no_token, kalshi_ticker, kalshi_side, shares,
-                 cost_basis_usdc, expiry_ts, status, poly_title, kalshi_title)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'open', %s, %s)
+                 cost_basis_usdc, expiry_ts, status, poly_title, kalshi_title,
+                 poly_entry_price, kalshi_entry_price, poly_side)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'open', %s, %s, %s, %s, %s)
             ON CONFLICT (pair_id) DO UPDATE SET
                 shares = arb_positions.shares + EXCLUDED.shares,
                 cost_basis_usdc = arb_positions.cost_basis_usdc + EXCLUDED.cost_basis_usdc,
-                kalshi_side = EXCLUDED.kalshi_side
+                kalshi_side = EXCLUDED.kalshi_side,
+                poly_entry_price = EXCLUDED.poly_entry_price,
+                kalshi_entry_price = EXCLUDED.kalshi_entry_price,
+                poly_side = EXCLUDED.poly_side
         """, (pair_id, poly_yes_token, poly_no_token, kalshi_ticker, kalshi_side, shares,
-              cost_basis_usdc, expiry_ts, poly_title, kalshi_title))
+              cost_basis_usdc, expiry_ts, poly_title, kalshi_title,
+              poly_entry_price, kalshi_entry_price, poly_side))
         conn.commit()
         cur.close()
         log(f"✅ Position upserted: pair_id={pair_id} shares={shares} cost={cost_basis_usdc}")
@@ -297,31 +305,52 @@ def get_open_positions() -> list[dict]:
                    COALESCE(kalshi_side, 'YES'),
                    shares, cost_basis_usdc, expiry_ts, status,
                    COALESCE(settled_pnl_usdc, 0), opened_at,
-                   COALESCE(poly_title, ''), COALESCE(kalshi_title, '')
+                   COALESCE(poly_title, ''), COALESCE(kalshi_title, ''),
+                   COALESCE(poly_entry_price, 0), COALESCE(kalshi_entry_price, 0),
+                   COALESCE(poly_side, 'YES')
             FROM arb_positions
             WHERE status = 'open'
             ORDER BY opened_at DESC
         """)
         rows = cur.fetchall()
         cur.close()
-        return [
-            {
+        import time as _time
+        now = _time.time()
+        results = []
+        for r in rows:
+            poly_price = float(r[13])
+            kalshi_price = float(r[14])
+            shares_val = float(r[5])
+            expiry = int(r[7])
+            edge = round(1.0 - poly_price - kalshi_price, 4) if (poly_price > 0 and kalshi_price > 0) else 0.0
+            days_to_expiry = max(0.0, (expiry - now) / 86400) if expiry > now else 0.0
+            cost_per_pair = poly_price + kalshi_price
+            apr = round((edge / cost_per_pair) * (365.0 / max(days_to_expiry, 1.0)) * 100, 2) if cost_per_pair > 0 else 0.0
+            locked_pnl = round(shares_val * edge, 4)
+            results.append({
                 "pair_id": r[0],
                 "poly_yes_token": r[1],
                 "poly_no_token": r[2],
                 "kalshi_ticker": r[3],
                 "kalshi_side": r[4],
-                "shares": float(r[5]),
+                "shares": shares_val,
                 "cost_basis_usdc": float(r[6]),
-                "expiry_ts": int(r[7]),
+                "expiry_ts": expiry,
                 "status": r[8],
                 "settled_pnl_usdc": float(r[9]),
                 "opened_at": r[10].isoformat() if r[10] else None,
                 "poly_title": r[11],
                 "kalshi_title": r[12],
-            }
-            for r in rows
-        ]
+                "poly_entry_price": poly_price,
+                "kalshi_entry_price": kalshi_price,
+                "poly_side": r[15],
+                "edge": edge,
+                "edge_pct": round(edge * 100, 2),
+                "apr": apr,
+                "locked_pnl_usdc": locked_pnl,
+                "days_to_expiry": round(days_to_expiry, 1),
+            })
+        return results
     except Exception as e:
         log(f"❌ Error fetching open positions: {e}")
         return []

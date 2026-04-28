@@ -37,6 +37,8 @@ import os
 import time
 import struct as _struct
 
+from .arb_withdrawals import withdraw_from_platforms, get_pending_withdrawals_total_usdc
+
 DOMAIN_SALT_TEXT = "PMFIArbVaultV2.v1"
 BASE_CHAIN_ID = 8453
 BASE_RPC = os.environ.get("BASE_RPC_URL", "https://mainnet.base.org")
@@ -57,6 +59,10 @@ REPORT_DEADLINE_BUFFER = 3600  # 1 hour
 # Default: process up to 50 deposits and 50 redeems per report call
 DEFAULT_MAX_DEPOSITS = 50
 DEFAULT_MAX_REDEEMS = 50
+
+# Local cooldown guard — prevents hammering report() when on-chain reads return 0
+_last_local_report_ts: float = 0.0
+_LOCAL_REPORT_COOLDOWN = int(os.environ.get("ARB_LOCAL_REPORT_COOLDOWN", str(6 * 3600)))
 
 
 def log(msg: str):
@@ -179,42 +185,100 @@ def _call_view_uint(to: str, selector_hex: str) -> int:
     return int(raw, 16) if raw and raw != "0x" else 0
 
 
-# 4-byte selectors (keccak256 first 4 bytes)
-# lastReportNonce()   → 0x6e8d8fb5  (computed offline: keccak256("lastReportNonce()"))
-# lastReportTimestamp() → 0x ... computed from ABI
-# reportCooldown()
-# officialPPS()
-# idleBalance()
-# totalPendingRedeemShares()
+# 4-byte selectors for the actual deployed PMFIArbVaultV2 contract
 
-SEL_LAST_REPORT_NONCE      = "247afd64"   # keccak256("lastReportNonce()")[:4]
-SEL_LAST_REPORT_TIMESTAMP  = "57db845a"   # keccak256("lastReportTimestamp()")[:4]
-SEL_REPORT_COOLDOWN        = "54b81a71"   # keccak256("reportCooldown()")[:4]
-SEL_OFFICIAL_PPS           = "bc0a7f5d"   # keccak256("officialPPS()")[:4]
-SEL_IDLE_BALANCE           = "b1bbb310"   # keccak256("idleBalance()")[:4]
-SEL_PENDING_REDEEM_SHARES  = "8eff0106"   # keccak256("totalPendingRedeemShares()")[:4]
+SEL_LAST_REPORT_NONCE            = _keccak256_text("lastReportNonce()")[:4].hex()
+SEL_LAST_REPORT_TIMESTAMP        = _keccak256_text("lastReportTimestamp()")[:4].hex()
+SEL_REPORT_COOLDOWN             = _keccak256_text("reportCooldown()")[:4].hex()
+SEL_OFFICIAL_PPS                = _keccak256_text("officialPPS()")[:4].hex()
+SEL_LAST_REPORTED_BACKING       = _keccak256_text("lastReportedBackingAssets()")[:4].hex()
+SEL_TOTAL_PENDING_REDEEM_SHARES = _keccak256_text("totalPendingRedeemShares()")[:4].hex()
+SEL_PAUSED                      = _keccak256_text("paused()")[:4].hex()
+SEL_SHUTDOWN                    = _keccak256_text("shutdown()")[:4].hex()
+SEL_TOTAL_SUPPLY                = _keccak256_text("totalSupply()")[:4].hex()
+SEL_USDC_BALANCE_VAULT          = "70a08231"  # balanceOf(address) on USDC, used with address(this)
+
+LOCAL_REPORT_COOLDOWN = int(os.environ.get("ARB_REPORT_COOLDOWN_SECS", "1800"))
+
+
+def _call_view_bool(to: str, selector_hex: str) -> bool:
+    raw = _call_view(to, selector_hex)
+    return bool(int(raw, 16)) if raw and raw != "0x" else False
+
+
+def _call_view_tuple_uints_and_bools(to: str, selector_hex: str) -> tuple:
+    from eth_abi import decode as abi_decode
+    raw = _call_view(to, selector_hex)
+    if not raw or raw == "0x":
+        raise RuntimeError(f"empty tuple response for selector {selector_hex}")
+    data = bytes.fromhex(raw[2:])
+    return abi_decode(
+        [
+            "uint256", "uint256", "uint256", "uint256", "uint256",
+            "uint256", "uint256", "uint256", "bool", "bool"
+        ],
+        data,
+    )
 
 
 def _read_vault_state(vault_address: str) -> dict:
-    """Read key vault state variables via eth_call."""
+    """Read vault state via getVaultState() - single call using real contract ABI.
+
+    getVaultState() returns 12-element tuple per ABI:
+      [0] officialPPS  [1] circulatingSupply  [2] idleBal
+      [3] lastReportedBacking  [4] highWaterMarkAssets  [5] pendingDepositAssets
+      [6] claimableRedeemAssets  [7] pendingRedeemShares
+      [8] lastReportTimestamp  [9] lastReportNonce  [10] paused  [11] shutdown
+    """
     try:
-        last_nonce     = _call_view_uint(vault_address, SEL_LAST_REPORT_NONCE)
-        last_ts        = _call_view_uint(vault_address, SEL_LAST_REPORT_TIMESTAMP)
-        cooldown       = _call_view_uint(vault_address, SEL_REPORT_COOLDOWN)
-        official_pps   = _call_view_uint(vault_address, SEL_OFFICIAL_PPS)
-        idle_balance   = _call_view_uint(vault_address, SEL_IDLE_BALANCE)
-        pending_redeem = _call_view_uint(vault_address, SEL_PENDING_REDEEM_SHARES)
+        from eth_abi import decode as abi_decode
+
+        sel = _keccak256_text("getVaultState()")[:4].hex()
+        raw = _call_view(vault_address, sel)
+
+        if not raw or raw == "0x":
+            raise ValueError(f"getVaultState() empty — wrong address? sel={sel}")
+
+        result_bytes = bytes.fromhex(raw[2:] if raw.startswith("0x") else raw)
+        decoded = abi_decode(
+            ["uint256","uint256","uint256","uint256","uint256",
+             "uint256","uint256","uint256","uint256","uint256",
+             "bool","bool"],
+            result_bytes,
+        )
+        official_pps   = decoded[0]
+        idle_balance   = decoded[2]
+        pending_redeem = decoded[7]
+        last_ts        = decoded[8]
+        last_nonce     = decoded[9]
+
+        # reportCooldown is not in getVaultState, read separately
+        cooldown = _call_view_uint(vault_address, _keccak256_text("reportCooldown()")[:4].hex())
+        if cooldown == 0:
+            log(f"WARNING reportCooldown() returned 0, using fallback {_LOCAL_REPORT_COOLDOWN}s")
+            cooldown = _LOCAL_REPORT_COOLDOWN
+
+        # If chain shows last_ts=0 but we recently submitted, use local record
+        if last_ts == 0 and _last_local_report_ts > 0:
+            log(f"WARNING lastReportTimestamp=0 on-chain, using local ts={int(_last_local_report_ts)}")
+            last_ts = int(_last_local_report_ts)
+
+        log(
+            f"Vault state: pps={official_pps} idle={idle_balance/1e6:.4f} "
+            f"pending_redeem={pending_redeem} last_ts={last_ts} "
+            f"nonce={last_nonce} cooldown={cooldown}s"
+        )
         return {
-            "last_report_nonce":      last_nonce,
-            "last_report_timestamp":  last_ts,
-            "report_cooldown":        cooldown,
-            "official_pps":           official_pps,
-            "idle_balance_usdc":      idle_balance / 1e6,
-            "pending_redeem_shares":  pending_redeem,
+            "last_report_nonce":     last_nonce,
+            "last_report_timestamp": last_ts,
+            "report_cooldown":       cooldown,
+            "official_pps":          official_pps,
+            "idle_balance_usdc":     idle_balance / 1e6,
+            "pending_redeem_shares": pending_redeem,
             "ok": True,
         }
     except Exception as e:
-        log(f"⚠️ Could not read vault state: {e}")
+        log(f"WARNING Could not read vault state: {e}")
         return {"ok": False}
 
 
@@ -275,7 +339,7 @@ def compute_reported_assets(vault_address: str) -> dict:
     try:
         vault_state = _read_vault_state(vault_address)
         if vault_state["ok"]:
-            vault_idle = vault_state["idle_balance_usdc"]
+            vault_idle = _read_usdc_balance(vault_address)  # raw vault USDC; contract deducts pendingDeposits+claimableRedeems itself
             log(f"  vault idle USDC: {vault_idle:.4f}")
     except Exception as e:
         log(f"  ⚠️ Could not read vault idle: {e}")
@@ -292,7 +356,7 @@ def compute_reported_assets(vault_address: str) -> dict:
     # One leg resolves to $1, other to $0 → floor value = $1/pair; $0.99 is conservative.
     # settled_pnl excluded: settled proceeds already land in platform cash balances.
     open_positions = _load_open_positions()
-    open_position_value = sum(pos.shares * 0.99 for pos in open_positions)
+    open_position_value = sum(pos.cost_basis_usdc for pos in open_positions)
     log(
         f"  open_positions={len(open_positions)} positions, "
         f"value={open_position_value:.4f} USDC (@ $0.99/share)"
@@ -497,6 +561,9 @@ def submit_report(
         tx_hash = _rpc("eth_sendRawTransaction", [raw_hex])
         log(f"✅ report() tx sent: {tx_hash}")
         _save_report_snapshot(payload, tx_hash)
+        global _last_local_report_ts
+        _last_local_report_ts = time.time()
+        log(f"Local report guard set: cooldown {_LOCAL_REPORT_COOLDOWN}s started")
         return tx_hash
     except Exception as e:
         log(f"❌ report() tx failed: {e}")
@@ -633,8 +700,7 @@ def run_withdrawal_waterfall(vault_address: str, servicer_key: str) -> None:
         log("⚠️ Waterfall: cannot read vault state — skip")
         return
 
-    official_pps          = vault_state["official_pps"]
-    idle_balance          = vault_state["idle_balance_usdc"]
+    idle_balance = vault_state["idle_balance_usdc"]
     pending_redeem_shares = vault_state["pending_redeem_shares"]
 
     # ── Step 1: Vault idle covers redemptions ─────────────────────────────────
@@ -642,7 +708,13 @@ def run_withdrawal_waterfall(vault_address: str, servicer_key: str) -> None:
         log("✅ Waterfall: no pending redemptions")
         return
 
-    pending_redeem_value = (pending_redeem_shares * official_pps) / 1e18 / 1e6
+    official_pps = int(vault_state.get("official_pps") or 0)
+
+    if pending_redeem_shares > 0 and official_pps > 0:
+        pending_redeem_value = (pending_redeem_shares / 1e18) * (official_pps / 1e6)
+    else:
+        pending_redeem_value = 0.0
+
     shortfall = max(0.0, pending_redeem_value - idle_balance)
 
     log(
@@ -690,7 +762,6 @@ def run_withdrawal_waterfall(vault_address: str, servicer_key: str) -> None:
         )
         try:
             from .arb_nav import _get_servicer_balances
-            from .arb_withdrawals import withdraw_from_platforms
 
             poly_cash, kalshi_cash, opinion_cash = _get_servicer_balances()
             total_platform_cash = poly_cash + kalshi_cash + opinion_cash
@@ -710,6 +781,13 @@ def run_withdrawal_waterfall(vault_address: str, servicer_key: str) -> None:
                 f"✅ Waterfall Step 3.5: initiated {initiated:.4f} USDC of platform withdrawals "
                 f"(funds in transit — will arrive in 5–30 min depending on platform)"
             )
+           
+            pending_inflight = get_pending_withdrawals_total_usdc()
+            log(
+                f"ℹ️ Waterfall Step 3.5: pending in-flight platform withdrawals="
+                f"{pending_inflight:.4f} USDC"
+            )
+
             # We don't immediately reduce the shortfall (funds haven't arrived yet),
             # but we log the expectation so Step 4 can be informational rather than critical
             if initiated >= shortfall * 0.9:
@@ -764,16 +842,19 @@ def should_report_early(vault_state: dict) -> bool:
     """
     from ..config import ARB_EARLY_REPORT_PRESSURE_RATIO, ARB_EARLY_REPORT_MIN_ELAPSED
 
-    pending_redeem_shares = vault_state.get("pending_redeem_shares", 0)
+    pending_redeem_shares = int(vault_state.get("pending_redeem_shares", 0) or 0)
     if pending_redeem_shares == 0:
         return False
 
-    official_pps = vault_state.get("official_pps", 0)
-    idle_balance = vault_state.get("idle_balance_usdc", 0.0)
-    last_ts      = vault_state.get("last_report_timestamp", 0)
-    now          = int(time.time())
+    idle_balance = float(vault_state.get("idle_balance_usdc", 0.0) or 0.0)
+    last_ts = int(vault_state.get("last_report_timestamp", 0) or 0)
+    official_pps = int(vault_state.get("official_pps", 0) or 0)
+    now = int(time.time())
 
-    pending_redeem_value = (pending_redeem_shares * official_pps) / 1e18 / 1e6
+    if pending_redeem_shares > 0 and official_pps > 0:
+        pending_redeem_value = (pending_redeem_shares / 1e18) * (official_pps / 1e6)
+    else:
+        pending_redeem_value = 0.0
 
     # Must have enough time elapsed since last report
     elapsed = now - last_ts if last_ts > 0 else ARB_EARLY_REPORT_MIN_ELAPSED + 1
@@ -785,7 +866,6 @@ def should_report_early(vault_state: dict) -> bool:
 
     # Pressure ratio check
     if idle_balance <= 0:
-        # Any pending redeems with zero idle is full pressure
         log(f"🚨 Early report: idle=0, pending_redeem={pending_redeem_value:.4f} — TRIGGER")
         return True
 
@@ -835,11 +915,41 @@ def _wait_for_tx_confirm(tx_hash: str, timeout: int = 90, poll_interval: int = 6
 
 
 def _get_request_count(vault_address: str, is_deposit: bool) -> int:
-    """Return total number of deposit or redeem requests (all statuses combined)."""
-    fn_sig = "depositRequestCount()" if is_deposit else "redeemRequestCount()"
+    """Best-effort request count by probing public array getter until it reverts."""
+    from eth_abi import encode as abi_encode
+
+    fn_sig = "depositRequests(uint256)" if is_deposit else "redeemRequests(uint256)"
     selector = _keccak256_text(fn_sig)[:4]
-    raw = _rpc("eth_call", [{"to": vault_address, "data": "0x" + selector.hex()}, "latest"])
-    return int(raw, 16)
+
+    def exists(idx: int) -> bool:
+        try:
+            encoded = abi_encode(["uint256"], [idx])
+            raw = _rpc("eth_call", [
+                {"to": vault_address, "data": "0x" + (selector + encoded).hex()},
+                "latest",
+            ])
+            return bool(raw and raw != "0x")
+        except Exception:
+            return False
+
+    if not exists(0):
+        return 0
+
+    lo, hi = 0, 1
+    while exists(hi):
+        lo = hi
+        hi *= 2
+        if hi > 1_000_000:
+            break
+
+    while lo + 1 < hi:
+        mid = (lo + hi) // 2
+        if exists(mid):
+            lo = mid
+        else:
+            hi = mid
+
+    return lo + 1
 
 
 def _get_deposit_request(vault_address: str, idx: int) -> dict:
@@ -1166,6 +1276,15 @@ def run_reporter_tick():
     except Exception as e:
         log(f"⚠️ Waterfall error (non-fatal): {e}")
 
+    # Settlement checker
+    try:
+        from .arb_settlement import check_and_settle_positions
+        settled = check_and_settle_positions()
+        if settled > 0:
+            log(f"Settlement checker: {settled} position(s) settled this cycle")
+    except Exception as e:
+        log(f"Settlement checker error (non-fatal): {e}")
+
     # ── 1b. Catch-up claim sweep ───────────────────────────────────────────────
     # Always sweep for CLAIMABLE requests on every tick.  This handles:
     #   - Requests that became CLAIMABLE in a previous cycle but weren't claimed
@@ -1180,6 +1299,12 @@ def run_reporter_tick():
 
     # ── 2 + 3. Report: cooldown OR early trigger ───────────────────────────────
     try:
+        # Local cooldown guard - fast path, no RPC needed
+        _local_elapsed = time.time() - _last_local_report_ts
+        if _last_local_report_ts > 0 and _local_elapsed < _LOCAL_REPORT_COOLDOWN:
+            log(f"Local cooldown guard: {int(_LOCAL_REPORT_COOLDOWN - _local_elapsed)}s remaining — skip")
+            return
+
         vault_state = _read_vault_state(vault_address)
         if not vault_state["ok"]:
             log("⚠️ Cannot read vault state for report check — skip")
@@ -1190,19 +1315,22 @@ def run_reporter_tick():
         now       = int(time.time())
         elapsed   = now - last_ts if last_ts > 0 else cooldown + 1
 
-        cooldown_elapsed = elapsed >= cooldown
-        early_trigger    = (not cooldown_elapsed) and should_report_early(vault_state)
-
-        if not cooldown_elapsed and not early_trigger:
-            remaining = cooldown - elapsed
-            log(f"⏳ Report: cooldown {remaining}s remaining, no early trigger — skip")
+        if vault_state.get("paused"):
+            log("⚠️ Report: vault is paused — skip")
             return
 
-        reason = "cooldown elapsed" if cooldown_elapsed else "early trigger (redemption pressure)"
+        cooldown_elapsed = elapsed >= cooldown
+        early_trigger    = False  # TEMP: disable early-triggered report attempts for PMFIArbVaultV2
+
+        if not cooldown_elapsed:
+            remaining = cooldown - elapsed
+            log(f"⏳ Report: cooldown {remaining}s remaining — skip")
+            return
+
+        reason = "cooldown elapsed"
         log(f"📋 Report firing — reason: {reason}")
 
-        # force=True skips internal cooldown re-check when early trigger decided above
-        payload = build_report_payload(vault_address, signer_key, force=early_trigger)
+        payload = build_report_payload(vault_address, signer_key, force=False)
         if payload:
             report_tx = submit_report(payload, signer_key)
             if report_tx:

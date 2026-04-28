@@ -570,6 +570,9 @@ def _execution_cycle():
         log(f"✅ Execution succeeded for {opp.pair_id} — stopping cycle (one trade per cycle)")
         try:
             kalshi_side = getattr(result, "kalshi_side", opp.kalshi_side)
+            # Determine which side was bought on Polymarket
+            _buying_poly_no = (kalshi_side == "YES")
+            _poly_side = "NO" if _buying_poly_no else "YES"
             upsert_position(
                 pair_id=opp.pair_id,
                 poly_yes_token=opp.poly_yes_token,
@@ -581,6 +584,9 @@ def _execution_cycle():
                 poly_title=opp.poly_title,
                 kalshi_title=opp.kalshi_title,
                 kalshi_side=kalshi_side,
+                poly_entry_price=result.filled_poly_price,
+                kalshi_entry_price=result.filled_kalshi_price,
+                poly_side=_poly_side,
             )
             log(
                 f"✅ Position persisted for {opp.pair_id}: "

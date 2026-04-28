@@ -329,10 +329,11 @@ def arb_positions():
                    p.poly_yes_token, p.kalshi_ticker, p.kalshi_side,
                    p.shares, p.cost_basis_usdc, p.expiry_ts, p.status,
                    p.poly_title, p.kalshi_title, p.opened_at,
+                   p.poly_entry_price, p.kalshi_entry_price, p.poly_side,
                    e_poly.venue  AS poly_venue,
                    e_poly.price  AS poly_price,
                    e_poly.size   AS poly_size,
-                   e_poly.side   AS poly_side,
+                   e_poly.side   AS exec_poly_side,
                    e_k.venue     AS venue2,
                    e_k.price     AS k_price,
                    e_k.size      AS k_size,
@@ -382,12 +383,12 @@ def arb_positions():
             venue2 = r['venue2'] or ('kalshi' if r['kalshi_ticker'] else 'unknown')
             platform_label = f"{_venue_label(poly_venue)} × {_venue_label(venue2)}"
 
-            # Per-leg data from arb_executions
-            poly_price = float(r['poly_price'] or 0)
-            poly_size  = float(r['poly_size']  or 0)
-            poly_side  = r['poly_side'] or 'YES'
-            k_price    = float(r['k_price'] or 0)
-            k_size     = float(r['k_size']  or 0)
+            # Per-leg data: prefer persisted entry prices from arb_positions
+            poly_price = float(r['poly_entry_price'] or r['poly_price'] or 0)
+            poly_size  = float(r['poly_size'] or shares or 0)
+            poly_side  = r['poly_side'] or r['exec_poly_side'] or 'YES'
+            k_price    = float(r['kalshi_entry_price'] or r['k_price'] or 0)
+            k_size     = float(r['k_size'] or shares or 0)
             k_side     = r['k_side'] or (r['kalshi_side'] or 'NO')
 
             # Edge: what's left of $1 after paying for both legs

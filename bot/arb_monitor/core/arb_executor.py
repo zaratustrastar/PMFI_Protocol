@@ -13,63 +13,15 @@ import os
 import math
 from typing import Optional
 
-# ── Route Polymarket CLOB through residential proxy (bypasses geoblock) ──────
-# py_clob_client calls requests.request() directly (no Session, no proxies arg).
-# Setting env vars (HTTPS_PROXY) is NOT reliable inside systemd-managed processes.
-# Instead we monkey-patch py_clob_client.http_helpers.helpers.request directly so
-# every call made by ClobClient.post_order / get / post automatically goes through
-# the proxy — no env-var dependency whatsoever.
-#
-# Kalshi has dedicated direct-request calls in this file that use _KALSHI_SESSION
-# (trust_env=False) so they are never routed through the proxy.
-import re as _re
+# ── Route Polymarket CLOB through residential proxy (V1/V2 compatible) -------
+# Uses HTTPAdapter.send patch instead of the old py_clob_client internal hook,
+# which may not exist in V2. Host-matched on clob*.polymarket.com only.
 import requests as _requests_mod
+from .clob_proxy import install_proxy_patch as _install_clob_proxy
 
-_poly_clob_proxy = (
-    os.environ.get("POLY_CLOB_PROXY_URL")
-    or os.environ.get("PROXY_URL", "")
-)
-_proxy_display = (
-    _re.sub(r"//[^@]+@", "//<redacted>@", _poly_clob_proxy)
-    if _poly_clob_proxy else ""
-)
+_install_clob_proxy()
 
-if _poly_clob_proxy:
-    # Monkey-patch py_clob_client's internal request function to inject proxies.
-    # post() and get() in helpers.py resolve "request" via the module namespace,
-    # so replacing helpers.request here redirects ALL py_clob_client HTTP calls.
-    import py_clob_client.http_helpers.helpers as _pch_helpers
-    from py_clob_client.exceptions import PolyApiException as _PolyApiException
-
-    _pch_proxies = {"https": _poly_clob_proxy, "http": _poly_clob_proxy}
-    _pch_orig_request = _pch_helpers.request  # keep reference for debugging
-
-    def _pch_proxied_request(endpoint, method, headers=None, data=None):
-        try:
-            headers = _pch_helpers.overloadHeaders(method, headers)
-            resp = _requests_mod.request(
-                method=method,
-                url=endpoint,
-                headers=headers,
-                json=data if data else None,
-                proxies=_pch_proxies,
-            )
-            if resp.status_code != 200:
-                raise _PolyApiException(resp)
-            try:
-                return resp.json()
-            except _requests_mod.exceptions.JSONDecodeError:
-                return resp.text
-        except _requests_mod.exceptions.RequestException:
-            raise _PolyApiException(error_msg="Request exception!")
-
-    _pch_helpers.request = _pch_proxied_request
-    print(f"⚡ [Arb/Executor] 🌐 Poly CLOB proxy ACTIVE (monkey-patched): {_proxy_display}", flush=True)
-else:
-    print("⚡ [Arb/Executor] ⚠️ No Poly CLOB proxy configured (PROXY_URL / POLY_CLOB_PROXY_URL)", flush=True)
-
-# Kalshi HTTP calls in this file use a dedicated session with trust_env=False
-# to ensure they always go direct and are never affected by any proxy settings.
+# Kalshi HTTP calls use a dedicated session with trust_env=False (always direct).
 _KALSHI_SESSION = _requests_mod.Session()
 _KALSHI_SESSION.trust_env = False
 
@@ -97,7 +49,6 @@ from ..config import (
     ARB_POLY_FEE_PCT,
     ARB_KALSHI_FEE_PCT,
     ARB_OPINION_FEE_PCT,
-    KALSHI_PRICE_PAD_CENTS,
 )
 
 
@@ -192,12 +143,12 @@ def _place_poly_order(
         return False, "", err
 
     try:
-        from py_clob_client.client import ClobClient
-        from py_clob_client.clob_types import (
-            ApiCreds, OrderArgs, OrderType, PartialCreateOrderOptions
+        from .clob_compat import (
+            make_client, ApiCreds, OrderArgs, OrderType,
+            PartialCreateOrderOptions, SDK_VERSION,
         )
     except ImportError:
-        err = "py_clob_client not installed — cannot place Polymarket orders"
+        err = "clob_compat / py-clob-client(-v2) not installed"
         log(f"❌ [POLY] {err}")
         return False, "", err
 
@@ -215,17 +166,17 @@ def _place_poly_order(
                 api_secret=poly_api_secret,
                 api_passphrase=poly_api_passphrase,
             )
-            client = ClobClient(
-                clob_url, key=poly_private_key, chain_id=chain_id, creds=creds,
+            client = make_client(
+                host=clob_url, key=poly_private_key, chain_id=chain_id, creds=creds,
                 signature_type=2, funder=poly_proxy_address,
             )
-            log(f"🔑 [POLY] Using L2-authenticated ClobClient (sig_type=2/GNOSIS_SAFE, funder={poly_proxy_address})")
+            log(f"🔑 [POLY] Using L2-authenticated ClobClient (SDK={SDK_VERSION}, sig_type=2/GNOSIS_SAFE, funder={poly_proxy_address})")
         else:
-            client = ClobClient(
-                clob_url, key=poly_private_key, chain_id=chain_id,
+            client = make_client(
+                host=clob_url, key=poly_private_key, chain_id=chain_id,
                 signature_type=2, funder=poly_proxy_address,
             )
-            log(f"🔑 [POLY] Using L1-only ClobClient (sig_type=2/GNOSIS_SAFE, funder={poly_proxy_address})")
+            log(f"🔑 [POLY] Using L1-only ClobClient (SDK={SDK_VERSION}, sig_type=2/GNOSIS_SAFE, funder={poly_proxy_address})")
 
         tick_size = client.get_tick_size(token_id)
         neg_risk  = client.get_neg_risk(token_id)
@@ -436,8 +387,7 @@ def _unwind_poly_leg(
 
     def _make_poly_client_for_unwind():
         """Build a fully-authenticated ClobClient for unwind operations."""
-        from py_clob_client.client import ClobClient
-        from py_clob_client.clob_types import ApiCreds
+        from .clob_compat import make_client, ApiCreds, SDK_VERSION
         clob_url            = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
         chain_id            = int(os.environ.get("POLY_CHAIN_ID", "137"))
         poly_api_key        = os.environ.get("POLY_API_KEY", "")
@@ -450,14 +400,14 @@ def _unwind_poly_leg(
                 api_secret=poly_api_secret,
                 api_passphrase=poly_api_passphrase,
             )
-            log(f"🔑 [POLY/UNWIND] Using L2-authenticated ClobClient (funder={poly_proxy_address})")
-            return ClobClient(
-                clob_url, key=poly_private_key, chain_id=chain_id,
+            log(f"🔑 [POLY/UNWIND] Using L2 ClobClient (SDK={SDK_VERSION}, funder={poly_proxy_address})")
+            return make_client(
+                host=clob_url, key=poly_private_key, chain_id=chain_id,
                 creds=creds, signature_type=2, funder=poly_proxy_address,
             )
-        log("⚠️ [POLY/UNWIND] L2 API credentials missing — cancel/sell may fail auth")
-        return ClobClient(
-            clob_url, key=poly_private_key, chain_id=chain_id,
+        log(f"⚠️ [POLY/UNWIND] L2 credentials missing (SDK={SDK_VERSION})")
+        return make_client(
+            host=clob_url, key=poly_private_key, chain_id=chain_id,
             signature_type=2, funder=poly_proxy_address,
         )
 
@@ -493,7 +443,7 @@ def _unwind_poly_leg(
 
     log(f"📤 [POLY] Placing offset SELL to unwind filled position: token={token_id[:16]}... size_usdc={filled_size_usdc}")
     try:
-        from py_clob_client.clob_types import OrderArgs, OrderType
+        from .clob_compat import OrderArgs, OrderType
 
         client = _make_poly_client_for_unwind()
 
@@ -507,7 +457,7 @@ def _unwind_poly_leg(
         shares = filled_size_usdc / filled_price if filled_price > 0 else 0
         size_val = int(round(shares))
         sell_px  = round(float(sell_price), 2)
-        from py_clob_client.clob_types import PartialCreateOrderOptions
+        from .clob_compat import PartialCreateOrderOptions
         tick_size = client.get_tick_size(token_id)
         neg_risk  = client.get_neg_risk(token_id)
         order_args = OrderArgs(
@@ -851,6 +801,36 @@ def _opinion_get_best_ask(
         return None
 
 
+def _kalshi_taker_fee_pad(price: float, contracts: int) -> float:
+    """
+    Estimate Kalshi taker fee as decimal dollars per contract.
+
+    Formula:
+      total_fee_cents = ceil(0.07 * contracts * price_cents * (1 - price_cents / 100))
+
+    price is decimal, e.g. 0.85 for 85c.
+    return value is decimal dollars per contract, e.g. 0.00893.
+    """
+    try:
+        n = int(contracts or 0)
+        px = float(price or 0.0)
+    except Exception:
+        return 0.0
+
+    if n <= 0 or px <= 0:
+        return 0.0
+
+    px = max(0.0, min(1.0, px))
+    price_cents = px * 100.0
+    total_fee_cents = math.ceil(0.07 * n * price_cents * (1.0 - price_cents / 100.0))
+    return (total_fee_cents / 100.0) / n
+
+
+def _venue2_fee_pad(venue2: str, price: float, contracts: int) -> float:
+    if str(venue2 or "").lower() != "kalshi":
+        return 0.0
+    return _kalshi_taker_fee_pad(price, contracts)
+
 def execute_arb(
     opportunity: ArbOpportunity,
     size_usdc: float,
@@ -1078,11 +1058,11 @@ def execute_arb(
     # edge calculations so the gate and sizing account for taker fees before trading.
     # The actual order price submitted to Kalshi is still live_kalshi_ask (the real
     # market price); the pad is purely an accounting buffer in our math.
-    _kalshi_pad = (KALSHI_PRICE_PAD_CENTS / 100.0) if venue2 == "kalshi" else 0.0
+    _kalshi_pad = _venue2_fee_pad(venue2, live_kalshi_ask, ARB_MIN_CONTRACTS)
     if _kalshi_pad > 0:
         log(
             f"📊 Best asks: poly={live_poly_ask:.4f} {leg2_venue_label}={live_kalshi_ask:.4f} "
-            f"(+{KALSHI_PRICE_PAD_CENTS:.1f}¢ fee pad → eff={live_kalshi_ask + _kalshi_pad:.4f}) | "
+            f"(+{_kalshi_pad*100:.2f}¢ Kalshi fee est → eff={live_kalshi_ask + _kalshi_pad:.4f}) | "
             f"Oddpool net_edge={opp_net_edge:.4f}% (reference only)"
         )
     else:
@@ -1094,7 +1074,7 @@ def execute_arb(
     # ── Initial target_contracts from best-ask estimate ───────────────────────
     # Both legs must fill EXACTLY the same number of contracts — the natural
     # execution unit is contracts, not USDC.  USDC cost is downstream of this.
-    # Kalshi fee pad is included so we size conservatively from the start.
+    # Kalshi fee estimate is included so we size conservatively from the start.
     total_budget = min(size_usdc, ARB_MAX_PAIR_USDC)
     combined_best_ask = live_poly_ask + live_kalshi_ask + _kalshi_pad
     if combined_best_ask <= 0:
@@ -1199,6 +1179,7 @@ def execute_arb(
     fee_pct = ARB_POLY_FEE_PCT + (
         ARB_KALSHI_FEE_PCT if venue2 == "kalshi" else ARB_OPINION_FEE_PCT
     )
+    _kalshi_pad = _venue2_fee_pad(venue2, matched_v2_vwap, matched_contracts)
     _eff_v2_vwap   = matched_v2_vwap + _kalshi_pad
     gross_edge_pct = (1.0 - matched_poly_vwap - _eff_v2_vwap) * 100.0
     net_edge_pct   = gross_edge_pct - fee_pct
@@ -1266,7 +1247,8 @@ def execute_arb(
 
     # Re-cap contract_count to budget at marginal ask prices (worst-case USDC cost).
     # Include _kalshi_pad so we don't over-allocate capital before fees.
-    budget_at_marginal = int(total_budget / (live_poly_ask + live_kalshi_ask + _kalshi_pad))
+    _marginal_kalshi_pad = _venue2_fee_pad(venue2, live_kalshi_ask, matched_contracts)
+    budget_at_marginal = int(total_budget / (live_poly_ask + live_kalshi_ask + _marginal_kalshi_pad))
     contract_count = min(matched_contracts, budget_at_marginal)
 
     log(
@@ -1432,12 +1414,13 @@ def execute_arb(
                     )
                     live_kalshi_ask = _fresh_kalshi
                     result.live_kalshi_ask = live_kalshi_ask
-                    # Re-check combined cost (including fee pad): if combined >= 1.0 the arb is gone
-                    _combined_fresh = live_poly_ask + live_kalshi_ask + _kalshi_pad
+                    # Re-check combined cost including Kalshi fee estimate: if combined >= 1.0 the arb is gone
+                    _fresh_kalshi_pad = _venue2_fee_pad(venue2, live_kalshi_ask, final_contracts)
+                    _combined_fresh = live_poly_ask + live_kalshi_ask + _fresh_kalshi_pad
                     if _combined_fresh >= 1.0:
                         result.error = (
                             f"vwap_edge_gone_on_refresh: combined={_combined_fresh:.4f} ≥ 1.0 "
-                            f"after price refresh (poly={live_poly_ask:.4f} kalshi={live_kalshi_ask:.4f} pad={_kalshi_pad:.4f})"
+                            f"after price refresh (poly={live_poly_ask:.4f} kalshi={live_kalshi_ask:.4f} fee_pad={_fresh_kalshi_pad:.4f})"
                         )
                         log(f"❌ {result.error}")
                         return result
@@ -1475,19 +1458,16 @@ def execute_arb(
         except Exception as _pr_err:
             log(f"⚠️ [PriceRefresh] Kalshi re-fetch failed ({_pr_err}) — proceeding with cached price")
 
-    # ── Fire BOTH legs SIMULTANEOUSLY via ThreadPoolExecutor ─────────────────
-    # Per the reference pipeline: submit both orders at the same time so that
-    # execution is atomic — the arb window cannot close between leg 1 and leg 2.
-    # Both futures are awaited with a 30-second timeout.
-    import concurrent.futures as _cf_exec
-
+    # ── Fire legs SEQUENTIALLY: Poly first, then venue2 ──────────────────────
+    # This is safer than simultaneous submission for a small vault:
+    # never place Kalshi/Opinion if Polymarket already failed.
     poly_order_side_label = "NO_BUY" if buying_poly_no else "YES_BUY"
     leg2_side_label = opinion_side if venue2 == "opinion" else kalshi_side
 
     log(
-        f"📤 Firing both legs SIMULTANEOUSLY | "
+        f"📤 Firing legs SEQUENTIALLY | "
         f"LEG1: Polymarket {('NO' if buying_poly_no else 'YES')} {contract_count}×"
-        f"@{live_poly_ask} token={poly_token_for_price[:16]}... | "
+        f"@{live_poly_ask} token={poly_token_for_price[:16]}... THEN "
         f"LEG2: {venue2} {leg2_side_label} {contract_count}×@{live_kalshi_ask}"
     )
 
@@ -1501,8 +1481,6 @@ def execute_arb(
 
     def _run_leg2() -> tuple:
         if venue2 == "opinion":
-            # Add 1 tick (0.1¢) above the live ask to ensure the order crosses
-            # as a taker and fills immediately rather than resting as a maker bid.
             opinion_taker_price = round(live_kalshi_ask + 0.001, 4)
             log(f"📤 [OPINION] Taker price: {live_kalshi_ask:.4f} + 0.001 tick = {opinion_taker_price:.4f}")
             return _place_opinion_order(
@@ -1525,27 +1503,17 @@ def execute_arb(
     leg1_ok: bool = False;  leg1_order_id: str = "";  leg1_err: str = ""
     leg2_ok: bool = False;  leg2_order_id: str = "";  leg2_err: str = ""
 
-    with _cf_exec.ThreadPoolExecutor(max_workers=2) as _exec_pool:
-        fut1 = _exec_pool.submit(_run_leg1)
-        fut2 = _exec_pool.submit(_run_leg2)
-        try:
-            leg1_ok, leg1_order_id, leg1_err = fut1.result(timeout=30)
-        except Exception as _e1:
-            leg1_ok, leg1_order_id, leg1_err = False, "", str(_e1)
-            log(f"❌ Leg 1 future raised: {_e1}")
-        try:
-            leg2_ok, leg2_order_id, leg2_err = fut2.result(timeout=30)
-        except Exception as _e2:
-            leg2_ok, leg2_order_id, leg2_err = False, "", str(_e2)
-            log(f"❌ Leg 2 future raised: {_e2}")
+    try:
+        leg1_ok, leg1_order_id, leg1_err = _run_leg1()
+    except Exception as _e1:
+        leg1_ok, leg1_order_id, leg1_err = False, "", str(_e1)
+        log(f"❌ Leg 1 raised: {_e1}")
 
     log(
-        f"{'✅' if leg1_ok else '❌'} Leg1={leg1_ok} orderId={leg1_order_id!r} err={leg1_err!r} | "
-        f"{'✅' if leg2_ok else '❌'} Leg2={leg2_ok} orderId={leg2_order_id!r} err={leg2_err!r}"
+        f"{'✅' if leg1_ok else '❌'} Leg1={leg1_ok} orderId={leg1_order_id!r} err={leg1_err!r}"
     )
 
     result.leg1_order_id = leg1_order_id
-    result.leg2_order_id = leg2_order_id
     result.kalshi_side = leg2_side_label
 
     log_execution_to_db(
@@ -1553,40 +1521,31 @@ def execute_arb(
         price=live_poly_ask, size=float(contract_count),
         success=leg1_ok, error=leg1_err, order_id=leg1_order_id,
     )
+
+    if not leg1_ok:
+        result.error = f"leg1_failed: {leg1_err}"
+        log(f"❌ Leg 1 failed — NOT submitting leg 2: {result.error}")
+        return result
+
+    try:
+        leg2_ok, leg2_order_id, leg2_err = _run_leg2()
+    except Exception as _e2:
+        leg2_ok, leg2_order_id, leg2_err = False, "", str(_e2)
+        log(f"❌ Leg 2 raised: {_e2}")
+
+    log(
+        f"{'✅' if leg2_ok else '❌'} Leg2={leg2_ok} orderId={leg2_order_id!r} err={leg2_err!r}"
+    )
+
+    result.leg2_order_id = leg2_order_id
+
     log_execution_to_db(
         pair_id=pair_id, leg=2, venue=venue2, side=f"{leg2_side_label}_BUY",
         price=live_kalshi_ask, size=float(contract_count),
         success=leg2_ok, error=leg2_err, order_id=leg2_order_id,
     )
 
-    # ── Handle failures ──────────────────────────────────────────────────
-    if not leg1_ok and not leg2_ok:
-        result.error = f"both_legs_failed: leg1={leg1_err} | leg2={leg2_err}"
-        log(f"❌ Both legs failed — no capital moved: {result.error}")
-        return result
-
-    if not leg1_ok:
-        # Leg 2 went through but Leg 1 (Polymarket) failed.
-        # Immediately cancel leg 2 to avoid holding a one-sided hedge.
-        log(f"❌ Leg 1 failed: {leg1_err} — initiating AUTO-CANCEL of leg 2 ({venue2} orderId={leg2_order_id!r})")
-        cancel2_ok = _cancel_leg2_order(
-            venue2=venue2,
-            order_id=leg2_order_id,
-            kalshi_ticker=kalshi_ticker,
-            opinion_market_id=opinion_market_id,
-        )
-        result.unwound = cancel2_ok
-        result.error = (
-            f"leg1_failed: {leg1_err}. "
-            f"Leg 2 ({venue2}) auto-cancel "
-            f"{'succeeded' if cancel2_ok else 'FAILED — manual intervention needed'} "
-            f"(orderId={leg2_order_id!r})."
-        )
-        log(f"{'✅' if cancel2_ok else '⚠️'} Leg 2 cancel: {result.error}")
-        return result
-
     if not leg2_ok:
-        # Leg 1 (Polymarket) went through but Leg 2 failed — unwind Polymarket position.
         log(f"❌ Leg 2 failed: {leg2_err} — initiating AUTO-UNWIND of leg 1")
         unwind_ok = _unwind_poly_leg(
             order_id=leg1_order_id,
@@ -1629,25 +1588,17 @@ def execute_arb(
         )
         post_edge_threshold = min_edge_pct * 0.5
         if post_edge < post_edge_threshold:
+            # POST-FILL OBSERVATION ONLY — do NOT unwind.
+            # Both FOK legs are already filled. The arb is locked in at the
+            # prices we paid (one side resolves to $1, the other to $0).
+            # The current market spread is irrelevant — our own fills moved
+            # the book. Unwinding would cost spreads/fees and destroy the
+            # guaranteed profit.
             log(
-                f"❌ Post-fill edge={post_edge:.4f} < threshold={post_edge_threshold:.4f} — "
-                f"spread deteriorated after fills; unwinding BOTH legs"
+                f"ℹ️ Post-fill spread observation: post_edge={post_edge:.4f} < "
+                f"threshold={post_edge_threshold:.4f} (expected — our fills moved the book). "
+                f"Position is locked in at profitable VWAP prices. NOT unwinding."
             )
-            unwind_ok = _unwind_poly_leg(
-                order_id=leg1_order_id,
-                token_id=poly_yes_token,
-                filled_size_usdc=leg1_usdc,
-                filled_price=live_poly_ask,
-            )
-            if venue2 != "opinion":
-                _kalshi_unwind_best_effort(kalshi_ticker, float(contract_count), live_kalshi_ask, kalshi_side)
-            result.unwound = unwind_ok
-            result.error = (
-                f"post_fill_edge_too_thin: post_edge={post_edge:.4f} < {post_edge_threshold:.4f}. "
-                f"Both legs unwound (poly={'ok' if unwind_ok else 'FAILED'})."
-            )
-            log(f"⚠️ Post-fill unwind: {result.error}")
-            return result
     except Exception as e:
         log(f"⚠️ Post-placement price validation error (non-fatal): {e}")
 

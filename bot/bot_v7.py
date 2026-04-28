@@ -4393,7 +4393,96 @@ def api_arb_vault_nav():
         return jsonify({'error': 'arb_monitor not available'}), 503
     try:
         from arb_monitor.core.arb_nav import compute_nav
+        from arb_monitor.core.arb_positions_db import get_db_conn
+
         nav_payload = compute_nav()
+
+        apr = None
+        apy = None
+
+        conn = get_db_conn()
+        if conn:
+            cur = conn.cursor()
+            try:
+                # 1) Prefer realized APR from settled positions
+                cur.execute("""
+                    SELECT
+                        SUM(settled_pnl_usdc) AS total_pnl,
+                        SUM(cost_basis_usdc) AS total_cost,
+                        MIN(opened_at) AS first_open,
+                        MAX(COALESCE(settled_at, NOW())) AS last_settled,
+                        COUNT(*) AS n
+                    FROM arb_positions
+                    WHERE status = 'settled' AND cost_basis_usdc > 0
+                """)
+                row = cur.fetchone()
+
+                if row and row[4] and row[1] and float(row[1]) > 0:
+                    total_pnl = float(row[0] or 0)
+                    total_cost = float(row[1] or 0)
+                    first_open = row[2]
+                    last_settled = row[3]
+                    if first_open and last_settled:
+                        days = max(1.0, (last_settled - first_open).total_seconds() / 86400)
+                        apr = (total_pnl / total_cost) * (365.0 / days) * 100.0
+
+                # 2) Fallback: estimate APR from open positions with expiry
+                if apr is None:
+                    cur.execute("""
+                        SELECT shares, cost_basis_usdc, expiry_ts
+                        FROM arb_positions
+                        WHERE status = 'open'
+                          AND shares > 0
+                          AND cost_basis_usdc > 0
+                          AND expiry_ts > 0
+                    """)
+                    rows = cur.fetchall()
+                    import time as _time
+                    now_ts = _time.time()
+                    weighted_sum = 0.0
+                    total_capital = 0.0
+
+                    for r in rows:
+                        shares = float(r[0] or 0)
+                        cost = float(r[1] or 0)
+                        expiry_ts = float(r[2] or 0)
+
+                        if cost <= 0 or expiry_ts <= now_ts:
+                            continue
+
+                        days_remaining = max(1.0, (expiry_ts - now_ts) / 86400.0)
+                        expected_payout = shares * 1.0
+                        edge_pct = (expected_payout - cost) / cost
+                        apr_est = edge_pct / days_remaining * 365.0 * 100.0
+
+                        weighted_sum += apr_est * cost
+                        total_capital += cost
+
+                    if total_capital > 0:
+                        apr = weighted_sum / total_capital
+
+                if apr is not None:
+                    apy = ((1 + apr / 100.0 / 365.0) ** 365 - 1) * 100.0
+
+            finally:
+                try:
+                    cur.close()
+                except Exception:
+                    pass
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+
+        nav_payload["apr"] = round(apr, 2) if apr is not None else None
+        nav_payload["apy"] = round(apy, 2) if apy is not None else None
+
+        # Frontend compatibility
+        if "open_positions_value" in nav_payload:
+            nav_payload["deployed"] = nav_payload["open_positions_value"]
+        if "settled_pnl" not in nav_payload:
+            nav_payload["settled_pnl"] = 0.0
+
         return jsonify(nav_payload)
     except Exception as e:
         print(f"❌ [ArbVault] /api/arb-vault/nav error: {e}")

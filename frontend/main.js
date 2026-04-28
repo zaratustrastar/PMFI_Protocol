@@ -662,14 +662,8 @@ async function loadArbVaultStats() {
             const d = await navResp.json();
             const elAPR      = document.getElementById('arbStatAPR');
             const elAPY      = document.getElementById('arbStatAPY');
-            const elDeployed = document.getElementById('arbStatDeployed');
-            const elSettled  = document.getElementById('arbStatSettledPnl');
             if (elAPR)      elAPR.textContent      = d.apr  != null ? d.apr.toFixed(1)  + '%' : '—';
             if (elAPY)      elAPY.textContent      = d.apy  != null ? d.apy.toFixed(1)  + '%' : '—';
-            if (elDeployed) elDeployed.textContent = d.open_positions_value != null
-                ? '$' + Number(d.open_positions_value).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—';
-            if (elSettled)  elSettled.textContent  = d.settled_pnl != null
-                ? '$' + Number(d.settled_pnl).toFixed(2) : '—';
         }
     } catch (e) {
         console.warn('[pARB V2] loadArbVaultStats nav fetch error:', e);
@@ -696,8 +690,8 @@ async function webLoadArbCardPositions() {
 
             const polyShares  = Number(pos.poly_shares  || pos.shares || 0);
             const kShares     = Number(pos.kalshi_shares || pos.shares || 0);
-            const polyPrice   = Number(pos.poly_price   || 0);
-            const kPrice      = Number(pos.kalshi_price || 0);
+            const polyPrice   = Number(pos.poly_entry_price || pos.poly_price || 0);
+            const kPrice      = Number(pos.kalshi_entry_price || pos.kalshi_price || 0);
             const edge        = Number(pos.edge_pct     || 0);
             const edgeColor   = edge >= 3 ? '#7ee787' : edge >= 1 ? '#fbbf24' : '#9ca3af';
             const expiry      = pos.expiry_ts > 0

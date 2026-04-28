@@ -1,23 +1,6 @@
-"""arb_liquidity.py — Centralized liquidity state for pARB V2.
+"""arb_liquidity.py — Centralized liquidity state for pARB V2."""
 
-Computes the full set of metrics required for liquidity-aware vault management:
-
-    idleAvailable      — USDC currently idle inside the vault contract
-    requiredIdle       — max(idleTargetBps * totalAssets, pendingRedeemValue + safetyBuffer)
-    pendingRedeemValue — USDC owed to all queued redeemers at current officialPPS
-    deployableCapital  — max(0, servicer_usdc - requiredIdle)
-    freeCash           — servicer wallet USDC on Base
-    settledProceeds    — realized (settled) PnL from closed positions
-    shortfall          — max(0, pendingRedeemValue - idleAvailable)
-    underPressure      — shortfall > 0
-    unwindNeeded       — shortfall cannot be covered by free cash + settled proceeds
-
-Single source of truth — imported by arb_funder, arb_reporter, arb_execution_loop.
-Never raises; returns LiquidityState(ok=False) on any error.
-"""
-
-import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from ..config import ARB_IDLE_TARGET_BPS, ARB_SAFETY_BUFFER_USDC
 
@@ -28,37 +11,25 @@ def log(msg: str):
 
 @dataclass
 class LiquidityState:
-    # ── vault-side ────────────────────────────────────────────────────────────
-    idle_available: float      = 0.0   # USDC idle in vault contract right now
-    total_assets: float        = 0.0   # conservative estimate of all assets
+    idle_available: float = 0.0
+    total_assets: float = 0.0
+    pending_redeem_value: float = 0.0
+    required_idle: float = 0.0
+    deployable_capital: float = 0.0
 
-    # ── redeem pressure ───────────────────────────────────────────────────────
-    pending_redeem_value: float = 0.0  # USDC owed at current officialPPS
+    free_cash: float = 0.0
+    settled_proceeds: float = 0.0
+    pending_withdrawals: float = 0.0
+    platform_cash: float = 0.0
+    coverable_cash: float = 0.0
 
-    # ── target / deployable ───────────────────────────────────────────────────
-    required_idle: float       = 0.0   # max(target %, pending + buffer)
-    deployable_capital: float  = 0.0   # servicer_usdc beyond required_idle
-
-    # ── cash layers (waterfall) ───────────────────────────────────────────────
-    free_cash: float           = 0.0   # servicer wallet USDC on Base
-    settled_proceeds: float    = 0.0   # settled / realized PnL from positions
-
-    # ── flags ─────────────────────────────────────────────────────────────────
-    shortfall: float           = 0.0   # pending_redeem_value - idle_available (≥ 0)
-    under_pressure: bool       = False # shortfall > 0
-    unwind_needed: bool        = False # shortfall > free_cash + settled proceeds
-    ok: bool                   = True  # False means compute failed (treat as unknown)
+    shortfall: float = 0.0
+    under_pressure: bool = False
+    unwind_needed: bool = False
+    ok: bool = True
 
 
 def compute_liquidity_state(vault_address: str, servicer_wallet: str) -> LiquidityState:
-    """Compute the full liquidity state from on-chain vault data + servicer wallet + DB.
-
-    Args:
-        vault_address:   deployed PMFIArbVaultV2 address (empty → ok=False)
-        servicer_wallet: servicer wallet address on Base (empty → free_cash=0)
-
-    Returns LiquidityState. Never raises.
-    """
     state = LiquidityState()
 
     if not vault_address:
@@ -67,22 +38,23 @@ def compute_liquidity_state(vault_address: str, servicer_wallet: str) -> Liquidi
         return state
 
     try:
-        # ── 1. Read vault on-chain state ──────────────────────────────────────
         from .arb_reporter import _read_vault_state, _read_usdc_balance
+        from .arb_nav import _get_settled_pnl, _get_servicer_balances
+        from .arb_withdrawals import get_pending_withdrawal_usdc, mark_withdrawals_arrived
+
         vault_state = _read_vault_state(vault_address)
         if not vault_state["ok"]:
             log("⚠️ Could not read vault state — liquidity unknown")
             state.ok = False
             return state
 
-        official_pps_raw      = vault_state["official_pps"]        # wei (USDC × 1e6 per 1e18 shares)
-        idle_balance          = vault_state["idle_balance_usdc"]    # already in USDC float
-        pending_redeem_shares = vault_state["pending_redeem_shares"] # raw token units (1e18)
+        official_pps_raw = vault_state["official_pps"]
+        idle_balance = vault_state["idle_balance_usdc"]
+        pending_redeem_shares = vault_state["pending_redeem_shares"]
 
-        state.idle_available       = idle_balance
+        state.idle_available = idle_balance
         state.pending_redeem_value = (pending_redeem_shares * official_pps_raw) / 1e18 / 1e6
 
-        # ── 2. Servicer wallet free cash ──────────────────────────────────────
         servicer_usdc = 0.0
         if servicer_wallet:
             try:
@@ -91,34 +63,52 @@ def compute_liquidity_state(vault_address: str, servicer_wallet: str) -> Liquidi
                 log(f"⚠️ Could not read servicer balance: {e}")
         state.free_cash = servicer_usdc
 
-        # ── 3. Settled proceeds (realized PnL from closed arb positions) ──────
         try:
-            from .arb_nav import _get_settled_pnl
             settled = _get_settled_pnl()
             state.settled_proceeds = max(0.0, settled)
         except Exception as e:
             log(f"⚠️ Could not read settled PnL: {e}")
             state.settled_proceeds = 0.0
 
-        # ── 4. Total asset estimate (conservative, no position marks) ─────────
-        # idle_balance already excludes claimable redeems (contract handles that)
-        state.total_assets = idle_balance + servicer_usdc + state.settled_proceeds
+        try:
+            poly_cash, kalshi_cash, opinion_cash = _get_servicer_balances()
+            state.platform_cash = max(0.0, poly_cash) + max(0.0, kalshi_cash) + max(0.0, opinion_cash)
+        except Exception as e:
+            log(f"⚠️ Could not read platform cash: {e}")
+            state.platform_cash = 0.0
 
-        # ── 5. Required idle = max(target %, pending redeems + safety buffer) ─
-        idle_from_target  = state.total_assets * ARB_IDLE_TARGET_BPS / 10_000
+        # First reconcile mature recalls against current servicer balance, then read pending amount.
+        try:
+            mark_withdrawals_arrived(servicer_usdc)
+            state.pending_withdrawals = max(0.0, get_pending_withdrawal_usdc())
+        except Exception as e:
+            log(f"⚠️ Could not read pending recalls: {e}")
+            state.pending_withdrawals = 0.0
+
+        state.total_assets = (
+            idle_balance
+            + servicer_usdc
+            + state.settled_proceeds
+            + state.platform_cash
+        )
+
+        idle_from_target = state.total_assets * ARB_IDLE_TARGET_BPS / 10_000
         idle_from_redeems = state.pending_redeem_value + ARB_SAFETY_BUFFER_USDC
         state.required_idle = max(idle_from_target, idle_from_redeems)
 
-        # ── 6. Deployable = servicer cash beyond required idle ─────────────────
         state.deployable_capital = max(0.0, servicer_usdc - state.required_idle)
 
-        # ── 7. Pressure / unwind flags ────────────────────────────────────────
-        state.shortfall      = max(0.0, state.pending_redeem_value - idle_balance)
+        state.shortfall = max(0.0, state.pending_redeem_value - idle_balance)
         state.under_pressure = state.shortfall > 0.0
+
+        # Coverage available without forced unwind:
+        # - 90% of free cash
+        # - settled proceeds
+        # - withdrawals already initiated and in flight
+        state.coverable_cash = servicer_usdc * 0.9 + state.settled_proceeds + state.pending_withdrawals
+
         if state.under_pressure:
-            # Can we cover it with servicer free cash + settled proceeds?
-            coverable = servicer_usdc * 0.9 + state.settled_proceeds
-            state.unwind_needed = state.shortfall > coverable
+            state.unwind_needed = state.shortfall > state.coverable_cash
 
         state.ok = True
 
@@ -126,7 +116,8 @@ def compute_liquidity_state(vault_address: str, servicer_wallet: str) -> Liquidi
             f"idle={state.idle_available:.2f} required={state.required_idle:.2f} "
             f"pending_redeem={state.pending_redeem_value:.2f} shortfall={state.shortfall:.2f} "
             f"free_cash={state.free_cash:.2f} settled={state.settled_proceeds:.2f} "
-            f"deployable={state.deployable_capital:.2f} "
+            f"pending_withdrawals={state.pending_withdrawals:.2f} platform_cash={state.platform_cash:.2f} "
+            f"coverable={state.coverable_cash:.2f} deployable={state.deployable_capital:.2f} "
             f"under_pressure={state.under_pressure} unwind_needed={state.unwind_needed}"
         )
 

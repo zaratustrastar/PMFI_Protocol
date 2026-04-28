@@ -64,8 +64,8 @@ SELECTOR_BALANCE_OF = "70a08231" # balanceOf(address)
 # Must stay in sync with fund_both_legs_for_trade() logic.
 VENUE_MIN_DEPOSIT: dict = {
     "opinion":    3.0,   # Opinion Labs: $3 minimum deposit
-    "polymarket": 1.0,   # Polymarket CLOB: $1 effective minimum
-    "kalshi":     1.0,   # Kalshi: $1 effective minimum
+    "polymarket": 3.0,   # Polymarket CLOB: $1 effective minimum
+    "kalshi":     3.0,   # Kalshi: $1 effective minimum
 }
 
 
@@ -471,8 +471,9 @@ def _get_platform_balance(venue: str, raise_on_error: bool = False) -> float:
         if not poly_api_key:
             return _handle_err("⚠️ POLY_API_KEY not set — Poly balance unknown (returning 0)")
         try:
-            from py_clob_client.client import ClobClient
-            from py_clob_client.clob_types import ApiCreds, BalanceAllowanceParams, AssetType
+            from .clob_compat import (
+                make_client, ApiCreds, BalanceAllowanceParams, AssetType, SDK_VERSION,
+            )
             clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
             private_key        = os.environ.get("POLY_PRIVATE_KEY", "")
             poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
@@ -481,8 +482,8 @@ def _get_platform_balance(venue: str, raise_on_error: bool = False) -> float:
                 api_secret=poly_api_secret.strip(),
                 api_passphrase=poly_api_passphrase.strip(),
             )
-            client = ClobClient(
-                clob_url,
+            client = make_client(
+                host=clob_url,
                 key=private_key,
                 chain_id=137,
                 creds=creds,
@@ -506,7 +507,7 @@ def _get_platform_balance(venue: str, raise_on_error: bool = False) -> float:
 
             # Diagnostic: also query sig_type=0 (EOA) to see which account has funds
             try:
-                client_eoa = ClobClient(clob_url, key=private_key, chain_id=137, creds=creds, signature_type=0)
+                client_eoa = make_client(host=clob_url, key=private_key, chain_id=137, creds=creds, signature_type=0)
                 result_eoa = client_eoa.get_balance_allowance(
                     BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
                 )
