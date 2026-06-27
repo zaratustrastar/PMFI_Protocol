@@ -35,7 +35,7 @@
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0d1117;
+            background: #08111f;
             color: #f0f6fc;
             min-height: 100vh;
         }
@@ -205,9 +205,10 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px 40px;
+            padding: 20px 44px;
             border-bottom: 1px solid rgba(255,255,255,0.06);
             position: relative;
+            background: #08111f;
         }
 
         .header-nav {
@@ -265,22 +266,36 @@
 
         .logo-link {
             text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
         }
 
         .logo-text {
             font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            font-weight: 400;
-            color: #e8edf3;
-            letter-spacing: -0.5px;
+            font-size: 56px;
+            line-height: 1;
+            font-weight: 500;
+            color: #f0f6fc;
+            letter-spacing: -1.8px;
         }
 
         .header-logo {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            box-shadow: 0 0 20px rgba(240, 246, 252, 0.3), 0 0 40px rgba(126, 231, 135, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: none;
+            border: none;
+            background: transparent;
+            object-fit: cover;
+            display: block;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 600px) {
+            .logo-link { gap: 10px; }
+            .logo-text { font-size: 34px; letter-spacing: -1px; }
+            .header-logo { width: 40px; height: 40px; }
         }
 
         .connect-btn {
@@ -934,12 +949,1543 @@
         .invite-code-status.available { background: rgba(126,231,135,0.15); color: #7ee787; }
         .invite-code-status.used { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.35); }
         .invite-copy-btn { background: #388bfd; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    
+        /* === PMFI dApp landing-inspired visual skin === */
+        #arbVaultCard {
+            background:
+                radial-gradient(circle at 72% 0%, rgba(255,255,255,0.035), transparent 34%),
+                linear-gradient(180deg, rgba(31,36,52,0.92), rgba(20,25,37,0.96)) !important;
+            border: 1px solid rgba(240,246,252,0.12) !important;
+            border-radius: 18px !important;
+            box-shadow: none !important;
+        }
+
+        #arbVaultCard .vault-header {
+            margin-bottom: 22px !important;
+        }
+
+        #arbVaultCard .vault-name {
+            font-family: 'Playfair Display', serif !important;
+            font-size: 34px !important;
+            line-height: 1 !important;
+            font-weight: 400 !important;
+            letter-spacing: -0.8px !important;
+            color: #f0f6fc !important;
+            text-transform: none !important;
+        }
+
+        #arbVaultCard #arbVaultStats {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 12px !important;
+            margin-bottom: 18px !important;
+        }
+
+        #arbVaultCard #arbVaultStats > div {
+            padding: 16px 18px !important;
+            border: 1px solid rgba(240,246,252,0.10) !important;
+            border-radius: 7px !important;
+            background: rgba(8,17,31,0.22) !important;
+            min-height: 72px !important;
+        }
+
+        #arbVaultCard #arbVaultStats span {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.22em !important;
+            text-transform: uppercase !important;
+            color: rgba(240,246,252,0.42) !important;
+            opacity: 1 !important;
+        }
+
+        #arbVaultCard #arbVaultStats strong,
+        #arbVaultCard #arbVaultStats > div > span[id] {
+            font-family: 'Playfair Display', serif !important;
+            font-size: 28px !important;
+            line-height: 1.05 !important;
+            font-weight: 400 !important;
+            letter-spacing: -0.4px !important;
+            color: #f0f6fc !important;
+        }
+
+        #arbVaultCard #arbStatAPR,
+        #arbVaultCard #arbStatAPY,
+        #arbVaultCard #arbStatSettledPnl {
+            color: #22e58a !important;
+        }
+
+        #arbVaultCard .deposit-btn,
+        #arbVaultCard .withdraw-btn {
+            min-height: 46px !important;
+            border-radius: 8px !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+        }
+
+        #arbVaultCard .deposit-btn {
+            background: #f0f6fc !important;
+            color: #08111f !important;
+            border: 1px solid rgba(255,255,255,0.75) !important;
+        }
+
+        #arbVaultCard .withdraw-btn {
+            background: transparent !important;
+            color: #f0f6fc !important;
+            border: 1px solid rgba(240,246,252,0.24) !important;
+        }
+
+        #arbVaultCard #arbCardPositions {
+            margin-top: 18px !important;
+            border-top: 1px solid rgba(240,246,252,0.10) !important;
+            padding-top: 16px !important;
+        }
+
+        #arbVaultCard #arbCardPositions,
+        #arbVaultCard #arbCardPositions * {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        #arbVaultCard #arbCardPositions strong,
+        #arbVaultCard #arbCardPositions b {
+            color: rgba(240,246,252,0.86) !important;
+        }
+
+        #arbVaultCard #arbCardPositions [style*="color:#7ee787"],
+        #arbVaultCard #arbCardPositions [style*="color: #7ee787"] {
+            color: #22e58a !important;
+        }
+
+        @media (max-width: 800px) {
+            #arbVaultCard .vault-name {
+                font-size: 30px !important;
+            }
+
+            #arbVaultCard #arbVaultStats {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+    
+        /* === PMFI safe vault polish v1 === */
+        #arbVaultCard {
+            position: relative !important;
+        }
+
+        #arbVaultCard .vault-header {
+            padding-right: 300px !important;
+        }
+
+        #arbVaultCard .vault-rewards-note {
+            position: absolute !important;
+            top: 34px !important;
+            right: 34px !important;
+            z-index: 3 !important;
+            margin: 0 !important;
+            padding: 8px 13px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            width: auto !important;
+            border-radius: 999px !important;
+            border: 1px solid rgba(34,229,138,0.18) !important;
+            background: rgba(34,229,138,0.065) !important;
+            color: rgba(126,231,135,0.86) !important;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+            font-size: 12px !important;
+            line-height: 1 !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.02em !important;
+            white-space: nowrap !important;
+        }
+
+        #arbVaultCard #arbStatTVL {
+            white-space: nowrap !important;
+            font-size: 24px !important;
+        }
+
+        #arbVaultCard #arbCardPositions {
+            margin-top: 20px !important;
+            padding-top: 18px !important;
+            border-top: 1px solid rgba(240,246,252,0.10) !important;
+        }
+
+        #arbVaultCard #arbCardPositions::before {
+            content: "Recent captured pairs";
+            display: block;
+            margin: 0 0 16px 0;
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            line-height: 1.1;
+            font-weight: 400;
+            letter-spacing: -0.45px;
+            color: #f0f6fc;
+        }
+
+        #arbVaultCard #arbCardPositions .pmfi-openpairs-meta {
+            display: none !important;
+        }
+
+        #arbVaultCard #arbCardPositions .pmfi-pair-title {
+            color: rgba(240,246,252,0.84) !important;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+            font-size: 14px !important;
+            line-height: 1.35 !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.01em !important;
+        }
+
+        #arbVaultCard #arbCardPositions .pmfi-leg-market {
+            color: rgba(240,246,252,0.38) !important;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+            font-size: 11px !important;
+            line-height: 1.25 !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.20em !important;
+            text-transform: uppercase !important;
+        }
+
+        #arbVaultCard #arbCardPositions .pmfi-shares {
+            color: rgba(240,246,252,0.88) !important;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+            font-size: 13px !important;
+            line-height: 1.25 !important;
+            font-weight: 700 !important;
+            letter-spacing: 0 !important;
+            text-transform: none !important;
+        }
+
+        #arbVaultCard #arbCardPositions .pmfi-leg-price {
+            color: rgba(240,246,252,0.48) !important;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+            font-size: 12px !important;
+            line-height: 1.25 !important;
+            font-weight: 500 !important;
+            letter-spacing: 0 !important;
+            text-transform: none !important;
+        }
+
+        #arbVaultCard #arbCardPositions .pmfi-apr-readout {
+            color: #22e58a !important;
+            font-family: "SF Mono", "Roboto Mono", monospace !important;
+            font-size: 14px !important;
+            line-height: 1.15 !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.04em !important;
+            text-transform: uppercase !important;
+        }
+
+        #arbVaultCard #arbCardPositions .pmfi-apr-date {
+            color: rgba(240,246,252,0.40) !important;
+            font-family: "SF Mono", "Roboto Mono", monospace !important;
+            font-size: 11px !important;
+            line-height: 1.25 !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.10em !important;
+            text-transform: uppercase !important;
+        }
+
+        @media (max-width: 980px) {
+            #arbVaultCard .vault-header {
+                padding-right: 0 !important;
+            }
+
+            #arbVaultCard .vault-rewards-note {
+                position: static !important;
+                margin: 10px 0 18px !important;
+            }
+        }
+
+    
+        /* === PMFI micro polish yellow rewards + apr fix v1 === */
+        #arbVaultCard .vault-rewards-note {
+            border: 1px solid rgba(239, 255, 0, 0.22) !important;
+            background: rgba(239, 255, 0, 0.08) !important;
+            color: #efff5a !important;
+            box-shadow: 0 0 14px rgba(239, 255, 0, 0.06) !important;
+        }
+
+        #arbVaultCard #arbCardPositions .pmfi-apr-readout {
+            color: #59f39b !important;
+            white-space: nowrap !important;
+        }
+
+        #arbVaultCard #arbCardPositions .pmfi-apr-readout::after {
+            content: " APR";
+            color: #59f39b;
+            font: inherit;
+            letter-spacing: inherit;
+        }
+
+        #arbVaultCard #arbCardPositions .pmfi-apr-label-old {
+            display: none !important;
+        }
+
+    
+        /* === PMFI rewards lime tweak v1 === */
+        #arbVaultCard .vault-rewards-note {
+            border: 1px solid rgba(230, 242, 74, 0.26) !important;
+            background: rgba(230, 242, 74, 0.08) !important;
+            color: #E6F24A !important;
+            box-shadow:
+                0 0 12px rgba(230, 242, 74, 0.08),
+                inset 0 0 0 1px rgba(230, 242, 74, 0.03) !important;
+        }
+
+    
+        /* === PMFI interactive capital efficiency chart v1 === */
+        .capital-efficiency-card {
+            grid-column: 1 / -1 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .ce-frame {
+            position: relative;
+            min-height: 560px;
+            padding: 34px 38px 32px;
+            border: 1px solid rgba(255, 109, 31, 0.82);
+            border-radius: 8px;
+            background:
+                linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px),
+                radial-gradient(circle at 70% 0%, rgba(255,109,31,0.055), transparent 34%),
+                linear-gradient(180deg, rgba(8,13,22,0.98), rgba(6,10,17,0.98));
+            background-size: 34px 34px, 34px 34px, auto, auto;
+            box-shadow:
+                inset 0 0 0 1px rgba(255,109,31,0.08),
+                0 0 28px rgba(255,109,31,0.035);
+        }
+
+        .ce-frame::before,
+        .ce-frame::after {
+            content: "";
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-color: rgba(255,109,31,0.85);
+            pointer-events: none;
+        }
+
+        .ce-frame::before {
+            top: 10px;
+            left: 10px;
+            border-top: 1px solid;
+            border-left: 1px solid;
+        }
+
+        .ce-frame::after {
+            right: 10px;
+            bottom: 10px;
+            border-right: 1px solid;
+            border-bottom: 1px solid;
+        }
+
+        .ce-topline {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .ce-chip {
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 13px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: rgba(240,246,252,0.78);
+        }
+
+        .ce-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .ce-tab {
+            height: 34px;
+            padding: 0 12px;
+            border: 1px solid rgba(255,109,31,0.28);
+            background: rgba(255,109,31,0.035);
+            color: rgba(240,246,252,0.72);
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .ce-tab.active {
+            color: #f0f6fc;
+            border-color: rgba(255,109,31,0.66);
+            background: rgba(255,109,31,0.085);
+        }
+
+        .ce-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 8px;
+            vertical-align: 1px;
+        }
+
+        .ce-blue { background: #1066ff; box-shadow: 0 0 10px rgba(16,102,255,0.5); }
+        .ce-orange { background: #ff780f; box-shadow: 0 0 10px rgba(255,120,15,0.5); }
+        .ce-green { background: #35d263; box-shadow: 0 0 10px rgba(53,210,99,0.45); }
+
+        .ce-title-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .ce-title {
+            margin: 0;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(44px, 6vw, 82px);
+            line-height: 0.95;
+            font-weight: 400;
+            letter-spacing: -2.2px;
+            color: #f0f6fc;
+        }
+
+        .ce-chart-shell {
+            position: relative;
+            height: 355px;
+            padding: 0 0 40px 88px;
+        }
+
+        .ce-y-label {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%) rotate(-90deg);
+            transform-origin: center;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.12em;
+            color: rgba(240,246,252,0.80);
+        }
+
+        .ce-y-axis {
+            position: absolute;
+            left: 42px;
+            top: 0;
+            bottom: 40px;
+            width: 42px;
+            border-right: 1px solid rgba(240,246,252,0.45);
+        }
+
+        .ce-y-axis span {
+            position: absolute;
+            right: 10px;
+            transform: translateY(50%);
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 12px;
+            color: rgba(240,246,252,0.66);
+        }
+
+        .ce-grid {
+            position: relative;
+            height: 100%;
+            border-bottom: 1px solid rgba(240,246,252,0.72);
+            background:
+                repeating-linear-gradient(
+                    to top,
+                    rgba(240,246,252,0.10) 0,
+                    rgba(240,246,252,0.10) 1px,
+                    transparent 1px,
+                    transparent 12.5%
+                );
+            display: grid;
+            grid-template-columns: repeat(5, minmax(90px, 1fr));
+            align-items: end;
+            gap: clamp(18px, 4vw, 60px);
+            padding: 0 22px;
+        }
+
+        .ce-bar-wrap {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            cursor: crosshair;
+        }
+
+        .ce-total-label {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: calc(var(--cash-height) + 8px);
+            white-space: nowrap;
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 13px;
+            color: rgba(240,246,252,0.88);
+            text-shadow: 0 0 12px rgba(0,0,0,0.55);
+        }
+
+        .ce-bar {
+            width: min(126px, 72%);
+            height: var(--total-height);
+            position: relative;
+            display: flex;
+            flex-direction: column-reverse;
+            border: 1px solid rgba(240,246,252,0.10);
+            background: rgba(255,255,255,0.02);
+            transition: transform 180ms ease, filter 180ms ease;
+        }
+
+        .ce-bar-wrap:hover .ce-bar {
+            transform: translateY(-4px);
+            filter: brightness(1.12);
+        }
+
+        .ce-segment {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 18px;
+            overflow: hidden;
+            color: #f0f6fc;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            text-shadow: 0 1px 10px rgba(0,0,0,0.42);
+        }
+
+        .ce-segment::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.18), transparent 52%);
+            pointer-events: none;
+        }
+
+        .ce-segment-base {
+            background: linear-gradient(180deg, #1478ff 0%, #0040b8 100%);
+            box-shadow: inset 0 0 20px rgba(0,125,255,0.22);
+        }
+
+        .ce-segment-boost {
+            background: linear-gradient(180deg, #ff8c12 0%, #e76200 100%);
+            box-shadow: inset 0 0 20px rgba(255,109,31,0.25);
+        }
+
+        .ce-segment-rewards {
+            background: linear-gradient(180deg, #3ad76b 0%, #126f29 100%);
+            box-shadow: inset 0 0 20px rgba(53,210,99,0.22);
+            font-size: 22px;
+        }
+
+        .ce-x {
+            position: absolute;
+            top: calc(100% + 14px);
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 15px;
+            color: rgba(240,246,252,0.78);
+        }
+
+        .ce-x-label {
+            margin-top: 30px;
+            text-align: center;
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 14px;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            color: rgba(240,246,252,0.78);
+        }
+
+        .ce-tooltip {
+            position: absolute;
+            z-index: 10;
+            min-width: 220px;
+            padding: 12px 14px;
+            border: 1px solid rgba(255,109,31,0.58);
+            background: rgba(6,10,17,0.96);
+            color: #f0f6fc;
+            pointer-events: none;
+            opacity: 0;
+            transform: translate(-50%, -12px);
+            transition: opacity 120ms ease;
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 12px;
+            line-height: 1.55;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+        }
+
+        .ce-tooltip.visible {
+            opacity: 1;
+        }
+
+        .ce-tooltip b {
+            color: #ff7a1a;
+            font-weight: 700;
+        }
+
+        .ce-tooltip .green {
+            color: #77ff7a;
+        }
+
+        .ce-tooltip .blue {
+            color: #58a6ff;
+        }
+
+        .ce-tooltip .orange {
+            color: #ff9b40;
+        }
+
+        @media (max-width: 900px) {
+            .ce-frame {
+                padding: 26px 20px 28px;
+                min-height: 520px;
+            }
+
+            .ce-topline {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .ce-tabs {
+                justify-content: flex-start;
+            }
+
+            .ce-chart-shell {
+                overflow-x: auto;
+                padding-left: 76px;
+            }
+
+            .ce-grid {
+                min-width: 760px;
+            }
+
+            .ce-title {
+                font-size: 42px;
+            }
+        }
+
+    
+        /* === PMFI centered fit v3 === */
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden !important;
+        }
+
+        /* Main app content wrapper */
+        .app-container,
+        .dashboard-container,
+        .dashboard-grid,
+        .main-content {
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+        }
+
+        /* pARBITRAGE vault card */
+        #arbVaultCard,
+        .arb-vault-card,
+        .vault-card,
+        .parbitrage-card {
+            width: min(1080px, calc(100vw - 56px)) !important;
+            max-width: min(1080px, calc(100vw - 56px)) !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            justify-self: center !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Capital efficiency chart card */
+        #capitalEfficiencyCard,
+        .capital-efficiency-card {
+            width: min(980px, calc(100vw - 56px)) !important;
+            max-width: min(980px, calc(100vw - 56px)) !important;
+            margin: 26px auto 0 auto !important;
+            justify-self: center !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Make sure internal content never overflows card width */
+        #arbVaultCard *,
+        .arb-vault-card *,
+        .vault-card *,
+        .parbitrage-card *,
+        #capitalEfficiencyCard *,
+        .capital-efficiency-card * {
+            box-sizing: border-box !important;
+        }
+
+        /* Open pairs section inside vault card */
+        #arbVaultCard .open-pairs-list,
+        #arbVaultCard .pair-row,
+        #arbVaultCard .pair-item,
+        #arbVaultCard .pair-card,
+        #arbVaultCard .pair-market,
+        #arbVaultCard .pair-market-card,
+        #arbVaultCard .pair-columns,
+        #arbVaultCard .pair-content,
+        .arb-vault-card .open-pairs-list,
+        .arb-vault-card .pair-row,
+        .arb-vault-card .pair-item,
+        .arb-vault-card .pair-card,
+        .arb-vault-card .pair-market,
+        .arb-vault-card .pair-market-card,
+        .arb-vault-card .pair-columns,
+        .arb-vault-card .pair-content {
+            max-width: 100% !important;
+        }
+
+        /* If pair rows use grid/flex, keep them fitting inside card */
+        #arbVaultCard .pair-row,
+        .arb-vault-card .pair-row {
+            width: 100% !important;
+        }
+
+        /* Chart visual scaling */
+        .capital-efficiency-card .ce-frame,
+        #capitalEfficiencyCard .ce-frame {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-height: 520px !important;
+            padding: 26px 26px 28px !important;
+            overflow: hidden !important;
+        }
+
+        .capital-efficiency-card .ce-title,
+        #capitalEfficiencyCard .ce-title {
+            font-size: clamp(40px, 5vw, 66px) !important;
+            line-height: 0.96 !important;
+            white-space: normal !important;
+            max-width: 100% !important;
+        }
+
+        .capital-efficiency-card .ce-topline,
+        #capitalEfficiencyCard .ce-topline {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: flex-start !important;
+            gap: 18px !important;
+            flex-wrap: wrap !important;
+        }
+
+        .capital-efficiency-card .ce-tabs,
+        #capitalEfficiencyCard .ce-tabs {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: flex-end !important;
+            gap: 10px !important;
+            max-width: 100% !important;
+        }
+
+        .capital-efficiency-card .ce-chart-shell,
+        #capitalEfficiencyCard .ce-chart-shell {
+            height: 345px !important;
+            padding: 0 20px 46px 78px !important;
+            overflow: hidden !important;
+        }
+
+        .capital-efficiency-card .ce-grid,
+        #capitalEfficiencyCard .ce-grid {
+            width: 100% !important;
+            max-width: 100% !important;
+            grid-template-columns: repeat(5, minmax(70px, 1fr)) !important;
+            gap: clamp(14px, 2.2vw, 34px) !important;
+            padding: 0 10px 0 10px !important;
+        }
+
+        .capital-efficiency-card .ce-bar,
+        #capitalEfficiencyCard .ce-bar {
+            width: min(84px, 72%) !important;
+        }
+
+        .capital-efficiency-card .ce-total-label,
+        #capitalEfficiencyCard .ce-total-label {
+            font-size: 11px !important;
+            line-height: 1.1 !important;
+            max-width: 110px !important;
+            text-align: center !important;
+        }
+
+        .capital-efficiency-card .ce-x,
+        #capitalEfficiencyCard .ce-x {
+            font-size: 12px !important;
+        }
+
+        .capital-efficiency-card .ce-x-label,
+        #capitalEfficiencyCard .ce-x-label {
+            margin-top: 26px !important;
+            font-size: 12px !important;
+            letter-spacing: 0.18em !important;
+        }
+
+        @media (max-width: 1100px) {
+            #arbVaultCard,
+            .arb-vault-card,
+            .vault-card,
+            .parbitrage-card {
+                width: calc(100vw - 28px) !important;
+                max-width: calc(100vw - 28px) !important;
+            }
+
+            #capitalEfficiencyCard,
+            .capital-efficiency-card {
+                width: calc(100vw - 28px) !important;
+                max-width: calc(100vw - 28px) !important;
+            }
+
+            .capital-efficiency-card .ce-frame,
+            #capitalEfficiencyCard .ce-frame {
+                min-height: 500px !important;
+                padding: 22px 16px 26px !important;
+            }
+
+            .capital-efficiency-card .ce-chart-shell,
+            #capitalEfficiencyCard .ce-chart-shell {
+                padding: 0 10px 42px 62px !important;
+            }
+
+            .capital-efficiency-card .ce-grid,
+            #capitalEfficiencyCard .ce-grid {
+                gap: 16px !important;
+            }
+        }
+
+    
+        /* === PMFI chart cleanup v4 === */
+        #capitalEfficiencyCard .ce-title,
+        .capital-efficiency-card .ce-title {
+            display: none !important;
+        }
+
+        #capitalEfficiencyCard .ce-total-label,
+        .capital-efficiency-card .ce-total-label {
+            display: none !important;
+        }
+
+        #capitalEfficiencyCard .ce-frame,
+        .capital-efficiency-card .ce-frame {
+            padding-top: 14px !important;
+        }
+
+        #capitalEfficiencyCard .ce-topline,
+        .capital-efficiency-card .ce-topline {
+            margin-bottom: 8px !important;
+        }
+
+        #capitalEfficiencyCard .ce-chart-shell,
+        .capital-efficiency-card .ce-chart-shell {
+            padding-top: 6px !important;
+        }
+
+    
+        /* === PMFI chart repair v5 === */
+        #capitalEfficiencyCard,
+        .capital-efficiency-card {
+            width: min(980px, calc(100vw - 56px)) !important;
+            max-width: min(980px, calc(100vw - 56px)) !important;
+            margin: 26px auto 0 auto !important;
+            transform: none !important;
+            justify-self: center !important;
+            overflow: visible !important;
+        }
+
+        #capitalEfficiencyCard .ce-frame,
+        .capital-efficiency-card .ce-frame {
+            min-height: 500px !important;
+            height: auto !important;
+            padding: 22px 26px 28px !important;
+            overflow: hidden !important;
+        }
+
+        /* Remove the large title row completely */
+        #capitalEfficiencyCard .ce-title-row,
+        .capital-efficiency-card .ce-title-row,
+        #capitalEfficiencyCard .ce-title,
+        .capital-efficiency-card .ce-title {
+            display: none !important;
+        }
+
+        #capitalEfficiencyCard .ce-topline,
+        .capital-efficiency-card .ce-topline {
+            margin-bottom: 18px !important;
+        }
+
+        #capitalEfficiencyCard .ce-chart-shell,
+        .capital-efficiency-card .ce-chart-shell {
+            position: relative !important;
+            height: 360px !important;
+            padding: 0 22px 46px 78px !important;
+            margin-top: 12px !important;
+            overflow: visible !important;
+        }
+
+        #capitalEfficiencyCard .ce-grid,
+        .capital-efficiency-card .ce-grid {
+            position: relative !important;
+            height: 100% !important;
+            max-height: 100% !important;
+            align-items: end !important;
+            overflow: visible !important;
+            grid-template-columns: repeat(5, minmax(70px, 1fr)) !important;
+            gap: clamp(14px, 2.4vw, 36px) !important;
+            padding: 0 12px !important;
+        }
+
+        #capitalEfficiencyCard .ce-bar-wrap,
+        .capital-efficiency-card .ce-bar-wrap {
+            position: relative !important;
+            height: 100% !important;
+            align-items: end !important;
+        }
+
+        #capitalEfficiencyCard .ce-bar,
+        .capital-efficiency-card .ce-bar {
+            width: min(86px, 72%) !important;
+            max-height: 100% !important;
+        }
+
+        /* Remove Cash APR labels behind bars */
+        #capitalEfficiencyCard .ce-total-label,
+        .capital-efficiency-card .ce-total-label {
+            display: none !important;
+        }
+
+        #capitalEfficiencyCard .ce-segment,
+        .capital-efficiency-card .ce-segment {
+            font-size: 12px !important;
+        }
+
+        #capitalEfficiencyCard .ce-segment-rewards,
+        .capital-efficiency-card .ce-segment-rewards {
+            font-size: 19px !important;
+        }
+
+        #capitalEfficiencyCard .ce-x-label,
+        .capital-efficiency-card .ce-x-label {
+            margin-top: 26px !important;
+            font-size: 12px !important;
+            letter-spacing: 0.18em !important;
+        }
+
+        @media (max-width: 900px) {
+            #capitalEfficiencyCard,
+            .capital-efficiency-card {
+                width: calc(100vw - 28px) !important;
+                max-width: calc(100vw - 28px) !important;
+            }
+
+            #capitalEfficiencyCard .ce-frame,
+            .capital-efficiency-card .ce-frame {
+                min-height: 500px !important;
+                padding: 20px 16px 26px !important;
+            }
+
+            #capitalEfficiencyCard .ce-chart-shell,
+            .capital-efficiency-card .ce-chart-shell {
+                padding-left: 64px !important;
+                padding-right: 10px !important;
+            }
+        }
+
+    
+        /* === PMFI CE7 clean contained chart === */
+        #capitalEfficiencyCard {
+            display: none !important;
+        }
+
+        #capitalEfficiencyCardCE7 {
+            grid-column: 1 / -1 !important;
+            width: min(980px, calc(100vw - 56px)) !important;
+            max-width: min(980px, calc(100vw - 56px)) !important;
+            margin: 26px auto 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+            box-sizing: border-box !important;
+        }
+
+        #capitalEfficiencyCardCE7,
+        #capitalEfficiencyCardCE7 * {
+            box-sizing: border-box !important;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-frame {
+            position: relative;
+            width: 100%;
+            padding: 18px 20px 24px;
+            border: 1px solid rgba(255, 109, 31, 0.86);
+            border-radius: 8px;
+            background:
+                linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px),
+                radial-gradient(circle at 72% 0%, rgba(255,109,31,0.052), transparent 34%),
+                linear-gradient(180deg, rgba(8,13,22,0.98), rgba(6,10,17,0.98));
+            background-size: 34px 34px, 34px 34px, auto, auto;
+            overflow: hidden;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-frame::before,
+        #capitalEfficiencyCardCE7 .ce7-frame::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: rgba(240,246,252,0.80);
+            pointer-events: none;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-frame::before {
+            top: 10px;
+            left: 10px;
+            border-top: 1px solid;
+            border-left: 1px solid;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-frame::after {
+            right: 10px;
+            bottom: 10px;
+            border-right: 1px solid;
+            border-bottom: 1px solid;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-topline {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-kicker {
+            padding-left: 24px;
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 13px;
+            line-height: 32px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: rgba(240,246,252,0.78);
+            white-space: nowrap;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-legend-item {
+            height: 32px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid rgba(255,109,31,0.55);
+            background: rgba(255,109,31,0.055);
+            color: rgba(240,246,252,0.86);
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 8px;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-blue { background: #1066ff; box-shadow: 0 0 10px rgba(16,102,255,0.45); }
+        #capitalEfficiencyCardCE7 .ce7-orange { background: #ff780f; box-shadow: 0 0 10px rgba(255,120,15,0.45); }
+        #capitalEfficiencyCardCE7 .ce7-green { background: #35d263; box-shadow: 0 0 10px rgba(53,210,99,0.45); }
+
+        #capitalEfficiencyCardCE7 .ce7-chart {
+            position: relative;
+            padding: 14px 12px 62px 76px;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-y-label {
+            position: absolute;
+            left: 16px;
+            top: 176px;
+            transform: rotate(-90deg);
+            transform-origin: center;
+            color: rgba(240,246,252,0.78);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-yaxis {
+            position: absolute;
+            left: 52px;
+            top: 14px;
+            height: 320px;
+            width: 48px;
+            border-right: 1px solid rgba(240,246,252,0.50);
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-yaxis span {
+            position: absolute;
+            right: 10px;
+            transform: translateY(50%);
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 11px;
+            color: rgba(240,246,252,0.66);
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-plot {
+            position: relative;
+            height: 320px;
+            border-bottom: 1px solid rgba(240,246,252,0.72);
+            background:
+                repeating-linear-gradient(
+                    to top,
+                    rgba(240,246,252,0.11) 0,
+                    rgba(240,246,252,0.11) 1px,
+                    transparent 1px,
+                    transparent 20%
+                );
+            overflow: visible;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-bars {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(70px, 1fr));
+            gap: clamp(16px, 3vw, 48px);
+            align-items: end;
+            padding: 0 18px;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-bar-wrap {
+            position: relative;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            cursor: crosshair;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-stack {
+            width: min(76px, 76%);
+            height: var(--total);
+            display: flex;
+            flex-direction: column-reverse;
+            border: 1px solid rgba(240,246,252,0.08);
+            transition: transform 160ms ease, filter 160ms ease;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-bar-wrap:hover .ce7-stack {
+            transform: translateY(-4px);
+            filter: brightness(1.12);
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-segment {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #f0f6fc;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            text-shadow: 0 1px 10px rgba(0,0,0,0.45);
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-segment::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.18), transparent 52%);
+            pointer-events: none;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-segment span {
+            position: relative;
+            z-index: 1;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-base {
+            height: var(--base);
+            background: linear-gradient(180deg, #4d96ff 0%, #0051d6 100%);
+            box-shadow: inset 0 0 20px rgba(0,125,255,0.22);
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-boost {
+            height: var(--boost);
+            background: linear-gradient(180deg, #ff9a1c 0%, #f06400 100%);
+            box-shadow: inset 0 0 20px rgba(255,109,31,0.25);
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-rewards {
+            height: var(--rewards);
+            background: linear-gradient(180deg, #56e37b 0%, #118333 100%);
+            box-shadow: inset 0 0 20px rgba(53,210,99,0.22);
+            font-size: 19px;
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-x {
+            position: absolute;
+            top: calc(100% + 14px);
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(240,246,252,0.76);
+        }
+
+        #capitalEfficiencyCardCE7 .ce7-x-label {
+            margin-top: 18px;
+            text-align: center;
+            color: rgba(240,246,252,0.76);
+            font-family: "SF Mono", "Roboto Mono", monospace;
+            font-size: 12px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 900px) {
+            #capitalEfficiencyCardCE7 {
+                width: calc(100vw - 28px) !important;
+                max-width: calc(100vw - 28px) !important;
+            }
+
+            #capitalEfficiencyCardCE7 .ce7-frame {
+                padding: 16px 12px 20px;
+            }
+
+            #capitalEfficiencyCardCE7 .ce7-topline {
+                flex-direction: column;
+                margin-bottom: 12px;
+            }
+
+            #capitalEfficiencyCardCE7 .ce7-kicker {
+                padding-left: 18px;
+                line-height: 24px;
+            }
+
+            #capitalEfficiencyCardCE7 .ce7-chart {
+                padding-left: 64px;
+                padding-right: 6px;
+            }
+
+            #capitalEfficiencyCardCE7 .ce7-yaxis {
+                left: 42px;
+            }
+
+            #capitalEfficiencyCardCE7 .ce7-bars {
+                gap: 12px;
+                padding: 0 8px;
+            }
+
+            #capitalEfficiencyCardCE7 .ce7-stack {
+                width: min(62px, 80%);
+            }
+
+            #capitalEfficiencyCardCE7 .ce7-segment {
+                font-size: 10px;
+            }
+
+            #capitalEfficiencyCardCE7 .ce7-rewards {
+                font-size: 16px;
+            }
+        }
+
+    
+        /* === PMFI Expected APR tile safe v3 === */
+        #arbVaultCard .pmfi-hidden-rate-tile {
+            display: none !important;
+        }
+
+        #arbVaultCard #expectedAprTile {
+            cursor: pointer !important;
+            position: relative !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            min-height: 112px !important;
+            padding: 16px 18px !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            border-radius: 12px !important;
+            background: rgba(255,255,255,0.01) !important;
+            transition:
+                border-color 160ms ease,
+                background 160ms ease,
+                transform 160ms ease,
+                box-shadow 160ms ease !important;
+        }
+
+        #arbVaultCard #expectedAprTile:hover {
+            transform: translateY(-1px) !important;
+            border-color: rgba(255,255,255,0.18) !important;
+            background: rgba(255,255,255,0.018) !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+        }
+
+        #arbVaultCard #expectedAprTile .pmfi-expected-top {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 12px !important;
+            margin-bottom: 10px !important;
+        }
+
+        #arbVaultCard #expectedAprTile .pmfi-expected-label {
+            display: inline-block !important;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.22em !important;
+            text-transform: uppercase !important;
+            color: rgba(240,246,252,0.42) !important;
+        }
+
+        #arbVaultCard #expectedAprTile .pmfi-expected-icon {
+            width: 28px !important;
+            height: 28px !important;
+            min-width: 28px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 8px !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            background: rgba(255,255,255,0.03) !important;
+            color: rgba(240,246,252,0.82) !important;
+        }
+
+        #arbVaultCard #expectedAprTile .pmfi-expected-icon svg {
+            width: 15px !important;
+            height: 15px !important;
+            display: block !important;
+        }
+
+        #arbVaultCard #expectedAprTile .pmfi-expected-value {
+            display: block !important;
+            font-family: 'Playfair Display', serif !important;
+            font-size: 28px !important;
+            line-height: 1.05 !important;
+            font-weight: 400 !important;
+            letter-spacing: -0.4px !important;
+            color: #F3F5F9 !important;
+            white-space: nowrap !important;
+            margin-bottom: 6px !important;
+        }
+
+        #arbVaultCard #expectedAprTile .pmfi-expected-hint {
+            display: block !important;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+            font-size: 11px !important;
+            line-height: 1.3 !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.08em !important;
+            text-transform: uppercase !important;
+            color: rgba(240,246,252,0.54) !important;
+        }
+
+    
+        /* === PMFI precise hide disclaimer and invite gate v1 === */
+        #disclaimerModal,
+        #inviteGate {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+    
+        /* === PMFI center Share Price and TVL values v1 === */
+        #arbVaultCard #arbVaultStats > .pmfi-center-stat-tile {
+            position: relative !important;
+            min-height: 112px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            padding: 18px 20px !important;
+        }
+
+        #arbVaultCard #arbVaultStats > .pmfi-center-stat-tile .pmfi-center-stat-label {
+            position: absolute !important;
+            top: 20px !important;
+            left: 22px !important;
+            right: 22px !important;
+            text-align: left !important;
+            margin: 0 !important;
+        }
+
+        #arbVaultCard #arbVaultStats > .pmfi-center-stat-tile .pmfi-center-stat-value {
+            position: absolute !important;
+            left: 18px !important;
+            right: 18px !important;
+            top: 56% !important;
+            transform: translateY(-50%) !important;
+            width: auto !important;
+            max-width: calc(100% - 36px) !important;
+            margin: 0 auto !important;
+            text-align: center !important;
+            white-space: nowrap !important;
+        }
+
+        #arbVaultCard #arbVaultStats > .pmfi-center-stat-tile.pmfi-tvl-stat-tile .pmfi-center-stat-value {
+            font-size: clamp(24px, 2.2vw, 30px) !important;
+            letter-spacing: -0.4px !important;
+        }
+
+        @media (max-width: 760px) {
+            #arbVaultCard #arbVaultStats > .pmfi-center-stat-tile {
+                min-height: 96px !important;
+            }
+
+            #arbVaultCard #arbVaultStats > .pmfi-center-stat-tile .pmfi-center-stat-value {
+                top: 58% !important;
+            }
+        }
+
+    
+        /* === PMFI center Expected APR value v2 === */
+        #arbVaultCard #expectedAprTile {
+            position: relative !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            padding: 18px 54px !important;
+        }
+
+        /* Break the previous flex-row top wrapper so label and icon can align independently */
+        #arbVaultCard #expectedAprTile .pmfi-expected-top {
+            position: static !important;
+            display: block !important;
+            margin: 0 !important;
+            pointer-events: none !important;
+        }
+
+        /* Match Share Price / TVL label placement */
+        #arbVaultCard #expectedAprTile .pmfi-expected-label {
+            position: absolute !important;
+            top: 22px !important;
+            left: 22px !important;
+            right: auto !important;
+            margin: 0 !important;
+            display: block !important;
+            text-align: left !important;
+            line-height: 1 !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.22em !important;
+            text-transform: uppercase !important;
+            color: rgba(240,246,252,0.42) !important;
+        }
+
+        /* Keep chart icon cleanly in top-right */
+        #arbVaultCard #expectedAprTile .pmfi-expected-icon {
+            position: absolute !important;
+            top: 18px !important;
+            right: 18px !important;
+            margin: 0 !important;
+            pointer-events: none !important;
+        }
+
+        #arbVaultCard #expectedAprTile .pmfi-expected-value {
+            margin: 16px 0 5px 0 !important;
+            width: 100% !important;
+            text-align: center !important;
+            color: #F3F5F9 !important;
+            font-size: 28px !important;
+            line-height: 1.05 !important;
+        }
+
+        #arbVaultCard #expectedAprTile .pmfi-expected-hint {
+            width: 100% !important;
+            text-align: center !important;
+            color: rgba(240,246,252,0.50) !important;
+            font-size: 9.5px !important;
+            line-height: 1.2 !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.075em !important;
+            text-transform: uppercase !important;
+            white-space: nowrap !important;
+        }
+
+        @media (max-width: 760px) {
+            #arbVaultCard #expectedAprTile {
+                padding-left: 24px !important;
+                padding-right: 24px !important;
+            }
+
+            #arbVaultCard #expectedAprTile .pmfi-expected-label {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                margin-bottom: 10px !important;
+                text-align: left !important;
+                width: 100% !important;
+            }
+
+            #arbVaultCard #expectedAprTile .pmfi-expected-icon {
+                top: 16px !important;
+                right: 16px !important;
+            }
+
+            #arbVaultCard #expectedAprTile .pmfi-expected-value {
+                margin-top: 0 !important;
+            }
+
+            #arbVaultCard #expectedAprTile .pmfi-expected-hint {
+                white-space: normal !important;
+            }
+        }
+
+    
+        /* === PMFI remove visible community rewards precise v1 === */
+        #arbVaultCard .vault-rewards-note,
+        #capitalEfficiencyCardCE7 .ce7-rewards {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
     </style>
+
+<!-- PMFI hide community rewards note css-only v1 -->
+<style id="pmfi-hide-community-rewards-css-only-v1">
+  #arbVaultCard .pmfi-expected-hint,
+  .pmfi-expected-hint {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+</style>
+
 </head>
 <body>
     <header class="header">
-        <a href="https://pmfi.cc" target="_blank" class="logo-link">
-            <img src="logo.png" alt="PMFI" class="header-logo">
+        <a href="https://pmfi.cc" target="_blank" class="logo-link" aria-label="PMFI">
+            <img src="/logo-rimless.png?v=1" alt="PMFI" class="header-logo">
+            <span class="logo-text">PMFI</span>
         </a>
 
         
@@ -961,7 +2507,6 @@
                 <div class="card" id="arbVaultCard" style="grid-column: 1 / -1">
                     <div class="vault-header">
                         <span class="vault-name">pARBITRAGE</span>
-                        <span class="teaser-live-badge"><span class="teaser-live-dot"></span>Live</span>
                     </div>
                     <div id="arbVaultStats" class="vault-stats-bar" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 12px;margin-bottom:10px;font-size:12px;">
                         <div><span style="opacity:.6">Share Price</span><br><strong id="arbStatPPS" style="font-size:14px;">—</strong></div>
@@ -989,7 +2534,107 @@
                     <div id="arbCardPositions" style="margin-top:14px;"></div>
                 </div>
 
-                <div class="card">
+                <!-- PMFI_CE7_START -->
+                <div class="card capital-efficiency-card-ce7" id="capitalEfficiencyCardCE7">
+                    <div class="ce7-frame">
+                        <div class="ce7-topline">
+                            <div class="ce7-kicker">Capital Efficiency</div>
+                            <div class="ce7-legend" aria-label="Capital efficiency legend">
+                                <span class="ce7-legend-item"><span class="ce7-dot ce7-blue"></span>Base APR</span>
+                                <span class="ce7-legend-item"><span class="ce7-dot ce7-orange"></span>Robin boost</span>
+                            </div>
+                        </div>
+
+                        <div class="ce7-chart">
+                            <div class="ce7-y-label">APR (%)</div>
+
+                            <div class="ce7-yaxis" aria-hidden="true">
+                                <span style="bottom:0%">0%</span>
+                                <span style="bottom:20%">4%</span>
+                                <span style="bottom:40%">8%</span>
+                                <span style="bottom:60%">12%</span>
+                                <span style="bottom:80%">16%</span>
+                                <span style="bottom:100%">20%</span>
+                            </div>
+
+                            <div class="ce7-plot">
+                                <div class="ce7-bars">
+                                    <div class="ce7-bar-wrap" title="$50k — Base APR 15.76%, Robin boost 1.74%" style="--total:87.5%; --base:90.06%; --boost:9.94%;">
+                                        <div class="ce7-stack">
+                                            <div class="ce7-segment ce7-base"><span>15.76%</span></div>
+                                            <div class="ce7-segment ce7-boost"><span>1.74%</span></div>                                        </div>
+                                        <div class="ce7-x">$50k</div>
+                                    </div>
+
+                                    <div class="ce7-bar-wrap" title="$75k — Base APR 13.51%, Robin boost 1.52%" style="--total:75.15%; --base:89.89%; --boost:10.11%;">
+                                        <div class="ce7-stack">
+                                            <div class="ce7-segment ce7-base"><span>13.51%</span></div>
+                                            <div class="ce7-segment ce7-boost"><span>1.52%</span></div>                                        </div>
+                                        <div class="ce7-x">$75k</div>
+                                    </div>
+
+                                    <div class="ce7-bar-wrap" title="$100k — Base APR 11.93%, Robin boost 1.28%" style="--total:66.05%; --base:90.31%; --boost:9.69%;">
+                                        <div class="ce7-stack">
+                                            <div class="ce7-segment ce7-base"><span>11.93%</span></div>
+                                            <div class="ce7-segment ce7-boost"><span>1.28%</span></div>                                        </div>
+                                        <div class="ce7-x">$100k</div>
+                                    </div>
+
+                                    <div class="ce7-bar-wrap" title="$150k — Base APR 9.42%, Robin boost 1.05%" style="--total:52.35%; --base:89.97%; --boost:10.03%;">
+                                        <div class="ce7-stack">
+                                            <div class="ce7-segment ce7-base"><span>9.42%</span></div>
+                                            <div class="ce7-segment ce7-boost"><span>1.05%</span></div>                                        </div>
+                                        <div class="ce7-x">$150k</div>
+                                    </div>
+
+                                    <div class="ce7-bar-wrap" title="$163k max — Base APR 8.97%, Robin boost 0.98%" style="--total:49.75%; --base:90.15%; --boost:9.85%;">
+                                        <div class="ce7-stack">
+                                            <div class="ce7-segment ce7-base"><span>8.97%</span></div>
+                                            <div class="ce7-segment ce7-boost"><span>0.98%</span></div>                                        </div>
+                                        <div class="ce7-x">$163k max</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ce7-x-label">Vault size / deployed capital</div>
+                    </div>
+                </div>
+                <!-- PMFI_CE7_END -->
+
+                <div class="card capital-efficiency-card" id="capitalEfficiencyCard">
+                    <div class="ce-frame">
+                        <div class="ce-topline">
+                            <span class="ce-chip">Capital Efficiency</span>
+                            <div class="ce-tabs" aria-label="Capital efficiency chart legend">
+                                <button class="ce-tab active" data-series="base" type="button"><span class="ce-dot ce-blue"></span>Base APR</button>
+                                <button class="ce-tab active" data-series="boost" type="button"><span class="ce-dot ce-orange"></span>Robin boost</button>
+                            </div>
+                        </div>
+
+                        
+                        </div>
+
+                        <div class="ce-chart-shell">
+                            <div class="ce-y-label">APR (%)</div>
+                            <div class="ce-y-axis" aria-hidden="true">
+                                <span style="bottom:0%">0%</span>
+                                <span style="bottom:20%">4%</span>
+                                <span style="bottom:40%">8%</span>
+                                <span style="bottom:60%">12%</span>
+                                <span style="bottom:80%">16%</span>
+                                <span style="bottom:100%">20%</span>
+                            </div>
+
+                            <div class="ce-grid" id="ceGrid"></div>
+                            <div class="ce-tooltip" id="ceTooltip" role="status"></div>
+                        </div>
+
+                        <div class="ce-x-label">Vault size / deployed capital</div>
+                    </div>
+                </div>
+
+                <div class="card" id="psniperCard" style="display:none !important;">
                     <div class="vault-header">
                         <span class="vault-name">pSNIPER</span>
                     </div>
@@ -1011,7 +2656,7 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" id="statsCard" style="display:none !important;">
                     <div class="stats-card-title">Stats</div>
                     <div class="big-stat">
                         <div class="big-stat-label">Total Value Locked</div>
@@ -1072,7 +2717,7 @@
         </div>
     </div>
 
-    <div id="disclaimerModal" class="modal-overlay">
+    <div id="disclaimerModal" class="modal-overlay hidden" style="display:none !important;">
         <div class="modal">
             <h2 class="modal-title">Disclaimer</h2>
             <p class="modal-text">PMFI is experimental.</p>
@@ -1175,7 +2820,7 @@
     </div>
 
     <!-- Invite Code Gate -->
-    <div id="inviteGate" class="invite-gate">
+    <div id="inviteGate" class="invite-gate hidden" style="display:none !important;">
         <div class="invite-card">
             <div class="invite-logo-wrapper">
                 <img src="logo.png" alt="PMFI" class="invite-logo">
@@ -1214,7 +2859,743 @@
         };
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="builder-attribution.js"></script>
-    <script src="main.js"></script>
+    <script src="builder-attribution.js?v=builder-code-20260626T152152Z"></script>
+    <script src="privy-bridge.bundle.js?v=privy20260609_212336"></script>
+    <script src="main.js?v=privy20260609_212336"></script>
+
+    <script>
+    /* PMFI TVL cap display v2 */
+    (function () {
+        const CAP_DISPLAY = "$100,000";
+
+        function applyTvlCap() {
+            const el = document.getElementById("arbStatTVL");
+            if (!el) return;
+
+            const current = (el.textContent || "").trim();
+            if (!current || current === "—") return;
+
+            const base = current.split("/")[0].trim();
+            const next = `${base} / ${CAP_DISPLAY}`;
+
+            if (current !== next) {
+                el.textContent = next;
+            }
+        }
+
+        function start() {
+            const el = document.getElementById("arbStatTVL");
+            if (!el) {
+                setTimeout(start, 500);
+                return;
+            }
+
+            applyTvlCap();
+
+            const observer = new MutationObserver(applyTvlCap);
+            observer.observe(el, {
+                childList: true,
+                characterData: true,
+                subtree: true
+            });
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", start);
+        } else {
+            start();
+        }
+    })();
+    </script>
+
+
+    <script>
+    /* PMFI pair text polish safe v1 */
+    (function () {
+        function clean(text) {
+            return (text || "").replace(/\s+/g, " ").trim();
+        }
+
+        function applyPairTextPolish() {
+            const root = document.getElementById("arbCardPositions");
+            if (!root) return;
+
+            root.querySelectorAll("div, span, p").forEach((el) => {
+                const txt = clean(el.textContent);
+                if (!txt) return;
+
+                if (/^OPEN PAIRS\s+\d+$/i.test(txt)) {
+                    el.classList.add("pmfi-openpairs-meta");
+                    return;
+                }
+
+                if (/^(POLYMARKET|KALSHI)\s+(YES|NO)$/i.test(txt)) {
+                    el.classList.add("pmfi-leg-market");
+                    return;
+                }
+
+                if (/^\d+(\.\d+)?\s+shares$/i.test(txt)) {
+                    el.classList.add("pmfi-shares");
+                    return;
+                }
+
+                if (/^@\s*\d+(\.\d+)?[¢c]$/i.test(txt)) {
+                    el.classList.add("pmfi-leg-price");
+                    return;
+                }
+
+                if (/^[+-]\d+(\.\d+)?%\s*APR$/i.test(txt)) {
+                    el.classList.add("pmfi-apr-readout");
+                    return;
+                }
+
+                if (/^(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s+\d{1,2},\s+\d{2,4}$/i.test(txt)) {
+                    el.classList.add("pmfi-apr-date");
+                    return;
+                }
+
+                if (
+                    txt.length < 90 &&
+                    /^[a-z0-9-]+(?:_[a-z0-9-]+)+$/i.test(txt)
+                ) {
+                    el.classList.add("pmfi-pair-title");
+                    return;
+                }
+            });
+        }
+
+        function start() {
+            const root = document.getElementById("arbCardPositions");
+            if (!root) {
+                setTimeout(start, 500);
+                return;
+            }
+
+            applyPairTextPolish();
+
+            const observer = new MutationObserver(applyPairTextPolish);
+            observer.observe(root, {
+                childList: true,
+                characterData: true,
+                subtree: true
+            });
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", start);
+        } else {
+            start();
+        }
+    })();
+    </script>
+
+
+    <script>
+    /* PMFI APR inline fix v1 */
+    (function () {
+        function clean(text) {
+            return (text || "").replace(/\s+/g, " ").trim();
+        }
+
+        function applyAprInlineFix() {
+            const root = document.getElementById("arbCardPositions");
+            if (!root) return;
+
+            root.querySelectorAll("div, span, p").forEach((el) => {
+                const txt = clean(el.textContent);
+                if (!txt) return;
+
+                if (/^APR$/i.test(txt)) {
+                    el.classList.add("pmfi-apr-label-old");
+                }
+            });
+        }
+
+        function start() {
+            const root = document.getElementById("arbCardPositions");
+            if (!root) {
+                setTimeout(start, 500);
+                return;
+            }
+
+            applyAprInlineFix();
+
+            const observer = new MutationObserver(applyAprInlineFix);
+            observer.observe(root, {
+                childList: true,
+                characterData: true,
+                subtree: true
+            });
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", start);
+        } else {
+            start();
+        }
+    })();
+    </script>
+
+
+    <script>
+    /* PMFI interactive capital efficiency chart v1 */
+    (function () {
+        const data = [
+            { label: "$50k", base: 15.76, boost: 1.74, cash: 13.16, rewardVisual: 1.72 },
+            { label: "$75k", base: 13.51, boost: 1.52, cash: 10.91, rewardVisual: 1.58 },
+            { label: "$100k", base: 11.93, boost: 1.28, cash: 9.33, rewardVisual: 1.46 },
+            { label: "$150k", base: 9.42, boost: 1.05, cash: 6.82, rewardVisual: 1.42 },
+            { label: "$163k max", base: 8.97, boost: 0.98, cash: 6.37, rewardVisual: 1.36 }
+        ];
+
+        const maxApr = 20;
+        const state = { base: true, boost: true, rewards: true };
+
+        function pct(value) {
+            return `${value.toFixed(2)}%`;
+        }
+
+        function render() {
+            const grid = document.getElementById("ceGrid");
+            if (!grid) return;
+
+            grid.innerHTML = "";
+
+            data.forEach((d) => {
+                const visibleBase = state.base ? d.base : 0;
+                const visibleBoost = state.boost ? d.boost : 0;
+                const visibleRewards = state.rewards ? d.rewardVisual : 0;
+                const visibleTotal = visibleBase + visibleBoost + visibleRewards;
+
+                const wrap = document.createElement("div");
+                wrap.className = "ce-bar-wrap";
+                wrap.style.setProperty("--total-height", `${Math.max(visibleTotal / maxApr * 100, 1)}%`);
+                wrap.style.setProperty("--cash-height", `${Math.max((visibleBase + visibleBoost) / maxApr * 100, 1)}%`);
+
+                const label = document.createElement("div");
+                label.className = "ce-total-label";
+                label.textContent = `Cash APR ${pct(d.cash)}`;
+
+                const bar = document.createElement("div");
+                bar.className = "ce-bar";
+
+                if (state.base) {
+                    const base = document.createElement("div");
+                    base.className = "ce-segment ce-segment-base";
+                    base.style.height = `${d.base / visibleTotal * 100}%`;
+                    base.textContent = pct(d.base);
+                    bar.appendChild(base);
+                }
+
+                if (state.boost) {
+                    const boost = document.createElement("div");
+                    boost.className = "ce-segment ce-segment-boost";
+                    boost.style.height = `${d.boost / visibleTotal * 100}%`;
+                    boost.textContent = pct(d.boost);
+                    bar.appendChild(boost);
+                }
+
+                if (state.rewards) {
+                    const rewards = document.createElement("div");
+                    rewards.className = "ce-segment ce-segment-rewards";
+                    rewards.style.height = `${d.rewardVisual / visibleTotal * 100}%`;
+                    rewards.textContent = "?";
+                    bar.appendChild(rewards);
+                }
+
+                const x = document.createElement("div");
+                x.className = "ce-x";
+                x.textContent = d.label;
+
+                wrap.appendChild(label);
+                wrap.appendChild(bar);
+                wrap.appendChild(x);
+
+                attachTooltip(wrap, d);
+                grid.appendChild(wrap);
+            });
+        }
+
+        function attachTooltip(el, d) {
+            const tooltip = document.getElementById("ceTooltip");
+            if (!tooltip) return;
+
+            el.addEventListener("mousemove", (event) => {
+                const shell = document.querySelector(".ce-chart-shell");
+                if (!shell) return;
+
+                const rect = shell.getBoundingClientRect();
+                tooltip.style.left = `${event.clientX - rect.left}px`;
+                tooltip.style.top = `${event.clientY - rect.top}px`;
+                tooltip.innerHTML = `
+                    <b>${d.label}</b><br>
+                    <span class="blue">Base APR:</span> ${pct(d.base)}<br>
+                    <span class="orange">Robin boost:</span> ${pct(d.boost)}<br>
+                    Cash APR: ${pct(d.cash)}<br>
+                    <span class="green">PMFI rewards:</span> variable / estimated
+                `;
+                tooltip.classList.add("visible");
+            });
+
+            el.addEventListener("mouseleave", () => {
+                tooltip.classList.remove("visible");
+            });
+        }
+
+        function bindTabs() {
+            document.querySelectorAll(".ce-tab").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const key = btn.getAttribute("data-series");
+                    if (!key) return;
+
+                    state[key] = !state[key];
+                    btn.classList.toggle("active", state[key]);
+
+                    if (!state.base && !state.boost && !state.rewards) {
+                        state[key] = true;
+                        btn.classList.add("active");
+                    }
+
+                    render();
+                });
+            });
+        }
+
+        function start() {
+            if (!document.getElementById("ceGrid")) {
+                setTimeout(start, 500);
+                return;
+            }
+
+            bindTabs();
+            render();
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", start);
+        } else {
+            start();
+        }
+    })();
+    </script>
+
+
+    <script>
+    /* PMFI Expected APR tile safe v3 */
+    (function () {
+        let attempts = 0;
+        const maxAttempts = 30;
+
+        function getDirectStatTile(statsRoot, el) {
+            if (!statsRoot || !el) return null;
+
+            let node = el;
+            while (node && node.parentElement !== statsRoot) {
+                node = node.parentElement;
+            }
+
+            return node && node.parentElement === statsRoot ? node : null;
+        }
+
+        function findChartTarget() {
+            return (
+                document.getElementById("capitalEfficiencyCardCE7") ||
+                document.getElementById("capitalEfficiencyCardClean") ||
+                document.getElementById("capitalEfficiencyCard")
+            );
+        }
+
+        function scrollToCapitalEfficiency() {
+            const target = findChartTarget();
+            if (!target) return;
+
+            target.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+
+        function expectedTileHTML() {
+            return `
+                <div class="pmfi-expected-top">
+                    <span class="pmfi-expected-label">Expected APR</span>
+                    <span class="pmfi-expected-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 17L9 12L13 15L20 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M15 8H20V13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                </div>
+                <strong class="pmfi-expected-value">≈ 12%</strong>
+            `;
+        }
+
+        function applyExpectedAprTile() {
+            attempts += 1;
+
+            const statsRoot = document.getElementById("arbVaultStats");
+            if (!statsRoot) return false;
+
+            const aprValue = document.getElementById("arbStatAPR");
+            const apyValue = document.getElementById("arbStatAPY");
+            const tvlValue = document.getElementById("arbStatTVL");
+
+            const aprTile = getDirectStatTile(statsRoot, aprValue);
+            const apyTile = getDirectStatTile(statsRoot, apyValue);
+            const tvlTile = getDirectStatTile(statsRoot, tvlValue);
+
+            if (aprTile) aprTile.classList.add("pmfi-hidden-rate-tile");
+            if (apyTile) apyTile.classList.add("pmfi-hidden-rate-tile");
+
+            let expectedTile = document.getElementById("expectedAprTile");
+
+            if (!expectedTile) {
+                expectedTile = document.createElement("div");
+                expectedTile.id = "expectedAprTile";
+                expectedTile.setAttribute("role", "button");
+                expectedTile.setAttribute("tabindex", "0");
+                expectedTile.setAttribute("aria-label", "Expected APR approximately 12 percent. View Capital Efficiency chart.");
+                expectedTile.innerHTML = expectedTileHTML();
+
+                if (tvlTile && tvlTile.parentElement === statsRoot) {
+                    tvlTile.insertAdjacentElement("afterend", expectedTile);
+                } else {
+                    statsRoot.appendChild(expectedTile);
+                }
+            } else if (expectedTile.dataset.pmfiSafeV3 !== "1") {
+                expectedTile.innerHTML = expectedTileHTML();
+            }
+
+            expectedTile.dataset.pmfiSafeV3 = "1";
+            expectedTile.onclick = scrollToCapitalEfficiency;
+            expectedTile.onkeydown = function (event) {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    scrollToCapitalEfficiency();
+                }
+            };
+
+            return true;
+        }
+
+        function start() {
+            const ok = applyExpectedAprTile();
+
+            if (!ok && attempts < maxAttempts) {
+                setTimeout(start, 300);
+            }
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", start);
+        } else {
+            start();
+        }
+    })();
+    </script>
+
+
+    <script>
+    /* PMFI center Share Price and TVL values v1 */
+    (function () {
+        let attempts = 0;
+        const maxAttempts = 30;
+
+        function clean(text) {
+            return (text || "").replace(/\s+/g, " ").trim();
+        }
+
+        function deepestMatchingText(root, matcher) {
+            const nodes = Array.from(root.querySelectorAll("*")).reverse();
+
+            for (const node of nodes) {
+                const text = clean(node.textContent);
+                if (!matcher(text, node)) continue;
+
+                const childHasSame = Array.from(node.children || []).some((child) => {
+                    return matcher(clean(child.textContent), child);
+                });
+
+                if (!childHasSame) return node;
+            }
+
+            return null;
+        }
+
+        function applyCentering() {
+            attempts += 1;
+
+            const statsRoot = document.getElementById("arbVaultStats");
+            if (!statsRoot) return false;
+
+            const tiles = Array.from(statsRoot.children || []);
+
+            tiles.forEach((tile) => {
+                const text = clean(tile.textContent).toUpperCase();
+
+                const isSharePrice = text.includes("SHARE PRICE");
+                const isTVL = text.includes("TVL") && !text.includes("EXPECTED APR");
+
+                if (!isSharePrice && !isTVL) return;
+
+                tile.classList.add("pmfi-center-stat-tile");
+
+                if (isTVL) {
+                    tile.classList.add("pmfi-tvl-stat-tile");
+                }
+
+                const labelText = isSharePrice ? "SHARE PRICE" : "TVL";
+
+                const labelEl = deepestMatchingText(tile, (txt) => {
+                    return clean(txt).toUpperCase() === labelText;
+                });
+
+                if (labelEl) {
+                    labelEl.classList.add("pmfi-center-stat-label");
+                }
+
+                let valueEl = null;
+
+                if (isTVL) {
+                    valueEl =
+                        tile.querySelector("#arbStatTVL") ||
+                        deepestMatchingText(tile, (txt) => txt.includes("$") && txt.includes("/"));
+                } else {
+                    valueEl =
+                        tile.querySelector("#arbStatSharePrice, #arbSharePrice, #sharePrice, #arbStatPrice") ||
+                        deepestMatchingText(tile, (txt) => /^\$[0-9,.]+/.test(txt));
+                }
+
+                if (valueEl) {
+                    valueEl.classList.add("pmfi-center-stat-value");
+                }
+            });
+
+            return true;
+        }
+
+        function start() {
+            const ok = applyCentering();
+
+            if (!ok && attempts < maxAttempts) {
+                setTimeout(start, 300);
+            }
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", start);
+        } else {
+            start();
+        }
+    })();
+    </script>
+
+
+<!-- PMFI app UI pps floor and venue accounts v1 -->
+<style id="pmfi-venue-accounts-style-v1">
+  #pmfiVenueAccounts {
+    width: min(980px, calc(100vw - 56px));
+    max-width: min(980px, calc(100vw - 56px));
+    margin: 22px auto 0 auto !important;
+    box-sizing: border-box;
+    display: block !important;
+    grid-column: 1 / -1 !important;
+    justify-self: center !important;
+    align-self: center !important;
+  }
+
+  #pmfiVenueAccounts .pmfi-venue-card {
+    border: 1px solid rgba(240,246,252,0.10);
+    background: rgba(240,246,252,0.025);
+    border-radius: 14px;
+    padding: 22px;
+  }
+
+  #pmfiVenueAccounts .pmfi-venue-title {
+    margin: 0 0 14px 0;
+    font-family: "Playfair Display", serif;
+    font-size: 28px;
+    line-height: 1.1;
+    font-weight: 400;
+    letter-spacing: -0.45px;
+    color: #f0f6fc;
+  }
+
+  #pmfiVenueAccounts .pmfi-venue-subtitle {
+    margin: -4px 0 18px 0;
+    max-width: 720px;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(240,246,252,0.52);
+  }
+
+  #pmfiVenueAccounts table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  #pmfiVenueAccounts th,
+  #pmfiVenueAccounts td {
+    padding: 13px 0;
+    border-top: 1px solid rgba(240,246,252,0.09);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  #pmfiVenueAccounts th {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: rgba(240,246,252,0.38);
+    font-weight: 700;
+  }
+
+  #pmfiVenueAccounts td {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14px;
+    color: rgba(240,246,252,0.78);
+  }
+
+  #pmfiVenueAccounts a {
+    color: rgba(240,246,252,0.84);
+    text-decoration: none;
+    word-break: break-all;
+  }
+
+  #pmfiVenueAccounts a:hover {
+    color: #f0f6fc;
+    text-decoration: underline;
+  }
+
+  @media (max-width: 720px) {
+    #pmfiVenueAccounts {
+      width: min(100%, calc(100vw - 32px));
+      max-width: min(100%, calc(100vw - 32px));
+    }
+
+    #pmfiVenueAccounts .pmfi-venue-card {
+      padding: 18px;
+    }
+
+    #pmfiVenueAccounts th,
+    #pmfiVenueAccounts td {
+      display: block;
+      width: 100%;
+      padding: 8px 0;
+    }
+
+    #pmfiVenueAccounts tr {
+      display: block;
+      padding: 10px 0;
+      border-top: 1px solid rgba(240,246,252,0.09);
+    }
+
+    #pmfiVenueAccounts tr:first-child {
+      border-top: 0;
+    }
+
+    #pmfiVenueAccounts th {
+      display: none;
+    }
+  }
+</style>
+
+<script id="pmfi-venue-accounts-script-v1">
+(function () {
+  const MIN_DISPLAY_PPS = 1.0;
+
+  function parseMoney(text) {
+    const n = Number(String(text || "").replace(/[^0-9.\-]/g, ""));
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function formatPps(value) {
+    return "$" + Number(value).toLocaleString("en-US", {
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4
+    });
+  }
+
+  function floorSharePriceDisplay() {
+    const el = document.getElementById("arbStatPPS");
+    if (!el) return;
+
+    const current = parseMoney(el.textContent);
+    if (current !== null && current > 0 && current < MIN_DISPLAY_PPS) {
+      el.textContent = formatPps(MIN_DISPLAY_PPS);
+      el.setAttribute("data-pmfi-display-floor", "1");
+    }
+  }
+
+  function addVenueAccountsTable() {
+    if (document.getElementById("pmfiVenueAccounts")) return true;
+
+    const graph =
+      document.getElementById("capitalEfficiencyCard") ||
+      document.querySelector(".capital-efficiency-card") ||
+      document.querySelector("[data-pmfi-capital-efficiency]");
+
+    const fallback = document.getElementById("arbVaultCard");
+    const target = graph || fallback;
+    if (!target || !target.parentNode) return false;
+
+    const section = document.createElement("section");
+    section.id = "pmfiVenueAccounts";
+    section.innerHTML = `
+      <div class="pmfi-venue-card">
+        <h3 class="pmfi-venue-title">Public venue profiles</h3>
+        <p class="pmfi-venue-subtitle">Users can track account level activity alongside live vault positions.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Venue</th>
+              <th>Exact link</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Polymarket</td>
+              <td><a href="https://polymarket.com/@pmfi3" target="_blank" rel="noopener noreferrer">https://polymarket.com/@pmfi3</a></td>
+            </tr>
+            <tr>
+              <td>Kalshi</td>
+              <td><a href="https://kalshi.com/ideas/profiles/pmfi" target="_blank" rel="noopener noreferrer">https://kalshi.com/ideas/profiles/pmfi</a></td>
+            </tr>
+            <tr>
+              <td>Opinion</td>
+              <td><a href="https://app.opinion.trade/profile?address=0x61068AbfB8349f90bd0bAb12347ec10e0C55C20f" target="_blank" rel="noopener noreferrer">https://app.opinion.trade/profile?address=0x61068AbfB8349f90bd0bAb12347ec10e0C55C20f</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    target.insertAdjacentElement("afterend", section);
+    return true;
+  }
+
+  function applyPmfiUiPatch() {
+    floorSharePriceDisplay();
+    addVenueAccountsTable();
+  }
+
+  document.addEventListener("DOMContentLoaded", applyPmfiUiPatch);
+  window.addEventListener("load", applyPmfiUiPatch);
+
+  setTimeout(applyPmfiUiPatch, 250);
+  setTimeout(applyPmfiUiPatch, 1000);
+  setInterval(applyPmfiUiPatch, 3000);
+
+  const observer = new MutationObserver(applyPmfiUiPatch);
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+})();
+</script>
+
 </body>
 </html>

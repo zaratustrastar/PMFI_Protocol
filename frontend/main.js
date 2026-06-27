@@ -103,161 +103,11 @@ async function redeemInviteCode(code, walletAddress) {
     }
 }
 
-// Initialize invite gate - New flow:
-// 1. Connect wallet first (no code input on step 1)
-// 2. Auto-check access - if wallet has access, enter app immediately
-// 3. If no access, show code input + request access link
-function initInviteGate() {
-    const gate = document.getElementById('inviteGate');
-    const step1 = document.getElementById('inviteStep1');
-    const step2 = document.getElementById('inviteStep2');
-    const codeInput = document.getElementById('inviteCodeInput');
-    const connectBtn = document.getElementById('inviteConnectBtn');
-    const redeemBtn = document.getElementById('inviteRedeemBtn');
-    const backBtn = document.getElementById('inviteBackBtn');
-    const walletDisplay = document.getElementById('inviteWalletDisplay');
-    const error1 = document.getElementById('inviteError');
-    const error2 = document.getElementById('inviteError2');
-    const success = document.getElementById('inviteSuccess');
-
-    let gateWalletAddress = null;
-
-    // Check cached access
-    const cachedAccess = localStorage.getItem(INVITE_STORAGE_KEY);
-    if (cachedAccess) {
-        try {
-            const parsed = JSON.parse(cachedAccess);
-            if (parsed.wallet && parsed.expires > Date.now()) {
-                // Cached access valid, hide gate
-                gate.classList.add('hidden');
-                return;
-            }
-        } catch (e) {}
-    }
-
-    // Auto-uppercase code input (in step 2)
-    codeInput.addEventListener('input', (e) => {
-        e.target.value = e.target.value.toUpperCase();
-    });
-
-    // Connect wallet button (Step 1) - just connects wallet and checks access
-    connectBtn.addEventListener('click', async () => {
-        error1.classList.remove('show');
-        connectBtn.disabled = true;
-        connectBtn.textContent = 'Connecting...';
-
-        try {
-            if (typeof window.ethereum === 'undefined') {
-                error1.textContent = 'Please install MetaMask or another wallet';
-                error1.classList.add('show');
-                return;
-            }
-
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            gateWalletAddress = accounts[0];
-
-            // Update button to show checking status
-            connectBtn.textContent = 'Checking access...';
-
-            // Check if already has access
-            const hasAccess = await checkBetaAccess(gateWalletAddress);
-            if (hasAccess) {
-                // Grant access immediately - no code needed
-                localStorage.setItem(INVITE_STORAGE_KEY, JSON.stringify({
-                    wallet: gateWalletAddress,
-                    expires: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
-                }));
-                gate.classList.add('hidden');
-                // Trigger main app connection
-                if (typeof connectWallet === 'function') {
-                    connectWallet();
-                }
-                return;
-            }
-
-            // No access - show step 2 with code input
-            walletDisplay.textContent = `${gateWalletAddress.slice(0, 6)}...${gateWalletAddress.slice(-4)}`;
-            step1.classList.remove('active');
-            step2.classList.add('active');
-
-        } catch (err) {
-            console.error('Wallet connection failed:', err);
-            error1.textContent = 'Wallet connection failed. Please try again.';
-            error1.classList.add('show');
-        } finally {
-            connectBtn.disabled = false;
-            connectBtn.textContent = 'Connect Wallet';
-        }
-    });
-
-    // Redeem button (Step 2) - now gets code from step 2 input
-    redeemBtn.addEventListener('click', async () => {
-        const code = codeInput.value.trim();
-        
-        if (!code || code.length < 6) {
-            error2.textContent = 'Please enter a valid invite code';
-            error2.classList.add('show');
-            return;
-        }
-
-        error2.classList.remove('show');
-        success.classList.remove('show');
-        redeemBtn.disabled = true;
-        redeemBtn.textContent = 'Redeeming...';
-
-        try {
-            const result = await redeemInviteCode(code, gateWalletAddress);
-
-            if (result.error) {
-                error2.textContent = result.error;
-                error2.classList.add('show');
-            } else if (result.success) {
-                success.textContent = result.message || 'Access granted!';
-                success.classList.add('show');
-
-                // Cache access
-                localStorage.setItem(INVITE_STORAGE_KEY, JSON.stringify({
-                    wallet: gateWalletAddress,
-                    expires: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
-                }));
-
-                // Hide gate after short delay
-                setTimeout(() => {
-                    gate.classList.add('hidden');
-                    // Trigger main app connection
-                    if (typeof connectWallet === 'function') {
-                        connectWallet();
-                    }
-                }, 1500);
-            }
-        } catch (err) {
-            error2.textContent = 'Failed to redeem code. Please try again.';
-            error2.classList.add('show');
-        } finally {
-            redeemBtn.disabled = false;
-            redeemBtn.textContent = 'Redeem Code';
-        }
-    });
-
-    // Back button - go back to step 1
-    backBtn.addEventListener('click', () => {
-        step2.classList.remove('active');
-        step1.classList.add('active');
-        error2.classList.remove('show');
-        success.classList.remove('show');
-        codeInput.value = '';
-        gateWalletAddress = null;
-    });
-}
-
-// Invite gate disabled — app is open to everyone
-function initInviteGate() {
+// Legacy invite gate is disabled; keep its old HTML hidden.
+document.addEventListener('DOMContentLoaded', () => {
     const gate = document.getElementById('inviteGate');
     if (gate) gate.classList.add('hidden');
-}
-
-// Initialize gate on load
-document.addEventListener('DOMContentLoaded', initInviteGate);
+});
 
 // =============================================================================
 // STATE
@@ -275,6 +125,11 @@ let priceRefreshTimer = null;
 let arbRefreshTimer = null;
 let isConnected = false;
 let lastPriceData = null;
+let walletRequestProvider = null;
+
+function getWalletRequestProvider() {
+    return walletRequestProvider || window.ethereum || null;
+}
 
 // =============================================================================
 // DOM ELEMENTS
@@ -310,10 +165,11 @@ const switchNetworkBtn = document.getElementById("switchNetworkBtn");
 // =============================================================================
 
 async function checkNetwork() {
-    if (typeof window.ethereum === "undefined") return true;
+    const ethProvider = getWalletRequestProvider();
+    if (!ethProvider || typeof ethProvider.request !== "function") return true;
     
     try {
-        const chainId = await window.ethereum.request({ method: "eth_chainId" });
+        const chainId = await ethProvider.request({ method: "eth_chainId" });
         const currentChainId = parseInt(chainId, 16);
         
         if (currentChainId !== BASE_MAINNET_CHAIN_ID) {
@@ -330,8 +186,14 @@ async function checkNetwork() {
 }
 
 async function switchToBase() {
+    const ethProvider = getWalletRequestProvider();
+    if (!ethProvider || typeof ethProvider.request !== "function") {
+        alert("Connect wallet first");
+        return;
+    }
+
     try {
-        await window.ethereum.request({
+        await ethProvider.request({
             method: "wallet_switchEthereumChain",
             params: [{ chainId: "0x2105" }]
         });
@@ -339,7 +201,7 @@ async function switchToBase() {
     } catch (switchError) {
         if (switchError.code === 4902) {
             try {
-                await window.ethereum.request({
+                await ethProvider.request({
                     method: "wallet_addEthereumChain",
                     params: [{
                         chainId: "0x2105",
@@ -662,8 +524,8 @@ async function loadArbVaultStats() {
             const d = await navResp.json();
             const elAPR      = document.getElementById('arbStatAPR');
             const elAPY      = document.getElementById('arbStatAPY');
-            if (elAPR)      elAPR.textContent      = d.apr  != null ? d.apr.toFixed(1)  + '%' : '—';
-            if (elAPY)      elAPY.textContent      = d.apy  != null ? d.apy.toFixed(1)  + '%' : '—';
+            if (elAPR)      elAPR.textContent      = d.apr  != null ? Number(d.apr).toFixed(2)  + '%' : '—';
+            if (elAPY)      elAPY.textContent      = d.apy  != null ? Number(d.apy).toFixed(4)  + '%' : '—';
         }
     } catch (e) {
         console.warn('[pARB V2] loadArbVaultStats nav fetch error:', e);
@@ -692,8 +554,21 @@ async function webLoadArbCardPositions() {
             const kShares     = Number(pos.kalshi_shares || pos.shares || 0);
             const polyPrice   = Number(pos.poly_entry_price || pos.poly_price || 0);
             const kPrice      = Number(pos.kalshi_entry_price || pos.kalshi_price || 0);
+
+function arbAprFromEdge(edgePct, expiryTs) {
+    const edge = Number(edgePct || 0);
+    const expiry = Number(expiryTs || 0);
+    if (!Number.isFinite(edge) || !Number.isFinite(expiry) || expiry <= 0) return edge;
+
+    const expiryMs = expiry > 1e12 ? expiry : expiry * 1000;
+    const days = Math.max((expiryMs - Date.now()) / 86400000, 1);
+
+    return edge * 365 / days;
+}
+
             const edge        = Number(pos.edge_pct     || 0);
-            const edgeColor   = edge >= 3 ? '#7ee787' : edge >= 1 ? '#fbbf24' : '#9ca3af';
+            const apr         = arbAprFromEdge(edge, pos.expiry_ts || pos.expiry || pos.expiryTs);
+            const edgeColor   = '#7ee787';
             const expiry      = pos.expiry_ts > 0
                 ? new Date(pos.expiry_ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
                 : '—';
@@ -702,7 +577,7 @@ async function webLoadArbCardPositions() {
                 <div style="font-size:12px;color:rgba(255,255,255,0.85);margin-bottom:6px;font-weight:500;">${shortTitle}</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;font-size:11px;">
                     <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:6px 8px;">
-                        <div style="color:rgba(255,255,255,0.4);margin-bottom:2px;">POLY ${polySide}</div>
+                        <div style="color:rgba(255,255,255,0.4);margin-bottom:2px;">POLYMARKET ${polySide}</div>
                         <div style="font-weight:600;color:#fff;">${polyShares.toFixed(1)} shares</div>
                         <div style="color:rgba(255,255,255,0.45);">@ ${(polyPrice * 100).toFixed(1)}¢</div>
                     </div>
@@ -712,8 +587,8 @@ async function webLoadArbCardPositions() {
                         <div style="color:rgba(255,255,255,0.45);">@ ${(kPrice * 100).toFixed(1)}¢</div>
                     </div>
                     <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px;">
-                        <span style="font-size:13px;font-weight:700;color:${edgeColor};">+${edge.toFixed(1)}%</span>
-                        <span style="font-size:10px;color:rgba(255,255,255,0.3);">edge</span>
+                        <span style="font-size:13px;font-weight:700;color:#7ee787;">+${apr.toFixed(1)}%</span>
+                        <span style="font-size:10px;color:rgba(255,255,255,0.3);">APR</span>
                         <span style="font-size:10px;color:rgba(255,255,255,0.25);">${expiry}</span>
                     </div>
                 </div>
@@ -753,14 +628,14 @@ function startAutoRefresh() {
 // =============================================================================
 
 async function connectWallet() {
-    if (typeof window.ethereum === "undefined") {
-        alert("Please install MetaMask to use this app!");
+    // Same top-right button: connect when disconnected, disconnect when connected
+    if (isConnected) {
+        await disconnectWallet();
         return;
     }
 
-    // If already connected, disconnect
-    if (isConnected) {
-        disconnectWallet();
+    if (!window.pmfiPrivy || typeof window.pmfiPrivy.connect !== "function") {
+        alert("Privy is still loading. Please try again in a moment.");
         return;
     }
 
@@ -779,19 +654,29 @@ async function connectWallet() {
             abisLoaded = true;
         }
 
-        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const privyWallet = await window.pmfiPrivy.connect();
+        if (!privyWallet || !privyWallet.ethereumProvider) {
+            throw new Error("Privy did not return an Ethereum wallet provider.");
+        }
+
+        walletRequestProvider = privyWallet.ethereumProvider;
 
         const isCorrectNetwork = await checkNetwork();
         if (!isCorrectNetwork) {
-            connectBtn.textContent = "Connect Wallet";
-            connectBtn.disabled = false;
-            return;
+            await switchToBase();
+            const switched = await checkNetwork();
+            if (!switched) {
+                connectBtn.textContent = "Connect Wallet";
+                connectBtn.disabled = false;
+                return;
+            }
         }
 
-        provider = new ethers.BrowserProvider(window.ethereum);
+        provider = new ethers.BrowserProvider(walletRequestProvider);
         signer = await provider.getSigner();
         if (window.__builderAttribution) signer = window.__builderAttribution.wrapSigner(signer);
-        userAddress = await signer.getAddress();
+
+        userAddress = privyWallet.address || await signer.getAddress();
 
         vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
         usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
@@ -812,29 +697,52 @@ async function connectWallet() {
         await refreshAll();
         startAutoRefresh();
 
-        // Refresh tab content that depends on wallet
         if (webActiveTab === 'tasks') { webLoadTasks(); webLoadInviteCodes(); }
         if (webActiveTab === 'rankings') webLoadLeaderboard();
 
-        window.ethereum.on("accountsChanged", handleAccountsChanged);
-        window.ethereum.on("chainChanged", handleChainChanged);
+        if (walletRequestProvider && typeof walletRequestProvider.on === "function") {
+            walletRequestProvider.on("accountsChanged", handleAccountsChanged);
+            walletRequestProvider.on("chainChanged", handleChainChanged);
+        }
 
     } catch (error) {
-        console.error("Connection error:", error);
+        console.error("Privy connection error:", error);
         connectBtn.textContent = "Connect Wallet";
         connectBtn.disabled = false;
-        alert("Failed to connect: " + error.message);
+        alert("Failed to connect with Privy: " + (error?.message || error));
     }
 }
 
-function disconnectWallet() {
+async function disconnectWallet(options = {}) {
+    const skipPrivyLogout = !!options.skipPrivyLogout;
+
+    try {
+        if (!skipPrivyLogout && window.pmfiPrivy && typeof window.pmfiPrivy.logout === "function") {
+            await window.pmfiPrivy.logout();
+        }
+    } catch (e) {
+        console.warn("[PMFI Privy] logout failed:", e);
+    }
+
+    try {
+        if (walletRequestProvider && typeof walletRequestProvider.removeListener === "function") {
+            walletRequestProvider.removeListener("accountsChanged", handleAccountsChanged);
+            walletRequestProvider.removeListener("chainChanged", handleChainChanged);
+        }
+    } catch (_) {}
+
     isConnected = false;
     userAddress = null;
     signer = null;
+    provider = null;
+    walletRequestProvider = null;
+    vaultContract = null;
+    usdcContract = null;
     arbVaultV2Contract = null;
 
     connectBtn.textContent = "Connect Wallet";
     connectBtn.classList.remove("connected");
+    connectBtn.disabled = false;
     
     openDepositBtn.disabled = true;
     userStatsEl.classList.add("hidden");
@@ -844,12 +752,14 @@ function disconnectWallet() {
     if (_arbStats) _arbStats.classList.add('hidden');
     _updateArbVaultVisibility(null);
 
-    // Reinitialize with read-only provider
-    initReadOnlyProvider();
+    await initReadOnlyProvider();
+
+    if (webActiveTab === 'tasks') { webLoadTasks(); webLoadInviteCodes(); }
+    if (webActiveTab === 'rankings') webLoadLeaderboard();
 }
 
 function handleAccountsChanged(accounts) {
-    if (accounts.length === 0) {
+    if (!accounts || accounts.length === 0) {
         disconnectWallet();
     } else {
         userAddress = accounts[0];
@@ -2077,7 +1987,7 @@ async function webLoadArbHistory() {
             const platform = t.platform_label || t.leg_label || '—';
             const edge = Number(t.edge_pct || 0).toFixed(1);
             const avgPrice = Number(t.avg_price_per_pair || 0).toFixed(4);
-            const contracts = Math.round(t.shares || 0).toLocaleString();
+            const contracts = Math.round(t.contracts ?? t.shares ?? 0).toLocaleString();
             const cost = '$' + Number(t.cost_usdc || 0).toFixed(2);
 
             let pnlCell, statusCell;
@@ -2162,7 +2072,7 @@ function webRenderArbCard(item) {
     const expiry = item.expiryTs ? new Date(item.expiryTs * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null;
 
     const polyVenue = `<${polyUrl ? `a href="${polyUrl}" target="_blank"` : 'div'} class="arb-venue-box">
-        <div class="arb-venue-name">POLY ${polySide}</div>
+        <div class="arb-venue-name">POLYMARKET ${polySide}</div>
         <div class="arb-venue-price">${polyPrice}\u00a2</div>
     </${polyUrl ? 'a' : 'div'}>`;
 
@@ -2490,18 +2400,14 @@ function webCopyCode(code, idx) {
         // Start price auto-refresh from VPS (if configured)
         startPriceAutoRefresh();
         
-        if (typeof window.ethereum !== "undefined") {
-            checkNetwork();
-            
-            window.ethereum.on("chainChanged", checkNetwork);
-            
+        if (window.pmfiPrivy && window.pmfiPrivy.ready) {
             try {
-                const accounts = await window.ethereum.request({ method: "eth_accounts" });
-                if (accounts.length > 0) {
-                    connectWallet();
-                }
+                await window.pmfiPrivy.ready;
+                window.addEventListener("pmfiPrivyLoggedOut", () => {
+                    if (isConnected) disconnectWallet({ skipPrivyLogout: true });
+                });
             } catch (e) {
-                console.log("Auto-connect check failed:", e);
+                console.log("Privy init check failed:", e);
             }
         }
     }
@@ -2520,4 +2426,51 @@ function webCopyCode(code, idx) {
     } else {
         console.log("No Price API URL configured. Set via localStorage: localStorage.setItem('predictfi_price_api_url', 'http://your-vps:8080')");
     }
+})();
+
+
+// precise-hide-deployed-settled-pnl
+(function hideOnlyDeprecatedMetricTiles() {
+  const banned = new Set(["Deployed", "Settled PnL"]);
+  const keep = new Set(["TVL", "APR", "APY", "pArbitrage TVL"]);
+
+  function hasKeepLabel(node) {
+    const text = (node && node.innerText) ? node.innerText : "";
+    for (const label of keep) {
+      if (text.includes(label)) return true;
+    }
+    return false;
+  }
+
+  function run() {
+    document.querySelectorAll("*").forEach((labelEl) => {
+      const label = (labelEl.textContent || "").trim();
+      if (!banned.has(label)) return;
+
+      // Prefer the smallest parent tile, not the full metrics wrapper.
+      let node = labelEl;
+      for (let depth = 0; depth < 5 && node && node.parentElement; depth++) {
+        node = node.parentElement;
+        const text = node.innerText || "";
+
+        // Never hide a container that also contains TVL/APR/APY.
+        if (hasKeepLabel(node)) continue;
+
+        // Hide small tile-like blocks only.
+        const rect = node.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0 && rect.height < 180) {
+          node.style.display = "none";
+          return;
+        }
+      }
+
+      // Fallback: hide only the label and its immediate value sibling, not parent panel.
+      labelEl.style.display = "none";
+      const next = labelEl.nextElementSibling;
+      if (next) next.style.display = "none";
+    });
+  }
+
+  run();
+  setInterval(run, 1000);
 })();
