@@ -39,10 +39,14 @@ import struct as _struct
 
 from .arb_withdrawals import withdraw_from_platforms, get_pending_withdrawals_total_usdc
 
-DOMAIN_SALT_TEXT = "PMFIArbVaultV2.v1"
-BASE_CHAIN_ID = 8453
-BASE_RPC = os.environ.get("BASE_RPC_URL", "https://mainnet.base.org")
-USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+# Defaults = the live Base V2 vault. A MILORD V3 vault on Robinhood Chain sets:
+#   ARB_VAULT_DOMAIN_SALT=PMFIArbVaultV3.milord.v1  ARB_VAULT_CHAIN_ID=4663
+#   ARB_VAULT_RPC_URL=<Robinhood RPC>  ARB_VAULT_ASSET=<USDG address, 6 decimals>
+# (names below are kept so the rest of this module is unchanged)
+DOMAIN_SALT_TEXT = os.environ.get("ARB_VAULT_DOMAIN_SALT", "PMFIArbVaultV2.v1")
+BASE_CHAIN_ID = int(os.environ.get("ARB_VAULT_CHAIN_ID", "8453"))
+BASE_RPC = os.environ.get("ARB_VAULT_RPC_URL", os.environ.get("BASE_RPC_URL", "https://mainnet.base.org"))
+USDC_BASE = os.environ.get("ARB_VAULT_ASSET", "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
 
 # report() external ABI — 4-field struct only.
 # vault/chainId/domainSalt are hardcoded inside the contract; the caller omits them.

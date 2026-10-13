@@ -75,8 +75,8 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
     <h3><i>03</i>Rewards</h3>
     <div>
       <div class="stats" id="rew"><div><em>Claimable pARB</em><b>—</b></div></div>
-      <div class="actions"><button class="btn primary" id="claim" disabled>Claim pARB</button><button class="btn" id="setPayout" disabled>Set Base payout address</button></div>
-      <p class="fine">Protocol fees are deposited as USDC into the pARBITRAGE vault on Base; the shares go to Milords held during each UTC week, weighted by time held. Earlier holders keep what they earned. pARB has a 0% performance fee here, its price can fall, and redemption goes through the vault's queue. Nothing here is a promise of return.</p>
+      <div class="actions"><button class="btn primary" id="claim" disabled>Claim pARB</button></div>
+      <p class="fine">Protocol fees are swapped to USDG and deposited into the pARBITRAGE vault on Robinhood Chain; the shares go to Milords held during each UTC week, weighted by time held. Earlier holders keep what they earned. pARB has a 0% performance fee here, its price can fall, and redemption goes through the vault's queue. Nothing here is a promise of return.</p>
     </div>
   </section>
 
@@ -103,8 +103,8 @@ async function refresh() {
   $("stats").innerHTML = [
     ["Milords awake", s.circulating], ["Asleep (returned)", s.inventory], ["Can be awake at once", s.maxSimultaneouslyBacked],
     ["$MILORD supply", fmt(s.milordSupply, 0)], ["Burned on redeem", fmt(s.burnedOnExit, 0)], ["Burned by buyback", fmt(s.burnedByBuyback, 0)],
-    ["Entry fees (ETH)", fmt(s.entryFeesEth)], ["Fee USDC into vault", fmt(s.feeUsdcDeposited, 2)], ["pARB minted for holders", fmt(s.parbMinted)],
-    ["pARB price (USDC)", fmt(s.parbPps, 6)], ["pARB claimed", fmt(s.parbClaimed)], ["Waking", s.entryPaused ? "paused" : "open"],
+    ["Entry fees (ETH)", fmt(s.entryFeesEth)], ["Fee USDG into vault", fmt(s.feeUsdcDeposited, 2)], ["pARB minted for holders", fmt(s.parbMinted)],
+    ["pARB price (USDG)", fmt(s.parbPps, 6)], ["pARB claimed", fmt(s.parbClaimed)], ["Waking", s.entryPaused ? "paused" : "open"],
   ].map(([k, v]) => `<div><em>${k}</em><b>${v}</b></div>`).join("");
   $("wake").disabled = s.entryPaused;
   const fee = await milord.previewFee(m, QUOTE).catch(() => null);
@@ -118,7 +118,7 @@ async function refresh() {
       <button class="btn" data-redeem="${n.id}">Redeem</button></span></div>`).join("") : `<p class="fine">No Milords yet.</p>`;
   if (epoch) {
     const r = await milord.rewards(m, epoch);
-    $("rew").innerHTML = `<div><em>Claimable pARB</em><b>${fmt(r.claimable)}</b></div><div><em>Earned to date</em><b>${fmt(r.cumulative)}</b></div><div><em>Already claimed</em><b>${fmt(r.claimed)}</b></div><div><em>Paid to (Base)</em><b style="font-size:13px">${r.payTo.slice(0, 10)}…</b></div>`;
+    $("rew").innerHTML = `<div><em>Claimable pARB</em><b>${fmt(r.claimable)}</b></div><div><em>Earned to date</em><b>${fmt(r.cumulative)}</b></div><div><em>Already claimed</em><b>${fmt(r.claimed)}</b></div>`;
     $("claim").disabled = !(Number(r.claimable) > 0);
   }
 }
@@ -130,13 +130,11 @@ $("connect").onclick = async () => {
   chars = await milord.characteristics(m);
   $("net").textContent = `chain ${D.chainId}`;
   $("acct").textContent = m.account.slice(0, 6) + "…" + m.account.slice(-4);
-  $("setPayout").disabled = false;
   await refresh();
   log("connected");
 };
 $("wake").onclick = async () => { try { await milord.wake(m, QUOTE); await refresh(); log("woke a Milord"); } catch (e) { log(e.shortMessage ?? e.message); } };
 $("claim").onclick = async () => { try { await milord.claim(m, epoch); log("claimed pARB"); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
-$("setPayout").onclick = async () => { const a = prompt("Base address to receive your pARB (blank = this wallet)") ?? ""; try { await milord.setPayout(m, a || "0x0000000000000000000000000000000000000000"); log("payout address set"); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
 document.addEventListener("click", async (e) => {
   const r = e.target.dataset.redeem, c = e.target.dataset.choose;
   try {

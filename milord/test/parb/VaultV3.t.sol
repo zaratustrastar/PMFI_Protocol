@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {BaseFixture} from "../utils/BaseFixture.sol";
-import {PMFIArbVaultV3} from "../../src/base/PMFIArbVaultV3.sol";
+import {ParbFixture} from "../utils/ParbFixture.sol";
+import {PMFIArbVaultV3} from "../../src/parb/PMFIArbVaultV3.sol";
 
 /// V3 behaviour with an open (unrestricted) vault so individual depositors can be modelled.
-contract VaultV3Test is BaseFixture {
+contract VaultV3Test is ParbFixture {
     address alice = makeAddr("alice");
     address bob = makeAddr("bob");
 

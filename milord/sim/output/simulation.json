@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-13T18:07:16.030Z",
-  "disclaimer": "Local simulation with hypothetical SCENARIO inputs and mock bridge/swap/oracle. Not performance data, not a forecast.",
+  "generatedAt": "2026-10-13T18:46:01.028Z",
+  "disclaimer": "Local single-chain simulation (as on Robinhood Chain) with hypothetical SCENARIO inputs and mock USDG, swap and quote price. Not performance data, not a forecast.",
   "scenario": {
     "weiPerMillionEarly": "30000000000000000",
     "weiPerMillionLater": "12000000000000000",
@@ -30,28 +30,28 @@
       "ethEntryFeesTotal": 0.25,
       "ethToArbitrageSafeTotal": 0.228345,
       "ethToTeamSafeTotal": 0.128345,
-      "ethBridgedThisWeek": 0.228345,
-      "usdcDepositedThisWeek": 570.8625,
-      "pnlUsdcThisWeek": 0,
+      "ethSwappedThisWeek": 0.228345,
+      "usdgDepositedThisWeek": 570.8625,
+      "pnlUsdgThisWeek": 0,
       "parbMintedThisWeek": 570.8625,
       "parbMintedTotal": 570.8625,
-      "ppsUsdc": 1,
-      "reportedAssetsUsdc": 570.8625,
+      "ppsUsdg": 1,
+      "reportedAssetsUsdg": 570.8625,
       "parbAllocatedThisWeek": 570.8625,
-      "dustCarried": 2.2e-17,
+      "dustCarried": 2e-17,
       "eligibleWallets": 42,
       "cumulativeAllocated": 570.8625,
-      "claimedTotal": 275.33510097114856,
+      "claimedTotal": 275.33513894572894,
       "milordSupply": 6765999800,
       "escrowMilord": 100000000,
       "burnedOnExitTotal": 0,
       "burnedByBuybackTotal": 1000200,
-      "merkleRoot": "0xfbaafb8dcb8011e3eb784d240d64f7c79a637e648db13d9577d23d767b1c90f8",
+      "merkleRoot": "0xc2dc6e489ffb1e735ee1793beb300dad54fc15ef5e59274ee7791297bfeb8b74",
       "tracked": {
         "seller_alice": {
           "weightSeconds": 1454399,
-          "allocatedThisWeek": 18.19552993847906,
-          "cumulative": 18.19552993847906,
+          "allocatedThisWeek": 18.195529140954047,
+          "cumulative": 18.195529140954047,
           "nftsHeld": 3
         },
         "buyer": {
@@ -61,15 +61,9 @@
           "nftsHeld": 0
         },
         "redeemer_carol": {
-          "weightSeconds": 1436399,
-          "allocatedThisWeek": 17.97033758143493,
-          "cumulative": 17.97033758143493,
-          "nftsHeld": 3
-        },
-        "smartWallet": {
-          "weightSeconds": 1427400,
-          "allocatedThisWeek": 17.857753913599367,
-          "cumulative": 17.857753913599367,
+          "weightSeconds": 1436400,
+          "allocatedThisWeek": 17.97034930446624,
+          "cumulative": 17.97034930446624,
           "nftsHeld": 3
         }
       }
@@ -88,47 +82,41 @@
       "ethEntryFeesTotal": 0.27,
       "ethToArbitrageSafeTotal": 0.242345,
       "ethToTeamSafeTotal": 0.134345,
-      "ethBridgedThisWeek": 0.014,
-      "usdcDepositedThisWeek": 35,
-      "pnlUsdcThisWeek": 10.275525,
+      "ethSwappedThisWeek": 0.014,
+      "usdgDepositedThisWeek": 35,
+      "pnlUsdgThisWeek": 10.275525,
       "parbMintedThisWeek": 34.381139489194496,
       "parbMintedTotal": 605.2436394891945,
-      "ppsUsdc": 1.018,
-      "reportedAssetsUsdc": 616.138025,
+      "ppsUsdg": 1.018,
+      "reportedAssetsUsdg": 616.138025,
       "parbAllocatedThisWeek": 34.381139489194496,
-      "dustCarried": 2.5e-17,
+      "dustCarried": 7e-18,
       "eligibleWallets": 52,
       "cumulativeAllocated": 605.2436394891945,
-      "claimedTotal": 291.8463130074368,
+      "claimedTotal": 291.84635074635594,
       "milordSupply": 6765899800,
       "escrowMilord": 109000000,
       "burnedOnExitTotal": 100000,
       "burnedByBuybackTotal": 1000200,
-      "merkleRoot": "0xb38287aab626ae698102d2020129f5c280fb50c7371237974b8678c492d464c5",
+      "merkleRoot": "0xfe5f3b4fef0d0e54a0597905640a7b388011a1b4d1b4e456820836bc64f77a1f",
       "tracked": {
         "seller_alice": {
           "weightSeconds": 1512000,
-          "allocatedThisWeek": 0.8084924545106038,
-          "cumulative": 19.00402239298966,
+          "allocatedThisWeek": 0.8084924167880472,
+          "cumulative": 19.004021557742092,
           "nftsHeld": 2
         },
         "buyer": {
           "weightSeconds": 302400,
-          "allocatedThisWeek": 0.16169849090212077,
-          "cumulative": 0.16169849090212077,
+          "allocatedThisWeek": 0.16169848335760945,
+          "cumulative": 0.16169848335760945,
           "nftsHeld": 1
         },
         "redeemer_carol": {
           "weightSeconds": 1339200,
-          "allocatedThisWeek": 0.7160933168522491,
-          "cumulative": 18.686430898287178,
+          "allocatedThisWeek": 0.7160932834408418,
+          "cumulative": 18.68644258790708,
           "nftsHeld": 2
-        },
-        "smartWallet": {
-          "weightSeconds": 1814400,
-          "allocatedThisWeek": 0.9701909454127245,
-          "cumulative": 18.827944859012092,
-          "nftsHeld": 3
         }
       }
     },
@@ -146,47 +134,41 @@
       "ethEntryFeesTotal": 0.285,
       "ethToArbitrageSafeTotal": 0.252845,
       "ethToTeamSafeTotal": 0.138845,
-      "ethBridgedThisWeek": 0.0105,
-      "usdcDepositedThisWeek": 26.25,
-      "pnlUsdcThisWeek": -16.635726,
+      "ethSwappedThisWeek": 0.0105,
+      "usdgDepositedThisWeek": 26.25,
+      "pnlUsdgThisWeek": -16.635726,
       "parbMintedThisWeek": 26.50139220647058,
       "parbMintedTotal": 631.745031695665,
-      "ppsUsdc": 0.990514,
-      "reportedAssetsUsdc": 625.752299,
+      "ppsUsdg": 0.990514,
+      "reportedAssetsUsdg": 625.752299,
       "parbAllocatedThisWeek": 26.50139220647058,
       "dustCarried": 2.3e-17,
       "eligibleWallets": 52,
       "cumulativeAllocated": 631.745031695665,
-      "claimedTotal": 304.4254311365477,
+      "claimedTotal": 304.42546887546683,
       "milordSupply": 6765899800,
       "escrowMilord": 114000000,
       "burnedOnExitTotal": 100000,
       "burnedByBuybackTotal": 1000200,
-      "merkleRoot": "0xf33005b216cd137ae16ed207ae325f835784fa2cd763c15716e57e72fd15bf6f",
+      "merkleRoot": "0x45461a9a614cdad341a9a2821611006a1059b44168853dec73fd5744c8da2472",
       "tracked": {
         "seller_alice": {
           "weightSeconds": 1209600,
           "allocatedThisWeek": 0.47108601107682335,
-          "cumulative": 19.475108404066486,
+          "cumulative": 19.475107568818917,
           "nftsHeld": 2
         },
         "buyer": {
           "weightSeconds": 604800,
           "allocatedThisWeek": 0.23554300553841168,
-          "cumulative": 0.3972414964405324,
+          "cumulative": 0.3972414888960211,
           "nftsHeld": 1
         },
         "redeemer_carol": {
           "weightSeconds": 1209600,
           "allocatedThisWeek": 0.47108601107682335,
-          "cumulative": 19.157516909364002,
+          "cumulative": 19.1575285989839,
           "nftsHeld": 2
-        },
-        "smartWallet": {
-          "weightSeconds": 1814400,
-          "allocatedThisWeek": 0.706629016615235,
-          "cumulative": 19.534573875627327,
-          "nftsHeld": 3
         }
       }
     }
@@ -217,10 +199,6 @@
       "pass": true
     },
     {
-      "name": "smart wallet paid to its Base payout address",
-      "pass": true
-    },
-    {
       "name": "PPS rose in the positive week",
       "pass": true
     },
@@ -242,25 +220,24 @@
     }
   ],
   "deployments": {
-    "BasePayoutRegistry": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
     "BuybackBurner": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
-    "EntryFeeSplitter": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-    "MILORD": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-    "MilordConverter": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-    "MilordGovernor": "0x59b670e9fA9D0A427751Af201D676719a970857b",
-    "Milords": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-    "MockSwapAdapter": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-    "ParbFundingAdapter": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
-    "RoyaltySplitter": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    "ShareDistributor": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
-    "StrategyRegistry": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+    "EntryFeeSplitter": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "MILORD": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    "MilordConverter": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+    "MilordGovernor": "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
+    "Milords": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+    "MockSwapAdapter": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "ParbFundingAdapter": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+    "RoyaltySplitter": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+    "ShareDistributor": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+    "StrategyRegistry": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
     "TradingTaxSplitter": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
-    "USDC": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1",
+    "USDG": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     "arbitrageSafe": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
     "chainId": 31337,
     "operator": "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
     "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-    "pARBVault": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
+    "pARBVault": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
     "quoteSigner": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
     "reportSigner": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
     "teamSafe": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"

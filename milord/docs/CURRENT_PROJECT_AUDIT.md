@@ -81,7 +81,7 @@ project Safes, and its native launch is incompatible with a 6.767B supply. This 
 2. Website source project (only compiled artifacts exist).
 3. The 8 characteristic names.
 4. pARB V2 deployed address/bytecode for verification (not needed if V3 is approved).
-5. Robinhood Chain mainnet RPC; USDC availability and bridge route between Robinhood Chain and Base.
+5. Robinhood Chain mainnet RPC. (Superseded 2026-10-13: the pARB vault now runs on Robinhood Chain with USDG, so fees need no bridge; see ROBINHOOD_VAULT_MIGRATION.)
 6. Safe addresses (Team, Arbitrage Funding), quote-signer and report-signer key custody plan.
 
 ## 8. Data and execution providers used by the bot

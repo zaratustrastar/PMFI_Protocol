@@ -10,10 +10,11 @@ are marked; none of them contradicts the spec.
 | D1 | Trading-tax mechanism (Hookr conflict) | A static 1.5% v4 pool · **B minimal dynamic-fee hook** · C custom tax hook · D Hookr frozen params | **B** recommended; nothing implemented yet. See HOOKR_COMPATIBILITY. |
 | D2 | Milords artwork + metadata | must be supplied | `ipfs://PENDING-METADATA/` placeholder; `freezeMetadata()` after upload |
 | D3 | 8 characteristic names (and any mapping to art traits) | must be supplied | "Characteristic 1–8" placeholders |
-| D4 | pARB instance | **new V3 instance, 0% fee** · reuse V2 (20% fee, PPS bugs) | V3 |
-| D5 | Bridge and swap route Robinhood → Base, USDC availability on Robinhood Chain | to confirm | Safe transactions; mocked locally |
+| D4 | pARB instance | **new V3 instance on Robinhood Chain, asset USDG, 0% fee** · reuse V2 on Base (20% fee, PPS bugs) | V3 on Robinhood (owner instruction 2026-10-13) |
+| D5 | USDG address and decimals on Robinhood Chain; engine funding route Robinhood USDG ↔ Polymarket/Kalshi/Opinion | to confirm on-chain; route to build | address seen on aggregators `0x5fc5…1d168` (unverified); vault enforces 6 decimals; fees no longer bridge |
 | D6 | Robinhood Chain mainnet RPC | to supply | — |
 | D7 | Initial MILORD allocation (liquidity, team, legacy holders, treasury) | not in brief | all to deployer in local build |
+| D9 | Kalshi withdrawals: which chain and asset Kalshi can pay out to | to confirm with Kalshi | until known, Kalshi recalls land on Base USDC and are bridged |
 | D8 | Website source project | not in repo; only compiled artifacts | integration delivered as a drop-in SDK + section markup |
 
 ## Parameters to approve

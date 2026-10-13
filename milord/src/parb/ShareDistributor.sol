@@ -9,7 +9,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 
 /// @title ShareDistributor
 /// @notice Holds pARB minted for Milords holders and pays it out against a cumulative
-///         Merkle root (one leaf per Base payout address: cumulative pARB ever allocated).
+///         Merkle root (one leaf per holder address: cumulative pARB ever allocated).
 ///
 ///  - Cumulative leaves: claiming late or skipping weeks loses nothing; a claim pays
 ///    `cumulative - claimed[account]`. Allocations earned by a former holder stay with them.

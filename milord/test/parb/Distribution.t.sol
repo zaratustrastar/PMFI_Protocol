@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {BaseFixture} from "../utils/BaseFixture.sol";
+import {ParbFixture} from "../utils/ParbFixture.sol";
 import {Merkle} from "../utils/Merkle.sol";
-import {ParbFundingAdapter} from "../../src/base/ParbFundingAdapter.sol";
-import {ShareDistributor} from "../../src/base/ShareDistributor.sol";
+import {ParbFundingAdapter} from "../../src/parb/ParbFundingAdapter.sol";
+import {ShareDistributor} from "../../src/parb/ShareDistributor.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MockUSDC} from "../../src/mocks/MockUSDC.sol";
 
-contract DistributionTest is BaseFixture {
+contract DistributionTest is ParbFixture {
     address alice = makeAddr("alice");
     address bob = makeAddr("bob");
     address carol = makeAddr("carol");

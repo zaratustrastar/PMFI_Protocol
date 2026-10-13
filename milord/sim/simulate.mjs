@@ -9,7 +9,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { JsonRpcProvider, Wallet, Contract, parseEther, formatEther, formatUnits, keccak256, toUtf8Bytes, hexlify, randomBytes, id } from "ethers";
-import { ownershipIntervals, eligibility, allocate, applyPayout, accumulate, buildTree, proofFor, DAY, WEEK } from "../offchain/lib/eligibility.mjs";
+import { ownershipIntervals, eligibility, allocate, accumulate, buildTree, proofFor, DAY, WEEK } from "../offchain/lib/eligibility.mjs";
 import { issueQuote } from "../offchain/lib/quote.mjs";
 import { signReport } from "../offchain/lib/report.mjs";
 
@@ -17,7 +17,7 @@ import { signReport } from "../offchain/lib/report.mjs";
 const SCENARIO = {
   weiPerMillionEarly: parseEther("0.03"),  // ETH value of 1M MILORD for the first 50 conversions
   weiPerMillionLater: parseEther("0.012"), // later price, low enough that the 0.002 ETH minimum applies
-  ethUsd: 2500n,                           // used only by the mock bridge/swap ETH -> USDC
+  ethUsd: 2500n,                           // used only by the mock ETH -> USDG swap on Robinhood Chain
   royaltySaleEth: parseEther("0.1"),       // one secondary sale that pays royalty
   tradingTaxEthWeek1: parseEther("0.15"),  // illustrative tax inflow; tax mechanism pending decision
   pnlBpsWeek2: 200,                        // +2% on deployed capital
@@ -49,8 +49,7 @@ const royaltySplit = C(D.RoyaltySplitter, abi("RevenueSplitter"));
 const taxSplit = C(D.TradingTaxSplitter, abi("RevenueSplitter"));
 const burner = C(D.BuybackBurner, abi("BuybackBurner"));
 const registry = C(D.StrategyRegistry, abi("StrategyRegistry"));
-const payoutReg = C(D.BasePayoutRegistry, abi("BasePayoutRegistry"));
-const usdc = C(D.USDC, abi("MockUSDC"));
+const usdc = C(D.USDG, abi("MockUSDG")); // vault asset: USDG (mock), same chain as everything else
 const vault = C(D.pARBVault, abi("PMFIArbVaultV3"));
 const dist = C(D.ShareDistributor, abi("ShareDistributor"));
 const adapter = C(D.ParbFundingAdapter, abi("ParbFundingAdapter"));
@@ -67,8 +66,7 @@ const fmtU = (v) => Number(formatUnits(v, 6));
 // ───────────── actors ─────────────
 const holders = Array.from({ length: 40 }, (_, i) => Wallet.createRandom().connect(provider));
 const newcomers = Array.from({ length: 12 }, () => Wallet.createRandom().connect(provider));
-const ALICE = holders[0], CAROL = holders[2], BUYER = newcomers[11], SMART = holders[3];
-const PAYOUT_ON_BASE = Wallet.createRandom().address; // holders[3] is a "smart wallet"; pays out elsewhere
+const ALICE = holders[0], CAROL = holders[2], BUYER = newcomers[11];
 for (const w of [...holders, ...newcomers]) await provider.send("anvil_setBalance", [w.address, "0x56BC75E2D63100000"]); // 100 ETH
 
 async function giveMilord(w, amount) {
@@ -126,7 +124,7 @@ let lastTree = null;
 const weeks = [];
 const arbAlloc = async () => (await entrySplit.totalAllocated(ZERO, D.arbitrageSafe)) + (await royaltySplit.totalAllocated(ZERO, D.arbitrageSafe)) + (await taxSplit.totalAllocated(ZERO, D.arbitrageSafe));
 const ZERO = "0x0000000000000000000000000000000000000000";
-let arbBridged = 0n;
+let arbSwapped = 0n;
 
 async function closeWeek(label, start, end, pnlBps, notes) {
   await setTime(end);
@@ -140,17 +138,17 @@ async function closeWeek(label, start, end, pnlBps, notes) {
     const r = await send(burner.connect(operator).buybackAndBurn(budget, minOut, end + 600));
     bought = (await burner.totalBurnedFromBuybacks());
   }
-  // 3. mock bridge: ETH that reached the arbitrage Safe this week -> USDC on Base
+  // 3. mock swap on Robinhood Chain: ETH that reached the arbitrage Safe this week -> USDG (no bridge)
   const arbTotal = await arbAlloc();
-  const ethToBridge = arbTotal - arbBridged;
-  arbBridged = arbTotal;
-  const usdcIn = (ethToBridge * SCENARIO.ethUsd) / 10n ** 12n; // wei * $/ETH -> 6-dec USDC
+  const ethToSwap = arbTotal - arbSwapped;
+  arbSwapped = arbTotal;
+  const usdcIn = (ethToSwap * SCENARIO.ethUsd) / 10n ** 12n; // wei * $/ETH -> 6-dec USDG
   // 4. trading result on capital already deployed, then report + settle
   const pnl = pnlBps ? await applyPnl(pnlBps) : 0n;
   let batchId = null, shares = 0n;
   if (usdcIn >= 10_000_000n) {
     await send(usdc.mint(D.ParbFundingAdapter, usdcIn));
-    const ref = id(`milord-fees:${label}:${ethToBridge}`);
+    const ref = id(`milord-fees:${label}:${ethToSwap}`);
     const r = await send(adapter.connect(operator).fund(ref, usdcIn));
     batchId = Number(await adapter.batchCount()) - 1;
   }
@@ -168,9 +166,7 @@ async function closeWeek(label, start, end, pnlBps, notes) {
   const { weights, daily } = eligibility(iv, { start, end, excluded: [D.MilordConverter] });
   const available = (await vault.balanceOf(D.ShareDistributor)) + (await dist.totalClaimed()) - prevTotal;
   const { allocations, dust } = allocate(available, weights);
-  const payoutCache = new Map();
-  for (const h of allocations.keys()) payoutCache.set(h, (await payoutReg.payoutAddress(h)).toLowerCase());
-  const byPayout = applyPayout(allocations, (h) => payoutCache.get(h));
+  const byPayout = allocations; // same chain: allocations go to the holder address itself
   cumulative = accumulate(cumulative, byPayout);
   const built = buildTree(cumulative);
   let rootHex = null;
@@ -205,9 +201,9 @@ async function closeWeek(label, start, end, pnlBps, notes) {
     conversionsTotal: Number(await conv.totalConversions()), redemptionsTotal: Number(await conv.totalRedemptions()),
     ethEntryFeesTotal: fmtE(await conv.totalEntryFeesWei()),
     ethToArbitrageSafeTotal: fmtE(arbTotal), ethToTeamSafeTotal: fmtE((await entrySplit.totalAllocated(ZERO, D.teamSafe)) + (await royaltySplit.totalAllocated(ZERO, D.teamSafe)) + (await taxSplit.totalAllocated(ZERO, D.teamSafe))),
-    ethBridgedThisWeek: fmtE(ethToBridge), usdcDepositedThisWeek: fmtU(usdcIn), pnlUsdcThisWeek: fmtU(pnl),
+    ethSwappedThisWeek: fmtE(ethToSwap), usdgDepositedThisWeek: fmtU(usdcIn), pnlUsdgThisWeek: fmtU(pnl),
     parbMintedThisWeek: fmtE(shares), parbMintedTotal: fmtE(await adapter.totalSharesMinted()),
-    ppsUsdc: fmtU(pps), reportedAssetsUsdc: fmtU(reported),
+    ppsUsdg: fmtU(pps), reportedAssetsUsdg: fmtU(reported),
     parbAllocatedThisWeek: fmtE([...allocations.values()].reduce((a, b) => a + b, 0n)), dustCarried: fmtE(dust),
     eligibleWallets: weights.size, cumulativeAllocated: fmtE(prevTotal), claimedTotal: fmtE(await dist.totalClaimed()),
     milordSupply: fmtE(await token.totalSupply()), escrowMilord: fmtE(await token.balanceOf(D.MilordConverter)),
@@ -217,15 +213,15 @@ async function closeWeek(label, start, end, pnlBps, notes) {
   };
   for (const [name, wal] of Object.entries(TRACK)) {
     const a = wal.toLowerCase();
-    w.tracked[name] = { weightSeconds: Number(weights.get(a) ?? 0n), allocatedThisWeek: fmtE(byPayout.get(payoutCache.get(a) ?? a) ?? 0n), cumulative: fmtE(cumulative.get(payoutCache.get(a) ?? a) ?? 0n), nftsHeld: Number(await nft.balanceOf(wal)) };
+    w.tracked[name] = { weightSeconds: Number(weights.get(a) ?? 0n), allocatedThisWeek: fmtE(byPayout.get(a) ?? 0n), cumulative: fmtE(cumulative.get(a) ?? 0n), nftsHeld: Number(await nft.balanceOf(wal)) };
   }
   weeks.push(w);
-  console.log(`${label}: active=${w.activeNFTs} usdcIn=${w.usdcDepositedThisWeek} pARB+${w.parbMintedThisWeek} PPS=${w.ppsUsdc} allocated=${w.parbAllocatedThisWeek}`);
+  console.log(`${label}: active=${w.activeNFTs} usdgIn=${w.usdgDepositedThisWeek} pARB+${w.parbMintedThisWeek} PPS=${w.ppsUsdg} allocated=${w.parbAllocatedThisWeek}`);
   return w;
 }
 
 // ───────────── scenario ─────────────
-const TRACK = { seller_alice: ALICE.address, buyer: BUYER.address, redeemer_carol: CAROL.address, smartWallet: SMART.address };
+const TRACK = { seller_alice: ALICE.address, buyer: BUYER.address, redeemer_carol: CAROL.address };
 const t0raw = await now();
 const T0 = t0raw - ((t0raw - 4 * DAY) % WEEK) + WEEK; // next Monday 00:00 UTC
 await setTime(T0 - 3600);
@@ -234,7 +230,6 @@ console.log("start: zero holders, zero NFTs");
 
 // Week 1: first 100 NFTs, fees, a royalty-paying sale, a sale without royalty, illustrative tax inflow
 for (const w of holders) await giveMilord(w, parseEther("3000000"));
-await send(payoutReg.connect(SMART).setPayoutAddress(PAYOUT_ON_BASE));
 const ids = [];
 for (let i = 0; i < 100; i++) {
   await setTime(T0 + i * 3000);
@@ -301,14 +296,13 @@ ok("shares recorded once", (await vault.balanceOf(D.ShareDistributor)) + (await 
 ok("seller keeps week-1 allocation after selling", weeks[2].tracked.seller_alice.cumulative >= weeks[0].tracked.seller_alice.cumulative && weeks[0].tracked.seller_alice.cumulative > 0);
 ok("buyer earns only from day 3.5 of week 2", weeks[0].tracked.buyer.cumulative === 0 && Math.abs(weeks[1].tracked.buyer.weightSeconds - 3.5 * DAY) <= 60);
 ok("redeemer earns only while holding", weeks[1].tracked.redeemer_carol.weightSeconds < weeks[0].tracked.redeemer_carol.weightSeconds);
-ok("smart wallet paid to its Base payout address", cumulative.get(PAYOUT_ON_BASE.toLowerCase()) > 0n && !cumulative.has(SMART.address.toLowerCase()));
-ok("PPS rose in the positive week", weeks[1].ppsUsdc > weeks[0].ppsUsdc);
-ok("PPS fell in the negative week (not reset to $1)", weeks[2].ppsUsdc < weeks[1].ppsUsdc && weeks[2].ppsUsdc !== 1);
+ok("PPS rose in the positive week", weeks[1].ppsUsdg > weeks[0].ppsUsdg);
+ok("PPS fell in the negative week (not reset to $1)", weeks[2].ppsUsdg < weeks[1].ppsUsdg && weeks[2].ppsUsdg !== 1);
 ok("collection unchanged when strategy added", D.Milords === nftAddrBefore && Number(pref.strategyId) === sid && pref.personal);
 ok("reissued ID came from inventory", Number(await nft.activationCount(carolId)) === 2);
 ok("no performance fee shares", (await vault.balanceOf(D.teamSafe)) === 0n);
 
-const out = { generatedAt: new Date().toISOString(), disclaimer: "Local simulation with hypothetical SCENARIO inputs and mock bridge/swap/oracle. Not performance data, not a forecast.", scenario: Object.fromEntries(Object.entries(SCENARIO).map(([k, v]) => [k, typeof v === "bigint" ? v.toString() : v])), start: snapshot0, weeks, checks, deployments: D };
+const out = { generatedAt: new Date().toISOString(), disclaimer: "Local single-chain simulation (as on Robinhood Chain) with hypothetical SCENARIO inputs and mock USDG, swap and quote price. Not performance data, not a forecast.", scenario: Object.fromEntries(Object.entries(SCENARIO).map(([k, v]) => [k, typeof v === "bigint" ? v.toString() : v])), start: snapshot0, weeks, checks, deployments: D };
 fs.writeFileSync(path.join(root, "sim/output/simulation.json"), JSON.stringify(out, null, 2));
 if (lastTree) {
   const claims = {};

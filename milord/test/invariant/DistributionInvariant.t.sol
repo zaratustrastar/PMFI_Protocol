@@ -2,16 +2,16 @@
 pragma solidity 0.8.26;
 
 import {Test} from "forge-std/Test.sol";
-import {BaseFixture} from "../utils/BaseFixture.sol";
+import {ParbFixture} from "../utils/ParbFixture.sol";
 import {Merkle} from "../utils/Merkle.sol";
 import {MockUSDC} from "../../src/mocks/MockUSDC.sol";
-import {PMFIArbVaultV3} from "../../src/base/PMFIArbVaultV3.sol";
-import {ParbFundingAdapter} from "../../src/base/ParbFundingAdapter.sol";
-import {ShareDistributor} from "../../src/base/ShareDistributor.sol";
+import {PMFIArbVaultV3} from "../../src/parb/PMFIArbVaultV3.sol";
+import {ParbFundingAdapter} from "../../src/parb/ParbFundingAdapter.sol";
+import {ShareDistributor} from "../../src/parb/ShareDistributor.sol";
 
 /// Drives funding, honest reports with P&L, weekly cumulative roots and claims.
 contract DistHandler is Test {
-    BaseFixtureView f;
+    ParbFixtureView f;
     MockUSDC usdc;
     PMFIArbVaultV3 vault;
     ParbFundingAdapter adapter;
@@ -27,7 +27,7 @@ contract DistHandler is Test {
     uint256[] pendingBatches;
     bytes32[] lastLeaves;
 
-    constructor(BaseFixtureView f_) {
+    constructor(ParbFixtureView f_) {
         f = f_;
         (usdc, vault, adapter, dist, op, publisher) = f.parts();
     }
@@ -84,7 +84,7 @@ contract DistHandler is Test {
     }
 }
 
-interface BaseFixtureView {
+interface ParbFixtureView {
     function parts()
         external
         view
@@ -92,7 +92,7 @@ interface BaseFixtureView {
     function reportWithPnl(int256 bps) external;
 }
 
-contract DistributionInvariantTest is BaseFixture, BaseFixtureView {
+contract DistributionInvariantTest is ParbFixture, ParbFixtureView {
     DistHandler h;
 
     function setUp() public override {

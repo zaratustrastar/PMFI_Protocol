@@ -8,11 +8,13 @@ hardware wallet or Safe for every owner action and pass deployer keys via `--led
 
 - [ ] External audit complete, findings fixed
 - [ ] D1–D8 in OPEN_DECISIONS resolved
-- [ ] Team Safe and Arbitrage Funding Safe deployed on Robinhood Chain and Base (same signers)
+- [ ] Team Safe and Arbitrage Funding Safe deployed on Robinhood Chain
+- [ ] USDG address, `decimals() == 6`, pause/freeze/upgrade roles confirmed on-chain (ROBINHOOD_VAULT_MIGRATION §1)
+- [ ] Engine funding route Robinhood USDG ↔ venues built and tested (ROBINHOOD_VAULT_MIGRATION §3)
 - [ ] Quote-signer and report-signer keys generated in their services; addresses recorded
 - [ ] Robinhood Chain RPC with `finalized` tag support
 - [ ] Reporter fixes merged (PARBITRAGE_INTEGRATION)
-- [ ] Testnet rehearsal (Robinhood testnet 46630 + Base Sepolia) of every step below
+- [ ] Testnet rehearsal on Robinhood testnet 46630 with `script/DeployRobinhood.s.sol` (it refuses 4663)
 
 ## 1. Robinhood Chain (id 4663)
 
@@ -26,19 +28,25 @@ hardware wallet or Safe for every owner action and pass deployer keys via `--led
    Safe: `setOperator(opsKey)`.
 7. Deploy `TradingTaxSplitter` (Burner / Team / Arbitrage).
 8. Deploy `StrategyRegistry(Team Safe, nft)`; Safe: add 8 characteristics, add strategy "pArbitrage"
-   (chainId 8453, vault, vault), `setDefaultStrategy`.
-9. Deploy `BasePayoutRegistry`, `MilordGovernor(nft)`.
+   (chainId 4663, vault, vault), `setDefaultStrategy`.
+9. Deploy `MilordGovernor(nft)`.
 10. Verify all sources on the explorer; record addresses in `deployments/robinhood-mainnet.json`.
 
-## 2. Base (id 8453)
+## 2. pARB on Robinhood Chain (same chain, id 4663)
 
-1. Deploy `PMFIArbVaultV3("PMFI Arb (MILORD)", "pARB-M", USDC 0x8335…2913, reportSigner, feeRecipient = Team Safe, servicer, cap, 0)`.
+The order below is what `script/MilordDeployer.sol` does in one run; a mainnet script needs a separate
+approval and should be a copy of `DeployRobinhood.s.sol` with the chain guard changed.
+
+1. Deploy `PMFIArbVaultV3("PMFI Arb (MILORD)", "pARB-M", USDG, reportSigner, feeRecipient = Team Safe, servicer, cap, 0)`
+   (constructor reverts unless the asset has 6 decimals).
 2. Deploy `ShareDistributor(owner = Team Safe, vault, publisher)`.
-3. Deploy `ParbFundingAdapter(owner = Team Safe, USDC, vault, distributor)`.
+3. Deploy `ParbFundingAdapter(owner = Team Safe, USDG, vault, distributor)`.
 4. Safe on vault: `setDepositorRestricted(true)`, `setAllowedDepositor(adapter, true)`, review idle/cooldown params,
    `transferOwnership(Team Safe)` (V3 uses Ownable; deployer → Safe).
 5. Safe on adapter: `setOperator(opsKey)`. Safe on distributor: `setActivationDelay(1 days)`.
-6. Verify; record in `deployments/base-mainnet-milord.json`.
+6. Reporter env: `ARB_VAULT_DOMAIN_SALT=PMFIArbVaultV3.milord.v1`, `ARB_VAULT_CHAIN_ID=4663`,
+   `ARB_VAULT_RPC_URL`, `ARB_VAULT_ASSET=<USDG>`, `ARB_VAULT_V2_ADDRESS=<V3 vault>`.
+7. Verify; record in `deployments/robinhood-mainnet.json`.
 
 ## 3. Launch sequence
 
@@ -51,8 +59,8 @@ hardware wallet or Safe for every owner action and pass deployer keys via `--led
 ## 4. Weekly operations
 
 1. `distribute` all three splitters; execute buybacks within limits.
-2. 💸 Arbitrage Safe: bridge ETH → Base, swap → USDC, send to adapter.
-3. Ops: `adapter.fund(sourceRef, amount)` (sourceRef = hash of the splitter allocation logs and bridge/swap txs).
+2. 💸 Arbitrage Safe: swap ETH → USDG on Robinhood Chain, send to adapter.
+3. Ops: `adapter.fund(sourceRef, amount)` (sourceRef = hash of the splitter allocation logs and swap tx).
 4. Next vault report; `adapter.settle(batchId)`.
 5. After Monday 00:00 UTC + finality margin: run the epoch job, publish `epoch-N.json` (IPFS), `proposeRoot`.
 6. During the activation delay, a second person recomputes the root from public data; veto if it differs.
@@ -66,6 +74,7 @@ hardware wallet or Safe for every owner action and pass deployer keys via `--led
 | Fee too high | `reduceFeeParams` (immediate) |
 | Bad report | vault `setPaused(true)`; investigate; reports moving PPS > 10% already revert |
 | Bad root | `vetoPending()` during the delay |
+| USDG paused or vault frozen by the issuer | claims of pARB keep working; deposits, `tend` and redemptions wait. Pause entry funding; tell holders. |
 | Vault wind-down | `setShutdown(true)`; keep reporting so redemptions process; depositors can cancel pending deposits |
 
 ## 6. Rollback

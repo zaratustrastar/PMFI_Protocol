@@ -11,9 +11,9 @@
 | NFT owner | Team Safe | royalty ≤10%, metadata until frozen | move NFTs, change converter |
 | Splitter owner | Team Safe | shares within fixed bounds; payee change after 2 days | withdraw funds |
 | Burner owner / operator | Team Safe / ops key | limits, operators; buyback within size and slippage bounds | send ETH anywhere except the swap adapter |
-| Vault owner (Base) | Team Safe | config, pause, shutdown, approve large PPS move, allowlist, emergency withdraw of **unreserved** USDC in shutdown | take reserved USDC; mint shares; change perf fee |
+| Vault owner | Team Safe | config, pause, shutdown, approve large PPS move, allowlist, emergency withdraw of **unreserved** USDG in shutdown | take reserved USDG; mint shares; change perf fee |
 | Report signer | reporter bot key | publish NAV within guards | move PPS > 10% without owner approval; report below on-chain cash |
-| Funding operator | ops key | deposit USDC held by the adapter | fund the same `sourceRef` twice; take shares |
+| Funding operator | ops key | deposit USDG held by the adapter | fund the same `sourceRef` twice; take shares |
 | Root publisher | ops key | propose a fully funded root | activate before delay; publish unfunded totals; withdraw pARB |
 | Distributor owner | Team Safe | veto pending roots; set delay ≤ 7 days | withdraw pARB |
 
@@ -32,7 +32,9 @@ Neither the team nor governance has any withdrawal path to MILORD redemption esc
 | ERC-6551 TBA drained before sale | UI warning; documented |
 | Royalty non-payment | treated as optional income; nothing depends on it |
 | pARB illiquidity | redemption is queued; documented; no instant-exit promise |
-| Smart-contract wallets on Base | `BasePayoutRegistry` |
+| Smart-contract wallets | same chain: pARB is paid to the holder address itself |
+| USDG issuer controls (upgradeable proxy, pause, freeze and wipe) | out of our control; pARB claims keep working while USDG is paused (tested); documented in ROBINHOOD_VAULT_MIGRATION |
+| Venue balances in USDC/USDT reported as USDG | assumes a 1:1 peg; reporter should value at market and flag deviations |
 | Supply burns vs 6,767 backing | `maxSimultaneouslyBacked()`; no insolvency |
 | Admin key loss | Safes; no function is required for exits or claims |
 

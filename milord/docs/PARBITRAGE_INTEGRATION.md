@@ -8,7 +8,8 @@ MILORD reuses the existing pARB design end to end. It adds no new arbitrage acco
   `autoClaimRedeems`, `cancelRequest`, `tend`, `report`, previews, request getters).
 - The `ReportDataV2` struct and EIP-191 signing (new domain salt `PMFIArbVaultV3.milord.v1` so V2 reports
   cannot be replayed).
-- The arbitrage engine, servicer wallet and venue accounts.
+- The arbitrage engine, servicer wallet and venue accounts. The engine's funding and recall paths still point at
+  Base USDC and need a Robinhood USDG leg; see ROBINHOOD_VAULT_MIGRATION §3.
 - The frontend's deposit/redeem flow (address change only).
 
 ## What changes (PMFIArbVaultV3)
@@ -18,10 +19,11 @@ MILORD reuses the existing pARB design end to end. It adds no new arbitrage acco
 | V3-1 perf fee constructor param, 0 for MILORD | spec; V2 fee is a constant 20% |
 | V3-2/3 outstanding shares = circulating + locked-for-redeem + processed-unclaimed | V2 PPS inflation bugs |
 | V3-4 zero NAV reverts | no fake $1 |
-| V3-5 report ≥ vault USDC; PPS move ≤ 10% per report unless owner pre-approves that nonce | single-signer blast radius |
+| V3-5 report ≥ vault asset balance; PPS move ≤ 10% per report unless owner pre-approves that nonce | single-signer blast radius |
 | V3-6 optional depositor allowlist (only the adapter for MILORD) | keeps fee-funded instance clean |
-| V3-7 emergency withdraw limited to unreserved USDC, shutdown only | V2 could take reserved funds |
+| V3-7 emergency withdraw limited to unreserved asset, shutdown only | V2 could take reserved funds |
 | V3-8 report runs in shutdown (redeems only), deposits cancellable | orderly exit |
+| V3-10 constructor requires a 6-decimal asset | USDG on Robinhood Chain replaces USDC on Base; every PPS/minimum constant assumes 6 decimals |
 
 ## Separate instance, not the existing V2
 

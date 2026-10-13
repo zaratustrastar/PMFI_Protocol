@@ -24,7 +24,7 @@ interface IParbVault {
 }
 
 /// @title ParbFundingAdapter
-/// @notice Turns MILORD protocol-fee USDC on Base into pARB shares through the vault's
+/// @notice Turns MILORD protocol-fee stablecoin (USDG on Robinhood Chain) into pARB shares through the vault's
 ///         normal deposit flow. It adds no accounting of its own: shares come from
 ///         requestDeposit -> report -> autoClaimDeposits exactly like any depositor.
 ///

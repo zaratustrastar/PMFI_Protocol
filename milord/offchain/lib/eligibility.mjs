@@ -74,16 +74,6 @@ export function allocate(amount, weights) {
   return { allocations: out, dust: amount - used };
 }
 
-/** Re-key allocations by Base payout address (BasePayoutRegistry lookup result). */
-export function applyPayout(allocations, payoutOf) {
-  const out = new Map();
-  for (const [holder, a] of allocations) {
-    const p = (payoutOf(holder) ?? holder).toLowerCase();
-    out.set(p, (out.get(p) ?? 0n) + a);
-  }
-  return out;
-}
-
 /** Add this epoch to the running cumulative totals (never decreases). */
 export function accumulate(prevCumulative, allocations) {
   const next = new Map(prevCumulative);

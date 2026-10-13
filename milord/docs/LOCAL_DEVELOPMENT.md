@@ -4,14 +4,16 @@
 cd milord
 npm install                      # OpenZeppelin, merkle-tree, ethers, forge-std
 forge build
-forge test                       # unit + fuzz + invariant (104 tests)
+forge test                       # unit + fuzz + invariant (119 tests)
 node offchain/test-eligibility.mjs
 ./sim/run-local.sh               # fresh anvil -> DeployLocal -> 3-week simulation -> sim/output/simulation.json
 node sim/build-dashboard.mjs     # -> sim/output/dashboard.html
 ```
 
 `script/DeployLocal.s.sol` refuses to run on any chain but 31337 and uses anvil's public test keys only.
-Both chains are simulated on one anvil; the bridge and swap are mocks (`MockUSDC.mint`, `MockSwapAdapter`).
+The anvil chain stands in for Robinhood Chain; USDG and the ETH→USDG swap are mocks (`MockUSDG`, `MockSwapAdapter`).
+`script/DeployRobinhood.s.sol` deploys the same set to Robinhood testnet 46630 from `MILORD_*` env vars and refuses
+chain 4663. `offchain/gen_reporter_fixture.py` signs a report with the real `arb_reporter.py` for the compatibility test.
 
 Frontend: `frontend-integration/` contains `milord-sdk.mjs` (contract calls) and `milords-app.html`
 (the prototype's look, wired to a local deployment). Serve the folder and open it with

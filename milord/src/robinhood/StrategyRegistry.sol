@@ -18,8 +18,8 @@ import {MilordsNFT} from "./MilordsNFT.sol";
 ///    The new holder may make their own selection.
 ///  - The first selection ever made for a token is kept as its origin record. Every
 ///    selection is appended to the token's history.
-///  - Strategies describe where rewards come from (chain, vault, reward asset); pARB on Base
-///    is one entry, not a hard-coded assumption.
+///  - Strategies describe where rewards come from (chain, vault, reward asset); pARB on Robinhood
+///    Chain is one entry, not a hard-coded assumption.
 contract StrategyRegistry is Ownable2Step {
     struct Characteristic {
         string name;

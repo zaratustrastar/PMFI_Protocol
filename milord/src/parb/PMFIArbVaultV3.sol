@@ -3,6 +3,7 @@ pragma solidity 0.8.26;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -34,6 +35,10 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
  *   V3-8  Shutdown is an orderly exit: report() still runs (redeems only), pending deposits
  *         can be cancelled immediately.
  *   V3-9  Unused MAX_REPORT_INTERVAL constant removed.
+ *   V3-10 Chain-neutral: the asset is any 6-decimal USD stablecoin (USDC on Base, USDG on
+ *         Robinhood Chain). The constructor rejects other decimals because INITIAL_PPS,
+ *         MIN_DEPOSIT_USDC and minimumIdleAmount are expressed in 6-decimal units.
+ *         Variable names keep "usdc" so the reporter, bot and frontend ABIs are unchanged.
  */
 contract PMFIArbVaultV3 is ERC20, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -195,6 +200,7 @@ contract PMFIArbVaultV3 is ERC20, Ownable, ReentrancyGuard {
         require(_feeRecipient != address(0), "Invalid fee recipient");
         require(_arbServicerWallet != address(0), "Invalid servicer");
         require(_perfFeeBps <= MAX_PERF_FEE_BPS, "Perf fee too high");
+        require(IERC20Metadata(_usdc).decimals() == 6, "Asset must have 6 decimals"); // V3-10
 
         usdc = IERC20(_usdc);
         reportSigner = _reportSigner;

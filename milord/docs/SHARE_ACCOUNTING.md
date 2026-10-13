@@ -1,6 +1,6 @@
 # Share accounting (PMFIArbVaultV3)
 
-Units: USDC 6 decimals; shares 18 decimals; PPS = USDC per 1e18 shares (so $1.00 = 1,000,000).
+Units: USDG 6 decimals (the constructor rejects any other asset decimals); shares 18 decimals; PPS = USDG per 1e18 shares (so $1.00 = 1,000,000).
 
 ## Report
 
@@ -37,6 +37,6 @@ PPS          = (backing − fee) / outstanding
 
 ## Deposited capital is not revenue
 
-Deposits raise the HWM and are excluded from profit; with a 0% fee nothing is taken in any case. Fee USDC
+Deposits raise the HWM and are excluded from profit; with a 0% fee nothing is taken in any case. Fee USDG
 deposited by the adapter buys shares at the current PPS like any deposit, so it neither raises PPS for
 existing holders nor gets counted as profit.

@@ -19,7 +19,6 @@ const A = {
     "function strategy(uint256) view returns ((string name,bool enabled,uint256 chainId,address vault,address rewardAsset))",
     "function resolve(uint256,uint256) view returns (uint256)", "function select(uint256,uint256,uint256) returns (uint256)",
     "function currentPreference(uint256) view returns (bool personal,uint256 charA,uint256 charB,uint256 strategyId)"],
-  payout: ["function payoutAddress(address) view returns (address)", "function setPayoutAddress(address)"],
   vault: ["function officialPPS() view returns (uint256)", "function balanceOf(address) view returns (uint256)",
     "function requestRedeem(uint256,address) returns (uint256)", "function lastReportTimestamp() view returns (uint256)"],
   dist: ["function claimed(address) view returns (uint256)", "function totalClaimed() view returns (uint256)",
@@ -37,8 +36,8 @@ export async function connect(deployments, ethereum = window.ethereum) {
   return {
     provider, signer, account: await signer.getAddress(), D,
     token: c(D.MILORD, A.token), nft: c(D.Milords, A.nft), conv: c(D.MilordConverter, A.conv),
-    registry: c(D.StrategyRegistry, A.registry), payout: c(D.BasePayoutRegistry, A.payout),
-    // On mainnet the next four live on Base: build them with a Base provider instead.
+    registry: c(D.StrategyRegistry, A.registry),
+    // pARB vault and distributor live on the same chain (Robinhood Chain): one provider.
     vault: c(D.pARBVault, A.vault), dist: c(D.ShareDistributor, A.dist), adapter: c(D.ParbFundingAdapter, A.adapter),
     burner: c(D.BuybackBurner, A.burner),
   };
@@ -84,7 +83,6 @@ export async function myMilords(m, who = m.account) {
 
 export const redeem = async (m, id) => (await m.conv.redeem(id)).wait();
 export const choose = async (m, id, a, b) => (await m.registry.select(id, a, b)).wait();
-export const setPayout = async (m, addr) => (await m.payout.setPayoutAddress(addr)).wait();
 
 export async function characteristics(m) {
   const n = Number(await m.registry.characteristicCount());
@@ -95,7 +93,7 @@ export async function characteristics(m) {
 
 /** epoch = published epoch file {root, claims:{addr:{cumulative, proof}}}. */
 export async function rewards(m, epoch, who = m.account) {
-  const payTo = (await m.payout.payoutAddress(who)).toLowerCase();
+  const payTo = who.toLowerCase(); // same chain: pARB is paid to the holder address
   const leaf = epoch?.claims?.[payTo];
   const claimed = await m.dist.claimed(payTo);
   const active = await m.dist.active();

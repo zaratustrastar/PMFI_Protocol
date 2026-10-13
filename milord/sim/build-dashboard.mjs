@@ -21,8 +21,8 @@ const rows = [
   ["Milords awake", "activeNFTs", 0], ["Unique holders", "uniqueHolders", 0], ["Asleep (inventory)", "inventory", 0],
   ["Conversions (total)", "conversionsTotal", 0], ["Redemptions (total)", "redemptionsTotal", 0],
   ["Entry fees, ETH (total)", "ethEntryFeesTotal"], ["ETH to Arbitrage Safe (total)", "ethToArbitrageSafeTotal"], ["ETH to Team Safe (total)", "ethToTeamSafeTotal"],
-  ["ETH bridged this week", "ethBridgedThisWeek"], ["USDC deposited this week", "usdcDepositedThisWeek", 2], ["Scenario P&L this week, USDC", "pnlUsdcThisWeek", 2],
-  ["pARB minted this week", "parbMintedThisWeek"], ["pARB price, USDC", "ppsUsdc", 6], ["Reported assets, USDC", "reportedAssetsUsdc", 2],
+  ["ETH swapped to USDG this week", "ethSwappedThisWeek"], ["USDG deposited this week", "usdgDepositedThisWeek", 2], ["Scenario P&L this week, USDG", "pnlUsdgThisWeek", 2],
+  ["pARB minted this week", "parbMintedThisWeek"], ["pARB price, USDG", "ppsUsdg", 6], ["Reported assets, USDG", "reportedAssetsUsdg", 2],
   ["pARB allocated this week", "parbAllocatedThisWeek"], ["Dust carried", "dustCarried", 18], ["Eligible wallets", "eligibleWallets", 0],
   ["pARB claimed (total)", "claimedTotal"], ["MILORD supply", "milordSupply", 0], ["MILORD escrowed", "escrowMilord", 0],
   ["Burned on redeem (total)", "burnedOnExitTotal", 0], ["Burned by buyback (total)", "burnedByBuybackTotal", 0],
@@ -50,12 +50,12 @@ small{color:var(--muted);font-weight:400}.ok{color:#2f7d4f}.bad{color:#b23b3b}co
 </style></head><body><main>
 <h1>MILORD local simulation</h1>
 <div class="warn">${esc(S.disclaimer)}</div>
-<p>Three UTC weeks on a local chain against the real contracts. Generated ${esc(S.generatedAt)}. Start: ${S.start.activeNFTs} Milords, no holders.</p>
-<h2>Scenario inputs (hypothetical)</h2><ul>${Object.entries(S.scenario).map(([k, v]) => `<li><code>${esc(k)}</code>: ${esc(/Eth|wei/.test(k) ? `${Number(v) / 1e18} ETH` : /Bps/.test(k) ? `${Number(v) / 100}%` : k === "ethUsd" ? `$${v} per ETH (mock swap)` : v)}</li>`).join("")}</ul>
+<p>Three UTC weeks on one local chain configured like Robinhood Chain (token, NFTs, pARB vault and distributor together, no bridge), against the real contracts. Generated ${esc(S.generatedAt)}. Start: ${S.start.activeNFTs} Milords, no holders.</p>
+<h2>Scenario inputs (hypothetical)</h2><ul>${Object.entries(S.scenario).map(([k, v]) => `<li><code>${esc(k)}</code>: ${esc(/Eth|wei/.test(k) ? `${Number(v) / 1e18} ETH` : /Bps/.test(k) ? `${Number(v) / 100}%` : k === "ethUsd" ? `$${v} per ETH (mock ETH→USDG swap)` : v)}</li>`).join("")}</ul>
 <h2>What happened each week</h2><ul>${S.weeks.map((w) => `<li><b>${esc(w.label)}</b>: ${esc(w.notes)}</li>`).join("")}</ul>
-<h2>Charts</h2><div class="charts">${bars("Milords awake", "activeNFTs", "count", 0)}${bars("USDC deposited from fees", "usdcDepositedThisWeek", "USDC", 2)}${bars("pARB minted for holders", "parbMintedThisWeek", "pARB", 2)}${bars("pARB price", "ppsUsdc", "USDC per share", 6)}</div>
+<h2>Charts</h2><div class="charts">${bars("Milords awake", "activeNFTs", "count", 0)}${bars("USDG deposited from fees", "usdgDepositedThisWeek", "USDG", 2)}${bars("pARB minted for holders", "parbMintedThisWeek", "pARB", 2)}${bars("pARB price", "ppsUsdg", "USDG per share", 6)}</div>
 <h2>Weekly numbers</h2><div class="tw">${table}</div>
-<h2>Tracked wallets</h2><p>Seller keeps week-1 earnings; buyer earns from the sale; redeemer stops earning at redemption; the smart wallet's allocation goes to its Base payout address.</p><div class="tw">${tracked}</div>
+<h2>Tracked wallets</h2><p>Seller keeps week-1 earnings; buyer earns from the sale; redeemer stops earning at redemption;</p><div class="tw">${tracked}</div>
 <h2>Checks</h2><ul>${S.checks.map((c) => `<li class="${c.pass ? "ok" : "bad"}">${c.pass ? "✓" : "✗"} ${esc(c.name)}</li>`).join("")}</ul>
 </main></body></html>`;
 fs.writeFileSync(new URL("sim/output/dashboard.html", root), html);

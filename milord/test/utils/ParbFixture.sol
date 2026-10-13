@@ -5,11 +5,11 @@ import {Test} from "forge-std/Test.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MockUSDC} from "../../src/mocks/MockUSDC.sol";
-import {PMFIArbVaultV3} from "../../src/base/PMFIArbVaultV3.sol";
-import {ParbFundingAdapter, IParbVault} from "../../src/base/ParbFundingAdapter.sol";
-import {ShareDistributor} from "../../src/base/ShareDistributor.sol";
+import {PMFIArbVaultV3} from "../../src/parb/PMFIArbVaultV3.sol";
+import {ParbFundingAdapter, IParbVault} from "../../src/parb/ParbFundingAdapter.sol";
+import {ShareDistributor} from "../../src/parb/ShareDistributor.sol";
 
-abstract contract BaseFixture is Test {
+abstract contract ParbFixture is Test {
     uint256 internal reporterPk = 0xB0B;
     address internal reporter;
     address internal owner = makeAddr("baseOwner");

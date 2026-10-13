@@ -26,11 +26,11 @@ If the launch venue keeps a commission from the 1.5%, the splitter only sees wha
 shares shrink proportionally with no contract change. Example: 1.5% tax with a 0.3% venue cut leaves 1.2%,
 i.e. 0.4% each.
 
-## Bridging to Base
+## Swapping to USDG
 
-The Arbitrage Funding Safe bridges ETH to Base and swaps to USDC through ordinary Safe transactions; no
-contract holds funds in transit. Each batch is tagged with a `sourceRef` (hash of the splitter allocation
-events and the bridge/swap transactions) that `ParbFundingAdapter` accepts only once, so the same fees cannot
+The Arbitrage Funding Safe swaps ETH to USDG on Robinhood Chain through an ordinary Safe transaction; no
+contract holds funds in transit and there is no reward bridge. Each batch is tagged with a `sourceRef` (hash
+of the splitter allocation events and the swap transaction) that `ParbFundingAdapter` accepts only once, so the same fees cannot
 be turned into shares twice. The Team Safe's share is never deposited.
 
 ## Buyback and burn
