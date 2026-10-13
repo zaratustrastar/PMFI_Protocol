@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Milords app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono&display=swap" rel="stylesheet">
+<style>
+/* Tokens and component vocabulary copied from the Milords prototype (sky / ink / butter, rows, ledger, chips). */
+:root{--sky:#e0ebf4;--ink:#1e2238;--muted:#545d78;--line:#1e223829;--blue:#6895ce;--butter:#f4d35e;--text:"Geist",system-ui,sans-serif;--pixel:"Geist Mono",monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--sky);color:var(--ink);font:400 16px/1.5 var(--text);-webkit-font-smoothing:antialiased}
+.page{max-width:1240px;margin:0 auto;padding:40px 48px 96px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:32px}
+header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none}
+.chips li{border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:4px 12px;font-size:13px}
+.btn{border:2px solid var(--ink);border-radius:999px;height:42px;padding:0 18px;font:600 14px var(--text);background:none;color:var(--ink);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--butter);border-color:var(--butter)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{border-top:1px solid var(--line);display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px;padding:40px 0}
+.row h3{font-size:15px;font-weight:600}
+.row h3 i{display:block;font-style:normal;font-family:var(--pixel);color:var(--blue);font-size:14px;margin-bottom:4px}
+.ledger{border:1.5px solid var(--ink);border-radius:6px;display:grid;grid-template-columns:repeat(3,1fr)}
+.ledger>div{padding:14px 16px;display:grid;gap:2px;align-content:start}
+.ledger>div+div{border-left:1.5px solid var(--ink)}
+.ledger em{color:var(--muted);font-size:12px;font-style:normal}
+.ledger b{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.ledger span{color:var(--muted);font-size:13px}
+.ledger .sum{background:var(--butter)}
+.fine{color:var(--muted);font-size:13px;max-width:680px;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.stats div{border:1.5px solid var(--ink);border-radius:6px;padding:12px 14px}
+.stats em{display:block;color:var(--muted);font-size:12px;font-style:normal}
+.stats b{font-size:18px;font-variant-numeric:tabular-nums}
+.list{display:grid;gap:10px}
+.item{border:1.5px solid var(--ink);border-radius:6px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.item select{font:inherit;border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:#fff}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+#log{font-family:var(--pixel);font-size:12px;color:var(--muted);white-space:pre-wrap;margin-top:12px}
+@media (max-width:760px){.page{padding:24px 16px 64px}.row{grid-template-columns:1fr;gap:16px}.ledger{grid-template-columns:1fr}.ledger>div+div{border-left:0;border-top:1.5px solid var(--ink)}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <b>Milords</b>
+    <ul class="chips"><li id="net">not connected</li><li id="acct">—</li></ul>
+    <button class="btn primary" id="connect">Connect wallet</button>
+  </header>
+
+  <section class="row">
+    <h3><i>01</i>Wake a Milord</h3>
+    <div>
+      <div class="ledger">
+        <div><em>You lock</em><b>1,000,000</b><span>$MILORD, held in escrow</span></div>
+        <div><em>Plus an ETH fee</em><b id="fee">—</b><span id="feeRule">10% of the ETH value of 1M $MILORD, min 0.002 ETH</span></div>
+        <div class="sum"><em>On redeem</em><b>900,000</b><span>back to you, 100,000 burned</span></div>
+      </div>
+      <p class="fine">The fee comes from a short-lived signed price quote. If pricing is unavailable, waking is paused; redeeming never is. Your Milord's ID comes from the returned pool first, then the next new one. Fees are split 70% to arbitrage funding and 30% to the team.</p>
+      <div class="actions"><button class="btn primary" id="wake" disabled>Wake a Milord</button><span id="milordBal" class="fine"></span></div>
+    </div>
+  </section>
+
+  <section class="row">
+    <h3><i>02</i>Your Milords</h3>
+    <div>
+      <div class="list" id="mine"><p class="fine">Connect to see your Milords.</p></div>
+      <p class="fine">Pick two characteristics to set the strategy preference for this holding. It is free, belongs to you, and resets when the Milord changes hands. All pairs map to Arbitrage today. If your Milord has an ERC-6551 wallet, check its contents before buying or selling: assets in it move with the NFT.</p>
+    </div>
+  </section>
+
+  <section class="row">
+    <h3><i>03</i>Rewards</h3>
+    <div>
+      <div class="stats" id="rew"><div><em>Claimable pARB</em><b>—</b></div></div>
+      <div class="actions"><button class="btn primary" id="claim" disabled>Claim pARB</button><button class="btn" id="setPayout" disabled>Set Base payout address</button></div>
+      <p class="fine">Protocol fees are deposited as USDC into the pARBITRAGE vault on Base; the shares go to Milords held during each UTC week, weighted by time held. Earlier holders keep what they earned. pARB has a 0% performance fee here, its price can fall, and redemption goes through the vault's queue. Nothing here is a promise of return.</p>
+    </div>
+  </section>
+
+  <section class="row">
+    <h3><i>04</i>Protocol</h3>
+    <div><div class="stats" id="stats"></div><div id="log"></div></div>
+  </section>
+</div>
+
+<script type="module">
+import * as milord from "./milord-sdk.mjs";
+const q = new URLSearchParams(location.search);
+const DEPLOY = q.get("deployments") ?? "../sim/deployments.local.json";
+const EPOCH = q.get("epoch") ?? "../sim/output/epoch-latest.json";
+const QUOTE = q.get("quote") ?? "http://127.0.0.1:8787/quote";
+const $ = (id) => document.getElementById(id);
+const log = (s) => { $("log").textContent = `${new Date().toLocaleTimeString()}  ${s}\n` + $("log").textContent; };
+const fmt = (s, d = 4) => Number(s).toLocaleString(undefined, { maximumFractionDigits: d });
+let m, epoch, chars;
+
+async function refresh() {
+  const s = await milord.status(m);
+  $("feeRule").textContent = `${s.entryFeeBps / 100}% of the ETH value of 1M $MILORD, min ${s.minEntryFeeEth} ETH`;
+  $("stats").innerHTML = [
+    ["Milords awake", s.circulating], ["Asleep (returned)", s.inventory], ["Can be awake at once", s.maxSimultaneouslyBacked],
+    ["$MILORD supply", fmt(s.milordSupply, 0)], ["Burned on redeem", fmt(s.burnedOnExit, 0)], ["Burned by buyback", fmt(s.burnedByBuyback, 0)],
+    ["Entry fees (ETH)", fmt(s.entryFeesEth)], ["Fee USDC into vault", fmt(s.feeUsdcDeposited, 2)], ["pARB minted for holders", fmt(s.parbMinted)],
+    ["pARB price (USDC)", fmt(s.parbPps, 6)], ["pARB claimed", fmt(s.parbClaimed)], ["Waking", s.entryPaused ? "paused" : "open"],
+  ].map(([k, v]) => `<div><em>${k}</em><b>${v}</b></div>`).join("");
+  $("wake").disabled = s.entryPaused;
+  const fee = await milord.previewFee(m, QUOTE).catch(() => null);
+  $("fee").textContent = fee ? `${fmt(fee, 5)} ETH` : "pricing unavailable";
+  $("milordBal").textContent = `Your balance: ${fmt((Number(await m.token.balanceOf(m.account)) / 1e18), 0)} $MILORD`;
+  const mine = await milord.myMilords(m);
+  const opts = chars.filter((c) => c.active).map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
+  $("mine").innerHTML = mine.length ? mine.map((n) => `
+    <div class="item"><b>#${n.id}</b><span class="fine" style="margin:0">wake ${n.activation} · ${n.personal ? `chose ${n.charA} + ${n.charB} → strategy ${n.strategyId}` : "no choice yet (Arbitrage)"}</span>
+      <span><select data-a="${n.id}">${opts}</select> <select data-b="${n.id}">${opts}</select> <button class="btn" data-choose="${n.id}">Choose</button>
+      <button class="btn" data-redeem="${n.id}">Redeem</button></span></div>`).join("") : `<p class="fine">No Milords yet.</p>`;
+  if (epoch) {
+    const r = await milord.rewards(m, epoch);
+    $("rew").innerHTML = `<div><em>Claimable pARB</em><b>${fmt(r.claimable)}</b></div><div><em>Earned to date</em><b>${fmt(r.cumulative)}</b></div><div><em>Already claimed</em><b>${fmt(r.claimed)}</b></div><div><em>Paid to (Base)</em><b style="font-size:13px">${r.payTo.slice(0, 10)}…</b></div>`;
+    $("claim").disabled = !(Number(r.claimable) > 0);
+  }
+}
+
+$("connect").onclick = async () => {
+  const D = await (await fetch(DEPLOY)).json();
+  m = await milord.connect(D);
+  epoch = await fetch(EPOCH).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  chars = await milord.characteristics(m);
+  $("net").textContent = `chain ${D.chainId}`;
+  $("acct").textContent = m.account.slice(0, 6) + "…" + m.account.slice(-4);
+  $("setPayout").disabled = false;
+  await refresh();
+  log("connected");
+};
+$("wake").onclick = async () => { try { await milord.wake(m, QUOTE); await refresh(); log("woke a Milord"); } catch (e) { log(e.shortMessage ?? e.message); } };
+$("claim").onclick = async () => { try { await milord.claim(m, epoch); log("claimed pARB"); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
+$("setPayout").onclick = async () => { const a = prompt("Base address to receive your pARB (blank = this wallet)") ?? ""; try { await milord.setPayout(m, a || "0x0000000000000000000000000000000000000000"); log("payout address set"); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
+document.addEventListener("click", async (e) => {
+  const r = e.target.dataset.redeem, c = e.target.dataset.choose;
+  try {
+    if (r && confirm(`Redeem #${r}? You get 900,000 $MILORD back and 100,000 are burned.`)) { await milord.redeem(m, r); log(`redeemed #${r}`); await refresh(); }
+    if (c) { const a = document.querySelector(`[data-a="${c}"]`).value, b = document.querySelector(`[data-b="${c}"]`).value; await milord.choose(m, c, a, b); log(`#${c} chose ${a} + ${b}`); await refresh(); }
+  } catch (err) { log(err.shortMessage ?? err.message); }
+});
+</script>
+</body>
+</html>

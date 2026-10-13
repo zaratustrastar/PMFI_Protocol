@@ -1,0 +1,268 @@
+{
+  "generatedAt": "2026-10-13T18:07:16.030Z",
+  "disclaimer": "Local simulation with hypothetical SCENARIO inputs and mock bridge/swap/oracle. Not performance data, not a forecast.",
+  "scenario": {
+    "weiPerMillionEarly": "30000000000000000",
+    "weiPerMillionLater": "12000000000000000",
+    "ethUsd": "2500",
+    "royaltySaleEth": "100000000000000000",
+    "tradingTaxEthWeek1": "150000000000000000",
+    "pnlBpsWeek2": 200,
+    "pnlBpsWeek3": -300
+  },
+  "start": {
+    "activeNFTs": 0,
+    "holders": 0,
+    "milordSupply": 6767000000
+  },
+  "weeks": [
+    {
+      "label": "week 1",
+      "start": 1792368000,
+      "end": 1792972800,
+      "notes": "first 100 Milords; one royalty-paying sale, one without; illustrative tax inflow",
+      "activeNFTs": 100,
+      "uniqueHolders": 42,
+      "inventory": 0,
+      "totalMinted": 100,
+      "conversionsTotal": 100,
+      "redemptionsTotal": 0,
+      "ethEntryFeesTotal": 0.25,
+      "ethToArbitrageSafeTotal": 0.228345,
+      "ethToTeamSafeTotal": 0.128345,
+      "ethBridgedThisWeek": 0.228345,
+      "usdcDepositedThisWeek": 570.8625,
+      "pnlUsdcThisWeek": 0,
+      "parbMintedThisWeek": 570.8625,
+      "parbMintedTotal": 570.8625,
+      "ppsUsdc": 1,
+      "reportedAssetsUsdc": 570.8625,
+      "parbAllocatedThisWeek": 570.8625,
+      "dustCarried": 2.2e-17,
+      "eligibleWallets": 42,
+      "cumulativeAllocated": 570.8625,
+      "claimedTotal": 275.33510097114856,
+      "milordSupply": 6765999800,
+      "escrowMilord": 100000000,
+      "burnedOnExitTotal": 0,
+      "burnedByBuybackTotal": 1000200,
+      "merkleRoot": "0xfbaafb8dcb8011e3eb784d240d64f7c79a637e648db13d9577d23d767b1c90f8",
+      "tracked": {
+        "seller_alice": {
+          "weightSeconds": 1454399,
+          "allocatedThisWeek": 18.19552993847906,
+          "cumulative": 18.19552993847906,
+          "nftsHeld": 3
+        },
+        "buyer": {
+          "weightSeconds": 0,
+          "allocatedThisWeek": 0,
+          "cumulative": 0,
+          "nftsHeld": 0
+        },
+        "redeemer_carol": {
+          "weightSeconds": 1436399,
+          "allocatedThisWeek": 17.97033758143493,
+          "cumulative": 17.97033758143493,
+          "nftsHeld": 3
+        },
+        "smartWallet": {
+          "weightSeconds": 1427400,
+          "allocatedThisWeek": 17.857753913599367,
+          "cumulative": 17.857753913599367,
+          "nftsHeld": 3
+        }
+      }
+    },
+    {
+      "label": "week 2",
+      "start": 1792972800,
+      "end": 1793577600,
+      "notes": "one redemption (day 1.5, reissued later from inventory), one sale mid-week (day 3.5), 10 new conversions, +2% scenario P&L",
+      "activeNFTs": 109,
+      "uniqueHolders": 52,
+      "inventory": 0,
+      "totalMinted": 109,
+      "conversionsTotal": 110,
+      "redemptionsTotal": 1,
+      "ethEntryFeesTotal": 0.27,
+      "ethToArbitrageSafeTotal": 0.242345,
+      "ethToTeamSafeTotal": 0.134345,
+      "ethBridgedThisWeek": 0.014,
+      "usdcDepositedThisWeek": 35,
+      "pnlUsdcThisWeek": 10.275525,
+      "parbMintedThisWeek": 34.381139489194496,
+      "parbMintedTotal": 605.2436394891945,
+      "ppsUsdc": 1.018,
+      "reportedAssetsUsdc": 616.138025,
+      "parbAllocatedThisWeek": 34.381139489194496,
+      "dustCarried": 2.5e-17,
+      "eligibleWallets": 52,
+      "cumulativeAllocated": 605.2436394891945,
+      "claimedTotal": 291.8463130074368,
+      "milordSupply": 6765899800,
+      "escrowMilord": 109000000,
+      "burnedOnExitTotal": 100000,
+      "burnedByBuybackTotal": 1000200,
+      "merkleRoot": "0xb38287aab626ae698102d2020129f5c280fb50c7371237974b8678c492d464c5",
+      "tracked": {
+        "seller_alice": {
+          "weightSeconds": 1512000,
+          "allocatedThisWeek": 0.8084924545106038,
+          "cumulative": 19.00402239298966,
+          "nftsHeld": 2
+        },
+        "buyer": {
+          "weightSeconds": 302400,
+          "allocatedThisWeek": 0.16169849090212077,
+          "cumulative": 0.16169849090212077,
+          "nftsHeld": 1
+        },
+        "redeemer_carol": {
+          "weightSeconds": 1339200,
+          "allocatedThisWeek": 0.7160933168522491,
+          "cumulative": 18.686430898287178,
+          "nftsHeld": 2
+        },
+        "smartWallet": {
+          "weightSeconds": 1814400,
+          "allocatedThisWeek": 0.9701909454127245,
+          "cumulative": 18.827944859012092,
+          "nftsHeld": 3
+        }
+      }
+    },
+    {
+      "label": "week 3",
+      "start": 1793577600,
+      "end": 1794182400,
+      "notes": "-3% scenario P&L; 5 new conversions; characteristic 9 and strategy 2 added; one holder selected the new pair",
+      "activeNFTs": 114,
+      "uniqueHolders": 52,
+      "inventory": 0,
+      "totalMinted": 114,
+      "conversionsTotal": 115,
+      "redemptionsTotal": 1,
+      "ethEntryFeesTotal": 0.285,
+      "ethToArbitrageSafeTotal": 0.252845,
+      "ethToTeamSafeTotal": 0.138845,
+      "ethBridgedThisWeek": 0.0105,
+      "usdcDepositedThisWeek": 26.25,
+      "pnlUsdcThisWeek": -16.635726,
+      "parbMintedThisWeek": 26.50139220647058,
+      "parbMintedTotal": 631.745031695665,
+      "ppsUsdc": 0.990514,
+      "reportedAssetsUsdc": 625.752299,
+      "parbAllocatedThisWeek": 26.50139220647058,
+      "dustCarried": 2.3e-17,
+      "eligibleWallets": 52,
+      "cumulativeAllocated": 631.745031695665,
+      "claimedTotal": 304.4254311365477,
+      "milordSupply": 6765899800,
+      "escrowMilord": 114000000,
+      "burnedOnExitTotal": 100000,
+      "burnedByBuybackTotal": 1000200,
+      "merkleRoot": "0xf33005b216cd137ae16ed207ae325f835784fa2cd763c15716e57e72fd15bf6f",
+      "tracked": {
+        "seller_alice": {
+          "weightSeconds": 1209600,
+          "allocatedThisWeek": 0.47108601107682335,
+          "cumulative": 19.475108404066486,
+          "nftsHeld": 2
+        },
+        "buyer": {
+          "weightSeconds": 604800,
+          "allocatedThisWeek": 0.23554300553841168,
+          "cumulative": 0.3972414964405324,
+          "nftsHeld": 1
+        },
+        "redeemer_carol": {
+          "weightSeconds": 1209600,
+          "allocatedThisWeek": 0.47108601107682335,
+          "cumulative": 19.157516909364002,
+          "nftsHeld": 2
+        },
+        "smartWallet": {
+          "weightSeconds": 1814400,
+          "allocatedThisWeek": 0.706629016615235,
+          "cumulative": 19.534573875627327,
+          "nftsHeld": 3
+        }
+      }
+    }
+  ],
+  "checks": [
+    {
+      "name": "escrow == backedCount x 1M",
+      "pass": true
+    },
+    {
+      "name": "distributor solvent",
+      "pass": true
+    },
+    {
+      "name": "shares recorded once",
+      "pass": true
+    },
+    {
+      "name": "seller keeps week-1 allocation after selling",
+      "pass": true
+    },
+    {
+      "name": "buyer earns only from day 3.5 of week 2",
+      "pass": true
+    },
+    {
+      "name": "redeemer earns only while holding",
+      "pass": true
+    },
+    {
+      "name": "smart wallet paid to its Base payout address",
+      "pass": true
+    },
+    {
+      "name": "PPS rose in the positive week",
+      "pass": true
+    },
+    {
+      "name": "PPS fell in the negative week (not reset to $1)",
+      "pass": true
+    },
+    {
+      "name": "collection unchanged when strategy added",
+      "pass": true
+    },
+    {
+      "name": "reissued ID came from inventory",
+      "pass": true
+    },
+    {
+      "name": "no performance fee shares",
+      "pass": true
+    }
+  ],
+  "deployments": {
+    "BasePayoutRegistry": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+    "BuybackBurner": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+    "EntryFeeSplitter": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    "MILORD": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "MilordConverter": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "MilordGovernor": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+    "Milords": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+    "MockSwapAdapter": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+    "ParbFundingAdapter": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+    "RoyaltySplitter": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "ShareDistributor": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+    "StrategyRegistry": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+    "TradingTaxSplitter": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+    "USDC": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1",
+    "arbitrageSafe": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+    "chainId": 31337,
+    "operator": "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "pARBVault": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
+    "quoteSigner": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+    "reportSigner": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+    "teamSafe": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+  }
+}
