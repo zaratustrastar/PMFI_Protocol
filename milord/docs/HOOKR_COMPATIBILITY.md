@@ -1,5 +1,9 @@
 # Hookr compatibility
 
+> **Superseded 2026-10-13.** The owner chose a Hookr existing-token pool with the immutable 1.5%/1.5% Tax +
+> Conversion block and no custom hook. Current plan: [launch/HOOKR_FINAL_CONFIG.md](launch/HOOKR_FINAL_CONFIG.md).
+> This file is kept for the earlier analysis.
+
 Source: public Hookr documentation (hookr.fun/docs: launchpad, pools/fees, concepts/immutability-and-ownership,
 guides/open-an-existing-asset-market, reference/config-schema-and-limits, reference/contracts-and-addresses),
 read on 2026-10-13. Hookr contracts were not inspected on-chain (RPC blocked from this environment), so

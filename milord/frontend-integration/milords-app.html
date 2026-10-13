@@ -51,6 +51,21 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
   </header>
 
   <section class="row">
+    <h3><i>00</i>Buy and sell $MILORD</h3>
+    <div>
+      <div class="ledger">
+        <div><em>Buy tax</em><b id="buyTax">1.5%</b><span>paid in ETH, fixed at launch</span></div>
+        <div><em>Sell tax</em><b id="sellTax">1.5%</b><span>paid in ETH, fixed at launch</span></div>
+        <div class="sum"><em>Pool LP fee</em><b id="lpFee">—</b><span>separate, goes to liquidity providers</span></div>
+      </div>
+      <p class="fine" id="taxSplit">Of each tax, Hookr keeps its platform share (20% when set at launch). The rest is split in three equal parts: buyback-and-burn of $MILORD, the Team Safe, and arbitrage funding for pARB. Transfers between wallets pay no tax.</p>
+      <div class="stats" id="mkt"></div>
+      <div class="actions"><a class="btn primary" id="hookrLink" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;text-decoration:none">Trade on Hookr</a>
+        <span id="localTrade" style="display:none"><input id="amt" value="0.1" size="8" style="font:inherit;border:1px solid var(--line);border-radius:999px;padding:8px 12px"> <button class="btn" id="buy">Buy (ETH)</button> <button class="btn" id="sell">Sell (MILORD)</button> <span class="fine">local test pool</span></span></div>
+    </div>
+  </section>
+
+  <section class="row">
     <h3><i>01</i>Wake a Milord</h3>
     <div>
       <div class="ledger">
@@ -58,7 +73,7 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
         <div><em>Plus an ETH fee</em><b id="fee">—</b><span id="feeRule">10% of the ETH value of 1M $MILORD, min 0.002 ETH</span></div>
         <div class="sum"><em>On redeem</em><b>900,000</b><span>back to you, 100,000 burned</span></div>
       </div>
-      <p class="fine">The fee comes from a short-lived signed price quote. If pricing is unavailable, waking is paused; redeeming never is. Your Milord's ID comes from the returned pool first, then the next new one. Fees are split 70% to arbitrage funding and 30% to the team.</p>
+      <p class="fine">The fee comes from a short-lived signed quote priced from the pool's 30-minute average, never its instant price. Right after launch, or if pricing is unavailable, waking waits; redeeming never does. Your Milord's ID comes from the returned pool first, then the next new one. Fees are split 70% to arbitrage funding and 30% to the team.</p>
       <div class="actions"><button class="btn primary" id="wake" disabled>Wake a Milord</button><span id="milordBal" class="fine"></span></div>
     </div>
   </section>
@@ -67,7 +82,8 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
     <h3><i>02</i>Your Milords</h3>
     <div>
       <div class="list" id="mine"><p class="fine">Connect to see your Milords.</p></div>
-      <p class="fine">Pick two characteristics to set the strategy preference for this holding. It is free, belongs to you, and resets when the Milord changes hands. All pairs map to Arbitrage today. If your Milord has an ERC-6551 wallet, check its contents before buying or selling: assets in it move with the NFT.</p>
+      <p class="fine" id="strategy"></p>
+      <p class="fine">Pick two characteristics to set the strategy preference for this holding. It is free, belongs to you, and resets when the Milord changes hands; the Milord's identity and first choice are kept. All pairs map to pArbitrage today, the only live strategy. If your Milord has an ERC-6551 wallet, check its contents before buying or selling: assets in it move with the NFT.</p>
     </div>
   </section>
 
@@ -76,12 +92,22 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
     <div>
       <div class="stats" id="rew"><div><em>Claimable pARB</em><b>—</b></div></div>
       <div class="actions"><button class="btn primary" id="claim" disabled>Claim pARB</button></div>
+      <p class="fine" id="market"></p>
       <p class="fine">Protocol fees are swapped to USDG and deposited into the pARBITRAGE vault on Robinhood Chain; the shares go to Milords held during each UTC week, weighted by time held. Earlier holders keep what they earned. pARB has a 0% performance fee here, its price can fall, and redemption goes through the vault's queue. Nothing here is a promise of return.</p>
     </div>
   </section>
 
   <section class="row">
-    <h3><i>04</i>Protocol</h3>
+    <h3><i>04</i>Governance</h3>
+    <div>
+      <div class="stats" id="gov"><div><em>Your votes</em><b>—</b></div></div>
+      <div class="actions"><button class="btn" id="delegate" disabled>Activate my votes</button></div>
+      <p class="fine">Each awake Milord is one vote once you activate (self-delegate). Governance is advisory in V1: votes signal, the Team Safe executes.</p>
+    </div>
+  </section>
+
+  <section class="row">
+    <h3><i>05</i>Protocol</h3>
     <div><div class="stats" id="stats"></div><div id="log"></div></div>
   </section>
 </div>
@@ -92,6 +118,8 @@ const q = new URLSearchParams(location.search);
 const DEPLOY = q.get("deployments") ?? "../sim/deployments.local.json";
 const EPOCH = q.get("epoch") ?? "../sim/output/epoch-latest.json";
 const QUOTE = q.get("quote") ?? "http://127.0.0.1:8787/quote";
+const HOOKR = q.get("hookr");      // the MILORD pool page on hookr.fun, once the market is open
+const MARKET = q.get("market");    // the Milords collection page on a marketplace, once listed
 const $ = (id) => document.getElementById(id);
 const log = (s) => { $("log").textContent = `${new Date().toLocaleTimeString()}  ${s}\n` + $("log").textContent; };
 const fmt = (s, d = 4) => Number(s).toLocaleString(undefined, { maximumFractionDigits: d });
@@ -109,11 +137,25 @@ async function refresh() {
   $("wake").disabled = s.entryPaused;
   const fee = await milord.previewFee(m, QUOTE).catch(() => null);
   $("fee").textContent = fee ? `${fmt(fee, 5)} ETH` : "pricing unavailable";
+  const mk = await milord.market(m).catch(() => null);
+  if (mk) {
+    $("buyTax").textContent = `${mk.buyTaxPct}%`; $("sellTax").textContent = `${mk.sellTaxPct}%`; $("lpFee").textContent = `${mk.lpFeePct}%`;
+    $("taxSplit").textContent = `Of each tax, Hookr keeps ${mk.hookrSharePct}% as its platform share. The rest is split in three equal parts: buyback-and-burn of $MILORD, the Team Safe, and arbitrage funding for pARB. Transfers between wallets pay no tax.`;
+    $("mkt").innerHTML = [["Price, ETH per 1M", fmt(mk.ethPerMillion, 6)], ["Taxed volume (ETH)", fmt(mk.volumeEth)], ["Tax collected (ETH)", fmt(mk.taxCollectedEth)], ["Hookr share (ETH)", fmt(mk.hookrCommissionEth)]]
+      .map(([k, v]) => `<div><em>${k}</em><b>${v}</b></div>`).join("");
+  }
+  const st = await milord.strategyInfo(m, 1);
+  $("strategy").textContent = `Live strategy: ${st.name} (vault ${st.vault.slice(0, 8)}…, chain ${st.chainId}).`;
+  const pos = await milord.parbPosition(m);
+  $("market").textContent = `Your pARB: ${fmt(pos.shares)} shares at ${fmt(pos.pps, 6)} USDG each (≈ ${fmt(pos.valueUsdg, 2)} USDG at the last report).`;
+  const g = await milord.governance(m);
+  $("gov").innerHTML = `<div><em>Your votes</em><b>${g.votes}</b></div><div><em>Votes active</em><b>${g.selfDelegated ? "yes" : "no"}</b></div>`;
+  $("delegate").disabled = g.selfDelegated;
   $("milordBal").textContent = `Your balance: ${fmt((Number(await m.token.balanceOf(m.account)) / 1e18), 0)} $MILORD`;
   const mine = await milord.myMilords(m);
   const opts = chars.filter((c) => c.active).map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
   $("mine").innerHTML = mine.length ? mine.map((n) => `
-    <div class="item"><b>#${n.id}</b><span class="fine" style="margin:0">wake ${n.activation} · ${n.personal ? `chose ${n.charA} + ${n.charB} → strategy ${n.strategyId}` : "no choice yet (Arbitrage)"}</span>
+    <div class="item"><b>#${n.id}</b><span class="fine" style="margin:0">${MARKET ? `<a href="${MARKET}/${n.id}" target="_blank" rel="noopener">view on marketplace</a> · ` : ""}wake ${n.activation} · ${n.personal ? `chose ${n.charA} + ${n.charB} → strategy ${n.strategyId}` : "no choice yet (pArbitrage)"}</span>
       <span><select data-a="${n.id}">${opts}</select> <select data-b="${n.id}">${opts}</select> <button class="btn" data-choose="${n.id}">Choose</button>
       <button class="btn" data-redeem="${n.id}">Redeem</button></span></div>`).join("") : `<p class="fine">No Milords yet.</p>`;
   if (epoch) {
@@ -125,7 +167,10 @@ async function refresh() {
 
 $("connect").onclick = async () => {
   const D = await (await fetch(DEPLOY)).json();
+  await milord.switchNetwork(D.chainId).catch((e) => log(`network switch: ${e.message}`));
   m = await milord.connect(D);
+  if (HOOKR) $("hookrLink").href = HOOKR; else $("hookrLink").style.display = "none";
+  if (m.router) $("localTrade").style.display = "inline";
   epoch = await fetch(EPOCH).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   chars = await milord.characteristics(m);
   $("net").textContent = `chain ${D.chainId}`;
@@ -134,6 +179,9 @@ $("connect").onclick = async () => {
   log("connected");
 };
 $("wake").onclick = async () => { try { await milord.wake(m, QUOTE); await refresh(); log("woke a Milord"); } catch (e) { log(e.shortMessage ?? e.message); } };
+$("buy").onclick = async () => { try { await milord.localTrade(m, "buy", $("amt").value); log(`bought with ${$("amt").value} ETH`); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
+$("sell").onclick = async () => { try { await milord.localTrade(m, "sell", $("amt").value); log(`sold ${$("amt").value} MILORD`); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
+$("delegate").onclick = async () => { try { await milord.delegateSelf(m); log("votes activated"); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
 $("claim").onclick = async () => { try { await milord.claim(m, epoch); log("claimed pARB"); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
 document.addEventListener("click", async (e) => {
   const r = e.target.dataset.redeem, c = e.target.dataset.choose;

@@ -48,7 +48,7 @@ abstract contract SingleChainFixture is Test, MilordDeployer {
         cfg.operator = operator;
         cfg.tokenHolder = treasury;
         cfg.asset = address(usdg);
-        cfg.swapAdapter = address(swap);
+        cfg.swapAdapter = _initialSwapAdapter();
         cfg.baseURI = "ipfs://test/";
         cfg.characteristics = new string[](8);
         for (uint256 i; i < 8; ++i) cfg.characteristics[i] = string.concat("Characteristic ", vm.toString(i + 1));
@@ -74,6 +74,11 @@ abstract contract SingleChainFixture is Test, MilordDeployer {
 
         vm.prank(treasury);
         d.token.transfer(address(swap), 500_000_000 ether);
+    }
+
+    /// Burner route at deployment. The Hookr fixture returns 0 and sets the v4 adapter once the pool exists.
+    function _initialSwapAdapter() internal view virtual returns (address) {
+        return address(swap);
     }
 
     function _now() internal view returns (uint256) {

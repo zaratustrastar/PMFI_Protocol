@@ -36,7 +36,7 @@ contract DeployRobinhood is Script, MilordDeployer {
         c.operator = vm.envAddress("MILORD_OPERATOR");
         c.tokenHolder = vm.envAddress("MILORD_TOKEN_HOLDER");
         c.asset = vm.envAddress("MILORD_VAULT_ASSET");
-        c.swapAdapter = vm.envAddress("MILORD_SWAP_ADAPTER");
+        c.swapAdapter = vm.envOr("MILORD_SWAP_ADAPTER", address(0)); // normally unset: route set after the Hookr market opens
         c.baseURI = vm.envString("MILORD_BASE_URI");
         c.characteristics = vm.envString("MILORD_CHARACTERISTICS", ",");
         c.vaultCap = vm.envUint("MILORD_VAULT_CAP");

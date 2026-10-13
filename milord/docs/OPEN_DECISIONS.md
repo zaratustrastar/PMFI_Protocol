@@ -7,14 +7,18 @@ are marked; none of them contradicts the spec.
 
 | # | Decision | Options | Local default / recommendation |
 |---|---|---|---|
-| D1 | Trading-tax mechanism (Hookr conflict) | A static 1.5% v4 pool · **B minimal dynamic-fee hook** · C custom tax hook · D Hookr frozen params | **B** recommended; nothing implemented yet. See HOOKR_COMPATIBILITY. |
+| D1 | Trading-tax mechanism | **Resolved 2026-10-13: Hookr existing-token pool, Tax + Conversion 1.5%/1.5% in ETH, immutable, no custom hook** | See launch/HOOKR_FINAL_CONFIG.md |
+| D10 | Launch values: pool share, opening FDV, range, remainder allocation and lockups | launch/TOKEN_ALLOCATION.md | illustrative 50% / ~10 ETH / 10,000x in the simulation only |
+| D11 | Hookr launch-tax decay (must not exceed 1.5%) | decay 0 if it keeps the tax flat; else owner decision | to confirm on the hookr-1 contract |
+| D12 | Hookr commission, LP fee, lock type, LP fee recipient | 20% · 0.3% · forever · Team Safe proposed | launch/HOOKR_FINAL_CONFIG.md |
+| D13 | Tax recipient | **TradingTaxSplitter** · Hookr Revenue Router | splitter (exact thirds, burn record) |
 | D2 | Milords artwork + metadata | must be supplied | `ipfs://PENDING-METADATA/` placeholder; `freezeMetadata()` after upload |
 | D3 | 8 characteristic names (and any mapping to art traits) | must be supplied | "Characteristic 1–8" placeholders |
 | D4 | pARB instance | **new V3 instance on Robinhood Chain, asset USDG, 0% fee** · reuse V2 on Base (20% fee, PPS bugs) | V3 on Robinhood (owner instruction 2026-10-13) |
 | D5 | USDG address and decimals on Robinhood Chain; engine funding route Robinhood USDG ↔ Polymarket/Kalshi/Opinion | to confirm on-chain; route to build | address seen on aggregators `0x5fc5…1d168` (unverified); vault enforces 6 decimals; fees no longer bridge |
 | D6 | Robinhood Chain mainnet RPC | to supply | — |
 | D7 | Initial MILORD allocation (liquidity, team, legacy holders, treasury) | not in brief | all to deployer in local build |
-| D9 | Kalshi withdrawals: which chain and asset Kalshi can pay out to | to confirm with Kalshi | until known, Kalshi recalls land on Base USDC and are bridged |
+| D9 | Kalshi withdrawals: which chain and asset Kalshi can pay out to | to confirm with Kalshi | USDC on Base/Solana/Ethereum only, crypto withdrawals capped at $2,500/day; keep or drop Kalshi (launch/ARBITRAGE_FUNDING_READINESS.md) |
 | D8 | Website source project | not in repo; only compiled artifacts | integration delivered as a drop-in SDK + section markup |
 
 ## Parameters to approve

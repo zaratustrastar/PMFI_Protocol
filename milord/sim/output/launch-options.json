@@ -1,0 +1,755 @@
+{
+  "illustrative": true,
+  "assumptions": {
+    "tax": 0.015,
+    "lpFee": 0.003,
+    "tickSpacing": 60,
+    "supply": 6767000000
+  },
+  "rows": [
+    {
+      "share": 0.4,
+      "milordInLiquidity": 2706800000,
+      "milordOutsideLiquidity": 4060200000,
+      "openingFdvEth": 2.5,
+      "openingEthPerMillion": 0.0003695,
+      "tickUpper": 217200,
+      "tickLower": 171180,
+      "rangeTopFdvEth": 250,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 244210658,
+          "priceChangePct": 18.5
+        },
+        "1ETH": {
+          "milordOut": 1411089436,
+          "priceChangePct": 254.8
+        },
+        "5ETH": {
+          "milordOut": 2452898710,
+          "priceChangePct": 2835.3
+        },
+        "10ETH": {
+          "milordOut": 2702286434,
+          "priceChangePct": 9574.1
+        }
+      },
+      "grossEthToBuyWholePosition": 10.2,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.4,
+      "milordInLiquidity": 2706800000,
+      "milordOutsideLiquidity": 4060200000,
+      "openingFdvEth": 2.5,
+      "openingEthPerMillion": 0.0003695,
+      "tickUpper": 217200,
+      "tickLower": 148140,
+      "rangeTopFdvEth": 2500,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 242710362,
+          "priceChangePct": 19.9
+        },
+        "1ETH": {
+          "milordOut": 1362427211,
+          "priceChangePct": 280.6
+        },
+        "5ETH": {
+          "milordOut": 2309507320,
+          "priceChangePct": 3211.1
+        },
+        "10ETH": {
+          "milordOut": 2529283672,
+          "priceChangePct": 10942.7
+        }
+      },
+      "grossEthToBuyWholePosition": 32.2,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.4,
+      "milordInLiquidity": 2706800000,
+      "milordOutsideLiquidity": 4060200000,
+      "openingFdvEth": 5,
+      "openingEthPerMillion": 0.0007411,
+      "tickUpper": 210240,
+      "tickLower": 164220,
+      "rangeTopFdvEth": 500,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 126928479,
+          "priceChangePct": 9
+        },
+        "1ETH": {
+          "milordOut": 919933561,
+          "priceChangePct": 107.5
+        },
+        "5ETH": {
+          "milordOut": 2068879353,
+          "priceChangePct": 925.7
+        },
+        "10ETH": {
+          "milordOut": 2451621731,
+          "priceChangePct": 2821.8
+        }
+      },
+      "grossEthToBuyWholePosition": 20.4,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.4,
+      "milordInLiquidity": 2706800000,
+      "milordOutsideLiquidity": 4060200000,
+      "openingFdvEth": 5,
+      "openingEthPerMillion": 0.0007411,
+      "tickUpper": 210240,
+      "tickLower": 141180,
+      "rangeTopFdvEth": 5000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 126521989,
+          "priceChangePct": 9.7
+        },
+        "1ETH": {
+          "milordOut": 899000134,
+          "priceChangePct": 117.3
+        },
+        "5ETH": {
+          "milordOut": 1965929164,
+          "priceChangePct": 1036
+        },
+        "10ETH": {
+          "milordOut": 2308375243,
+          "priceChangePct": 3195.7
+        }
+      },
+      "grossEthToBuyWholePosition": 64.5,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.4,
+      "milordInLiquidity": 2706800000,
+      "milordOutsideLiquidity": 4060200000,
+      "openingFdvEth": 10,
+      "openingEthPerMillion": 0.001486,
+      "tickUpper": 203280,
+      "tickLower": 157260,
+      "rangeTopFdvEth": 1000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 64653521,
+          "priceChangePct": 4.4
+        },
+        "1ETH": {
+          "milordOut": 541742347,
+          "priceChangePct": 48.8
+        },
+        "5ETH": {
+          "milordOut": 1574491607,
+          "priceChangePct": 340.3
+        },
+        "10ETH": {
+          "milordOut": 2067058008,
+          "priceChangePct": 921.8
+        }
+      },
+      "grossEthToBuyWholePosition": 40.9,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.4,
+      "milordInLiquidity": 2706800000,
+      "milordOutsideLiquidity": 4060200000,
+      "openingFdvEth": 10,
+      "openingEthPerMillion": 0.001486,
+      "tickUpper": 203280,
+      "tickLower": 134220,
+      "rangeTopFdvEth": 10000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 64547888,
+          "priceChangePct": 4.8
+        },
+        "1ETH": {
+          "milordOut": 534414188,
+          "priceChangePct": 52.9
+        },
+        "5ETH": {
+          "milordOut": 1514147796,
+          "priceChangePct": 376.1
+        },
+        "10ETH": {
+          "milordOut": 1964284503,
+          "priceChangePct": 1031.5
+        }
+      },
+      "grossEthToBuyWholePosition": 129.4,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.4,
+      "milordInLiquidity": 2706800000,
+      "milordOutsideLiquidity": 4060200000,
+      "openingFdvEth": 25,
+      "openingEthPerMillion": 0.0037,
+      "tickUpper": 194160,
+      "tickLower": 148140,
+      "rangeTopFdvEth": 2500,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 26312128,
+          "priceChangePct": 1.8
+        },
+        "1ETH": {
+          "milordOut": 243919181,
+          "priceChangePct": 18.4
+        },
+        "5ETH": {
+          "milordOut": 920903442,
+          "priceChangePct": 107.7
+        },
+        "10ETH": {
+          "milordOut": 1410115784,
+          "priceChangePct": 254.4
+        }
+      },
+      "grossEthToBuyWholePosition": 101.8,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.4,
+      "milordInLiquidity": 2706800000,
+      "milordOutsideLiquidity": 4060200000,
+      "openingFdvEth": 25,
+      "openingEthPerMillion": 0.0037,
+      "tickUpper": 194160,
+      "tickLower": 125100,
+      "rangeTopFdvEth": 25000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 26294615,
+          "priceChangePct": 1.9
+        },
+        "1ETH": {
+          "milordOut": 242422453,
+          "priceChangePct": 19.9
+        },
+        "5ETH": {
+          "milordOut": 899926355,
+          "priceChangePct": 117.5
+        },
+        "10ETH": {
+          "milordOut": 1361519533,
+          "priceChangePct": 280.1
+        }
+      },
+      "grossEthToBuyWholePosition": 322.1,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.5,
+      "milordInLiquidity": 3383500000,
+      "milordOutsideLiquidity": 3383500000,
+      "openingFdvEth": 2.5,
+      "openingEthPerMillion": 0.0003695,
+      "tickUpper": 217200,
+      "tickLower": 171180,
+      "rangeTopFdvEth": 250,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 248241288,
+          "priceChangePct": 14.6
+        },
+        "1ETH": {
+          "milordOut": 1557182009,
+          "priceChangePct": 191.3
+        },
+        "5ETH": {
+          "milordOut": 2930881282,
+          "priceChangePct": 1956
+        },
+        "10ETH": {
+          "milordOut": 3294129011,
+          "priceChangePct": 6410.1
+        }
+      },
+      "grossEthToBuyWholePosition": 12.7,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.5,
+      "milordInLiquidity": 3383500000,
+      "milordOutsideLiquidity": 3383500000,
+      "openingFdvEth": 2.5,
+      "openingEthPerMillion": 0.0003695,
+      "tickUpper": 217200,
+      "tickLower": 148140,
+      "rangeTopFdvEth": 2500,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 246999680,
+          "priceChangePct": 15.8
+        },
+        "1ETH": {
+          "milordOut": 1509581665,
+          "priceChangePct": 210
+        },
+        "5ETH": {
+          "milordOut": 2766681886,
+          "priceChangePct": 2207.2
+        },
+        "10ETH": {
+          "milordOut": 3088136605,
+          "priceChangePct": 7307.6
+        }
+      },
+      "grossEthToBuyWholePosition": 40.2,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.5,
+      "milordInLiquidity": 3383500000,
+      "milordOutsideLiquidity": 3383500000,
+      "openingFdvEth": 5,
+      "openingEthPerMillion": 0.0007411,
+      "tickUpper": 210240,
+      "tickLower": 164220,
+      "rangeTopFdvEth": 500,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 128008750,
+          "priceChangePct": 7.2
+        },
+        "1ETH": {
+          "milordOut": 979865326,
+          "priceChangePct": 82.9
+        },
+        "5ETH": {
+          "milordOut": 2398847506,
+          "priceChangePct": 663
+        },
+        "10ETH": {
+          "milordOut": 2929058324,
+          "priceChangePct": 1947
+        }
+      },
+      "grossEthToBuyWholePosition": 25.5,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.5,
+      "milordInLiquidity": 3383500000,
+      "milordOutsideLiquidity": 3383500000,
+      "openingFdvEth": 5,
+      "openingEthPerMillion": 0.0007411,
+      "tickUpper": 210240,
+      "tickLower": 141180,
+      "rangeTopFdvEth": 5000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 127677795,
+          "priceChangePct": 7.7
+        },
+        "1ETH": {
+          "milordOut": 960801324,
+          "priceChangePct": 90.2
+        },
+        "5ETH": {
+          "milordOut": 2287720478,
+          "priceChangePct": 738.9
+        },
+        "10ETH": {
+          "milordOut": 2765057408,
+          "priceChangePct": 2197
+        }
+      },
+      "grossEthToBuyWholePosition": 80.7,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.5,
+      "milordInLiquidity": 3383500000,
+      "milordOutsideLiquidity": 3383500000,
+      "openingFdvEth": 10,
+      "openingEthPerMillion": 0.001486,
+      "tickUpper": 203280,
+      "tickLower": 157260,
+      "rangeTopFdvEth": 1000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 64932640,
+          "priceChangePct": 3.5
+        },
+        "1ETH": {
+          "milordOut": 561984241,
+          "priceChangePct": 38.2
+        },
+        "5ETH": {
+          "milordOut": 1758584873,
+          "priceChangePct": 252.9
+        },
+        "10ETH": {
+          "milordOut": 2396399198,
+          "priceChangePct": 660.2
+        }
+      },
+      "grossEthToBuyWholePosition": 51.1,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.5,
+      "milordInLiquidity": 3383500000,
+      "milordOutsideLiquidity": 3383500000,
+      "openingFdvEth": 10,
+      "openingEthPerMillion": 0.001486,
+      "tickUpper": 203280,
+      "tickLower": 134220,
+      "rangeTopFdvEth": 10000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 64847375,
+          "priceChangePct": 3.8
+        },
+        "1ETH": {
+          "milordOut": 555660879,
+          "priceChangePct": 41.4
+        },
+        "5ETH": {
+          "milordOut": 1698114263,
+          "priceChangePct": 278.5
+        },
+        "10ETH": {
+          "milordOut": 2285493646,
+          "priceChangePct": 735.8
+        }
+      },
+      "grossEthToBuyWholePosition": 161.8,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.5,
+      "milordInLiquidity": 3383500000,
+      "milordOutsideLiquidity": 3383500000,
+      "openingFdvEth": 25,
+      "openingEthPerMillion": 0.0037,
+      "tickUpper": 194160,
+      "tickLower": 148140,
+      "rangeTopFdvEth": 2500,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 26358239,
+          "priceChangePct": 1.4
+        },
+        "1ETH": {
+          "milordOut": 247940115,
+          "priceChangePct": 14.6
+        },
+        "5ETH": {
+          "milordOut": 980965771,
+          "priceChangePct": 83.1
+        },
+        "10ETH": {
+          "milordOut": 1555996398,
+          "priceChangePct": 191
+        }
+      },
+      "grossEthToBuyWholePosition": 127.2,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.5,
+      "milordInLiquidity": 3383500000,
+      "milordOutsideLiquidity": 3383500000,
+      "openingFdvEth": 25,
+      "openingEthPerMillion": 0.0037,
+      "tickUpper": 194160,
+      "tickLower": 125100,
+      "rangeTopFdvEth": 25000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 26344178,
+          "priceChangePct": 1.5
+        },
+        "1ETH": {
+          "milordOut": 246701511,
+          "priceChangePct": 15.8
+        },
+        "5ETH": {
+          "milordOut": 961859342,
+          "priceChangePct": 90.4
+        },
+        "10ETH": {
+          "milordOut": 1508467404,
+          "priceChangePct": 209.6
+        }
+      },
+      "grossEthToBuyWholePosition": 402.7,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.6,
+      "milordInLiquidity": 4060200000,
+      "milordOutsideLiquidity": 2706800000,
+      "openingFdvEth": 2.5,
+      "openingEthPerMillion": 0.0003695,
+      "tickUpper": 217200,
+      "tickLower": 171180,
+      "rangeTopFdvEth": 250,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 251003112,
+          "priceChangePct": 12.1
+        },
+        "1ETH": {
+          "milordOut": 1672628812,
+          "priceChangePct": 152.5
+        },
+        "5ETH": {
+          "milordOut": 3368478981,
+          "priceChangePct": 1456.5
+        },
+        "10ETH": {
+          "milordOut": 3857340555,
+          "priceChangePct": 4647.8
+        }
+      },
+      "grossEthToBuyWholePosition": 15.3,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.6,
+      "milordInLiquidity": 4060200000,
+      "milordOutsideLiquidity": 2706800000,
+      "openingFdvEth": 2.5,
+      "openingEthPerMillion": 0.0003695,
+      "tickUpper": 217200,
+      "tickLower": 148140,
+      "rangeTopFdvEth": 2500,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 249944455,
+          "priceChangePct": 13.1
+        },
+        "1ETH": {
+          "milordOut": 1626714944,
+          "priceChangePct": 167
+        },
+        "5ETH": {
+          "milordOut": 3187307173,
+          "priceChangePct": 1638.5
+        },
+        "10ETH": {
+          "milordOut": 3621606615,
+          "priceChangePct": 5286
+        }
+      },
+      "grossEthToBuyWholePosition": 48.3,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.6,
+      "milordInLiquidity": 4060200000,
+      "milordOutsideLiquidity": 2706800000,
+      "openingFdvEth": 5,
+      "openingEthPerMillion": 0.0007411,
+      "tickUpper": 210240,
+      "tickLower": 164220,
+      "rangeTopFdvEth": 500,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 128739205,
+          "priceChangePct": 6
+        },
+        "1ETH": {
+          "milordOut": 1024355067,
+          "priceChangePct": 67.4
+        },
+        "5ETH": {
+          "milordOut": 2684257942,
+          "priceChangePct": 509.3
+        },
+        "10ETH": {
+          "milordOut": 3366071252,
+          "priceChangePct": 1449.9
+        }
+      },
+      "grossEthToBuyWholePosition": 30.6,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.6,
+      "milordInLiquidity": 4060200000,
+      "milordOutsideLiquidity": 2706800000,
+      "openingFdvEth": 5,
+      "openingEthPerMillion": 0.0007411,
+      "tickUpper": 210240,
+      "tickLower": 141180,
+      "rangeTopFdvEth": 5000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 128460136,
+          "priceChangePct": 6.4
+        },
+        "1ETH": {
+          "milordOut": 1006949386,
+          "priceChangePct": 73.2
+        },
+        "5ETH": {
+          "milordOut": 2567941213,
+          "priceChangePct": 565.8
+        },
+        "10ETH": {
+          "milordOut": 3185151393,
+          "priceChangePct": 1631
+        }
+      },
+      "grossEthToBuyWholePosition": 96.8,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.6,
+      "milordInLiquidity": 4060200000,
+      "milordOutsideLiquidity": 2706800000,
+      "openingFdvEth": 10,
+      "openingEthPerMillion": 0.001486,
+      "tickUpper": 203280,
+      "tickLower": 157260,
+      "rangeTopFdvEth": 1000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 65120062,
+          "priceChangePct": 3
+        },
+        "1ETH": {
+          "milordOut": 576340668,
+          "priceChangePct": 31.4
+        },
+        "5ETH": {
+          "milordOut": 1907251786,
+          "priceChangePct": 200
+        },
+        "10ETH": {
+          "milordOut": 2681192757,
+          "priceChangePct": 507.3
+        }
+      },
+      "grossEthToBuyWholePosition": 61.3,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.6,
+      "milordInLiquidity": 4060200000,
+      "milordOutsideLiquidity": 2706800000,
+      "openingFdvEth": 10,
+      "openingEthPerMillion": 0.001486,
+      "tickUpper": 203280,
+      "tickLower": 134220,
+      "rangeTopFdvEth": 10000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 65048582,
+          "priceChangePct": 3.2
+        },
+        "1ETH": {
+          "milordOut": 570789453,
+          "priceChangePct": 34
+        },
+        "5ETH": {
+          "milordOut": 1847782631,
+          "priceChangePct": 219.7
+        },
+        "10ETH": {
+          "milordOut": 2565135781,
+          "priceChangePct": 563.5
+        }
+      },
+      "grossEthToBuyWholePosition": 194.1,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.6,
+      "milordInLiquidity": 4060200000,
+      "milordOutsideLiquidity": 2706800000,
+      "openingFdvEth": 25,
+      "openingEthPerMillion": 0.0037,
+      "tickUpper": 194160,
+      "tickLower": 148140,
+      "rangeTopFdvEth": 2500,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 26389070,
+          "priceChangePct": 1.2
+        },
+        "1ETH": {
+          "milordOut": 250695205,
+          "priceChangePct": 12.1
+        },
+        "5ETH": {
+          "milordOut": 1025557770,
+          "priceChangePct": 67.5
+        },
+        "10ETH": {
+          "milordOut": 1671260963,
+          "priceChangePct": 152.3
+        }
+      },
+      "grossEthToBuyWholePosition": 152.7,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    },
+    {
+      "share": 0.6,
+      "milordInLiquidity": 4060200000,
+      "milordOutsideLiquidity": 2706800000,
+      "openingFdvEth": 25,
+      "openingEthPerMillion": 0.0037,
+      "tickUpper": 194160,
+      "tickLower": 125100,
+      "rangeTopFdvEth": 25000,
+      "impacts": {
+        "0.1ETH": {
+          "milordOut": 26377324,
+          "priceChangePct": 1.3
+        },
+        "1ETH": {
+          "milordOut": 249639138,
+          "priceChangePct": 13.1
+        },
+        "5ETH": {
+          "milordOut": 1008111541,
+          "priceChangePct": 73.3
+        },
+        "10ETH": {
+          "milordOut": 1625421130,
+          "priceChangePct": 166.7
+        }
+      },
+      "grossEthToBuyWholePosition": 483.2,
+      "entryFeeAtOpenEth": 0.002,
+      "minimumFeeUntilFdvEth": 135.3
+    }
+  ]
+}

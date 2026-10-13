@@ -12,6 +12,10 @@ via_ir = true
 remappings = [
   "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
   "forge-std/=node_modules/forge-std/src/",
+  "@uniswap/v4-core/=node_modules/@uniswap/v4-core/",
+  "@uniswap/v4-periphery/=node_modules/@uniswap/v4-periphery/",
+  "permit2/=node_modules/@uniswap/v4-periphery/lib/permit2/",
+  "solmate/=node_modules/@uniswap/v4-core/lib/solmate/",
 ]
 fs_permissions = [{ access = "read-write", path = "./sim" }, { access = "read", path = "./" }]
 

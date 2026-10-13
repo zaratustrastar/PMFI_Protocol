@@ -126,6 +126,14 @@ contract BuybackBurner is Ownable2Step, ReentrancyGuard {
         emit LimitsSet(minWei, maxWei);
     }
 
+    /// @notice One-time initial route, for deployments where the pool (and so the adapter) only exists after
+    ///         this contract: allowed only while no adapter has ever been set. Later changes use the delay.
+    function setInitialAdapter(address adapter_) external onlyOwner {
+        require(address(adapter) == address(0) && adapter_ != address(0), "adapter already set");
+        adapter = ISwapAdapter(adapter_);
+        emit AdapterSet(adapter_);
+    }
+
     function queueAdapter(address adapter_) external onlyOwner {
         pendingAdapter = adapter_;
         pendingAdapterEta = uint64(block.timestamp + ADAPTER_CHANGE_DELAY);
