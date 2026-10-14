@@ -1,4 +1,7 @@
-# Supply and pool allocation (ILLUSTRATIVE, NEEDS APPROVAL)
+# Supply and pool allocation
+
+> **2026-10-14:** Bobo approved a 10 ETH opening FDV and 0 ETH seeded. The 25 / 50 / 75% comparison at that FDV,
+> with a recommendation, is in [LIQUIDITY_ALLOCATION_10ETH.md](LIQUIDITY_ALLOCATION_10ETH.md). The wider table below is kept for reference.
 
 No production allocation, opening price or FDV has been chosen. The numbers below come from
 `offchain/launch-plan.mjs` (concentrated-liquidity math, 1.5% tax and 0.3% LP fee included) and the full table is

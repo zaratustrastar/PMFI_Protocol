@@ -1,5 +1,9 @@
 # Arbitrage funding readiness (the key blocker)
 
+> **2026-10-14 (Bobo):** keep the existing Polymarket and Kalshi execution infrastructure; change only Robinhood USDG
+> funding, withdrawal and NAV reconciliation. **Opinion is disabled for V1** (insufficient liquidity); its adapter stays
+> in the code for later. The Opinion column below is kept for reference only.
+
 The V3 vault, pARB and the distributor are on Robinhood Chain (4663) with USDG. The funding bot
 (`bot/arb_monitor/core/`) is written for the Base V2 vault with USDC: it moves vault cash to a servicer wallet on
 Base and funds Polymarket and Kalshi from Base, and Opinion through a Base→BSC bridge. **No real funds were

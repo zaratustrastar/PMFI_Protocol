@@ -32,6 +32,7 @@ export function buy(p, ethIn, from = p.sqU) {
 
 const ethPerMillion = (sq) => 1e6 / (sq * sq);
 const rows = [];
+if (process.argv[1]?.endsWith("launch-plan.mjs")) {
 for (const share of [0.4, 0.5, 0.6]) for (const fdvEth of [2.5, 5, 10, 25]) for (const rangeMultiple of [100, 1000]) {
   const p = position({ fdvEth, share, rangeMultiple });
   const open = ethPerMillion(p.sqU);
@@ -49,3 +50,4 @@ fs.writeFileSync(new URL("../sim/output/launch-options.json", import.meta.url), 
 const ref = rows.find((r) => r.share === 0.5 && r.openingFdvEth === 10 && r.rangeTopFdvEth === 10000);
 console.log("reference (sim) row:", JSON.stringify(ref));
 console.table(rows.map((r) => ({ share: r.share, fdv: r.openingFdvEth, top: r.rangeTopFdvEth, open: r.openingEthPerMillion, "1ETH%": r.impacts["1ETH"].priceChangePct, "10ETH%": r.impacts["10ETH"].priceChangePct, clearEth: r.grossEthToBuyWholePosition })));
+}

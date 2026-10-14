@@ -13,7 +13,7 @@ Status tags used in every document here:
 | # | Deliverable | File |
 |---|---|---|
 | 1 | Proposed Hookr launch parameters | [HOOKR_FINAL_CONFIG.md](HOOKR_FINAL_CONFIG.md) |
-| 2 | Supply and pool allocation options | [TOKEN_ALLOCATION.md](TOKEN_ALLOCATION.md) |
+| 2 | Supply and pool allocation options | [TOKEN_ALLOCATION.md](TOKEN_ALLOCATION.md), [LIQUIDITY_ALLOCATION_10ETH.md](LIQUIDITY_ALLOCATION_10ETH.md) |
 | 3 | Fee paths and recipients | [FEE_ROUTING_VERIFICATION.md](FEE_ROUTING_VERIFICATION.md) |
 | 4 | Full economic transaction trace | [MILORD_END_TO_END.md](MILORD_END_TO_END.md) |
 | 5 | Venue funding and withdrawal routes | [ARBITRAGE_FUNDING_READINESS.md](ARBITRAGE_FUNDING_READINESS.md) |

@@ -1,0 +1,593 @@
+{
+  "approvedOpeningFdvEth": 10,
+  "assumptions": {
+    "tax": 0.015,
+    "lpFee": 0.003,
+    "supply": 6767000000,
+    "tickSpacing": 60
+  },
+  "rows": [
+    {
+      "share": 0.25,
+      "rangeMultiple": 100,
+      "milordInLiquidity": 1691750000,
+      "milordReserved": 5075250000,
+      "tickLower": 157260,
+      "tickUpper": 203280,
+      "openingEthPerMillion": 0.001486,
+      "openingFdvEth": 10.058,
+      "rangeTopFdvEth": 1002,
+      "grossEthToBuyWholePosition": 25.6,
+      "ethInPoolAfterFirst1EthBuy": 0.982,
+      "sell1MAfterFirst1EthBuyEthNet": 0.002664,
+      "maxNftsBackableFromPool": 1691,
+      "buys": [
+        {
+          "ethIn": 0.01,
+          "milordOut": 6584224,
+          "nftsWorth": 6.6,
+          "avgEthPerMillion": 0.001519,
+          "priceAfterEthPerMillion": 0.001497,
+          "priceChangePct": 0.7,
+          "fdvAfterEth": 10.13,
+          "capped": false
+        },
+        {
+          "ethIn": 0.05,
+          "milordOut": 32466320,
+          "nftsWorth": 32.5,
+          "avgEthPerMillion": 0.00154,
+          "priceAfterEthPerMillion": 0.001539,
+          "priceChangePct": 3.55,
+          "fdvAfterEth": 10.41,
+          "capped": false
+        },
+        {
+          "ethIn": 0.1,
+          "milordOut": 63830378,
+          "nftsWorth": 63.8,
+          "avgEthPerMillion": 0.001567,
+          "priceAfterEthPerMillion": 0.001593,
+          "priceChangePct": 7.15,
+          "fdvAfterEth": 10.78,
+          "capped": false
+        },
+        {
+          "ethIn": 0.5,
+          "milordOut": 280992120,
+          "nftsWorth": 281,
+          "avgEthPerMillion": 0.001779,
+          "priceAfterEthPerMillion": 0.002055,
+          "priceChangePct": 38.23,
+          "fdvAfterEth": 13.9,
+          "capped": false
+        },
+        {
+          "ethIn": 1,
+          "milordOut": 488912495,
+          "nftsWorth": 488.9,
+          "avgEthPerMillion": 0.002045,
+          "priceAfterEthPerMillion": 0.002715,
+          "priceChangePct": 82.64,
+          "fdvAfterEth": 18.37,
+          "capped": false
+        },
+        {
+          "ethIn": 2,
+          "milordOut": 776021343,
+          "nftsWorth": 776,
+          "avgEthPerMillion": 0.002577,
+          "priceAfterEthPerMillion": 0.00431,
+          "priceChangePct": 189.98,
+          "fdvAfterEth": 29.17,
+          "capped": false
+        },
+        {
+          "ethIn": 5,
+          "milordOut": 1198199599,
+          "nftsWorth": 1198.2,
+          "avgEthPerMillion": 0.004173,
+          "priceAfterEthPerMillion": 0.0113,
+          "priceChangePct": 660.22,
+          "fdvAfterEth": 76.46,
+          "capped": false
+        },
+        {
+          "ethIn": 10,
+          "milordOut": 1463616248,
+          "nftsWorth": 1463.6,
+          "avgEthPerMillion": 0.006832,
+          "priceAfterEthPerMillion": 0.03029,
+          "priceChangePct": 1937.99,
+          "fdvAfterEth": 204.98,
+          "capped": false
+        }
+      ]
+    },
+    {
+      "share": 0.5,
+      "rangeMultiple": 100,
+      "milordInLiquidity": 3383500000,
+      "milordReserved": 3383500000,
+      "tickLower": 157260,
+      "tickUpper": 203280,
+      "openingEthPerMillion": 0.001486,
+      "openingFdvEth": 10.058,
+      "rangeTopFdvEth": 1002,
+      "grossEthToBuyWholePosition": 51.1,
+      "ethInPoolAfterFirst1EthBuy": 0.982,
+      "sell1MAfterFirst1EthBuyEthNet": 0.002017,
+      "maxNftsBackableFromPool": 3383,
+      "buys": [
+        {
+          "ethIn": 0.01,
+          "milordOut": 6595774,
+          "nftsWorth": 6.6,
+          "avgEthPerMillion": 0.001516,
+          "priceAfterEthPerMillion": 0.001492,
+          "priceChangePct": 0.35,
+          "fdvAfterEth": 10.09,
+          "capped": false
+        },
+        {
+          "ethIn": 0.05,
+          "milordOut": 32749085,
+          "nftsWorth": 32.7,
+          "avgEthPerMillion": 0.001527,
+          "priceAfterEthPerMillion": 0.001513,
+          "priceChangePct": 1.76,
+          "fdvAfterEth": 10.24,
+          "capped": false
+        },
+        {
+          "ethIn": 0.1,
+          "milordOut": 64932640,
+          "nftsWorth": 64.9,
+          "avgEthPerMillion": 0.00154,
+          "priceAfterEthPerMillion": 0.001539,
+          "priceChangePct": 3.55,
+          "fdvAfterEth": 10.41,
+          "capped": false
+        },
+        {
+          "ethIn": 0.5,
+          "milordOut": 303686247,
+          "nftsWorth": 303.7,
+          "avgEthPerMillion": 0.001646,
+          "priceAfterEthPerMillion": 0.001759,
+          "priceChangePct": 18.34,
+          "fdvAfterEth": 11.9,
+          "capped": false
+        },
+        {
+          "ethIn": 1,
+          "milordOut": 561984241,
+          "nftsWorth": 562,
+          "avgEthPerMillion": 0.001779,
+          "priceAfterEthPerMillion": 0.002055,
+          "priceChangePct": 38.23,
+          "fdvAfterEth": 13.9,
+          "capped": false
+        },
+        {
+          "ethIn": 2,
+          "milordOut": 977824990,
+          "nftsWorth": 977.8,
+          "avgEthPerMillion": 0.002045,
+          "priceAfterEthPerMillion": 0.002715,
+          "priceChangePct": 82.64,
+          "fdvAfterEth": 18.37,
+          "capped": false
+        },
+        {
+          "ethIn": 5,
+          "milordOut": 1758584873,
+          "nftsWorth": 1758.6,
+          "avgEthPerMillion": 0.002843,
+          "priceAfterEthPerMillion": 0.005245,
+          "priceChangePct": 252.91,
+          "fdvAfterEth": 35.5,
+          "capped": false
+        },
+        {
+          "ethIn": 10,
+          "milordOut": 2396399198,
+          "nftsWorth": 2396.4,
+          "avgEthPerMillion": 0.004173,
+          "priceAfterEthPerMillion": 0.0113,
+          "priceChangePct": 660.22,
+          "fdvAfterEth": 76.46,
+          "capped": false
+        }
+      ]
+    },
+    {
+      "share": 0.75,
+      "rangeMultiple": 100,
+      "milordInLiquidity": 5075250000,
+      "milordReserved": 1691750000,
+      "tickLower": 157260,
+      "tickUpper": 203280,
+      "openingEthPerMillion": 0.001486,
+      "openingFdvEth": 10.058,
+      "rangeTopFdvEth": 1002,
+      "grossEthToBuyWholePosition": 76.7,
+      "ethInPoolAfterFirst1EthBuy": 0.982,
+      "sell1MAfterFirst1EthBuyEthNet": 0.001821,
+      "maxNftsBackableFromPool": 5075,
+      "buys": [
+        {
+          "ethIn": 0.01,
+          "milordOut": 6599633,
+          "nftsWorth": 6.6,
+          "avgEthPerMillion": 0.001515,
+          "priceAfterEthPerMillion": 0.00149,
+          "priceChangePct": 0.23,
+          "fdvAfterEth": 10.08,
+          "capped": false
+        },
+        {
+          "ethIn": 0.05,
+          "milordOut": 32844438,
+          "nftsWorth": 32.8,
+          "avgEthPerMillion": 0.001522,
+          "priceAfterEthPerMillion": 0.001504,
+          "priceChangePct": 1.17,
+          "fdvAfterEth": 10.18,
+          "capped": false
+        },
+        {
+          "ethIn": 0.1,
+          "milordOut": 65308569,
+          "nftsWorth": 65.3,
+          "avgEthPerMillion": 0.001531,
+          "priceAfterEthPerMillion": 0.001521,
+          "priceChangePct": 2.36,
+          "fdvAfterEth": 10.29,
+          "capped": false
+        },
+        {
+          "ethIn": 0.5,
+          "milordOut": 312088104,
+          "nftsWorth": 312.1,
+          "avgEthPerMillion": 0.001602,
+          "priceAfterEthPerMillion": 0.001666,
+          "priceChangePct": 12.06,
+          "fdvAfterEth": 11.27,
+          "capped": false
+        },
+        {
+          "ethIn": 1,
+          "milordOut": 591449821,
+          "nftsWorth": 591.4,
+          "avgEthPerMillion": 0.001691,
+          "priceAfterEthPerMillion": 0.001855,
+          "priceChangePct": 24.8,
+          "fdvAfterEth": 12.55,
+          "capped": false
+        },
+        {
+          "ethIn": 2,
+          "milordOut": 1070630485,
+          "nftsWorth": 1070.6,
+          "avgEthPerMillion": 0.001868,
+          "priceAfterEthPerMillion": 0.002264,
+          "priceChangePct": 52.35,
+          "fdvAfterEth": 15.32,
+          "capped": false
+        },
+        {
+          "ethIn": 5,
+          "milordOut": 2083375814,
+          "nftsWorth": 2083.4,
+          "avgEthPerMillion": 0.0024,
+          "priceAfterEthPerMillion": 0.003737,
+          "priceChangePct": 151.46,
+          "fdvAfterEth": 25.29,
+          "capped": false
+        },
+        {
+          "ethIn": 10,
+          "milordOut": 3042806884,
+          "nftsWorth": 3042.8,
+          "avgEthPerMillion": 0.003286,
+          "priceAfterEthPerMillion": 0.007008,
+          "priceChangePct": 371.53,
+          "fdvAfterEth": 47.42,
+          "capped": false
+        }
+      ]
+    },
+    {
+      "share": 0.25,
+      "rangeMultiple": 1000,
+      "milordInLiquidity": 1691750000,
+      "milordReserved": 5075250000,
+      "tickLower": 134220,
+      "tickUpper": 203280,
+      "openingEthPerMillion": 0.001486,
+      "openingFdvEth": 10.058,
+      "rangeTopFdvEth": 10037,
+      "grossEthToBuyWholePosition": 80.9,
+      "ethInPoolAfterFirst1EthBuy": 0.982,
+      "sell1MAfterFirst1EthBuyEthNet": 0.00277,
+      "maxNftsBackableFromPool": 1691,
+      "buys": [
+        {
+          "ethIn": 0.01,
+          "milordOut": 6582469,
+          "nftsWorth": 6.6,
+          "avgEthPerMillion": 0.001519,
+          "priceAfterEthPerMillion": 0.001498,
+          "priceChangePct": 0.76,
+          "fdvAfterEth": 10.13,
+          "capped": false
+        },
+        {
+          "ethIn": 0.05,
+          "milordOut": 32423688,
+          "nftsWorth": 32.4,
+          "avgEthPerMillion": 0.001542,
+          "priceAfterEthPerMillion": 0.001543,
+          "priceChangePct": 3.82,
+          "fdvAfterEth": 10.44,
+          "capped": false
+        },
+        {
+          "ethIn": 0.1,
+          "milordOut": 63665798,
+          "nftsWorth": 63.7,
+          "avgEthPerMillion": 0.001571,
+          "priceAfterEthPerMillion": 0.001601,
+          "priceChangePct": 7.71,
+          "fdvAfterEth": 10.83,
+          "capped": false
+        },
+        {
+          "ethIn": 0.5,
+          "milordOut": 277830439,
+          "nftsWorth": 277.8,
+          "avgEthPerMillion": 0.0018,
+          "priceAfterEthPerMillion": 0.002102,
+          "priceChangePct": 41.4,
+          "fdvAfterEth": 14.22,
+          "capped": false
+        },
+        {
+          "ethIn": 1,
+          "milordOut": 479419764,
+          "nftsWorth": 479.4,
+          "avgEthPerMillion": 0.002086,
+          "priceAfterEthPerMillion": 0.002823,
+          "priceChangePct": 89.94,
+          "fdvAfterEth": 19.1,
+          "capped": false
+        },
+        {
+          "ethIn": 2,
+          "milordOut": 752375627,
+          "nftsWorth": 752.4,
+          "avgEthPerMillion": 0.002658,
+          "priceAfterEthPerMillion": 0.004585,
+          "priceChangePct": 208.49,
+          "fdvAfterEth": 31.03,
+          "capped": false
+        },
+        {
+          "ethIn": 5,
+          "milordOut": 1142746823,
+          "nftsWorth": 1142.7,
+          "avgEthPerMillion": 0.004375,
+          "priceAfterEthPerMillion": 0.01242,
+          "priceChangePct": 735.79,
+          "fdvAfterEth": 84.06,
+          "capped": false
+        },
+        {
+          "ethIn": 10,
+          "milordOut": 1381715130,
+          "nftsWorth": 1381.7,
+          "avgEthPerMillion": 0.007237,
+          "priceAfterEthPerMillion": 0.03399,
+          "priceChangePct": 2186.75,
+          "fdvAfterEth": 230,
+          "capped": false
+        }
+      ]
+    },
+    {
+      "share": 0.5,
+      "rangeMultiple": 1000,
+      "milordInLiquidity": 3383500000,
+      "milordReserved": 3383500000,
+      "tickLower": 134220,
+      "tickUpper": 203280,
+      "openingEthPerMillion": 0.001486,
+      "openingFdvEth": 10.058,
+      "rangeTopFdvEth": 10037,
+      "grossEthToBuyWholePosition": 161.8,
+      "ethInPoolAfterFirst1EthBuy": 0.982,
+      "sell1MAfterFirst1EthBuyEthNet": 0.002063,
+      "maxNftsBackableFromPool": 3383,
+      "buys": [
+        {
+          "ethIn": 0.01,
+          "milordOut": 6594893,
+          "nftsWorth": 6.6,
+          "avgEthPerMillion": 0.001516,
+          "priceAfterEthPerMillion": 0.001492,
+          "priceChangePct": 0.38,
+          "fdvAfterEth": 10.1,
+          "capped": false
+        },
+        {
+          "ethIn": 0.05,
+          "milordOut": 32727382,
+          "nftsWorth": 32.7,
+          "avgEthPerMillion": 0.001528,
+          "priceAfterEthPerMillion": 0.001515,
+          "priceChangePct": 1.9,
+          "fdvAfterEth": 10.25,
+          "capped": false
+        },
+        {
+          "ethIn": 0.1,
+          "milordOut": 64847375,
+          "nftsWorth": 64.8,
+          "avgEthPerMillion": 0.001542,
+          "priceAfterEthPerMillion": 0.001543,
+          "priceChangePct": 3.82,
+          "fdvAfterEth": 10.44,
+          "capped": false
+        },
+        {
+          "ethIn": 0.5,
+          "milordOut": 301830145,
+          "nftsWorth": 301.8,
+          "avgEthPerMillion": 0.001657,
+          "priceAfterEthPerMillion": 0.001781,
+          "priceChangePct": 19.8,
+          "fdvAfterEth": 12.05,
+          "capped": false
+        },
+        {
+          "ethIn": 1,
+          "milordOut": 555660879,
+          "nftsWorth": 555.7,
+          "avgEthPerMillion": 0.0018,
+          "priceAfterEthPerMillion": 0.002102,
+          "priceChangePct": 41.4,
+          "fdvAfterEth": 14.22,
+          "capped": false
+        },
+        {
+          "ethIn": 2,
+          "milordOut": 958839528,
+          "nftsWorth": 958.8,
+          "avgEthPerMillion": 0.002086,
+          "priceAfterEthPerMillion": 0.002823,
+          "priceChangePct": 89.94,
+          "fdvAfterEth": 19.1,
+          "capped": false
+        },
+        {
+          "ethIn": 5,
+          "milordOut": 1698114263,
+          "nftsWorth": 1698.1,
+          "avgEthPerMillion": 0.002944,
+          "priceAfterEthPerMillion": 0.005626,
+          "priceChangePct": 278.5,
+          "fdvAfterEth": 38.07,
+          "capped": false
+        },
+        {
+          "ethIn": 10,
+          "milordOut": 2285493646,
+          "nftsWorth": 2285.5,
+          "avgEthPerMillion": 0.004375,
+          "priceAfterEthPerMillion": 0.01242,
+          "priceChangePct": 735.79,
+          "fdvAfterEth": 84.06,
+          "capped": false
+        }
+      ]
+    },
+    {
+      "share": 0.75,
+      "rangeMultiple": 1000,
+      "milordInLiquidity": 5075250000,
+      "milordReserved": 1691750000,
+      "tickLower": 134220,
+      "tickUpper": 203280,
+      "openingEthPerMillion": 0.001486,
+      "openingFdvEth": 10.058,
+      "rangeTopFdvEth": 10037,
+      "grossEthToBuyWholePosition": 242.6,
+      "ethInPoolAfterFirst1EthBuy": 0.982,
+      "sell1MAfterFirst1EthBuyEthNet": 0.00185,
+      "maxNftsBackableFromPool": 5075,
+      "buys": [
+        {
+          "ethIn": 0.01,
+          "milordOut": 6599045,
+          "nftsWorth": 6.6,
+          "avgEthPerMillion": 0.001515,
+          "priceAfterEthPerMillion": 0.00149,
+          "priceChangePct": 0.25,
+          "fdvAfterEth": 10.08,
+          "capped": false
+        },
+        {
+          "ethIn": 0.05,
+          "milordOut": 32829882,
+          "nftsWorth": 32.8,
+          "avgEthPerMillion": 0.001523,
+          "priceAfterEthPerMillion": 0.001505,
+          "priceChangePct": 1.26,
+          "fdvAfterEth": 10.18,
+          "capped": false
+        },
+        {
+          "ethIn": 0.1,
+          "milordOut": 65251041,
+          "nftsWorth": 65.3,
+          "avgEthPerMillion": 0.001533,
+          "priceAfterEthPerMillion": 0.001524,
+          "priceChangePct": 2.54,
+          "fdvAfterEth": 10.31,
+          "capped": false
+        },
+        {
+          "ethIn": 0.5,
+          "milordOut": 310778768,
+          "nftsWorth": 310.8,
+          "avgEthPerMillion": 0.001609,
+          "priceAfterEthPerMillion": 0.00168,
+          "priceChangePct": 13,
+          "fdvAfterEth": 11.37,
+          "capped": false
+        },
+        {
+          "ethIn": 1,
+          "milordOut": 586764872,
+          "nftsWorth": 586.8,
+          "avgEthPerMillion": 0.001704,
+          "priceAfterEthPerMillion": 0.001885,
+          "priceChangePct": 26.8,
+          "fdvAfterEth": 12.75,
+          "capped": false
+        },
+        {
+          "ethIn": 2,
+          "milordOut": 1055376966,
+          "nftsWorth": 1055.4,
+          "avgEthPerMillion": 0.001895,
+          "priceAfterEthPerMillion": 0.00233,
+          "priceChangePct": 56.78,
+          "fdvAfterEth": 15.77,
+          "capped": false
+        },
+        {
+          "ethIn": 5,
+          "milordOut": 2026384034,
+          "nftsWorth": 2026.4,
+          "avgEthPerMillion": 0.002467,
+          "priceAfterEthPerMillion": 0.003951,
+          "priceChangePct": 165.8,
+          "fdvAfterEth": 26.73,
+          "capped": false
+        },
+        {
+          "ethIn": 10,
+          "milordOut": 2922749513,
+          "nftsWorth": 2922.7,
+          "avgEthPerMillion": 0.003421,
+          "priceAfterEthPerMillion": 0.007596,
+          "priceChangePct": 411.06,
+          "fdvAfterEth": 51.4,
+          "capped": false
+        }
+      ]
+    }
+  ]
+}

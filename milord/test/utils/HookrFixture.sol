@@ -39,6 +39,11 @@ abstract contract HookrFixture is SingleChainFixture, HookrLaunchKit {
         return address(0);
     }
 
+    /// Share of the 6,767,000,000 supply placed in the MILORD-only position (default 50%).
+    function _liquidityShareBps() internal pure virtual returns (uint256) {
+        return 5_000;
+    }
+
     function setUp() public virtual override {
         super.setUp();
         new DeployPermit2().deployPermit2();
@@ -54,7 +59,7 @@ abstract contract HookrFixture is SingleChainFixture, HookrLaunchKit {
         hook = MockHookrTaxHook(payable(hookAddr));
 
         launch = LaunchParams({
-            milordForLiquidity: 3_383_500_000 ether,
+            milordForLiquidity: 6_767_000_000 ether * _liquidityShareBps() / 10_000,
             tickUpper: 203_280, // ~10 ETH fully diluted at open
             tickLower: 203_280 - 69_060, // up to ~1,000x the opening price
             lpFee: 3000,

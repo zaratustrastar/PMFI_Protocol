@@ -4,7 +4,7 @@
 cd milord
 npm install                      # OpenZeppelin, merkle-tree, ethers, forge-std
 forge build
-forge test                       # unit + fuzz + invariant (134 tests)
+forge test                       # unit + fuzz + invariant (143 tests)
 node offchain/test-eligibility.mjs
 ./sim/run-local.sh               # fresh anvil -> DeployLocal -> 3-week simulation -> sim/output/simulation.json
 node sim/build-dashboard.mjs     # -> sim/output/dashboard.html

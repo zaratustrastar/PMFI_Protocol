@@ -2,10 +2,11 @@
 
 Run on 2026-10-13 in a local container. Nothing broadcast to a public network.
 
-## Foundry (`forge test`): 134 passed, 0 failed, 0 skipped
+## Foundry (`forge test`): 143 passed, 0 failed, 0 skipped
 
 | Suite | Tests | Covers |
 |---|---|---|
+| HookrAllocation25/50/75Test | 9 | approved 10 ETH FDV: opening price, first buy matches the model, sells pay ETH only after buys, bounded by buyers' net ETH |
 | HookrLaunchTest | 15 | token-only open, sell before buy gets 0, 1.5% tax both sides in ETH, 20% commission and equal thirds, LP fees separate, round-trip bounded, price impact, buyback true burn with price limit and threshold, lock has no withdraw, ETH→USDG, adapter errors, adapter set once, commission fuzz 20–50% |
 | ConverterTest | 28 | entry fee max(10%, 0.002 ETH), signed TWAP quotes, staleness, collateral, exit 900k/100k |
 | ConverterInvariantTest | 5 | escrow == active NFTs × 1M; no unbacked NFT |

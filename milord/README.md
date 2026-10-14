@@ -11,7 +11,7 @@ The next version of PMFI: a tradeable **MILORD** token on Robinhood Chain, 6,767
 | `src/robinhood` | MILORDToken, MilordsNFT, MilordConverter, RevenueSplitter, BuybackBurner, StrategyRegistry, MilordGovernor |
 | `src/parb` | PMFIArbVaultV3 (pARB V2 fork, 0% fee, PPS fixes), ParbFundingAdapter, ShareDistributor |
 | `src/legacy` | compile-only copy of the deployed V2 source, used to reproduce its issues |
-| `test` | 134 Foundry unit, fuzz and invariant tests, including Robinhood deployment and the full fee-to-pARB flow |
+| `test` | 143 Foundry unit, fuzz and invariant tests, including Robinhood deployment and the full fee-to-pARB flow |
 | `script` | `MilordDeployer` (one-chain wiring), `DeployLocal` (anvil only), `DeployRobinhood` (testnet 46630 only, refuses mainnet) |
 | `offchain` | quote signing, report signing, eligibility + cumulative Merkle builder, local quote service |
 | `sim` | `run-local.sh` 3-week end-to-end simulation, dashboard builder, outputs |
