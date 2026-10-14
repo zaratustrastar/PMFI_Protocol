@@ -20,7 +20,7 @@ contract HookrFullSupplyTest is HookrFixture {
         assertEq(d.token.balanceOf(teamSafe), 0, "team keeps nothing");
         assertEq(d.token.balanceOf(address(v4.poolManager)), supply - launchDust, "everything else is in the pool");
         assertEq(d.token.totalSupply(), supply - launchDust, "the remainder was burned, not kept");
-        assertEq(IERC721(address(v4.positionManager)).ownerOf(positionId), address(lock));
+        assertEq(IERC721(address(v4.positionManager)).ownerOf(positionId), address(familyLock));
         emit log_named_uint("MILORD wei in the position", supply - launchDust);
         emit log_named_uint("MILORD wei burned as rounding remainder", launchDust);
     }
@@ -29,7 +29,7 @@ contract HookrFullSupplyTest is HookrFixture {
         (, int24 tick,,) = _slot0(v4.poolManager, milordKey);
         assertEq(tick, launch.tickUpper);
         assertApproxEqRel(_weiPerMillion() * 6_767, 10.058 ether, 0.001e18, "opening FDV ~10 ETH");
-        assertApproxEqAbs(address(v4.poolManager).balance, 2_000 ether, 1e6, "only the USDG pool's ETH: 0 ETH in the MILORD pool");
+        assertEq(address(v4.poolManager).balance, 0, "0 ETH in the MILORD pool");
     }
 
     function test_firstBuyWorksAndMatchesModel() public {

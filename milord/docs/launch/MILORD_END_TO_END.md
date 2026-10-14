@@ -12,7 +12,7 @@ P&L (+2% week 2, −3% week 3, scenario inputs, **not** performance data). Illus
 ## Launch (final configuration, LAUNCH_LIQUIDITY.md)
 
 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, tick 134220–203280 (≈10.06 ETH opening FDV, range
-top ≈1,000× the opening price), 0 ETH, 0.3% LP fee, spacing 60, position minted to `MilordLiquidityLock` (local only;
+top ≈1,000× the opening price), 0 ETH, 0.3% LP fee, spacing 60, position held by `MockHookrFamilyLock` and locked forever with `HookrLockFeeCollector` as beneficiary (local only;
 the mainnet lock awaits approval). The 24,920-wei rounding remainder is burned; the deployer ends with 0 MILORD.
 
 ## Steps and results

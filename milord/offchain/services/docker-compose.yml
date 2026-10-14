@@ -1,0 +1,31 @@
+# Testnet / local deployment of the three services. Mainnet only after owner approval (ALLOW_MAINNET=yes).
+#   cd milord && docker compose -f offchain/services/docker-compose.yml --env-file offchain/services/.env up -d
+services:
+  keeper:
+    build: { context: ../.., dockerfile: offchain/services/Dockerfile }
+    command: ["node", "offchain/services/keeper.mjs"]
+    env_file: .env
+    environment: { HEALTH_PORT: "9101", INTERVAL_SECS: "${KEEPER_INTERVAL_SECS:-300}" }
+    volumes: ["keeper-state:/data", "${DEPLOYMENTS_HOST_FILE:-../../sim/deployments.local.json}:/app/deployments.json:ro"]
+    ports: ["127.0.0.1:9101:9101"]
+    restart: unless-stopped
+  epoch-publisher:
+    build: { context: ../.., dockerfile: offchain/services/Dockerfile }
+    command: ["node", "offchain/services/epoch-publisher.mjs"]
+    env_file: .env
+    environment: { HEALTH_PORT: "9102", INTERVAL_SECS: "${PUBLISHER_INTERVAL_SECS:-900}" }
+    volumes: ["publisher-state:/data", "${DEPLOYMENTS_HOST_FILE:-../../sim/deployments.local.json}:/app/deployments.json:ro"]
+    ports: ["127.0.0.1:9102:9102"]
+    restart: unless-stopped
+  root-checker:
+    build: { context: ../.., dockerfile: offchain/services/Dockerfile }
+    command: ["node", "offchain/services/root-checker.mjs"]
+    env_file: .env
+    # independent RPC provider; no private key is passed to this container
+    environment: { HEALTH_PORT: "9103", INTERVAL_SECS: "${CHECKER_INTERVAL_SECS:-600}", RPC_URL: "${CHECKER_RPC_URL}", KEEPER_PRIVATE_KEY: "", PUBLISHER_PRIVATE_KEY: "" }
+    volumes: ["${DEPLOYMENTS_HOST_FILE:-../../sim/deployments.local.json}:/app/deployments.json:ro"]
+    ports: ["127.0.0.1:9103:9103"]
+    restart: unless-stopped
+volumes:
+  keeper-state:
+  publisher-state:

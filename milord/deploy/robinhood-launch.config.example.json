@@ -1,24 +1,25 @@
 {
-  "_comment": "EXAMPLE, NOT EXECUTED. Final allocation (Bobo, 2026-10-14): 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, 0 ETH, ~10 ETH opening FDV, range top ~1,000x. Addresses marked 0x000..0 are filled after deployment. liquidityLock, lock parameters, LP fee and commission still need owner approval. No keys or secrets belong in this file.",
+  "_comment": "EXAMPLE, NOT EXECUTED. Owner decisions (Bobo, 2026-10-14): 100% of supply (6,767,000,000 MILORD) in one MILORD-only founding position via Hookr's existing-token launcher, 0 ETH, ~10 ETH opening FDV, ticks 134220-203280, LP fee 0.3%, 1.5%/1.5% ETH tax, Hookr commission 20% (to verify), permanent lock with HookrLockFeeCollector as beneficiary (approved as architecture, NOT to be executed yet). Addresses 0x000..0N are filled after testnet deployment. No keys or secrets belong in this file.",
   "chainId": 4663,
   "milord": "0x0000000000000000000000000000000000000001",
-  "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
-  "positionManager": "0x58daec3116aae6D93017bAAea7749052E8a04fA7",
+  "hookr": {
+    "launcher": "0x1cf2748A6670572425eAbf9Ab9e5BC4eb2eB8Ef4",
+    "familyLock": "0xfAFEcE64099C1E791C4B46189c277f00c0c7e00b",
+    "root": "0x89c9FB50d1f03192230FFB1c279BB6E7d3Fe6aCc",
+    "rules": "0x4a71c270b1520F94064268102AebD744b0DE7942",
+    "taxConversionAdvisory": null,
+    "familyId": null
+  },
   "poolManager": "0x8366a39CC670B4001A1121B8F6A443A643e40951",
-  "pool": {
-    "currency0": "0x0000000000000000000000000000000000000000",
-    "fee": 8388608,
-    "tickSpacing": 60,
-    "hooks": "0x89c9FB50d1f03192230FFB1c279BB6E7d3Fe6aCc"
-  },
-  "position": {
-    "tickLower": 134220,
-    "tickUpper": 203280
-  },
+  "position": { "tickLower": 134220, "tickUpper": 203280, "tickSpacing": 60, "baseLpFeePips": 3000 },
   "milordForLiquidityWei": "6767000000000000000000000000",
-  "liquidityLock": "0x0000000000000000000000000000000000000002",
+  "lockFeeCollector": "0x0000000000000000000000000000000000000002",
   "buybackBurner": "0x0000000000000000000000000000000000000003",
   "v4SwapAdapter": "0x0000000000000000000000000000000000000004",
-  "permitExpiry": 1893456000,
+  "arbitrageFundingRouter": "0x0000000000000000000000000000000000000005",
+  "ownable2StepContracts": {
+    "teamSafe": ["0x0000000000000000000000000000000000000006"],
+    "arbitrageSafe": ["0x0000000000000000000000000000000000000005"]
+  },
   "deadline": 1893456000
 }

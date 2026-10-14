@@ -75,7 +75,7 @@ contract MockHookrTaxHook {
             uint256 ethIn = uint256(-params.amountSpecified);
             uint256 tax = (ethIn * buyTaxBps) / 10_000;
             if (tax > 0) {
-                poolManager.take(key.currency0, address(this), tax);
+                poolManager.mint(address(this), key.currency0.toId(), tax); // ERC-6909 claim: needs no PoolManager ETH mid-swap
                 _accrue(true, ethIn, tax);
             }
             return (IHooks.beforeSwap.selector, toBeforeSwapDelta(int128(int256(tax)), 0), 0);
@@ -95,7 +95,7 @@ contract MockHookrTaxHook {
         uint256 volume = uint256(uint128(eth < 0 ? -eth : eth));
         uint256 tax = (volume * (params.zeroForOne ? buyTaxBps : sellTaxBps)) / 10_000;
         if (tax > 0) {
-            poolManager.take(key.currency0, address(this), tax);
+            poolManager.mint(address(this), key.currency0.toId(), tax); // ERC-6909 claim: needs no PoolManager ETH mid-swap
             _accrue(params.zeroForOne, volume, tax);
         }
         return (IHooks.afterSwap.selector, int128(int256(tax)));
@@ -122,9 +122,18 @@ contract MockHookrTaxHook {
         projectAccrued = 0;
         totalPlatformPaid += p;
         totalProjectPaid += q;
+        uint256 claims = poolManager.balanceOf(address(this), 0); // native ETH claim id
+        if (claims > 0) poolManager.unlock(abi.encode(claims));
         if (p > 0) _send(platform, p);
         if (q > 0) _send(projectRecipient, q);
         emit Collected(p, q);
+    }
+
+    function unlockCallback(bytes calldata data) external onlyPoolManager returns (bytes memory) {
+        uint256 amount = abi.decode(data, (uint256));
+        poolManager.burn(address(this), 0, amount);
+        poolManager.take(Currency.wrap(address(0)), address(this), amount);
+        return "";
     }
 
     function _send(address to, uint256 amount) internal {

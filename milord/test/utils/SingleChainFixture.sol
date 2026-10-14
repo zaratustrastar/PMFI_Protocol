@@ -56,6 +56,7 @@ abstract contract SingleChainFixture is Test, MilordDeployer {
         cfg.rootActivationDelay = 1 days;
         cfg.splitterMin = [uint16(6000), 4000, 2500];
         cfg.splitterMax = [uint16(8000), 6000, 4000];
+        _beforeDeploy();
         d = _deployMilord(cfg);
 
         // Safe accepts every Ownable2Step handover
@@ -71,9 +72,17 @@ abstract contract SingleChainFixture is Test, MilordDeployer {
         d.adapter.acceptOwnership();
         d.vault.setReportCooldown(0);
         vm.stopPrank();
+        if (address(d.router) != address(0)) {
+            vm.prank(arbSafe);
+            d.router.acceptOwnership();
+        }
 
         _fundMockSwap();
     }
+
+    /// Extra configuration before the protocol is deployed (the Hookr fixture builds the WETH/USDG market and the
+    /// automation router's venue and price reference here).
+    function _beforeDeploy() internal virtual {}
 
     /// MILORD inventory for the mock buyback router. The Hookr fixture skips it: all supply goes into the pool.
     function _fundMockSwap() internal virtual {

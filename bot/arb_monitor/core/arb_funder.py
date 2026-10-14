@@ -24,6 +24,13 @@ Tend tick (run_tend_tick — called from reporter each cycle):
   NOTE: No float maintenance — there are no standing reserves. Capital is
   deposited exactly when and in exactly the amount that a specific trade needs.
 
+Funding chain (ARB_FUNDING_CHAIN, default "base" = unchanged legacy V2 path):
+  robinhood — servicer cash is USDG on Robinhood Chain 4663; tend() hits the V3 vault there;
+  Polymarket is funded by a USDG transfer to POLY_RH_DEPOSIT_ADDR; Kalshi by an Across
+  (Relay fallback) USDG→Base USDC bridge followed by the existing Base USDC transfer.
+  Bridge legs are written to the in-transit ledger in arb_withdrawals so NAV counts them.
+  Opinion is skipped unless ARB_OPINION_ENABLED=true (and has no Robinhood route).
+
 Nonce management: _NonceTracker is initialised from pending nonce and
 incremented client-side per transfer to prevent nonce collisions.
 All errors are logged and suppressed — never raises.
@@ -42,6 +49,16 @@ from ..config import (
     KALSHI_BASE_DEPOSIT_ADDR,
     OPINION_BASE_DEPOSIT_ADDR,
     OPINION_BSC_DEPOSIT_ADDR,
+    is_robinhood_funding,
+    opinion_enabled,
+    robinhood_chain_id,
+    robinhood_rpc_url,
+    usdg_address,
+    poly_rh_deposit_addr,
+    across_api_url,
+    relay_api_url,
+    bridge_max_fee_bps,
+    rh_sweep_min_usdc,
 )
 
 BASE_RPC = os.environ.get("BASE_RPC_URL", "https://mainnet.base.org")
@@ -94,11 +111,11 @@ def _checksum(addr: str) -> str:
     return eth_utils.to_checksum_address(addr)
 
 
-def _get_usdc_balance(wallet: str, rpc_url: str = BASE_RPC) -> float:
-    """Return USDC balance of wallet (normalised to float USDC)."""
+def _get_usdc_balance(wallet: str, rpc_url: str = BASE_RPC, token: str = USDC_BASE) -> float:
+    """Return USDC (or any 6-decimal stablecoin, e.g. USDG) balance of wallet as float."""
     padded = "000000000000000000000000" + wallet.lower().replace("0x", "")
     data = "0x" + SELECTOR_BALANCE_OF + padded
-    raw = _rpc("eth_call", [{"to": USDC_BASE, "data": data}, "latest"], rpc_url)
+    raw = _rpc("eth_call", [{"to": token, "data": data}, "latest"], rpc_url)
     balance_raw = int(raw, 16) if raw and raw != "0x" else 0
     return balance_raw / 1_000_000
 
@@ -117,6 +134,34 @@ def _get_allowance(owner: str, spender: str, token: str = USDC_BASE, rpc_url: st
     raw = _rpc("eth_call", [{"to": token, "data": data}, "latest"], rpc_url)
     raw_int = int(raw, 16) if raw and raw != "0x" else 0
     return raw_int / 1_000_000
+
+
+# ---------------------------------------------------------------------------
+# Funding chain (ARB_FUNDING_CHAIN=base|robinhood)
+# ---------------------------------------------------------------------------
+
+def _funding_rpc_chain() -> tuple[str, int]:
+    """(rpc_url, chain_id) of the chain holding servicer cash and the vault."""
+    if is_robinhood_funding():
+        rpc = robinhood_rpc_url()
+        if not rpc:
+            raise RuntimeError("ARB_FUNDING_CHAIN=robinhood but ROBINHOOD_RPC_URL is not set")
+        return rpc, robinhood_chain_id()
+    return BASE_RPC, BASE_CHAIN_ID
+
+
+def get_servicer_cash_usdc(wallet: str) -> float:
+    """Servicer cash on the funding chain: USDG on 4663 (robinhood) or USDC on Base (base)."""
+    if is_robinhood_funding():
+        rpc, _ = _funding_rpc_chain()
+        return _get_usdc_balance(wallet, rpc, token=usdg_address())
+    return _get_usdc_balance(wallet)
+
+
+def _get_servicer_gas_eth(wallet: str) -> float:
+    """Gas balance on the funding chain."""
+    rpc, _ = _funding_rpc_chain()
+    return _get_eth_balance(wallet, rpc)
 
 
 # ---------------------------------------------------------------------------
@@ -360,6 +405,258 @@ def _bridge_usdc_base_to_bsc(
 
 
 # ---------------------------------------------------------------------------
+# Across (primary) / Relay (fallback) bridge — Robinhood USDG <-> Base USDC
+# ---------------------------------------------------------------------------
+
+def _to_int(v, default: int = 0) -> int:
+    if v is None or v == "":
+        return default
+    if isinstance(v, int):
+        return v
+    s = str(v)
+    return int(s, 16) if s.lower().startswith("0x") else int(s)
+
+
+def _across_quote(amount_raw, trade_type, from_addr, recipient,
+                  origin_chain, origin_token, dest_chain, dest_token):
+    """Across swap API. Returns (txs, input_raw, min_output_raw, request_id)."""
+    import requests as _req
+    resp = _req.get(f"{across_api_url()}/swap/approval", params={
+        "tradeType": trade_type,  # exactInput | exactOutput
+        "amount": str(amount_raw),
+        "inputToken": origin_token,
+        "originChainId": origin_chain,
+        "outputToken": dest_token,
+        "destinationChainId": dest_chain,
+        "depositor": from_addr,
+        "recipient": recipient,
+    }, timeout=20)
+    resp.raise_for_status()
+    q = resp.json()
+    swap_tx = q.get("swapTx") or {}
+    if not swap_tx.get("to"):
+        raise RuntimeError(f"Across quote missing swapTx: {list(q.keys())}")
+    txs = [t for t in (q.get("approvalTxns") or []) if t.get("to")] + [swap_tx]
+    if trade_type == "exactInput":
+        in_raw = amount_raw
+        out_raw = _to_int(q.get("minOutputAmount") or q.get("expectedOutputAmount"))
+    else:
+        in_raw = _to_int(q.get("maxInputAmount") or q.get("inputAmount"))
+        out_raw = amount_raw
+    return txs, in_raw, out_raw, None
+
+
+def _relay_quote(amount_raw, trade_type, from_addr, recipient,
+                 origin_chain, origin_token, dest_chain, dest_token):
+    """Relay quote API (same pattern as arb_withdrawals._relay_bridge_polygon_to_base)."""
+    import requests as _req
+    resp = _req.post(f"{relay_api_url()}/quote", json={
+        "user": from_addr,
+        "originChainId": origin_chain,
+        "destinationChainId": dest_chain,
+        "originCurrency": origin_token,
+        "destinationCurrency": dest_token,
+        "amount": str(amount_raw),
+        "recipient": recipient,
+        "tradeType": "EXACT_INPUT" if trade_type == "exactInput" else "EXACT_OUTPUT",
+    }, timeout=20)
+    resp.raise_for_status()
+    q = resp.json()
+    txs, request_id = [], None
+    for step in q.get("steps", []):
+        request_id = request_id or step.get("requestId")
+        for item in step.get("items", []):
+            data = item.get("data") or {}
+            if data.get("to"):
+                txs.append(data)
+    if not txs:
+        raise RuntimeError(f"Relay quote returned no executable steps: {list(q.keys())}")
+    details = q.get("details") or {}
+    if trade_type == "exactInput":
+        in_raw = amount_raw
+        cur_out = details.get("currencyOut") or {}
+        out_raw = _to_int(cur_out.get("minimumAmount") or cur_out.get("amount"))
+    else:
+        in_raw = _to_int((details.get("currencyIn") or {}).get("amount"))
+        out_raw = amount_raw
+    return txs, in_raw, out_raw, request_id
+
+
+def _bridge_stable(
+    private_key: str,
+    from_addr: str,
+    recipient: str,
+    amount_usdc: float,
+    trade_type: str,
+    origin_chain: int,
+    origin_token: str,
+    origin_rpc: str,
+    dest_chain: int,
+    dest_token: str,
+    nonce_tracker: "_NonceTracker",
+) -> dict:
+    """Bridge a 6-decimal stablecoin via Across, falling back to Relay on a bad/failed QUOTE.
+
+    Guards (fail closed): fee <= ARB_BRIDGE_MAX_FEE_BPS, no native value attached, and every
+    tx before the final deposit must be an ERC-20 approve() on the origin token. Once a tx has
+    been broadcast we never fall back (that could double-spend); errors propagate.
+    Returns {provider, tx_hash, reference, input_usdc, output_usdc}.
+    """
+    amount_raw = int(round(amount_usdc * 1_000_000))
+    max_fee = bridge_max_fee_bps()
+    errors = []
+    for provider, quote_fn in (("across", _across_quote), ("relay", _relay_quote)):
+        try:
+            txs, in_raw, out_raw, request_id = quote_fn(
+                amount_raw, trade_type, from_addr, recipient,
+                origin_chain, origin_token, dest_chain, dest_token,
+            )
+            if in_raw <= 0 or out_raw <= 0 or out_raw * 10_000 < in_raw * (10_000 - max_fee):
+                raise RuntimeError(
+                    f"fee unverifiable or above {max_fee} bps (in={in_raw} out={out_raw})"
+                )
+            for tx in txs:
+                if _to_int(tx.get("value")) != 0:
+                    raise RuntimeError(f"quote tx carries native value {tx.get('value')}")
+            for tx in txs[:-1]:
+                if (tx["to"].lower() != origin_token.lower()
+                        or not str(tx.get("data", "")).lower().startswith("0x" + SELECTOR_APPROVE)):
+                    raise RuntimeError(f"unexpected pre-deposit tx to {tx['to']}")
+        except Exception as e:
+            errors.append(f"{provider}: {e}")
+            log(f"⚠️ {provider} bridge quote rejected: {e}")
+            continue
+
+        log(
+            f"🌉 {provider}: {in_raw / 1e6:.6f} (chain {origin_chain}) → "
+            f">= {out_raw / 1e6:.6f} (chain {dest_chain}) to {recipient} [{len(txs)} tx]"
+        )
+        tx_hash = None
+        for tx in txs:
+            gas = _to_int(tx.get("gas") or tx.get("gasLimit"))
+            tx_hash = _build_and_send_tx(
+                private_key=private_key,
+                to=tx["to"],
+                data=tx.get("data", "0x"),
+                nonce_tracker=nonce_tracker,
+                value_wei=0,
+                chain_id=origin_chain,
+                rpc_url=origin_rpc,
+                gas_override=int(gas * 1.2) if gas else None,
+            )
+        log(f"🌉 {provider} bridge deposit sent: {tx_hash}")
+        return {
+            "provider": provider,
+            "tx_hash": tx_hash,
+            "reference": request_id or tx_hash,
+            "input_usdc": in_raw / 1_000_000,
+            "output_usdc": out_raw / 1_000_000,
+        }
+    raise RuntimeError("all bridge providers failed: " + "; ".join(errors))
+
+
+def _bridge_usdg_to_base_usdc(
+    private_key: str,
+    servicer_wallet: str,
+    amount_usdc: float,
+    nonce_tracker: "_NonceTracker",
+) -> dict:
+    """USDG on Robinhood Chain → exactly `amount_usdc` USDC on Base (servicer wallet)."""
+    rpc, chain_id = _funding_rpc_chain()
+    return _bridge_stable(
+        private_key, servicer_wallet, servicer_wallet, amount_usdc, "exactOutput",
+        chain_id, usdg_address(), rpc, BASE_CHAIN_ID, USDC_BASE, nonce_tracker,
+    )
+
+
+def _bridge_base_usdc_to_usdg(
+    private_key: str,
+    servicer_wallet: str,
+    amount_usdc: float,
+    nonce_tracker: "_NonceTracker",
+) -> dict:
+    """All of `amount_usdc` USDC on Base → USDG on Robinhood Chain (servicer wallet)."""
+    return _bridge_stable(
+        private_key, servicer_wallet, servicer_wallet, amount_usdc, "exactInput",
+        BASE_CHAIN_ID, USDC_BASE, BASE_RPC, robinhood_chain_id(), usdg_address(), nonce_tracker,
+    )
+
+
+def _send_usdg_to_polymarket(private_key: str, amount_usdc: float, nonce_tracker: "_NonceTracker") -> str:
+    """Robinhood mode Polymarket deposit: USDG transfer on 4663 to the Polymarket bridge address."""
+    deposit_addr = poly_rh_deposit_addr()
+    if not deposit_addr:
+        raise RuntimeError("POLY_RH_DEPOSIT_ADDR not set")
+    rpc, chain_id = _funding_rpc_chain()
+    tx = _send_erc20_transfer(
+        private_key, deposit_addr, round(amount_usdc, 6), nonce_tracker,
+        token=usdg_address(), chain_id=chain_id, rpc_url=rpc,
+    )
+    try:
+        from .arb_withdrawals import record_bridge_transfer
+        record_bridge_transfer("rh_to_polymarket", "polymarket_bridge", tx, amount_usdc, chain_id)
+    except Exception as e:
+        log(f"⚠️ Could not record Polymarket in-transit deposit: {e}")
+    return tx
+
+
+def _fund_kalshi_from_robinhood(
+    private_key: str,
+    servicer_wallet: str,
+    amount_usdc: float,
+    nonce_tracker: "_NonceTracker",
+    wait_timeout: int,
+    poll_interval: int,
+) -> tuple[bool, str]:
+    """Robinhood mode Kalshi deposit: bridge USDG (4663) → USDC (Base), wait for arrival,
+    then the existing Base USDC transfer to KALSHI_BASE_DEPOSIT_ADDR.
+
+    Base USDC already sitting in the servicer wallet (e.g. from an earlier timed-out bridge)
+    is used first, so a stranded bridge is never paid for twice.
+    """
+    from .arb_withdrawals import record_bridge_transfer, mark_bridge_arrived
+
+    if not KALSHI_BASE_DEPOSIT_ADDR:
+        return False, "fund_both_legs: KALSHI_BASE_DEPOSIT_ADDR not set — cannot fund Kalshi"
+    base_eth = _get_eth_balance(servicer_wallet)
+    if base_eth < ARB_SERVICER_GAS_RESERVE_ETH:
+        return False, (
+            f"fund_both_legs: servicer Base ETH too low for the Kalshi transfer "
+            f"({base_eth:.6f} < {ARB_SERVICER_GAS_RESERVE_ETH})"
+        )
+
+    base_before = _get_usdc_balance(servicer_wallet)
+    need = round(amount_usdc - base_before, 6)
+    if need > 0:
+        try:
+            res = _bridge_usdg_to_base_usdc(private_key, servicer_wallet, need, nonce_tracker)
+        except Exception as e:
+            return False, f"fund_both_legs: USDG→Base bridge failed: {e}"
+        _, rh_chain = _funding_rpc_chain()
+        record_bridge_transfer(
+            "rh_to_base", res["provider"], res["reference"], res["input_usdc"], rh_chain,
+        )
+        ok, err = _wait_for_balance(
+            "servicer_base_usdc", base_before + need, wait_timeout, poll_interval,
+            reader=lambda: _get_usdc_balance(servicer_wallet),
+        )
+        if not ok:
+            return False, f"{err} (bridge {res['reference']} still recorded as in-transit)"
+        mark_bridge_arrived(res["reference"])
+    else:
+        log(f"ℹ️ Servicer already holds {base_before:.4f} USDC on Base — no bridge needed")
+
+    try:
+        kalshi_tx = _send_erc20_transfer(
+            private_key, KALSHI_BASE_DEPOSIT_ADDR, round(amount_usdc, 6), _NonceTracker(servicer_wallet)
+        )
+    except Exception as e:
+        return False, f"fund_both_legs: Kalshi deposit failed: {e}"
+    log(f"📤 Kalshi deposit TX: {amount_usdc:.4f} USDC → {KALSHI_BASE_DEPOSIT_ADDR} tx={kalshi_tx}")
+    return True, kalshi_tx
+
+
+# ---------------------------------------------------------------------------
 # Main funder tick
 # ---------------------------------------------------------------------------
 
@@ -411,12 +708,14 @@ def _call_tend_if_ready(vault_address: str, private_key: str, servicer_wallet: s
 
     def _read_uint256(fn_sig: str) -> int:
         sel = _sel(fn_sig)
-        raw = _rpc("eth_call", [{"to": vault_address, "data": "0x" + sel}, "latest"])
+        raw = _rpc("eth_call", [{"to": vault_address, "data": "0x" + sel}, "latest"], rpc_url)
         if not raw or raw == "0x":
             return 0
         return int(raw, 16)
 
     try:
+        # Base V2 vault (default) or the V3 vault on Robinhood Chain 4663 — same tend() ABI.
+        rpc_url, chain_id = _funding_rpc_chain()
         last_tend_ts  = _read_uint256("lastTendTimestamp()")
         tend_cooldown = _read_uint256("tendCooldown()")
         now = int(time.time())
@@ -429,12 +728,14 @@ def _call_tend_if_ready(vault_address: str, private_key: str, servicer_wallet: s
         log(f"🔄 tend() cooldown elapsed (last={last_tend_ts}, cooldown={tend_cooldown}s) — calling")
 
         tend_data    = "0x" + _sel("tend()")
-        nonce_tracker = _NonceTracker(servicer_wallet)
+        nonce_tracker = _NonceTracker(servicer_wallet, rpc_url)
         tx_hash = _build_and_send_tx(
             private_key=private_key,
             to=vault_address,
             data=tend_data,
             nonce_tracker=nonce_tracker,
+            chain_id=chain_id,
+            rpc_url=rpc_url,
             gas_override=120_000,
         )
         log(f"✅ tend() sent: tx={tx_hash}")
@@ -547,6 +848,9 @@ def _get_platform_balance(venue: str, raise_on_error: bool = False) -> float:
             return _handle_err(f"⚠️ Kalshi balance read error: {e}", e)
 
     elif venue == "opinion":
+        if not opinion_enabled():
+            log("ℹ️ Opinion disabled (ARB_OPINION_ENABLED=false) — Opinion balance treated as 0")
+            return 0.0
         try:
             from ..adapters.opinion_clob import get_balance as opinion_get_balance
             return opinion_get_balance()
@@ -613,7 +917,11 @@ def ensure_funded_for_trade(
         True  — platform has (or now has) sufficient funds; safe to trade
         False — servicer wallet cannot cover the gap; trade should be aborted
     """
-    deposit_addr = POLY_BASE_DEPOSIT_ADDR if venue == "polymarket" else KALSHI_BASE_DEPOSIT_ADDR
+    rh_mode = is_robinhood_funding()
+    if rh_mode and venue == "polymarket":
+        deposit_addr = poly_rh_deposit_addr()
+    else:
+        deposit_addr = POLY_BASE_DEPOSIT_ADDR if venue == "polymarket" else KALSHI_BASE_DEPOSIT_ADDR
     if not deposit_addr:
         log(
             f"⚠️ No deposit address configured for {venue} — "
@@ -638,8 +946,8 @@ def ensure_funded_for_trade(
     )
 
     # Gate: servicer must keep ARB_SAFETY_BUFFER_USDC after the top-up
-    servicer_usdc = _get_usdc_balance(servicer_wallet)
-    servicer_eth  = _get_eth_balance(servicer_wallet)
+    servicer_usdc = get_servicer_cash_usdc(servicer_wallet)
+    servicer_eth  = _get_servicer_gas_eth(servicer_wallet)
 
     if servicer_eth < ARB_SERVICER_GAS_RESERVE_ETH:
         log(
@@ -657,6 +965,21 @@ def ensure_funded_for_trade(
             f"(needs {required_servicer:.4f})"
         )
         return False
+
+    if rh_mode:
+        try:
+            nt = nonce_tracker or _NonceTracker(servicer_wallet, _funding_rpc_chain()[0])
+            if venue == "polymarket":
+                tx = _send_usdg_to_polymarket(private_key, gap, nt)
+                log(f"📤 [{venue}] Deposited {gap:.4f} USDG → {deposit_addr} tx={tx}")
+                return True
+            ok, ref = _fund_kalshi_from_robinhood(private_key, servicer_wallet, gap, nt, 180, 10)
+            if not ok:
+                log(f"❌ [{venue}] {ref}")
+            return ok
+        except Exception as e:
+            log(f"❌ [{venue}] Top-up transfer failed: {e}")
+            return False
 
     try:
         nt = nonce_tracker or _NonceTracker(servicer_wallet)
@@ -690,7 +1013,7 @@ def get_servicer_deployable_usdc() -> float:
         log("⚠️ ARB_SERVICER_WALLET not set — cannot determine deployable USDC")
         return 0.0
     try:
-        usdc = _get_usdc_balance(servicer_wallet)
+        usdc = get_servicer_cash_usdc(servicer_wallet)
         deployable = max(0.0, usdc - ARB_SAFETY_BUFFER_USDC)
         log(
             f"💼 Servicer deployable: {usdc:.4f} USDC total − "
@@ -739,6 +1062,17 @@ def fund_both_legs_for_trade(
         (True, "")           — both platforms funded; safe to execute
         (False, error_str)   — cannot fund; error_str explains why
     """
+    if venue2 == "opinion" and not opinion_enabled():
+        # "funding_insufficient" prefix = no capital moved, so the execution loop skips to the next pair.
+        msg = "funding_insufficient: opinion_disabled (ARB_OPINION_ENABLED=false) — Opinion leg not funded"
+        log(f"❌ {msg}")
+        return False, msg
+    if venue2 == "opinion" and is_robinhood_funding():
+        # Opinion code is kept intact but has no Robinhood Chain funding route in V1.
+        msg = "funding_insufficient: Opinion funding from Robinhood Chain is not implemented (V1 keeps Opinion off)"
+        log(f"❌ {msg}")
+        return False, msg
+
     private_key     = os.environ.get("POLY_PRIVATE_KEY", "")
     servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
 
@@ -754,8 +1088,9 @@ def fund_both_legs_for_trade(
 
     # ── Step 1: Servicer balance ──────────────────────────────────────────
     try:
-        servicer_eth  = _get_eth_balance(servicer_wallet)
-        servicer_usdc = _get_usdc_balance(servicer_wallet)
+        # Base mode: USDC/ETH on Base. Robinhood mode: USDG/ETH on 4663.
+        servicer_eth  = _get_servicer_gas_eth(servicer_wallet)
+        servicer_usdc = get_servicer_cash_usdc(servicer_wallet)
     except Exception as e:
         msg = f"fund_both_legs: cannot read servicer wallet: {e}"
         log(f"❌ {msg}")
@@ -884,6 +1219,14 @@ def fund_both_legs_for_trade(
         f"− reservation={pending_reservation:.4f} → effective={effective_servicer:.4f} >= "
         f"required={required:.4f} (gaps={total_gap:.4f} + buffer={ARB_SAFETY_BUFFER_USDC:.2f})"
     )
+
+    # ── Step 5r: Robinhood mode — Poly via USDG on 4663, Kalshi via bridge to Base ──
+    if is_robinhood_funding():
+        return _fund_legs_robinhood(
+            private_key, servicer_wallet,
+            poly_before, poly_gap, venue2_before, venue2_gap,
+            wait_timeout, poll_interval,
+        )
 
     # ── Step 5a: Opinion ─────────────────────────────────────────────────────
     if venue2 == "opinion":
@@ -1052,24 +1395,84 @@ def fund_both_legs_for_trade(
     return False, msg
 
 
+def _fund_legs_robinhood(
+    private_key: str,
+    servicer_wallet: str,
+    poly_before: float,
+    poly_gap: float,
+    kalshi_before: float,
+    kalshi_gap: float,
+    wait_timeout: int,
+    poll_interval: int,
+) -> tuple[bool, str]:
+    """Robinhood-mode deposits for fund_both_legs_for_trade (Poly + Kalshi only)."""
+    from .arb_withdrawals import mark_bridge_arrived
+
+    try:
+        nt = _NonceTracker(servicer_wallet, _funding_rpc_chain()[0])
+    except Exception as e:
+        msg = f"fund_both_legs: cannot init nonce tracker: {e}"
+        log(f"❌ {msg}")
+        return False, msg
+
+    poly_tx = None
+    if poly_gap > 0:
+        try:
+            poly_tx = _send_usdg_to_polymarket(private_key, poly_gap, nt)
+            log(f"📤 Poly deposit TX: {poly_gap:.4f} USDG (4663) → {poly_rh_deposit_addr()} tx={poly_tx}")
+        except Exception as e:
+            msg = f"fund_both_legs: Poly deposit failed: {e}"
+            log(f"❌ {msg}")
+            return False, msg
+
+    if kalshi_gap > 0:
+        ok, ref = _fund_kalshi_from_robinhood(
+            private_key, servicer_wallet, kalshi_gap, nt, wait_timeout, poll_interval,
+        )
+        if not ok:
+            log(f"❌ {ref}")
+            return False, ref
+
+    if poly_gap > 0 and kalshi_gap > 0:
+        ok, err = _wait_for_both_balances(
+            "polymarket", poly_before + poly_gap, "kalshi", kalshi_before + kalshi_gap,
+            wait_timeout, poll_interval,
+        )
+    elif poly_gap > 0:
+        ok, err = _wait_for_balance("polymarket", poly_before + poly_gap, wait_timeout, poll_interval)
+    elif kalshi_gap > 0:
+        ok, err = _wait_for_balance("kalshi", kalshi_before + kalshi_gap, wait_timeout, poll_interval)
+    else:
+        ok, err = True, ""
+
+    if ok and poly_tx:
+        mark_bridge_arrived(poly_tx)
+    if ok and ARB_DEPOSIT_WAIT_SECS > 0:
+        log(f"⏱ Post-funding settlement delay: {ARB_DEPOSIT_WAIT_SECS}s (ARB_DEPOSIT_WAIT_SECS)")
+        time.sleep(ARB_DEPOSIT_WAIT_SECS)
+    return ok, err
+
+
 def _wait_for_balance(
     venue: str,
     target: float,
     wait_timeout: int,
     poll_interval: int,
+    reader=None,
 ) -> tuple[bool, str]:
-    """Poll a single platform balance until it reaches `target` or timeout."""
+    """Poll a single platform balance (or `reader()`) until it reaches `target` or timeout."""
+    read = reader or (lambda: _get_platform_balance(venue))
     deadline = time.time() + wait_timeout
     while time.time() < deadline:
         time.sleep(poll_interval)
-        current = _get_platform_balance(venue)
+        current = read()
         if current >= target - 0.01:
             log(f"✅ {venue} balance {current:.4f} >= {target:.4f} — funded")
             return True, ""
         remaining = deadline - time.time()
         log(f"⏳ {venue}: {current:.4f}/{target:.4f} ({remaining:.0f}s remaining)")
 
-    final = _get_platform_balance(venue)
+    final = read()
     msg = f"fund_both_legs: {venue} deposit timeout after {wait_timeout}s — {final:.4f}/{target:.4f}"
     log(f"❌ {msg}")
     return False, msg
@@ -1150,10 +1553,10 @@ def run_tend_tick() -> None:
 
         # ── Servicer status ────────────────────────────────────────────────
         try:
-            raw_usdc = _get_usdc_balance(servicer_wallet)
-            raw_eth  = _get_eth_balance(servicer_wallet)
+            raw_usdc = get_servicer_cash_usdc(servicer_wallet)
+            raw_eth  = _get_servicer_gas_eth(servicer_wallet)
             log(
-                f"💼 Servicer [{ts}]: address={servicer_wallet} "
+                f"💼 Servicer [{ts}]: chain={'robinhood' if is_robinhood_funding() else 'base'} address={servicer_wallet} "
                 f"USDC={raw_usdc:.4f} ETH={raw_eth:.6f} "
                 f"safety_buffer={ARB_SAFETY_BUFFER_USDC} "
                 f"gas_reserve={ARB_SERVICER_GAS_RESERVE_ETH:.4f} ETH"
@@ -1161,10 +1564,18 @@ def run_tend_tick() -> None:
             if raw_eth < ARB_SERVICER_GAS_RESERVE_ETH:
                 log(
                     f"❌ Servicer ETH too low: {raw_eth:.6f} < {ARB_SERVICER_GAS_RESERVE_ETH} ETH — "
-                    f"send ETH to {servicer_wallet} on Base"
+                    f"send ETH to {servicer_wallet} on {'Robinhood Chain' if is_robinhood_funding() else 'Base'}"
                 )
         except Exception as _be:
             log(f"⚠️ Could not read servicer wallet balances: {_be}")
+
+        # ── Robinhood mode: bring Base USDC (Kalshi withdrawals, stranded bridges) home as USDG ──
+        if is_robinhood_funding():
+            try:
+                from .arb_withdrawals import sweep_base_usdc_to_robinhood
+                sweep_base_usdc_to_robinhood(servicer_wallet, private_key)
+            except Exception as e:
+                log(f"⚠️ Base→USDG sweep failed (non-fatal): {e}")
 
         # ── Liquidity health snapshot (observability only) ─────────────────
         if vault_address:

@@ -1,8 +1,12 @@
 # Simulation and test report
 
-Run on 2026-10-13 in a local container. Nothing broadcast to a public network.
+Run on 2026-10-14 in a local container. Nothing broadcast to a public network.
 
-## Foundry (`forge test`): 139 passed, 0 failed, 0 skipped
+**Totals: Foundry 162/162, simulation 39/39, services failure tests 14/14, funding bot 19/19, website flow test passes.**
+
+## Foundry (`forge test`): 162 passed, 0 failed, 0 skipped
+
+New in this round: ArbitrageFundingRouterTest (16: wiring, revenue → USDG → vault → pARB at reported PPS, per-tx/daily caps and interval, threshold, parameter bounds, pause rules, keeper mode, sweep only to owner, keeper cannot reach adapter, same-block manipulation refused, small move bounded by slippage, no-history revert, bad reference cannot force a trade, venue checks, Chainlink + DualReference, paused router accumulates safely) and HookrLockFeesTest (9: exact ETH-to-burner and MILORD burn, no-trade collect takes 0, second collect empty, only fees leave the pool, only beneficiary collects / no role withdraws / release refused, ERC-6909 claims redeemed and burned, PoolManager-only callback, no interference with trading or conversion, fuzz: collect never takes principal). HookrLaunchTest now checks LP fees reach buyback-and-burn.
 
 | Suite | Tests | Covers |
 |---|---|---|
@@ -22,7 +26,9 @@ Run on 2026-10-13 in a local container. Nothing broadcast to a public network.
 | LegacyV2BugsTest | 4 | known V2 issues absent in V3 |
 | ReporterCompatTest | 1 | bot NAV signature accepted by V3 |
 
-## End-to-end simulation (`./sim/run-local.sh`): 36 / 36 checks pass (100% allocation)
+## End-to-end simulation (`./sim/run-local.sh`): 39 / 39 checks pass
+
+The weekly close now runs the packaged services' own code (`offchain/services/lib/jobs.mjs`): keeper passes (tax settle, splits, LP fee collection into buyback-and-burn, buyback, router ETH → USDG on an official Uniswap V3 pool with a 30-min TWAP, settle, root activation), then the epoch publisher (deterministic root after a 6 h settlement grace) and the root checker. New checks: router swaps within cap and slippage of the TWAP; router swapped + held == allocated; every proposed root recomputed identically; keeper passes had no failed step; LP fees ETH → burner and MILORD burned; position locked forever with release refused.
 
 See [MILORD_END_TO_END.md](MILORD_END_TO_END.md) for the trace. Invariants checked:
 

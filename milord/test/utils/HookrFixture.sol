@@ -5,7 +5,12 @@ import {SingleChainFixture} from "./SingleChainFixture.sol";
 import {HookrLaunchKit} from "../../script/HookrLaunchKit.sol";
 import {MockHookrTaxHook} from "../../src/mocks/MockHookrTaxHook.sol";
 import {V4SwapAdapter} from "../../src/launch/V4SwapAdapter.sol";
-import {MilordLiquidityLock} from "../../src/launch/MilordLiquidityLock.sol";
+import {MockHookrFamilyLock} from "../../src/mocks/MockHookrFamilyLock.sol";
+import {HookrLockFeeCollector, IHookrFamilyLock} from "../../src/launch/HookrLockFeeCollector.sol";
+import {UniV3LocalKit} from "../../script/UniV3LocalKit.sol";
+import {UniV3SwapVenue, IUniswapV3PoolSwap, IWETH9} from "../../src/automation/UniV3SwapVenue.sol";
+import {UniV3TwapReference, IUniswapV3PoolOracle} from "../../src/automation/UniV3TwapReference.sol";
+import {IMILORD} from "../../src/interfaces/IMILORD.sol";
 import {DeployPermit2} from "permit2/test/utils/DeployPermit2.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
@@ -17,18 +22,23 @@ import {PoolSwapTest} from "@uniswap/v4-core/src/test/PoolSwapTest.sol";
 
 /// @notice Full MILORD deployment plus a local Hookr-style market on the official Uniswap v4 contracts:
 ///         native ETH / MILORD pool behind MockHookrTaxHook (1.5% buy, 1.5% sell, 20% platform commission,
-///         project share to TradingTaxSplitter), one MILORD-only position owned by MilordLiquidityLock,
-///         an ETH / USDG pool for the funding swap, and V4SwapAdapter as the buyback route.
-///         Launch numbers are ILLUSTRATIVE (10 ETH opening FDV, 50% of supply in the position).
-abstract contract HookrFixture is SingleChainFixture, HookrLaunchKit {
+///         project share to TradingTaxSplitter), the MILORD-only position (100% of supply) held by
+///         MockHookrFamilyLock (stand-in for Hookr's launcher + HookrFamilyLock) and locked forever with
+///         HookrLockFeeCollector as beneficiary, V4SwapAdapter as the buyback route, and the automation router
+///         on an official Uniswap V3 WETH/USDG pool (30-minute TWAP reference).
+abstract contract HookrFixture is SingleChainFixture, HookrLaunchKit, UniV3LocalKit {
     address internal hookrTreasury = makeAddr("hookrTreasury");
     V4 internal v4;
     MockHookrTaxHook internal hook;
     V4SwapAdapter internal swapRoute;
-    MilordLiquidityLock internal lock;
+    MockHookrFamilyLock internal familyLock;
+    HookrLockFeeCollector internal collector;
+    bytes32 internal constant FAMILY_ID = keccak256("MILORD launch family (local)");
     PoolSwapTest internal router;
     PoolKey internal milordKey;
-    PoolKey internal usdgKey;
+    V3Market internal ethUsdg;
+    UniV3SwapVenue internal fundingVenue;
+    UniV3TwapReference internal twap;
     LaunchParams internal launch;
     uint256 internal launchDust; // MILORD wei the position could not take, burned at launch
     uint256 internal positionId;
@@ -47,10 +57,33 @@ abstract contract HookrFixture is SingleChainFixture, HookrLaunchKit {
         return 10_000;
     }
 
-    function setUp() public virtual override {
-        super.setUp();
+    /// Router bounds used by the fixture (production values are in docs/launch/SAFE_CONFIGURATION.md).
+    uint256 internal constant ROUTER_MIN = 0.05 ether;
+    uint256 internal constant ROUTER_MAX = 5 ether;
+    uint256 internal constant ROUTER_DAILY = 20 ether;
+    uint16 internal constant ROUTER_SLIPPAGE = 100; // 1% below the TWAP reference
+    uint32 internal constant ROUTER_INTERVAL = 1 hours;
+    address internal monitor = makeAddr("monitorPauser");
+
+    function _beforeDeploy() internal virtual override {
         new DeployPermit2().deployPermit2();
         v4 = _deployV4Local(address(this));
+        // WETH/USDG V3 market at ~2,500 USDG per ETH, 2,000 ETH + 5,000,000 USDG of liquidity
+        usdg.mint(address(this), 5_000_000e6);
+        vm.deal(address(this), 3_000 ether);
+        ethUsdg = _deployV3EthUsdg(v4.weth, address(usdg), 2_500, 2_000 ether, 5_000_000e6, address(this));
+        fundingVenue = new UniV3SwapVenue(IUniswapV3PoolSwap(ethUsdg.pool), IWETH9(v4.weth));
+        twap = new UniV3TwapReference(IUniswapV3PoolOracle(ethUsdg.pool), v4.weth, 30 minutes, 100);
+        cfg.fundingVenue = address(fundingVenue);
+        cfg.fundingReference = address(twap);
+        cfg.routerAmounts = [ROUTER_MIN, ROUTER_MAX, ROUTER_DAILY];
+        cfg.routerSlippageBps = ROUTER_SLIPPAGE;
+        cfg.routerInterval = ROUTER_INTERVAL;
+        cfg.routerPauser = monitor;
+    }
+
+    function setUp() public virtual override {
+        super.setUp();
         router = new PoolSwapTest(v4.poolManager);
 
         address hookAddr = address(uint160(0x4000000000000000000000000000000000000000) | TAX_HOOK_FLAGS);
@@ -71,22 +104,19 @@ abstract contract HookrFixture is SingleChainFixture, HookrLaunchKit {
         milordKey = _milordKey(address(d.token), hookAddr, launch);
         _openMarket(v4.poolManager, milordKey, launch);
 
-        lock = new MilordLiquidityLock(v4.positionManager, teamSafe);
+        familyLock = new MockHookrFamilyLock(v4.positionManager, address(this));
         vm.prank(treasury);
         d.token.transfer(address(this), launch.milordForLiquidity);
-        positionId = _addMilordOnlyLiquidity(v4, milordKey, launch, address(lock));
+        positionId = _addMilordOnlyLiquidity(v4, milordKey, launch, address(familyLock));
         launchDust = _burnLaunchRemainder(address(d.token), address(this), 1e6);
+        familyLock.addMember(FAMILY_ID, positionId);
+        collector = new HookrLockFeeCollector(
+            IHookrFamilyLock(address(familyLock)), FAMILY_ID, IMILORD(address(d.token)), payable(address(d.burner)), v4.poolManager
+        );
+        familyLock.lock(FAMILY_ID, address(collector), familyLock.FOREVER());
 
-        // ETH / USDG pool at ~2,500 USDG per ETH (stand-in for the Robinhood WETH/USDG market)
-        usdgKey = PoolKey(Currency.wrap(address(0)), Currency.wrap(address(usdg)), 500, 10, IHooks(address(0)));
-        v4.poolManager.initialize(usdgKey, TickMath.getSqrtPriceAtTick(-198_080));
-        usdg.mint(address(this), 5_000_000e6);
-        vm.deal(address(this), 3_000 ether);
-        _addEthTokenLiquidity(v4, usdgKey, -198_080 - 6_930, -198_080 + 6_930, 2_000 ether, 5_000_000e6, address(this));
-
-        PoolKey[] memory keys = new PoolKey[](2);
+        PoolKey[] memory keys = new PoolKey[](1);
         keys[0] = milordKey;
-        keys[1] = usdgKey;
         swapRoute = new V4SwapAdapter(v4.poolManager, keys);
         vm.prank(safe);
         d.burner.setInitialAdapter(address(swapRoute));

@@ -15,9 +15,12 @@ contract HookrLaunchTest is HookrFixture {
     function test_marketOpensWithMilordOnly() public view {
         (, int24 tick,,) = _slot0(v4.poolManager, milordKey);
         assertEq(tick, launch.tickUpper, "opens at the top of the range");
-        assertApproxEqAbs(address(v4.poolManager).balance, 2_000 ether, 1e6, "only the USDG pool's ETH; no ETH in the MILORD pool");
+        assertEq(address(v4.poolManager).balance, 0, "no ETH in the MILORD pool");
         assertApproxEqAbs(d.token.balanceOf(address(v4.poolManager)), launch.milordForLiquidity, 1e18, "MILORD in");
-        assertEq(IERC721(address(v4.positionManager)).ownerOf(positionId), address(lock), "position locked");
+        assertEq(IERC721(address(v4.positionManager)).ownerOf(positionId), address(familyLock), "position held by the (mock) Hookr family lock");
+        (address beneficiary, uint64 unlockBlock) = familyLock.lockOf(FAMILY_ID);
+        assertEq(beneficiary, address(collector));
+        assertEq(unlockBlock, type(uint64).max, "locked forever");
         assertEq(d.token.totalSupply() + launchDust, 6_767_000_000 ether);
     }
 
@@ -25,7 +28,7 @@ contract HookrLaunchTest is HookrFixture {
         // 100% of supply is in the pool, so nobody can sell before someone buys
         assertEq(d.token.balanceOf(treasury), 0);
         assertEq(d.token.balanceOf(bob), 0);
-        assertApproxEqAbs(address(v4.poolManager).balance, 2_000 ether, 1e6, "no ETH for sellers yet (only the USDG pool's ETH)");
+        assertEq(address(v4.poolManager).balance, 0, "no ETH for sellers yet");
         assertGt(_buy(alice, 1 ether), 0, "the first buy works");
         assertGt(_sell(alice, 1_000_000 ether), 0, "then sells are paid from the buyer's ETH");
     }
@@ -44,7 +47,7 @@ contract HookrLaunchTest is HookrFixture {
         d.taxSplit.distribute(address(0));
         // 0.40% of the trade each (burner gets the 1-bp rounding remainder of 33.34/33.33/33.33)
         assertEq(teamSafe.balance, (0.024 ether * 3333) / 10_000);
-        assertEq(arbSafe.balance, (0.024 ether * 3333) / 10_000);
+        assertEq(address(d.router).balance, (0.024 ether * 3333) / 10_000, "arbitrage third -> funding router");
         assertEq(address(d.burner).balance, 0.024 ether - 2 * ((0.024 ether * 3333) / 10_000));
         assertApproxEqRel(teamSafe.balance, (ethIn * 40) / 10_000, 1e15);
     }
@@ -67,7 +70,7 @@ contract HookrLaunchTest is HookrFixture {
         assertLt(outA + outB, 4 ether, "round trip loses taxes and LP fees");
         assertGt(outA + outB, 3.8 ether, "but only those");
         // all buyer ETH not paid back is held as tax (hook) or LP fees (pool, owed to the locked position)
-        assertApproxEqAbs(address(v4.poolManager).balance + address(hook).balance, 2_000 ether + 4 ether - outA - outB, 1e6);
+        assertApproxEqAbs(address(v4.poolManager).balance + address(hook).balance, 4 ether - outA - outB, 1e6);
     }
 
     function test_priceImpactOfExampleBuys() public {
@@ -125,40 +128,22 @@ contract HookrLaunchTest is HookrFixture {
         uint256 got = _buy(alice, 4 ether);
         _sell(alice, got / 2);
         uint256 taxBefore = hook.totalBuyTax() + hook.totalSellTax();
-        uint256 teamEth = teamSafe.balance;
-        uint256 teamMilord = d.token.balanceOf(teamSafe);
-        lock.register(positionId);
-        assertEq(lock.lockedCount(), 1);
-        lock.collectFees(positionId);
-        // 0.3% LP fee on the 3.94 ETH that reached the pool, and on the MILORD sold
-        assertApproxEqRel(teamSafe.balance - teamEth, (3.94 ether * 30) / 10_000, 0.01e18);
-        assertGt(d.token.balanceOf(teamSafe) - teamMilord, 0);
+        uint256 burnerEth = address(d.burner).balance;
+        uint256 supply = d.token.totalSupply();
+        collector.collect(0);
+        // 0.3% LP fee on the 3.94 ETH that reached the pool goes to buyback-and-burn; the MILORD fee is burned
+        assertApproxEqRel(address(d.burner).balance - burnerEth, (3.94 ether * 30) / 10_000, 0.01e18);
+        assertLt(d.token.totalSupply(), supply, "MILORD LP fees burned");
         assertEq(hook.totalBuyTax() + hook.totalSellTax(), taxBefore, "LP fee collection never touches tax");
-        assertEq(IERC721(address(v4.positionManager)).ownerOf(positionId), address(lock), "still locked");
-        assertEq(v4.positionManager.getPositionLiquidity(positionId) > 0, true);
-    }
-
-    function test_lockHasNoWithdrawPath() public {
-        (bool ok,) = address(lock).call(abi.encodeWithSignature("withdraw(uint256)", positionId));
-        assertFalse(ok);
-        vm.prank(address(lock));
-        // even the lock cannot be made to call PositionManager except through collectFees
-        assertEq(lock.feeRecipient(), teamSafe);
-    }
-
-    function test_arbitrageSafeSwapsEthToUsdg() public {
-        vm.deal(arbSafe, 1 ether);
-        vm.prank(arbSafe);
-        uint256 out = swapRoute.swapExactETHForToken{value: 1 ether}(address(usdg), 2_400e6, arbSafe, block.timestamp + 60);
-        assertApproxEqRel(out, 2_500e6, 0.01e18);
-        assertEq(usdg.balanceOf(arbSafe), out);
+        assertEq(IERC721(address(v4.positionManager)).ownerOf(positionId), address(familyLock), "still locked");
+        assertGt(v4.positionManager.getPositionLiquidity(positionId), 0);
     }
 
     function test_adapterRejectsUnknownTokenAndExpired() public {
-        vm.expectRevert(abi.encodeWithSelector(V4SwapAdapter.UnknownToken.selector, address(0xbeef)));
-        swapRoute.swapExactETHForToken{value: 0}(address(0xbeef), 0, address(this), block.timestamp);
+        vm.expectRevert(abi.encodeWithSelector(V4SwapAdapter.UnknownToken.selector, address(usdg)));
+        swapRoute.swapExactETHForToken{value: 0}(address(usdg), 0, address(this), block.timestamp);
         vm.expectRevert(V4SwapAdapter.Expired.selector);
-        swapRoute.swapExactETHForToken{value: 0}(address(usdg), 0, address(this), block.timestamp - 1);
+        swapRoute.swapExactETHForToken{value: 0}(address(d.token), 0, address(this), block.timestamp - 1);
     }
 
     function test_initialAdapterOnlyOnce() public {

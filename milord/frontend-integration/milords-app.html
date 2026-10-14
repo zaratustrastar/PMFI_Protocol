@@ -56,10 +56,11 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
       <div class="ledger">
         <div><em>Buy tax</em><b id="buyTax">1.5%</b><span>paid in ETH, fixed at launch</span></div>
         <div><em>Sell tax</em><b id="sellTax">1.5%</b><span>paid in ETH, fixed at launch</span></div>
-        <div class="sum"><em>Pool LP fee</em><b id="lpFee">—</b><span>separate from tax, earned by the launch position</span></div>
+        <div class="sum"><em>Pool LP fee</em><b id="lpFee">—</b><span>separate from tax: ETH fees buy back and burn $MILORD, $MILORD fees are burned</span></div>
       </div>
       <p class="fine" id="taxSplit">Of each tax, Hookr keeps its platform share (20% when set at launch). The rest is split in three equal parts: buyback-and-burn of $MILORD, the Team Safe, and arbitrage funding for pARB. Transfers between wallets pay no tax.</p>
       <p class="fine">All 6,767,000,000 $MILORD started in this pool, with no ETH added and no team or treasury allocation. Sellers are paid only from ETH that buyers have put in. To wake a Milord, first buy 1,000,000 $MILORD here.</p>
+      <p class="fine" id="lockStatus">Liquidity lock: the founding position is to be locked permanently in Hookr's launch lock, with no way for anyone to withdraw it. Its LP fees go to buyback-and-burn. Status is read from chain once connected.</p>
       <div class="stats" id="mkt"></div>
       <div class="actions"><a class="btn primary" id="hookrLink" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;text-decoration:none">Trade on Hookr</a>
         <span id="localTrade" style="display:none"><input id="amt" value="0.1" size="8" style="font:inherit;border:1px solid var(--line);border-radius:999px;padding:8px 12px"> <button class="btn" id="buy">Buy (ETH)</button> <button class="btn" id="sell">Sell (MILORD)</button> <span class="fine">local test pool</span></span></div>
@@ -108,7 +109,15 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
   </section>
 
   <section class="row">
-    <h3><i>05</i>Protocol</h3>
+    <h3><i>05</i>Automation</h3>
+    <div>
+      <p class="fine">The arbitrage share of protocol ETH is swapped to USDG and deposited into pArbitrage V3 by a public contract, in small capped amounts, never more than the set slippage below a 30-minute average price. New pARB is minted only when the vault accepts the deposit, then shared weekly between Milords holders. Anyone can trigger it; the Arbitrage Funding Safe can pause it.</p>
+      <div class="stats" id="auto"><div><em>Funding router</em><b>—</b></div></div>
+    </div>
+  </section>
+
+  <section class="row">
+    <h3><i>06</i>Protocol</h3>
     <div><div class="stats" id="stats"></div><div id="log"></div></div>
   </section>
 </div>
@@ -145,6 +154,16 @@ async function refresh() {
     $("mkt").innerHTML = [["Price, ETH per 1M", fmt(mk.ethPerMillion, 6)], ["Taxed volume (ETH)", fmt(mk.volumeEth)], ["Tax collected (ETH)", fmt(mk.taxCollectedEth)], ["Hookr share (ETH)", fmt(mk.hookrCommissionEth)]]
       .map(([k, v]) => `<div><em>${k}</em><b>${v}</b></div>`).join("");
   }
+  const au = await milord.automation(m).catch(() => ({}));
+  const rows = [];
+  if (au.router) rows.push(["Funding router", au.router.paused ? "paused" : "running"], ["ETH waiting", fmt(au.router.ethWaiting)], ["ETH swapped to USDG", fmt(au.router.ethSwapped)],
+    ["USDG into pArbitrage", fmt(au.router.usdgFunded, 2)], ["Per swap / per day", `${fmt(au.router.maxSwapEth)} / ${fmt(au.router.dailyCapEth)} ETH`], ["Max below TWAP", `${au.router.maxSlippagePct}%`],
+    ["Last run", au.router.lastExecution ? new Date(au.router.lastExecution * 1000).toLocaleString() : "not yet"]);
+  if (au.lpFees) rows.push(["LP fees to buyback (ETH)", fmt(au.lpFees.ethToBuyback)], ["LP fees burned ($MILORD)", fmt(au.lpFees.milordBurned, 0)]);
+  if (rows.length) $("auto").innerHTML = rows.map(([k, v]) => `<div><em>${k}</em><b>${v}</b></div>`).join("");
+  if (au.lock) $("lockStatus").textContent = au.lock.locked
+    ? `Liquidity lock: the founding position is locked ${au.lock.forever ? "forever" : "until a set block"}. Nobody can withdraw it. LP fees go to ${au.lock.beneficiaryIsCollector ? "the fee collector, which sends ETH to buyback-and-burn and burns $MILORD" : au.lock.beneficiary}.`
+    : "Liquidity lock: not locked yet. The permanent lock is approved as the design but has not been executed.";
   const st = await milord.strategyInfo(m, 1);
   $("strategy").textContent = `Live strategy: ${st.name} (vault ${st.vault.slice(0, 8)}…, chain ${st.chainId}).`;
   const pos = await milord.parbPosition(m);

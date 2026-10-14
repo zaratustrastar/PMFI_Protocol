@@ -26,5 +26,5 @@ Frontend: `frontend-integration/` contains `milord-sdk.mjs` (contract calls) and
 node sim/build-dashboard.mjs               # sim/output/dashboard.html
 node offchain/launch-final.mjs             # final launch numbers (100% allocation) -> sim/output/launch-final.json
 node offchain/safe-launch-batch.mjs        # Safe Transaction Builder JSON for the MILORD-only position (deploy/out/)
-forge script script/HookrPostLaunch.s.sol  # V4SwapAdapter + MilordLiquidityLock for a pool key (refuses chain 4663)
+forge script script/HookrPostLaunch.s.sol  # V4SwapAdapter + HookrLockFeeCollector for the Hookr pool (refuses chain 4663)
 ```

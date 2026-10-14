@@ -8,7 +8,7 @@ the owner's explicit approval. Scripts refuse chain 4663 today (`DeployRobinhood
 
 1. `forge script script/DeployRobinhood.s.sol --rpc-url $RH_TESTNET` with testnet Safes and a test 6-decimal asset.
 2. Open a Hookr pool on testnet if Hookr supports it; otherwise skip to the fork test.
-3. `forge script script/HookrPostLaunch.s.sol` with the Hookr pool key → V4SwapAdapter + MilordLiquidityLock.
+3. `forge script script/HookrPostLaunch.s.sol` with the Hookr pool key → V4SwapAdapter + HookrLockFeeCollector.
 4. Run the quote service and the website against testnet; repeat the UI test.
 
 ## Phase B: Robinhood Chain fork test (no broadcast)
@@ -27,7 +27,7 @@ simulation.
 | 3 | Verify all sources; record `deployments/robinhood-mainnet.json` | explorer | — |
 | 4 | Safe: `nft.setConverter`, registry 8 placeholders + pArbitrage, operators, quote signer | Safe batch | Team Safe |
 | 5 | 💸 Hookr launch: existing-token launch of MILORD, one ETH pool, tax 1.5/1.5, recipients TradingTaxSplitter, commission 20%, core blocks off, decay per R-01 | Hookr UI/launcher | allocation Safe |
-| 5b | (path B) 💸 mint all 6,767,000,000 MILORD as the MILORD-only position to MilordLiquidityLock and burn the rounding remainder, in one batch, **only after the lock parameters are approved** | `offchain/safe-launch-batch.mjs` → Safe Transaction Builder | allocation Safe |
+| 5b | (path B) 💸 Hookr launch with all 6,767,000,000 MILORD, then `transferFamily` + `HookrFamilyLock.lock(familyId, HookrLockFeeCollector, forever)`, **only after the owner's go-ahead to execute the lock** | `offchain/safe-launch-batch.mjs` → Safe Transaction Builder | allocation Safe |
 | 6 | Read back the pool: hook, blocks, tax, recipients, commission, tick, liquidity, lock | script / explorer | — |
 | 7 | Deploy V4SwapAdapter for the Hookr key and `burner.setInitialAdapter` | `HookrPostLaunch.s.sol` + Safe | Team Safe |
 | 8 | Start the quote service on the pool TWAP (entries refused for the first 30 minutes by design) | `offchain/quote-server.mjs` | quote signer (KMS) |

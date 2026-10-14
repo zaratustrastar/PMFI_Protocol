@@ -1,91 +1,35 @@
-# Arbitrage Funding Safe → pArbitrage V3 → weekly pARB: what runs on its own today
+# Protocol ETH → USDG → pArbitrage V3 → weekly pARB (automated)
 
-Read from the code on 2026-10-14. Line references are to `milord/`. Nothing deployed, no funds moved.
+**Status: TESTED locally (Foundry + anvil simulation). Not deployed.** No Safe signature per run; the Arbitrage Funding Safe only sets bounds, pauses and owns the router.
 
-## The flow as implemented
-
-| # | Step | Contract / code | Who triggers it | Bounded how |
+| # | Step | Code | Trigger | Bounds |
 |---|---|---|---|---|
-| 1 | Hookr tax settles and pays the TradingTaxSplitter | Hookr (external) | anyone (Hookr docs) | recipient frozen at launch |
-| 2 | Splitters push ETH: tax ⅓, entry fees 70%, royalties 50% to the Arbitrage Funding Safe | `RevenueSplitter.distribute` `src/robinhood/RevenueSplitter.sol:92` | **anyone** | fixed payees and shares; payee changes delayed 2 days |
-| 3 | ETH → USDG with slippage protection | Arbitrage Funding Safe | **Safe signers (manual)** | — |
-| 4 | USDG → vault deposit request, receiver = distributor | `ParbFundingAdapter.fund` `src/parb/ParbFundingAdapter.sol:81` | **operator key** | can only deposit USDG the adapter holds, only into the vault, only for the distributor; each `sourceRef` once |
-| 5 | Vault prices the request at the reported PPS | `PMFIArbVaultV3.report` `src/parb/PMFIArbVaultV3.sol:378` | existing reporter bot (`bot/arb_monitor/core/arb_reporter.py`) | EIP-712 report signer; >10% PPS move reverts; vault accepts deposits only from the adapter |
-| 6 | Real pARB minted to the distributor, amount recorded | `ParbFundingAdapter.settle` `:98` | **anyone** | shares are whatever the vault mints; no other mint path |
-| 7 | Weekly eligibility and Merkle root | `offchain/lib/eligibility.mjs` (used by the simulation; **no production job script yet**) | publisher key | see Q3, Q4 |
-| 8 | Root proposed, activates after delay | `ShareDistributor.proposeRoot` `src/parb/ShareDistributor.sol:67` | publisher key | must be funded; 1-day delay; Team Safe can veto (`:80`) |
-| 9 | Claims | `ShareDistributor.claim` `:100` | holder, or anyone on the holder's behalf | pARB only goes to the account in the leaf |
+| 1 | Hookr tax settles to TradingTaxSplitter | Hookr | keeper / anyone | recipient frozen at launch |
+| 2 | Splitters pay the arbitrage share (tax ⅓, entry 70%, royalty 50%) to **ArbitrageFundingRouter** | `RevenueSplitter.distribute` | keeper / anyone | fixed payees, timelocked changes |
+| 3 | ETH → USDG | `ArbitrageFundingRouter.execute` → `UniV3SwapVenue` (Robinhood WETH/USDG V3 pool) | keeper / anyone (`openExecution`) | min 0.05 ETH, max per tx, max per day, min interval; minimum output = 30-min V3 TWAP − maxSlippage (≤ 5% hard cap); full fill required |
+| 4 | USDG → vault deposit request for the distributor | router → `ParbFundingAdapter.fund` | router (only automated operator) | unique `sourceRef` per run; only the adapter can deposit |
+| 5 | Vault processes the request at the reported PPS | existing reporter → `PMFIArbVaultV3.report` | reporter bot | signed report, max PPS move |
+| 6 | pARB minted to the distributor | `ParbFundingAdapter.settle` | keeper / anyone | only what the vault minted |
+| 7 | Weekly eligibility, Merkle tree, `proposeRoot` | `offchain/services/epoch-publisher.mjs` | publisher key | deterministic from finalized data; cannot exceed pARB held |
+| 8 | Independent recomputation | `offchain/services/root-checker.mjs` | no key | critical alert → Team Safe `vetoPending` within 1 day |
+| 9 | Activation and claims | `activateRoot`, `claim` | keeper / anyone | 1-day delay; pARB goes only to the leaf account |
 
-After claiming, pARB is an ordinary ERC-20 in the holder's wallet and stays there after the NFT is sold or redeemed
-(simulation checks "seller keeps week-1 pARB", "redeemer keeps earned pARB"). No USDC/USDG profit is paid out
-separately, and the vault charges 0% performance fee (check "no performance-fee shares").
+## Price reference and manipulation protection
+Uniswap v4 has **no built-in oracle**, so the ETH price comes from the Uniswap V3 WETH/USDG pool's `observe()` oracle (`UniV3TwapReference`):
+- 30-minute time-weighted mean tick; moving it means holding a skewed price for 30 minutes against arbitrage;
+- reverts if the pool's history is shorter than the window (no fallback price);
+- reverts if spot differs from the mean by more than 100 ticks (~1%), so a same-block push is refused (`test_sameBlockManipulationRefused`);
+- optional `DualReference(TWAP, ChainlinkReference)`: both must agree within a bound and the lower price is used; Chainlink staleness and incomplete rounds revert. No Chainlink feed is confirmed on 4663 yet (BLOCKERS B8).
+- Even a wrong reference cannot force a bad trade below the venue's realised price: the swap reverts if output < minimum (`test_badReferenceCannotForceABadTrade`).
 
-## 1. What is automatic and what needs a person or a keeper
+## Failure behaviour
+| Failure | Effect | Test |
+|---|---|---|
+| Router paused | ETH accumulates in the router; nothing lost; funds after unpause within bounds | `test_routerStoppedRevenueAccumulatesSafely`, services test |
+| Keeper down | nothing moves; one pass catches up every step; all steps are permissionless | services test "keeper down for days" |
+| Reporter down | requests stay pending, no pARB minted, nothing allocated; settles after the next report | services test "reporter down" |
+| Indexer down | the next run proposes one cumulative root covering missed weeks | services test "indexer down for two weeks" |
+| No eligible NFTs | nothing allocated, shares roll to the next epoch | services test "zero eligible" |
+| Wrong root | root checker alerts; Team Safe vetoes | services test "root checker" |
 
-- **Fully permissionless (any keeper can run them):** Hookr settle/payout, splitter `distribute`, adapter `settle`,
-  vault `tend`, root `activateRoot`, `claim` on behalf of holders, `BuybackBurner.burnHeldTokens`, lock `collectFees`.
-- **Bot keys with narrow roles:** adapter `fund` (operator), `proposeRoot` (publisher), vault `report` (report signer),
-  `buybackAndBurn` (burner operator, per-call min/max).
-- **Still a human:** step 3. The ETH sits in a Safe, and swapping it needs Safe signatures every week. This is the only
-  manual step in the weekly loop.
-- **Missing software:** a production epoch job (reads finalized Transfer events, computes weights, builds the tree,
-  publishes data, calls `proposeRoot`) and a keeper loop that calls the permissionless steps. The logic exists and
-  is tested; it runs inside `sim/simulate.mjs` today, not as a service.
-
-## 2. Can it run without giving a bot control of the Safe?
-
-Yes, with one small contract. **Recommended (smallest change): `ArbitrageFundingRouter`** (~120 lines, not built yet):
-
-- Set as the arbitrage payee in the three splitters at deployment (instead of the Safe). Owner = Arbitrage Funding Safe.
-- `swapAndFund(ethIn)` callable by a keeper: wraps ETH, swaps on the Robinhood WETH/USDG Uniswap V3 pool, computes
-  `minOut` **itself** from the pool's 30-minute TWAP minus a fixed max slippage (for example 1%), sends USDG to
-  `ParbFundingAdapter` and calls `fund` with a unique `sourceRef`. The keeper chooses only when and how much.
-- Bounds: max ETH per call and per day, minimum interval, the vault's $10 minimum, deadline.
-- Safe-only: `pause`, change caps (with a delay), and `sweep` ETH/USDG **only to the Arbitrage Funding Safe**.
-- The router becomes the adapter's operator; the separate operator key is no longer needed.
-
-If you want fee ETH to keep landing in the Safe first, the alternative is a Safe module (Safe Allowance Module or
-Zodiac Roles) that lets a keeper send at most X ETH per day from the Safe to the router. It works but adds module
-configuration to review; the payee change is simpler.
-
-Nothing else needs a change: steps 2, 6, 8 and 9 already run without the Safe, and the Safe only acts to pause, veto or
-change parameters.
-
-## 3. How ownership records are verified and roots published
-
-- The job replays the Milords NFT `Transfer` events from **finalized** blocks only into ownership intervals
-  (`eligibility.mjs:15`), and scores NFT-seconds per owner per UTC day for the week (`:36`). Converter inventory and the
-  zero address earn nothing, so redeemed NFTs stop earning immediately; each NFT counts equally.
-- Weekly pARB = everything unallocated in the distributor (new batches plus carried dust), split by NFT-seconds
-  (`:63`), added to cumulative totals (`:78`), and committed as an OpenZeppelin Merkle tree of
-  `(address, cumulative)` (`:85`).
-- The job publishes the full data (daily breakdown, cumulative table, tree) to IPFS and passes its hash as `dataHash`
-  to `proposeRoot`. During the 1-day activation delay anyone can recompute the root from public chain data; the Team
-  Safe can `vetoPending`. Recommended: run a second, independent watcher that recomputes each root and alerts the Safe
-  signers on any mismatch.
-
-## 4. How over-distribution is prevented
-
-On-chain, not by trust in the job: `proposeRoot` reverts with `Underfunded` unless the root's total cumulative
-allocation ≤ pARB the distributor holds + pARB already claimed (`ShareDistributor.sol:72-73`). Cumulative totals can
-only grow, and `claim` pays `cumulative − already claimed`, so the same pARB cannot be claimed twice. The distributor's
-pARB comes only from `settle`, i.e. shares the vault actually minted; `rescue` cannot move pARB (`:139`). Simulation
-checks: allocated ≤ minted, distributor balance + claimed == minted, a second claim pays nothing.
-
-## 5. Zero eligible NFTs in a period
-
-`allocate` returns everything as carried dust when total weight is 0 (`eligibility.mjs:67`). The pARB stays in the
-distributor as unallocated and is allocated in the next week that has eligible holders. No root is needed for that
-week (the previous root stays active); nothing is lost or burned. The vault deposit itself is unaffected.
-
-## Smallest set of changes to make it fully operational
-
-1. `ArbitrageFundingRouter` + tests; arbitrage payee in the three splitters = router (deployment config).
-2. `offchain/epoch-job.mjs`: the production wrapper around `eligibility.mjs` (finalized-block reader, IPFS publish,
-   `proposeRoot`), plus the independent watcher.
-3. `offchain/keeper.mjs`: Hookr settle/payout, `distribute` ×3, router `swapAndFund`, adapter `settle`, `activateRoot`,
-   optional claim relaying, `burnHeldTokens`, `collectFees`.
-4. Keys: keeper (no Safe rights), publisher, report signer: separate keys in a KMS. Pause controls: vault `setPaused`,
-   router `pause`, converter `setEntryPaused`, distributor `vetoPending`, burner operator removal.
-
-No change to pArbitrage V3, ParbFundingAdapter, ShareDistributor, the splitters or the converter.
+Weekly rule: epoch k covers one UTC week from Monday; its pARB is everything settled before `end + 6 h` and not yet allocated, split by NFT-seconds held, converter inventory excluded. Recipients keep claimed pARB after selling or redeeming their NFT.

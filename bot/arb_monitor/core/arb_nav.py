@@ -27,7 +27,13 @@ from dataclasses import dataclass
 from typing import Optional
 from ..adapters.polymarket import get_best_prices as poly_get_best_prices
 from ..adapters.kalshi import get_best_prices as kalshi_get_best_prices
-from ..config import OPINION_BASE_URL, OPINION_API_KEY
+from ..config import (
+    OPINION_BASE_URL,
+    OPINION_API_KEY,
+    is_robinhood_funding,
+    opinion_enabled,
+    peg_max_deviation_bps,
+)
 
 
 def log(msg: str):
@@ -36,6 +42,10 @@ def log(msg: str):
 
 ARB_VAULT_DOMAIN_SALT = "PMFIArbVaultV2.v1"
 NAV_VALIDITY_WINDOW = 30  # 30-second deadline window (contract MAX_NAV_AGE = 30)
+
+# Injectable USDG price in USDC (callable -> float), used only when
+# ARB_PEG_MAX_DEVIATION_BPS > 0. Set by the host process or passed to compute_nav().
+PEG_PRICE_SOURCE = None
 
 
 @dataclass
@@ -190,6 +200,11 @@ def _get_servicer_wallet_usdc_on_base() -> float:
     Uses a direct eth_call (no web3 dependency — requests only).
     Returns balance in USDC (float, 6-decimal normalised). Returns 0.0 on error.
     """
+    if is_robinhood_funding():
+        # Name kept for callers (arb_reporter): robinhood mode returns all servicer cash
+        # incl. USDG on 4663, USDC on Base and in-transit amounts.
+        return _get_servicer_cash_breakdown()["total"]
+
     servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
     if not servicer_wallet:
         log("ℹ️ ARB_SERVICER_WALLET not set — servicer_on_base = 0")
@@ -219,6 +234,80 @@ def _get_servicer_wallet_usdc_on_base() -> float:
     except Exception as e:
         log(f"⚠️ Error fetching servicer wallet balance on Base: {e}")
     return 0.0
+
+
+def _peg_factor(price_source=None) -> float:
+    """USDG/USDC peg haircut. 1.0 unless ARB_PEG_MAX_DEVIATION_BPS > 0 and the peg is off by
+    more than that, then min(price, 1). Unknown price with a threshold set -> worst tolerated."""
+    max_dev = peg_max_deviation_bps()
+    if max_dev <= 0:
+        return 1.0
+    src = price_source or PEG_PRICE_SOURCE
+    try:
+        if src is None:
+            raise RuntimeError("no USDG/USDC price source injected")
+        price = float(src())
+    except Exception as e:
+        factor = 1.0 - max_dev / 10_000
+        log(f"⚠️ USDG peg price unavailable ({e}) — applying worst tolerated factor {factor:.4f}")
+        return factor
+    if abs(1.0 - price) * 10_000 > max_dev:
+        factor = min(price, 1.0)
+        log(f"⚠️ USDG peg off: price={price:.6f} > {max_dev} bps — haircut factor {factor:.6f}")
+        return factor
+    return 1.0
+
+
+def _get_servicer_cash_breakdown(peg_price_source=None) -> dict:
+    """Robinhood mode servicer cash incl. in-transit money (§4 of ARBITRAGE_FUNDING_READINESS):
+
+      servicer USDG on 4663 (× peg factor) + servicer USDC still on Base
+      + pending withdrawals (ledger) + bridge transfers sent but not yet arrived.
+
+    Pending Kalshi recalls land as USDC on Base first; the part already visible in the Base
+    balance is not counted twice (pending_base − base_usdc, floored at 0).
+    """
+    from .arb_funder import get_servicer_cash_usdc, _get_usdc_balance
+    from .arb_withdrawals import (
+        mark_withdrawals_arrived,
+        get_pending_withdrawal_usdc_by_dest,
+        reconcile_bridge_transfers,
+        get_inflight_bridge_usdc,
+    )
+
+    out = {"servicer_usdg_rh": 0.0, "servicer_usdc_base": 0.0, "pending_withdrawals": 0.0,
+           "bridges_in_transit": 0.0, "peg_factor": 1.0, "total": 0.0}
+    wallet = os.environ.get("ARB_SERVICER_WALLET", "")
+    if not wallet:
+        log("ℹ️ ARB_SERVICER_WALLET not set — servicer cash = 0")
+        return out
+    try:
+        out["servicer_usdg_rh"] = get_servicer_cash_usdc(wallet)
+    except Exception as e:
+        log(f"⚠️ Error reading servicer USDG on Robinhood Chain: {e}")
+    try:
+        out["servicer_usdc_base"] = _get_usdc_balance(wallet)
+    except Exception as e:
+        log(f"⚠️ Error reading servicer USDC on Base: {e}")
+    try:
+        reconcile_bridge_transfers()
+        mark_withdrawals_arrived(out["servicer_usdg_rh"], out["servicer_usdc_base"])
+        pending = get_pending_withdrawal_usdc_by_dest()
+        out["pending_withdrawals"] = pending["servicer"] + max(0.0, pending["base_usdc"] - out["servicer_usdc_base"])
+        out["bridges_in_transit"] = get_inflight_bridge_usdc()
+    except Exception as e:
+        log(f"⚠️ Error reading in-transit ledgers: {e}")
+    out["peg_factor"] = _peg_factor(peg_price_source)
+    out["total"] = (
+        out["servicer_usdg_rh"] * out["peg_factor"] + out["servicer_usdc_base"]
+        + out["pending_withdrawals"] + out["bridges_in_transit"]
+    )
+    log(
+        f"Servicer (robinhood): usdg={out['servicer_usdg_rh']:.4f} ×{out['peg_factor']:.4f} "
+        f"base_usdc={out['servicer_usdc_base']:.4f} pending_withdrawals={out['pending_withdrawals']:.4f} "
+        f"bridges_in_transit={out['bridges_in_transit']:.4f} total={out['total']:.4f}"
+    )
+    return out
 
 
 def _get_servicer_balances() -> tuple[float, float, float]:
@@ -305,7 +394,11 @@ def _get_servicer_balances() -> tuple[float, float, float]:
     else:
         log("ℹ️ Kalshi credentials not configured (KALSHI_API_KEY_ID / KALSHI_PRIVATE_KEY_PATH) — kalshi_cash = 0")
 
-    opinion_cash = _get_opinion_cash()
+    if opinion_enabled():
+        opinion_cash = _get_opinion_cash()
+    else:
+        log("ℹ️ Opinion disabled (ARB_OPINION_ENABLED=false) — opinion_cash = 0")
+        opinion_cash = 0.0
 
     return poly_cash, kalshi_cash, opinion_cash
 
@@ -512,7 +605,7 @@ def _get_next_round_id() -> int:
         return new_counter
 
 
-def compute_nav() -> dict:
+def compute_nav(peg_price_source=None) -> dict:
     """Compute current vault NAV and return signed payload.
 
     NAV = poly_cash + kalshi_cash + opinion_cash + servicer_on_base
@@ -535,11 +628,19 @@ def compute_nav() -> dict:
 
     # USDC in servicer wallet on Base, awaiting distribution to platforms.
     # Folded into poly_cash so it's visible in NAV immediately after deposit.
-    servicer_on_base = _get_servicer_wallet_usdc_on_base()
+    # Robinhood mode: USDG on 4663 (peg-adjusted) + USDC on Base + in-transit.
+    servicer_breakdown = None
+    if is_robinhood_funding():
+        servicer_breakdown = _get_servicer_cash_breakdown(peg_price_source)
+        servicer_on_base = servicer_breakdown["total"]
+    else:
+        servicer_on_base = _get_servicer_wallet_usdc_on_base()
 
     positions = _load_open_positions()
     # Value each open position at $0.99/share — deterministic, no live API calls.
     # One leg resolves to $1, the other to $0; $0.99 shaves 1¢ for conservatism.
+    # NOTE: the code below actually sums cost_basis_usdc, not shares × $0.99. Left unchanged
+    # on purpose (see ARBITRAGE_FUNDING_READINESS.md §3); confirm which is intended.
     open_positions_value = sum(pos.cost_basis_usdc for pos in positions)
 
     total_assets = (
@@ -618,6 +719,11 @@ def compute_nav() -> dict:
             for pos in positions
         ],
     }
+
+    if servicer_breakdown is not None:
+        # Robinhood mode only (display breakdown; base-mode payload is unchanged).
+        payload["funding_chain"] = "robinhood"
+        payload["servicer_breakdown"] = {k: round(v, 6) for k, v in servicer_breakdown.items()}
 
     log(f"NAV computed in {elapsed_ms}ms: total={total_assets:.4f} USDC, roundId={round_id}")
     return payload

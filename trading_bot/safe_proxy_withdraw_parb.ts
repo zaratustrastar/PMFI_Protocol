@@ -39,8 +39,10 @@ const BUILDER_PASSPHRASE = process.env.POLY2_API_PASSPHRASE || '';
 // Bridged USDC (PoS) on Polygon - this is what Polymarket uses
 const USDC_E_POLYGON = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174';
 const RELAY_API_URL = 'https://api.relay.link';
-const BASE_CHAIN_ID = 8453;
-const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+// Bridge destination. Defaults = Base USDC (legacy V2). The Python bot sets these for
+// ARB_FUNDING_CHAIN=robinhood: WITHDRAW_DEST_CHAIN_ID=4663, WITHDRAW_DEST_CURRENCY=<USDG>.
+const BASE_CHAIN_ID = Number(process.env.WITHDRAW_DEST_CHAIN_ID || 8453);
+const USDC_BASE = process.env.WITHDRAW_DEST_CURRENCY || '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 
 // Relayer URL
 const RELAYER_URL = 'https://relayer-v2.polymarket.com';

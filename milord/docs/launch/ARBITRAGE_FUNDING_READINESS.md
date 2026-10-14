@@ -57,6 +57,17 @@ Code note: `compute_nav`'s docstring says open positions are valued at $0.99 per
 
 Use Across/Relay directly rather than LI.FI's default route to avoid the 0.25% fee where possible.
 
+**Implemented (offline-tested, not run against live venues or chains).** `ARB_FUNDING_CHAIN=robinhood`
+(default `base` keeps the V2 path unchanged, Opinion included) switches servicer cash to USDG on 4663,
+`tend()` to the V3 vault on 4663, Polymarket funding to a USDG transfer to `POLY_RH_DEPOSIT_ADDR`, and
+Kalshi funding to an Across `exactOutput` quote (Relay fallback, fee cap `ARB_BRIDGE_MAX_FEE_BPS`=50,
+approve-only pre-txs, no native value) followed by the existing Base USDC transfer. Withdrawals land as
+USDG on 4663 (Polymarket script destination set by env; Kalshi USDC on Base is swept back each tend tick).
+Bridge legs go to an in-transit ledger; `compute_nav` adds pending withdrawals and in-transit bridges,
+with an optional peg haircut (`ARB_PEG_MAX_DEVIATION_BPS`). In robinhood mode Opinion is off unless `ARB_OPINION_ENABLED=true`; base mode keeps it on.
+Tests: `python3 -m unittest discover -s bot/arb_monitor/tests -v`. The Opinion row (`:272`) was not
+changed because Opinion is disabled for V1.
+
 ## 4. NAV rule while funds move
 
 NAV = vault USDG + servicer USDG (4663) + servicer USDC (Base) + venue cash (Polymarket, Kalshi, Opinion) + open
@@ -71,5 +82,7 @@ only when nothing is in transit or the in-transit amount is counted.
 | Confirm Polymarket withdrawal can land as USDG on 4663 (one small test) | team, real funds, approval needed | EXTERNAL |
 | Confirm Kalshi entity account and the $2,500/day crypto withdrawal cap for our volumes | team | EXTERNAL |
 | Confirm Opinion collateral token (USDT vs USDC) | team | EXTERNAL |
-| Implement the table in §3 and test against small amounts | Claude, after approval | NOT STARTED (deliberately: it moves money) |
+| Implement the table in §3 | Claude | DONE, offline tests only (mocked RPC/HTTP) |
+| Confirm Across and Relay support Robinhood Chain 4663 ⇄ Base, and the exact quote/status field names | team | EXTERNAL |
+| Test against small amounts | team, real funds, approval needed | NOT STARTED |
 | Decide whether Kalshi stays given the cap | owner | NEEDS APPROVAL |

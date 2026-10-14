@@ -14,7 +14,17 @@ from typing import Any
 
 import requests
 
-from ..config import KALSHI_BASE_URL, OPINION_BASE_URL
+from ..config import (
+    KALSHI_BASE_URL,
+    OPINION_BASE_URL,
+    is_robinhood_funding,
+    opinion_enabled,
+    robinhood_chain_id,
+    usdg_address,
+    across_api_url,
+    relay_api_url,
+    rh_sweep_min_usdc,
+)
 
 POLY_CLOB_URL = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
 RELAY_API_URL = "https://api.relay.link"
@@ -31,6 +41,15 @@ WITHDRAWAL_LEDGER_PATH = os.environ.get(
     os.path.expanduser("~/PolyNotifyBot/data/arb_withdrawals_ledger.json"),
 )
 
+# Outbound/inbound bridge transfers (robinhood mode): recorded when sent, cleared on arrival,
+# counted as in-transit by arb_nav.compute_nav so NAV does not dip while money is in a bridge.
+BRIDGE_LEDGER_PATH = os.environ.get(
+    "ARB_BRIDGE_LEDGER_PATH",
+    os.path.join(os.path.dirname(WITHDRAWAL_LEDGER_PATH), "arb_bridge_ledger.json"),
+)
+# Bridges with no status API (Polymarket deposit address) are assumed landed after this.
+BRIDGE_DEFAULT_ETA_SECS = int(os.environ.get("ARB_BRIDGE_ETA_SECS", "1800"))
+
 POLY_ESTIMATED_SETTLEMENT_SECS = int(os.environ.get("ARB_POLY_WITHDRAW_SETTLEMENT_SECS", "1800"))
 KALSHI_ESTIMATED_SETTLEMENT_SECS = int(os.environ.get("ARB_KALSHI_WITHDRAW_SETTLEMENT_SECS", "3600"))
 OPINION_ESTIMATED_SETTLEMENT_SECS = int(os.environ.get("ARB_OPINION_WITHDRAW_SETTLEMENT_SECS", "2700"))
@@ -40,15 +59,16 @@ def log(msg: str):
     print(f"💸 [ArbWithdrawals] {msg}")
 
 
-def _ensure_ledger_dir() -> None:
-    os.makedirs(os.path.dirname(WITHDRAWAL_LEDGER_PATH), exist_ok=True)
+def _ensure_ledger_dir(path: str | None = None) -> None:
+    os.makedirs(os.path.dirname(path or WITHDRAWAL_LEDGER_PATH), exist_ok=True)
 
 
-def _load_ledger() -> list[dict[str, Any]]:
+def _load_ledger(path: str | None = None) -> list[dict[str, Any]]:
+    path = path or WITHDRAWAL_LEDGER_PATH
     try:
-        if not os.path.exists(WITHDRAWAL_LEDGER_PATH):
+        if not os.path.exists(path):
             return []
-        with open(WITHDRAWAL_LEDGER_PATH, "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         return data if isinstance(data, list) else []
     except Exception as e:
@@ -56,13 +76,14 @@ def _load_ledger() -> list[dict[str, Any]]:
         return []
 
 
-def _save_ledger(rows: list[dict[str, Any]]) -> None:
+def _save_ledger(rows: list[dict[str, Any]], path: str | None = None) -> None:
+    path = path or WITHDRAWAL_LEDGER_PATH
     try:
-        _ensure_ledger_dir()
-        tmp = WITHDRAWAL_LEDGER_PATH + ".tmp"
+        _ensure_ledger_dir(path)
+        tmp = path + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(rows, f, indent=2, sort_keys=True)
-        os.replace(tmp, WITHDRAWAL_LEDGER_PATH)
+        os.replace(tmp, path)
     except Exception as e:
         log(f"⚠️ Could not save withdrawal ledger: {e}")
 
@@ -72,10 +93,13 @@ def record_withdrawal_intent(
     amount_usdc: float,
     reference: str,
     eta_seconds: int,
+    dest: str | None = None,
 ) -> None:
+    """dest (robinhood mode): "rh_usdg" = lands as USDG on 4663, "base_usdc" = lands as USDC
+    on Base and is then bridged home by sweep_base_usdc_to_robinhood(). None = legacy."""
     rows = _load_ledger()
     now = int(time.time())
-    rows.append({
+    row = {
         "platform": platform,
         "amount_usdc": round(float(amount_usdc), 6),
         "reference": str(reference),
@@ -84,7 +108,10 @@ def record_withdrawal_intent(
         "eta_at": now + max(60, int(eta_seconds)),
         "completed_at": None,
         "failed_at": None,
-    })
+    }
+    if dest:
+        row["dest"] = dest
+    rows.append(row)
     _save_ledger(rows)
     log(
         f"📝 Recorded withdrawal intent: platform={platform} amount={amount_usdc:.4f} "
@@ -105,11 +132,15 @@ def mark_withdrawal_failed(reference: str) -> None:
         _save_ledger(rows)
 
 
-def mark_withdrawals_arrived(servicer_balance_usdc: float) -> float:
+def mark_withdrawals_arrived(servicer_balance_usdc: float, base_usdc_balance: float | None = None) -> float:
     """
     Best-effort completion logic:
     if ETA has passed, mark pending recalls as completed up to current servicer balance.
     Conservative but much better than leaving recalls pending forever.
+
+    servicer_balance_usdc is servicer cash on the funding chain (USDG on 4663 in robinhood
+    mode). Rows with dest="base_usdc" are compared against base_usdc_balance instead and are
+    skipped when it is not given.
     """
     rows = _load_ledger()
     if not rows:
@@ -125,7 +156,13 @@ def mark_withdrawals_arrived(servicer_balance_usdc: float) -> float:
         if now < int(row.get("eta_at", 0)):
             continue
         amt = float(row.get("amount_usdc", 0.0))
-        if servicer_balance_usdc + 1e-9 >= amt:
+        if row.get("dest") == "base_usdc":
+            if base_usdc_balance is None:
+                continue
+            balance = base_usdc_balance
+        else:
+            balance = servicer_balance_usdc
+        if balance + 1e-9 >= amt:
             row["status"] = "completed"
             row["completed_at"] = now
             completed_total += amt
@@ -159,6 +196,157 @@ def get_pending_withdrawal_usdc() -> float:
         _save_ledger(rows)
 
     return round(total, 6)
+
+
+def get_pending_withdrawal_usdc_by_dest() -> dict:
+    """Pending recall totals split by landing place: {"base_usdc": x, "servicer": y}."""
+    get_pending_withdrawal_usdc()  # applies the 24h stale expiry
+    out = {"base_usdc": 0.0, "servicer": 0.0}
+    for row in _load_ledger():
+        if row.get("status") != "pending":
+            continue
+        key = "base_usdc" if row.get("dest") == "base_usdc" else "servicer"
+        out[key] += float(row.get("amount_usdc") or 0.0)
+    return {k: round(v, 6) for k, v in out.items()}
+
+
+def _complete_base_withdrawals_upto(amount_usdc: float) -> float:
+    """Mark pending dest=base_usdc recalls completed (oldest first) up to amount_usdc."""
+    rows = _load_ledger()
+    now = int(time.time())
+    left = float(amount_usdc)
+    done = 0.0
+    for row in sorted(rows, key=lambda r: int(r.get("created_at") or 0)):
+        if row.get("status") != "pending" or row.get("dest") != "base_usdc":
+            continue
+        amt = float(row.get("amount_usdc") or 0.0)
+        if amt > left + 1e-9:
+            break
+        row["status"] = "completed"
+        row["completed_at"] = now
+        left -= amt
+        done += amt
+    if done > 0:
+        _save_ledger(rows)
+    return round(done, 6)
+
+
+# ---------------------------------------------------------------------------
+# Bridge in-transit ledger (robinhood mode)
+# ---------------------------------------------------------------------------
+
+def record_bridge_transfer(
+    direction: str,
+    provider: str,
+    reference: str,
+    amount_usdc: float,
+    origin_chain_id: int,
+    eta_seconds: int | None = None,
+) -> None:
+    """Record money that has left a servicer balance and not yet landed anywhere we read.
+
+    direction: "rh_to_base" | "base_to_rh" | "rh_to_polymarket"
+    provider:  "across" | "relay" | "polymarket_bridge"
+    amount_usdc: amount that LEFT the origin balance (fees show up as a loss on arrival).
+    """
+    rows = _load_ledger(BRIDGE_LEDGER_PATH)
+    now = int(time.time())
+    rows.append({
+        "direction": direction,
+        "provider": provider,
+        "reference": str(reference),
+        "amount_usdc": round(float(amount_usdc), 6),
+        "origin_chain_id": int(origin_chain_id),
+        "status": "pending",
+        "created_at": now,
+        "eta_at": now + int(eta_seconds if eta_seconds is not None else BRIDGE_DEFAULT_ETA_SECS),
+        "completed_at": None,
+    })
+    _save_ledger(rows, BRIDGE_LEDGER_PATH)
+    log(f"📝 Bridge in-transit: {direction} via {provider} {amount_usdc:.4f} ref={reference}")
+
+
+def mark_bridge_arrived(reference: str, status: str = "completed") -> None:
+    rows = _load_ledger(BRIDGE_LEDGER_PATH)
+    changed = False
+    for row in rows:
+        if row.get("reference") == str(reference) and row.get("status") == "pending":
+            row["status"] = status
+            row["completed_at"] = int(time.time())
+            changed = True
+    if changed:
+        _save_ledger(rows, BRIDGE_LEDGER_PATH)
+        log(f"✅ Bridge {reference} → {status}")
+
+
+def _bridge_status(row: dict) -> str:
+    """Return "filled" | "refunded" | "pending" from the provider's status API."""
+    provider = row.get("provider")
+    if provider == "across":
+        resp = requests.get(f"{across_api_url()}/deposit/status", params={
+            "originChainId": row.get("origin_chain_id"),
+            "depositTxHash": row.get("reference"),
+        }, timeout=10)
+        resp.raise_for_status()
+        st = str(resp.json().get("status", "")).lower()
+        return "filled" if st == "filled" else "refunded" if st in ("refunded", "expired") else "pending"
+    if provider == "relay":
+        resp = requests.get(f"{relay_api_url()}/intents/status/v2",
+                            params={"requestId": row.get("reference")}, timeout=10)
+        resp.raise_for_status()
+        st = str(resp.json().get("status", "")).lower()
+        return "filled" if st == "success" else "refunded" if st in ("refund", "failure") else "pending"
+    # No status API (Polymarket deposit address): assume landed after its ETA.
+    return "filled" if int(time.time()) >= int(row.get("eta_at") or 0) else "pending"
+
+
+def reconcile_bridge_transfers() -> None:
+    """Clear pending bridge rows that the provider reports as filled (or refunded to origin)."""
+    for row in _load_ledger(BRIDGE_LEDGER_PATH):
+        if row.get("status") != "pending":
+            continue
+        try:
+            st = _bridge_status(row)
+        except Exception as e:
+            log(f"⚠️ Bridge status check failed for {row.get('reference')}: {e} (kept in-transit)")
+            continue
+        if st == "filled":
+            mark_bridge_arrived(row["reference"])
+        elif st == "refunded":
+            mark_bridge_arrived(row["reference"], status="refunded")
+        elif int(time.time()) > int(row.get("created_at") or 0) + 86400:
+            log(f"🚨 Bridge {row.get('reference')} pending > 24h — manual review needed (still counted)")
+
+
+def get_inflight_bridge_usdc() -> float:
+    total = 0.0
+    for row in _load_ledger(BRIDGE_LEDGER_PATH):
+        if row.get("status") == "pending":
+            total += float(row.get("amount_usdc") or 0.0)
+    return round(total, 6)
+
+
+def sweep_base_usdc_to_robinhood(servicer_wallet: str, private_key: str) -> float:
+    """Robinhood mode: bridge servicer USDC on Base (Kalshi withdrawals, stranded bridge output)
+    back to USDG on 4663. Skipped while a 4663→Base bridge is in flight (that USDC is about to be
+    forwarded to Kalshi). Returns the USDC amount bridged."""
+    if not is_robinhood_funding() or not servicer_wallet or not private_key:
+        return 0.0
+    if any(r.get("status") == "pending" and r.get("direction") == "rh_to_base"
+           for r in _load_ledger(BRIDGE_LEDGER_PATH)):
+        log("ℹ️ 4663→Base bridge in flight — Base USDC sweep skipped")
+        return 0.0
+    from .arb_funder import _get_usdc_balance, _bridge_base_usdc_to_usdg, _NonceTracker
+    base_usdc = _get_usdc_balance(servicer_wallet)
+    if base_usdc < rh_sweep_min_usdc():
+        return 0.0
+    amount = round(base_usdc, 6)
+    res = _bridge_base_usdc_to_usdg(private_key, servicer_wallet, amount, _NonceTracker(servicer_wallet))
+    # This USDC is now leaving Base: any Kalshi recall that landed there is no longer
+    # "pending withdrawal" but "bridge in-transit" (counted once, by the bridge row).
+    _complete_base_withdrawals_upto(amount)
+    record_bridge_transfer("base_to_rh", res["provider"], res["reference"], amount, BASE_CHAIN_ID)
+    return amount
 
 
 def _poly_clob_headers(method: str = "GET") -> dict:
@@ -400,7 +588,21 @@ def withdraw_from_polymarket(
             f"{withdraw_amount:.6f}",
         ]
 
-        log(f"📤 Full Polymarket recall: {withdraw_amount:.4f} USDC.e {poly_proxy} -> EOA -> Base vault")
+        script_env = {**os.environ}
+        if is_robinhood_funding():
+            # Route the Relay leg to USDG on Robinhood Chain, landing in the servicer wallet
+            # (safe_proxy_withdraw_parb.ts reads WITHDRAW_DEST_CHAIN_ID / WITHDRAW_DEST_CURRENCY).
+            servicer = os.environ.get("ARB_SERVICER_WALLET", "")
+            if not servicer:
+                return False, "ARB_SERVICER_WALLET not set (robinhood withdrawal destination)", 0.0
+            script_env.update({
+                "WITHDRAW_DEST_CHAIN_ID": str(robinhood_chain_id()),
+                "WITHDRAW_DEST_CURRENCY": usdg_address(),
+                "TREASURY_ADDRESS": servicer,
+            })
+            log(f"📤 Full Polymarket recall: {withdraw_amount:.4f} USDC.e {poly_proxy} -> EOA -> USDG (4663) {servicer}")
+        else:
+            log(f"📤 Full Polymarket recall: {withdraw_amount:.4f} USDC.e {poly_proxy} -> EOA -> Base vault")
 
         result = subprocess.run(
             cmd,
@@ -408,7 +610,7 @@ def withdraw_from_polymarket(
             capture_output=True,
             text=True,
             timeout=180,
-            env={**os.environ},
+            env=script_env,
         )
 
         output = (result.stdout or "") + "\n" + (result.stderr or "")
@@ -745,12 +947,20 @@ def withdraw_from_platforms(
         f"poly_avail={poly_cash:.4f} kalshi_avail={kalshi_cash:.4f} opinion_avail={opinion_cash:.4f}"
     )
 
+    rh_mode = is_robinhood_funding()
+    if not opinion_enabled() and opinion_cash:
+        log(f"ℹ️ Opinion disabled (ARB_OPINION_ENABLED=false) — ignoring opinion_cash={opinion_cash:.4f}")
+        opinion_cash = 0.0
+
     if remaining > 0 and poly_cash > 1.0:
         target = min(poly_cash * 0.9, remaining)
         log(f"📤 Polymarket withdrawal target: {target:.4f} USDC")
         ok, ref, amount = withdraw_from_polymarket(target)
         if ok:
-            record_withdrawal_intent("polymarket", amount, ref, 600)
+            # Robinhood mode: the script only reports success once the Relay fill landed as
+            # USDG on 4663, so a short ETA is enough before arrival is checked against USDG.
+            record_withdrawal_intent("polymarket", amount, ref, 60 if rh_mode else 600,
+                                     dest="rh_usdg" if rh_mode else None)
             log(f"✅ Polymarket withdrawal initiated: {amount:.4f} USDC (tx={ref})")
             total_initiated += amount
             remaining -= amount
@@ -761,9 +971,12 @@ def withdraw_from_platforms(
     if remaining > 0 and kalshi_cash > 1.0:
         target = min(kalshi_cash * 0.9, remaining)
         log(f"📤 Kalshi withdrawal target: {target:.4f} USDC")
+        # Robinhood mode: Kalshi still pays USDC on Base to the servicer EOA; run_tend_tick's
+        # sweep_base_usdc_to_robinhood() then bridges it to USDG on 4663.
         ok, ref, amount = withdraw_from_kalshi(target, servicer_wallet)
         if ok:
-            record_withdrawal_intent("kalshi", amount, ref, KALSHI_ESTIMATED_SETTLEMENT_SECS)
+            record_withdrawal_intent("kalshi", amount, ref, KALSHI_ESTIMATED_SETTLEMENT_SECS,
+                                     dest="base_usdc" if rh_mode else None)
             log(f"✅ Kalshi withdrawal initiated: {amount:.4f} USDC (id={ref})")
             total_initiated += amount
             remaining -= amount

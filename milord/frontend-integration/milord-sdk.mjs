@@ -3,6 +3,9 @@
 import { BrowserProvider, Contract, AbiCoder, keccak256, formatEther, formatUnits, parseEther } from "https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm";
 
 const A = {
+  fundingRouter: ["function paused() view returns (bool)", "function openExecution() view returns (bool)", "function totalEthSwapped() view returns (uint256)", "function totalAssetFunded() view returns (uint256)", "function lastExecution() view returns (uint64)", "function maxSwapWei() view returns (uint256)", "function dailyCapWei() view returns (uint256)", "function maxSlippageBps() view returns (uint16)", "function spentToday() view returns (uint256)"],
+  collector: ["function totalEthForwarded() view returns (uint256)", "function totalMilordBurned() view returns (uint256)"],
+  familyLock: ["function lockOf(bytes32) view returns (address beneficiary, uint64 unlockBlock)"],
   token: ["function balanceOf(address) view returns (uint256)", "function totalSupply() view returns (uint256)",
     "function allowance(address,address) view returns (uint256)", "function approve(address,uint256) returns (bool)"],
   nft: ["function ownerOf(uint256) view returns (address)", "function balanceOf(address) view returns (uint256)",
@@ -71,7 +74,33 @@ export async function connect(deployments, ethereum = window.ethereum) {
     router: D.SwapRouter ? c(D.SwapRouter, A.router) : null, // local only: stand-in for trading on Hookr
     governor: D.MilordGovernor ? c(D.MilordGovernor, A.governor) : null,
     key: D.HookrTaxHook ? ["0x0000000000000000000000000000000000000000", D.MILORD, D.lpFee, D.tickSpacing, D.HookrTaxHook] : null,
+    fundingRouter: D.ArbitrageFundingRouter ? c(D.ArbitrageFundingRouter, A.fundingRouter) : null,
+    collector: D.LockFeeCollector ? c(D.LockFeeCollector, A.collector) : null,
+    familyLock: D.HookrFamilyLock ? c(D.HookrFamilyLock, A.familyLock) : null,
   };
+}
+
+/** Automation and lock status: ETH -> USDG router, LP fee collector, founding-position lock. Read-only. */
+export async function automation(m) {
+  const out = {};
+  if (m.fundingRouter) {
+    const r = m.fundingRouter;
+    const [paused, open, held, swapped, funded, last, maxSwap, daily, slip, spent] = await Promise.all([
+      r.paused(), r.openExecution(), m.provider.getBalance(r.target), r.totalEthSwapped(), r.totalAssetFunded(),
+      r.lastExecution(), r.maxSwapWei(), r.dailyCapWei(), r.maxSlippageBps(), r.spentToday()]);
+    out.router = { paused, open, ethWaiting: formatEther(held), ethSwapped: formatEther(swapped), usdgFunded: formatUnits(funded, 6),
+      lastExecution: Number(last), maxSwapEth: formatEther(maxSwap), dailyCapEth: formatEther(daily), maxSlippagePct: Number(slip) / 100, spentTodayEth: formatEther(spent) };
+  }
+  if (m.collector) {
+    const [eth, mil] = await Promise.all([m.collector.totalEthForwarded(), m.collector.totalMilordBurned()]);
+    out.lpFees = { ethToBuyback: formatEther(eth), milordBurned: formatEther(mil) };
+  }
+  if (m.familyLock && m.D.familyId) {
+    const [beneficiary, unlockBlock] = await m.familyLock.lockOf(m.D.familyId);
+    const locked = beneficiary !== "0x0000000000000000000000000000000000000000";
+    out.lock = { locked, forever: unlockBlock === 2n ** 64n - 1n, beneficiary, beneficiaryIsCollector: beneficiary === m.D.LockFeeCollector };
+  }
+  return out;
 }
 
 export async function status(m) {

@@ -14,8 +14,12 @@ Status tags used in every document here:
 |---|---|---|
 | 1 | Hookr launch parameters | [HOOKR_FINAL_CONFIG.md](HOOKR_FINAL_CONFIG.md) |
 | 2 | Final launch liquidity (100%), balances, first-buy impact | [LAUNCH_LIQUIDITY.md](LAUNCH_LIQUIDITY.md) |
-| 2b | LP custody and locking proposal | [LP_LOCK_PROPOSAL.md](LP_LOCK_PROPOSAL.md) |
-| 5b | Arbitrage Funding Safe → pARB automation | [PARB_AUTOMATION.md](PARB_AUTOMATION.md) |
+| 2b | Permanent lock and LP fee burn | [LP_LOCK.md](LP_LOCK.md) |
+| 5b | Automated ETH → USDG → pARB | [PARB_AUTOMATION.md](PARB_AUTOMATION.md) |
+| 5c | Keeper, epoch publisher, root checker | `offchain/services/README.md` |
+| 6b | Hookr-1 verification and incompatibilities | [HOOKR_VERIFICATION.md](HOOKR_VERIFICATION.md) |
+| 10b | Safe configuration and permissions | [SAFE_CONFIGURATION.md](SAFE_CONFIGURATION.md) |
+| 13 | Remaining blockers by severity | [BLOCKERS.md](BLOCKERS.md) |
 | 3 | Fee paths and recipients | [FEE_ROUTING_VERIFICATION.md](FEE_ROUTING_VERIFICATION.md) |
 | 4 | Full economic transaction trace | [MILORD_END_TO_END.md](MILORD_END_TO_END.md) |
 | 5 | Venue funding and withdrawal routes | [ARBITRAGE_FUNDING_READINESS.md](ARBITRAGE_FUNDING_READINESS.md) |

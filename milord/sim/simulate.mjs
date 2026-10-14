@@ -3,10 +3,13 @@
 //   ./sim/run-local.sh        (fresh anvil -> Permit2 -> DeployLocal -> this script)
 //
 // What is real here: every MILORD contract, pArbitrage V3, ParbFundingAdapter, ShareDistributor, Uniswap v4
-// PoolManager / PositionManager / StateView, V4SwapAdapter, MilordLiquidityLock, the EIP-712 quote and
-// report signing code, the TWAP reference price, the eligibility and Merkle code.
-// What is mocked: Hookr's Tax + Conversion hook (MockHookrTaxHook reproduces its economics), USDG
-// (MockUSDG), the USDG/ETH market depth, arbitrage P&L (minted or burned on the servicer wallet).
+// PoolManager / PositionManager / StateView, V4SwapAdapter, HookrLockFeeCollector, ArbitrageFundingRouter with
+// UniV3SwapVenue and the 30-minute UniV3TwapReference on the official Uniswap V3 factory build, the EIP-712 quote
+// and report signing code, the TWAP reference price, and the packaged keeper and epoch-publisher jobs
+// (offchain/services/lib/jobs.mjs) that run the weekly flow.
+// What is mocked: Hookr's Tax + Conversion hook (MockHookrTaxHook reproduces its economics), Hookr's launcher and
+// HookrFamilyLock (MockHookrFamilyLock, same lock/collect surface), USDG (MockUSDG) and the WETH/USDG pool's
+// depth, arbitrage P&L (minted or burned on the servicer wallet).
 //
 // Every number marked SCENARIO or ILLUSTRATIVE is a hypothetical input chosen to exercise the mechanics.
 // None of it is a forecast, a proposed production value, measured profit or real share-price data.
@@ -17,6 +20,7 @@ import { ownershipIntervals, eligibility, allocate, accumulate, buildTree, proof
 import { issueQuote } from "../offchain/lib/quote.mjs";
 import { signReport } from "../offchain/lib/report.mjs";
 import { TwapOracle, weiPerMillionAtTick } from "../offchain/lib/twap.mjs";
+import { keeperTick, publishEpoch, checkRoot, readInputs } from "../offchain/services/lib/jobs.mjs";
 
 // ───────────── SCENARIO inputs (hypothetical) ─────────────
 const SCENARIO = {
@@ -27,7 +31,7 @@ const SCENARIO = {
   pnlBpsWeek2: 200,                         // +2% on deployed capital
   pnlBpsWeek3: -300,                        // -3% on deployed capital
 };
-const LAUNCH = "final allocation: 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, 0 ETH, ~10 ETH opening FDV, range to ~1,000x; 1.5%/1.5% tax; 0.3% LP fee and 20% Hookr commission pending approval";
+const LAUNCH = "final allocation: 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, 0 ETH, ~10 ETH opening FDV, range to ~1,000x; 1.5%/1.5% tax; 0.3% LP fee; 20% Hookr commission (to verify on Hookr); position locked forever, LP fees to buyback-and-burn";
 
 const RPC = process.env.RPC_URL ?? "http://127.0.0.1:8545";
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
@@ -61,7 +65,10 @@ const dist = C(D.ShareDistributor, abi("ShareDistributor"));
 const adapter = C(D.ParbFundingAdapter, abi("ParbFundingAdapter"));
 const hook = C(D.HookrTaxHook, abi("MockHookrTaxHook"));
 const route = C(D.V4SwapAdapter, abi("V4SwapAdapter"));
-const lock = C(D.LiquidityLock, abi("MilordLiquidityLock"));
+const familyLock = C(D.HookrFamilyLock, abi("MockHookrFamilyLock"));
+const collector = C(D.LockFeeCollector, abi("HookrLockFeeCollector"), operator);
+const arbRouter = C(D.ArbitrageFundingRouter, abi("ArbitrageFundingRouter"), operator);
+const twapRef = C(D.TwapReference, abi("UniV3TwapReference"));
 const router = C(D.SwapRouter, abi("PoolSwapTest"));
 const stateView = C(D.StateView, v4abi("v4-periphery/foundry-out/StateView.sol/StateView.json"));
 const chainId = Number((await provider.getNetwork()).chainId);
@@ -176,77 +183,82 @@ let lastTree = null;
 const weeks = [];
 const batches = [];
 const sumAlloc = async (who) => (await entrySplit.totalAllocated(ZERO, who)) + (await royaltySplit.totalAllocated(ZERO, who)) + (await taxSplit.totalAllocated(ZERO, who));
-let arbSwapped = 0n, ethToUsdgTotal = 0n, usdgFromSwapsTotal = 0n, lpFeesEthTotal = 0n, lpFeesMilordTotal = 0n;
+let lastEpoch = null;
+const rootChecks = [];
+
+const GRACE = 6 * 3600;
+const keeperContracts = {
+  hookrSettle: () => hook.connect(operator).collect(),
+  splitters: [entrySplit, royaltySplit, taxSplit].map((x) => x.connect(operator)),
+  collector, burner: burner.connect(operator), router: arbRouter, adapter: adapter.connect(operator), vault, distributor: dist.connect(operator),
+};
+const keeperOpts = {
+  now,
+  buyback: {
+    minBudgetWei: parseEther("0.01"),
+    // min output from the off-chain 30-min MILORD TWAP: at most 10% below it (tax + LP fee + impact)
+    quoteMinOut: async (budget) => { const ref = twap.price(await now()).weiPerMillion; return ((budget * 10n ** 24n) / ref) * 90n / 100n; },
+  },
+};
+const keeperLog = [];
+async function keeper(label) {
+  const r = await keeperTick(keeperContracts, keeperOpts);
+  await observe();
+  keeperLog.push({ label, t: await now(), steps: r.results.map((x) => `${x.step}:${x.status}`) });
+  if (r.failed) throw new Error(`keeper failed: ${JSON.stringify(r.results.filter((x) => x.status === "failed"))}`);
+  return r;
+}
+const routerPayee = D.ArbitrageFundingRouter;
 
 async function closeWeek(label, start, end, pnlBps, notes) {
   await setTime(end);
-  // 6-7. settle the Hookr tax queue (permissionless): commission to Hookr, project share to TradingTaxSplitter
-  await send(hook.collect());
-  // 8. equal three-way split of the project tax, plus entry-fee (70/30) and royalty (50/50) splits
-  for (const s of [entrySplit, royaltySplit, taxSplit]) await send(s.distribute(ZERO));
-  // ordinary LP fees of the locked launch position -> fee recipient (kept apart from tax)
-  const teamEth0 = await provider.getBalance(D.teamSafe), teamMil0 = await token.balanceOf(D.teamSafe);
-  await send(lock.connect(operator).collectFees(D.launchPositionId));
-  lpFeesEthTotal += (await provider.getBalance(D.teamSafe)) - teamEth0;
-  lpFeesMilordTotal += (await token.balanceOf(D.teamSafe)) - teamMil0;
-  // 9. real buyback: burner budget -> V4SwapAdapter -> taxed pool -> MILORD burned (supply falls)
-  const budget = await burner.budget();
-  let burnedNow = 0n;
-  if (budget >= parseEther("0.01")) {
-    const ref = twap.price(await now()).weiPerMillion;
-    const expected = (budget * 10n ** 24n) / ref;
-    const minOut = (expected * 90n) / 100n; // price limit: at most ~11% worse than the TWAP (tax + LP fee + impact)
-    const before = await burner.totalBurnedFromBuybacks();
-    await send(burner.connect(operator).buybackAndBurn(budget, minOut, (await now()) + 600));
-    burnedNow = (await burner.totalBurnedFromBuybacks()) - before;
-  }
-  // 14. batch conversion: arbitrage allocations this week, ETH -> USDG through the ETH/USDG pool, straight to the adapter
-  const arbTotal = await sumAlloc(D.arbitrageSafe);
-  const ethToSwap = arbTotal - arbSwapped;
-  arbSwapped = arbTotal;
-  let usdgIn = 0n;
-  if (ethToSwap > 0n) {
-    const before = await usdg.balanceOf(D.ParbFundingAdapter);
-    const minOut = (ethToSwap * 2400n) / 10n ** 12n; // >= 2,400 USDG per ETH (slippage bound on the ~2,500 pool)
-    await send(route.connect(arb).swapExactETHForToken(D.USDG, minOut, D.ParbFundingAdapter, (await now()) + 600, { value: ethToSwap }));
-    usdgIn = (await usdg.balanceOf(D.ParbFundingAdapter)) - before;
-    ethToUsdgTotal += ethToSwap;
-    usdgFromSwapsTotal += usdgIn;
-  }
-  // 21-22. trading result on capital already deployed (SCENARIO), then 15-16. fund -> report -> settle -> tend
+  const burnedBefore = await burner.totalBurnedFromBuybacks();
+  const swappedBefore = await arbRouter.totalEthSwapped();
+  const fundedBefore = await arbRouter.totalAssetFunded();
+  const batchesBefore = Number(await adapter.batchCount());
+  // keeper pass 1 (offchain/services keeperTick): settle the Hookr tax queue -> split revenue (tax thirds, entry
+  // 70/30, royalty 50/50) -> collect LP fees of the locked position into the burner -> bounded buyback-and-burn ->
+  // router: arbitrage ETH -> USDG at most 1% below the 30-min V3 TWAP -> vault deposit request
+  await keeper(`${label} pass 1`);
+  const burnedNow = (await burner.totalBurnedFromBuybacks()) - burnedBefore;
+  const ethToSwap = (await arbRouter.totalEthSwapped()) - swappedBefore;
+  const usdgIn = (await arbRouter.totalAssetFunded()) - fundedBefore;
+  const arbTotal = await sumAlloc(routerPayee);
+  // trading result on capital already deployed (SCENARIO), then the reporter's signed report
   const pnl = pnlBps ? await applyPnl(pnlBps) : 0n;
-  let batchId = null, shares = 0n;
-  if (usdgIn >= 10_000_000n) {
-    await send(adapter.connect(operator).fund(id(`milord-fees:${label}:${ethToSwap}`), usdgIn));
-    batchId = Number(await adapter.batchCount()) - 1;
-  }
   const reported = await report(label);
-  if (batchId !== null) {
-    await send(adapter.settle(batchId));
-    const b = await adapter.batch(batchId);
-    shares = b.sharesMinted;
+  // keeper pass 2: settle the processed deposit (pARB minted to the distributor at the reported PPS)
+  await keeper(`${label} pass 2`);
+  let shares = 0n;
+  for (let i = batchesBefore; i < Number(await adapter.batchCount()); i++) {
+    const b = await adapter.batch(i);
     const req = await vault.depositRequests(b.requestId);
-    batches.push({ label, usdg: b.usdcAmount, shares, processedPPS: req.processedPPS });
+    shares += b.sharesMinted;
+    batches.push({ label, usdg: b.usdcAmount, shares: b.sharesMinted, processedPPS: req.processedPPS });
   }
   await provider.send("evm_increaseTime", [61]);
   await send(vault.tend());
   const pps = await vault.officialPPS();
 
-  // 17. eligibility for [start, end), allocate everything unallocated (incl. carried dust)
-  const iv = ownershipIntervals(await transfers());
-  const { weights } = eligibility(iv, { start, end, excluded: [D.MilordConverter] });
-  const available = (await vault.balanceOf(D.ShareDistributor)) + (await dist.totalClaimed()) - prevTotal;
-  const { allocations, dust } = allocate(available, weights);
-  cumulative = accumulate(cumulative, allocations);
-  const built = buildTree(cumulative);
-  let rootHex = null;
-  if (built && built.total > prevTotal) {
-    await send(dist.connect(operator).proposeRoot(built.root, built.total, ++epoch, keccak256(toUtf8Bytes(JSON.stringify(built.values)))));
+  // epoch publisher after the settlement grace: finalized transfers + settled batches -> deterministic root
+  await setTime(end + GRACE + 60);
+  const inputs = await readInputs({ nft, adapter, provider, toBlock: await provider.getBlockNumber() });
+  const pub = await publishEpoch({ distributor: dist.connect(operator), inputs, genesis: T0, now: await now(), settlementGrace: GRACE, excluded: [D.MilordConverter], save: (e) => { lastEpoch = e; } });
+  await observe();
+  const chk = await checkRoot({ distributor: dist, parb: vault, inputs, genesis: T0, settlementGrace: GRACE, excluded: [D.MilordConverter] });
+  rootChecks.push(...chk.map((x) => ({ label, ...x })));
+  let rootHex = null, allocations = new Map(), dust = 0n, weights = new Map();
+  if (lastEpoch && lastEpoch.end === end) {
+    ({ allocations, dust, weights } = lastEpoch);
+    cumulative = lastEpoch.cumulative;
+  }
+  if (pub.action === "proposed") {
     await provider.send("evm_increaseTime", [3601]);
-    await send(dist.activateRoot());
-    prevTotal = built.total;
-    lastTree = built.tree;
-    rootHex = built.root;
+    await keeper(`${label} pass 3`); // activates the root after the delay
+    prevTotal = pub.total;
+    lastTree = lastEpoch.tree;
+    rootHex = pub.root;
+    epoch = pub.epoch;
   }
   // some holders claim (others wait; cumulative leaves mean they lose nothing)
   if (lastTree) {
@@ -272,13 +284,13 @@ async function closeWeek(label, start, end, pnlBps, notes) {
     ethTradingVolumeTotal: fmtE(ethVolume),
     hookrCommissionTotal: fmtE(await hook.totalPlatformPaid()), projectTaxTotal: fmtE(await hook.totalProjectPaid()),
     ethEntryFeesTotal: fmtE(await conv.totalEntryFeesWei()), royaltiesTotal: fmtE(await royaltySplit.totalDistributed(ZERO)),
-    teamRevenueEthTotal: fmtE(await sumAlloc(D.teamSafe)), lpFeesEthTotal: fmtE(lpFeesEthTotal), lpFeesMilordTotal: fmtE(lpFeesMilordTotal),
+    teamRevenueEthTotal: fmtE(await sumAlloc(D.teamSafe)), lpFeesEthTotal: fmtE(await collector.totalEthForwarded()), lpFeesMilordTotal: fmtE(await collector.totalMilordBurned()),
     arbitrageFundingEthTotal: fmtE(arbTotal), burnBudgetEthTotal: fmtE(await burner.totalEthReceived()),
-    ethSwappedThisWeek: fmtE(ethToSwap), usdgDepositedThisWeek: fmtU(usdgIn), pnlUsdgThisWeek: fmtU(pnl),
+    ethSwappedThisWeek: fmtE(ethToSwap), routerHeldEth: fmtE(await provider.getBalance(routerPayee)), usdgDepositedThisWeek: fmtU(usdgIn), pnlUsdgThisWeek: fmtU(pnl),
     parbMintedThisWeek: fmtE(shares), parbMintedTotal: fmtE(await adapter.totalSharesMinted()),
     ppsUsdg: fmtU(pps), navUsdg: fmtU(reported),
     parbAllocatedThisWeek: fmtE([...allocations.values()].reduce((a, b) => a + b, 0n)), dustCarried: fmtE(dust),
-    eligibleWallets: weights.size, cumulativeAllocated: fmtE(prevTotal), claimedTotal: fmtE(await dist.totalClaimed()),
+    eligibleWallets: weights.size, epochAction: pub.action, epochReason: pub.reason ?? null, cumulativeAllocated: fmtE(prevTotal), claimedTotal: fmtE(await dist.totalClaimed()),
     unclaimed: fmtE(prevTotal - (await dist.totalClaimed())),
     weiPerMillionSpot: fmtE(weiPerMillionAtTick(await spotTick())),
     merkleRoot: rootHex, tracked: {},
@@ -307,14 +319,14 @@ await setTime(T0 - 600);
 const start = {
   milordSupply: fmtE(await token.totalSupply()), activeNFTs: Number(await nft.activeSupply()), holders: 0,
   milordInPool: fmtE(await token.balanceOf(D.PoolManager)), milordOutsideLiquidity: fmtE(await token.balanceOf(D.owner)),
-  poolEth: fmtE(await provider.getBalance(D.PoolManager)) - 2000, vaultShares: fmtE(await vault.totalSupply()),
+  poolEth: fmtE(await provider.getBalance(D.PoolManager)), vaultShares: fmtE(await vault.totalSupply()),
   openingWeiPerMillion: fmtE(weiPerMillionAtTick(await spotTick())), launch: LAUNCH, launchDustBurnedWei: String(D.launchDustBurned),
 };
 const outsideAtOpen = {};
 for (const [n, a] of Object.entries({ deployer: D.owner, team: team.address, arbitrage: arb.address, operator: operator.address })) outsideAtOpen[n] = await token.balanceOf(a);
 await step(1, "deployment: 100% of supply into the founding position, rounding remainder burned", { milordInLiquidity: start.milordInPool, milordOutside: start.milordOutsideLiquidity, remainderBurnedWei: start.launchDustBurnedWei });
 await step(2, "Hookr-style MILORD/ETH market open (empty of ETH)", { tick: await spotTick() });
-await step(3, "MILORD-only concentrated position minted and locked", { positionId: D.launchPositionId });
+await step(3, "MILORD-only position minted into the (mock) Hookr family and locked forever; LP fee beneficiary = HookrLockFeeCollector", { positionId: D.launchPositionId });
 await samplePrice("open");
 
 await step("3b", "no wallet holds MILORD outside the pool, so the first trade can only be a buy", { outside: Object.fromEntries(Object.entries(outsideAtOpen).map(([k, v]) => [k, fmtE(v)])) });
@@ -461,11 +473,19 @@ const taxTotal = buyTax + sellTax, hookrPaid = await hook.totalPlatformPaid(), p
 const hookrAll = hookrPaid + (await hook.platformAccrued()), projAll = projPaid + (await hook.projectAccrued()); // incl. tax on the last buyback, not yet settled
 ok("Hookr commission == 20% of tax; project == 80%", hookrAll + projAll === taxTotal && near(hookrAll * 5n, taxTotal, 5000n), `${fmtE(hookrAll)} of ${fmtE(taxTotal)}`);
 ok("project tax fully received by TradingTaxSplitter", (await taxSplit.totalDistributed(ZERO)) === projPaid);
-const tb = await taxSplit.totalAllocated(ZERO, D.BuybackBurner), tt = await taxSplit.totalAllocated(ZERO, D.teamSafe), ta = await taxSplit.totalAllocated(ZERO, D.arbitrageSafe);
+const tb = await taxSplit.totalAllocated(ZERO, D.BuybackBurner), tt = await taxSplit.totalAllocated(ZERO, D.teamSafe), ta = await taxSplit.totalAllocated(ZERO, routerPayee);
 ok("burn / team / arbitrage tax shares equal within 1 bp", tb + tt + ta === projPaid && near(tb, tt, projPaid / 10000n + 10n) && near(tt, ta, 10n), `${fmtE(tb)} / ${fmtE(tt)} / ${fmtE(ta)}`);
-ok("entry fees: converter total == splitter total, 70/30", (await conv.totalEntryFeesWei()) === (await entrySplit.totalDistributed(ZERO)) && (await entrySplit.totalAllocated(ZERO, D.arbitrageSafe)) === ((await entrySplit.totalDistributed(ZERO)) * 7000n) / 10000n);
-ok("royalty received only when paid, split 50/50", (await royaltySplit.totalDistributed(ZERO)) === (SCENARIO.royaltySaleEth * 670n) / 10000n && (await royaltySplit.totalAllocated(ZERO, D.teamSafe)) === (await royaltySplit.totalAllocated(ZERO, D.arbitrageSafe)));
-ok("all arbitrage ETH swapped to USDG and deposited", ethToUsdgTotal === (await sumAlloc(D.arbitrageSafe)) && usdgFromSwapsTotal === (await adapter.totalUsdcDeposited()));
+ok("entry fees: converter total == splitter total, 70/30", (await conv.totalEntryFeesWei()) === (await entrySplit.totalDistributed(ZERO)) && (await entrySplit.totalAllocated(ZERO, routerPayee)) === ((await entrySplit.totalDistributed(ZERO)) * 7000n) / 10000n);
+ok("royalty received only when paid, split 50/50", (await royaltySplit.totalDistributed(ZERO)) === (SCENARIO.royaltySaleEth * 670n) / 10000n && (await royaltySplit.totalAllocated(ZERO, D.teamSafe)) === (await royaltySplit.totalAllocated(ZERO, routerPayee)));
+{
+  const swapped = await arbRouter.totalEthSwapped(), held = await provider.getBalance(routerPayee);
+  ok("arbitrage ETH: router swapped + still held == allocated to it; all USDG deposited", swapped + held === (await sumAlloc(routerPayee)) && (await arbRouter.totalAssetFunded()) === (await adapter.totalUsdcDeposited()), `${fmtE(swapped)} swapped, ${fmtE(held)} held (below threshold)`);
+  const ev = await arbRouter.queryFilter(arbRouter.filters.Executed(), 0, "latest");
+  const [maxSwap, slip] = [await arbRouter.maxSwapWei(), await arbRouter.maxSlippageBps()];
+  ok("router: every swap within the per-tx cap and at most maxSlippage below the 30-min V3 TWAP", ev.length > 0 && ev.every((e) => e.args.ethIn <= maxSwap && e.args.assetOut >= e.args.minOut && e.args.minOut === ((e.args.ethIn * e.args.price) / 10n ** 18n) * (10000n - slip) / 10000n), `${ev.length} swaps, slippage cap ${slip} bps`);
+}
+ok("root checker recomputed every proposed root identically", rootChecks.length > 0 && rootChecks.every((x) => x.match), `${rootChecks.length} checks`);
+ok("keeper passes ran without failed steps", keeperLog.every((k) => !k.steps.some((x) => x.endsWith(":failed"))), `${keeperLog.length} passes`);
 ok("buyback burns recorded == supply reduction from buybacks", buyBurns > 0n && (await burner.buybackCount()) >= 1n);
 ok("USDG has 6 decimals and NAV = vault + servicer USDG", Number(await usdg.decimals()) === 6 && ppsSeries.at(-1).navUsdg === fmtU((await usdg.balanceOf(D.pARBVault)) + (await usdg.balanceOf(servicer.address))));
 {
@@ -481,8 +501,14 @@ ok("pool started with 0 ETH and the first trade was a buy", Math.abs(start.poolE
 ok("entry refused at launch until 30 min of price history (no fallback)", launchQuoteRefused);
 ok("every entry fee == max(10% of the TWAP value of 1M MILORD, 0.002 ETH); both paths used", [...ids, ...laterFees].every((x) => x.fee === (x.weiPerMillion / 10n > parseEther("0.002") ? x.weiPerMillion / 10n : parseEther("0.002"))) && ids.some((x) => x.minimumApplied) && laterFees.some((x) => !x.minimumApplied), `${ids.filter((x) => x.minimumApplied).length} at minimum, ${laterFees.filter((x) => !x.minimumApplied).length} at 10%`);
 ok("second strategy inactive; collection unchanged", D.Milords === nftAddrBefore && sid2 === stratBefore + 1 && !(await registry.strategy(sid2)).enabled && pref.personal);
-ok("LP fees collected separately from tax", lpFeesEthTotal > 0n && (await hook.totalProjectPaid()) === projPaid);
-ok("launch position still locked", (await lock.isLocked(D.launchPositionId)));
+{
+  const lpEth = await collector.totalEthForwarded(), lpMil = await collector.totalMilordBurned();
+  ok("LP fees: ETH to BuybackBurner, MILORD burned, separate from tax", lpEth > 0n && lpMil > 0n && (await provider.getBalance(D.LockFeeCollector)) === 0n && (await token.balanceOf(D.LockFeeCollector)) === 0n && (await hook.totalProjectPaid()) === projPaid && directBurns >= lpMil, `${fmtE(lpEth)} ETH, ${fmtE(lpMil)} MILORD burned`);
+  const [ben, unlockBlock] = await familyLock.lockOf(D.familyId);
+  let releaseRefused = false;
+  try { await familyLock.connect(operator).release.staticCall(D.familyId, operator.address); } catch { releaseRefused = true; }
+  ok("founding position locked forever, beneficiary = fee collector, release refused", ben === D.LockFeeCollector && unlockBlock === 2n ** 64n - 1n && releaseRefused);
+}
 
 const last = weeks.at(-1);
 const owners = [...cumulative.entries()].sort((a, b) => (b[1] > a[1] ? 1 : -1)).slice(0, 15).map(([a, v]) => ({ address: a, cumulativePARB: fmtE(v), claimed: 0 }));
@@ -496,14 +522,14 @@ const out = {
   reconciliation: {
     ethVolume: fmtE(ethVolume), taxBuy: fmtE(buyTax), taxSell: fmtE(sellTax), hookrCommission: fmtE(hookrPaid), projectTax: fmtE(projPaid),
     taxToBurner: fmtE(tb), taxToTeam: fmtE(tt), taxToArbitrage: fmtE(ta),
-    entryFees: fmtE(await conv.totalEntryFeesWei()), entryToArbitrage: fmtE(await entrySplit.totalAllocated(ZERO, D.arbitrageSafe)), entryToTeam: fmtE(await entrySplit.totalAllocated(ZERO, D.teamSafe)),
-    royalties: fmtE(await royaltySplit.totalDistributed(ZERO)), lpFeesEth: fmtE(lpFeesEthTotal), lpFeesMilord: fmtE(lpFeesMilordTotal),
+    entryFees: fmtE(await conv.totalEntryFeesWei()), entryToArbitrage: fmtE(await entrySplit.totalAllocated(ZERO, routerPayee)), entryToTeam: fmtE(await entrySplit.totalAllocated(ZERO, D.teamSafe)),
+    royalties: fmtE(await royaltySplit.totalDistributed(ZERO)), lpFeesEth: fmtE(await collector.totalEthForwarded()), lpFeesMilord: fmtE(await collector.totalMilordBurned()),
     burnBudgetEth: fmtE(await burner.totalEthReceived()), burnSpentEth: fmtE(await burner.totalEthSpent()), milordBurnedByBuyback: fmtE(buyBurns), milordBurnedOnExit: fmtE(exitBurns),
-    arbitrageEth: fmtE(await sumAlloc(D.arbitrageSafe)), ethSwappedToUsdg: fmtE(ethToUsdgTotal), usdgDeposited: fmtU(await adapter.totalUsdcDeposited()),
+    arbitrageEth: fmtE(await sumAlloc(routerPayee)), ethSwappedToUsdg: fmtE(await arbRouter.totalEthSwapped()), routerHeldEth: fmtE(await provider.getBalance(routerPayee)), usdgDeposited: fmtU(await adapter.totalUsdcDeposited()),
     parbMinted: fmtE(await adapter.totalSharesMinted()), parbAllocated: fmtE(prevTotal), parbClaimed: fmtE(await dist.totalClaimed()), parbUnallocated: fmtE((await adapter.totalSharesMinted()) - prevTotal),
     supplyFinal: fmtE(supply),
   },
-  checks, deployments: D,
+  keeperLog, rootChecks: rootChecks.map((x) => ({ ...x })), checks, deployments: D,
 };
 fs.mkdirSync(path.join(root, "sim/output"), { recursive: true });
 fs.writeFileSync(path.join(root, "sim/output/simulation.json"), JSON.stringify(out, null, 2));

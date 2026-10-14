@@ -11,7 +11,7 @@ Contracts are **unaudited** and not production-ready until audited and fork-test
 | R-05 | Tax payout fails → recipient gets ERC-6909 claims the splitter cannot redeem | Medium | splitter `receive()` never reverts; monitor payouts | TESTED locally |
 | R-06 | Token-only pool: sellers are paid only from buyers' ETH | Medium | 100% in the pool, so no insider supply exists; disclosed on the site | accepted |
 | R-06b | No wallet limits at a 10 ETH FDV: one 10 ETH buyer gets ~50% of supply; ~323.5 ETH buys everything | High | disclosed; limits or anti-sniping only with owner approval | accepted by owner |
-| R-06c | The founding position holds 100% of supply: whoever controls it controls all unsold MILORD and buyers' ETH | Critical | mint straight into the lock in one batch once approved (LP_LOCK_PROPOSAL.md) | NEEDS APPROVAL |
+| R-06c | The founding position holds 100% of supply: whoever controls it controls all unsold MILORD and buyers' ETH | Critical | Hookr launch, then transferFamily + HookrFamilyLock.lock(collector, forever) in one Safe batch (LP_LOCK.md); prepared, not executed | APPROVED, NOT EXECUTED |
 | R-07 | USDG is upgradeable, pausable, freezable, wipeable by Paxos | Medium | accept issuer risk; monitor; pause deposits on a pause event | EXTERNAL |
 | R-08 | USDG/USDC peg drift during bridging distorts NAV | Medium | peg haircut and in-transit accounting in `arb_nav` | to implement |
 | R-09 | NAV misses in-transit funds | High | add pending bridge amounts (ARBITRAGE_FUNDING_READINESS §4) | to implement |

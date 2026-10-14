@@ -8,7 +8,11 @@ Tick every line before any 💸 transaction. Status today in brackets.
 - [x] 100% of supply (6,767,000,000 MILORD) in the founding position, 0 outside; no migration reserve (Bobo, 2026-10-14, final)
 - [ ] Range top ≈1,000× (ticks 134220–203280), "subject to technical feasibility": feasible, confirm
 - [ ] LP fee (0.3% proposed)
-- [ ] Lock: type, position owner and fee beneficiary (LP_LOCK_PROPOSAL.md: permanent, MilordLiquidityLock, BuybackBurner)
+- [x] Lock architecture approved: permanent HookrFamilyLock, beneficiary HookrLockFeeCollector (LP_LOCK.md)
+- [ ] Owner go-ahead to EXECUTE the lock (irreversible)
+- [ ] Hookr fork verification passes (HOOKR_VERIFICATION.md; BLOCKERS.md B1-B5)
+- [ ] Safe signers, thresholds and router bounds confirmed (SAFE_CONFIGURATION.md)
+- [ ] Services deployed on testnet with alerts wired (offchain/services/README.md)
 - [ ] ArbitrageFundingRouter as the arbitrage payee, its caps and slippage (PARB_AUTOMATION.md)
 - [ ] Deployment gas and transaction expenses (explicit approval required)
 - [ ] Hookr commission (20%, the minimum, proposed)

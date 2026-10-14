@@ -9,7 +9,7 @@ weeks, illustrative trades). SIMULATED: no real trades or revenue.
 |---|---|---|---|---|
 | Trading tax | 1.5% buy, 1.5% sell, in ETH | traders | Hookr Tax + Conversion → (Hookr keeps commission) → TradingTaxSplitter → ⅓ BuybackBurner / ⅓ Team Safe / ⅓ Arbitrage Safe | SIMULATED WITH MOCKS (hook), splitter TESTED; EXTERNAL for real Hookr |
 | Hookr commission | 20% of tax (0.30% of volume) | from tax | Hookr treasury | EXTERNAL |
-| LP fee | 0.3% | traders | stays in the locked v4 position; `MilordLiquidityLock.collectFees` sends ETH + MILORD to a fixed recipient | TESTED (real v4) |
+| LP fee | 0.3% | traders | accrues to the locked position; `HookrLockFeeCollector.collect` sends ETH to BuybackBurner and burns MILORD | TESTED (real v4, mock Hookr lock) |
 | NFT entry fee | max(10% of 1M MILORD value, 0.002 ETH) | converters | MilordConverter → EntryFeeSplitter → 70% Arbitrage Safe / 30% Team Safe | TESTED |
 | Exit burn | 100,000 MILORD per redemption | redeemer | `burn()` in MilordRedemptionEscrow | TESTED |
 | Royalty | 6.7% when the marketplace honours ERC-2981 | buyer/marketplace | RoyaltySplitter → 50% Arbitrage Safe / 50% Team Safe | TESTED (paid and unpaid cases) |

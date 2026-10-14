@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T12:09:19.404Z",
+  "generatedAt": "2026-10-14T14:31:27.421Z",
   "disclaimer": "SIMULATED. Local chain with hypothetical SCENARIO inputs, illustrative (unapproved) launch parameters, a mock of Hookr's tax hook, mock USDG and scenario P&L. Not actual financial performance, not a forecast, not proposed production values.",
   "scenario": {
     "firstBuyEth": "1000000000000000000",
@@ -15,7 +15,7 @@
     "pnlBpsWeek2": 200,
     "pnlBpsWeek3": -300
   },
-  "launch": "final allocation: 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, 0 ETH, ~10 ETH opening FDV, range to ~1,000x; 1.5%/1.5% tax; 0.3% LP fee and 20% Hookr commission pending approval",
+  "launch": "final allocation: 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, 0 ETH, ~10 ETH opening FDV, range to ~1,000x; 1.5%/1.5% tax; 0.3% LP fee; 20% Hookr commission (to verify on Hookr); position locked forever, LP fees to buyback-and-burn",
   "start": {
     "milordSupply": 6767000000,
     "activeNFTs": 0,
@@ -25,7 +25,7 @@
     "poolEth": 0,
     "vaultShares": 1,
     "openingWeiPerMillion": 0.001486288643256,
-    "launch": "final allocation: 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, 0 ETH, ~10 ETH opening FDV, range to ~1,000x; 1.5%/1.5% tax; 0.3% LP fee and 20% Hookr commission pending approval",
+    "launch": "final allocation: 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, 0 ETH, ~10 ETH opening FDV, range to ~1,000x; 1.5%/1.5% tax; 0.3% LP fee; 20% Hookr commission (to verify on Hookr); position locked forever, LP fees to buyback-and-burn",
     "launchDustBurnedWei": "24920"
   },
   "weeks": [
@@ -34,50 +34,53 @@
       "start": 1792368000,
       "end": 1792972800,
       "notes": "launch, first-hour buys, 100 Milords, one royalty-paying sale, one without",
-      "milordSupply": 6757908336.09307,
+      "milordSupply": 6751273772.440382,
       "milordEscrowed": 100000000,
-      "milordInPool": 5020985372.280342,
-      "milordCirculating": 1636922963.8127282,
-      "milordBurnedTotal": 9091663.906929903,
+      "milordInPool": 5015701613.476478,
+      "milordCirculating": 1635572158.9639044,
+      "milordBurnedTotal": 15726227.559617728,
       "burnedOnExitTotal": 0,
-      "burnedByBuybackTotal": 9091663.906929903,
-      "burnedByBuybackThisWeek": 9091663.906929903,
+      "burnedByBuybackTotal": 14375422.710793931,
+      "burnedByBuybackThisWeek": 14375422.710793931,
       "activeNFTs": 100,
       "inventoryNFTs": 0,
       "totalMinted": 100,
       "conversionsTotal": 100,
       "redemptionsTotal": 0,
       "ethTradingVolumeTotal": 6.086536291172719,
-      "hookrCommissionTotal": 0.018303835959474036,
-      "projectTaxTotal": 0.07321534383789623,
+      "hookrCommissionTotal": 0.01841974149172432,
+      "projectTaxTotal": 0.07367896596689737,
       "ethEntryFeesTotal": 0.2,
       "royaltiesTotal": 0.0335,
-      "teamRevenueEthTotal": 0.10115267410117082,
-      "lpFeesEthTotal": 0.014225181781207016,
+      "teamRevenueEthTotal": 0.1013071993567669,
+      "lpFeesEthTotal": 0.014339348730473545,
       "lpFeesMilordTotal": 1350804.8488237977,
       "arbitrageFundingEthTotal": 0.1811526741011708,
-      "burnBudgetEthTotal": 0.024409995635554602,
+      "burnBudgetEthTotal": 0.03890391598383713,
       "ethSwappedThisWeek": 0.1811526741011708,
-      "usdgDepositedThisWeek": 452.627601,
+      "routerHeldEth": 0.000154525255596081,
+      "usdgDepositedThisWeek": 453.080421,
       "pnlUsdgThisWeek": 0,
-      "parbMintedThisWeek": 452.627601,
-      "parbMintedTotal": 452.627601,
+      "parbMintedThisWeek": 453.080421,
+      "parbMintedTotal": 453.080421,
       "ppsUsdg": 1,
-      "navUsdg": 452.627601,
-      "parbAllocatedThisWeek": 452.627601,
-      "dustCarried": 2.2e-17,
+      "navUsdg": 453.080421,
+      "parbAllocatedThisWeek": 453.080421,
+      "dustCarried": 2.1e-17,
       "eligibleWallets": 42,
-      "cumulativeAllocated": 452.627601,
-      "claimedTotal": 217.56408156373138,
-      "unclaimed": 235.06351943626862,
-      "weiPerMillionSpot": 0.002641252987683,
-      "merkleRoot": "0x5c9d3b64deb076cea9cc18b7c8b23b7c30af34a84583e45826a1192085fc4b8a",
+      "epochAction": "proposed",
+      "epochReason": null,
+      "cumulativeAllocated": 453.080421,
+      "claimedTotal": 217.78174679865361,
+      "unclaimed": 235.2986742013464,
+      "weiPerMillionSpot": 0.002646805169103,
+      "merkleRoot": "0x1b95c634ca8bf053bac90da63bb117f14168cc3289b633d893ff5bf5d8334254",
       "tracked": {
         "seller_alice": {
-          "weightSeconds": 1540800,
-          "allocatedThisWeek": 13.88707651477232,
-          "cumulative": 13.88707651477232,
-          "pARBBalance": 13.88707651477232,
+          "weightSeconds": 1540799,
+          "allocatedThisWeek": 13.900961025970703,
+          "cumulative": 13.900961025970703,
+          "pARBBalance": 13.900961025970703,
           "nftsHeld": 3
         },
         "buyer": {
@@ -88,10 +91,10 @@
           "nftsHeld": 0
         },
         "redeemer_carol": {
-          "weightSeconds": 1533597,
-          "allocatedThisWeek": 13.82215659516179,
-          "cumulative": 13.82215659516179,
-          "pARBBalance": 13.82215659516179,
+          "weightSeconds": 1533599,
+          "allocatedThisWeek": 13.83600322200861,
+          "cumulative": 13.83600322200861,
+          "pARBBalance": 13.83600322200861,
           "nftsHeld": 3
         }
       }
@@ -101,64 +104,67 @@
       "start": 1792972800,
       "end": 1793577600,
       "notes": "redemption day 1.5, large buy, 10 conversions (10% fee path), sale day 3.5, +2% SCENARIO P&L",
-      "milordSupply": 6734296642.783298,
+      "milordSupply": 6713251320.059347,
       "milordEscrowed": 109000000,
-      "milordInPool": 2730561397.7866335,
-      "milordCirculating": 3894735244.996664,
-      "milordBurnedTotal": 32703357.216702487,
+      "milordInPool": 2717968760.5741744,
+      "milordCirculating": 3886282559.4851723,
+      "milordBurnedTotal": 53748679.94065304,
       "burnedOnExitTotal": 100000,
-      "burnedByBuybackTotal": 32603357.216702487,
-      "burnedByBuybackThisWeek": 23511693.309772585,
+      "burnedByBuybackTotal": 48362937.01679854,
+      "burnedByBuybackThisWeek": 33987514.30600461,
       "activeNFTs": 109,
       "inventoryNFTs": 0,
       "totalMinted": 109,
       "conversionsTotal": 110,
       "redemptionsTotal": 1,
-      "ethTradingVolumeTotal": 55.235505348633644,
-      "hookrCommissionTotal": 0.16667497615080784,
-      "projectTaxTotal": 0.6666999046032315,
-      "ethEntryFeesTotal": 0.225980465388063,
+      "ethTradingVolumeTotal": 55.232494310280536,
+      "hookrCommissionTotal": 0.1675708434269238,
+      "projectTaxTotal": 0.6702833737076953,
+      "ethEntryFeesTotal": 0.225996841124466,
       "royaltiesTotal": 0.0335,
-      "teamRevenueEthTotal": 0.30675521782067594,
-      "lpFeesEthTotal": 0.10372950068571125,
-      "lpFeesMilordTotal": 5290486.222787553,
-      "arbitrageFundingEthTotal": 0.39714740397590115,
-      "burnBudgetEthTotal": 0.22227774819471738,
-      "ethSwappedThisWeek": 0.21599472987473034,
-      "usdgDepositedThisWeek": 539.652507,
-      "pnlUsdgThisWeek": 8.147296,
-      "parbMintedThisWeek": 530.1110384194876,
-      "parbMintedTotal": 982.7386394194876,
+      "teamRevenueEthTotal": 0.3079545007941146,
+      "lpFeesEthTotal": 0.10462148447661296,
+      "lpFeesMilordTotal": 5285742.923854497,
+      "arbitrageFundingEthTotal": 0.39720351512908486,
+      "burnBudgetEthTotal": 0.32809396127075857,
+      "ethSwappedThisWeek": 0.21605084102791403,
+      "routerHeldEth": 0.001149722114816208,
+      "usdgDepositedThisWeek": 540.332685,
+      "pnlUsdgThisWeek": 8.155447,
+      "parbMintedThisWeek": 530.7791903528392,
+      "parbMintedTotal": 983.8596113528392,
       "ppsUsdg": 1.017999,
-      "navUsdg": 1000.427404,
-      "parbAllocatedThisWeek": 530.1110384194876,
-      "dustCarried": 3.4e-17,
+      "navUsdg": 1001.568553,
+      "parbAllocatedThisWeek": 530.7791903528392,
+      "dustCarried": 9e-18,
       "eligibleWallets": 53,
-      "cumulativeAllocated": 982.7386394194876,
-      "claimedTotal": 475.62743476689707,
-      "unclaimed": 507.1112046525906,
-      "weiPerMillionSpot": 0.008331104037731,
-      "merkleRoot": "0x59060ee8f00eff238a74ae4fb5b9c6281ac32cd4997ee6d676a03e86d778da34",
+      "epochAction": "proposed",
+      "epochReason": null,
+      "cumulativeAllocated": 983.8596113528392,
+      "claimedTotal": 476.17035477613246,
+      "unclaimed": 507.6892565767068,
+      "weiPerMillionSpot": 0.008402216667018,
+      "merkleRoot": "0xfaabdbc88213308fa9a1f5ea4fa252d56be44f9d966dd4d3b7ca5506639c739d",
       "tracked": {
         "seller_alice": {
           "weightSeconds": 1512000,
-          "allocatedThisWeek": 12.483342211127528,
-          "cumulative": 26.37041872589985,
-          "pARBBalance": 26.37041872589985,
+          "allocatedThisWeek": 12.49907621519189,
+          "cumulative": 26.400037241162593,
+          "pARBBalance": 26.400037241162593,
           "nftsHeld": 2
         },
         "buyer": {
           "weightSeconds": 302400,
-          "allocatedThisWeek": 2.4966684422255057,
-          "cumulative": 2.4966684422255057,
-          "pARBBalance": 2.4966684422255057,
+          "allocatedThisWeek": 2.4998152430383778,
+          "cumulative": 2.4998152430383778,
+          "pARBBalance": 2.4998152430383778,
           "nftsHeld": 1
         },
         "redeemer_carol": {
-          "weightSeconds": 1339200,
-          "allocatedThisWeek": 11.056674529855812,
-          "cumulative": 24.8788311250176,
-          "pARBBalance": 24.8788311250176,
+          "weightSeconds": 1339201,
+          "allocatedThisWeek": 11.0706186286119,
+          "cumulative": 24.90662185062051,
+          "pARBBalance": 24.90662185062051,
           "nftsHeld": 2
         }
       }
@@ -168,64 +174,67 @@
       "start": 1793577600,
       "end": 1794182400,
       "notes": "-3% SCENARIO P&L, then a new fee deposit priced at the lower PPS; 5 conversions; inactive strategy 2",
-      "milordSupply": 6732323095.457454,
+      "milordSupply": 6709846307.925279,
       "milordEscrowed": 114000000,
-      "milordInPool": 3132313499.538274,
-      "milordCirculating": 3486009595.9191794,
-      "milordBurnedTotal": 34676904.54254672,
+      "milordInPool": 3119519264.064464,
+      "milordCirculating": 3476327043.8608146,
+      "milordBurnedTotal": 57153692.074721165,
       "burnedOnExitTotal": 100000,
-      "burnedByBuybackTotal": 34576904.54254672,
-      "burnedByBuybackThisWeek": 1973547.32584423,
+      "burnedByBuybackTotal": 50538082.60399359,
+      "burnedByBuybackThisWeek": 2175145.5871950476,
       "activeNFTs": 114,
       "inventoryNFTs": 0,
       "totalMinted": 114,
       "conversionsTotal": 115,
       "redemptionsTotal": 1,
-      "ethTradingVolumeTotal": 58.23326045596541,
-      "hookrCommissionTotal": 0.17639497429495954,
-      "projectTaxTotal": 0.7055798971798383,
-      "ethEntryFeesTotal": 0.235980465388063,
+      "ethTradingVolumeTotal": 58.254477840015774,
+      "hookrCommissionTotal": 0.17681418397738397,
+      "projectTaxTotal": 0.707256735909536,
+      "ethEntryFeesTotal": 0.235996841124466,
       "royaltiesTotal": 0.0335,
-      "teamRevenueEthTotal": 0.322713919346459,
-      "lpFeesEthTotal": 0.10443974518846316,
-      "lpFeesMilordTotal": 6520352.769660627,
-      "arbitrageFundingEthTotal": 0.4171061055016842,
-      "burnBudgetEthTotal": 0.23524033771975808,
-      "ethSwappedThisWeek": 0.019958701525783024,
-      "usdgDepositedThisWeek": 49.864139,
-      "pnlUsdgThisWeek": -27.011539,
-      "parbMintedThisWeek": 50.341731002016125,
-      "parbMintedTotal": 1033.0803704215039,
+      "teamRevenueEthTotal": 0.3232777224159881,
+      "lpFeesEthTotal": 0.10479064734813334,
+      "lpFeesMilordTotal": 6515609.47072757,
+      "arbitrageFundingEthTotal": 0.41761888278748793,
+      "burnBudgetEthTotal": 0.3405900431003726,
+      "ethSwappedThisWeek": 0.020415367658403096,
+      "routerHeldEth": 0.000057576078286618,
+      "usdgDepositedThisWeek": 51.056076,
+      "pnlUsdgThisWeek": -27.04235,
+      "parbMintedThisWeek": 51.54508421393763,
+      "parbMintedTotal": 1035.4046955667768,
       "ppsUsdg": 0.990513,
-      "navUsdg": 1023.280004,
-      "parbAllocatedThisWeek": 50.341731002016125,
-      "dustCarried": 1.8e-17,
+      "navUsdg": 1025.582279,
+      "parbAllocatedThisWeek": 51.54508421393763,
+      "dustCarried": 2.4e-17,
       "eligibleWallets": 56,
-      "cumulativeAllocated": 1033.0803704215039,
-      "claimedTotal": 499.96735007563615,
-      "unclaimed": 533.1130203458677,
-      "weiPerMillionSpot": 0.00645405586257,
-      "merkleRoot": "0x0006d1b5a0e6b3239ce7383a0491f8052e995e5c1056e422e4837bc1813c80b2",
+      "epochAction": "proposed",
+      "epochReason": null,
+      "cumulativeAllocated": 1035.4046955667768,
+      "claimedTotal": 501.0920839137106,
+      "unclaimed": 534.3126116530663,
+      "weiPerMillionSpot": 0.006503941411376,
+      "merkleRoot": "0x232ad70a146df43a0683b3ccb10b2241a486fdfd33113c2efeec6d86b98973f8",
       "tracked": {
         "seller_alice": {
           "weightSeconds": 1209600,
-          "allocatedThisWeek": 0.894869437828119,
-          "cumulative": 27.265288163727966,
-          "pARBBalance": 27.265288163727966,
+          "allocatedThisWeek": 0.9162601208822582,
+          "cumulative": 27.316297362044853,
+          "pARBBalance": 27.316297362044853,
           "nftsHeld": 2
         },
         "buyer": {
           "weightSeconds": 604800,
-          "allocatedThisWeek": 0.4474347189140595,
-          "cumulative": 2.9441031611395654,
-          "pARBBalance": 2.9441031611395654,
+          "allocatedThisWeek": 0.4581300604411291,
+          "cumulative": 2.957945303479507,
+          "pARBBalance": 2.957945303479507,
           "nftsHeld": 1
         },
         "redeemer_carol": {
           "weightSeconds": 1209600,
-          "allocatedThisWeek": 0.894869437828119,
-          "cumulative": 25.77370056284572,
-          "pARBBalance": 25.77370056284572,
+          "allocatedThisWeek": 0.9162601208822582,
+          "cumulative": 25.82288197150277,
+          "pARBBalance": 25.82288197150277,
           "nftsHeld": 2
         }
       }
@@ -249,7 +258,7 @@
     {
       "step": 3,
       "t": 1792367400,
-      "text": "MILORD-only concentrated position minted and locked",
+      "text": "MILORD-only position minted into the (mock) Hookr family and locked forever; LP fee beneficiary = HookrLockFeeCollector",
       "positionId": 1
     },
     {
@@ -283,7 +292,7 @@
     },
     {
       "step": 10,
-      "t": 1792410301,
+      "t": 1792410300,
       "text": "40 users bought their MILORD in the pool (2-3M each)"
     },
     {
@@ -312,12 +321,12 @@
     },
     {
       "step": 13,
-      "t": 1792976468,
+      "t": 1792998066,
       "text": "entry fees split 70/30; tax split after commission; buyback burned; ETH -> USDG; deposit; report; pARB minted; root published; claims"
     },
     {
       "step": 20,
-      "t": 1793102400,
+      "t": 1793102401,
       "text": "redemption: 900,000 MILORD returned, 100,000 burned",
       "returned": 900000,
       "burned": 100000
@@ -329,33 +338,33 @@
     },
     {
       "step": 21,
-      "t": 1793581268,
+      "t": 1793602867,
       "text": "positive-return report",
       "pps": 1.017999
     },
     {
       "step": 25,
-      "t": 1793664000,
+      "t": 1793664001,
       "text": "second strategy registered, inactive; collection and token unchanged",
       "strategyId": 2
     },
     {
       "step": 22,
-      "t": 1794186068,
+      "t": 1794207666,
       "text": "negative-return report",
       "pps": 0.990513
     },
     {
       "step": 23,
-      "t": 1794186068,
+      "t": 1794207666,
       "text": "fee-funded deposit after the PPS change",
-      "usdg": 49.864139
+      "usdg": 51.056076
     },
     {
       "step": 24,
-      "t": 1794186068,
+      "t": 1794207666,
       "text": "shares minted at the new PPS",
-      "shares": 50.341731002016125,
+      "shares": 51.54508421393763,
       "pps": 0.990513
     }
   ],
@@ -381,24 +390,24 @@
       "weiPerMillion": 0.003147299100725
     },
     {
-      "t": 1792976468,
+      "t": 1792998066,
       "label": "week 1 close",
-      "weiPerMillion": 0.002641252987683
+      "weiPerMillion": 0.002646805169103
     },
     {
       "t": 1793145600,
       "label": "week 2 large buy",
-      "weiPerMillion": 0.02584040594436
+      "weiPerMillion": 0.02585849965591
     },
     {
-      "t": 1793581268,
+      "t": 1793602867,
       "label": "week 2 close",
-      "weiPerMillion": 0.008331104037731
+      "weiPerMillion": 0.008402216667018
     },
     {
-      "t": 1794186068,
+      "t": 1794207666,
       "label": "week 3 close",
-      "weiPerMillion": 0.00645405586257
+      "weiPerMillion": 0.006503941411376
     }
   ],
   "ppsSeries": [
@@ -406,107 +415,107 @@
       "t": 1792972801,
       "label": "week 1",
       "pps": 1,
-      "navUsdg": 452.627601,
+      "navUsdg": 453.080421,
       "supply": 1
     },
     {
-      "t": 1793577602,
+      "t": 1793577601,
       "label": "week 2",
       "pps": 1.017999,
-      "navUsdg": 1000.427404,
-      "supply": 453.627601
+      "navUsdg": 1001.568553,
+      "supply": 454.080421
     },
     {
       "t": 1794182401,
       "label": "week 3",
       "pps": 0.990513,
-      "navUsdg": 1023.280004,
-      "supply": 983.7386394194876
+      "navUsdg": 1025.582279,
+      "supply": 984.8596113528392
     }
   ],
   "quoteRefusals": [],
   "owners": [
     {
-      "address": "0xb474f8dc1ffa9d9b4645108b4d5e28030e5308b5",
-      "cumulativePARB": 30.176944884412457,
+      "address": "0x4be8acd5099eac6dcd8ec22c56147de7f3bcf2e3",
+      "cumulativePARB": 30.24177278546053,
       "claimed": 0
     },
     {
-      "address": "0x9b2df5cab99643d7dc844b3d8c297080bfe2013a",
-      "cumulativePARB": 30.112052003502306,
+      "address": "0x19d5e65c121048e3c8e240694821de7d872948cf",
+      "cumulativePARB": 30.17680595958122,
       "claimed": 0
     },
     {
-      "address": "0xaeb3515e67e94671b28891aabc4ec5c2d588897a",
-      "cumulativePARB": 30.07960556304723,
-      "claimed": 30.07960556304723
+      "address": "0xd338aa490ace8e25565f912a076fa0c945bcfdcc",
+      "cumulativePARB": 30.14433607951739,
+      "claimed": 30.14433607951739
     },
     {
-      "address": "0x8434d19ed7b48c4463aa0889e4039552ee5916cd",
-      "cumulativePARB": 29.982266241682005,
+      "address": "0xd1bf36f23c1358a693b38317d803f229965520e4",
+      "cumulativePARB": 30.04689937357425,
       "claimed": 0
     },
     {
-      "address": "0xd6f16a2f6124883846b83e4fc1e3858f7349a04d",
-      "cumulativePARB": 29.94979276252655,
-      "claimed": 29.94979276252655
+      "address": "0x4b3d7cfdadd3e5aec027f64289ebd986f729376e",
+      "cumulativePARB": 30.014411449675986,
+      "claimed": 30.014411449675986
     },
     {
-      "address": "0x78ebdeab0c08665d9fc47fa1b0b0f3690065357e",
-      "cumulativePARB": 29.917373360771855,
+      "address": "0x4fee593b43f08c55f82885e61e09fd3d4c18f5d2",
+      "cumulativePARB": 29.98193254769494,
       "claimed": 0
     },
     {
-      "address": "0x5724e1b76a3c32e0cf275d8d3a8ecccea94ec53e",
-      "cumulativePARB": 29.88492692031678,
-      "claimed": 29.88492692031678
+      "address": "0x64330fb804228641afd605a6a49c8229f8fd3df7",
+      "cumulativePARB": 29.94946266763111,
+      "claimed": 29.94946266763111
     },
     {
-      "address": "0x6f390889e0d9a7e26513a8cb172c6e7ff04cc611",
-      "cumulativePARB": 29.852453441161323,
+      "address": "0x513c709ea2e89738c48940dd64a07dd3259a6ee1",
+      "cumulativePARB": 29.916974743732847,
       "claimed": 0
     },
     {
-      "address": "0x0a11f8572118acbc15d48151547f837d8f7613af",
-      "cumulativePARB": 29.82003403940663,
-      "claimed": 29.82003403940663
+      "address": "0xfa4daf08b843b1c4c6f46ee9688a905dc434cd19",
+      "cumulativePARB": 29.8844958417518,
+      "claimed": 29.8844958417518
     },
     {
-      "address": "0xf87a585c37c28991284cf81e146710b91c101fdc",
-      "cumulativePARB": 29.78758759895155,
+      "address": "0x5a63dc8d2579a6e895408baf31b0853535cc11ef",
+      "cumulativePARB": 29.85202596168797,
       "claimed": 0
     },
     {
-      "address": "0x3fa134640c3fe6f080572515a67dc64925409441",
-      "cumulativePARB": 29.755114119796097,
-      "claimed": 29.755114119796097
+      "address": "0x8e5840fa175b3b90a792b4ee693a6364863d9a6e",
+      "cumulativePARB": 29.819538037789705,
+      "claimed": 29.819538037789705
     },
     {
-      "address": "0x24b8ce89633768aa00b5d50a720376c4be530580",
-      "cumulativePARB": 29.7226947180414,
+      "address": "0xf6d6093108aa3ed29b31de5cbbfbb2610d2fb449",
+      "cumulativePARB": 29.787050113891443,
       "claimed": 0
     },
     {
-      "address": "0x95eb2777694de40bf24c0bcf48b0585efbbbd7c4",
-      "cumulativePARB": 29.690248277586324,
-      "claimed": 29.690248277586324
+      "address": "0x05bde0e11c6c12e3bae1d4c4bb8166ca67593e22",
+      "cumulativePARB": 29.75458925574483,
+      "claimed": 29.75458925574483
     },
     {
-      "address": "0xcf59963930ef28385050d014ec2028d64bd90f48",
-      "cumulativePARB": 29.65777479843087,
+      "address": "0xad6184741828784e8d321cfe28cfe5737713c613",
+      "cumulativePARB": 29.722101331846567,
       "claimed": 0
     },
     {
-      "address": "0xb1aea9dc6cdc80345a01524107596c3889ccd005",
-      "cumulativePARB": 29.625355396676174,
-      "claimed": 29.625355396676174
+      "address": "0x8401dd10cfdf902183fa50a1e5920828fc533b41",
+      "cumulativePARB": 29.689613407948304,
+      "claimed": 29.689613407948304
     }
   ],
   "conversions": [
     {
       "id": 1,
       "feeEth": 0.002,
-      "weiPerMillion": 0.003146039097582,
+      "weiPerMillion": 0.003146040495752,
       "minimumApplied": true
     },
     {
@@ -1105,128 +1114,308 @@
     },
     {
       "id": 3,
-      "feeEth": 0.002584040594436,
-      "weiPerMillion": 0.02584040594436,
+      "feeEth": 0.002585849965591,
+      "weiPerMillion": 0.02585849965591,
       "minimumApplied": false
     },
     {
       "id": 101,
-      "feeEth": 0.002587143149185,
-      "weiPerMillion": 0.02587143149185,
+      "feeEth": 0.00258895469278,
+      "weiPerMillion": 0.0258895469278,
       "minimumApplied": false
     },
     {
       "id": 102,
-      "feeEth": 0.002590249429047,
-      "weiPerMillion": 0.02590249429047,
+      "feeEth": 0.002592061419736,
+      "weiPerMillion": 0.02592061419736,
       "minimumApplied": false
     },
     {
       "id": 103,
-      "feeEth": 0.002593359438497,
-      "weiPerMillion": 0.02593359438497,
+      "feeEth": 0.002594917573074,
+      "weiPerMillion": 0.02594917573074,
       "minimumApplied": false
     },
     {
       "id": 104,
-      "feeEth": 0.002596473182011,
-      "weiPerMillion": 0.02596473182011,
+      "feeEth": 0.002598031455443,
+      "weiPerMillion": 0.02598031455443,
       "minimumApplied": false
     },
     {
       "id": 105,
-      "feeEth": 0.002599590664073,
-      "weiPerMillion": 0.02599590664073,
+      "feeEth": 0.002601152542477,
+      "weiPerMillion": 0.02601152542477,
       "minimumApplied": false
     },
     {
       "id": 106,
-      "feeEth": 0.002602710154118,
-      "weiPerMillion": 0.02602710154118,
+      "feeEth": 0.002604273906764,
+      "weiPerMillion": 0.02604273906764,
       "minimumApplied": false
     },
     {
       "id": 107,
-      "feeEth": 0.002605836861801,
-      "weiPerMillion": 0.02605836861801,
+      "feeEth": 0.002607402493027,
+      "weiPerMillion": 0.02607402493027,
       "minimumApplied": false
     },
     {
       "id": 108,
-      "feeEth": 0.002608963847239,
-      "weiPerMillion": 0.02608963847239,
+      "feeEth": 0.00261053135721,
+      "weiPerMillion": 0.0261053135721,
       "minimumApplied": false
     },
     {
       "id": 109,
-      "feeEth": 0.002612098067656,
-      "weiPerMillion": 0.02612098067656,
+      "feeEth": 0.002613665718364,
+      "weiPerMillion": 0.02613665718364,
       "minimumApplied": false
     },
     {
       "id": 110,
       "feeEth": 0.002,
-      "weiPerMillion": 0.008331104037731,
+      "weiPerMillion": 0.008402216667018,
       "minimumApplied": true
     },
     {
       "id": 111,
       "feeEth": 0.002,
-      "weiPerMillion": 0.008336107191642,
+      "weiPerMillion": 0.008408103253099,
       "minimumApplied": true
     },
     {
       "id": 112,
       "feeEth": 0.002,
-      "weiPerMillion": 0.008341940973624,
+      "weiPerMillion": 0.008413987419428,
       "minimumApplied": true
     },
     {
       "id": 113,
       "feeEth": 0.002,
-      "weiPerMillion": 0.008347782084405,
+      "weiPerMillion": 0.008419878977854,
       "minimumApplied": true
     },
     {
       "id": 114,
       "feeEth": 0.002,
-      "weiPerMillion": 0.008353627285191,
+      "weiPerMillion": 0.008424932168391,
       "minimumApplied": true
     }
   ],
   "reconciliation": {
-    "ethVolume": 58.23326045596541,
-    "taxBuy": 0.5302056772785351,
-    "taxSell": 0.3519636330391383,
-    "hookrCommission": 0.17639497429495954,
-    "projectTax": 0.7055798971798383,
-    "taxToBurner": 0.23524033771975808,
-    "taxToTeam": 0.23516977973004008,
-    "taxToArbitrage": 0.23516977973004008,
-    "entryFees": 0.235980465388063,
-    "entryToArbitrage": 0.1651863257716441,
-    "entryToTeam": 0.0707941396164189,
+    "ethVolume": 58.254477840015774,
+    "taxBuy": 0.5317923469706789,
+    "taxSell": 0.3522785729162411,
+    "hookrCommission": 0.17681418397738397,
+    "projectTax": 0.707256735909536,
+    "taxToBurner": 0.2357993957522393,
+    "taxToTeam": 0.23572867007864834,
+    "taxToArbitrage": 0.23572867007864834,
+    "entryFees": 0.235996841124466,
+    "entryToArbitrage": 0.1651977887871262,
+    "entryToTeam": 0.0707990523373398,
     "royalties": 0.0335,
-    "lpFeesEth": 0.10443974518846316,
-    "lpFeesMilord": 6520352.769660627,
-    "burnBudgetEth": 0.23524033771975808,
-    "burnSpentEth": 0.23524033771975808,
-    "milordBurnedByBuyback": 34576904.54254672,
+    "lpFeesEth": 0.10479064734813334,
+    "lpFeesMilord": 6515609.47072757,
+    "burnBudgetEth": 0.3405900431003726,
+    "burnSpentEth": 0.34048991116584265,
+    "milordBurnedByBuyback": 50538082.60399359,
     "milordBurnedOnExit": 100000,
-    "arbitrageEth": 0.4171061055016842,
-    "ethSwappedToUsdg": 0.4171061055016842,
-    "usdgDeposited": 1042.144247,
-    "parbMinted": 1033.0803704215039,
-    "parbAllocated": 1033.0803704215039,
-    "parbClaimed": 499.96735007563615,
-    "parbUnallocated": 1.8e-17,
-    "supplyFinal": 6732323095.457454
+    "arbitrageEth": 0.41767645886577454,
+    "ethSwappedToUsdg": 0.41761888278748793,
+    "routerHeldEth": 0.000057576078286618,
+    "usdgDeposited": 1044.469182,
+    "parbMinted": 1035.4046955667768,
+    "parbAllocated": 1035.4046955667768,
+    "parbClaimed": 501.0920839137106,
+    "parbUnallocated": 2.4e-17,
+    "supplyFinal": 6709846307.925279
   },
+  "keeperLog": [
+    {
+      "label": "week 1 pass 1",
+      "t": 1792972801,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:done",
+        "split-1:done",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:done",
+        "router:done",
+        "settle:skipped",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 1 pass 2",
+      "t": 1792972802,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:done",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 1 pass 3",
+      "t": 1792998063,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:skipped",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:skipped",
+        "activate-root:done"
+      ]
+    },
+    {
+      "label": "week 2 pass 1",
+      "t": 1793577601,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:done",
+        "split-1:skipped",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:done",
+        "router:done",
+        "settle:skipped",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 2 pass 2",
+      "t": 1793577602,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:done",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 2 pass 3",
+      "t": 1793602863,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:skipped",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:skipped",
+        "activate-root:done"
+      ]
+    },
+    {
+      "label": "week 3 pass 1",
+      "t": 1794182400,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:done",
+        "split-1:skipped",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:done",
+        "router:done",
+        "settle:skipped",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 3 pass 2",
+      "t": 1794182401,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:done",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 3 pass 3",
+      "t": 1794207663,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:skipped",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:skipped",
+        "activate-root:done"
+      ]
+    }
+  ],
+  "rootChecks": [
+    {
+      "label": "week 1",
+      "which": "pending",
+      "epoch": 1,
+      "match": true,
+      "expected": "0x1b95c634ca8bf053bac90da63bb117f14168cc3289b633d893ff5bf5d8334254",
+      "onchain": "0x1b95c634ca8bf053bac90da63bb117f14168cc3289b633d893ff5bf5d8334254"
+    },
+    {
+      "label": "week 2",
+      "which": "pending",
+      "epoch": 2,
+      "match": true,
+      "expected": "0xfaabdbc88213308fa9a1f5ea4fa252d56be44f9d966dd4d3b7ca5506639c739d",
+      "onchain": "0xfaabdbc88213308fa9a1f5ea4fa252d56be44f9d966dd4d3b7ca5506639c739d"
+    },
+    {
+      "label": "week 2",
+      "which": "active",
+      "epoch": 1,
+      "match": true,
+      "expected": "0x1b95c634ca8bf053bac90da63bb117f14168cc3289b633d893ff5bf5d8334254",
+      "onchain": "0x1b95c634ca8bf053bac90da63bb117f14168cc3289b633d893ff5bf5d8334254"
+    },
+    {
+      "label": "week 3",
+      "which": "pending",
+      "epoch": 3,
+      "match": true,
+      "expected": "0x232ad70a146df43a0683b3ccb10b2241a486fdfd33113c2efeec6d86b98973f8",
+      "onchain": "0x232ad70a146df43a0683b3ccb10b2241a486fdfd33113c2efeec6d86b98973f8"
+    },
+    {
+      "label": "week 3",
+      "which": "active",
+      "epoch": 2,
+      "match": true,
+      "expected": "0xfaabdbc88213308fa9a1f5ea4fa252d56be44f9d966dd4d3b7ca5506639c739d",
+      "onchain": "0xfaabdbc88213308fa9a1f5ea4fa252d56be44f9d966dd4d3b7ca5506639c739d"
+    }
+  ],
   "checks": [
     {
       "name": "exact supply after burns: 6,767,000,000 - launch remainder - exit burns - buyback burns",
       "pass": true,
-      "detail": "6732323095.457454"
+      "detail": "6709846307.925279"
     },
     {
       "name": "no MILORD minted after deployment",
@@ -1293,12 +1482,12 @@
     {
       "name": "tax = 1.5% of taxed ETH volume (buys and sells)",
       "pass": true,
-      "detail": "0.8821693103176734 ETH on 58.81128735451156 ETH"
+      "detail": "0.88407091988692 ETH on 58.93806132579466 ETH"
     },
     {
       "name": "Hookr commission == 20% of tax; project == 80%",
       "pass": true,
-      "detail": "0.17643386206353465 of 0.8821693103176734"
+      "detail": "0.17681418397738397 of 0.88407091988692"
     },
     {
       "name": "project tax fully received by TradingTaxSplitter",
@@ -1307,7 +1496,7 @@
     {
       "name": "burn / team / arbitrage tax shares equal within 1 bp",
       "pass": true,
-      "detail": "0.23524033771975808 / 0.23516977973004008 / 0.23516977973004008"
+      "detail": "0.2357993957522393 / 0.23572867007864834 / 0.23572867007864834"
     },
     {
       "name": "entry fees: converter total == splitter total, 70/30",
@@ -1318,8 +1507,24 @@
       "pass": true
     },
     {
-      "name": "all arbitrage ETH swapped to USDG and deposited",
-      "pass": true
+      "name": "arbitrage ETH: router swapped + still held == allocated to it; all USDG deposited",
+      "pass": true,
+      "detail": "0.41761888278748793 swapped, 0.000057576078286618 held (below threshold)"
+    },
+    {
+      "name": "router: every swap within the per-tx cap and at most maxSlippage below the 30-min V3 TWAP",
+      "pass": true,
+      "detail": "3 swaps, slippage cap 100 bps"
+    },
+    {
+      "name": "root checker recomputed every proposed root identically",
+      "pass": true,
+      "detail": "5 checks"
+    },
+    {
+      "name": "keeper passes ran without failed steps",
+      "pass": true,
+      "detail": "9 passes"
     },
     {
       "name": "buyback burns recorded == supply reduction from buybacks",
@@ -1332,7 +1537,7 @@
     {
       "name": "PPS x outstanding pARB == NAV (vault + servicer USDG) after settlement",
       "pass": true,
-      "detail": "1023.279536 vs 1023.280004"
+      "detail": "1025.581811 vs 1025.582279"
     },
     {
       "name": "seller keeps week-1 pARB after selling",
@@ -1369,37 +1574,47 @@
       "pass": true
     },
     {
-      "name": "LP fees collected separately from tax",
-      "pass": true
+      "name": "LP fees: ETH to BuybackBurner, MILORD burned, separate from tax",
+      "pass": true,
+      "detail": "0.10479064734813334 ETH, 6515609.47072757 MILORD burned"
     },
     {
-      "name": "launch position still locked",
+      "name": "founding position locked forever, beneficiary = fee collector, release refused",
       "pass": true
     }
   ],
   "deployments": {
-    "BuybackBurner": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
-    "EntryFeeSplitter": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-    "HookrTaxHook": "0x170ACBc980606c4bF997FA89A1e6148aD3C940Cc",
-    "LiquidityLock": "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
-    "MILORD": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    "MilordConverter": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-    "MilordGovernor": "0xc5a5C42992dECbae36851359345FE25997F5C42d",
-    "Milords": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-    "ParbFundingAdapter": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
-    "PoolManager": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
-    "PositionManager": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
-    "RoyaltySplitter": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-    "ShareDistributor": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
-    "StateView": "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
-    "StrategyRegistry": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
-    "SwapRouter": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
-    "TradingTaxSplitter": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+    "ArbitrageFundingRouter": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
+    "BuybackBurner": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
+    "EntryFeeSplitter": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
+    "FundingVenue": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+    "HookrFamilyLock": "0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3",
+    "HookrTaxHook": "0x303552376ebDC9ef04d02c0e0Cc82435E6fcC0CC",
+    "LockFeeCollector": "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f",
+    "MILORD": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+    "MilordConverter": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
+    "MilordGovernor": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
+    "Milords": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
+    "ParbFundingAdapter": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+    "PoolManager": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "PositionManager": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+    "RoyaltySplitter": "0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E",
+    "ShareDistributor": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+    "StateView": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "StrategyRegistry": "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
+    "SwapRouter": "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
+    "TradingTaxSplitter": "0xf5059a5D33d5853360D16C683c16e67980206f36",
+    "TwapReference": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
     "USDG": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-    "V4Quoter": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
-    "V4SwapAdapter": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
+    "V3Factory": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+    "V3Helper": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+    "V4Quoter": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+    "V4SwapAdapter": "0x162A433068F51e18b7d13932F27e66a3f99E6890",
+    "WETH": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    "WethUsdgPool": "0x25AAF240b93Aa2EF8f8d9Fa0eA076Ced74E001F2",
     "arbitrageSafe": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
     "chainId": 31337,
+    "familyId": "0x1cb27d8c5b3ab3fcd1a8a9b3e2dbc327ae7eaa59fcd02cce69b9863c4a028e8c",
     "hookrTreasury": "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
     "launchDustBurned": 24920,
     "launchPositionId": 1,
@@ -1407,7 +1622,7 @@
     "milordForLiquidity": "6767000000000000000000000000",
     "operator": "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
     "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-    "pARBVault": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+    "pARBVault": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
     "quoteSigner": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
     "reportSigner": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
     "teamSafe": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",

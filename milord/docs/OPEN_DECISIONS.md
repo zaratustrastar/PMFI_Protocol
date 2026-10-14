@@ -9,7 +9,7 @@ are marked; none of them contradicts the spec.
 |---|---|---|---|
 | D1 | Trading-tax mechanism | **Resolved 2026-10-13: Hookr existing-token pool, Tax + Conversion 1.5%/1.5% in ETH, immutable, no custom hook** | See launch/HOOKR_FINAL_CONFIG.md |
 | D10 | Launch values | **Final (Bobo 2026-10-14): 100% of supply in the founding position, 0 outside, 0 ETH, ~10 ETH FDV, range ~1,000×; no migration reserve** | launch/LAUNCH_LIQUIDITY.md |
-| D14 | LP lock type, position owner, fee beneficiary | permanent / MilordLiquidityLock / BuybackBurner proposed | launch/LP_LOCK_PROPOSAL.md |
+| D14 | LP lock type, position owner, fee beneficiary | APPROVED 2026-10-14: permanent HookrFamilyLock, beneficiary HookrLockFeeCollector (ETH → BuybackBurner, MILORD burned). Execution waits for a separate go-ahead | launch/LP_LOCK.md |
 | D15 | Weekly funding automation | ArbitrageFundingRouter as arbitrage payee proposed | launch/PARB_AUTOMATION.md |
 | D11 | Hookr launch-tax decay (must not exceed 1.5%) | decay 0 if it keeps the tax flat; else owner decision | to confirm on the hookr-1 contract |
 | D12 | Hookr commission, LP fee, lock type, LP fee recipient | 20% · 0.3% · forever · Team Safe proposed | launch/HOOKR_FINAL_CONFIG.md |
