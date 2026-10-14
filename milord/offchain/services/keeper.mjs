@@ -9,7 +9,7 @@ import path from "node:path";
 import { loadConfig, connect } from "./lib/config.mjs";
 import { keeperTick } from "./lib/jobs.mjs";
 import { createAlerter, createMetrics, startHealthServer, runLoop, stateFile } from "./lib/runtime.mjs";
-import { PoolPriceSource } from "../lib/pool-price.mjs";
+import { entryPriceSource } from "../lib/entry-price.mjs";
 
 const cfg = loadConfig();
 const { provider, contracts } = connect(cfg, "KEEPER_PRIVATE_KEY");
@@ -18,11 +18,7 @@ const metrics = createMetrics("keeper");
 const state = stateFile(path.join(cfg.stateDir, "keeper.json"), { passes: 0 });
 const D = cfg.D;
 const milordPrice = D.PoolManager && D.StateView
-  ? new PoolPriceSource(provider, {
-      poolManager: D.PoolManager, stateView: D.StateView,
-      key: ["0x0000000000000000000000000000000000000000", D.MILORD, D.lpFee, D.tickSpacing, D.HookrTaxHook ?? D.HookrRoot],
-      window: 1800, minHistory: 1800, maxDeviationBps: 1000, maxStaleness: Number(process.env.MAX_STALENESS ?? 120),
-    })
+  ? entryPriceSource(provider, D, { maxStaleness: Number(process.env.MAX_STALENESS ?? 120) })
   : null;
 
 startHealthServer({ port: cfg.healthPort, metrics, staleMs: 3 * cfg.intervalMs });

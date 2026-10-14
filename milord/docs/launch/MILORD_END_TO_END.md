@@ -24,7 +24,7 @@ the mainnet lock awaits approval). The 24,920-wei rounding remainder is burned; 
 | 3 | Mint MILORD-only position, lock | position #1 owned by the lock, no withdraw function |
 | 3b | Nobody holds MILORD outside the pool | the first trade can only be a buy |
 | 4 | First buy 1 ETH | 603,660,290.5 MILORD out (after tax and LP fee), +19.8% price |
-| 4b | Entry quote at minute 5 | **refused**: insufficient TWAP history (no 0.002 ETH fallback) |
+| 4b | Entry quote at minute 5 | bounded bootstrap: highest price since open, fee 0.002 ETH (minimum) |
 | 5 | More buys in the first hour; later two traders sell half | tax charged on both sides in ETH |
 | 6–9 | Tax settle, commission, split | Hookr 20%, rest split ⅓ / ⅓ / ⅓ by TradingTaxSplitter |
 | 10 | 40 users buy 2–3M MILORD each | — |

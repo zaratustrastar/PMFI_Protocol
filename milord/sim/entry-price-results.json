@@ -1,0 +1,79 @@
+[
+  {
+    "name": "pool opened at the approved launch tick; no quote before the first buy",
+    "tick": 203280,
+    "fdvEth": "10.06"
+  },
+  {
+    "name": "9 wrong token ordering / non-18-decimal token / wrong token rejected before any price is read"
+  },
+  {
+    "name": "1 launch (~10 ETH FDV): bootstrap quote, entry fee 0.002 ETH, NFT minted",
+    "mode": "bootstrap",
+    "weiPerMillion": "0.001551744860652",
+    "fee": "0.002",
+    "convertGas": "414498"
+  },
+  {
+    "name": "bootstrap is bounded: TWAP mode once 30 minutes of history exist",
+    "mode": "twap"
+  },
+  {
+    "name": "2 100 ETH FDV: entry fee",
+    "fee": "0.002",
+    "expected": "0.002"
+  },
+  {
+    "name": "3 200 ETH FDV: entry fee",
+    "fee": "0.002955735665844",
+    "expected": "0.0029555"
+  },
+  {
+    "name": "4 500 ETH FDV: entry fee",
+    "fee": "0.007389808041776",
+    "expected": "0.0073888"
+  },
+  {
+    "name": "convert at 500 ETH FDV charges the TWAP fee",
+    "fee": "0.007389808041776",
+    "convertGas": "260021"
+  },
+  {
+    "name": "5a push 10x and restore inside one block: zero weight, quote unchanged",
+    "block": 197,
+    "quoteBefore": "0.07389808041776",
+    "quoteAfter": "0.07389808041776",
+    "attackerMilordGained": "-2039204.420471372462488809"
+  },
+  {
+    "name": "5b push 2x held to the end of a block: quote refused; after restore the effect is <1%",
+    "quote": "0.07389808041776"
+  },
+  {
+    "name": "6a price held 5% low for 5 minutes (25 blocks): quote = TWAP above spot, fee only ~k/1800 of the push lower",
+    "cleanFee": "0.007389808041776",
+    "feeAfter": "0.007326897653618",
+    "savingPct": "0.851"
+  },
+  {
+    "name": "6b price held 20% low for 5 minutes: quotes refused (spot >10% from TWAP)"
+  },
+  {
+    "name": "7 stale or missing observations: no quote issued (no fallback)"
+  },
+  {
+    "name": "8a inactive pool (2 h without swaps, indexer synced): quote = the unchanged pool price",
+    "quote": "0.07389808041776"
+  },
+  {
+    "name": "8b in-range liquidity below the configured minimum: quotes refused"
+  },
+  {
+    "name": "8c price pushed past the founding range (no liquidity): quotes refused",
+    "tick": 128219
+  },
+  {
+    "name": "10 redeem works while the price service refuses every quote",
+    "redeemGas": "259938"
+  }
+]

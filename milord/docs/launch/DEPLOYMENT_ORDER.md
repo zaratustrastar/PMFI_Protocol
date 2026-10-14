@@ -30,7 +30,7 @@ simulation.
 | 5b | (path B) 💸 Hookr launch with all 6,767,000,000 MILORD, then `transferFamily` + `HookrFamilyLock.lock(familyId, HookrLockFeeCollector, forever)`, **only after the owner's go-ahead to execute the lock** | `offchain/safe-launch-batch.mjs` → Safe Transaction Builder | allocation Safe |
 | 6 | Read back the pool: hook, blocks, tax, recipients, commission, tick, liquidity, lock | script / explorer | — |
 | 7 | Deploy V4SwapAdapter for the Hookr key and `burner.setInitialAdapter` | `HookrPostLaunch.s.sol` + Safe | Team Safe |
-| 8 | Start the quote service on the pool TWAP (entries refused for the first 30 minutes by design) | `offchain/quote-server.mjs` | quote signer (KMS) |
+| 8 | Start the quote service on the pool TWAP (first 30 minutes: bounded bootstrap at the highest price since open, see ENTRY_FEE_PRICING.md) | `offchain/quote-server.mjs` | quote signer (KMS) |
 | 9 | 💸 First conversion and first redemption by a team wallet; check escrow, fees, NFT, votes | website | team wallet |
 | 10 | Turn on the website with the official pool link (`?hookr=`) and marketplace link (`?market=`) | frontend | — |
 | 11 | First weekly close (runbook §4) with a second person recomputing the root | ops | Arbitrage Safe, ops |

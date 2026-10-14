@@ -64,7 +64,7 @@ Tick every line before any 💸 transaction. Status today in brackets.
 
 - [ ] Safes created with agreed signers (allocation, Team, Arbitrage)
 - [ ] Quote signer key in KMS/HSM; report signer separate; operators separate
-- [ ] Quote service deployed with production TWAP settings (1800/1800/120 s/10%)
+- [ ] Quote service deployed with production settings from `offchain/lib/entry-price.mjs` (30 min / 120 s / 10% / ticks 134220–203280 / min liquidity 1e23 / opening tick 203280), ticks re-checked against the real Hookr pool
 - [ ] Epoch job and second-person root check scheduled
 - [ ] Monitoring: tax payouts, splitter balances, buybacks, vault reports, USDG pause events, bridge arrivals
 - [ ] Incident contacts (Hookr, Paxos, venues)

@@ -54,7 +54,7 @@ delegate votes, wake (convert), choose characteristics, redeem: passed.
 
 ## Offchain
 
-`node offchain/test-twap.mjs`: passed (window, minimum history, staleness, deviation refusal).
+`node offchain/test-twap.mjs`: passed (fees at 10/100/200/500 ETH FDV, bootstrap, same-block and sustained manipulation, staleness, liquidity, range, ordering). `./sim/run-entry-price.sh`: 17 checks on real v4 swaps passed (ENTRY_FEE_PRICING.md).
 
 ## Not covered
 

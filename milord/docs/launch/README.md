@@ -17,6 +17,7 @@ Status tags used in every document here:
 | 2b | Permanent lock and LP fee burn | [LP_LOCK.md](LP_LOCK.md) |
 | 5b | Automated ETH → USDG → pARB | [PARB_AUTOMATION.md](PARB_AUTOMATION.md) |
 | 5c | Keeper, epoch publisher, root checker | `offchain/services/README.md` |
+| 5d | NFT entry-fee pricing (TWAP quote, bootstrap, trust assumptions) | [ENTRY_FEE_PRICING.md](ENTRY_FEE_PRICING.md) |
 | 6b | Hookr-1 verification and incompatibilities | [HOOKR_VERIFICATION.md](HOOKR_VERIFICATION.md) |
 | 10b | Safe configuration and permissions | [SAFE_CONFIGURATION.md](SAFE_CONFIGURATION.md) |
 | 13 | Remaining blockers by severity | [BLOCKERS.md](BLOCKERS.md) |

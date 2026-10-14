@@ -20,6 +20,7 @@ import { ownershipIntervals, eligibility, allocate, accumulate, buildTree, proof
 import { issueQuote } from "../offchain/lib/quote.mjs";
 import { signReport } from "../offchain/lib/report.mjs";
 import { TwapOracle, weiPerMillionAtTick } from "../offchain/lib/twap.mjs";
+import { ENTRY_PRICE } from "../offchain/lib/entry-price.mjs";
 import { keeperTick, publishEpoch, checkRoot, readInputs } from "../offchain/services/lib/jobs.mjs";
 
 // ───────────── SCENARIO inputs (hypothetical) ─────────────
@@ -81,11 +82,15 @@ const POOL_ID = keccak256(AbiCoder.defaultAbiCoder().encode(["address", "address
 const SETTINGS = [false, false];
 
 // ───────────── chain helpers + TWAP observer ─────────────
-const twap = new TwapOracle({ window: 1800, minHistory: 1800, maxStaleness: 3 * DAY, maxDeviationBps: 1000 });
+const twap = new TwapOracle({
+  window: ENTRY_PRICE.window, maxDeviationBps: ENTRY_PRICE.maxDeviationBps, maxStaleness: 3 * DAY,
+  tickLower: ENTRY_PRICE.tickLower, tickUpper: ENTRY_PRICE.tickUpper, minLiquidity: ENTRY_PRICE.minLiquidity,
+  bootstrapOpeningTick: ENTRY_PRICE.openingTick,
+});
 // maxStaleness is relaxed locally only because the simulation jumps days between blocks; production: 120 s.
 const now = async () => (await provider.getBlock("latest")).timestamp;
 const spotTick = async () => Number((await stateView.getSlot0(POOL_ID)).tick);
-const observe = async () => twap.record(await now(), await spotTick());
+const observe = async () => twap.record(await now(), await spotTick(), await stateView.getLiquidity(POOL_ID));
 const setTime = async (t) => { t = Math.max(Math.floor(t), (await now()) + 1); await provider.send("evm_setNextBlockTimestamp", [t]); await provider.send("evm_mine", []); await observe(); };
 const send = async (p) => { const r = await (await p).wait(); await observe(); return r; };
 const fmtE = (v) => Number(formatEther(v));
@@ -336,9 +341,13 @@ const firstOut = await buyExactIn(traders[0], SCENARIO.firstBuyEth);
 await step(4, "first buy: 1 ETH -> MILORD", { milordOut: fmtE(firstOut) });
 await samplePrice("first buy");
 await setTime(T0 + 300);
-let launchQuoteRefused = false;
-try { twap.price(await now()); } catch (e) { launchQuoteRefused = /insufficient price history/.test(e.message); }
-await step("4b", "entry quote requested 5 minutes after open: refused (insufficient price history)", { refused: launchQuoteRefused });
+const launchQuote = twap.price(await now());
+const launchFee = await conv.entryFeeFor(launchQuote.weiPerMillion);
+await step("4b", "entry quote 5 minutes after open: bounded bootstrap (highest price since open), fee = 0.002 ETH minimum", {
+  mode: launchQuote.mode, weiPerMillion: fmtE(launchQuote.weiPerMillion), fee: fmtE(launchFee),
+});
+const launchBootstrapOk = launchQuote.mode === "bootstrap" && launchFee === parseEther("0.002")
+  && launchQuote.weiPerMillion >= weiPerMillionAtTick(await spotTick()); // never below the current price
 for (let i = 0; i < SCENARIO.launchTraderBuysEth.length; i++) {
   await setTime(T0 + 600 + i * 600);
   await buyExactIn(traders[1 + (i % 4)], SCENARIO.launchTraderBuysEth[i]);
@@ -498,7 +507,7 @@ ok("buyer earns only from day 3.5 of week 2", weeks[0].tracked.buyer.cumulative 
 ok("redeemer keeps earned pARB, earns nothing after redeeming", (cumulative.get(CAROL.address.toLowerCase()) ?? 0n) >= carolEarned && carolEarned > 0n && weeks[2].tracked.redeemer_carol.weightSeconds === (perHolder[2] - 1) * 7 * DAY);
 ok("100% of supply entered the position: deployer, team, arbitrage and operator held 0 MILORD at open", Object.values(outsideAtOpen).every((v) => v === 0n) && BigInt(D.launchDustBurned) <= 1_000_000n, `remainder burned ${D.launchDustBurned} wei`);
 ok("pool started with 0 ETH and the first trade was a buy", Math.abs(start.poolEth) < 1e-9 && firstOut > 0n);
-ok("entry refused at launch until 30 min of price history (no fallback)", launchQuoteRefused);
+ok("launch entry: bounded bootstrap quote, never below spot, fee = 0.002 ETH minimum", launchBootstrapOk);
 ok("every entry fee == max(10% of the TWAP value of 1M MILORD, 0.002 ETH); both paths used", [...ids, ...laterFees].every((x) => x.fee === (x.weiPerMillion / 10n > parseEther("0.002") ? x.weiPerMillion / 10n : parseEther("0.002"))) && ids.some((x) => x.minimumApplied) && laterFees.some((x) => !x.minimumApplied), `${ids.filter((x) => x.minimumApplied).length} at minimum, ${laterFees.filter((x) => !x.minimumApplied).length} at 10%`);
 ok("second strategy inactive; collection unchanged", D.Milords === nftAddrBefore && sid2 === stratBefore + 1 && !(await registry.strategy(sid2)).enabled && pref.personal);
 {

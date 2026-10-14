@@ -16,7 +16,7 @@ Contracts are **unaudited** and not production-ready until audited and fork-test
 | R-08 | USDG/USDC peg drift during bridging distorts NAV | Medium | peg haircut and in-transit accounting in `arb_nav` | to implement |
 | R-09 | NAV misses in-transit funds | High | add pending bridge amounts (ARBITRAGE_FUNDING_READINESS §4) | to implement |
 | R-10 | Kalshi $2,500/day withdrawal cap locks capital | Medium | Kalshi kept (owner); size positions to the cap | accepted |
-| R-11 | Entry pricing manipulated by spot moves | High | 30-min TWAP, 30-min history, 10% spot deviation, 120 s staleness, no fallback | TESTED |
+| R-11 | Entry pricing manipulated by spot moves | High | 30-min TWAP from complete pool event history, quote = max(TWAP, spot), 10% spot deviation, 120 s staleness, range + liquidity checks, bounded 30-min bootstrap, no fallback (ENTRY_FEE_PRICING.md) | TESTED |
 | R-12 | Oracle/quote outage makes the 0.002 ETH minimum exploitable | High | no fallback: conversions stop instead | TESTED |
 | R-13 | Quote-signer key compromise | High | signer key in a KMS/HSM; short quote validity; owner can revoke and rotate signers (`setQuoteSigner`) | process |
 | R-14 | Buybacks sandwiched | Medium | minOut from TWAP, price limit, threshold, allow-listed operators, per-buy min/max | TESTED |
