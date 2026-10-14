@@ -5,12 +5,14 @@
 //   1. MILORD.approve(Permit2, milordForLiquidity)
 //   2. Permit2.approve(MILORD, PositionManager, milordForLiquidity, expiry)
 //   3. PositionManager.modifyLiquidities(MINT_POSITION + SETTLE_PAIR) -> position NFT minted to MilordLiquidityLock
-//   4. BuybackBurner.setInitialAdapter(V4SwapAdapter)            (from the Team Safe, owner of the burner)
+//   4. MILORD.burn(remainder): the few wei the position cannot take, so the Safe ends with 0 MILORD
+//   5. BuybackBurner.setInitialAdapter(V4SwapAdapter)            (from the Team Safe, owner of the burner)
 // It only ENCODES transactions. Nothing is signed or sent; every value comes from the config file, which needs
-// owner approval (TOKEN_ALLOCATION.md, HOOKR_FINAL_CONFIG.md). No keys are read.
+// owner approval (LAUNCH_LIQUIDITY.md, LP_LOCK_PROPOSAL.md, HOOKR_FINAL_CONFIG.md). No keys are read.
 import fs from "node:fs";
 import path from "node:path";
 import { Interface, AbiCoder, getAddress } from "ethers";
+import { liquidityForAmount1, amount1ForLiquidity } from "./lib/v4math.mjs";
 
 const cfgPath = process.argv[2] ?? "deploy/robinhood-launch.config.example.json";
 const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
@@ -19,16 +21,16 @@ const erc20 = new Interface(["function approve(address,uint256)"]);
 const permit2 = new Interface(["function approve(address token,address spender,uint160 amount,uint48 expiration)"]);
 const posm = new Interface(["function modifyLiquidities(bytes unlockData,uint256 deadline)"]);
 const burner = new Interface(["function setInitialAdapter(address)"]);
-
-const Q96 = 2n ** 96n;
-// LiquidityAmounts.getLiquidityForAmount1 with sqrt prices from ticks (float sqrt, then integer math; small rounding
-// down only reduces liquidity, never asks for more MILORD than approved)
-const sqrtAtTick = (t) => BigInt(Math.floor(Math.sqrt(1.0001 ** t) * 2 ** 48)) * 2n ** 48n;
-const liquidityForAmount1 = (tl, tu, amount1) => (amount1 * Q96) / (sqrtAtTick(tu) - sqrtAtTick(tl));
+const milordI = new Interface(["function burn(uint256)"]);
 
 const amount = BigInt(cfg.milordForLiquidityWei);
 const key = [cfg.pool.currency0, cfg.milord, cfg.pool.fee, cfg.pool.tickSpacing, cfg.pool.hooks];
-const liquidity = (liquidityForAmount1(cfg.position.tickLower, cfg.position.tickUpper, amount) * 999n) / 1000n;
+// exact v4 math: the largest liquidity whose MILORD cost fits in `amount`; the rest (integer rounding, a few tens
+// of thousands of wei) is burned in the same batch so the allocation Safe ends with exactly 0 MILORD
+const liquidity = liquidityForAmount1(cfg.position.tickLower, cfg.position.tickUpper, amount);
+const taken = amount1ForLiquidity(cfg.position.tickLower, cfg.position.tickUpper, liquidity);
+const dust = amount - taken;
+if (dust < 0n || dust > 1_000_000n) throw new Error(`unexpected remainder ${dust}`);
 const actions = "0x020d"; // MINT_POSITION, SETTLE_PAIR
 const params = [
   coder.encode(["tuple(address,address,uint24,int24,address)", "int24", "int24", "uint256", "uint128", "uint128", "address", "bytes"],
@@ -44,10 +46,11 @@ const batch = {
     tx(cfg.milord, erc20.encodeFunctionData("approve", [cfg.permit2, amount]), "allocation Safe: approve Permit2"),
     tx(cfg.permit2, permit2.encodeFunctionData("approve", [cfg.milord, cfg.positionManager, amount, cfg.permitExpiry]), "allocation Safe: Permit2 allowance for PositionManager"),
     tx(cfg.positionManager, posm.encodeFunctionData("modifyLiquidities", [unlockData, cfg.deadline]), "allocation Safe: mint MILORD-only position to MilordLiquidityLock"),
+    ...(dust > 0n ? [tx(cfg.milord, milordI.encodeFunctionData("burn", [dust]), `allocation Safe: burn the ${dust}-wei rounding remainder (ends with 0 MILORD)`)] : []),
     tx(cfg.buybackBurner, burner.encodeFunctionData("setInitialAdapter", [cfg.v4SwapAdapter]), "Team Safe (separate batch): buyback route"),
   ],
 };
 fs.mkdirSync(path.join(path.dirname(cfgPath), "out"), { recursive: true });
 const out = path.join(path.dirname(cfgPath), "out", "safe-launch-batch.json");
 fs.writeFileSync(out, JSON.stringify(batch, null, 2));
-console.log(`wrote ${out} (liquidity ${liquidity}, MILORD ${amount})`);
+console.log(`wrote ${out} (liquidity ${liquidity}, MILORD into position ${taken}, remainder burned ${dust})`);

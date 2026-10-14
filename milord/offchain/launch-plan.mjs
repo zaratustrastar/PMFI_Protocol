@@ -1,6 +1,7 @@
-// node offchain/launch-plan.mjs  ->  prints and writes sim/output/launch-options.json
+// Launch arithmetic library (used by offchain/launch-final.mjs). Running it directly prints the older pre-decision
+// option table (sim/output/launch-options.json), kept only for the record: the allocation is final at 100%.
 //
-// ILLUSTRATIVE launch arithmetic for a MILORD-only Uniswap v4 position (ETH = currency0, MILORD = currency1).
+// Launch arithmetic for a MILORD-only Uniswap v4 position (ETH = currency0, MILORD = currency1).
 // None of these rows is a recommendation or an approved production value. Uses concentrated-liquidity math
 // for a single position with constant liquidity across its range (checked against the on-chain simulation).
 import fs from "node:fs";

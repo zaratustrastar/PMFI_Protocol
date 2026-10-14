@@ -22,6 +22,10 @@ import {IAllowanceTransfer} from "permit2/src/interfaces/IAllowanceTransfer.sol"
 ///           3. the position NFT handed to its owner (the liquidity lock).
 ///         Local v4 contracts are the official Uniswap build artifacts; Permit2 must already be at its canonical
 ///         address (tests etch it, run-local.sh sets it on anvil).
+interface IMILORDBurn {
+    function burn(uint256 value) external;
+}
+
 abstract contract HookrLaunchKit {
     using PoolIdLibrary for PoolKey;
     Vm private constant _vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -40,7 +44,7 @@ abstract contract HookrLaunchKit {
         address weth;
     }
 
-    /// Illustrative launch parameters. Production values need owner approval (TOKEN_ALLOCATION.md).
+    /// Launch parameters. Final allocation is 100% of supply (docs/launch/LAUNCH_LIQUIDITY.md); lock, LP fee and commission need owner approval.
     struct LaunchParams {
         uint256 milordForLiquidity; // MILORD placed in the single-sided position
         int24 tickUpper; // opening tick: price = lowest MILORD price, all liquidity is MILORD
@@ -105,6 +109,15 @@ abstract contract HookrLaunchKit {
         params[1] = abi.encode(key.currency0, key.currency1);
         tokenId = v.positionManager.nextTokenId();
         v.positionManager.modifyLiquidities(abi.encode(actions, params), block.timestamp + 1 hours);
+    }
+
+    /// @notice Burns the MILORD the position could not take (integer rounding of liquidity: at most a few tens of
+    ///         thousands of wei), so the account that seeded 100% of supply ends with exactly 0 MILORD.
+    /// `holder` is the account that seeded the position and sends the burn (the broadcaster in a script).
+    function _burnLaunchRemainder(address milord, address holder, uint256 maxDust) internal returns (uint256 dust) {
+        dust = IERC20(milord).balanceOf(holder);
+        require(dust <= maxDust, "remainder is not rounding dust");
+        if (dust > 0) IMILORDBurn(milord).burn(dust);
     }
 
     /// @notice Two-sided ETH / token position (used locally for the ETH -> USDG route).

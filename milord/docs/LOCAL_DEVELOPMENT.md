@@ -4,7 +4,7 @@
 cd milord
 npm install                      # OpenZeppelin, merkle-tree, ethers, forge-std
 forge build
-forge test                       # unit + fuzz + invariant (143 tests)
+forge test                       # unit + fuzz + invariant (139 tests)
 node offchain/test-eligibility.mjs
 ./sim/run-local.sh               # fresh anvil -> DeployLocal -> 3-week simulation -> sim/output/simulation.json
 node sim/build-dashboard.mjs     # -> sim/output/dashboard.html
@@ -24,7 +24,7 @@ Frontend: `frontend-integration/` contains `milord-sdk.mjs` (contract calls) and
 ```bash
 ./sim/run-local.sh                         # anvil + Permit2 + DeployLocal (protocol + local Hookr-style v4 market) + simulation
 node sim/build-dashboard.mjs               # sim/output/dashboard.html
-node offchain/launch-plan.mjs              # illustrative launch options -> sim/output/launch-options.json
+node offchain/launch-final.mjs             # final launch numbers (100% allocation) -> sim/output/launch-final.json
 node offchain/safe-launch-batch.mjs        # Safe Transaction Builder JSON for the MILORD-only position (deploy/out/)
 forge script script/HookrPostLaunch.s.sol  # V4SwapAdapter + MilordLiquidityLock for a pool key (refuses chain 4663)
 ```

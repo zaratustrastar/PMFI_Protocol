@@ -9,20 +9,21 @@ TWAP quote service. Mocked: the Hookr hook (`MockHookrTaxHook`, implements 1.5%/
 USDG (6-decimal ERC-20), the ETH/USDG pool (a local v4 pool instead of the Robinhood V3 pool), and the arbitrage
 P&L (+2% week 2, −3% week 3, scenario inputs, **not** performance data). Illustrative launch values only.
 
-## Launch (reference row of TOKEN_ALLOCATION.md)
+## Launch (final configuration, LAUNCH_LIQUIDITY.md)
 
-50% of supply (3,383,500,000 MILORD) in one MILORD-only position, tick 134220–203280 (about 10 ETH opening FDV,
-range top at about 1,000x the opening price, i.e. 10,000 ETH FDV), 0.3% LP fee, spacing 60, position minted to `MilordLiquidityLock`.
+100% of supply (6,767,000,000 MILORD) in one MILORD-only position, tick 134220–203280 (≈10.06 ETH opening FDV, range
+top ≈1,000× the opening price), 0 ETH, 0.3% LP fee, spacing 60, position minted to `MilordLiquidityLock` (local only;
+the mainnet lock awaits approval). The 24,920-wei rounding remainder is burned; the deployer ends with 0 MILORD.
 
 ## Steps and results
 
 | # | Step | Result |
 |---|---|---|
-| 1 | Deploy and allocate | 6,767,000,000 MILORD minted once; 3,383,500,000 to the pool |
+| 1 | Deploy and allocate | 6,767,000,000 MILORD minted once; all of it offered to the pool; 24,920-wei remainder burned; deployer, team, arbitrage and operator hold 0 |
 | 2 | Open MILORD/ETH market | pool initialised at tick 203280 with 0 ETH |
 | 3 | Mint MILORD-only position, lock | position #1 owned by the lock, no withdraw function |
-| 3b | Sell before any buy | static call: 10M MILORD sell receives **0 ETH** |
-| 4 | First buy 1 ETH | 555,660,878.6 MILORD out (after tax and LP fee) |
+| 3b | Nobody holds MILORD outside the pool | the first trade can only be a buy |
+| 4 | First buy 1 ETH | 603,660,290.5 MILORD out (after tax and LP fee), +19.8% price |
 | 4b | Entry quote at minute 5 | **refused**: insufficient TWAP history (no 0.002 ETH fallback) |
 | 5 | More buys in the first hour; later two traders sell half | tax charged on both sides in ETH |
 | 6–9 | Tax settle, commission, split | Hookr 20%, rest split ⅓ / ⅓ / ⅓ by TradingTaxSplitter |
@@ -32,25 +33,25 @@ range top at about 1,000x the opening price, i.e. 10,000 ETH FDV), 0.3% LP fee, 
 | 13 | Weekly close | entry fees 70/30; tax split; buyback burn; ETH → USDG; deposit; report; pARB minted; Merkle root; claims |
 | 14–17 | Characteristics | owners without a choice default to pArbitrage; one holder edits their preference to characteristics 2 and 5 (identity and original selection unchanged); pArbitrage is the only live strategy |
 | 18 | Secondary sales | one sale pays 6.7% (0.0335 ETH, split 50/50); a private sale pays none |
-| 19 | Large buy (15 ETH) in week 2 | price rises; later conversions pay the 10% path |
+| 19 | Large buy (30 ETH, SCENARIO) in week 2 | FDV passes ≈135 ETH; later conversions pay the 10% path |
 | 20 | Redemption | 900,000 MILORD returned, 100,000 burned; NFT to inventory |
 | 21 | Positive report | PPS 1.000000 → 1.017999 |
 | 22 | Negative report | PPS → 0.990513 (not reset to 1) |
-| 23 | Fee deposit after the loss | 49.966827 USDG |
-| 24 | Shares at the new PPS | 50.445403 pARB minted at 0.990513 |
+| 23 | Fee deposit after the loss | 49.864139 USDG |
+| 24 | Shares at the new PPS | 50.341731 pARB minted at 0.990513 |
 | 25 | Second strategy registered | inactive; collection and token unchanged |
-| 26 | Final reconciliation | 35/35 checks pass |
+| 26 | Final reconciliation | 36/36 checks pass |
 
 ## Weekly summary
 
 | Week | Supply (MILORD) | Active NFTs | USDG deposited | Scenario P&L | pARB minted | PPS | NAV (USDG) | Eligible wallets | Claimed total |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | 6,760,562,411.84 | 100 | 457.933179 | 0 | 457.933179 | 1.000000 | 457.93 | 42 | 220.11 |
-| 2 | 6,751,523,602.58 | 109 | 301.864789 | +8.242797 | 296.527589 | 1.017999 | 768.04 | 53 | 364.47 |
-| 3 | 6,749,646,057.76 | 114 | 49.966827 | −20.737100 | 50.445403 | 0.990513 | 797.27 | 56 | 388.86 |
+| 1 | 6,757,908,336.09 | 100 | 452.627601 | 0 | 452.627601 | 1.000000 | 452.63 | 42 | 217.56 |
+| 2 | 6,734,296,642.78 | 109 | 539.652507 | +8.147296 | 530.111038 | 1.017999 | 1,000.43 | 53 | 475.63 |
+| 3 | 6,732,323,095.46 | 114 | 49.864139 | −27.011539 | 50.341731 | 0.990513 | 1,023.28 | 56 | 499.97 |
 
-Totals: 17,253,942.24 MILORD burned by buybacks, 100,000 on exit; 115 conversions (105 at the 0.002 ETH
-minimum, 10 at 10%); 804.906 pARB minted and fully allocated (unallocated dust 5e-17); 388.857 claimed.
+Totals: 34,576,904.54 MILORD burned by buybacks, 100,000 on exit, 24,920 wei at launch; 115 conversions (105 at the
+0.002 ETH minimum, 10 at 10%); 1,033.080 pARB minted and fully allocated (unallocated dust 2e-17); 499.967 claimed.
 
 ## Tracked wallets
 

@@ -8,7 +8,9 @@ are marked; none of them contradicts the spec.
 | # | Decision | Options | Local default / recommendation |
 |---|---|---|---|
 | D1 | Trading-tax mechanism | **Resolved 2026-10-13: Hookr existing-token pool, Tax + Conversion 1.5%/1.5% in ETH, immutable, no custom hook** | See launch/HOOKR_FINAL_CONFIG.md |
-| D10 | Launch values | **Opening FDV 10 ETH, 0 ETH seeded (Bobo 2026-10-14)**; pool share 25/50/75% open, 50% recommended; remainder lockups open | launch/LIQUIDITY_ALLOCATION_10ETH.md |
+| D10 | Launch values | **Final (Bobo 2026-10-14): 100% of supply in the founding position, 0 outside, 0 ETH, ~10 ETH FDV, range ~1,000×; no migration reserve** | launch/LAUNCH_LIQUIDITY.md |
+| D14 | LP lock type, position owner, fee beneficiary | permanent / MilordLiquidityLock / BuybackBurner proposed | launch/LP_LOCK_PROPOSAL.md |
+| D15 | Weekly funding automation | ArbitrageFundingRouter as arbitrage payee proposed | launch/PARB_AUTOMATION.md |
 | D11 | Hookr launch-tax decay (must not exceed 1.5%) | decay 0 if it keeps the tax flat; else owner decision | to confirm on the hookr-1 contract |
 | D12 | Hookr commission, LP fee, lock type, LP fee recipient | 20% · 0.3% · forever · Team Safe proposed | launch/HOOKR_FINAL_CONFIG.md |
 | D13 | Tax recipient | **TradingTaxSplitter** · Hookr Revenue Router | splitter (exact thirds, burn record) |
@@ -17,7 +19,7 @@ are marked; none of them contradicts the spec.
 | D4 | pARB instance | **new V3 instance on Robinhood Chain, asset USDG, 0% fee** · reuse V2 on Base (20% fee, PPS bugs) | V3 on Robinhood (owner instruction 2026-10-13) |
 | D5 | USDG address and decimals on Robinhood Chain; engine funding route Robinhood USDG ↔ Polymarket/Kalshi/Opinion | to confirm on-chain; route to build | address seen on aggregators `0x5fc5…1d168` (unverified); vault enforces 6 decimals; fees no longer bridge |
 | D6 | Robinhood Chain mainnet RPC | to supply | — |
-| D7 | Initial MILORD allocation (liquidity, team, legacy holders, treasury) | not in brief | all to deployer in local build |
+| D7 | Initial MILORD allocation | **resolved: 100% to the founding position (D10)** | legacy PMFI handled by a disclosed off-chain process, no contract |
 | D9 | Kalshi withdrawals: which chain and asset Kalshi can pay out to | to confirm with Kalshi | USDC on Base/Solana/Ethereum only, crypto withdrawals capped at $2,500/day; **Kalshi kept, Opinion disabled for V1 (Bobo 2026-10-14)** |
 | D8 | Website source project | not in repo; only compiled artifacts | integration delivered as a drop-in SDK + section markup |
 

@@ -1,4 +1,9 @@
-# Hookr launch configuration (proposed, NEEDS APPROVAL)
+# Hookr launch configuration
+
+> **2026-10-14 final decisions (Bobo):** 100% of supply in the founding position, 0 ETH, ~10 ETH opening FDV, range
+> top ~1,000×, 1.5%/1.5% tax with no launch surcharge, no transfer tax, no custom hook. Details: LAUNCH_LIQUIDITY.md.
+> Still to approve: LP fee (0.3% proposed), commission (20% target), lock type, position owner and fee beneficiary
+> (LP_LOCK_PROPOSAL.md).
 
 Sources: hookr.fun docs read on 2026-10-13 (the-new-hookr, open-an-existing-asset-market, hooks/tax-conversion,
 pools/fees, guides/providing-liquidity, pools/launch-lock, hooks/revenue-router, hooks/auto-burn, hooks/anti-snipe,
@@ -57,8 +62,8 @@ approved ceiling and needs your explicit approval. **Not chosen; awaiting confir
 | Base LP fee | **0.3%** (Hookr default), separate from tax, paid to the position | NEEDS APPROVAL |
 | Tick spacing | 60 (Hookr default) | EXTERNAL |
 | Position | MILORD only, opening price at the top of the range | TESTED (real v4) |
-| Range, amount, price | see TOKEN_ALLOCATION.md (simulation: 50%, ~10 ETH FDV, top 1,000x) | NEEDS APPROVAL |
-| Ownership / lock | **lock forever**, fees to the Team Safe (or another recipient you choose) | NEEDS APPROVAL |
+| Range, amount, price | **final:** ticks 134220–203280, all 6,767,000,000 MILORD, ~10.06 ETH FDV (LAUNCH_LIQUIDITY.md) | NEEDS APPROVAL |
+| Ownership / lock | permanent lock in the mint batch, fees to BuybackBurner proposed (LP_LOCK_PROPOSAL.md) | NEEDS APPROVAL |
 
 Two equivalent ways to create the founding position:
 
@@ -71,7 +76,7 @@ Two equivalent ways to create the founding position:
 
 Sell-side reality (TESTED): with MILORD-only liquidity the pool holds **0 ETH** until someone buys. A sell before
 any buy receives 0 ETH; afterwards sellers can only receive ETH that buyers put in (minus tax and LP fee).
-Holders of MILORD outside the pool (team, treasury) can drain buyers' ETH by selling; allocation lockups matter.
+With 100% of supply in the pool, no team or treasury MILORD exists to sell into it.
 
 ## 5. Fee collection
 

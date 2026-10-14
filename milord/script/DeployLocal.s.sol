@@ -72,7 +72,7 @@ contract DeployLocal is Script, MilordDeployer, HookrLaunchKit {
         require(address(hook) == hookAddr, "hook address");
 
         LaunchParams memory p = LaunchParams({
-            milordForLiquidity: 3_383_500_000 ether,
+            milordForLiquidity: d.token.balanceOf(me), // 100% of supply (owner decision 2026-10-14)
             tickUpper: 203_280,
             tickLower: 203_280 - 69_060,
             lpFee: 3000,
@@ -82,6 +82,8 @@ contract DeployLocal is Script, MilordDeployer, HookrLaunchKit {
         _openMarket(v.poolManager, mk, p);
         MilordLiquidityLock lock = new MilordLiquidityLock(v.positionManager, c.teamSafe);
         uint256 positionId = _addMilordOnlyLiquidity(v, mk, p, address(lock));
+        uint256 launchDust = _burnLaunchRemainder(address(d.token), me, 1e6);
+        require(d.token.balanceOf(me) == 0, "deployer must hold no MILORD");
         lock.register(positionId);
 
         PoolKey memory uk = PoolKey(Currency.wrap(address(0)), Currency.wrap(address(usdg)), 500, 10, IHooks(address(0)));
@@ -127,6 +129,7 @@ contract DeployLocal is Script, MilordDeployer, HookrLaunchKit {
         vm.serializeInt(k, "tickLower", p.tickLower);
         vm.serializeInt(k, "tickUpper", p.tickUpper);
         vm.serializeUint(k, "milordForLiquidity", p.milordForLiquidity);
+        vm.serializeUint(k, "launchDustBurned", launchDust);
         vm.serializeAddress(k, "owner", c.owner);
         vm.serializeAddress(k, "teamSafe", c.teamSafe);
         vm.serializeAddress(k, "arbitrageSafe", c.arbitrageSafe);

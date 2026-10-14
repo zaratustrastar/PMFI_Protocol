@@ -56,9 +56,10 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
       <div class="ledger">
         <div><em>Buy tax</em><b id="buyTax">1.5%</b><span>paid in ETH, fixed at launch</span></div>
         <div><em>Sell tax</em><b id="sellTax">1.5%</b><span>paid in ETH, fixed at launch</span></div>
-        <div class="sum"><em>Pool LP fee</em><b id="lpFee">—</b><span>separate, goes to liquidity providers</span></div>
+        <div class="sum"><em>Pool LP fee</em><b id="lpFee">—</b><span>separate from tax, earned by the launch position</span></div>
       </div>
       <p class="fine" id="taxSplit">Of each tax, Hookr keeps its platform share (20% when set at launch). The rest is split in three equal parts: buyback-and-burn of $MILORD, the Team Safe, and arbitrage funding for pARB. Transfers between wallets pay no tax.</p>
+      <p class="fine">All 6,767,000,000 $MILORD started in this pool, with no ETH added and no team or treasury allocation. Sellers are paid only from ETH that buyers have put in. To wake a Milord, first buy 1,000,000 $MILORD here.</p>
       <div class="stats" id="mkt"></div>
       <div class="actions"><a class="btn primary" id="hookrLink" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;text-decoration:none">Trade on Hookr</a>
         <span id="localTrade" style="display:none"><input id="amt" value="0.1" size="8" style="font:inherit;border:1px solid var(--line);border-radius:999px;padding:8px 12px"> <button class="btn" id="buy">Buy (ETH)</button> <button class="btn" id="sell">Sell (MILORD)</button> <span class="fine">local test pool</span></span></div>

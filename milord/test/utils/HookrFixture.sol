@@ -30,18 +30,21 @@ abstract contract HookrFixture is SingleChainFixture, HookrLaunchKit {
     PoolKey internal milordKey;
     PoolKey internal usdgKey;
     LaunchParams internal launch;
+    uint256 internal launchDust; // MILORD wei the position could not take, burned at launch
     uint256 internal positionId;
 
     uint16 internal constant TAX_BPS = 150;
     uint16 internal constant COMMISSION_BPS = 2000;
 
+    function _fundMockSwap() internal override {}
+
     function _initialSwapAdapter() internal pure override returns (address) {
         return address(0);
     }
 
-    /// Share of the 6,767,000,000 supply placed in the MILORD-only position (default 50%).
+    /// Share of the 6,767,000,000 supply placed in the MILORD-only position (owner decision 2026-10-14: 100%).
     function _liquidityShareBps() internal pure virtual returns (uint256) {
-        return 5_000;
+        return 10_000;
     }
 
     function setUp() public virtual override {
@@ -72,6 +75,7 @@ abstract contract HookrFixture is SingleChainFixture, HookrLaunchKit {
         vm.prank(treasury);
         d.token.transfer(address(this), launch.milordForLiquidity);
         positionId = _addMilordOnlyLiquidity(v4, milordKey, launch, address(lock));
+        launchDust = _burnLaunchRemainder(address(d.token), address(this), 1e6);
 
         // ETH / USDG pool at ~2,500 USDG per ETH (stand-in for the Robinhood WETH/USDG market)
         usdgKey = PoolKey(Currency.wrap(address(0)), Currency.wrap(address(usdg)), 500, 10, IHooks(address(0)));

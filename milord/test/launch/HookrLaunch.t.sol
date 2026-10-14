@@ -18,17 +18,16 @@ contract HookrLaunchTest is HookrFixture {
         assertApproxEqAbs(address(v4.poolManager).balance, 2_000 ether, 1e6, "only the USDG pool's ETH; no ETH in the MILORD pool");
         assertApproxEqAbs(d.token.balanceOf(address(v4.poolManager)), launch.milordForLiquidity, 1e18, "MILORD in");
         assertEq(IERC721(address(v4.positionManager)).ownerOf(positionId), address(lock), "position locked");
-        assertEq(d.token.totalSupply(), 6_767_000_000 ether);
+        assertEq(d.token.totalSupply() + launchDust, 6_767_000_000 ether);
     }
 
-    function test_sellBeforeAnyBuyReceivesNoEth() public {
-        vm.prank(treasury);
-        d.token.transfer(bob, 10_000_000 ether);
-        uint256 out = _sell(bob, 10_000_000 ether);
-        assertEq(out, 0, "token-only liquidity has no ETH to pay sellers");
-        assertEq(hook.totalSellTax(), 0);
-        // the first buy still works afterwards and enters the range
-        assertGt(_buy(alice, 1 ether), 0);
+    function test_firstTradeMustBeABuy() public {
+        // 100% of supply is in the pool, so nobody can sell before someone buys
+        assertEq(d.token.balanceOf(treasury), 0);
+        assertEq(d.token.balanceOf(bob), 0);
+        assertApproxEqAbs(address(v4.poolManager).balance, 2_000 ether, 1e6, "no ETH for sellers yet (only the USDG pool's ETH)");
+        assertGt(_buy(alice, 1 ether), 0, "the first buy works");
+        assertGt(_sell(alice, 1_000_000 ether), 0, "then sells are paid from the buyer's ETH");
     }
 
     function test_buyTaxCommissionAndEqualProjectSplit() public {

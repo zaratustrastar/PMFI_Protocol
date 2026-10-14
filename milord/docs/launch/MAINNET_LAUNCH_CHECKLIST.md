@@ -5,10 +5,12 @@ Tick every line before any 💸 transaction. Status today in brackets.
 ## Owner approvals [NEEDS APPROVAL]
 
 - [x] Opening FDV 10 ETH, 0 ETH seeded, MILORD-only position (Bobo, 2026-10-14)
-- [ ] Pool share of supply (25 / 50 / 75%, 50% recommended) and range (LIQUIDITY_ALLOCATION_10ETH.md)
-- [ ] Remainder allocation and lockups (team, treasury, community, legacy PMFI)
+- [x] 100% of supply (6,767,000,000 MILORD) in the founding position, 0 outside; no migration reserve (Bobo, 2026-10-14, final)
+- [ ] Range top ≈1,000× (ticks 134220–203280), "subject to technical feasibility": feasible, confirm
 - [ ] LP fee (0.3% proposed)
-- [ ] Lock type: forever (proposed) or until a block; LP fee recipient (Team Safe proposed)
+- [ ] Lock: type, position owner and fee beneficiary (LP_LOCK_PROPOSAL.md: permanent, MilordLiquidityLock, BuybackBurner)
+- [ ] ArbitrageFundingRouter as the arbitrage payee, its caps and slippage (PARB_AUTOMATION.md)
+- [ ] Deployment gas and transaction expenses (explicit approval required)
 - [ ] Hookr commission (20%, the minimum, proposed)
 - [ ] Launch-tax handling (R-01): decay = 0 if flat; anything above 1.5% needs explicit approval
 - [ ] Tax recipient: TradingTaxSplitter instead of Revenue Router (proposed)
@@ -18,7 +20,11 @@ Tick every line before any 💸 transaction. Status today in brackets.
 ## Hookr [EXTERNAL]
 
 - [ ] Verified hookr-1 source/ABI for HookrLauncher and HookrRoot read
-- [ ] Existing-token launch accepts a MILORD-only seed with 0 ETH (or use path B)
+- [ ] Existing-token launch accepts our complete supply as a MILORD-only seed with 0 ETH (or use path B)
+- [ ] On the real contracts: exactly 6,767,000,000 MILORD (minus rounding, burned) enters the position; the deployer/Safe
+      ends with 0; opening FDV ≈10 ETH; 0 ETH in the position
+- [ ] First buy succeeds; later buys and sells execute; tax is 1.5% from the first transaction
+- [ ] Hookr commission and the three fee destinations settle correctly; a buyback buys and burns MILORD
 - [ ] **Required by Bobo before deployment:** the actual Hookr contracts charge exactly 1.5% from the first trade, with no higher launch surcharge (decay = 0 or equivalent)
 - [ ] Live commission floor and `launchFee()` read
 - [ ] Tax payout asset (ETH or WETH) and payout function confirmed
@@ -37,12 +43,18 @@ Tick every line before any 💸 transaction. Status today in brackets.
 
 ## Contracts [TESTED locally, not audited]
 
-- [x] 143 Foundry tests pass
-- [x] 35/35 end-to-end checks pass
+- [x] 139 Foundry tests pass (100% allocation)
+- [x] 36/36 end-to-end checks pass (100% allocation)
 - [ ] Robinhood fork test of the full path passes
 - [ ] Testnet dry run done
 - [ ] External audit, findings resolved
 - [ ] Sources verified on the explorer after deployment
+
+## Automation (PARB_AUTOMATION.md)
+
+- [ ] ArbitrageFundingRouter built, tested, set as arbitrage payee in the three splitters
+- [ ] Production epoch job (finalized blocks, IPFS data, `proposeRoot`) and independent root watcher
+- [ ] Keeper for the permissionless steps (Hookr payout, distribute, settle, activateRoot, burnHeldTokens, collectFees)
 
 ## Operations
 

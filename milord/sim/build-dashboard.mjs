@@ -98,7 +98,7 @@ details{margin-top:8px}summary{cursor:pointer;font-weight:600}
 <div class="warn">SIMULATED, NOT ACTUAL FINANCIAL PERFORMANCE. ${esc(S.disclaimer)}</div>
 <p>One local chain configured like Robinhood Chain, against the real MILORD, pArbitrage V3 and Uniswap v4 contracts. Hookr's tax hook is a local mock with the same economics. Generated ${esc(S.generatedAt)}.</p>
 <p><b>Illustrative launch (not approved):</b> ${esc(S.launch)}.</p>
-<p><b>Start:</b> ${n(S.start.milordSupply, 0)} MILORD, ${n(S.start.milordInPool, 0)} in the position, ${n(S.start.milordOutsideLiquidity, 0)} held outside liquidity, 0 ETH in the pool, 0 NFTs, 0 pARB. Opening price ${n(S.start.openingWeiPerMillion, 6)} ETH per 1M MILORD.</p>
+<p><b>Start:</b> ${n(S.start.milordSupply, 0)} MILORD, ${n(S.start.milordInPool, 0)} in the position, ${n(S.start.milordOutsideLiquidity, 0)} held outside liquidity (${S.start.launchDustBurnedWei} wei rounding remainder burned), 0 ETH in the pool, 0 NFTs, 0 pARB. Opening price ${n(S.start.openingWeiPerMillion, 6)} ETH per 1M MILORD.</p>
 <h2>Totals after three weeks (simulated)</h2>${tilesHtml}
 <h2>Charts</h2><div class="charts">
 ${line("MILORD price", S.priceSeries.map((p, i) => ({ y: p.weiPerMillion, label: p.label, short: String(i + 1) })), "ETH per 1M MILORD (spot)", 4)}

@@ -22,12 +22,12 @@ import { TwapOracle, weiPerMillionAtTick } from "../offchain/lib/twap.mjs";
 const SCENARIO = {
   firstBuyEth: parseEther("1"),
   launchTraderBuysEth: ["0.5", "1", "0.5", "1", "0.5"].map(parseEther), // first hour after the market opens
-  week2WhaleBuyEth: parseEther("15"),       // moves the price so the 10% entry fee exceeds the 0.002 ETH minimum
+  week2WhaleBuyEth: parseEther("30"),       // moves the price past ~135 ETH FDV so the 10% entry fee exceeds the 0.002 ETH minimum
   royaltySaleEth: parseEther("0.5"),        // one secondary sale through a royalty-honouring marketplace
   pnlBpsWeek2: 200,                         // +2% on deployed capital
   pnlBpsWeek3: -300,                        // -3% on deployed capital
 };
-const ILLUSTRATIVE_LAUNCH = "50% of supply (3,383,500,000 MILORD) in one MILORD-only position, ~10 ETH opening FDV, range to ~1,000x, 0.3% LP fee, 1.5%/1.5% tax, 20% Hookr commission";
+const LAUNCH = "final allocation: 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, 0 ETH, ~10 ETH opening FDV, range to ~1,000x; 1.5%/1.5% tax; 0.3% LP fee and 20% Hookr commission pending approval";
 
 const RPC = process.env.RPC_URL ?? "http://127.0.0.1:8545";
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
@@ -308,19 +308,16 @@ const start = {
   milordSupply: fmtE(await token.totalSupply()), activeNFTs: Number(await nft.activeSupply()), holders: 0,
   milordInPool: fmtE(await token.balanceOf(D.PoolManager)), milordOutsideLiquidity: fmtE(await token.balanceOf(D.owner)),
   poolEth: fmtE(await provider.getBalance(D.PoolManager)) - 2000, vaultShares: fmtE(await vault.totalSupply()),
-  openingWeiPerMillion: fmtE(weiPerMillionAtTick(await spotTick())), launch: ILLUSTRATIVE_LAUNCH,
+  openingWeiPerMillion: fmtE(weiPerMillionAtTick(await spotTick())), launch: LAUNCH, launchDustBurnedWei: String(D.launchDustBurned),
 };
-await step(1, "deployment and initial allocation", { milordInLiquidity: start.milordInPool, milordReserved: start.milordOutsideLiquidity });
+const outsideAtOpen = {};
+for (const [n, a] of Object.entries({ deployer: D.owner, team: team.address, arbitrage: arb.address, operator: operator.address })) outsideAtOpen[n] = await token.balanceOf(a);
+await step(1, "deployment: 100% of supply into the founding position, rounding remainder burned", { milordInLiquidity: start.milordInPool, milordOutside: start.milordOutsideLiquidity, remainderBurnedWei: start.launchDustBurnedWei });
 await step(2, "Hookr-style MILORD/ETH market open (empty of ETH)", { tick: await spotTick() });
 await step(3, "MILORD-only concentrated position minted and locked", { positionId: D.launchPositionId });
 await samplePrice("open");
 
-// a seller before any buyer: token-only liquidity has no ETH to pay out
-await send(token.transfer(traders[5].address, parseEther("10000000")));
-await send(token.connect(traders[5]).approve(D.SwapRouter, parseEther("10000000")));
-const preDelta = await router.connect(traders[5]).swap.staticCall(KEY, [false, -parseEther("10000000"), MAX_SQRT], SETTINGS, "0x");
-const preSellEth = BigInt.asIntN(128, preDelta >> 128n);
-await step("3b", "a 10M MILORD sell before any buy would receive 0 ETH (static call)", { ethOut: fmtE(preSellEth) });
+await step("3b", "no wallet holds MILORD outside the pool, so the first trade can only be a buy", { outside: Object.fromEntries(Object.entries(outsideAtOpen).map(([k, v]) => [k, fmtE(v)])) });
 
 await setTime(T0 + 60);
 const firstOut = await buyExactIn(traders[0], SCENARIO.firstBuyEth);
@@ -432,7 +429,7 @@ const ok = (name, cond, detail) => { checks.push({ name, pass: !!cond, ...(detai
 const INITIAL = parseEther("6767000000");
 const supply = await token.totalSupply();
 const exitBurns = await conv.totalMilordBurnedOnExit(), buyBurns = await burner.totalBurnedFromBuybacks(), directBurns = await burner.totalBurnedDirect();
-ok("exact supply after burns: 6,767,000,000 - exit burns - buyback burns", supply === INITIAL - exitBurns - buyBurns - directBurns, `${fmtE(supply)}`);
+ok("exact supply after burns: 6,767,000,000 - launch remainder - exit burns - buyback burns", supply === INITIAL - BigInt(D.launchDustBurned) - exitBurns - buyBurns - directBurns, `${fmtE(supply)}`);
 ok("no MILORD minted after deployment", supply <= INITIAL);
 ok("escrow == backed NFTs x 1,000,000 (no unbacked NFT)", (await token.balanceOf(D.MilordConverter)) === (await conv.backedCount()) * parseEther("1000000"));
 ok("active NFTs == backed count", Number(await nft.activeSupply()) === Number(await conv.backedCount()));
@@ -479,9 +476,10 @@ ok("USDG has 6 decimals and NAV = vault + servicer USDG", Number(await usdg.deci
 ok("seller keeps week-1 pARB after selling", weeks[2].tracked.seller_alice.cumulative >= weeks[0].tracked.seller_alice.cumulative && weeks[0].tracked.seller_alice.cumulative > 0);
 ok("buyer earns only from day 3.5 of week 2", weeks[0].tracked.buyer.cumulative === 0 && Math.abs(weeks[1].tracked.buyer.weightSeconds - 3.5 * DAY) <= 60);
 ok("redeemer keeps earned pARB, earns nothing after redeeming", (cumulative.get(CAROL.address.toLowerCase()) ?? 0n) >= carolEarned && carolEarned > 0n && weeks[2].tracked.redeemer_carol.weightSeconds === (perHolder[2] - 1) * 7 * DAY);
-ok("token-only liquidity paid 0 ETH to a seller before any buy", preSellEth === 0n);
+ok("100% of supply entered the position: deployer, team, arbitrage and operator held 0 MILORD at open", Object.values(outsideAtOpen).every((v) => v === 0n) && BigInt(D.launchDustBurned) <= 1_000_000n, `remainder burned ${D.launchDustBurned} wei`);
+ok("pool started with 0 ETH and the first trade was a buy", Math.abs(start.poolEth) < 1e-9 && firstOut > 0n);
 ok("entry refused at launch until 30 min of price history (no fallback)", launchQuoteRefused);
-ok("0.002 ETH minimum used only with a valid TWAP; 10% path used after the price rose", ids.some((x) => x.minimumApplied) && laterFees.some((x) => !x.minimumApplied), `${ids.filter((x) => x.minimumApplied).length} at minimum, ${laterFees.filter((x) => !x.minimumApplied).length} at 10%`);
+ok("every entry fee == max(10% of the TWAP value of 1M MILORD, 0.002 ETH); both paths used", [...ids, ...laterFees].every((x) => x.fee === (x.weiPerMillion / 10n > parseEther("0.002") ? x.weiPerMillion / 10n : parseEther("0.002"))) && ids.some((x) => x.minimumApplied) && laterFees.some((x) => !x.minimumApplied), `${ids.filter((x) => x.minimumApplied).length} at minimum, ${laterFees.filter((x) => !x.minimumApplied).length} at 10%`);
 ok("second strategy inactive; collection unchanged", D.Milords === nftAddrBefore && sid2 === stratBefore + 1 && !(await registry.strategy(sid2)).enabled && pref.personal);
 ok("LP fees collected separately from tax", lpFeesEthTotal > 0n && (await hook.totalProjectPaid()) === projPaid);
 ok("launch position still locked", (await lock.isLocked(D.launchPositionId)));
@@ -493,7 +491,7 @@ const out = {
   generatedAt: new Date().toISOString(),
   disclaimer: "SIMULATED. Local chain with hypothetical SCENARIO inputs, illustrative (unapproved) launch parameters, a mock of Hookr's tax hook, mock USDG and scenario P&L. Not actual financial performance, not a forecast, not proposed production values.",
   scenario: Object.fromEntries(Object.entries(SCENARIO).map(([k, v]) => [k, Array.isArray(v) ? v.map(String) : typeof v === "bigint" ? v.toString() : v])),
-  launch: ILLUSTRATIVE_LAUNCH, start, weeks, timeline, priceSeries, ppsSeries, quoteRefusals, owners,
+  launch: LAUNCH, start, weeks, timeline, priceSeries, ppsSeries, quoteRefusals, owners,
   conversions: [...ids, ...laterFees].map((x) => ({ id: x.id, feeEth: fmtE(x.fee), weiPerMillion: fmtE(x.weiPerMillion), minimumApplied: x.minimumApplied })),
   reconciliation: {
     ethVolume: fmtE(ethVolume), taxBuy: fmtE(buyTax), taxSell: fmtE(sellTax), hookrCommission: fmtE(hookrPaid), projectTax: fmtE(projPaid),

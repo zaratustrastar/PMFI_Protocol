@@ -27,7 +27,7 @@ simulation.
 | 3 | Verify all sources; record `deployments/robinhood-mainnet.json` | explorer | — |
 | 4 | Safe: `nft.setConverter`, registry 8 placeholders + pArbitrage, operators, quote signer | Safe batch | Team Safe |
 | 5 | 💸 Hookr launch: existing-token launch of MILORD, one ETH pool, tax 1.5/1.5, recipients TradingTaxSplitter, commission 20%, core blocks off, decay per R-01 | Hookr UI/launcher | allocation Safe |
-| 5b | (path B) 💸 mint the MILORD-only position to MilordLiquidityLock | `offchain/safe-launch-batch.mjs` → Safe Transaction Builder | allocation Safe |
+| 5b | (path B) 💸 mint all 6,767,000,000 MILORD as the MILORD-only position to MilordLiquidityLock and burn the rounding remainder, in one batch, **only after the lock parameters are approved** | `offchain/safe-launch-batch.mjs` → Safe Transaction Builder | allocation Safe |
 | 6 | Read back the pool: hook, blocks, tax, recipients, commission, tick, liquidity, lock | script / explorer | — |
 | 7 | Deploy V4SwapAdapter for the Hookr key and `burner.setInitialAdapter` | `HookrPostLaunch.s.sol` + Safe | Team Safe |
 | 8 | Start the quote service on the pool TWAP (entries refused for the first 30 minutes by design) | `offchain/quote-server.mjs` | quote signer (KMS) |

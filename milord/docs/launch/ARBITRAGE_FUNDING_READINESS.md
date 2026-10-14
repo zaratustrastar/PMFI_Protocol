@@ -2,7 +2,8 @@
 
 > **2026-10-14 (Bobo):** keep the existing Polymarket and Kalshi execution infrastructure; change only Robinhood USDG
 > funding, withdrawal and NAV reconciliation. **Opinion is disabled for V1** (insufficient liquidity); its adapter stays
-> in the code for later. The Opinion column below is kept for reference only.
+> in the code for later. The Opinion column below is kept for reference only. The on-chain side (Safe → USDG →
+> vault → pARB → claims) is covered in [PARB_AUTOMATION.md](PARB_AUTOMATION.md).
 
 The V3 vault, pARB and the distributor are on Robinhood Chain (4663) with USDG. The funding bot
 (`bot/arb_monitor/core/`) is written for the Base V2 vault with USDC: it moves vault cash to a servicer wallet on

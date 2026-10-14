@@ -72,6 +72,11 @@ abstract contract SingleChainFixture is Test, MilordDeployer {
         d.vault.setReportCooldown(0);
         vm.stopPrank();
 
+        _fundMockSwap();
+    }
+
+    /// MILORD inventory for the mock buyback router. The Hookr fixture skips it: all supply goes into the pool.
+    function _fundMockSwap() internal virtual {
         vm.prank(treasury);
         d.token.transfer(address(swap), 500_000_000 ether);
     }

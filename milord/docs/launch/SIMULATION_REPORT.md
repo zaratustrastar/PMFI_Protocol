@@ -2,12 +2,12 @@
 
 Run on 2026-10-13 in a local container. Nothing broadcast to a public network.
 
-## Foundry (`forge test`): 143 passed, 0 failed, 0 skipped
+## Foundry (`forge test`): 139 passed, 0 failed, 0 skipped
 
 | Suite | Tests | Covers |
 |---|---|---|
-| HookrAllocation25/50/75Test | 9 | approved 10 ETH FDV: opening price, first buy matches the model, sells pay ETH only after buys, bounded by buyers' net ETH |
-| HookrLaunchTest | 15 | token-only open, sell before buy gets 0, 1.5% tax both sides in ETH, 20% commission and equal thirds, LP fees separate, round-trip bounded, price impact, buyback true burn with price limit and threshold, lock has no withdraw, ETH→USDG, adapter errors, adapter set once, commission fuzz 20–50% |
+| HookrFullSupplyTest | 5 | final config: all supply in the position, every other wallet 0, remainder burned, ~10 ETH FDV with 0 ETH, first buy matches the model, buys then sells, whole position purchasable |
+| HookrLaunchTest | 15 | token-only open, first trade must be a buy, 1.5% tax both sides in ETH, 20% commission and equal thirds, LP fees separate, round-trip bounded, price impact, buyback true burn with price limit and threshold, lock has no withdraw, ETH→USDG, adapter errors, adapter set once, commission fuzz 20–50% |
 | ConverterTest | 28 | entry fee max(10%, 0.002 ETH), signed TWAP quotes, staleness, collateral, exit 900k/100k |
 | ConverterInvariantTest | 5 | escrow == active NFTs × 1M; no unbacked NFT |
 | VaultV3Test | 16 | V3 vault on USDG, 0% fee, PPS from reports only |
@@ -22,11 +22,11 @@ Run on 2026-10-13 in a local container. Nothing broadcast to a public network.
 | LegacyV2BugsTest | 4 | known V2 issues absent in V3 |
 | ReporterCompatTest | 1 | bot NAV signature accepted by V3 |
 
-## End-to-end simulation (`./sim/run-local.sh`): 35 / 35 checks pass
+## End-to-end simulation (`./sim/run-local.sh`): 36 / 36 checks pass (100% allocation)
 
 See [MILORD_END_TO_END.md](MILORD_END_TO_END.md) for the trace. Invariants checked:
 
-- Supply: exact supply after burns; no mint after deployment; buyback burns recorded == supply reduction.
+- Supply: exact supply after burns (launch remainder, exits, buybacks); no mint after deployment; buyback burns recorded == supply reduction.
 - Collateral: escrow == backed NFTs × 1,000,000; active NFTs == backed count; redemption 900,000 / 100,000;
   reissued ID came from inventory.
 - pARB: distributor balance + claimed == minted from fee deposits; allocated ≤ minted; every batch minted at
@@ -36,9 +36,10 @@ See [MILORD_END_TO_END.md](MILORD_END_TO_END.md) for the trace. Invariants check
 - Fees: tax 1.5% of volume; commission 20%; splitter receives all project tax; equal thirds within 1 bp; entry
   70/30; royalty only when paid, 50/50; all arbitrage ETH swapped and deposited; LP fees separate.
 - Eligibility: seller keeps earned pARB; buyer earns from purchase time; redeemer earns nothing after redeeming.
-- Launch: token-only liquidity pays 0 ETH to an early seller; entry refused for the first 30 minutes (no
-  fallback); minimum fee used only with a valid TWAP; 10% path used after the price rose; position still locked;
-  second strategy inactive.
+- Launch: 100% of supply entered the position (deployer, team, arbitrage, operator at 0; remainder ≤1e6 wei burned);
+  pool started with 0 ETH and the first trade was a buy; entry refused for the first 30 minutes (no fallback);
+  every entry fee == max(10% of TWAP value, 0.002 ETH) with both paths used; position still locked; second strategy
+  inactive.
 
 ## Website
 

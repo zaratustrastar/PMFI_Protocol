@@ -16,24 +16,24 @@ weeks, illustrative trades). SIMULATED: no real trades or revenue.
 | Arbitrage funding | all ETH reaching the Arbitrage Safe | — | ETH → USDG (V4SwapAdapter locally; Uniswap V3 WETH/USDG on Robinhood) → ParbFundingAdapter → V3 vault deposit → pARB → distributor | TESTED locally; route on Robinhood EXTERNAL |
 | Buyback burn | burner's ⅓ of tax | — | BuybackBurner at threshold, minOut + price limit, `MILORD.burn`, `BuybackBurned` event | TESTED |
 
-## Simulation reconciliation (3 weeks)
+## Simulation reconciliation (3 weeks, final 100% configuration)
 
 | Item | ETH |
 |---|---|
-| Taxed volume | 34.459398 |
-| Buy tax | 0.308075 |
-| Sell tax | 0.213910 |
-| Total tax (1.5% of volume) | 0.521985 |
-| Hookr commission (20%) | 0.104358 |
-| Project share (80%) | 0.417432 |
-| → BuybackBurner | 0.139172 |
-| → Team Safe | 0.139130 |
-| → Arbitrage Safe | 0.139130 |
-| Entry fees | 0.240306 (Arbitrage 0.168214 / Team 0.072092) |
+| Taxed volume | 58.233260 |
+| Buy tax | 0.530206 |
+| Sell tax | 0.351964 |
+| Total tax (1.5% of volume) | 0.882170 |
+| Hookr commission (20%) | 0.176395 |
+| Project share (80%) | 0.705580 |
+| → BuybackBurner | 0.235240 |
+| → Team Safe | 0.235170 |
+| → Arbitrage Safe | 0.235170 |
+| Entry fees | 0.235980 (Arbitrage 0.165186 / Team 0.070794) |
 | Royalties (one honoured sale) | 0.033500 (50/50) |
-| LP fees (separate) | 0.060693 ETH + 3,649,158.6 MILORD |
-| Arbitrage ETH swapped to USDG | 0.324095 → 809.764795 USDG → 804.906 pARB |
-| Burn budget spent | 0.139172 → 17,253,942.24 MILORD burned |
+| LP fees (separate, stay with the position) | 0.104440 ETH + 6,520,352.8 MILORD |
+| Arbitrage ETH swapped to USDG | 0.417106 → 1,042.144247 USDG → 1,033.080 pARB |
+| Burn budget spent | 0.235240 → 34,576,904.54 MILORD burned |
 
 The burner's share is 0.03 bp higher than the other two because the splitter assigns rounding dust to the first
 payee (33.34%). Checked within 1 bp.
