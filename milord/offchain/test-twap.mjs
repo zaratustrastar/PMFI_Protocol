@@ -113,6 +113,20 @@ t("8 inactive pool is fine; low liquidity and out-of-range spot refuse", () => {
   assert.ok(ex.price(1810).meanTick >= ENTRY_PRICE.tickLower);
 });
 
+t("first-buy jump after bootstrap: refusal carries a retryAfter estimate (~14 min for 19.8%)", () => {
+  const o = oracle();
+  for (let s = 0; s <= 7200; s += 60) o.record(s, 203_280, L);
+  const jumped = 203_280 - Math.round(Math.log(1.198) / Math.log(1.0001));
+  o.record(7201, jumped, L, true);
+  let err; try { o.price(7201); } catch (e) { err = e; }
+  assert.match(err.message, /deviates/);
+  assert.ok(err.retryAfter >= 840 && err.retryAfter <= 870, `${err.retryAfter}`);
+  for (let s = 7260; s <= 7201 + err.retryAfter; s += 60) o.record(s, jumped, L);
+  o.record(7201 + err.retryAfter, jumped, L);
+  assert.equal(o.price(7201 + err.retryAfter).mode, "twap");
+  assert.equal(o.lastSwapAt, 7201); // sync points do not count as swaps
+});
+
 t("9 tick to wei conversion: ETH is currency0, both 18 decimals", () => {
   assert.equal(weiPerMillionAtTick(0), 10n ** 24n); // 1:1 => 1M MILORD = 1M ETH
   near(weiPerMillionAtTick(203_280), 1_486_288_643_256_000n, 1, "launch tick (FDV ~10.06 ETH)");

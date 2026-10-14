@@ -19,7 +19,8 @@ if (D.chainId !== 31337) throw new Error("local quote server only runs against a
 const provider = new JsonRpcProvider(process.env.RPC_URL ?? "http://127.0.0.1:8545");
 const signer = new Wallet("0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"); // anvil #3
 // anvil only mines on demand; the UI test raises MAX_STALENESS
-const source = entryPriceSource(provider, D, { maxStaleness: Number(process.env.MAX_STALENESS ?? 120) });
+// anvil's clock is moved by tests, so the wall-clock head check is off locally
+const source = entryPriceSource(provider, D, { maxStaleness: Number(process.env.MAX_STALENESS ?? 120), maxHeadLag: Infinity });
 
 http.createServer(async (req, res) => {
   res.setHeader("access-control-allow-origin", "*");
@@ -34,6 +35,6 @@ http.createServer(async (req, res) => {
     });
     res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ quote: Object.fromEntries(Object.entries(quote).map(([k, v]) => [k, v.toString()])), signature }));
   } catch (e) {
-    res.writeHead(503, { "content-type": "application/json" }).end(JSON.stringify({ error: String(e.message ?? e) }));
+    res.writeHead(503, { "content-type": "application/json" }).end(JSON.stringify({ error: String(e.message ?? e), retryAfter: e.retryAfter ?? null }));
   }
 }).listen(8787, () => console.log("quote service on http://127.0.0.1:8787/quote?account=0x…"));

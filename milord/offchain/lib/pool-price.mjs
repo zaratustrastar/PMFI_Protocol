@@ -31,7 +31,9 @@ export async function verifyPoolKey(provider, key, expectedToken) {
 
 export class PoolPriceSource {
   /** key = [currency0, currency1, fee, tickSpacing, hooks]; options as TwapOracle */
-  constructor(provider, { poolManager, stateView, key, ...oracleOpts }) {
+  constructor(provider, { poolManager, stateView, key, maxHeadLag = Infinity, clock = () => Math.floor(Date.now() / 1000), ...oracleOpts }) {
+    this.maxHeadLag = maxHeadLag; // wall-clock check that the RPC's chain head itself is current
+    this.clock = clock;
     this.provider = provider;
     this.key = key;
     this.pm = new Contract(poolManager, PM_ABI, provider);
@@ -60,7 +62,7 @@ export class PoolPriceSource {
         ...(await this.pm.queryFilter(this.pm.filters.Initialize(this.id), this.nextBlock, latest.number)),
         ...(await this.pm.queryFilter(this.pm.filters.Swap(this.id), this.nextBlock, latest.number)),
       ].sort((a, b) => a.blockNumber - b.blockNumber || a.index - b.index);
-      for (const l of logs) this.oracle.record(await this.#blockTime(l.blockNumber), Number(l.args.tick));
+      for (const l of logs) this.oracle.record(await this.#blockTime(l.blockNumber), Number(l.args.tick), null, true);
       this.nextBlock = latest.number + 1;
     }
     if (this.oracle.obs.length) {
@@ -73,6 +75,7 @@ export class PoolPriceSource {
   /** @returns {{weiPerMillion, observedAt, mode}} or throws "... entry waits" */
   async price() {
     const now = await this.sync();
+    if (this.clock() - now > this.maxHeadLag) throw new Error("RPC chain head is behind the wall clock: entry waits");
     return this.oracle.price(now);
   }
 }

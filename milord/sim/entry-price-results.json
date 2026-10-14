@@ -8,15 +8,24 @@
     "name": "9 wrong token ordering / non-18-decimal token / wrong token rejected before any price is read"
   },
   {
-    "name": "1 launch (~10 ETH FDV): bootstrap quote, entry fee 0.002 ETH, NFT minted",
-    "mode": "bootstrap",
-    "weiPerMillion": "0.001551744860652",
-    "fee": "0.002",
-    "convertGas": "414498"
+    "name": "3b first 1 ETH buy two hours after open (bootstrap over): conversions wait under the 10% rule",
+    "priceJumpPct": "19.80",
+    "waitSeconds": 852,
+    "waitMinutes": "14.2",
+    "firstEstimateSeconds": 840
   },
   {
-    "name": "bootstrap is bounded: TWAP mode once 30 minutes of history exist",
-    "mode": "twap"
+    "name": "1 launch (~10 ETH FDV): bootstrap quote, entry fee 0.002 ETH, NFT minted",
+    "mode": "bootstrap",
+    "weiPerMillion": "0.001780640506687",
+    "fee": "0.002",
+    "convertGas": "414510"
+  },
+  {
+    "name": "3a first 1 ETH buy right after open: bootstrap then TWAP, conversions never unavailable",
+    "priceJumpPct": "19.80",
+    "minutesChecked": 39,
+    "unavailableMinutes": 0
   },
   {
     "name": "2 100 ETH FDV: entry fee",
@@ -36,11 +45,11 @@
   {
     "name": "convert at 500 ETH FDV charges the TWAP fee",
     "fee": "0.007389808041776",
-    "convertGas": "260021"
+    "convertGas": "260009"
   },
   {
     "name": "5a push 10x and restore inside one block: zero weight, quote unchanged",
-    "block": 197,
+    "block": 205,
     "quoteBefore": "0.07389808041776",
     "quoteAfter": "0.07389808041776",
     "attackerMilordGained": "-2039204.420471372462488809"
@@ -59,11 +68,21 @@
     "name": "6b price held 20% low for 5 minutes: quotes refused (spot >10% from TWAP)"
   },
   {
-    "name": "7 stale or missing observations: no quote issued (no fallback)"
+    "name": "7 stale or missing observations, or an RPC head behind the wall clock: no quote issued (no fallback)"
   },
   {
-    "name": "8a inactive pool (2 h without swaps, indexer synced): quote = the unchanged pool price",
+    "name": "8a quiet pool: 6 h without swaps, indexer syncing: quotes keep working at the unchanged price; only indexer lag refuses",
+    "quotesOk": 36,
+    "lastSwapAgeHours": "6.5",
+    "indexerLagSeconds": 0,
     "quote": "0.07389808041776"
+  },
+  {
+    "name": "website SDK: a 100x quote from a compromised signer is refused before the wallet is asked (nothing sent); fair quote converts; the wait is explained",
+    "ceilingFee": "0.008128788845953362",
+    "fairFee": "0.007389808041776",
+    "refusedFee": "0.7389808041776",
+    "waitText": "The $MILORD price moved more than 10% from its 30-minute average, so waking pauses until the average catches up (about 14 min if the price holds). A ~20% jump pauses waking for about 14 minutes. Redeeming is not affected."
   },
   {
     "name": "8b in-range liquidity below the configured minimum: quotes refused"

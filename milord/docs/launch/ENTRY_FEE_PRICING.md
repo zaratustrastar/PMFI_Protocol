@@ -1,6 +1,6 @@
 # NFT entry-fee pricing
 
-Status: implemented and tested locally. Not audited. Nothing deployed or broadcast.
+Status: approved architecture (Bobo, 2026-10-14). Locally complete after the edge-case checks below. Not audited. Nothing deployed or broadcast.
 
 ## Formula (unchanged)
 
@@ -120,11 +120,58 @@ and the 39 simulation checks still pass.
 | 8 | low liquidity / inactive pool / out of range | `test-twap.mjs`, anvil (2 h idle OK; below min refused; pushed past range refused) | pass |
 | 9 | token ordering and decimals | `test-twap.mjs`, anvil (`verifyPoolKey`) | pass |
 | 10 | redemption independent of pricing | Foundry (signer revoked + entry paused), anvil (price refused) | pass |
+| E1 | quiet pool 6.5 h; indexer lag and RPC head lag refuse | anvil | pass |
+| E2 | compromised signer overpricing: maxFee, msg.value, chain/contract/account binding, expiry, replay, revocation; website ceiling | Foundry `CompromisedSignerTest`, anvil (SDK) | pass |
+| E3 | first 1 ETH buy +19.8%: 0 min at launch, 14.2 min if after bootstrap | anvil, `test-twap.mjs` | pass |
 
 Run: `node offchain/test-twap.mjs`, `./sim/run-entry-price.sh` (fresh anvil, real v4 swaps),
 `forge test --match-contract EntryFeePricingTest -vv`, `./sim/run-local.sh`.
 
-Full suites: forge 169/169, simulation 39/39, services 14/14.
+Full suites: forge 178/178, simulation 39/39, services 14/14, entry-price integration 19 checks, TWAP unit 9 groups.
+
+## Edge-case verification (requested 2026-10-14)
+
+### 1. Quiet pool: indexer freshness is not last-swap age
+
+- `maxStaleness` (120 s) measures how long ago the **indexer** read the chain. Each sync records slot0 and
+  liquidity at the latest block, so a pool with no swaps keeps quoting at its unchanged price.
+- `lastSwapAt` (time of the last Initialize/Swap event) is reported with every quote and is never a refusal reason.
+- New: `maxHeadLag` (120 s) refuses when the RPC's latest block is more than 120 s behind the wall clock (a stuck
+  node). That also keeps quotes valid on chain, because `issuedAt` is the indexed block time and quotes live 5 minutes.
+- The service indexes the sequencer's latest blocks, not L1-finalized ones: on an Orbit/Arbitrum-style chain
+  finality lags by many minutes, which would expire every 5-minute quote before use. Reorgs of sequenced blocks
+  are not expected there; a reorged swap would only shift a 30-minute mean briefly. If Robinhood Chain has idle
+  stretches with no blocks at all, `maxHeadLag` must be raised to match, at the cost of slower stale detection.
+- Tested on the local chain: 6.5 hours without swaps, indexer syncing every 10 minutes: 36/36 quotes served at
+  the unchanged price. The same pool with the indexer stopped for 121 s, or with an RPC head 121 s behind: refused.
+
+### 2. Compromised signer: overpricing as well as underpricing
+
+A signer can put any price in a quote. What it cannot do (`CompromisedSignerTest`, 9 Foundry tests):
+- **charge more than the user authorised:** `fee > maxFee` reverts `FeeAboveMax`, and `msg.value < fee` reverts;
+  any ETH above the fee is refunded. Nothing (ETH or MILORD) leaves the wallet on a revert.
+- **reuse a quote across chains or deployments:** the EIP-712 domain includes the chain id and converter address.
+- **use an expired, not-yet-valid or over-long quote** (> 5 minutes), **replay a nonce**, or **use a quote
+  issued for another account**.
+- **keep working after revocation:** `setQuoteSigner(signer, false)` (Team Safe only) kills outstanding quotes at once.
+
+`maxFee` only protects users if it does not come from the same quote, so the website now computes its own ceiling:
+the fee at the pool's on-chain price + 10%, read through the user's wallet RPC (`feeCeilingWei`). A quote above it
+is refused before the wallet is asked. Tested end to end: a 100x quote (0.739 ETH vs a 0.0081 ETH ceiling) from a
+compromised signer and quote service sent nothing; a fair quote converted. During the 30-minute launch bootstrap a
+legitimate quote can exceed spot + 10% after a pump-and-dump; the page then asks the user to retry later.
+
+### 3. The first 1 ETH purchase (+19.8%)
+
+Measured on real v4 swaps through the Hookr-style hook (1.5% tax, 0.3% LP fee): the first 1 ETH buy moves the
+price +19.80%.
+- **First buy within 30 minutes of the pool opening (planned launch):** the bootstrap applies, so there is **no
+  wait**. Checked every minute for 39 minutes, through the hand-over to TWAP: 0 unavailable minutes.
+- **First buy later than 30 minutes after opening:** the 10% deviation rule applies and conversions pause for
+  **14.2 minutes** (852 s; the service's first estimate was 840 s). The same holds for any later sudden ~20% move.
+- The quote service now returns `retryAfter`, and the website explains the pause in plain words
+  ("…about 14 min if the price holds… Redeeming is not affected"). The wake section's fine print explains the
+  10% rule and the ~14-minute pause for a ~20% move.
 
 ## Gas
 

@@ -118,14 +118,42 @@ export async function status(m) {
   };
 }
 
-/** Ask the quote service, then convert with maxFee = quoted fee. Approves MILORD if needed. */
-export async function wake(m, quoteUrl) {
+/** Plain-language reason for a refused quote, with the service's estimate of when waking reopens. */
+export function explainEntryWait(body) {
+  const err = String(body?.error ?? "");
+  const mins = body?.retryAfter ? Math.max(1, Math.ceil(body.retryAfter / 60)) : null;
+  if (/deviates/.test(err)) return `The $MILORD price moved more than 10% from its 30-minute average, so waking pauses until the average catches up${mins ? ` (about ${mins} min if the price holds)` : ""}. A ~20% jump pauses waking for about 14 minutes. Redeeming is not affected.`;
+  if (/insufficient price history|liquidity too low/.test(err)) return "Waking opens after the first purchase in the pool. Redeeming is not affected.";
+  if (/approved launch price/.test(err)) return "The pool did not open at the approved launch price, so waking waits for 30 minutes of price history.";
+  if (/outside the liquidity range/.test(err)) return "The price is outside the pool's liquidity range, so waking is paused. Redeeming is not affected.";
+  if (/stale|behind/.test(err)) return "Pricing data is temporarily out of date, so waking waits. Redeeming is not affected.";
+  return err || "Pricing is unavailable, so waking waits. Redeeming is not affected.";
+}
+
+/** Highest fee this page will let a wallet pay: the fee at the pool's on-chain price + 10%, read through the
+ *  user's own wallet RPC, independent of the quote service. A wrong or compromised quote above it is never sent. */
+export async function feeCeilingWei(m) {
+  const tick = Number((await m.stateView.getSlot0(poolIdOf(m.key))).tick);
+  const spotWpm = BigInt(Math.round(1e24 / 1.0001 ** tick));
+  return m.conv.entryFeeFor((spotWpm * 110n) / 100n + 1n);
+}
+
+async function fetchQuote(m, quoteUrl) {
   const r = await fetch(`${quoteUrl}?account=${m.account}`);
-  const body = await r.json();
-  if (!r.ok) throw new Error(body.error ?? "quote unavailable; conversion is paused until pricing returns");
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(explainEntryWait(body)), { retryAfter: body.retryAfter ?? null, entryWaits: true });
+  return body;
+}
+
+/** Ask the quote service, check its fee against the pool-based ceiling, then convert with maxFee = that fee.
+ *  The wallet shows the exact ETH amount before signing. Approves MILORD if needed. */
+export async function wake(m, quoteUrl) {
+  const body = await fetchQuote(m, quoteUrl);
+  const fee = await m.conv.entryFeeFor(body.quote.weiPerMillion);
+  const ceiling = await feeCeilingWei(m);
+  if (fee > ceiling) throw new Error(`Quoted fee ${formatEther(fee)} ETH is above the ${formatEther(ceiling)} ETH this page allows at the current pool price; nothing was sent. Try again in a few minutes.`);
   const principal = await m.conv.PRINCIPAL();
   if ((await m.token.allowance(m.account, m.D.MilordConverter)) < principal) await (await m.token.approve(m.D.MilordConverter, principal)).wait();
-  const fee = await m.conv.entryFeeFor(body.quote.weiPerMillion);
   const tx = await m.conv.convert(body.quote, body.signature, fee, { value: fee });
   return tx.wait();
 }
@@ -168,12 +196,15 @@ export async function claim(m, epoch, who = m.account) {
   return (await m.dist.claim(r.payTo, r.leaf.cumulative, r.leaf.proof)).wait();
 }
 
-/** Current ETH fee from a fresh quote (display only; the real conversion requests its own quote). */
+/** Current ETH fee from a fresh quote (display only; the real conversion requests its own quote).
+ *  Returns { fee } or { wait: explanation }. */
 export async function previewFee(m, quoteUrl) {
-  const r = await fetch(`${quoteUrl}?account=${m.account}`);
-  if (!r.ok) return null;
-  const { quote } = await r.json();
-  return formatEther(await m.conv.entryFeeFor(quote.weiPerMillion));
+  try {
+    const { quote } = await fetchQuote(m, quoteUrl);
+    return { fee: formatEther(await m.conv.entryFeeFor(quote.weiPerMillion)) };
+  } catch (e) {
+    return { wait: e.message };
+  }
 }
 
 // ───────────── market (Hookr pool) ─────────────

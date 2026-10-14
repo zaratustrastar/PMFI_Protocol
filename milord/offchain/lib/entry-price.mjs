@@ -5,7 +5,8 @@ import { PoolPriceSource } from "./pool-price.mjs";
 export const ENTRY_PRICE = {
   window: 1800, // 30-minute TWAP
   maxDeviationBps: 1000, // refuse when spot and TWAP differ by more than 10%
-  maxStaleness: 120, // indexer must have synced within 2 minutes
+  maxStaleness: 120, // indexer must have synced within 2 minutes (indexer freshness, NOT time since the last swap)
+  maxHeadLag: 120, // the RPC's latest block must be within 2 minutes of the wall clock
   openingTick: 203_280, // approved launch price (~10 ETH FDV); bootstrap only if the pool opened here
   tickLower: 134_220, // founding position range: outside it the pool has no liquidity
   tickUpper: 203_280,
@@ -23,6 +24,8 @@ export function entryPriceSource(provider, D, overrides = {}) {
     minHistory: c.window,
     maxDeviationBps: c.maxDeviationBps,
     maxStaleness: c.maxStaleness,
+    maxHeadLag: c.maxHeadLag,
+    ...(c.clock ? { clock: c.clock } : {}),
     tickLower: c.tickLower,
     tickUpper: c.tickUpper,
     minLiquidity: c.minLiquidity,

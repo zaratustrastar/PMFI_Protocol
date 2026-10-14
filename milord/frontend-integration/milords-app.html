@@ -75,7 +75,8 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
         <div><em>Plus an ETH fee</em><b id="fee">—</b><span id="feeRule">10% of the ETH value of 1M $MILORD, min 0.002 ETH</span></div>
         <div class="sum"><em>On redeem</em><b>900,000</b><span>back to you, 100,000 burned</span></div>
       </div>
-      <p class="fine">The fee comes from a short-lived signed quote priced from the pool's 30-minute average, never its instant price. Right after launch, or if pricing is unavailable, waking waits; redeeming never does. Your Milord's ID comes from the returned pool first, then the next new one. Fees are split 70% to arbitrage funding and 30% to the team.</p>
+      <p class="fine" id="entryWait" style="color:var(--ink)"></p>
+      <p class="fine">The fee comes from a short-lived signed quote priced from the pool's 30-minute average (or the current price, if higher), never from a single trade. If the price moves more than 10% away from that average, waking pauses until the average catches up: after a sudden ~20% move that is about 14 minutes. Waking also waits until the first purchase in the pool and whenever pricing data is out of date. This page checks every quote against the pool's own price before your wallet signs, and never sends more than that ceiling. Redeeming never waits. Your Milord's ID comes from the returned pool first, then the next new one. Fees are split 70% to arbitrage funding and 30% to the team.</p>
       <div class="actions"><button class="btn primary" id="wake" disabled>Wake a Milord</button><span id="milordBal" class="fine"></span></div>
     </div>
   </section>
@@ -145,8 +146,9 @@ async function refresh() {
     ["pARB price (USDG)", fmt(s.parbPps, 6)], ["pARB claimed", fmt(s.parbClaimed)], ["Waking", s.entryPaused ? "paused" : "open"],
   ].map(([k, v]) => `<div><em>${k}</em><b>${v}</b></div>`).join("");
   $("wake").disabled = s.entryPaused;
-  const fee = await milord.previewFee(m, QUOTE).catch(() => null);
-  $("fee").textContent = fee ? `${fmt(fee, 5)} ETH` : "pricing unavailable";
+  const pv = await milord.previewFee(m, QUOTE).catch(() => ({ wait: "Pricing is unavailable, so waking waits. Redeeming is not affected." }));
+  $("fee").textContent = pv.fee ? `${fmt(pv.fee, 5)} ETH` : "waking paused";
+  $("entryWait").textContent = pv.wait ?? "";
   const mk = await milord.market(m).catch(() => null);
   if (mk) {
     $("buyTax").textContent = `${mk.buyTaxPct}%`; $("sellTax").textContent = `${mk.sellTaxPct}%`; $("lpFee").textContent = `${mk.lpFeePct}%`;
@@ -198,7 +200,7 @@ $("connect").onclick = async () => {
   await refresh();
   log("connected");
 };
-$("wake").onclick = async () => { try { await milord.wake(m, QUOTE); await refresh(); log("woke a Milord"); } catch (e) { log(e.shortMessage ?? e.message); } };
+$("wake").onclick = async () => { try { await milord.wake(m, QUOTE); await refresh(); log("woke a Milord"); } catch (e) { if (e.entryWaits) $("entryWait").textContent = e.message; log(e.shortMessage ?? e.message); } };
 $("buy").onclick = async () => { try { await milord.localTrade(m, "buy", $("amt").value); log(`bought with ${$("amt").value} ETH`); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
 $("sell").onclick = async () => { try { await milord.localTrade(m, "sell", $("amt").value); log(`sold ${$("amt").value} MILORD`); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
 $("delegate").onclick = async () => { try { await milord.delegateSelf(m); log("votes activated"); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };

@@ -18,7 +18,7 @@ const metrics = createMetrics("keeper");
 const state = stateFile(path.join(cfg.stateDir, "keeper.json"), { passes: 0 });
 const D = cfg.D;
 const milordPrice = D.PoolManager && D.StateView
-  ? entryPriceSource(provider, D, { maxStaleness: Number(process.env.MAX_STALENESS ?? 120) })
+  ? entryPriceSource(provider, D, { maxStaleness: Number(process.env.MAX_STALENESS ?? 120), maxHeadLag: Number(process.env.MAX_HEAD_LAG ?? 120) })
   : null;
 
 startHealthServer({ port: cfg.healthPort, metrics, staleMs: 3 * cfg.intervalMs });

@@ -16,6 +16,8 @@
 // below the current market price; pushing it UP only makes entry more expensive (griefing, paid in tax).
 // A quote is refused (entry waits, there is NO fallback price) when:
 //   - the indexer has not synced the pool recently            (maxStaleness, default 120 s)
+//     Freshness is how recently the INDEXER read the chain, not how recently someone swapped: a quiet pool keeps
+//     quoting at its unchanged price for as long as the indexer keeps syncing (lastSwapAt is reported, not limited).
 //   - spot differs from the TWAP by more than maxDeviationBps   (default 10%: active manipulation or a crash)
 //   - spot is outside the founding position's range             (no liquidity there: price moves for free)
 //   - in-range liquidity is below minLiquidity                  (pool drained / abnormal)
@@ -50,14 +52,31 @@ export class TwapOracle {
     Object.assign(this, { window, minHistory, maxStaleness, maxDeviationBps, tickLower, tickUpper, minLiquidity, bootstrapOpeningTick });
     this.obs = []; // { t, tick } ascending; each tick holds until the next observation
     this.liquidity = null; // latest in-range liquidity, when the source reports it
+    this.lastSwapAt = null; // time of the last Initialize/Swap event (informational)
   }
 
-  record(t, tick, liquidity) {
+  /** swap = true for Initialize/Swap events, false for an indexer sync point (slot0 at the latest block). */
+  record(t, tick, liquidity, swap = false) {
     const last = this.obs[this.obs.length - 1];
     if (last && t < last.t) throw new Error("observations must be in time order");
     if (last && last.t === t) last.tick = tick; // same block: only the last price of the block persists
     else this.obs.push({ t, tick });
-    if (liquidity !== undefined) this.liquidity = BigInt(liquidity);
+    if (liquidity !== undefined && liquidity !== null) this.liquidity = BigInt(liquidity);
+    if (swap) this.lastSwapAt = t;
+  }
+
+  /** Seconds until spot is back within maxDeviationBps of the TWAP if the price stays where it is (null: > window). */
+  retryAfter(now) {
+    const last = this.obs[this.obs.length - 1];
+    const spot = weiPerMillionAtTick(last.tick);
+    for (let k = 15; k <= this.window; k += 15) {
+      this.obs.push({ t: now + k, tick: last.tick });
+      const twap = weiPerMillionAtTick(this.meanTick(now + k));
+      this.obs.pop();
+      const dev = twap > spot ? twap - spot : spot - twap;
+      if (dev * 10000n <= twap * BigInt(this.maxDeviationBps)) return k;
+    }
+    return null;
   }
 
   #clamp(tick) {
@@ -89,13 +108,15 @@ export class TwapOracle {
       if (this.bootstrapOpeningTick === null || age >= this.window) throw new Error("insufficient price history: entry waits");
       if (this.obs[0].tick !== this.bootstrapOpeningTick) throw new Error("pool did not open at the approved launch price: entry waits");
       const highestPriceTick = Math.min(...this.obs.map((o) => this.#clamp(o.tick))); // lowest tick = highest MILORD price
-      return { weiPerMillion: weiPerMillionAtTick(highestPriceTick), observedAt: last.t, meanTick: null, spotTick: last.tick, mode: "bootstrap" };
+      return { weiPerMillion: weiPerMillionAtTick(highestPriceTick), observedAt: last.t, meanTick: null, spotTick: last.tick, mode: "bootstrap", lastSwapAt: this.lastSwapAt };
     }
 
     const meanTick = this.meanTick(now);
     const twap = weiPerMillionAtTick(meanTick);
     const dev = twap > spot ? twap - spot : spot - twap;
-    if (dev * 10000n > twap * BigInt(this.maxDeviationBps)) throw new Error("spot deviates from TWAP: entry waits");
-    return { weiPerMillion: twap > spot ? twap : spot, observedAt: last.t, meanTick, spotTick: last.tick, mode: "twap" };
+    if (dev * 10000n > twap * BigInt(this.maxDeviationBps)) {
+      throw Object.assign(new Error("spot deviates from TWAP: entry waits"), { retryAfter: this.retryAfter(now) });
+    }
+    return { weiPerMillion: twap > spot ? twap : spot, observedAt: last.t, meanTick, spotTick: last.tick, mode: "twap", lastSwapAt: this.lastSwapAt };
   }
 }
