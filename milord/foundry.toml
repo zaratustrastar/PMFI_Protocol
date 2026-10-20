@@ -19,6 +19,13 @@ remappings = [
 ]
 fs_permissions = [{ access = "read-write", path = "./sim" }, { access = "read", path = "./" }]
 
+# Low-memory development builds (e.g. a 4 GB VPS): FOUNDRY_PROFILE=lowmem forge test --skip script
+# Not for gas numbers or releases: production artifacts come from the default (via-IR, optimized) profile in CI.
+# script/DeployLocal.s.sol needs via-IR; use CI-built artifacts for the local simulation.
+[profile.lowmem]
+via_ir = false
+optimizer = false
+
 [fuzz]
 runs = 512
 

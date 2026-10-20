@@ -1,0 +1,116 @@
+# MILORD V1: independent build + test environment.
+# - production: the default foundry profile (solc 0.8.26, via-IR, optimizer 200 runs) — the build that ships.
+#   Its artifacts (out/ + cache/) are uploaded so low-memory machines can run the anvil simulation without
+#   compiling via-IR themselves.
+# - lowmem: the development profile (no via-IR, no optimizer) used on small VPS machines; kept compiling here.
+# - simulation: the end-to-end anvil simulation on the production artifacts.
+# Nothing here deploys, signs or broadcasts to a live network (anvil only, public test keys).
+name: milord-ci
+
+on:
+  push:
+    branches: [main, "milord/**"]
+    paths: ["milord/**", ".github/workflows/milord-ci.yml"]
+  pull_request:
+    paths: ["milord/**", ".github/workflows/milord-ci.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: milord-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: milord
+
+jobs:
+  production:
+    name: production build + tests (via-IR, optimized)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: milord/package-lock.json
+      - run: npm ci
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.5.1
+      - name: Build (default profile)
+        run: forge build --sizes
+      - name: Test (default profile)
+        run: forge test
+      - name: Upload production artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: milord-production-out
+          path: |
+            milord/out
+            milord/cache
+          retention-days: 30
+          if-no-files-found: error
+
+  lowmem:
+    name: low-memory dev profile tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: lowmem
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: milord/package-lock.json
+      - run: npm ci
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.5.1
+      - run: forge test --skip script
+
+  offchain:
+    name: off-chain unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: milord/package-lock.json
+      - run: npm ci
+      - run: node offchain/test-twap.mjs
+      - run: node --test offchain/services/test/services.test.mjs
+
+  simulation:
+    name: anvil end-to-end simulation (production artifacts)
+    needs: production
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: milord/package-lock.json
+      - run: npm ci
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.5.1
+      - uses: actions/download-artifact@v4
+        with:
+          name: milord-production-out
+          path: milord
+      - name: Simulation (39 checks)
+        run: ./sim/run-local.sh
+      - name: Entry-fee price integration (real v4 swaps)
+        run: ./sim/run-entry-price.sh

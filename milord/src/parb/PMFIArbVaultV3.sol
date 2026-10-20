@@ -435,6 +435,12 @@ contract PMFIArbVaultV3 is ERC20, Ownable, ReentrancyGuard {
         uint256 newDeductions = totalPendingDepositAssets + totalClaimableRedeemAssets;
         lastReportedBackingAssets = L.reportedAssets > newDeductions ? L.reportedAssets - newDeductions : 0;
 
+        _emitReported(L, data.nonce);
+    }
+
+    /// @dev Emits Reported. A separate function only to keep report()'s stack shallow enough for
+    ///      non-IR development builds (profile.lowmem); the via-IR production bytecode is unchanged.
+    function _emitReported(ReportLocals memory L, uint256 nonce) private {
         emit Reported(
             L.reportedAssets,
             L.backingAssetsNow,
@@ -444,7 +450,7 @@ contract PMFIArbVaultV3 is ERC20, Ownable, ReentrancyGuard {
             L.newPPS,
             L.depositsProcessed,
             L.redeemsProcessed,
-            data.nonce
+            nonce
         );
     }
 
