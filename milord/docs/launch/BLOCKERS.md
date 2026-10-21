@@ -1,3 +1,19 @@
+# Status update (2026-10-21): Robinhood fork suite
+
+The VPS can now fork Robinhood Chain, and `test/fork/` tests B1–B4 against the deployed Hookr-1 contracts
+(docs/launch/FORK_INTEGRATION.md, one command: `./fork/run-fork-tests.sh`). Until that run reports green:
+
+| # | Status |
+|---|---|
+| B1 | Resolved from source, fork run confirms: Tax + Conversion is 0xE73f…1e1F / 0x9901…5d3c; config is `abi.encode(Config)` (320 bytes), flat 1.5% from the launch block with no launch-tax decay |
+| B2 | Resolved from source, fork run confirms: commission = `protocolShareBps` 2000, applied as 20% of the tax (queue split) and 20% of any Snipe; no Hookr minimum fee asserted |
+| B3 | Fork run decides: `test_buybackAndBurnThroughHookr` buys through V4SwapAdapter (unauthenticated) |
+| B4 | Resolved from source, fork run confirms: `lock` performs `acceptFamily`; forever = 2^64-1; `collect` pays the beneficiary directly; `claims = 0` pays tokens |
+| B5 | Resolved by the VPS (forks 4663 locally); this environment still cannot |
+| New B13 | High: an outsider may open the ETH/MILORD Hookr pool first (ETH-only, no MILORD), making our launch revert. Fix: deploy MILORD and launch atomically. `test_poolSquattingRisk` confirms or rules it out |
+| New B14 | High: the tax is pulled, not pushed. The keeper must call `payCreator()` on both tax queues before `splitter.distribute` |
+| New B15 | Medium: `offchain/safe-launch-batch.mjs` must encode `launchFamily` with the fork-tested parameters |
+
 # Remaining blockers, most severe first (2026-10-14)
 
 | # | Severity | Blocker | Who can clear it | What clears it |

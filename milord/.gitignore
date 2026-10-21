@@ -4,3 +4,4 @@ cache/
 broadcast/
 out-lowmem/
 cache-lowmem/
+fork/logs/

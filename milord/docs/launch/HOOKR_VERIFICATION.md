@@ -1,5 +1,7 @@
 # Hookr-1 compatibility verification (2026-10-14)
 
+> 2026-10-21: superseded for B1–B4 by the Robinhood fork suite and the Hookr-1 source review in FORK_INTEGRATION.md.
+
 **Result: not yet verifiable on chain. No incompatibility with the approved tokenomics was found in the published ABIs, but four parameters cannot be confirmed without a Robinhood Chain fork, and the launch call cannot be encoded until Hookr publishes the Tax + Conversion advisory address and config format.** Tokenomics were not changed to work around anything.
 
 ## What was checked and how
