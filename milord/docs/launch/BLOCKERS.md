@@ -1,4 +1,32 @@
-# Status update (2026-10-21): Robinhood fork suite
+# Blocker matrix (2026-10-21, production-readiness round)
+
+No deployment, broadcast, lock or real funds. The Anti-Snipe 40% / 60-minute setting is a candidate, not a decision.
+Status key: **Code** = implemented and tested here; **Fork** = run on the VPS against real Hookr-1; **Fork pending** =
+compiled, waiting for the VPS run; **Ops** = operational step or assumption; **Owner** = needs Bobo's decision.
+
+| # | Severity | Item | Status | What clears it |
+|---|---|---|---|---|
+| B13 | High | Pool squatting (fork-confirmed) | Code + Fork pending: `MilordAtomicLaunch` (ATOMIC_LAUNCH.md) | VPS run of `MilordAtomicLaunchFork` |
+| B15 | Medium | Launch encoding | Code: `safe-launch-batch.mjs` encodes the atomic launch, accept and lock batches | VPS run, then testnet rehearsal |
+| B14 | High | Tax is pulled, not pushed | Code: keeper pays both queues, fails closed, idempotent (services README) | keeper run against a launched pool (fork or testnet) |
+| B16 | High | Principal withdrawable between `principalLockedUntil` and the lock | Ops: LOCK_PROCEDURE.md (pre-signed lock, `lock-watch` alerts, late lock still works) | Bobo's go-ahead to execute the lock; signatures collected right after the launch |
+| B17 | High | Hookr-1 bytecode vs published source | Code: `hookr-verify/`; offline phase passes for all 23 contracts MILORD touches (settings, sources, metadata, 4 libraries by keccak); no upgradeable proxies (HOOKR_BYTECODE_VERIFICATION.md) | VPS on-chain phase; check the two tax-queue clones after launch |
+| B20 | Medium | Only HookrDirectionalTax A (0xE73f…1e1F) fits: B (0x9901…5d3c) is HookrPartnerTax, for HookrAttributionLauncher pools only | Code: the helper takes the tax address as config; use A | confirm A is admitted under the root at launch time (the helper refuses otherwise) |
+| B18 | Medium | Robinhood `block.number` cadence (guard and lock lengths) | Code: clock probe; Fork pending: no-ArbSys-stub pass (CLOCK_AND_ARBSYS.md) | run the probe; set guard/lock from its numbers |
+| B19 | Medium | Option D split is off-chain | Code: reconciliation + Safe batch from events; Fork pending: event check | only if the Anti-Snipe candidate is chosen (Owner) |
+| B6 | High (pre-mainnet) | Independent security review | Owner: scope in AUDIT_SCOPE.md | auditor engagement |
+| B7 | Medium | WETH/USDG V3 pool depth and cardinality on 4663 | open | read the pool; raise cardinality if low |
+| B8 | Medium | Second ETH/USD reference | Owner | TWAP only, or TWAP + feed |
+| B9 | Medium | Polymarket/Kalshi USDG funding routes, bridge allowlist | Owner / engine team | confirm routes |
+| B10 | Medium | Safe signer sets, thresholds, router bounds | Owner | confirm values |
+| B11 | Low | Art, metadata, website | Owner | content |
+| B12 | Low | `finalized` tag on Robinhood RPC | open | probe the RPC |
+| — | Owner | Anti-Snipe: flat launch or the 40%/60 min candidate (with Option D or 100% burn) | Owner | decision; both paths are implemented |
+
+Closed by the 2026-10-21 fork run: B1 (flat 1.5% tax config), B2 (20% commission), B3 (buyback through Hookr works),
+B4 (lock semantics), B5 (VPS forks 4663).
+
+# History: status update (2026-10-21, fork suite)
 
 The VPS can now fork Robinhood Chain, and `test/fork/` tests B1–B4 against the deployed Hookr-1 contracts
 (docs/launch/FORK_INTEGRATION.md, one command: `./fork/run-fork-tests.sh`). Until that run reports green:

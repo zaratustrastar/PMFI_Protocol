@@ -2,16 +2,21 @@
 //   node offchain/services/keeper.mjs
 // Env: RPC_URL, DEPLOYMENTS_FILE, KEEPER_PRIVATE_KEY (gas-only key; BuybackBurner operator), INTERVAL_SECS,
 //      MIN_BUYBACK_WEI, BUYBACK_MAX_BELOW_TWAP_BPS, HEALTH_PORT, ALERT_WEBHOOK_URL, STATE_DIR.
-// The key can call only: splitter.distribute, collector.collect, burner.buybackAndBurn (bounded by the burner's
+//      MIN_TAX_PAYOUT_WEI. Deployments file: HookrDirectionalTax, HookrRoot, MilordPoolId (and optionally
+//      HookrBuyTaxQueue/HookrSellTaxQueue, cross-checked on start).
+// The key can call only: HookrTaxQueue.payCreator (pays TradingTaxSplitter, nobody else), splitter.distribute, collector.collect, burner.buybackAndBurn (bounded by the burner's
 // limits and a TWAP-derived minimum), router.execute, adapter.settle, distributor.activateRoot. It holds no funds
 // beyond gas and has no role on any Safe.
 import path from "node:path";
-import { loadConfig, connect } from "./lib/config.mjs";
+import { loadConfig, connect, resolveTaxQueues, parentBlock } from "./lib/config.mjs";
 import { keeperTick } from "./lib/jobs.mjs";
 import { createAlerter, createMetrics, startHealthServer, runLoop, stateFile } from "./lib/runtime.mjs";
 import { entryPriceSource } from "../lib/entry-price.mjs";
 
 const cfg = loadConfig();
+// Refuses to start when recorded tax queues disagree with HookrDirectionalTax (configuration error, not an outage).
+const queues = await resolveTaxQueues(cfg.D, connect(cfg).provider);
+if (queues) Object.assign(cfg.D, queues);
 const { provider, contracts } = connect(cfg, "KEEPER_PRIVATE_KEY");
 const alerter = createAlerter({ service: "keeper" });
 const metrics = createMetrics("keeper");
@@ -30,6 +35,9 @@ await runLoop({
   tick: async () => {
     const r = await keeperTick(contracts, {
       alerter,
+      metrics,
+      parentBlock: () => parentBlock(provider),
+      taxQueue: { expect: { assetRecipient: D.TradingTaxSplitter, protocolShareBps: 2000 }, minPayoutWei: cfg.minTaxPayoutWei },
       now: async () => (await provider.getBlock("latest")).timestamp,
       buyback: milordPrice && {
         minBudgetWei: cfg.minBuybackWei,

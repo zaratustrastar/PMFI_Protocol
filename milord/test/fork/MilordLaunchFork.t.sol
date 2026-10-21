@@ -4,9 +4,9 @@ pragma solidity 0.8.26;
 import {console2} from "forge-std/Test.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
-import {IHookrLauncher} from "./hookr/interfaces/IHookrLauncher.sol";
-import {HookrTypes} from "./hookr/types/HookrTypes.sol";
-import {IHookrRulesFork, IHookrDirectionalTaxFork, IHookrTaxQueueFork, IHookrTreasuryFork} from "./HookrForkInterfaces.sol";
+import {IHookrLauncher} from "../../src/vendor/hookr/interfaces/IHookrLauncher.sol";
+import {HookrTypes} from "../../src/vendor/hookr/types/HookrTypes.sol";
+import {IHookrRulesFork, IHookrDirectionalTaxFork, IHookrTaxQueueFork, IHookrTreasuryFork} from "../../src/vendor/hookr/IHookrExtras.sol";
 import {MilordForkBase} from "./MilordForkBase.sol";
 
 /// Priority 1: the approved MILORD launch (no Anti-Snipe) through the live HookrLauncher on a Robinhood fork.

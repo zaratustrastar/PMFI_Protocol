@@ -88,6 +88,7 @@ jobs:
           cache-dependency-path: milord/package-lock.json
       - run: npm ci
       - run: node offchain/test-twap.mjs
+      - run: node offchain/test-option-d.mjs
       - run: node --test offchain/services/test/services.test.mjs
 
   simulation:

@@ -18,6 +18,7 @@
 #   FORK_BUILD=ci|lowmem             ci (default): CI production artifacts for this commit, downloaded with gh if
 #                                    missing; lowmem: compile the non-IR lowmem profile instead (~0.7 GB)
 #   MATCH=<regex>                    forge --match-test filter
+#   NO_STUB_PASS=1                   (default) run the suite a second time without the ArbSys stand-in; 0 skips it
 #   SNIPE_PIPS, SNIPE_SECONDS, GUARD_BLOCKS, LOCK_MARGIN_BLOCKS   Anti-Snipe exploration knobs (tests' defaults:
 #                                    400000, 3600, 300, 7200)
 set -euo pipefail
@@ -140,22 +141,33 @@ say "  launchFee (fee, treasury, pending, pendingTreasury, readyAt): $(c $LAUNCH
 # ---------------------------------------------------------------------------------------------- 5. the suite
 FORGE=(forge test --match-path 'test/fork/*' --fork-url "$FORK_URL" --threads "${FORGE_THREADS:-2}" -vv)
 [ -n "${MATCH:-}" ] && FORGE+=(--match-test "$MATCH")
-say "== forge ${FORGE[*]:1}"
 hwm_mb() { echo $(( $(grep -o 'VmHWM:[[:space:]]*[0-9]*' "/proc/$1/status" 2>/dev/null | grep -o '[0-9]*$' || echo 0) / 1024 )); }
-SECONDS=0
-set +e
-"${LOWPRIO[@]}" "${FORGE[@]}" > >(tee -a "$LOG") 2>&1 &
-FORGE_PID=$!
 FORGE_PEAK=0; ANVIL_PEAK=0
-while kill -0 "$FORGE_PID" 2>/dev/null; do
-  m=$(hwm_mb "$FORGE_PID"); [ "$m" -gt "$FORGE_PEAK" ] && FORGE_PEAK=$m
-  if [ -n "$ANVIL_PID" ]; then m=$(hwm_mb "$ANVIL_PID"); [ "$m" -gt "$ANVIL_PEAK" ] && ANVIL_PEAK=$m; fi
+run_suite() { # $1 = label; the rest of the environment is inherited
+  say "== [$1] forge ${FORGE[*]:1}"
+  set +e
+  "${LOWPRIO[@]}" "${FORGE[@]}" > >(tee -a "$LOG") 2>&1 &
+  local pid=$! m
+  while kill -0 "$pid" 2>/dev/null; do
+    m=$(hwm_mb "$pid"); [ "$m" -gt "$FORGE_PEAK" ] && FORGE_PEAK=$m
+    if [ -n "$ANVIL_PID" ]; then m=$(hwm_mb "$ANVIL_PID"); [ "$m" -gt "$ANVIL_PEAK" ] && ANVIL_PEAK=$m; fi
+    sleep 0.5
+  done
+  wait "$pid"
+  local st=$?
+  set -e
   sleep 0.5
-done
-wait "$FORGE_PID"
-STATUS=$?
-set -e
-sleep 0.5
+  return $st
+}
+SECONDS=0
+STATUS=0
+run_suite "ArbSys stub" || STATUS=$?
+# Second pass without the ArbSys (0x64) stand-in: only Hookr's arb recapture (off for MILORD) reads ArbSys, so every
+# result must be the same. A difference means some MILORD result depends on the simulated clock
+# (docs/launch/CLOCK_AND_ARBSYS.md). NO_STUB_PASS=0 skips it.
+if [ "${NO_STUB_PASS:-1}" = "1" ]; then
+  FORK_NO_ARBSYS_STUB=true run_suite "no ArbSys stub" || STATUS=$?
+fi
 say "resources: forge peak ${FORGE_PEAK} MB, runner's anvil peak ${ANVIL_PEAK} MB (0 = reused FORK_URL), wall ${SECONDS} s"
 say "log: $LOG"
 exit $STATUS

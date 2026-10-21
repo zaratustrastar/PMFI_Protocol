@@ -2,9 +2,9 @@
 pragma solidity 0.8.26;
 
 import {console2} from "forge-std/Test.sol";
-import {IHookrLauncher} from "./hookr/interfaces/IHookrLauncher.sol";
-import {HookrTypes} from "./hookr/types/HookrTypes.sol";
-import {IHookrRulesFork, IHookrDirectionalTaxFork} from "./HookrForkInterfaces.sol";
+import {IHookrLauncher} from "../../src/vendor/hookr/interfaces/IHookrLauncher.sol";
+import {HookrTypes} from "../../src/vendor/hookr/types/HookrTypes.sol";
+import {IHookrRulesFork, IHookrDirectionalTaxFork} from "../../src/vendor/hookr/IHookrExtras.sol";
 import {MilordForkBase} from "./MilordForkBase.sol";
 
 /// Priority 2: Hookr's native Anti-Snipe on an existing-token launch (EXPLORATION, not an approved launch setting):

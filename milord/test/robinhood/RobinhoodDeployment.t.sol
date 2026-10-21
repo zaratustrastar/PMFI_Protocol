@@ -69,8 +69,20 @@ contract RobinhoodDeploymentTest is SingleChainFixture {
         this.deployWith(c);
     }
 
-    function deployWith(Config memory c) external {
-        _deployMilord(c);
+    function deployWith(Config memory c) external returns (Deployment memory) {
+        return _deployMilord(c);
+    }
+
+    /// Atomic launch: the protocol is deployed against MilordAtomicLaunch.predictedToken(), which has no code yet.
+    function test_deployAgainstPredictedToken() public {
+        Config memory c = cfg;
+        c.token = makeAddr("predictedMilord");
+        c.tokenHolder = address(0);
+        Deployment memory x = this.deployWith(c);
+        assertEq(address(x.token), c.token);
+        assertEq(address(x.converter.token()), c.token);
+        assertEq(address(x.burner.token()), c.token);
+        assertEq(c.token.code.length, 0, "nothing was deployed at the predicted address");
     }
 
     function test_reportSignedForBaseIsRejectedOnRobinhood() public {

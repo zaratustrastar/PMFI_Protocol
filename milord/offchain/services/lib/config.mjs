@@ -24,6 +24,15 @@ export const ABI = {
   ],
   nft: ["event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"],
   hook: ["function collect()"],
+  taxQueue: [
+    "function terms() view returns (tuple(address root,address rules,bytes32 poolId,address quote,bool isBuy,address protocolRecipient,uint16 protocolShareBps,bytes32 routeId,address assetRecipient,address recoveryRecipient,uint32 staleRecoveryDelay))",
+    "function ledger() view returns (tuple(uint256 protocolOwed,uint256 creatorOwed,uint256 income,uint256 protocolIncome,uint256 creatorIncome,uint256 protocolSwept,uint256 creatorConverted,uint256 creatorPaid,uint256 outputDelivered))",
+    "function pending() view returns (uint256)",
+    "function accountingInvariant() view returns (bool)",
+    "function payCreator() returns (uint256)",
+  ],
+  launcher: ["function familyOwner(bytes32) view returns (address)", "function principalLockedUntil(bytes32) view returns (uint256)"],
+  directionalTax: ["function terms(address root, bytes32 poolId) view returns (tuple(address buyQueue,uint24 buyTaxPips,bool bound,bool tiered,bool decaying,address sellQueue,uint24 sellTaxPips))"],
 };
 
 export function loadConfig(env = process.env) {
@@ -42,7 +51,8 @@ export function loadConfig(env = process.env) {
     stateDir: env.STATE_DIR ?? "./state",
     minBuybackWei: BigInt(env.MIN_BUYBACK_WEI ?? "10000000000000000"),
     buybackMaxBelowTwapBps: num("BUYBACK_MAX_BELOW_TWAP_BPS", 1000),
-    hookrSettle: env.HOOKR_SETTLE === "mock", // local mock tax hook only; on mainnet Hookr's own settlement
+    hookrSettle: env.HOOKR_SETTLE === "mock", // local mock tax hook only; on mainnet the Hookr tax queues below
+    minTaxPayoutWei: BigInt(env.MIN_TAX_PAYOUT_WEI ?? "1000000000000000"),
   };
 }
 
@@ -66,8 +76,40 @@ export function connect(cfg, keyEnv) {
       distributor: c(D.ShareDistributor, ABI.distributor),
       nft: c(D.Milords, ABI.nft),
       hookrSettle: cfg.hookrSettle && D.HookrTaxHook ? () => c(D.HookrTaxHook, ABI.hook).collect() : null,
+      taxQueues: [
+        D.HookrBuyTaxQueue && { name: "buy", queue: c(D.HookrBuyTaxQueue, ABI.taxQueue) },
+        D.HookrSellTaxQueue && { name: "sell", queue: c(D.HookrSellTaxQueue, ABI.taxQueue) },
+      ].filter(Boolean),
+      lockWatch: D.HookrLauncher && D.MilordFamilyId && D.HookrFamilyLock
+        ? { launcher: c(D.HookrLauncher, ABI.launcher), familyId: D.MilordFamilyId, familyLock: D.HookrFamilyLock }
+        : null,
     },
   };
+}
+
+/** block.number as contracts see it on an Arbitrum-style chain: the parent-chain height (l1BlockNumber). */
+export async function parentBlock(provider) {
+  const b = await provider.send("eth_getBlockByNumber", ["latest", false]);
+  if (b?.l1BlockNumber === undefined) throw new Error("RPC returned no l1BlockNumber: cannot read Robinhood Chain's block.number");
+  return BigInt(b.l1BlockNumber);
+}
+
+/**
+ * The buy and sell HookrTaxQueue clones of the MILORD pool. Taken from the deployments file when recorded
+ * (MilordAtomicLaunch.buyQueue/sellQueue after the launch), and always cross-checked against
+ * HookrDirectionalTax.terms(root, poolId): a disagreement is a configuration error, never resolved silently.
+ */
+export async function resolveTaxQueues(D, provider) {
+  if (!D.HookrDirectionalTax || !D.HookrRoot || !D.MilordPoolId) {
+    if (D.HookrBuyTaxQueue || D.HookrSellTaxQueue) throw new Error("tax queues recorded without HookrDirectionalTax/HookrRoot/MilordPoolId to check them against");
+    return null;
+  }
+  const t = await new Contract(D.HookrDirectionalTax, ABI.directionalTax, provider).terms(D.HookrRoot, D.MilordPoolId);
+  if (!t.bound) throw new Error("HookrDirectionalTax has no terms for the MILORD pool");
+  for (const [k, onchain] of [["HookrBuyTaxQueue", t.buyQueue], ["HookrSellTaxQueue", t.sellQueue]]) {
+    if (D[k] && D[k].toLowerCase() !== onchain.toLowerCase()) throw new Error(`${k} ${D[k]} disagrees with HookrDirectionalTax (${onchain})`);
+  }
+  return { HookrBuyTaxQueue: t.buyQueue, HookrSellTaxQueue: t.sellQueue };
 }
 
 /** Latest block considered final (Robinhood Chain is an Arbitrum Orbit chain: use the 'finalized' tag when served). */

@@ -218,3 +218,138 @@ test("loop: keeps running through failures, alerts after 3 in a row, sends resol
   assert.equal(metrics.summary().counters.tick_failures, 5);
   assert.deepEqual(posts.map((p) => p.level), ["critical", "resolved"], "one critical (throttled), then resolved");
 });
+
+// ───────────────────── Hookr tax queues (mainnet settlement) ─────────────────────
+
+const SPLITTER = "0x00000000000000000000000000000000000000d4";
+const BYTES0 = "0x" + "0".repeat(64);
+
+function fakeQueue({ recipient = SPLITTER, routeId = BYTES0, share = 2000, invariant = true } = {}) {
+  const st = { claim: 0n, owed: 0n, paid: [], calls: 0 };
+  const settle = () => { const creator = st.claim - (st.claim * BigInt(share)) / 10_000n; st.owed += creator; st.claim = 0n; };
+  const payCreator = async () => {
+    st.calls++;
+    settle();
+    if (st.owed === 0n) throw revert("NothingDue");
+    st.paid.push(st.owed);
+    st.owed = 0n;
+  };
+  payCreator.staticCall = async () => { const o = st.owed + st.claim - (st.claim * BigInt(share)) / 10_000n; if (o === 0n) throw revert("NothingDue"); return o; };
+  const queue = {
+    terms: async () => ({ assetRecipient: recipient, routeId, quote: Z, protocolShareBps: share }),
+    ledger: async () => ({ creatorOwed: st.owed }),
+    pending: async () => st.claim,
+    accountingInvariant: async () => invariant,
+    payCreator,
+  };
+  return { queue, st };
+}
+const taxOpts = (alerts, extra = {}) => ({
+  now: async () => G, alerter: { alert: async (level, key, text) => alerts.push({ level, key, text }) },
+  taxQueue: { expect: { assetRecipient: SPLITTER, protocolShareBps: 2000 }, minPayoutWei: 0n, ...extra },
+});
+
+test("tax queues: pays the 80% creator share before the splitters run, then skips (idempotent)", async () => {
+  const ch = fakeChain();
+  const buy = fakeQueue();
+  const sell = fakeQueue();
+  buy.st.claim = 1000n;
+  sell.st.claim = 500n;
+  ch.c.taxQueues = [{ name: "buy", queue: buy.queue }, { name: "sell", queue: sell.queue }];
+  const alerts = [];
+  const r = await keeperTick(ch.c, taxOpts(alerts));
+  assert.deepEqual(buy.st.paid, [800n]);
+  assert.deepEqual(sell.st.paid, [400n]);
+  assert.deepEqual(r.results.slice(0, 2).map((x) => x.step), ["hookr-tax-buy", "hookr-tax-sell"], "before split-*");
+  const again = await keeperTick(ch.c, taxOpts(alerts));
+  assert.equal(again.results.find((x) => x.step === "hookr-tax-buy").status, "skipped");
+  assert.equal(buy.st.calls, 1, "nothing due: no transaction sent");
+  assert.equal(alerts.length, 0);
+});
+
+test("tax queues: a retried pass after a payout already landed is a skip, not a failure", async () => {
+  const q = fakeQueue();
+  q.st.claim = 100n;
+  const ch = fakeChain();
+  ch.c.taxQueues = [{ name: "buy", queue: q.queue }];
+  // the previous pass's transaction was mined but its receipt was lost: the staticCall now reverts NothingDue
+  await q.queue.payCreator();
+  q.queue.pending = async () => 1n; // dust still pending, but nothing owed after the Hookr split rounds
+  q.queue.payCreator.staticCall = async () => { throw revert("NothingDue"); };
+  const r = await keeperTick(ch.c, taxOpts([]));
+  assert.equal(r.failed, 0);
+  assert.equal(r.results.find((x) => x.step === "hookr-tax-buy").status, "skipped");
+  assert.deepEqual(q.st.paid, [80n]);
+});
+
+test("tax queues: below the minimum payout waits (saves gas), above it pays", async () => {
+  const q = fakeQueue();
+  q.st.claim = 100n;
+  const ch = fakeChain();
+  ch.c.taxQueues = [{ name: "buy", queue: q.queue }];
+  await keeperTick(ch.c, taxOpts([], { minPayoutWei: 100n }));
+  assert.deepEqual(q.st.paid, []);
+  q.st.claim = 200n;
+  await keeperTick(ch.c, taxOpts([], { minPayoutWei: 100n }));
+  assert.deepEqual(q.st.paid, [160n]);
+});
+
+test("tax queues: fail closed on wrong recipient, conversion route, broken accounting or missing config", async () => {
+  for (const [label, q, extra] of [
+    ["recipient", fakeQueue({ recipient: A }), {}],
+    ["route", fakeQueue({ routeId: "0x" + "1".repeat(64) }), {}],
+    ["share", fakeQueue({ share: 2500 }), {}],
+    ["invariant", fakeQueue({ invariant: false }), {}],
+    ["unconfigured", fakeQueue(), { expect: {} }],
+  ]) {
+    q.st.claim = 1000n;
+    const ch = fakeChain();
+    ch.c.taxQueues = [{ name: "buy", queue: q.queue }];
+    const alerts = [];
+    const r = await keeperTick(ch.c, taxOpts(alerts, extra));
+    assert.equal(r.results[0].status, "failed", label);
+    assert.equal(q.st.calls, 0, `${label}: payCreator never called`);
+    assert.ok(alerts.some((a) => a.level === "critical" && a.key === "keeper:tax-buy"), `${label}: critical alert`);
+    assert.ok(r.results.some((x) => x.step === "split-0"), `${label}: the rest of the pass still runs`);
+  }
+});
+
+test("tax queues: an unexpected payout revert is a failed step with a warning; the pass continues", async () => {
+  const q = fakeQueue();
+  q.st.claim = 1000n;
+  q.queue.payCreator.staticCall = async () => { throw revert("ReentrantCall"); };
+  const ch = fakeChain();
+  ch.c.taxQueues = [{ name: "sell", queue: q.queue }];
+  const alerts = [];
+  const r = await keeperTick(ch.c, taxOpts(alerts));
+  assert.equal(r.results[0].status, "failed");
+  assert.ok(alerts.some((a) => a.level === "warning" && a.key === "keeper:hookr-tax-sell"));
+  assert.ok(r.results.some((x) => x.step === "activate-root"));
+});
+
+// ───────────────────── permanent-lock handover watch ─────────────────────
+
+const SAFE = "0x00000000000000000000000000000000000000e7";
+const LOCKADDR = "0x00000000000000000000000000000000000000f1";
+function lockWatch(owner, until) {
+  return { launcher: { familyOwner: async () => owner, principalLockedUntil: async () => until }, familyId: "0x01", familyLock: LOCKADDR };
+}
+test("lock watch: silent when locked or far from the unlock block, warns, then critical, then 'withdrawable'", async () => {
+  const cases = [
+    [LOCKADDR, 10_000n, 9_999n, null],
+    [SAFE, 10_000n, 5_000n, null],
+    [SAFE, 10_000n, 8_500n, "warning"],
+    [SAFE, 10_000n, 9_800n, "critical"],
+    [SAFE, 10_000n, 10_000n, "critical"],
+  ];
+  for (const [owner, until, now, level] of cases) {
+    const ch = fakeChain();
+    ch.c.lockWatch = lockWatch(owner, until);
+    const alerts = [];
+    const r = await keeperTick(ch.c, { ...opts(ch.st, { alert: async (l, k, t) => alerts.push({ l, k, t }) }), parentBlock: async () => now });
+    const w = alerts.filter((a) => a.k === "keeper:lock-watch");
+    assert.equal(r.failed, 0);
+    assert.equal(w[0]?.l ?? null, level, `${owner} at ${now}`);
+    if (now >= until) assert.match(w[0].t, /WITHDRAWABLE/);
+  }
+});

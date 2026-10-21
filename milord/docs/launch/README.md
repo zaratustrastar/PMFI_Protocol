@@ -20,7 +20,13 @@ Status tags used in every document here:
 | 5d | NFT entry-fee pricing (TWAP quote, bootstrap, trust assumptions) | [ENTRY_FEE_PRICING.md](ENTRY_FEE_PRICING.md) |
 | 6b | Hookr-1 verification and incompatibilities | [HOOKR_VERIFICATION.md](HOOKR_VERIFICATION.md) |
 | 10b | Safe configuration and permissions | [SAFE_CONFIGURATION.md](SAFE_CONFIGURATION.md) |
-| 13 | Remaining blockers by severity | [BLOCKERS.md](BLOCKERS.md) |
+| 13 | Blocker matrix | [BLOCKERS.md](BLOCKERS.md) |
+| 14 | Atomic MILORD deployment + Hookr launch, pre-emption | [ATOMIC_LAUNCH.md](ATOMIC_LAUNCH.md) |
+| 15 | Temporary and permanent lock, missed-handover contingency, Option D split | [LOCK_PROCEDURE.md](LOCK_PROCEDURE.md) |
+| 16 | Hookr-1 bytecode verification | [HOOKR_BYTECODE_VERIFICATION.md](HOOKR_BYTECODE_VERIFICATION.md) |
+| 17 | Fork clock, ArbSys stub, what to validate on Robinhood | [CLOCK_AND_ARBSYS.md](CLOCK_AND_ARBSYS.md) |
+| 18 | Security-audit scope | [AUDIT_SCOPE.md](AUDIT_SCOPE.md) |
+| 19 | Robinhood fork suite | [FORK_INTEGRATION.md](FORK_INTEGRATION.md) |
 | 3 | Fee paths and recipients | [FEE_ROUTING_VERIFICATION.md](FEE_ROUTING_VERIFICATION.md) |
 | 4 | Full economic transaction trace | [MILORD_END_TO_END.md](MILORD_END_TO_END.md) |
 | 5 | Venue funding and withdrawal routes | [ARBITRAGE_FUNDING_READINESS.md](ARBITRAGE_FUNDING_READINESS.md) |

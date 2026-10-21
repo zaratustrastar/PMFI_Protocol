@@ -19,12 +19,12 @@ import {SwapParams, ModifyLiquidityParams} from "@uniswap/v4-core/src/types/Pool
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {FullMath} from "@uniswap/v4-core/src/libraries/FullMath.sol";
 import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
-import {IHookrLauncher} from "./hookr/interfaces/IHookrLauncher.sol";
-import {IHookrRegistry} from "./hookr/interfaces/IHookrRegistry.sol";
-import {IHookrFamilyLock} from "./hookr/interfaces/IHookrFamilyLock.sol";
-import {IHookrLaunchFee} from "./hookr/interfaces/IHookrLaunchFee.sol";
-import {HookrTypes} from "./hookr/types/HookrTypes.sol";
-import {IHookrRulesFork, IHookrDirectionalTaxFork, IHookrTaxQueueFork, IHookrTreasuryFork} from "./HookrForkInterfaces.sol";
+import {IHookrLauncher} from "../../src/vendor/hookr/interfaces/IHookrLauncher.sol";
+import {IHookrRegistry} from "../../src/vendor/hookr/interfaces/IHookrRegistry.sol";
+import {IHookrFamilyLock} from "../../src/vendor/hookr/interfaces/IHookrFamilyLock.sol";
+import {IHookrLaunchFee} from "../../src/vendor/hookr/interfaces/IHookrLaunchFee.sol";
+import {HookrTypes} from "../../src/vendor/hookr/types/HookrTypes.sol";
+import {IHookrRulesFork, IHookrDirectionalTaxFork, IHookrTaxQueueFork, IHookrTreasuryFork} from "../../src/vendor/hookr/IHookrExtras.sol";
 
 import {MILORDToken} from "../../src/robinhood/MILORDToken.sol";
 import {BuybackBurner, ISwapAdapter} from "../../src/robinhood/BuybackBurner.sol";
@@ -117,7 +117,9 @@ abstract contract MilordForkBase is Test, IUnlockCallback {
             vm.skip(true, "fork-only: run fork/run-fork-tests.sh (local Anvil fork of Robinhood Chain)");
             return false;
         }
-        vm.etch(ARBSYS, address(new ArbSysForkStub()).code);
+        // FORK_NO_ARBSYS_STUB=true runs without the stub: every MILORD test must give the same result, because only
+        // Hookr's arb recapture (off for MILORD) reads ArbSys.
+        if (!vm.envOr("FORK_NO_ARBSYS_STUB", false)) vm.etch(ARBSYS, address(new ArbSysForkStub()).code);
         pm = LAUNCHER.poolManager();
         registry = LAUNCHER.registry();
         rules = vm.envOr("HOOKR_RULES", _admitted(RULES_A, RULES_B));

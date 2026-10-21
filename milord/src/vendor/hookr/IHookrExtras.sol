@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {PoolId} from "@uniswap/v4-core/src/types/PoolId.sol";
-import {HookrTypes} from "./hookr/types/HookrTypes.sol";
+import {HookrTypes} from "./types/HookrTypes.sol";
 
 // Hand-written subsets of Hookr-1 contracts the fork suite reads, from hookr-contracts@7e771b3 (hookr-1/src/core/
 // HookrRules.sol, hook-blocks/directional-tax/src/HookrDirectionalTax.sol and HookrTaxQueue.sol).

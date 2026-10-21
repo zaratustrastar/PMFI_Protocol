@@ -2,8 +2,8 @@
 pragma solidity 0.8.26;
 
 import {console2} from "forge-std/Test.sol";
-import {IHookrLauncher} from "./hookr/interfaces/IHookrLauncher.sol";
-import {IHookrFamilyLock} from "./hookr/interfaces/IHookrFamilyLock.sol";
+import {IHookrLauncher} from "../../src/vendor/hookr/interfaces/IHookrLauncher.sol";
+import {IHookrFamilyLock} from "../../src/vendor/hookr/interfaces/IHookrFamilyLock.sol";
 import {MilordForkBase} from "./MilordForkBase.sol";
 
 /// Priority 3: permanent HookrFamilyLock, LP fees through HookrLockFeeCollector into BuybackBurner, buybacks through the

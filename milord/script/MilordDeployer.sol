@@ -30,7 +30,10 @@ abstract contract MilordDeployer {
         address quoteSigner;
         address reportSigner;
         address operator; // buyback, funding and root-publishing ops key
-        address tokenHolder; // receives the 6.767B MILORD
+        address tokenHolder; // receives the 6.767B MILORD (ignored when `token` is set)
+        // Atomic launch: MilordAtomicLaunch.predictedToken(). MILORD is created later, inside the Safe's launch
+        // transaction, so nothing here may call the token; the constructors below only store its address.
+        address token;
         address asset; // vault stablecoin: USDG on Robinhood Chain (6 decimals)
         address swapAdapter; // MILORD buyback venue adapter
         string baseURI;
@@ -72,7 +75,7 @@ abstract contract MilordDeployer {
         require(c.characteristics.length == 8, "need 8 characteristics");
         address me = c.deployer;
 
-        d.token = new MILORDToken(c.tokenHolder);
+        d.token = c.token != address(0) ? MILORDToken(c.token) : new MILORDToken(c.tokenHolder);
 
         // pARB on the same chain: no reward bridge.
         d.vault = new PMFIArbVaultV3(

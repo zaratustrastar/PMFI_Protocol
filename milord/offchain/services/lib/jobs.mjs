@@ -23,8 +23,9 @@ const wait = async (txp) => {
  * is recorded as "skipped"; any other failure is recorded as "failed" and alerted, and the pass continues.
  * Nothing here can move funds anywhere except along the contracts' fixed routes.
  *
- * c: { hookrSettle?, splitters[], collector?, burner?, router?, adapter, vault, distributor }
- * opts: { buyback: { minBudgetWei, quoteMinOut(budget) -> bigint | null, deadlineSecs }, now(), alerter, members: [0] }
+ * c: { hookrSettle?, taxQueues?: [{ name, queue }], splitters[], collector?, burner?, router?, adapter, vault, distributor }
+ * opts: { buyback: { minBudgetWei, quoteMinOut(budget) -> bigint | null, deadlineSecs }, now(), alerter, members: [0],
+ *         taxQueue: { expect: { assetRecipient, protocolShareBps }, minPayoutWei }, metrics }
  */
 export async function keeperTick(c, opts = {}) {
   const res = [];
@@ -39,8 +40,12 @@ export async function keeperTick(c, opts = {}) {
     }
   };
 
-  // 1. Hookr tax settlement (on mainnet: whatever settle/payout call the Tax + Conversion block exposes)
+  // 1. Hookr tax settlement. Local simulation: the mock tax hook. Mainnet: the pair of HookrTaxQueue clones
+  //    (buy, sell) frozen at launch; payCreator pays the 80% creator share in ETH to TradingTaxSplitter.
   if (c.hookrSettle) await run("hookr-settle", async () => { await wait(c.hookrSettle()); });
+  for (const { name, queue } of c.taxQueues ?? []) {
+    await run(`hookr-tax-${name}`, () => payTaxQueue(name, queue, opts));
+  }
 
   // 2. revenue splitters (ETH)
   for (const [i, s] of (c.splitters ?? []).entries()) {
@@ -99,8 +104,67 @@ export async function keeperTick(c, opts = {}) {
     await wait(c.distributor.activateRoot());
   });
 
+  // 8. read-only watch on the permanent-lock handover (docs/launch/LOCK_PROCEDURE.md)
+  if (c.lockWatch) await run("lock-watch", () => watchLockHandover(c.lockWatch, opts));
+
   const failed = res.filter((r) => r.status === "failed");
   return { results: res, failed: failed.length };
+}
+
+/**
+ * Until HookrFamilyLock owns the MILORD family, principal becomes withdrawable by the family owner at
+ * principalLockedUntil (a PARENT-chain block: block.number on Robinhood Chain, not eth_blockNumber). Alerts as that
+ * block approaches and, once it has passed, on every pass. Read-only: never sends anything.
+ * w: { launcher, familyId, familyLock, warnBlocks = [1800, 300] }; opts.parentBlock() -> current block.number.
+ */
+export async function watchLockHandover(w, opts = {}) {
+  const owner = String(await w.launcher.familyOwner(w.familyId)).toLowerCase();
+  if (owner === w.familyLock.toLowerCase()) return null; // locked: nothing to watch
+  const until = BigInt(await w.launcher.principalLockedUntil(w.familyId));
+  const now = BigInt(await opts.parentBlock());
+  const left = until - now;
+  opts.metrics?.set("lock_blocks_left", left);
+  const [early, late] = (w.warnBlocks ?? [1800, 300]).map(BigInt);
+  const level = left <= 0n ? "critical" : left <= late ? "critical" : left <= early ? "warning" : null;
+  if (level && opts.alerter) {
+    const text = left <= 0n
+      ? `MILORD principal is WITHDRAWABLE by the family owner ${owner} since parent block ${until}: execute the Safe lock batch now`
+      : `MILORD permanent lock not executed: principal unlocks in ${left} parent blocks (~${(Number(left) * 12) / 60} min, block ${until})`;
+    await opts.alerter.alert(level, "keeper:lock-watch", text);
+  }
+  return { owner, until, left };
+}
+
+/**
+ * Pay one HookrTaxQueue's creator share to TradingTaxSplitter. Idempotent: payCreator pays exactly what the queue
+ * owes and then owes nothing, so a repeated or retried call reverts NothingDue (a skip). Fails closed: if the queue's
+ * frozen terms are not MILORD's (recipient, direct ETH payout, 20% Hookr share) or its own accounting invariant does
+ * not hold, nothing is called and a critical alert goes out; that needs a person, not a retry.
+ */
+export async function payTaxQueue(name, q, opts = {}) {
+  const t = await q.terms();
+  const exp = opts.taxQueue?.expect ?? {};
+  const bad = [];
+  if (!exp.assetRecipient) bad.push("no expected recipient configured (TradingTaxSplitter)");
+  else if (t.assetRecipient.toLowerCase() !== exp.assetRecipient.toLowerCase()) bad.push(`assetRecipient ${t.assetRecipient}`);
+  if (!/^0x0+$/.test(t.routeId)) bad.push(`routeId ${t.routeId} (conversion route: direct payout disabled)`);
+  if (BigInt(t.quote) !== 0n) bad.push(`quote ${t.quote} is not native ETH`);
+  if (exp.protocolShareBps !== undefined && Number(t.protocolShareBps) !== Number(exp.protocolShareBps)) bad.push(`protocolShareBps ${t.protocolShareBps}`);
+  if (!(await q.accountingInvariant())) bad.push("accountingInvariant() is false");
+  if (bad.length) {
+    if (opts.alerter) await opts.alerter.alert("critical", `keeper:tax-${name}`, `Hookr ${name} tax queue refused, nothing paid: ${bad.join("; ")}`);
+    throw new Error(`tax queue ${name} refused: ${bad.join("; ")}`);
+  }
+
+  const owed = BigInt((await q.ledger()).creatorOwed);
+  const incoming = BigInt(await q.pending()); // not yet booked: pulled from HookrRules and split on the next settle
+  const due = owed + incoming - (incoming * BigInt(t.protocolShareBps)) / 10_000n;
+  opts.metrics?.set(`tax_${name}_due_wei`, due);
+  if (due === 0n || due < (opts.taxQueue?.minPayoutWei ?? 0n)) return null;
+  if (q.payCreator.staticCall) await q.payCreator.staticCall(); // surfaces NothingDue/other reverts before spending gas
+  const r = await wait(q.payCreator());
+  opts.metrics?.inc(`tax_${name}_paid`);
+  return { due, tx: r?.hash };
 }
 
 // ───────────────────────────── epochs ─────────────────────────────

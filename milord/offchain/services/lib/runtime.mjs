@@ -26,7 +26,7 @@ export async function retry(fn, { attempts = 5, baseMs = 1000, maxMs = 30_000, i
 /** Revert reasons that will not change by retrying the same call now (expected states, not outages). */
 export function isExpectedRevert(e) {
   const m = String(e?.shortMessage ?? e?.message ?? e);
-  return /IsPaused|BelowThreshold|TooSoon|NotClaimable|AlreadySettled|NothingToClaim|OutOfBounds|TooEarly|SpotDeviatesFromTwap|ReferencesDisagree|StalePrice/.test(m);
+  return /IsPaused|BelowThreshold|TooSoon|NotClaimable|AlreadySettled|NothingToClaim|OutOfBounds|TooEarly|SpotDeviatesFromTwap|ReferencesDisagree|StalePrice|NothingDue/.test(m);
 }
 
 /**

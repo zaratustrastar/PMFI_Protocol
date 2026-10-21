@@ -1,36 +1,42 @@
 // node offchain/safe-launch-batch.mjs deploy/robinhood-launch.config.json  ->  deploy/out/safe-*.json
 //
-// Encodes (never signs or sends) the Safe Transaction Builder batches for the Hookr existing-token launch.
-// Every value comes from the config file. No keys are read.
+// Encodes (never signs or sends) the Safe Transaction Builder batches for the atomic MILORD launch
+// (docs/launch/ATOMIC_LAUNCH.md). Every value comes from the config file. No keys are read.
 //
-//   A. safe-launch-hookr.json      allocation Safe: MILORD.approve(HookrLauncher, 100% of supply), then
-//                                   HookrLauncher.launch(...). BLOCKED: the launch call is NOT encoded while the
-//                                   Tax + Conversion advisory address/config and the familyId are unknown
-//                                   (docs/launch/HOOKR_COMPATIBILITY.md). The script lists the known Member fields.
-//   B. safe-lock-DO-NOT-EXECUTE.json   permanent lock, approved as architecture but NOT to be executed yet:
-//                                   HookrLauncher.transferFamily(familyId, HookrFamilyLock, 0) then
-//                                   HookrFamilyLock.lock(familyId, HookrLockFeeCollector, FOREVER).
-//   C. safe-team-setup.json        Team Safe: accept Ownable2Step handovers, BuybackBurner.setInitialAdapter.
-//   D. safe-arbitrage-setup.json   Arbitrage Funding Safe: accept ArbitrageFundingRouter ownership.
+// Before these batches: a deployer key deploys MilordAtomicLaunch (owner = Team Safe, holds no funds and no rights
+// until the Safe calls it), then the protocol against MilordAtomicLaunch.predictedToken() (MILORD_PREDICTED_TOKEN).
+//
+//   A.  safe-1-launch.json           Team Safe: MilordAtomicLaunch.launch{value: Hookr launch fee}(taxSplitter, deadline).
+//                                    Creates MILORD and the Hookr pool in ONE transaction (no pool pre-emption),
+//                                    verifies every frozen term, offers the family to the Safe.
+//   A2. safe-2-accept.json           Team Safe (needs familyId from the Launched event): HookrLauncher.acceptFamily,
+//                                    MilordAtomicLaunch.sweep (fees earned before acceptance), BuybackBurner.setInitialAdapter.
+//   B.  safe-3-lock-DO-NOT-EXECUTE.json   permanent lock, approved as architecture but NOT to be executed yet:
+//                                    HookrLauncher.transferFamily(familyId, HookrFamilyLock, 0) then
+//                                    HookrFamilyLock.lock(familyId, HookrLockFeeCollector, FOREVER). Must execute
+//                                    before the principal lock ends (MilordAtomicLaunch.lockEndBlock, a parent-chain
+//                                    block); see docs/launch/LOCK_PROCEDURE.md.
+//   C.  safe-team-setup.json         Team Safe: accept Ownable2Step handovers.
+//   D.  safe-arbitrage-setup.json    Arbitrage Funding Safe: accept ArbitrageFundingRouter ownership.
 import fs from "node:fs";
 import path from "node:path";
 import { Interface, getAddress } from "ethers";
-import { liquidityForAmount1, amount1ForLiquidity } from "./lib/v4math.mjs";
 
 const cfgPath = process.argv[2] ?? "deploy/robinhood-launch.config.example.json";
 const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
-const FOREVER = (1n << 64n) - 1n; // uint64 max: Hookr docs call this "forever" (exact sentinel to verify on fork)
-const erc20 = new Interface(["function approve(address,uint256)"]);
-const launcher = new Interface(["function transferFamily(bytes32 familyId,address newOwner,uint16 claims)"]);
+const FOREVER = (1n << 64n) - 1n; // uint64 max: HookrFamilyLock's "forever" (fork-verified: release reverts StillLocked)
+const helper = new Interface(["function launch(address taxRecipient,uint256 deadline) payable returns (bytes32)", "function sweep()"]);
+const launcher = new Interface([
+  "function transferFamily(bytes32 familyId,address newOwner,uint16 claims)",
+  "function acceptFamily(bytes32 familyId)",
+]);
 const familyLock = new Interface(["function lock(bytes32 familyId,address beneficiary,uint64 unlockBlock)"]);
 const burner = new Interface(["function setInitialAdapter(address)"]);
 const own = new Interface(["function acceptOwnership()"]);
 
-const amount = BigInt(cfg.milordForLiquidityWei);
-const { tickLower, tickUpper } = cfg.position;
-const liquidity = liquidityForAmount1(tickLower, tickUpper, amount);
-const taken = amount1ForLiquidity(tickLower, tickUpper, liquidity);
-const tx = (to, data, description) => ({ to: getAddress(to), value: "0", data, contractMethod: null, contractInputsValues: null, description });
+const tx = (to, data, description, value = 0n) => ({
+  to: getAddress(to), value: String(value), data, contractMethod: null, contractInputsValues: null, description,
+});
 const wrap = (name, description, transactions, extra = {}) => ({
   version: "1.0", chainId: String(cfg.chainId), createdAt: Date.now(),
   meta: { name, description: `${description} Generated by offchain/safe-launch-batch.mjs. Review every value before signing.` },
@@ -40,36 +46,34 @@ const outDir = path.join(path.dirname(cfgPath), "out");
 fs.mkdirSync(outDir, { recursive: true });
 const write = (f, o) => { fs.writeFileSync(path.join(outDir, f), JSON.stringify(o, (_, v) => (typeof v === "bigint" ? v.toString() : v), 2)); console.log(`wrote ${path.join(outDir, f)}`); };
 
-// A. launch
-const blockers = [];
-if (!cfg.hookr.taxConversionAdvisory) blockers.push("Tax + Conversion advisory address and its config encoding (advisoryConfigs bytes) are not published in hookr-1 docs/ABIs");
-blockers.push("existing-token launch with amount0Max = 0 (MILORD-only, 0 ETH) must be proven on a Robinhood fork");
-blockers.push("RulesConfig must be verified to allow snipeTaxPips = 0, maxBuyQuoteAmount = 0 (no cap), guardEndBlock = 0, no surcharge, and the 20% commission field (protocolShareBps?)");
-write("safe-launch-hookr.json", wrap("MILORD Hookr launch (BLOCKED DRAFT)", "Allocation Safe. Launch call not encoded until blockers clear.",
-  [tx(cfg.milord, erc20.encodeFunctionData("approve", [cfg.hookr.launcher, amount]), "allocation Safe: approve HookrLauncher for 100% of supply")],
-  { blocked: blockers, knownMemberFields: {
-      quote: "0x0000000000000000000000000000000000000000 (native ETH)", tickSpacing: cfg.position.tickSpacing,
-      tickLower, tickUpper, sqrtPriceX96AtTickUpper: "opening price = tickUpper (MILORD-only)", liquidity, milordTaken: taken,
-      remainderToBurn: amount - taken, amount0Max: 0, amount1Max: amount, baseLpFeePips: cfg.position.baseLpFeePips,
-      liquidityOwner: "launcher family (then HookrFamilyLock)", rules: { snipeTaxPips: 0, maxBuyQuoteAmount: 0, guardEndBlock: 0 },
-    } }));
+const L = cfg.atomicLaunch;
+const fee = BigInt(L.launchFeeWei);
+if (fee > BigInt(L.maxLaunchFeeWei)) throw new Error(`launch fee ${fee} above the helper's cap ${L.maxLaunchFeeWei}: the launch would revert`);
 
-// B. lock (prepared, NOT to be executed until the owner says so)
+// A. the atomic launch
+write("safe-1-launch.json", wrap("MILORD atomic launch", "Team Safe. Creates MILORD and its Hookr pool in one transaction. Re-read MilordAtomicLaunch.launchFee() right before signing; msg.value must equal it exactly.", [
+  tx(L.helper, helper.encodeFunctionData("launch", [cfg.tradingTaxSplitter, cfg.deadline]),
+    "MilordAtomicLaunch.launch: 100% of supply into the founding position, 0 ETH, 1.5%/1.5% tax to the trading-tax splitter", fee),
+], { expect: { token: L.predictedToken, principalLockedUntil: "launch block + guardBlocks + lockBlocks (parent-chain blocks)" } }));
+
+// A2 and B need the familyId from the Launched event.
 if (cfg.hookr.familyId) {
-  write("safe-lock-DO-NOT-EXECUTE.json", wrap("MILORD permanent LP lock (DO NOT EXECUTE)", "Family owner Safe. Irreversible. Approved as architecture only; execution needs a separate explicit approval.", [
-    tx(cfg.hookr.launcher, launcher.encodeFunctionData("transferFamily", [cfg.hookr.familyId, cfg.hookr.familyLock, 0]), "hand the MILORD family to HookrFamilyLock (claims = 0: semantics to verify)"),
+  write("safe-2-accept.json", wrap("MILORD accept family", "Team Safe. Accept the Hookr family the helper offered, forward fees earned before acceptance, set the buyback route.", [
+    tx(cfg.hookr.launcher, launcher.encodeFunctionData("acceptFamily", [cfg.hookr.familyId]), "accept the MILORD family (fees so far go to the helper)"),
+    tx(L.helper, helper.encodeFunctionData("sweep"), "forward those fees from the helper to the Safe"),
+    tx(cfg.buybackBurner, burner.encodeFunctionData("setInitialAdapter", [cfg.v4SwapAdapter]), "BuybackBurner: route through the Hookr MILORD pool"),
+  ]));
+  write("safe-3-lock-DO-NOT-EXECUTE.json", wrap("MILORD permanent LP lock (DO NOT EXECUTE)", "Team Safe (family owner). Irreversible. Approved as architecture only; execution needs a separate explicit approval. Must run before MilordAtomicLaunch.lockEndBlock.", [
+    tx(cfg.hookr.launcher, launcher.encodeFunctionData("transferFamily", [cfg.hookr.familyId, cfg.hookr.familyLock, 0]), "offer the MILORD family to HookrFamilyLock (claims = 0)"),
     tx(cfg.hookr.familyLock, familyLock.encodeFunctionData("lock", [cfg.hookr.familyId, cfg.lockFeeCollector, FOREVER]), "lock forever; beneficiary HookrLockFeeCollector (ETH fees -> BuybackBurner, MILORD fees burned)"),
   ], { irreversible: true, executed: false }));
 } else {
-  console.log("lock batch skipped: familyId is only known after the launch transaction");
+  console.log("accept and lock batches skipped: familyId is only known from the launch transaction's Launched event");
 }
 
 // C. Team Safe setup
-write("safe-team-setup.json", wrap("MILORD Team Safe setup", "Team Safe.", [
-  ...cfg.ownable2StepContracts.teamSafe.map((a) => tx(a, own.encodeFunctionData("acceptOwnership"), "accept ownership")),
-  tx(cfg.buybackBurner, burner.encodeFunctionData("setInitialAdapter", [cfg.v4SwapAdapter]), "BuybackBurner: route through the Hookr MILORD pool"),
-]));
+write("safe-team-setup.json", wrap("MILORD Team Safe setup", "Team Safe.",
+  cfg.ownable2StepContracts.teamSafe.map((a) => tx(a, own.encodeFunctionData("acceptOwnership"), "accept ownership"))));
 // D. Arbitrage Funding Safe setup
 write("safe-arbitrage-setup.json", wrap("MILORD Arbitrage Funding Safe setup", "Arbitrage Funding Safe.",
   cfg.ownable2StepContracts.arbitrageSafe.map((a) => tx(a, own.encodeFunctionData("acceptOwnership"), "accept ArbitrageFundingRouter ownership"))));
-console.log(`liquidity ${liquidity}, MILORD into position ${taken}, remainder ${amount - taken}`);
