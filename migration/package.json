@@ -1,0 +1,24 @@
+{
+  "name": "pmfi-legacy-migration",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "build": "node build.mjs",
+    "start": "node src/server.mjs",
+    "index": "node src/cli.mjs index",
+    "export": "node src/cli.mjs export"
+  },
+  "dependencies": {
+    "ethers": "6.17.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "esbuild": "0.25.12",
+    "prettier": "3.6.2"
+  }
+}

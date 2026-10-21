@@ -1,0 +1,22 @@
+{
+  "mode": "disabled",
+  "chainId": 8453,
+  "recipientChainId": 4663,
+  "origin": "https://pmfi.cc",
+  "token": null,
+  "safe": null,
+  "decimals": null,
+  "tokenCodeHash": null,
+  "safeCodeHash": null,
+  "safeSingletonCodeHash": null,
+  "owners": [],
+  "threshold": null,
+  "startBlock": null,
+  "confirmations": 64,
+  "start": null,
+  "end": null,
+  "policyUrl": null,
+  "tokenAccountingReview": null,
+  "maxIndexAgeSeconds": 120,
+  "bindingFrozen": false
+}

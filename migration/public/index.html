@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="PMFI legacy migration. Deposit on Base; track verified deposits and future MILORD allocation."
+    />
+    <title>PMFI → MILORD · Migration</title>
+    <link rel="stylesheet" href="/migrate/styles.css" />
+    <script defer src="/migrate/privy-bridge.bundle.js"></script>
+    <script type="module" src="/migrate/app.js"></script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/" aria-label="PMFI home">PMFI<span>®</span></a>
+      <nav>
+        <a href="https://docs.pmfi.cc">Documentation ↗</a
+        ><button id="connect">Connect wallet</button>
+      </nav>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="eyebrow"><span class="dot"></span> THE NEXT CHAPTER</div>
+        <h1>PMFI <span class="arrow">→</span> <em>MILORD</em></h1>
+        <h2>PMFI evolves into MILORD.</h2>
+        <p>
+          Deposit your PMFI on Base to participate in the<br class="desktop" />
+          MILORD migration on Robinhood Chain.
+        </p>
+        <div class="route">
+          <span>● &nbsp; Base</span><span class="line">→</span
+          ><span>Robinhood Chain &nbsp; ↗</span>
+        </div>
+      </section>
+      <section class="metrics" aria-label="Migration statistics">
+        <article>
+          <span>Verified PMFI received</span
+          ><strong id="total">Unavailable</strong
+          ><small>Confirmed on Base</small>
+        </article>
+        <article>
+          <span>Participating wallets</span
+          ><strong id="participants">Unavailable</strong
+          ><small>With eligible deposits</small>
+        </article>
+        <article>
+          <span>Migration window</span><strong id="window">Not scheduled</strong
+          ><small id="countdown">Dates awaiting approval</small>
+        </article>
+      </section>
+      <div class="layout">
+        <section class="panel deposit">
+          <div class="panel-head">
+            <h2>Deposit PMFI</h2>
+            <span class="badge">BASE</span>
+          </div>
+          <p class="subtle">One deposit. A verifiable record.</p>
+          <div id="gate" class="notice" role="status">
+            Deposits are disabled pending configuration and owner approval.
+          </div>
+          <dl class="details">
+            <div>
+              <dt>Connected wallet</dt>
+              <dd id="wallet">Not connected</dd>
+            </div>
+            <div>
+              <dt>Network</dt>
+              <dd id="network">—</dd>
+            </div>
+            <div>
+              <dt>PMFI balance</dt>
+              <dd id="balance">Unavailable</dd>
+            </div>
+          </dl>
+          <form id="deposit-form">
+            <label for="amount">Amount to deposit</label>
+            <div class="amount">
+              <input
+                id="amount"
+                type="text"
+                inputmode="decimal"
+                placeholder="0.00"
+                autocomplete="off"
+                aria-describedby="amount-hint"
+              /><span>PMFI</span><button id="max" type="button">MAX</button>
+            </div>
+            <small id="amount-hint"
+              >Your contribution determines your share of the acquired
+              MILORD.</small
+            >
+            <div class="address-card">
+              <span>Receiving Safe · Base</span
+              ><code id="safe">Awaiting verified address</code>
+            </div>
+            <details>
+              <summary>Token contract & transaction details</summary>
+              <code id="token">Awaiting verified token</code>
+              <p>Direct ERC-20 transfer. No token approval is required.</p>
+            </details>
+            <div class="gas-row">
+              <span>Estimated gas</span
+              ><span id="gas">Available at review</span>
+            </div>
+            <button type="button" id="switch" class="secondary" hidden>
+              Switch to Base</button
+            ><button type="submit" id="deposit" class="primary" disabled>
+              Deposit PMFI <span>↗</span>
+            </button>
+          </form>
+          <p class="fine">
+            MILORD is distributed later. There is no fixed exchange rate.
+          </p>
+          <p id="feedback" role="status" aria-live="polite"></p>
+          <a id="transaction" hidden target="_blank" rel="noopener noreferrer"
+            >View transaction on Base ↗</a
+          >
+        </section>
+        <aside>
+          <section class="panel how">
+            <div class="eyebrow">HOW IT WORKS</div>
+            <ol>
+              <li>
+                <span>01</span>
+                <div>
+                  <h3>Deposit on Base</h3>
+                  <p>
+                    Send PMFI to the approved project multisig during the
+                    migration window.
+                  </p>
+                </div>
+              </li>
+              <li>
+                <span>02</span>
+                <div>
+                  <h3>We verify your deposit</h3>
+                  <p>
+                    Your on-chain deposit is recorded. Return anytime to check
+                    its status.
+                  </p>
+                </div>
+              </li>
+              <li>
+                <span>03</span>
+                <div>
+                  <h3>Receive MILORD later</h3>
+                  <p>
+                    After acquisition, eligible holders receive a proportional
+                    share on Robinhood Chain.
+                  </p>
+                </div>
+              </li>
+            </ol>
+          </section>
+          <section class="disclosure">
+            <h3>Before you deposit</h3>
+            <p>
+              This is a custodial, manually settled migration, not an automatic
+              swap. Tokens go to a project-controlled multisig and transfers are
+              not automatically reversible.
+            </p>
+            <p>
+              Your final ratio depends on completed sales, purchases, fees, and
+              execution prices. No value or exchange rate is guaranteed.
+            </p>
+            <a id="policy" hidden target="_blank" rel="noopener noreferrer"
+              >Read the migration policy ↗</a
+            >
+            <p id="policy-pending">
+              Late deposits, refunds, exceptions, and deductions policy must be
+              published before activation.
+            </p>
+          </section>
+        </aside>
+      </div>
+      <section class="panel history">
+        <div class="panel-head">
+          <h2>Your migration</h2>
+          <span class="badge" id="history-status">CONNECT TO VIEW</span>
+        </div>
+        <div class="history-stats">
+          <div>
+            <span>Eligible PMFI</span><strong id="your-total">—</strong>
+          </div>
+          <div>
+            <span>MILORD allocation</span
+            ><strong id="allocation">Pending calculation</strong>
+          </div>
+          <div>
+            <span>Distribution</span
+            ><strong id="distribution">Not started</strong>
+          </div>
+        </div>
+        <div id="recipient-section" hidden>
+          <label for="recipient"
+            >MILORD recipient · Robinhood Chain (4663)</label
+          ><input
+            id="recipient"
+            class="recipient"
+            placeholder="0x…"
+            autocomplete="off"
+          />
+          <p class="fine">
+            Confirm control with a message signature. Contract wallets on Base
+            must nominate an EOA they control; their Base contract address is
+            not assumed to exist on Robinhood Chain.
+          </p>
+          <button id="bind" class="secondary">Confirm payout address</button>
+          <details>
+            <summary>Different recipient / contract wallet</summary>
+            <p>
+              First create a challenge, then sign that exact message using the
+              recipient wallet. Paste its signature below; your connected
+              depositing wallet will authorize the binding.
+            </p>
+            <button id="challenge" class="secondary">
+              Create signing message
+            </button>
+            <pre id="signing-message"></pre>
+            <label for="recipient-signature">Recipient wallet signature</label
+            ><input
+              id="recipient-signature"
+              autocomplete="off"
+              placeholder="0x…"
+            />
+          </details>
+          <p id="binding-status" class="fine"></p>
+        </div>
+        <div id="history-empty" class="empty">
+          Connect your wallet to see your verified deposits.
+        </div>
+        <div class="table-wrap">
+          <table hidden id="history-table">
+            <thead>
+              <tr>
+                <th>Date (UTC)</th>
+                <th>PMFI received</th>
+                <th>Status</th>
+                <th>Transaction</th>
+              </tr>
+            </thead>
+            <tbody id="history-rows"></tbody>
+          </table>
+        </div>
+      </section>
+      <footer>
+        <span>PMFI × MILORD</span><span>Base → Robinhood Chain</span
+        ><a href="/">Back to PMFI ↗</a>
+      </footer>
+    </main>
+    <dialog id="review">
+      <h2>Review your deposit</h2>
+      <p id="review-copy"></p>
+      <dl class="details">
+        <div>
+          <dt>From</dt>
+          <dd id="review-wallet"></dd>
+        </div>
+        <div>
+          <dt>Token · Base</dt>
+          <dd id="review-token"></dd>
+        </div>
+        <div>
+          <dt>Receiving Safe</dt>
+          <dd id="review-safe"></dd>
+        </div>
+        <div>
+          <dt>MILORD recipient</dt>
+          <dd id="review-recipient"></dd>
+        </div>
+      </dl>
+      <p id="review-gas"></p>
+      <p class="fine">
+        This transfer is not automatically reversible. MILORD allocation is
+        calculated later.
+      </p>
+      <label class="check"
+        ><input id="ack" type="checkbox" /> I have read the policy and
+        understand the custody and settlement terms.</label
+      >
+      <div class="dialog-actions">
+        <button id="cancel">Cancel</button
+        ><button id="confirm" class="primary" disabled>
+          Confirm in wallet
+        </button>
+      </div>
+    </dialog>
+  </body>
+</html>
