@@ -6,6 +6,11 @@ import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
+import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
+import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
+import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
+import {PoolId} from "@uniswap/v4-core/src/types/PoolId.sol";
+import {HookrTypes} from "../../src/vendor/hookr/types/HookrTypes.sol";
 import {IHookrLauncher} from "../../src/vendor/hookr/interfaces/IHookrLauncher.sol";
 import {IHookrLaunchFee} from "../../src/vendor/hookr/interfaces/IHookrLaunchFee.sol";
 import {IHookrTaxQueueFork} from "../../src/vendor/hookr/IHookrExtras.sol";
@@ -21,6 +26,12 @@ import {MilordForkBase} from "./MilordForkBase.sol";
 /// by the Team Safe, so the ETH/MILORD Hookr pool cannot be pre-empted. Then the Safe accepts the family and, in a
 /// later transaction, locks it for good. Also: exactly when principal becomes withdrawable, and the missed-handover
 /// contingency (priority 2).
+interface IHookrRootInit {
+    function initializePool(PoolKey calldata, HookrTypes.PoolConfig calldata, bytes calldata, bytes calldata, uint160)
+        external
+        returns (PoolId);
+}
+
 contract MilordAtomicLaunchFork is MilordForkBase {
     using PoolIdLibrary for PoolKey;
 
@@ -99,19 +110,133 @@ contract MilordAtomicLaunchFork is MilordForkBase {
 
     // ---------------------------------------------------------------- pre-emption
 
-    /// Before the launch transaction no one can open the pool: HookrLauncher refuses a token without code, and MILORD
-    /// has none until the Safe's call creates it.
-    function test_cannotPreemptBeforeLaunch() public {
-        _prepare(_config(0, 0, 0));
+    // Regression for the 2026-10-21 VPS failure of test_cannotPreemptBeforeLaunch: that test put
+    // `helper.launchFee()` inside the call's value expression, so vm.prank and vm.expectRevert were consumed by
+    // that (successful) view call and the launchFamily call itself was never checked. These tests capture the real
+    // results with try/catch instead, and run the attack with the same parameters against a token that has code.
+
+    struct SquatResult {
+        bool ok;
+        bytes err;
+        bytes32 familyId;
+    }
+
+    /// Plays the outsider: an ETH-only launchFamily for `token`. Fee and value are computed BEFORE the prank.
+    function _squat(address token) internal returns (SquatResult memory r) {
         address squatter = makeAddr("squatter");
         vm.deal(squatter, 1 ether);
-        IHookrLauncher.LaunchParams memory p = _squatParams(helper.predictedToken());
+        IHookrLauncher.LaunchParams memory p = _squatParams(token);
+        (uint256 fee,,,,) = IHookrLaunchFee(address(LAUNCHER)).launchFee();
+        uint256 value = 0.1 ether + fee;
         vm.prank(squatter);
-        vm.expectRevert(IHookrLauncher.InvalidFunding.selector);
-        LAUNCHER.launchFamily{value: 0.1 ether + helper.launchFee()}(p);
+        try LAUNCHER.launchFamily{value: value}(p) returns (bytes32 fid, address, uint256) {
+            r.ok = true;
+            r.familyId = fid;
+        } catch (bytes memory err) {
+            r.err = err;
+        }
+    }
 
-        _safeLaunch(); // and our launch still succeeds
-        assertEq(address(milord), helper.predictedToken());
+    function _keyFor(address token) internal pure returns (PoolKey memory k) {
+        k = PoolKey(ETH, Currency.wrap(token), LPFeeLibrary.DYNAMIC_FEE_FLAG, TICK_SPACING, IHooks(ROOT));
+    }
+
+    function _initialized(PoolKey memory k) internal view returns (bool) {
+        (uint160 sqrtP,,,) = StateLibrary.getSlot0(pm, k.toId());
+        return sqrtP != 0;
+    }
+
+    /// The attack against the predicted MILORD address, before the launch: refused with InvalidFunding, no family, no
+    /// pool. Then the Safe's launch opens exactly the expected pool.
+    function test_preemption_predictedAddressRefused() public {
+        _prepare(_config(0, 0, 0));
+        address predicted = helper.predictedToken();
+        PoolKey memory k = _keyFor(predicted);
+        console2.log("predicted MILORD", predicted);
+        console2.log("predicted code size", predicted.code.length);
+        console2.logBytes32(PoolId.unwrap(k.toId()));
+
+        SquatResult memory r = _squat(predicted);
+        console2.log("outsider launchFamily succeeded", r.ok);
+        console2.logBytes(r.err);
+        assertFalse(r.ok, "outsider launch must fail");
+        assertEq(bytes4(r.err), IHookrLauncher.InvalidFunding.selector, "refused for the missing token code");
+        assertFalse(_initialized(k), "no pool exists for the predicted token");
+
+        _safeLaunch();
+        assertEq(address(milord), predicted);
+        assertEq(PoolId.unwrap(poolId), PoolId.unwrap(k.toId()), "our launch opened exactly that pool");
+        assertTrue(_initialized(k));
+    }
+
+    /// Positive control: the SAME attack parameters work against a token that already has code (the original B13
+    /// finding). So the refusal above is due to the missing code, not to bad attack parameters.
+    function test_preemption_control_existingTokenIsSquattable() public {
+        _prepare(_config(0, 0, 0));
+        MILORDToken other = new MILORDToken(address(this)); // any deployed ERC-20
+        SquatResult memory r = _squat(address(other));
+        console2.log("outsider launchFamily on a deployed token succeeded", r.ok);
+        console2.logBytes32(r.familyId);
+        assertTrue(r.ok, "attack parameters are valid");
+        assertTrue(_initialized(_keyFor(address(other))), "the pool was squatted");
+    }
+
+    /// Why the token must not exist before our transaction: if code ever sat at the predicted address first (it
+    /// cannot: only the helper can CREATE2 there; simulated here with vm.etch), the squat succeeds and our launch then
+    /// reverts as a whole, losing nothing but gas.
+    function test_preemption_ifCodeExistedLaunchWouldFailClosed() public {
+        _prepare(_config(0, 0, 0));
+        address predicted = helper.predictedToken();
+        vm.etch(predicted, address(new MILORDToken(address(this))).code);
+        SquatResult memory r = _squat(predicted);
+        assertTrue(r.ok, "with code at the address the pool can be squatted");
+        assertTrue(_initialized(_keyFor(predicted)));
+        uint256 fee = helper.launchFee();
+        uint256 safeEth = safe.balance;
+        vm.prank(safe);
+        vm.expectRevert(); // CREATE2 collision: the whole launch reverts
+        helper.launch{value: fee}(address(taxSplit), block.timestamp + 1 hours);
+        assertEq(safe.balance, safeEth, "nothing spent");
+        assertFalse(helper.launched());
+    }
+
+    /// The other ways to open the Hookr pool are closed too: HookrRoot.initializePool needs an admitted launcher, and
+    /// PoolManager.initialize with the root as hook needs the root's own binding.
+    function test_preemption_directPathsRefused() public {
+        _prepare(_config(0, 0, 0));
+        address predicted = helper.predictedToken();
+        PoolKey memory k = _keyFor(predicted);
+        HookrTypes.PoolConfig memory pc = _squatParams(predicted).members[0].config;
+        pc.subject = Currency.wrap(predicted);
+        pc.quote = ETH;
+        pc.liquidityOwner = address(this);
+        bool ok;
+        vm.prank(makeAddr("squatter"));
+        try IHookrRootInit(ROOT).initializePool(k, pc, "", "", TickMath.getSqrtPriceAtTick(0)) {
+            ok = true;
+        } catch {}
+        assertFalse(ok, "root refuses a non-launcher");
+        vm.prank(makeAddr("squatter"));
+        try pm.initialize(k, TickMath.getSqrtPriceAtTick(0)) {
+            ok = true;
+        } catch {}
+        assertFalse(ok, "PoolManager.initialize with the root hook refused");
+        assertFalse(_initialized(k));
+        _safeLaunch();
+    }
+
+    /// Mempool / deterministic-address exposure: anyone may open OTHER pools for the predicted address (a plain v4
+    /// pool with no hook accepts a token without code). That does not block or alter our Hookr pool.
+    function test_preemption_otherPoolsDoNotBlockLaunch() public {
+        _prepare(_config(0, 0, 0));
+        address predicted = helper.predictedToken();
+        PoolKey memory plain = PoolKey(ETH, Currency.wrap(predicted), 3000, 60, IHooks(address(0)));
+        vm.prank(makeAddr("squatter"));
+        pm.initialize(plain, TickMath.getSqrtPriceAtTick(0));
+        assertTrue(_initialized(plain), "a hookless decoy pool can exist before MILORD");
+        _safeLaunch();
+        assertEq(PoolId.unwrap(poolId), PoolId.unwrap(_keyFor(predicted).toId()), "our pool is the Hookr pool");
+        assertTrue(PoolId.unwrap(poolId) != PoolId.unwrap(plain.toId()));
     }
 
     function _squatParams(address token) internal view returns (IHookrLauncher.LaunchParams memory p) {
@@ -210,9 +335,10 @@ contract MilordAtomicLaunchFork is MilordForkBase {
     function test_refusesBadInputs() public {
         _prepare(_config(0, 0, 0));
         uint256 fee = helper.launchFee();
+        address eoa = makeAddr("eoaRecipient"); // outside the prank/expectRevert window
         vm.prank(safe);
         vm.expectRevert(MilordAtomicLaunch.BadConfig.selector);
-        helper.launch{value: fee}(makeAddr("eoaRecipient"), block.timestamp + 1 hours); // tax recipient must be a contract
+        helper.launch{value: fee}(eoa, block.timestamp + 1 hours); // tax recipient must be a contract
 
         vm.prank(safe);
         vm.expectRevert(abi.encodeWithSelector(MilordAtomicLaunch.WrongValue.selector, fee + 1, fee));

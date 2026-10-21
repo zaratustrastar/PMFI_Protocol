@@ -41,7 +41,10 @@ the Safe; that is how fees earned between the launch and the Safe's `acceptFamil
 ## Pre-emption and front-running
 | Attack | Result | Evidence |
 |---|---|---|
-| Open the Hookr pool for MILORD before our launch | impossible: `HookrLauncher` refuses a token without code (`InvalidFunding`), and MILORD has none until step 3 | `test_cannotPreemptBeforeLaunch` |
+| Open the Hookr pool for MILORD before our launch | impossible: `HookrLauncher` refuses a token without code (`InvalidFunding`, HookrLauncher.sol:345), and HookrLane refuses it again at pool initialization (`_holdsOwnCode`); MILORD has no code until step 3 | `test_preemption_predictedAddressRefused`, with the positive control `test_preemption_control_existingTokenIsSquattable` (same attack parameters succeed on a deployed token) |
+| Initialize the pool without the launcher (`HookrRoot.initializePool` or `PoolManager.initialize` with the root hook) | refused: the root accepts only admitted launchers, and its `beforeInitialize` accepts only its own binding | `test_preemption_directPathsRefused` |
+| Code at the predicted address before our launch | cannot happen (only the helper can CREATE2 there); if it did, the pool could be squatted and our launch would revert as a whole, spending nothing | `test_preemption_ifCodeExistedLaunchWouldFailClosed` |
+| See the predicted address (public helper, or the launch tx in a mempool) and open other pools for it | possible (a hookless v4 pool accepts a token without code) but harmless: it is not the Hookr pool, and our launch still opens the exact Hookr key | `test_preemption_otherPoolsDoNotBlockLaunch` |
 | Deploy something else at the predicted address | impossible: the CREATE2 address is derived from the helper, which only creates MILORD | CREATE2 |
 | Call `launch` first | `NotOwner` | `test_onlySafeOnce` |
 | Hookr raises its launch fee before the Safe's transaction lands | `LaunchFeeTooHigh` (cap fixed at construction); exact `msg.value` means no overpayment | `test_refusesBadInputs` |
@@ -53,6 +56,14 @@ the Safe; that is how fees earned between the launch and the Safe's `acceptFamil
 
 Robinhood Chain's sequencer orders transactions first come, first served without a public mempool; the design does
 not rely on that.
+
+## 2026-10-21 VPS failure of the first pre-emption test
+`test_cannotPreemptBeforeLaunch` failed with "next call did not revert as expected". Cause: a test bug, not Hookr.
+The call was `vm.prank(squatter); vm.expectRevert(...); LAUNCHER.launchFamily{value: 0.1 ether + helper.launchFee()}(p)`.
+Solidity evaluates `helper.launchFee()` (an external view call) before `launchFamily`, so the prank and the expected
+revert were both consumed by that successful view call, and the launch attempt was never checked (it also ran from the
+test contract, not the squatter). Hookr source refuses a codeless token twice (above). The replacement tests compute the
+fee first and capture the real result with try/catch; the old test was removed, not loosened.
 
 ## Configuration note
 `tax` must be HookrDirectionalTax A (0xE73f…1e1F). Candidate B (0x9901…5d3c) is HookrPartnerTax, which binds only pools

@@ -6,7 +6,7 @@ compiled, waiting for the VPS run; **Ops** = operational step or assumption; **O
 
 | # | Severity | Item | Status | What clears it |
 |---|---|---|---|---|
-| B13 | High | Pool squatting (fork-confirmed) | Code + Fork pending: `MilordAtomicLaunch` (ATOMIC_LAUNCH.md) | VPS run of `MilordAtomicLaunchFork` |
+| B13 | Critical until the VPS confirms | Pool squatting (fork-confirmed for a deployed token) | Code: `MilordAtomicLaunch`. The 2026-10-21 VPS failure was a test bug (expectRevert consumed by a view call in the value expression); source shows Hookr refuses codeless tokens in the launcher and again in HookrLane. Regression tests now prove the attack on a deployed token and its refusal on the predicted address | VPS run of the five `test_preemption_*` tests |
 | B15 | Medium | Launch encoding | Code: `safe-launch-batch.mjs` encodes the atomic launch, accept and lock batches | VPS run, then testnet rehearsal |
 | B14 | High | Tax is pulled, not pushed | Code: keeper pays both queues, fails closed, idempotent (services README) | keeper run against a launched pool (fork or testnet) |
 | B16 | High | Principal withdrawable between `principalLockedUntil` and the lock | Ops: LOCK_PROCEDURE.md (pre-signed lock, `lock-watch` alerts, late lock still works) | Bobo's go-ahead to execute the lock; signatures collected right after the launch |
