@@ -10,11 +10,11 @@
 - EOA signature verification and EIP-1271 verification on the source chain. Different destinations require a second signature proving recipient EOA control. Base contract wallets must choose a controlled EOA: same-address cross-chain Safe deployment is never assumed. Supporting destination contract wallets requires a separately reviewed destination-chain verification path.
 - OS-protected CLI CSV/JSON exports; exact largest-remainder proportional allocation; settlement arithmetic; immutable allocation audit; read-only verification of later finalized MILORD distribution events. No automated selling, buying or distribution.
 
-## Audit findings and unfinished integration
+## Native landing integration and review
 
-Read [AUDIT.md](AUDIT.md). The live landing is a separate compiled React build; repository `frontend/` is not its source. The owner verified `/root/pmfi` and `/var/www/pmfi` on `147.182.206.35`; our trusted host-key check matched but SSH authentication failed. Consequently **the actual landing source, build scripts and current Nginx configuration could not be inspected**. No source integration or exact production filesystem modification has been pretended.
+The published landing snapshot is now integrated in a separate draft frontend branch. The native React `/migrate` page and isolated Vite release reuse the snapshot design; the backend and single SQLite ledger stay here. See [REVIEW-INTEGRATION.md](REVIEW-INTEGRATION.md) for accounting, RPC freshness, exclusive ownership and proxy rate-limit corrections, and [the deployment runbook](deploy/INTEGRATION-RUNBOOK.md) for the isolated Node 24/runtime and migration-only routing plan.
 
-The module can be mounted by the three scoped locations in `deploy/nginx.locations.conf`, preserving the homepage. Final source integration (e.g. navigation link and reusable React wrapper) and the Privy `pmfi.cc` origin allowlist must be verified on the VPS. Cross-subdomain login is not assumed. The reference screenshot mentioned in the brief was not attached; the page uses the requested structure and live PMFI visual tokens.
+The standalone frontend here remains a development harness. Production preview must use the separate native React release, not overwrite the homepage. Privy production-origin settings and effective VPS Nginx configuration still need verification; SSH authentication was unavailable. No production deployment or activation has occurred.
 
 ## Local build and tests
 
@@ -107,4 +107,4 @@ Read-only verification checks chain 4663, reviewed MILORD bytecode, successful c
 
 ## Deployment and rollback
 
-See [DEPLOYMENT.md](DEPLOYMENT.md). Production deployment and activation are separate owner approvals, both still outstanding.
+The updated native integration plan is [deploy/INTEGRATION-RUNBOOK.md](deploy/INTEGRATION-RUNBOOK.md); it supersedes the standalone frontend deployment proposal in DEPLOYMENT.md. Production deployment and activation are separate owner approvals, both still outstanding.
