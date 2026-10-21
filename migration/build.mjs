@@ -1,5 +1,6 @@
 import { build } from "esbuild";
-import { mkdir, copyFile } from "node:fs/promises";
+import { mkdir, copyFile, rm } from "node:fs/promises";
+await rm("dist", {recursive:true,force:true});
 await mkdir("dist", { recursive: true });
 for (const f of ["index.html", "styles.css"])
   await copyFile("public/" + f, "dist/" + f);

@@ -4,6 +4,7 @@ import { Store } from "./store.mjs";
 import { Chain, sync } from "./chain.mjs";
 import { JsonRpcProvider } from "ethers";
 import { reconcileSettlement, verifyDistributions } from "./settlement.mjs";
+import { acquireLedgerLock } from "./lock.mjs";
 import { health } from "./service.mjs";
 const c = validateConfig(
   JSON.parse(
@@ -17,6 +18,9 @@ if (command === "fingerprint") {
 }
 if (c.mode === "disabled")
   throw Error("Use a reviewed configuration or local test config");
+const release = acquireLedgerLock(
+  process.env.MIGRATION_DB || "migration.sqlite",
+);
 const store = new Store(process.env.MIGRATION_DB || "migration.sqlite", c);
 try {
   if (command === "index") {
@@ -31,9 +35,10 @@ try {
     }
   } else if (command === "export") {
     const bindings = store.db.prepare("SELECT * FROM bindings").all(),
-      manifest = store.get("allocation")
-        ? JSON.parse(store.get("allocation"))
-        : null;
+      manifest =
+        store.get("allocationInvalid") !== "true" && store.get("allocation")
+          ? JSON.parse(store.get("allocation"))
+          : null;
     const rows = store.deposits().map((e) => ({
       ...e,
       recipient: bindings.find((b) => b.wallet === e.from)?.recipient || null,
@@ -95,6 +100,8 @@ try {
     );
   } else if (command === "allocate") {
     store.transaction(() => {
+      if (store.accountingIssues().length)
+        throw Error("Unresolved custody/accounting exceptions");
       if (
         !health(store, c) ||
         Date.now() < Date.parse(c.end) ||
@@ -187,4 +194,5 @@ try {
     );
 } finally {
   store.close();
+  release();
 }

@@ -6,3 +6,4 @@ approval.local.json
 reports/
 test/evm/out/
 test/evm/cache/
+*.writer-lock/

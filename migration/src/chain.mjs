@@ -164,7 +164,7 @@ export class Chain {
     });
   }
 }
-export async function sync(store, chain, { limit = 500 } = {}) {
+export async function sync(store, chain, { limit = 500, now = Date.now } = {}) {
   store.set("healthy", false);
   await chain.verify();
   const c = store.c,
@@ -211,6 +211,10 @@ export async function sync(store, chain, { limit = 500 } = {}) {
   const actual = await chain.balance(tip.number);
   if ((await chain.block(tip.number)).hash !== tip.hash)
     throw Error("Chain changed during reconciliation");
+  const observedAt = now();
+  const chainAge = observedAt / 1000 - tip.timestamp;
+  const fresh = chainAge >= -30 && chainAge <= c.maxIndexAgeSeconds;
+  const accountingIssues = store.accountingIssues();
   store.transaction(() => {
     store.set("head", head);
     store.set(
@@ -223,9 +227,18 @@ export async function sync(store, chain, { limit = 500 } = {}) {
         matches: actual === expected,
       }),
     );
-    store.set("lastSync", Date.now());
-    store.set("healthy", tip.number === head && actual === expected);
+    store.set("lastSync", observedAt);
+    store.set("chainTimestamp", tip.timestamp);
+    store.set("accountingIssues", JSON.stringify(accountingIssues));
+    store.set(
+      "healthy",
+      tip.number === head &&
+        actual === expected &&
+        fresh &&
+        accountingIssues.length === 0,
+    );
   });
+  if (!fresh) throw Error("RPC canonical head is stale or future-dated");
   if (actual !== expected)
     throw Error(
       "Safe balance mismatch: pause and investigate token accounting",

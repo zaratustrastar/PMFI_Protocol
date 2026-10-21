@@ -71,7 +71,7 @@ try {
     mode: "local",
     chainId: 31337,
     recipientChainId: 4663,
-    origin: "http://127.0.0.1:18787",
+    origin: process.env.MIGRATION_FRONTEND_URL || "http://127.0.0.1:18787",
     token: await token.getAddress(),
     safe: await safe.getAddress(),
     decimals: 18,
@@ -108,6 +108,10 @@ try {
   const page = await browser.newPage({
     viewport: { width: 1440, height: 1100 },
   });
+  // External fonts are not part of wallet/ledger integration and may be offline.
+  await page.route(/https:\/\/fonts\.(googleapis|gstatic)\.com\//, (r) =>
+    r.abort(),
+  );
   let reject = false,
     wrongChain = false,
     sendCount = 0;

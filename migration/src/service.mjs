@@ -4,8 +4,12 @@ import { address, fingerprint, windowStatus } from "./core.mjs";
 export function health(store, c) {
   return (
     store?.get("healthy") === "true" &&
+    Date.now() - Number(store.get("lastSync") || 0) >= 0 &&
     Date.now() - Number(store.get("lastSync") || 0) <
-      c.maxIndexAgeSeconds * 1000
+      c.maxIndexAgeSeconds * 1000 &&
+    Number(store.get("chainTimestamp")) * 1000 >=
+      Date.now() - c.maxIndexAgeSeconds * 1000 &&
+    Number(store.get("chainTimestamp")) * 1000 <= Date.now() + 30000
   );
 }
 export function approved(c, approval) {
@@ -23,6 +27,11 @@ export function publicState(store, c, approval) {
     totals = healthy ? store.totals() : null;
   return {
     mode: c.mode,
+    configHash: fingerprint(c),
+    accountingReviewRequired: store
+      ? store.accountingIssues().length > 0
+      : false,
+    bindingFrozen: c.bindingFrozen === true || !!store?.get("allocation"),
     chainId: c.chainId,
     recipientChainId: c.recipientChainId,
     token: c.token,

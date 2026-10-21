@@ -90,8 +90,38 @@ export class Store {
         );
     });
   }
+  accountingIssues() {
+    // Outflows during collection can recycle refunded tokens into a second claim.
+    // Incoming/outgoing in one transaction may represent gross, not net receipts.
+    const rows = this.db.prepare("SELECT * FROM events WHERE orphaned=0").all();
+    const safe = address(this.c.safe);
+    const incoming = new Set(
+      rows
+        .filter((e) => e.recipient === safe && e.sender !== safe)
+        .map((e) => e.tx),
+    );
+    return rows
+      .filter(
+        (e) =>
+          e.sender === safe &&
+          BigInt(e.amount) > 0n &&
+          (e.timestamp * 1000 < Date.parse(this.c.end) || incoming.has(e.tx)),
+      )
+      .map((e) => ({
+        tx: e.tx,
+        logIndex: e.logIndex,
+        reason: incoming.has(e.tx)
+          ? "ambiguous-net-receipt"
+          : "outflow-during-collection",
+      }));
+  }
   events() {
     const head = Number(this.get("head") || 0);
+    const ambiguous = new Set(
+      this.accountingIssues()
+        .filter((e) => e.reason === "ambiguous-net-receipt")
+        .map((e) => e.tx),
+    );
     return this.db
       .prepare("SELECT * FROM events ORDER BY blockNumber,logIndex")
       .all()
@@ -108,7 +138,10 @@ export class Store {
         to: e.recipient,
         amount: e.amount,
         orphaned: !!e.orphaned,
-        status: eligibility(this.c, { ...e, from: e.sender }, head),
+        status:
+          !e.orphaned && ambiguous.has(e.tx)
+            ? "accounting-review"
+            : eligibility(this.c, { ...e, from: e.sender }, head),
       }));
   }
   deposits(wallet) {

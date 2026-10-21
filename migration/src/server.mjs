@@ -6,8 +6,17 @@ import { Store } from "./store.mjs";
 import { Chain, sync } from "./chain.mjs";
 import { validateConfig, address } from "./core.mjs";
 import { publicState, issueChallenge, bind } from "./service.mjs";
-export function createServer(c, store, chain, approval = null) {
-  const rates = new Map();
+import { acquireLedgerLock } from "./lock.mjs";
+import { clientAddress, createLimiter } from "./rate-limit.mjs";
+export function createServer(
+  c,
+  store,
+  chain,
+  approval = null,
+  { trustLoopbackProxy = false } = {},
+) {
+  const allowWrite = createLimiter();
+  const allowRead = createLimiter({ limit: 120 });
   return http.createServer(async (req, res) => {
     const send = (code, data) => {
       res.writeHead(code, {
@@ -19,6 +28,13 @@ export function createServer(c, store, chain, approval = null) {
     };
     try {
       const url = new URL(req.url, "http://localhost");
+      const client = clientAddress(req, trustLoopbackProxy);
+      if (
+        url.pathname.startsWith("/api/migration/") &&
+        req.method === "GET" &&
+        !allowRead(client)
+      )
+        return send(429, { error: "Please wait before retrying" });
       if (req.method === "GET" && url.pathname === "/api/migration/state")
         return send(200, publicState(store, c, approval));
       if (req.method === "GET" && url.pathname === "/api/migration/history") {
@@ -46,6 +62,7 @@ export function createServer(c, store, chain, approval = null) {
             .filter((e) => e.status === "eligible")
             .reduce((s, e) => s + BigInt(e.amount), 0n)
             .toString(),
+          allocationDecimals: manifest?.settlement.milordDecimals ?? null,
           allocation:
             manifest?.rows.find((r) => r.wallet === wallet)?.amount || null,
           distribution: invalid
@@ -74,12 +91,7 @@ export function createServer(c, store, chain, approval = null) {
           !req.headers["content-type"]?.startsWith("application/json")
         )
           return send(403, { error: "Origin/content type rejected" });
-        const key = req.socket.remoteAddress,
-          now = Date.now();
-        for (const [k, v] of rates) if (now - v.at > 60000) rates.delete(k);
-        const rate = rates.get(key) || { at: now, n: 0 };
-        rates.set(key, rate);
-        if (++rate.n > 30)
+        if (!allowWrite(client))
           return send(429, { error: "Please wait before retrying" });
         let data = "";
         for await (const chunk of req) {
@@ -142,6 +154,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const approval = process.env.MIGRATION_APPROVAL
     ? JSON.parse(readFileSync(process.env.MIGRATION_APPROVAL, "utf8"))
     : null;
+  const release =
+    c.mode === "disabled"
+      ? () => {}
+      : acquireLedgerLock(process.env.MIGRATION_DB || "migration.sqlite");
   const store =
     c.mode === "disabled"
       ? null
@@ -166,7 +182,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     if (!stopped) setTimeout(loop, 5000).unref();
   };
   if (chain) void loop();
-  const server = createServer(c, store, chain, approval);
+  const server = createServer(c, store, chain, approval, {
+    trustLoopbackProxy: process.env.TRUST_LOOPBACK_PROXY === "1",
+  });
   server.requestTimeout = 15000;
   server.headersTimeout = 10000;
   server.listen(Number(process.env.PORT || 8787), "127.0.0.1", () =>
@@ -176,8 +194,15 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         "/migrate",
     ),
   );
-  process.on("SIGTERM", () => {
+  const shutdown = () => {
     stopped = true;
-    server.close(() => process.exit(0));
-  });
+    server.close(() => {
+      chain?.providers.forEach((p) => p.destroy());
+      store?.close();
+      release();
+      process.exit(0);
+    });
+  };
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
 }

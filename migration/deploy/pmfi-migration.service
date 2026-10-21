@@ -1,4 +1,4 @@
-# REVIEW ONLY. Node 24 must be installed at this path; verify before installation.
+# REVIEW ONLY. Dedicated checksum-verified Node 24 runtime; system Node 20 stays unchanged.
 [Unit]
 Description=PMFI migration API and canonical Base ledger
 After=network-online.target
@@ -9,7 +9,7 @@ User=pmfi-migration
 Group=pmfi-migration
 WorkingDirectory=/opt/pmfi-migration/current
 EnvironmentFile=/etc/pmfi-migration/service.env
-ExecStart=/usr/bin/node src/server.mjs
+ExecStart=/opt/pmfi-migration/runtime/bin/node src/server.mjs
 Restart=on-failure
 RestartSec=5
 UMask=0077

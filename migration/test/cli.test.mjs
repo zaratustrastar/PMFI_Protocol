@@ -46,6 +46,7 @@ test("CLI freezes a reconciled allocation and exports CSV/JSON without broadcast
   s.set("head", 3);
   s.set("lastSync", Date.now());
   s.set("healthy", true);
+  s.set("chainTimestamp", Math.floor(Date.now() / 1000));
   s.db
     .prepare("INSERT INTO bindings VALUES (?,?,?,?,?)")
     .run(a, a, "test-nonce", "test-signature", new Date().toISOString());

@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Wallet } from "ethers";
 import { Store } from "../src/store.mjs";
-import { sync } from "../src/chain.mjs";
+import { sync as syncImpl } from "../src/chain.mjs";
 import {
   bind,
   issueChallenge,
@@ -13,6 +13,8 @@ import {
   approved,
 } from "../src/service.mjs";
 import { fingerprint } from "../src/core.mjs";
+const sync = (store, chain, options = {}) =>
+  syncImpl(store, chain, { now: () => 1767225603000, ...options });
 const a = "0x" + "1".repeat(40),
   safe = "0x" + "2".repeat(40),
   token = "0x" + "3".repeat(40);
@@ -78,7 +80,7 @@ test("persistent idempotent backfill, multiple events, outbound reconciliation a
   chain.balance = async (n) => (n === 0 ? 0n : n === 3 ? 125n : 100n);
   await sync(s, chain);
   assert.equal(s.deposits().length, 3);
-  assert.equal(s.get("healthy"), "true");
+  assert.equal(s.get("healthy"), "false"); // outflow during collection requires review
   assert.equal(s.totals()[a], "100");
   blocks[2] = {
     number: 2,
