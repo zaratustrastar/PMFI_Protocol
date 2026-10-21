@@ -22,9 +22,12 @@ fs_permissions = [{ access = "read-write", path = "./sim" }, { access = "read", 
 # Low-memory development builds (e.g. a 4 GB VPS): FOUNDRY_PROFILE=lowmem forge test --skip script
 # Not for gas numbers or releases: production artifacts come from the default (via-IR, optimized) profile in CI.
 # script/DeployLocal.s.sol needs via-IR; use CI-built artifacts for the local simulation.
+# Separate output folders, so a lowmem build never overwrites production artifacts in out/ and cache/.
 [profile.lowmem]
 via_ir = false
 optimizer = false
+out = "out-lowmem"
+cache_path = "cache-lowmem"
 
 [fuzz]
 runs = 512

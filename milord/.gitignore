@@ -2,3 +2,5 @@ node_modules/
 out/
 cache/
 broadcast/
+out-lowmem/
+cache-lowmem/

@@ -110,7 +110,13 @@ jobs:
         with:
           name: milord-production-out
           path: milord
+      # MILORD_PREBUILT=1: the runs must use the downloaded production artifacts and refuse to compile,
+      # exactly as on a low-memory VPS.
       - name: Simulation (39 checks)
         run: ./sim/run-local.sh
+        env:
+          MILORD_PREBUILT: "1"
       - name: Entry-fee price integration (real v4 swaps)
         run: ./sim/run-entry-price.sh
+        env:
+          MILORD_PREBUILT: "1"

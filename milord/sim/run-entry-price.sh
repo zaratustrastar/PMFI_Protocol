@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Fresh anvil -> Permit2 -> DeployLocal -> entry-fee price integration test. Local only; anvil test keys only.
+# Private anvil on 127.0.0.1:${ANVIL_PORT:-8545} -> Permit2 -> DeployLocal -> entry-fee price integration test.
+# Local only; anvil test keys only. MILORD_PREBUILT=1 runs on prebuilt production artifacts without compiling.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 [ -f env.sh ] && . ./env.sh
-pkill -x anvil 2>/dev/null || true
-anvil --silent --port 8545 --block-base-fee-per-gas 0 --code-size-limit 50000 >/dev/null 2>&1 &
-sleep 2
-cast rpc --rpc-url http://127.0.0.1:8545 anvil_setCode 0x000000000022D473030F116dDEE9F6B43aC78BA3 "$(cat sim/permit2.runtime.hex)" >/dev/null
-forge script script/DeployLocal.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --slow >/dev/null
+. sim/anvil-lib.sh
+start_anvil
+deploy_local
 node offchain/test-entry-price.mjs
