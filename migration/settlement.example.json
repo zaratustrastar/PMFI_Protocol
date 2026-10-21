@@ -1,0 +1,15 @@
+{
+  "ownerReviewed": false,
+  "reviewReference": "REPLACE_AFTER_OWNER_REVIEW",
+  "milordToken": null,
+  "milordCodeHash": null,
+  "milordDecimals": 18,
+  "distributionSafe": null,
+  "proceedsAsset": "ETH wei (use one reconciled accounting asset)",
+  "saleTransactions": [],
+  "acquisitionTransactions": [],
+  "pmfiRemainingUnits": "0",
+  "proceedsRemainingUnits": "0",
+  "deductions": { "proceedsUnits": "0", "milordUnits": "0", "reason": "" },
+  "netMilordUnits": "0"
+}

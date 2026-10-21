@@ -1,0 +1,40 @@
+name: Legacy PMFI migration (local only)
+on:
+  push:
+    paths: ["migration/**", ".github/workflows/migration-ci.yml"]
+  pull_request:
+    paths: ["migration/**", ".github/workflows/migration-ci.yml"]
+permissions:
+  contents: read
+jobs:
+  migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: migration
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: migration/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run build
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - run: forge build --root test/evm
+      - run: npx playwright install --with-deps chromium
+      - name: Local Anvil and browser workflow
+        run: |
+          export ANVIL=anvil
+          export CHROME="$(node --input-type=module -e 'import {chromium} from "@playwright/test";console.log(chromium.executablePath())')"
+          node test/e2e.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: migration-local-review
+          path: migration/reports

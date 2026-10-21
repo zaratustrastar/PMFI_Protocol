@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.sqlite*
+config.local.json
+approval.local.json
+reports/
+test/evm/out/
+test/evm/cache/
