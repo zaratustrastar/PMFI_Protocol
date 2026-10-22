@@ -45,7 +45,9 @@ export function validateConfig(c) {
   if (
     owners.includes(ZeroAddress) ||
     new Set(owners).size !== owners.length ||
-    c.threshold < 2 ||
+    // Custody configuration is owner-approved. A deployed 1-of-1 Safe is
+    // valid, while larger teams may choose a higher threshold.
+    c.threshold < 1 ||
     c.threshold > owners.length
   )
     throw Error("Invalid Safe owners/threshold");
