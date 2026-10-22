@@ -165,10 +165,10 @@ export class Chain {
   }
 }
 export async function sync(store, chain, { limit = 500, now = Date.now } = {}) {
-  // Preserve the last reconciled snapshot while the next sync is running.
-  // Freshness is bounded by health() and the outer indexer loop marks failures
-  // unhealthy; toggling this flag on every poll unnecessarily closes deposits.
-  await chain.verify();
+  // Keep the last reconciled snapshot during an in-progress sync. Errors
+  // explicitly invalidate it; health() also checks freshness on every request.
+  try {
+    await chain.verify();
   const c = store.c,
     head = await chain.head();
   let tip = store.tip();
@@ -203,7 +203,10 @@ export async function sync(store, chain, { limit = 500, now = Date.now } = {}) {
     store.commit(b, logs);
   }
   tip = store.tip();
-  if (!tip) return;
+  if (!tip) {
+    store.set("healthy", false);
+    return;
+  }
   let expected = BigInt(store.get("baseline"));
   for (const e of store.events())
     if (!e.orphaned) {
@@ -245,4 +248,10 @@ export async function sync(store, chain, { limit = 500, now = Date.now } = {}) {
     throw Error(
       "Safe balance mismatch: pause and investigate token accounting",
     );
+  } catch (error) {
+    // Fail closed on RPC errors, mismatches and baseline reorgs, but do not
+    // temporarily close deposits merely because the next poll has started.
+    store.set("healthy", false);
+    throw error;
+  }
 }
