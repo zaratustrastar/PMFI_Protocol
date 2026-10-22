@@ -88,3 +88,40 @@ test("wallet request enforces network/account/balance and sends only transfer wi
   assert.match(errorText({ code: "INSUFFICIENT_FUNDS" }), /ETH/);
   assert.match(errorText({ code: "CALL_EXCEPTION" }), /reverted/);
 });
+
+test("owner-approved 1-of-1 Safe can be configured; invalid thresholds still fail closed", () => {
+  const hash = "0x" + "a".repeat(64);
+  const valid = {
+    mode: "live",
+    chainId: 8453,
+    recipientChainId: 4663,
+    origin: "https://pmfi.cc",
+    token: a,
+    safe,
+    decimals: 18,
+    tokenCodeHash: hash,
+    safeCodeHash: hash,
+    safeSingletonCodeHash: hash,
+    owners: [b],
+    threshold: 1,
+    startBlock: 1,
+    confirmations: 64,
+    start: "2026-11-01T00:00:00Z",
+    end: "2026-11-08T00:00:00Z",
+    policyUrl: "https://pmfi.cc/migration-policy",
+    tokenAccountingReview: "net-transfer-events-no-rebase",
+    maxIndexAgeSeconds: 120,
+  };
+  assert.equal(validateConfig(valid), valid);
+  for (const invalid of [
+    { threshold: 0 },
+    { threshold: 2 },
+    { owners: [] },
+    { owners: [b, b] },
+    { token: safe },
+  ]) {
+    assert.throws(() => validateConfig({ ...valid, ...invalid }));
+  }
+  // Accepting an owner-selected signing threshold does not bypass the
+  // independent production approval and RPC accounting health checks.
+});
