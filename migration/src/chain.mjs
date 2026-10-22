@@ -237,7 +237,8 @@ export async function sync(store, chain, { limit = 500, now = Date.now } = {}) {
     store.set("accountingIssues", JSON.stringify(accountingIssues));
     store.set(
       "healthy",
-      tip.number === head &&
+      tip.number <= head &&
+        head - tip.number <= 12 &&
         actual === expected &&
         fresh &&
         accountingIssues.length === 0,
