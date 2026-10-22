@@ -125,3 +125,21 @@ test("owner-approved 1-of-1 Safe can be configured; invalid thresholds still fai
   // Accepting an owner-selected signing threshold does not bypass the
   // independent production approval and RPC accounting health checks.
 });
+
+test("healthy ledger stays available during an in-progress sync", async () => {
+  const { sync } = await import("../src/chain.mjs");
+  const values = new Map([["healthy", "true"]]);
+  const store = {
+    set(key, value) { values.set(key, String(value)); },
+    get(key) { return values.get(key); },
+  };
+  let finishVerify;
+  const chain = {
+    verify: () => new Promise((resolve) => { finishVerify = resolve; }),
+    head: async () => { throw Error("test probe completed"); },
+  };
+  const operation = sync(store, chain);
+  assert.equal(values.get("healthy"), "true");
+  finishVerify();
+  await assert.rejects(operation, /test probe completed/);
+});
