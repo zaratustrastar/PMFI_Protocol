@@ -165,7 +165,9 @@ export class Chain {
   }
 }
 export async function sync(store, chain, { limit = 500, now = Date.now } = {}) {
-  store.set("healthy", false);
+  // Preserve the last reconciled snapshot while the next sync is running.
+  // Freshness is bounded by health() and the outer indexer loop marks failures
+  // unhealthy; toggling this flag on every poll unnecessarily closes deposits.
   await chain.verify();
   const c = store.c,
     head = await chain.head();
