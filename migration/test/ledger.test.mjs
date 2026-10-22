@@ -206,3 +206,27 @@ test("live state requires exact approval config hash and fresh reconciled index"
   assert.equal(state.enabled, false);
   assert.equal(state.total, null);
 });
+
+test("bounded indexer lag stays healthy only with reconciled fresh data", async () => {
+  const { chain, blocks } = fixture();
+  const s = new Store(":memory:", c);
+  chain.head = async () => 4;
+  blocks.push({
+    number: 4,
+    hash: "hash4",
+    parentHash: "hash3",
+    timestamp: 1767225604,
+  });
+  await sync(s, chain, { limit: 3 });
+  assert.equal(s.tip().number, 3);
+  assert.equal(s.get("head"), "4");
+  assert.equal(s.get("healthy"), "true");
+  s.close();
+
+  const distant = new Store(":memory:", c);
+  chain.head = async () => 20;
+  await sync(distant, chain, { limit: 3 });
+  assert.equal(distant.tip().number, 3);
+  assert.equal(distant.get("healthy"), "false");
+  distant.close();
+});
