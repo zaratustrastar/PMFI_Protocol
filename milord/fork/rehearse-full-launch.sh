@@ -15,7 +15,8 @@
 #
 # Fails closed: any refused check, failed forge run or recorder result other than "complete" stops it (exit 1).
 # Usage (from milord/): ./fork/rehearse-full-launch.sh
-# Env: FORK_PORT (8550), ROBINHOOD_RPC, FORK_BLOCK, FORK_BUILD=ci|local (ci: CI artifacts for HEAD, as
+# Env: FORK_PORT (8550), ROBINHOOD_RPC, FORK_BLOCK, FORK_KEEP=yes (leave the fork running for a service/frontend soak),
+#      FORK_BUILD=ci|local (ci: CI artifacts for HEAD, as
 #      fork/rehearse-atomic-deploy.sh; local: fresh optimized build, workstation only, ~6 GB RAM)
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -151,3 +152,8 @@ flows operate "$TMP/deployments.json" "$HELPER" "$ADAPTER" "$COLLECTOR" || STATU
 keep_logs
 [ "$STATUS" = 0 ] || die "integrated rehearsal failed (exit $STATUS, see $LOG)"
 say "INTEGRATED REHEARSAL PASSED (private fork only; summary ${LOG%.log}.summary.json)"
+if [ "${FORK_KEEP:-no}" = yes ]; then
+  # Soak / frontend test against the rehearsed fork (docs/launch/TESTNET_SERVICES.md). Ctrl-C stops Anvil.
+  say "fork kept at $FORK_URL; deployments ${LOG%.log}.deployments.json. Services: ALLOW_LOCAL_FORK=yes RPC_URL=$FORK_URL"
+  wait "$ANVIL_PID" || true
+fi

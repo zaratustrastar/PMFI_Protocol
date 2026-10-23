@@ -1,8 +1,10 @@
 # Production deployment order, rollback and incident plan
 
 Nothing here has been executed on a public network. Every 💸 step spends funds and every step on 4663 needs
-the owner's explicit approval. Scripts refuse chain 4663 today (`DeployRobinhood.s.sol`, `HookrPostLaunch.s.sol`;
-`DeployAtomicLaunch.s.sol` accepts 4663 only on a local fork with the public Anvil key). No secrets are stored in the repo; keys are supplied by the signer at run time.
+the owner's explicit approval. On 4663 the three deploy scripts (`DeployAtomicLaunch`, `DeployRobinhood`,
+`HookrPostLaunch`) run only on a private fork with the public Anvil key, or with `MILORD_MAINNET_APPROVAL` equal to the
+configuration hash the owner approved after a dry run (MAINNET_RUNBOOK.md §1). Gates G1–G9 are listed in
+MAINNET_RUNBOOK.md §2. No secrets are stored in the repo; keys are supplied by the signer at run time.
 
 ## Phase A: Robinhood Chain testnet (46630) dry run
 
@@ -11,24 +13,24 @@ the owner's explicit approval. Scripts refuse chain 4663 today (`DeployRobinhood
 3. `forge script script/HookrPostLaunch.s.sol` with the Hookr pool key → V4SwapAdapter + HookrLockFeeCollector.
 4. Run the quote service and the website against testnet; repeat the UI test.
 
-## Phase B: Robinhood Chain fork test (no broadcast)
+## Phase B: Robinhood Chain private-fork rehearsal (no broadcast to the network)
 
-Fork 4663 at a recent block; run the launch path against the real HookrLauncher, HookrRoot, PoolManager,
-PositionManager and USDG: launch, buy, sell, settle, payout to TradingTaxSplitter, buyback through the adapter,
-ETH → USDG through the V3 pool, deposit, report, claim. Exit criterion: the same invariants as the local
-simulation.
+`./fork/rehearse-full-launch.sh` (VPS, CI artifacts of HEAD) runs Phase C steps 1–8 with the real deploy scripts and
+the generated Safe batches on a loopback Anvil fork of 4663, then trading, keeper passes, a conversion, a report, a
+weekly root and a claim (fork/rehearse-flows.mjs). Exit criterion: `INTEGRATED REHEARSAL PASSED` at the release SHA.
+The forge fork suite (`./fork/run-fork-tests.sh`) covers the Hookr terms and failure cases.
 
 ## Phase C: mainnet (after approval of every NEEDS APPROVAL item)
 
 | # | Step | Script / tool | Signer |
 |---|---|---|---|
-| 1 | Deploy `MilordAtomicLaunch` (owner Team Safe, flat launch); record `predictedToken()` | `DeployAtomicLaunch.s.sol` (guard lifted only for this run) | deployer, no rights kept |
-| 2 | Deploy the protocol against the predicted token: splitters, NFT, converter, BuybackBurner, registry, governor, V3 vault (USDG), ShareDistributor, ParbFundingAdapter, swap venue, TWAP reference, ArbitrageFundingRouter (payee of all three splitters) | `DeployRobinhood.s.sol` with `MILORD_PREDICTED_TOKEN` → `deployments/robinhood-4663.json` | deployer |
+| 1 | G1: deploy `MilordAtomicLaunch` (owner Team Safe, flat launch); record `predictedToken()` | `DeployAtomicLaunch.s.sol` with the approved configuration hash | deployer, no rights kept |
+| 2 | Deploy the protocol against the predicted token: splitters, NFT, converter, BuybackBurner, registry, governor, V3 vault (USDG), ShareDistributor, ParbFundingAdapter, swap venue, TWAP reference, ArbitrageFundingRouter (payee of all three splitters) | G2: `DeployRobinhood.s.sol` with `MILORD_PREDICTED_TOKEN` and the approved hash → `deployments/robinhood-4663.json` | deployer |
 | 3 | Verify all sources | explorer | — |
 | 4 | Accept ownerships | `safe-team-setup.json`, `safe-arbitrage-setup.json` | Team Safe, Arbitrage Safe |
 | 5 | 💸 Launch: MILORD created and launched on Hookr in one transaction, every frozen term verified | `safe-1-launch.json` | Team Safe |
 | 6 | Record the launch (read-only) | `offchain/record-launch.mjs` | — |
-| 7 | Accept the family, sweep, `setInitialAdapter` (adapter from `HookrPostLaunch.s.sol`) | `safe-2-accept.json` | Team Safe |
+| 7 | G5: `HookrPostLaunch.s.sol` (approved hash, recorded `MILORD_POOL_ID`); G6: accept the family, sweep, `setInitialAdapter` | `safe-2-accept.json` | deployer, then Team Safe |
 | 8 | Permanent lock, **only after the owner's go-ahead**, before `principalLockedUntil` | `safe-3-lock-DO-NOT-EXECUTE.json` | Team Safe |
 | 9 | Start services, quote server and engine | OPERATIONS_PLAN.md §5 | hot keys on their hosts |
 | 10 | 💸 First conversion and exit by a team wallet | website | team wallet |

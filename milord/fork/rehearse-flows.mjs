@@ -226,7 +226,7 @@ summary.trading = { buysEth: buys.map(formatEther), sold: formatEther(held / 10n
 
 // ── 5. keeper pass with the services' own code (offchain/services/lib) ──
 process.env.KEEPER_PRIVATE_KEY = KEYS.keeper;
-process.env.ALLOW_MAINNET = "yes"; // services' 4663 guard; this process verified a loopback Anvil fork above
+process.env.ALLOW_LOCAL_FORK = "yes"; // services' 4663 guard: loopback RPC only (verified as an Anvil fork above)
 const { loadConfig, connect, resolveTaxQueues } = await import("../offchain/services/lib/config.mjs");
 const { keeperTick, readInputs, publishEpoch, checkRoot } = await import("../offchain/services/lib/jobs.mjs");
 const { entryPriceSource } = await import("../offchain/lib/entry-price.mjs");
