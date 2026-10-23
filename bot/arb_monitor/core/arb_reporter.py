@@ -644,7 +644,8 @@ def _robinhood_report_guards(assets: dict) -> str | None:
             except Exception:
                 return f"position {p.pair_id}: settlement evidence unavailable"
         if p.status == "pending_redeem" and (p.resolved_venue == "kalshi" or ctf.enabled()):
-            return f"position {p.pair_id} resolved on {("Kalshi" if p.resolved_venue == "kalshi" else p.resolved_venue)}; payout not reconciled (mark_position_redeemed)"
+            venue = "Kalshi" if p.resolved_venue == "kalshi" else p.resolved_venue
+            return f"position {p.pair_id} resolved on {venue}; payout not reconciled (mark_position_redeemed)"
         if p.status == "open" and p.expiry_ts and now > p.expiry_ts + _expiry_grace_secs():
             return f"position {p.pair_id} still open {now - p.expiry_ts}s past expiry — settlement not reconciled"
     return None

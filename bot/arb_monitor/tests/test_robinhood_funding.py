@@ -213,20 +213,21 @@ class RobinhoodWithdrawalLedgerTests(_Base):
             self.assertEqual(arb_withdrawals._load_ledger()[0]["status"], "completed")
 
     def test_polymarket_recall_routes_to_usdg_on_4663(self):
+        """B9: robinhood recalls use Polymarket's own bridge (pUSD -> USDG on 4663), exact raw amount."""
+        import json
         import subprocess
-        out = "TX: 0x" + "ab" * 32 + "\n✅ FULL WITHDRAWAL COMPLETE\n"
+        out = '{"txHash": "0x' + "ab" * 32 + '", "bridgeAddress": "0x' + "22" * 20 + '"}\n'
         with mock.patch.object(arb_withdrawals, "_poly_get_balance", return_value=100.0), \
-             mock.patch.dict(os.environ, {"POLY_PROXY_ADDRESS": F.POLY_BASE_ADDR}), \
+             mock.patch.dict(os.environ, {"POLY_PROXY_ADDRESS": F.POLY_BASE_ADDR, "ARB_POLY_WITHDRAW_ROUTE": "polymarket_bridge"}), \
              mock.patch.object(subprocess, "run",
                                return_value=mock.Mock(returncode=0, stdout=out, stderr="")) as run:
             total = arb_withdrawals.withdraw_from_platforms(20.0, 100.0, 0.0, 0.0, F.SERVICER)
         self.assertEqual(total, 20.0)
-        env = run.call_args.kwargs["env"]
-        self.assertEqual(env["WITHDRAW_DEST_CHAIN_ID"], "4663")
-        self.assertEqual(env["WITHDRAW_DEST_CURRENCY"], F.USDG)
-        self.assertEqual(env["TREASURY_ADDRESS"], F.SERVICER)
+        self.assertTrue(run.call_args.args[0][-1].endswith("trading_bot/poly_bridge_withdraw.mjs"))
+        self.assertEqual(json.loads(run.call_args.kwargs["input"]), {"action": "withdraw", "amountRaw": "20000000"})
         row = arb_withdrawals._load_ledger()[0]
         self.assertEqual((row["platform"], row["dest"], row["status"]), ("polymarket", "rh_usdg", "pending"))
+        self.assertEqual(row["poly_bridge_address"], "0x" + "22" * 20)
 
     def test_kalshi_recall_on_base_is_swept_back_to_usdg(self):
         arb_withdrawals.record_withdrawal_intent("kalshi", 25.0, "kw-1", 3600, dest="base_usdc")
