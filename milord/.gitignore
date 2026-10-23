@@ -5,6 +5,7 @@ broadcast/
 out-lowmem/
 cache-lowmem/
 fork/logs/
+fork/.polygon-redemption-*/
 hookr-verify/out/
 deployments/*.json
 offchain/services/*.env
