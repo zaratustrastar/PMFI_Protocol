@@ -16,7 +16,7 @@ Status tags used in every document here:
 | 2 | Final launch liquidity (100%), balances, first-buy impact | [LAUNCH_LIQUIDITY.md](LAUNCH_LIQUIDITY.md) |
 | 2b | Permanent lock and LP fee burn | [LP_LOCK.md](LP_LOCK.md) |
 | 5b | Automated ETH → USDG → pARB | [PARB_AUTOMATION.md](PARB_AUTOMATION.md) |
-| 5c | Keeper, epoch publisher, root checker | `offchain/services/README.md` |
+| 5c | Keeper, epoch publisher, root checker, monitor | `offchain/services/README.md` |
 | 5d | NFT entry-fee pricing (TWAP quote, bootstrap, trust assumptions) | [ENTRY_FEE_PRICING.md](ENTRY_FEE_PRICING.md) |
 | 6b | Hookr-1 verification and incompatibilities | [HOOKR_VERIFICATION.md](HOOKR_VERIFICATION.md) |
 | 10b | Safe configuration and permissions | [SAFE_CONFIGURATION.md](SAFE_CONFIGURATION.md) |
@@ -27,6 +27,8 @@ Status tags used in every document here:
 | 17 | Fork clock, ArbSys stub, what to validate on Robinhood | [CLOCK_AND_ARBSYS.md](CLOCK_AND_ARBSYS.md) |
 | 18 | Security-audit scope | [AUDIT_SCOPE.md](AUDIT_SCOPE.md) |
 | 19 | Robinhood fork suite | [FORK_INTEGRATION.md](FORK_INTEGRATION.md) |
+| 20 | Autonomous pipeline readiness matrix (evidence per component) | [READINESS_MATRIX.md](READINESS_MATRIX.md) |
+| 21 | Hosts, resources, secrets, backups, go/no-go | [OPERATIONS_PLAN.md](OPERATIONS_PLAN.md) |
 | 3 | Fee paths and recipients | [FEE_ROUTING_VERIFICATION.md](FEE_ROUTING_VERIFICATION.md) |
 | 4 | Full economic transaction trace | [MILORD_END_TO_END.md](MILORD_END_TO_END.md) |
 | 5 | Venue funding and withdrawal routes | [ARBITRAGE_FUNDING_READINESS.md](ARBITRAGE_FUNDING_READINESS.md) |

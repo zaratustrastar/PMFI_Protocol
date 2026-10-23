@@ -20,6 +20,8 @@ export function entryPriceSource(provider, D, overrides = {}) {
     poolManager: D.PoolManager,
     stateView: D.StateView,
     key: ["0x0000000000000000000000000000000000000000", D.MILORD, D.lpFee, D.tickSpacing, D.HookrTaxHook ?? D.HookrRoot],
+    startBlock: Number(D.startBlock ?? 0),
+    logStep: c.logStep ?? 10_000,
     window: c.window,
     minHistory: c.window,
     maxDeviationBps: c.maxDeviationBps,

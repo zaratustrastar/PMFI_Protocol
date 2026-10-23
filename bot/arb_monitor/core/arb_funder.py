@@ -28,8 +28,11 @@ Funding chain (ARB_FUNDING_CHAIN, default "base" = unchanged legacy V2 path):
   robinhood — servicer cash is USDG on Robinhood Chain 4663; tend() hits the V3 vault there;
   Polymarket is funded by a USDG transfer to POLY_RH_DEPOSIT_ADDR; Kalshi by an Across
   (Relay fallback) USDG→Base USDC bridge followed by the existing Base USDC transfer.
-  Bridge legs are written to the in-transit ledger in arb_withdrawals so NAV counts them.
-  Opinion is skipped unless ARB_OPINION_ENABLED=true (and has no Robinhood route).
+  Every value-moving tx is write-ahead (arb_ledger intent + idempotency key), receipt-checked,
+  validated against arb_allowlist (tokens, bridge contracts, venue deposit addresses), and only
+  then written to the in-transit ledgers in arb_withdrawals (bridge / venue-deposit) so NAV counts
+  it exactly once. reconcile_funding_intents() resolves intents after a crash or RPC outage.
+  Opinion has no Robinhood route and is fully disabled in robinhood mode (V1).
 
 Nonce management: _NonceTracker is initialised from pending nonce and
 incremented client-side per transfer to prevent nonce collisions.
@@ -59,7 +62,12 @@ from ..config import (
     relay_api_url,
     bridge_max_fee_bps,
     rh_sweep_min_usdc,
+    tx_receipt_timeout_secs,
+    tx_receipt_poll_secs,
 )
+from . import arb_allowlist as AL
+from . import arb_ledger as _L
+from .arb_http import request_json
 
 BASE_RPC = os.environ.get("BASE_RPC_URL", "https://mainnet.base.org")
 BASE_CHAIN_ID = 8453
@@ -150,6 +158,21 @@ def _funding_rpc_chain() -> tuple[str, int]:
     return BASE_RPC, BASE_CHAIN_ID
 
 
+def rpc_for_chain(chain_id: int) -> str:
+    """RPC URL for a chain the funder sends on (4663 / Base / Polygon)."""
+    chain_id = int(chain_id)
+    if chain_id == BASE_CHAIN_ID:
+        return BASE_RPC
+    if chain_id == robinhood_chain_id():
+        rpc = robinhood_rpc_url()
+        if not rpc:
+            raise RuntimeError("ROBINHOOD_RPC_URL is not set")
+        return rpc
+    if chain_id == 137:
+        return os.environ.get("POLYGON_RPC_URL", "https://polygon-rpc.com")
+    raise RuntimeError(f"no RPC configured for chain {chain_id}")
+
+
 def get_servicer_cash_usdc(wallet: str) -> float:
     """Servicer cash on the funding chain: USDG on 4663 (robinhood) or USDC on Base (base)."""
     if is_robinhood_funding():
@@ -194,7 +217,7 @@ class _NonceTracker:
 # Transaction builder/signer
 # ---------------------------------------------------------------------------
 
-def _build_and_send_tx(
+def _prepare_signed_tx(
     private_key: str,
     to: str,
     data: str,
@@ -203,12 +226,8 @@ def _build_and_send_tx(
     chain_id: int = BASE_CHAIN_ID,
     rpc_url: str = BASE_RPC,
     gas_override: int | None = None,
-) -> str:
-    """Build, sign and broadcast a raw transaction. Returns tx hash string.
-
-    Uses nonce_tracker.consume() to get the next nonce — caller must pass the
-    same tracker for all txs in one tick to guarantee nonce ordering.
-    """
+) -> tuple[str, str, int]:
+    """Build and sign (no broadcast). Returns (raw_tx_hex, local_tx_hash, nonce)."""
     from eth_account import Account
 
     account = Account.from_key(private_key)
@@ -244,9 +263,164 @@ def _build_and_send_tx(
 
     signed = account.sign_transaction(tx)
     raw = signed.raw_transaction if hasattr(signed, "raw_transaction") else signed.rawTransaction
-    tx_hash = _rpc("eth_sendRawTransaction", ["0x" + raw.hex()], rpc_url)
+    local_hash = signed.hash.hex() if hasattr(signed, "hash") else ""
+    if local_hash and not local_hash.startswith("0x"):
+        local_hash = "0x" + local_hash
+    return "0x" + raw.hex(), local_hash, nonce
+
+
+def _build_and_send_tx(
+    private_key: str,
+    to: str,
+    data: str,
+    nonce_tracker: _NonceTracker,
+    value_wei: int = 0,
+    chain_id: int = BASE_CHAIN_ID,
+    rpc_url: str = BASE_RPC,
+    gas_override: int | None = None,
+) -> str:
+    """Build, sign and broadcast a raw transaction. Returns tx hash string.
+
+    Uses nonce_tracker.consume() to get the next nonce — caller must pass the
+    same tracker for all txs in one tick to guarantee nonce ordering.
+    (Base-mode behaviour unchanged: fire-and-forget, no receipt wait.)
+    """
+    raw, _, nonce = _prepare_signed_tx(private_key, to, data, nonce_tracker, value_wei,
+                                       chain_id, rpc_url, gas_override)
+    tx_hash = _rpc("eth_sendRawTransaction", [raw], rpc_url)
     log(f"📤 TX nonce={nonce} → {tx_hash}")
     return tx_hash
+
+
+def _wait_for_receipt(tx_hash: str, rpc_url: str, timeout: float | None = None,
+                      poll: float | None = None) -> str:
+    """Poll for a receipt: "success" (status 1) | "failed" (status 0) | "unconfirmed" (timeout).
+
+    Bounded by both wall-clock (ARB_TX_RECEIPT_TIMEOUT_SECS) and attempt count. RPC errors while
+    polling are treated as "no receipt yet".
+    """
+    import math
+    timeout = tx_receipt_timeout_secs() if timeout is None else timeout
+    poll = tx_receipt_poll_secs() if poll is None else poll
+    attempts = max(1, int(math.ceil(timeout / max(poll, 0.001)))) + 1
+    deadline = time.time() + timeout
+    warned = False
+    for i in range(attempts):
+        try:
+            rec = _rpc("eth_getTransactionReceipt", [tx_hash], rpc_url)
+        except Exception as e:
+            rec = None
+            if not warned:
+                log(f"⚠️ receipt poll error for {tx_hash}: {e}")
+                warned = True
+        if rec:
+            ok = _to_int(rec.get("status")) == 1
+            if not ok:
+                log(f"❌ TX {tx_hash} REVERTED (receipt status 0)")
+            return "success" if ok else "failed"
+        if time.time() >= deadline or i == attempts - 1:
+            break
+        time.sleep(poll)
+    log(f"⏳ TX {tx_hash}: no receipt within {timeout}s — UNCONFIRMED (counted in transit, flagged)")
+    return "unconfirmed"
+
+
+class FundingBlocked(RuntimeError):
+    """Refused before any tx was signed (no capital moved)."""
+
+
+def _execute_rh_op(
+    *,
+    key: str,
+    kind: str,
+    chain_id: int,
+    rpc_url: str,
+    token: str,
+    amount_usdc: float,
+    txs: list,
+    nonce_tracker: "_NonceTracker",
+    private_key: str,
+    sender: str,
+    meta: dict,
+) -> dict:
+    """Write-ahead execution of a value-moving operation (approvals first, value tx last).
+
+    1. begin_intent(key) BEFORE signing (refuses a live duplicate key);
+    2. each tx is signed, its precomputed hash + nonce stored in the intent, then broadcast;
+    3. approvals: a reverted approval aborts; an unconfirmed one proceeds (nonce ordering);
+    4. value tx: reverted → intent "reverted", nothing recorded in transit, raises;
+       status 1 → "confirmed"; timeout → "unconfirmed" (still counted, flagged);
+    5. our outflow is journaled and the in-transit row is written from the intent's meta
+       (_ledger_intent), the same code startup reconciliation uses after a crash.
+    """
+    _L.begin_intent(key, kind, chain_id, token, amount_usdc, sender, txs[-1]["to"], meta=meta)
+    final_hash = None
+    for i, tx in enumerate(txs):
+        final = i == len(txs) - 1
+        gas = _to_int(tx.get("gas") or tx.get("gasLimit"))
+        try:
+            raw, local_hash, nonce = _prepare_signed_tx(
+                private_key, tx["to"], tx.get("data", "0x"), nonce_tracker, 0, chain_id, rpc_url,
+                int(gas * 1.2) if gas else tx.get("gas_override"),
+            )
+        except Exception as e:
+            _L.update_intent(key, status="failed", error=f"sign tx {i}: {e}")
+            raise
+        if final:
+            _L.update_intent(key, add_tx=local_hash or None, status="broadcast", final_nonce=nonce)
+        else:
+            _L.update_intent(key, add_tx=local_hash or None)
+        try:
+            tx_hash = _rpc("eth_sendRawTransaction", [raw], rpc_url)
+        except Exception as e:
+            if final:
+                # Outcome unknown: the intent stays "broadcast" so nothing re-sends it until
+                # reconcile_funding_intents() resolves it by receipt / nonce.
+                raise RuntimeError(f"{kind}: broadcast outcome unknown ({e}); intent {key} left for reconciliation")
+            _L.update_intent(key, status="failed", error=f"approval broadcast: {e}")
+            raise
+        log(f"📤 TX nonce={nonce} → {tx_hash}")
+        _L.update_intent(key, add_tx=tx_hash)
+        st = _wait_for_receipt(tx_hash, rpc_url)
+        if not final:
+            if st == "failed":
+                _L.update_intent(key, status="failed", error=f"approval {tx_hash} reverted")
+                raise RuntimeError(f"{kind}: approval {tx_hash} reverted")
+            continue
+        final_hash = tx_hash
+        if st == "failed":
+            _L.update_intent(key, status="reverted", final_tx=tx_hash)
+            raise RuntimeError(f"{kind}: tx {tx_hash} reverted — nothing recorded in transit")
+        _L.update_intent(key, status="confirmed" if st == "success" else "unconfirmed", final_tx=tx_hash)
+        _L.record_cashflow(chain_id, token, -float(amount_usdc), kind, key)
+        _ledger_intent(key)
+        return {"tx_hash": final_hash, "receipt": st, "key": key}
+    raise RuntimeError(f"{kind}: no transactions")
+
+
+def _ledger_intent(key: str) -> None:
+    """Write the in-transit row described by an intent's meta (idempotent) and mark it ledgered."""
+    row = _L.get_intent(key)
+    if not row or row.get("ledgered"):
+        return
+    from .arb_withdrawals import record_bridge_transfer, record_venue_deposit
+    meta = row.get("meta") or {}
+    tx_hash = row.get("final_tx") or (row.get("tx_hashes") or [None])[-1]
+    receipt = "success" if row.get("status") == "confirmed" else "unconfirmed"
+    if meta.get("ledger") == "bridge":
+        record_bridge_transfer(
+            meta["direction"], meta["provider"], meta.get("reference") or tx_hash,
+            row["amount_usdc"], row["chain_id"], tx_hash=tx_hash, receipt=receipt,
+            dest_balance_before=meta.get("dest_balance_before"),
+            expected_out_usdc=meta.get("expected_out_usdc"), idem_key=key,
+        )
+    elif meta.get("ledger") == "venue":
+        record_venue_deposit(
+            meta["venue"], tx_hash, row["amount_usdc"], row["chain_id"],
+            dest_balance_before=meta.get("dest_balance_before"), receipt=receipt,
+            tx_hash=tx_hash, idem_key=key,
+        )
+    _L.update_intent(key, ledgered=True)
 
 
 # ---------------------------------------------------------------------------
@@ -417,11 +591,33 @@ def _to_int(v, default: int = 0) -> int:
     return int(s, 16) if s.lower().startswith("0x") else int(s)
 
 
+def _tok_fields(t) -> tuple:
+    """(chainId, address) from a token descriptor that may be a dict or a bare address."""
+    if isinstance(t, dict):
+        return t.get("chainId"), t.get("address")
+    return None, t if isinstance(t, str) else None
+
+
+def _across_route_fields(q: dict) -> dict:
+    in_chain, in_tok = _tok_fields(q.get("inputToken"))
+    out_chain, out_tok = _tok_fields(q.get("outputToken"))
+    return {"recipient": q.get("recipient"), "origin_chain": in_chain, "origin_token": in_tok,
+            "dest_chain": out_chain or q.get("destinationChainId"), "dest_token": out_tok}
+
+
+def _relay_route_fields(q: dict) -> dict:
+    d = q.get("details") or {}
+    cin = (d.get("currencyIn") or {}).get("currency") or {}
+    cout = (d.get("currencyOut") or {}).get("currency") or {}
+    return {"recipient": d.get("recipient"), "origin_chain": cin.get("chainId"),
+            "origin_token": cin.get("address"), "dest_chain": cout.get("chainId"),
+            "dest_token": cout.get("address")}
+
+
 def _across_quote(amount_raw, trade_type, from_addr, recipient,
                   origin_chain, origin_token, dest_chain, dest_token):
-    """Across swap API. Returns (txs, input_raw, min_output_raw, request_id)."""
-    import requests as _req
-    resp = _req.get(f"{across_api_url()}/swap/approval", params={
+    """Across swap API. Returns (txs, input_raw, min_output_raw, request_id, route_fields)."""
+    q = request_json("GET", f"{across_api_url()}/swap/approval", params={
         "tradeType": trade_type,  # exactInput | exactOutput
         "amount": str(amount_raw),
         "inputToken": origin_token,
@@ -431,8 +627,6 @@ def _across_quote(amount_raw, trade_type, from_addr, recipient,
         "depositor": from_addr,
         "recipient": recipient,
     }, timeout=20)
-    resp.raise_for_status()
-    q = resp.json()
     swap_tx = q.get("swapTx") or {}
     if not swap_tx.get("to"):
         raise RuntimeError(f"Across quote missing swapTx: {list(q.keys())}")
@@ -443,14 +637,13 @@ def _across_quote(amount_raw, trade_type, from_addr, recipient,
     else:
         in_raw = _to_int(q.get("maxInputAmount") or q.get("inputAmount"))
         out_raw = amount_raw
-    return txs, in_raw, out_raw, None
+    return txs, in_raw, out_raw, None, _across_route_fields(q)
 
 
 def _relay_quote(amount_raw, trade_type, from_addr, recipient,
                  origin_chain, origin_token, dest_chain, dest_token):
-    """Relay quote API (same pattern as arb_withdrawals._relay_bridge_polygon_to_base)."""
-    import requests as _req
-    resp = _req.post(f"{relay_api_url()}/quote", json={
+    """Relay quote API. Returns (txs, input_raw, min_output_raw, request_id, route_fields)."""
+    q = request_json("POST", f"{relay_api_url()}/quote", json_body={
         "user": from_addr,
         "originChainId": origin_chain,
         "destinationChainId": dest_chain,
@@ -460,8 +653,6 @@ def _relay_quote(amount_raw, trade_type, from_addr, recipient,
         "recipient": recipient,
         "tradeType": "EXACT_INPUT" if trade_type == "exactInput" else "EXACT_OUTPUT",
     }, timeout=20)
-    resp.raise_for_status()
-    q = resp.json()
     txs, request_id = [], None
     for step in q.get("steps", []):
         request_id = request_id or step.get("requestId")
@@ -479,7 +670,21 @@ def _relay_quote(amount_raw, trade_type, from_addr, recipient,
     else:
         in_raw = _to_int((details.get("currencyIn") or {}).get("amount"))
         out_raw = amount_raw
-    return txs, in_raw, out_raw, request_id
+    return txs, in_raw, out_raw, request_id, _relay_route_fields(q)
+
+
+def _validate_quote(provider, txs, in_raw, out_raw, route, amount_raw, trade_type, recipient,
+                    origin_chain, origin_token, dest_chain, dest_token) -> None:
+    max_fee = bridge_max_fee_bps()
+    if in_raw <= 0 or out_raw <= 0 or out_raw * 10_000 < in_raw * (10_000 - max_fee):
+        raise RuntimeError(f"fee unverifiable or above {max_fee} bps (in={in_raw} out={out_raw})")
+    if trade_type == "exactInput" and in_raw != amount_raw:
+        raise RuntimeError(f"exactInput quote input {in_raw} != requested {amount_raw}")
+    if trade_type == "exactOutput" and out_raw < amount_raw:
+        raise RuntimeError(f"exactOutput quote output {out_raw} < requested {amount_raw}")
+    AL.validate_bridge_txs(txs, origin_chain, origin_token, in_raw)
+    AL.validate_route(route, recipient=recipient, origin_chain=origin_chain, origin_token=origin_token,
+                      dest_chain=dest_chain, dest_token=dest_token)
 
 
 def _bridge_stable(
@@ -494,34 +699,36 @@ def _bridge_stable(
     dest_chain: int,
     dest_token: str,
     nonce_tracker: "_NonceTracker",
+    *,
+    direction: str = "bridge",
+    idempotency_key: str | None = None,
+    dest_balance_before: float | None = None,
 ) -> dict:
     """Bridge a 6-decimal stablecoin via Across, falling back to Relay on a bad/failed QUOTE.
 
-    Guards (fail closed): fee <= ARB_BRIDGE_MAX_FEE_BPS, no native value attached, and every
-    tx before the final deposit must be an ERC-20 approve() on the origin token. Once a tx has
-    been broadcast we never fall back (that could double-spend); errors propagate.
-    Returns {provider, tx_hash, reference, input_usdc, output_usdc}.
+    Fail-closed guards (arb_allowlist): allowlisted (chain, token) on both ends; fee and
+    slippage <= ARB_BRIDGE_MAX_FEE_BPS (min output for exactInput, max input for exactOutput);
+    approvals are exact approve(spender, <= input) on the origin token to an allowlisted
+    spender; the deposit `to` is allowlisted; no native value; quoted recipient / destination
+    must match when present. Once a tx has been broadcast we never fall back (that could
+    double-spend); errors propagate. The op is write-ahead (idempotency key) and the in-transit
+    row is written only after the deposit receipt (status 1, or "unconfirmed" on timeout).
+    Returns {provider, tx_hash, reference, input_usdc, output_usdc, receipt, key}.
     """
+    AL.require_token(origin_chain, origin_token)
+    AL.require_token(dest_chain, dest_token)
+    key = idempotency_key or _L.new_key(direction)
+    _L.assert_key_available(key)
     amount_raw = int(round(amount_usdc * 1_000_000))
-    max_fee = bridge_max_fee_bps()
     errors = []
     for provider, quote_fn in (("across", _across_quote), ("relay", _relay_quote)):
         try:
-            txs, in_raw, out_raw, request_id = quote_fn(
+            txs, in_raw, out_raw, request_id, route = quote_fn(
                 amount_raw, trade_type, from_addr, recipient,
                 origin_chain, origin_token, dest_chain, dest_token,
             )
-            if in_raw <= 0 or out_raw <= 0 or out_raw * 10_000 < in_raw * (10_000 - max_fee):
-                raise RuntimeError(
-                    f"fee unverifiable or above {max_fee} bps (in={in_raw} out={out_raw})"
-                )
-            for tx in txs:
-                if _to_int(tx.get("value")) != 0:
-                    raise RuntimeError(f"quote tx carries native value {tx.get('value')}")
-            for tx in txs[:-1]:
-                if (tx["to"].lower() != origin_token.lower()
-                        or not str(tx.get("data", "")).lower().startswith("0x" + SELECTOR_APPROVE)):
-                    raise RuntimeError(f"unexpected pre-deposit tx to {tx['to']}")
+            _validate_quote(provider, txs, in_raw, out_raw, route, amount_raw, trade_type, recipient,
+                            origin_chain, origin_token, dest_chain, dest_token)
         except Exception as e:
             errors.append(f"{provider}: {e}")
             log(f"⚠️ {provider} bridge quote rejected: {e}")
@@ -531,26 +738,23 @@ def _bridge_stable(
             f"🌉 {provider}: {in_raw / 1e6:.6f} (chain {origin_chain}) → "
             f">= {out_raw / 1e6:.6f} (chain {dest_chain}) to {recipient} [{len(txs)} tx]"
         )
-        tx_hash = None
-        for tx in txs:
-            gas = _to_int(tx.get("gas") or tx.get("gasLimit"))
-            tx_hash = _build_and_send_tx(
-                private_key=private_key,
-                to=tx["to"],
-                data=tx.get("data", "0x"),
-                nonce_tracker=nonce_tracker,
-                value_wei=0,
-                chain_id=origin_chain,
-                rpc_url=origin_rpc,
-                gas_override=int(gas * 1.2) if gas else None,
-            )
-        log(f"🌉 {provider} bridge deposit sent: {tx_hash}")
+        res = _execute_rh_op(
+            key=key, kind=direction, chain_id=origin_chain, rpc_url=origin_rpc, token=origin_token,
+            amount_usdc=in_raw / 1_000_000, txs=txs, nonce_tracker=nonce_tracker,
+            private_key=private_key, sender=from_addr,
+            meta={"ledger": "bridge", "direction": direction, "provider": provider,
+                  "reference": request_id, "dest_balance_before": dest_balance_before,
+                  "expected_out_usdc": out_raw / 1_000_000, "dest_chain_id": dest_chain},
+        )
+        log(f"🌉 {provider} bridge deposit sent: {res['tx_hash']} (receipt={res['receipt']})")
         return {
             "provider": provider,
-            "tx_hash": tx_hash,
-            "reference": request_id or tx_hash,
+            "tx_hash": res["tx_hash"],
+            "reference": request_id or res["tx_hash"],
             "input_usdc": in_raw / 1_000_000,
             "output_usdc": out_raw / 1_000_000,
+            "receipt": res["receipt"],
+            "key": key,
         }
     raise RuntimeError("all bridge providers failed: " + "; ".join(errors))
 
@@ -560,12 +764,15 @@ def _bridge_usdg_to_base_usdc(
     servicer_wallet: str,
     amount_usdc: float,
     nonce_tracker: "_NonceTracker",
+    dest_balance_before: float | None = None,
+    idempotency_key: str | None = None,
 ) -> dict:
     """USDG on Robinhood Chain → exactly `amount_usdc` USDC on Base (servicer wallet)."""
     rpc, chain_id = _funding_rpc_chain()
     return _bridge_stable(
         private_key, servicer_wallet, servicer_wallet, amount_usdc, "exactOutput",
         chain_id, usdg_address(), rpc, BASE_CHAIN_ID, USDC_BASE, nonce_tracker,
+        direction="rh_to_base", idempotency_key=idempotency_key, dest_balance_before=dest_balance_before,
     )
 
 
@@ -574,30 +781,59 @@ def _bridge_base_usdc_to_usdg(
     servicer_wallet: str,
     amount_usdc: float,
     nonce_tracker: "_NonceTracker",
+    idempotency_key: str | None = None,
 ) -> dict:
     """All of `amount_usdc` USDC on Base → USDG on Robinhood Chain (servicer wallet)."""
     return _bridge_stable(
         private_key, servicer_wallet, servicer_wallet, amount_usdc, "exactInput",
         BASE_CHAIN_ID, USDC_BASE, BASE_RPC, robinhood_chain_id(), usdg_address(), nonce_tracker,
+        direction="base_to_rh", idempotency_key=idempotency_key,
     )
 
 
-def _send_usdg_to_polymarket(private_key: str, amount_usdc: float, nonce_tracker: "_NonceTracker") -> str:
-    """Robinhood mode Polymarket deposit: USDG transfer on 4663 to the Polymarket bridge address."""
+def _erc20_transfer_calldata(to_addr: str, amount_usdc: float) -> str:
+    amount_raw = int(round(amount_usdc * 1_000_000))
+    return ("0x" + SELECTOR_TRANSFER + "000000000000000000000000" + to_addr.lower().replace("0x", "")
+            + hex(amount_raw)[2:].zfill(64))
+
+
+def _guard_no_inflight(direction: str | None = None, venue: str | None = None, kinds: tuple = ()) -> None:
+    """Refuse a new send while an earlier one to the same destination is unresolved or in transit
+    (prevents double-funding after a timeout or a crash/restart)."""
+    from .arb_withdrawals import inflight_rows_for
+    rows = inflight_rows_for(direction=direction, venue=venue)
+    if rows:
+        raise FundingBlocked(
+            f"in_transit_pending: {len(rows)} earlier {direction or venue} transfer(s) still in transit "
+            f"(refs={[r.get('reference') for r in rows][:3]})"
+        )
+    if kinds and _L.unresolved_intents(kinds=kinds):
+        raise FundingBlocked(f"unresolved_intent: an earlier {'/'.join(kinds)} operation awaits reconciliation")
+
+
+def _send_usdg_to_polymarket(private_key: str, amount_usdc: float, nonce_tracker: "_NonceTracker",
+                             poly_before: float | None = None, idempotency_key: str | None = None) -> str:
+    """Robinhood mode Polymarket deposit: USDG transfer on 4663 to the Polymarket bridge address.
+
+    Write-ahead + receipt-checked; the rh_to_polymarket in-transit row carries a Polymarket
+    balance snapshot and is cleared by balance delta. Returns the tx hash.
+    """
     deposit_addr = poly_rh_deposit_addr()
     if not deposit_addr:
-        raise RuntimeError("POLY_RH_DEPOSIT_ADDR not set")
+        raise FundingBlocked("POLY_RH_DEPOSIT_ADDR not set")
     rpc, chain_id = _funding_rpc_chain()
-    tx = _send_erc20_transfer(
-        private_key, deposit_addr, round(amount_usdc, 6), nonce_tracker,
-        token=usdg_address(), chain_id=chain_id, rpc_url=rpc,
+    AL.require_venue_deposit("polymarket", chain_id, usdg_address(), deposit_addr)
+    _guard_no_inflight(direction="rh_to_polymarket", kinds=("rh_to_polymarket",))
+    servicer = os.environ.get("ARB_SERVICER_WALLET", "")
+    res = _execute_rh_op(
+        key=idempotency_key or _L.new_key("rh_to_polymarket"), kind="rh_to_polymarket",
+        chain_id=chain_id, rpc_url=rpc, token=usdg_address(), amount_usdc=round(amount_usdc, 6),
+        txs=[{"to": usdg_address(), "data": _erc20_transfer_calldata(deposit_addr, amount_usdc)}],
+        nonce_tracker=nonce_tracker, private_key=private_key, sender=servicer,
+        meta={"ledger": "bridge", "direction": "rh_to_polymarket", "provider": "polymarket_bridge",
+              "reference": None, "dest_balance_before": poly_before},
     )
-    try:
-        from .arb_withdrawals import record_bridge_transfer
-        record_bridge_transfer("rh_to_polymarket", "polymarket_bridge", tx, amount_usdc, chain_id)
-    except Exception as e:
-        log(f"⚠️ Could not record Polymarket in-transit deposit: {e}")
-    return tx
+    return res["tx_hash"]
 
 
 def _fund_kalshi_from_robinhood(
@@ -607,17 +843,26 @@ def _fund_kalshi_from_robinhood(
     nonce_tracker: "_NonceTracker",
     wait_timeout: int,
     poll_interval: int,
+    kalshi_before: float | None = None,
 ) -> tuple[bool, str]:
     """Robinhood mode Kalshi deposit: bridge USDG (4663) → USDC (Base), wait for arrival,
-    then the existing Base USDC transfer to KALSHI_BASE_DEPOSIT_ADDR.
+    then the Base USDC transfer to KALSHI_BASE_DEPOSIT_ADDR (ledgered in transit until the
+    Kalshi balance moves). Returns (ok, kalshi_deposit_tx | error).
 
     Base USDC already sitting in the servicer wallet (e.g. from an earlier timed-out bridge)
-    is used first, so a stranded bridge is never paid for twice.
+    is used first, so a stranded bridge is never paid for twice. A new bridge / deposit is
+    refused while an earlier one is still in transit or unresolved.
     """
-    from .arb_withdrawals import record_bridge_transfer, mark_bridge_arrived
+    from .arb_withdrawals import mark_bridge_arrived
 
     if not KALSHI_BASE_DEPOSIT_ADDR:
         return False, "fund_both_legs: KALSHI_BASE_DEPOSIT_ADDR not set — cannot fund Kalshi"
+    try:
+        AL.require_venue_deposit("kalshi", BASE_CHAIN_ID, USDC_BASE, KALSHI_BASE_DEPOSIT_ADDR)
+        _guard_no_inflight(direction="rh_to_base", kinds=("rh_to_base", "base_to_rh"))
+        _guard_no_inflight(venue="kalshi", kinds=("base_to_kalshi",))
+    except (AL.AllowlistError, FundingBlocked) as e:
+        return False, f"funding_insufficient: {e}"
     base_eth = _get_eth_balance(servicer_wallet)
     if base_eth < ARB_SERVICER_GAS_RESERVE_ETH:
         return False, (
@@ -629,13 +874,10 @@ def _fund_kalshi_from_robinhood(
     need = round(amount_usdc - base_before, 6)
     if need > 0:
         try:
-            res = _bridge_usdg_to_base_usdc(private_key, servicer_wallet, need, nonce_tracker)
+            res = _bridge_usdg_to_base_usdc(private_key, servicer_wallet, need, nonce_tracker,
+                                            dest_balance_before=base_before)
         except Exception as e:
             return False, f"fund_both_legs: USDG→Base bridge failed: {e}"
-        _, rh_chain = _funding_rpc_chain()
-        record_bridge_transfer(
-            "rh_to_base", res["provider"], res["reference"], res["input_usdc"], rh_chain,
-        )
         ok, err = _wait_for_balance(
             "servicer_base_usdc", base_before + need, wait_timeout, poll_interval,
             reader=lambda: _get_usdc_balance(servicer_wallet),
@@ -646,13 +888,24 @@ def _fund_kalshi_from_robinhood(
     else:
         log(f"ℹ️ Servicer already holds {base_before:.4f} USDC on Base — no bridge needed")
 
+    if kalshi_before is None:
+        # Snapshot for delta-based clearing of the in-transit row (callers normally pass it).
+        try:
+            kalshi_before = _get_platform_balance("kalshi", raise_on_error=True)
+        except Exception as e:
+            log(f"⚠️ Kalshi balance unreadable before deposit ({e}) — row will need manual/funder clearing")
     try:
-        kalshi_tx = _send_erc20_transfer(
-            private_key, KALSHI_BASE_DEPOSIT_ADDR, round(amount_usdc, 6), _NonceTracker(servicer_wallet)
+        res = _execute_rh_op(
+            key=_L.new_key("base_to_kalshi"), kind="base_to_kalshi", chain_id=BASE_CHAIN_ID,
+            rpc_url=BASE_RPC, token=USDC_BASE, amount_usdc=round(amount_usdc, 6),
+            txs=[{"to": USDC_BASE, "data": _erc20_transfer_calldata(KALSHI_BASE_DEPOSIT_ADDR, amount_usdc)}],
+            nonce_tracker=_NonceTracker(servicer_wallet), private_key=private_key, sender=servicer_wallet,
+            meta={"ledger": "venue", "venue": "kalshi", "dest_balance_before": kalshi_before},
         )
     except Exception as e:
         return False, f"fund_both_legs: Kalshi deposit failed: {e}"
-    log(f"📤 Kalshi deposit TX: {amount_usdc:.4f} USDC → {KALSHI_BASE_DEPOSIT_ADDR} tx={kalshi_tx}")
+    kalshi_tx = res["tx_hash"]
+    log(f"📤 Kalshi deposit TX: {amount_usdc:.4f} USDC → {KALSHI_BASE_DEPOSIT_ADDR} tx={kalshi_tx} (receipt={res['receipt']})")
     return True, kalshi_tx
 
 
@@ -729,6 +982,13 @@ def _call_tend_if_ready(vault_address: str, private_key: str, servicer_wallet: s
 
         tend_data    = "0x" + _sel("tend()")
         nonce_tracker = _NonceTracker(servicer_wallet, rpc_url)
+        rh = is_robinhood_funding()
+        usdg_before = None
+        if rh:
+            try:
+                usdg_before = get_servicer_cash_usdc(servicer_wallet)
+            except Exception as e:
+                log(f"⚠️ tend(): cannot snapshot servicer USDG ({e}) — inflow will not be journaled")
         tx_hash = _build_and_send_tx(
             private_key=private_key,
             to=vault_address,
@@ -739,6 +999,16 @@ def _call_tend_if_ready(vault_address: str, private_key: str, servicer_wallet: s
             gas_override=120_000,
         )
         log(f"✅ tend() sent: tx={tx_hash}")
+        if rh:
+            # Journal the vault → servicer inflow so delta-based recall arrival detection does not
+            # mistake tend() proceeds for a landed recall.
+            st = _wait_for_receipt(tx_hash, rpc_url)
+            if st == "success" and usdg_before is not None:
+                delta = get_servicer_cash_usdc(servicer_wallet) - usdg_before
+                if delta > 0:
+                    _L.record_cashflow(chain_id, usdg_address(), delta, "tend", tx_hash)
+            elif st != "success":
+                log(f"⚠️ tend() receipt {st} — inflow (if any) not journaled")
 
     except Exception as e:
         log(f"⚠️ _call_tend_if_ready error (non-fatal): {e}")
@@ -923,6 +1193,9 @@ def ensure_funded_for_trade(
     else:
         deposit_addr = POLY_BASE_DEPOSIT_ADDR if venue == "polymarket" else KALSHI_BASE_DEPOSIT_ADDR
     if not deposit_addr:
+        if rh_mode:
+            log(f"❌ No deposit address configured for {venue} (robinhood mode fails closed)")
+            return False
         log(
             f"⚠️ No deposit address configured for {venue} — "
             "skipping funding check (trading with whatever balance exists on-platform)"
@@ -970,10 +1243,11 @@ def ensure_funded_for_trade(
         try:
             nt = nonce_tracker or _NonceTracker(servicer_wallet, _funding_rpc_chain()[0])
             if venue == "polymarket":
-                tx = _send_usdg_to_polymarket(private_key, gap, nt)
+                tx = _send_usdg_to_polymarket(private_key, gap, nt, poly_before=current)
                 log(f"📤 [{venue}] Deposited {gap:.4f} USDG → {deposit_addr} tx={tx}")
                 return True
-            ok, ref = _fund_kalshi_from_robinhood(private_key, servicer_wallet, gap, nt, 180, 10)
+            ok, ref = _fund_kalshi_from_robinhood(private_key, servicer_wallet, gap, nt, 180, 10,
+                                                  kalshi_before=current)
             if not ok:
                 log(f"❌ [{venue}] {ref}")
             return ok
@@ -1405,8 +1679,27 @@ def _fund_legs_robinhood(
     wait_timeout: int,
     poll_interval: int,
 ) -> tuple[bool, str]:
-    """Robinhood-mode deposits for fund_both_legs_for_trade (Poly + Kalshi only)."""
-    from .arb_withdrawals import mark_bridge_arrived
+    """Robinhood-mode deposits for fund_both_legs_for_trade (Poly + Kalshi only).
+
+    All refusals that happen before any tx is signed use the "funding_insufficient" prefix so the
+    execution loop moves on without treating it as committed capital.
+    """
+    from .arb_withdrawals import mark_bridge_arrived, mark_venue_deposit_arrived
+
+    # Pre-flight (no tx yet): allowlists and in-transit guards for BOTH legs, so we never fund
+    # one leg and then refuse the other.
+    try:
+        if poly_gap > 0:
+            AL.require_venue_deposit("polymarket", _funding_rpc_chain()[1], usdg_address(), poly_rh_deposit_addr())
+            _guard_no_inflight(direction="rh_to_polymarket", kinds=("rh_to_polymarket",))
+        if kalshi_gap > 0:
+            AL.require_venue_deposit("kalshi", BASE_CHAIN_ID, USDC_BASE, KALSHI_BASE_DEPOSIT_ADDR)
+            _guard_no_inflight(direction="rh_to_base", kinds=("rh_to_base", "base_to_rh"))
+            _guard_no_inflight(venue="kalshi", kinds=("base_to_kalshi",))
+    except (AL.AllowlistError, FundingBlocked) as e:
+        msg = f"funding_insufficient: {e}"
+        log(f"❌ {msg}")
+        return False, msg
 
     try:
         nt = _NonceTracker(servicer_wallet, _funding_rpc_chain()[0])
@@ -1418,20 +1711,29 @@ def _fund_legs_robinhood(
     poly_tx = None
     if poly_gap > 0:
         try:
-            poly_tx = _send_usdg_to_polymarket(private_key, poly_gap, nt)
+            poly_tx = _send_usdg_to_polymarket(private_key, poly_gap, nt, poly_before=poly_before)
             log(f"📤 Poly deposit TX: {poly_gap:.4f} USDG (4663) → {poly_rh_deposit_addr()} tx={poly_tx}")
+        except (AL.AllowlistError, FundingBlocked, _L.DuplicateOperation) as e:
+            msg = f"funding_insufficient: {e}"
+            log(f"❌ {msg}")
+            return False, msg
         except Exception as e:
             msg = f"fund_both_legs: Poly deposit failed: {e}"
             log(f"❌ {msg}")
             return False, msg
 
+    kalshi_tx = None
     if kalshi_gap > 0:
         ok, ref = _fund_kalshi_from_robinhood(
             private_key, servicer_wallet, kalshi_gap, nt, wait_timeout, poll_interval,
+            kalshi_before=kalshi_before,
         )
         if not ok:
             log(f"❌ {ref}")
+            if poly_tx and ref.startswith("funding_insufficient"):
+                ref = "fund_both_legs: " + ref   # the Poly leg already moved capital
             return False, ref
+        kalshi_tx = ref
 
     if poly_gap > 0 and kalshi_gap > 0:
         ok, err = _wait_for_both_balances(
@@ -1445,8 +1747,12 @@ def _fund_legs_robinhood(
     else:
         ok, err = True, ""
 
+    # Arrival is balance-delta based (venue balance reached before + deposit); on timeout the
+    # rows stay in transit (counted) and are settled later by reconcile_bridge_transfers().
     if ok and poly_tx:
         mark_bridge_arrived(poly_tx)
+    if ok and kalshi_tx:
+        mark_venue_deposit_arrived(kalshi_tx)
     if ok and ARB_DEPOSIT_WAIT_SECS > 0:
         log(f"⏱ Post-funding settlement delay: {ARB_DEPOSIT_WAIT_SECS}s (ARB_DEPOSIT_WAIT_SECS)")
         time.sleep(ARB_DEPOSIT_WAIT_SECS)
@@ -1572,6 +1878,10 @@ def run_tend_tick() -> None:
         # ── Robinhood mode: bring Base USDC (Kalshi withdrawals, stranded bridges) home as USDG ──
         if is_robinhood_funding():
             try:
+                reconcile_funding_intents()
+            except Exception as e:
+                log(f"⚠️ Intent reconciliation failed (non-fatal): {e}")
+            try:
                 from .arb_withdrawals import sweep_base_usdc_to_robinhood
                 sweep_base_usdc_to_robinhood(servicer_wallet, private_key)
             except Exception as e:
@@ -1596,6 +1906,111 @@ def run_tend_tick() -> None:
 
     except Exception as e:
         log(f"❌ Tend tick error (non-fatal): {e}")
+
+
+# ---------------------------------------------------------------------------
+# Startup / crash recovery
+# ---------------------------------------------------------------------------
+
+def _nonce_state(sender: str, rpc_url: str) -> tuple[int, int]:
+    latest = int(_rpc("eth_getTransactionCount", [sender, "latest"], rpc_url), 16)
+    pending = int(_rpc("eth_getTransactionCount", [sender, "pending"], rpc_url), 16)
+    return latest, pending
+
+
+def reconcile_funding_intents() -> dict:
+    """Resolve write-ahead intents left by a crash / restart / RPC outage. Idempotent.
+
+    * "intent"     — the value tx was never signed → "abandoned" (nothing moved).
+    * "broadcast"  — check receipts of every stored hash: status 1 → confirmed + in-transit row;
+                     status 0 → reverted. No receipt: if the account nonce has not reached the
+                     value tx's nonce (latest and pending) it was never broadcast → "abandoned";
+                     if it is only in the mempool it stays "broadcast" (blocks duplicates);
+                     if the nonce was consumed without our receipt → "unconfirmed" (counted, alert).
+    * confirmed/unconfirmed without an in-transit row → the row is written now.
+    * "unconfirmed" — receipt re-checked; a revert marks the intent and its row "reverted".
+    Returns counts per outcome. A live intent always blocks a new op for the same key/destination.
+    """
+    from .arb_withdrawals import mark_bridge_arrived, mark_venue_deposit_arrived
+    counts = {"abandoned": 0, "confirmed": 0, "reverted": 0, "unconfirmed": 0, "still_pending": 0, "ledgered": 0}
+    for row in _L.list_intents():
+        key, st = row.get("key"), row.get("status")
+        try:
+            if st == "intent":
+                _L.update_intent(key, status="abandoned", error="value tx never signed (reconciled)")
+                counts["abandoned"] += 1
+                continue
+            if st not in ("broadcast", "confirmed", "unconfirmed"):
+                continue
+            rpc_url = rpc_for_chain(row["chain_id"])
+            if st in ("broadcast", "unconfirmed"):
+                receipt = None
+                for h in reversed(row.get("tx_hashes") or []):
+                    try:
+                        rec = _rpc("eth_getTransactionReceipt", [h], rpc_url)
+                    except Exception:
+                        rec = None
+                    if rec:
+                        receipt = ("success" if _to_int(rec.get("status")) == 1 else "failed", h)
+                        break
+                if receipt and receipt[0] == "failed" and receipt[1] in (row.get("final_tx"), (row.get("tx_hashes") or [None])[-1]):
+                    _L.update_intent(key, status="reverted", final_tx=receipt[1])
+                    if row.get("ledgered"):
+                        ref = (row.get("meta") or {}).get("reference") or receipt[1]
+                        if (row.get("meta") or {}).get("ledger") == "venue":
+                            mark_venue_deposit_arrived(receipt[1], status="reverted")
+                        else:
+                            mark_bridge_arrived(ref, status="reverted")
+                    elif st != "broadcast":
+                        _L.record_cashflow(row["chain_id"], row["token"], row["amount_usdc"], "reverted", key)
+                    counts["reverted"] += 1
+                    continue
+                if receipt and receipt[0] == "success":
+                    _L.update_intent(key, status="confirmed", final_tx=receipt[1])
+                    if st == "broadcast":
+                        _L.record_cashflow(row["chain_id"], row["token"], -float(row["amount_usdc"]), row["kind"], key)
+                    counts["confirmed"] += 1
+                elif st == "broadcast":
+                    nonce = row.get("final_nonce")
+                    latest, pending = _nonce_state(row["sender"], rpc_url) if nonce is not None else (None, None)
+                    if nonce is not None and latest <= nonce and pending <= nonce:
+                        _L.update_intent(key, status="abandoned", error="nonce never used (reconciled)")
+                        counts["abandoned"] += 1
+                        continue
+                    if nonce is not None and latest > nonce:
+                        _L.update_intent(key, status="unconfirmed", error="nonce consumed, no receipt for our hash")
+                        _L.record_cashflow(row["chain_id"], row["token"], -float(row["amount_usdc"]), row["kind"], key)
+                        log(f"🚨 Intent {key}: nonce {nonce} consumed but no receipt — counted in transit, manual review")
+                        counts["unconfirmed"] += 1
+                    else:
+                        counts["still_pending"] += 1
+                        log(f"⏳ Intent {key}: tx still in mempool — kept unresolved (blocks duplicates)")
+                        continue
+            fresh = _L.get_intent(key) or {}
+            if fresh.get("status") in ("confirmed", "unconfirmed") and not fresh.get("ledgered"):
+                _ledger_intent(key)
+                counts["ledgered"] += 1
+        except Exception as e:
+            log(f"⚠️ Could not reconcile intent {key}: {e} (left unresolved — blocks duplicates)")
+    if any(counts.values()):
+        log(f"🔁 Intent reconciliation: {counts}")
+    return counts
+
+
+def run_startup_checks() -> list[str]:
+    """Robinhood mode: validate funding config (allowlists, venue deposit chain/token ties) and
+    reconcile write-ahead intents. Returns config problems; non-empty must block trading."""
+    if not is_robinhood_funding():
+        return []
+    errs = AL.validate_funding_config(kalshi_deposit_addr=KALSHI_BASE_DEPOSIT_ADDR)
+    for e in errs:
+        log(f"🛑 Funding config: {e}")
+    try:
+        reconcile_funding_intents()
+    except Exception as e:
+        errs.append(f"intent reconciliation failed: {e}")
+        log(f"🛑 Intent reconciliation failed: {e}")
+    return errs
 
 
 # Keep legacy name as alias so any external callers don't break immediately.

@@ -1,6 +1,6 @@
 # Protocol ETH → USDG → pArbitrage V3 → weekly pARB (automated)
 
-**Status: TESTED locally (Foundry + anvil simulation). Not deployed.** No Safe signature per run; the Arbitrage Funding Safe only sets bounds, pauses and owns the router.
+**Status: TESTED locally (Foundry + anvil simulation, 46/46 incl. redemptions with liquidity return and restarts). Not deployed.** Deployment wiring: `DeployRobinhood.s.sol` makes the router the arbitrage payee of all three splitters. Monitoring: `offchain/services/monitor.mjs`. No Safe signature per run; the Arbitrage Funding Safe only sets bounds, pauses and owns the router.
 
 | # | Step | Code | Trigger | Bounds |
 |---|---|---|---|---|

@@ -32,6 +32,8 @@ from ..config import (
     ARB_MAX_PAIR_USDC,
     ARB_MAX_DEPLOYED_USDC,
     ARB_USE_ODDPOOL_ONLY,
+    is_robinhood_funding,
+    opinion_enabled,
 )
 
 # Expiry guard: disabled by default (Oddpool's actionable filter already removes
@@ -146,6 +148,52 @@ def _get_liquidity_state():
         return None
 
 
+# Robinhood-mode startup check results (None = not run yet). Non-empty → no new trades.
+_STARTUP_ERRORS: list[str] | None = None
+
+
+def run_startup_checks() -> list[str]:
+    """Validate funding config + reconcile write-ahead intents (robinhood mode only)."""
+    global _STARTUP_ERRORS
+    try:
+        from .arb_funder import run_startup_checks as _funder_startup
+        _STARTUP_ERRORS = _funder_startup()
+    except Exception as e:
+        _STARTUP_ERRORS = [f"startup checks raised: {e}"]
+    if _STARTUP_ERRORS:
+        log(f"🛑 Startup funding checks failed — new trades blocked: {_STARTUP_ERRORS}")
+    return _STARTUP_ERRORS
+
+
+def _liquidity_allows_trading(liq) -> tuple[bool, str]:
+    """Robinhood-mode gate. Accepts the LiquidityState dataclass or a dict, with or without a
+    `trading_allowed` field: unavailable / not ok / falsy trading_allowed → no new trades."""
+    if liq is None:
+        return False, "liquidity state unavailable"
+    if isinstance(liq, dict):
+        ok, trading_allowed = liq.get("ok", False), liq.get("trading_allowed", None)
+        reason = liq.get("blocked_reason") or liq.get("trading_block_reason") or liq.get("reason")
+    else:
+        ok, trading_allowed = getattr(liq, "ok", False), getattr(liq, "trading_allowed", None)
+        reason = getattr(liq, "blocked_reason", None) or getattr(liq, "trading_block_reason", None) or getattr(liq, "reason", None)
+    if not ok:
+        return False, "liquidity state not ok"
+    if trading_allowed is not None and not trading_allowed:
+        return False, str(reason or "trading_allowed=False")
+    return True, ""
+
+
+def _filter_opinion(opportunities: list) -> list:
+    """MILORD V1: Opinion is fully disabled in robinhood mode (and whenever ARB_OPINION_ENABLED is
+    false), so its opportunities are dropped before any pre-warm, sizing or funding."""
+    if not (is_robinhood_funding() or not opinion_enabled()):
+        return opportunities
+    kept = [o for o in opportunities if getattr(o, "venue2", "kalshi") != "opinion"]
+    if len(kept) != len(opportunities):
+        log(f"🚫 Opinion disabled — dropped {len(opportunities) - len(kept)} Opinion opportunities")
+    return kept
+
+
 def _execution_cycle():
     """Run a single execution cycle: fetch, prioritize, execute eligible opportunities."""
     log("⚡ Starting execution cycle")
@@ -158,6 +206,19 @@ def _execution_cycle():
 
     # ── Liquidity state: gate trading decisions this cycle ────────────────────
     liq = _get_liquidity_state()
+    if is_robinhood_funding():
+        if _STARTUP_ERRORS is None or _STARTUP_ERRORS:
+            run_startup_checks()   # re-run while failing: recovers after an RPC outage / restart
+        allowed, why = _liquidity_allows_trading(liq)
+        if _STARTUP_ERRORS:
+            allowed, why = False, f"startup funding checks failed: {_STARTUP_ERRORS}"
+        if not allowed:
+            log(f"🛑 TRADE DEPLOYMENT BLOCKED (robinhood mode): {why}")
+            try:
+                run_tend_tick()
+            except Exception as e:
+                log(f"⚠️ Tend tick raised unexpectedly (non-fatal): {e}")
+            return
     if liq and liq.ok:
         log(
             f"📊 Cycle liquidity: idle={liq.idle_available:.2f} "
@@ -246,6 +307,7 @@ def _execution_cycle():
         log(f"❌ Failed to fetch Oddpool opportunities: {e}")
         return
 
+    opportunities = _filter_opinion(opportunities)
     if not opportunities:
         log("ℹ️ No opportunities from Oddpool this cycle")
         return
@@ -613,6 +675,8 @@ def _execution_loop_worker():
     """Daemon thread: continuously run execution cycles."""
     global _loop_running
     log("🟢 Arb execution loop started")
+    if is_robinhood_funding():
+        run_startup_checks()
 
     while _loop_running:
         try:

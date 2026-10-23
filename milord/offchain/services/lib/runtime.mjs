@@ -122,11 +122,13 @@ export function createMetrics(service) {
  * Run `tick` every `intervalMs`. A failed tick is counted and alerted (after `failAlertAfter` consecutive
  * failures) and the loop continues. When ticks start succeeding again a "resolved" alert is sent.
  */
-export async function runLoop({ tick, intervalMs, alerter, metrics, failAlertAfter = 3, stopSignal = { stop: false }, sleepFn = sleep }) {
+export async function runLoop({ tick, intervalMs, alerter, metrics, failAlertAfter = 3, stopSignal = { stop: false }, sleepFn = sleep, tickTimeoutMs = 10 * 60_000 }) {
   let failures = 0;
   while (!stopSignal.stop) {
     try {
-      await tick();
+      // Watchdog: a tick that hangs (dropped transaction, stuck RPC) fails like any other, so it is alerted and the
+      // next tick runs. The hung promise is abandoned; on-chain steps are idempotent, so the next tick re-checks.
+      await withTimeout(tick(), tickTimeoutMs, "TickTimeout");
       metrics.lastSuccessMs = Date.now();
       metrics.inc("ticks");
       if (failures >= failAlertAfter) await alerter.alert("resolved", "tick", `recovered after ${failures} failed ticks`);
@@ -140,6 +142,39 @@ export async function runLoop({ tick, intervalMs, alerter, metrics, failAlertAft
     if (!stopSignal.stop) await sleepFn(intervalMs);
   }
 }
+
+/** Rejects with `${label}` after `ms`; the underlying work is not cancelled. */
+export function withTimeout(promise, ms, label = "Timeout") {
+  let t;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => { t = setTimeout(() => reject(new Error(`${label} after ${ms} ms`)), ms); }),
+  ]).finally(() => clearTimeout(t));
+}
+
+/**
+ * Send and wait for a mined receipt, bounded. A transaction not mined within `timeoutMs` throws TxTimeout (alerted by
+ * the caller's step wrapper); the nonce manager is reset so the next tick re-reads the pending nonce instead of
+ * stacking behind it. A mined but reverted transaction throws TxReverted.
+ */
+export async function sendAndWait(txp, { timeoutMs = 3 * 60_000, signer } = {}) {
+  const tx = await txp;
+  if (!tx?.wait) return tx; // fakes in tests
+  try {
+    const r = await withTimeout(tx.wait(), timeoutMs, `TxTimeout ${tx.hash}`);
+    if (r && r.status === 0) throw new Error(`TxReverted ${tx.hash}`);
+    return r;
+  } catch (e) {
+    signer?.reset?.();
+    throw e;
+  }
+}
+
+/**
+ * eth_getLogs in bounded block ranges (public RPCs cap the range). `query(from, to)` returns the logs of one range.
+ * Halves the range on a range/size error, down to `minStep`.
+ */
+export { chunkedLogs } from "../../lib/logs.mjs";
 
 export function requireEnv(name) {
   const v = process.env[name];

@@ -4,6 +4,7 @@
 // History therefore survives a service restart and cannot be faked by the service's own uptime.
 import { Contract, AbiCoder, keccak256 } from "ethers";
 import { TwapOracle } from "./twap.mjs";
+import { chunkedLogs } from "./logs.mjs";
 
 const PM_ABI = [
   "event Initialize(bytes32 indexed id, address indexed currency0, address indexed currency1, uint24 fee, int24 tickSpacing, address hooks, uint160 sqrtPriceX96, int24 tick)",
@@ -31,7 +32,7 @@ export async function verifyPoolKey(provider, key, expectedToken) {
 
 export class PoolPriceSource {
   /** key = [currency0, currency1, fee, tickSpacing, hooks]; options as TwapOracle */
-  constructor(provider, { poolManager, stateView, key, maxHeadLag = Infinity, clock = () => Math.floor(Date.now() / 1000), ...oracleOpts }) {
+  constructor(provider, { poolManager, stateView, key, startBlock = 0, logStep = 10_000, maxHeadLag = Infinity, clock = () => Math.floor(Date.now() / 1000), ...oracleOpts }) {
     this.maxHeadLag = maxHeadLag; // wall-clock check that the RPC's chain head itself is current
     this.clock = clock;
     this.provider = provider;
@@ -40,7 +41,8 @@ export class PoolPriceSource {
     this.sv = new Contract(stateView, SV_ABI, provider);
     this.id = poolId(key);
     this.oracle = new TwapOracle(oracleOpts);
-    this.nextBlock = 0;
+    this.nextBlock = startBlock; // the deployments file's startBlock: no pool event can precede it
+    this.logStep = logStep;
     this.ts = new Map();
     this.verified = false;
   }
@@ -59,8 +61,8 @@ export class PoolPriceSource {
     const latest = await this.provider.getBlock("latest");
     if (this.nextBlock <= latest.number) {
       const logs = [
-        ...(await this.pm.queryFilter(this.pm.filters.Initialize(this.id), this.nextBlock, latest.number)),
-        ...(await this.pm.queryFilter(this.pm.filters.Swap(this.id), this.nextBlock, latest.number)),
+        ...(await chunkedLogs((a, b) => this.pm.queryFilter(this.pm.filters.Initialize(this.id), a, b), this.nextBlock, latest.number, { step: this.logStep })),
+        ...(await chunkedLogs((a, b) => this.pm.queryFilter(this.pm.filters.Swap(this.id), a, b), this.nextBlock, latest.number, { step: this.logStep })),
       ].sort((a, b) => a.blockNumber - b.blockNumber || a.index - b.index);
       for (const l of logs) this.oracle.record(await this.#blockTime(l.blockNumber), Number(l.args.tick), null, true);
       this.nextBlock = latest.number + 1;

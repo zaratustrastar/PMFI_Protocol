@@ -10,12 +10,17 @@
 import path from "node:path";
 import { loadConfig, connect, resolveTaxQueues, parentBlock } from "./lib/config.mjs";
 import { keeperTick } from "./lib/jobs.mjs";
-import { createAlerter, createMetrics, startHealthServer, runLoop, stateFile } from "./lib/runtime.mjs";
+import { createAlerter, createMetrics, startHealthServer, runLoop, stateFile, retry } from "./lib/runtime.mjs";
 import { entryPriceSource } from "../lib/entry-price.mjs";
 
 const cfg = loadConfig();
 // Refuses to start when recorded tax queues disagree with HookrDirectionalTax (configuration error, not an outage).
-const queues = await resolveTaxQueues(cfg.D, connect(cfg).provider);
+// RPC errors are retried; a disagreement is permanent and stops the keeper (a restart loop then alerts via healthz).
+const queues = await retry(() => resolveTaxQueues(cfg.D, connect(cfg).provider), {
+  attempts: 8,
+  isPermanent: (e) => /disagrees|no terms|without HookrDirectionalTax/.test(String(e?.message)),
+  onRetry: (e, n, wait) => console.error(JSON.stringify({ startupRetry: n, waitMs: wait, error: String(e?.shortMessage ?? e?.message) })),
+});
 if (queues) Object.assign(cfg.D, queues);
 const { provider, contracts } = connect(cfg, "KEEPER_PRIVATE_KEY");
 const alerter = createAlerter({ service: "keeper" });

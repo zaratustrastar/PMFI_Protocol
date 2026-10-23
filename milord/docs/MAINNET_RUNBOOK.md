@@ -6,65 +6,50 @@ hardware wallet or Safe for every owner action and pass deployer keys via `--led
 
 ## 0. Prerequisites
 
-- [ ] External audit complete, findings fixed
-- [ ] D1–D8 in OPEN_DECISIONS resolved
-- [ ] Team Safe and Arbitrage Funding Safe deployed on Robinhood Chain
-- [ ] USDG address, `decimals() == 6`, pause/freeze/upgrade roles confirmed on-chain (ROBINHOOD_VAULT_MIGRATION §1)
-- [ ] Engine funding route Robinhood USDG ↔ venues built and tested (ROBINHOOD_VAULT_MIGRATION §3)
-- [ ] Quote-signer and report-signer keys generated in their services; addresses recorded
-- [ ] Robinhood Chain RPC with `finalized` tag support
-- [ ] Reporter fixes merged (PARBITRAGE_INTEGRATION)
-- [ ] Testnet rehearsal on Robinhood testnet 46630 with `script/DeployRobinhood.s.sol` (it refuses 4663)
+All of `docs/launch/OPERATIONS_PLAN.md` §7 (go/no-go) and `docs/launch/READINESS_MATRIX.md` "Blocked by" cleared,
+including: external audit; fork suite and Hookr bytecode verification green at the release SHA; USDG and the
+WETH/USDG pool checked (`node offchain/check-funding-pool.mjs`); venue routes confirmed with approved small amounts;
+Safes deployed with confirmed signers; hosts provisioned; testnet week completed.
 
-## 1. Robinhood Chain (id 4663)
+## 1. Launch and protocol deployment (Robinhood Chain 4663) — every step needs written approval
 
-1. Deploy `MILORDToken(initialHolder = allocation Safe)` — check `totalSupply == 6,767,000,000e18`.
-2. Deploy splitters with production bounds:
-   royalty (Team 5000 / Arbitrage 5000), entry (Arbitrage 7000 / Team 3000).
-3. Deploy `MilordsNFT(owner = Team Safe, royaltyReceiver = RoyaltySplitter, baseURI)`.
-4. Deploy `MilordConverter(owner = Team Safe, token, nft, EntryFeeSplitter, quoteSigner)`.
-5. From Team Safe: `nft.setConverter(converter)` (one-time).
-6. Deploy swap adapter for the chosen pool (D1), `BuybackBurner(owner = Team Safe, token, adapter)`;
-   Safe: `setOperator(opsKey)`.
-7. Deploy `TradingTaxSplitter` (Burner / Team / Arbitrage).
-8. Deploy `StrategyRegistry(Team Safe, nft)`; Safe: add 8 characteristics, add strategy "pArbitrage"
-   (chainId 4663, vault, vault), `setDefaultStrategy`.
-9. Deploy `MilordGovernor(nft)`.
-10. Verify all sources on the explorer; record addresses in `deployments/robinhood-mainnet.json`.
+1. Deployer (hardware wallet): `script/DeployAtomicLaunch.s.sol` with `MILORD_TEAM_SAFE` → `MilordAtomicLaunch`
+   (flat launch; Anti-Snipe refused). Record `predictedToken()`. Today the script runs only on a local fork; lifting
+   its guard for mainnet is part of the approval.
+2. Deployer: `script/DeployRobinhood.s.sol` with `MILORD_PREDICTED_TOKEN=<predicted>` (guard lifted only for this
+   run) → splitters, NFT, converter, BuybackBurner, registry, governor, V3 vault (USDG), ShareDistributor (publisher
+   key ≠ keeper), ParbFundingAdapter, UniV3SwapVenue, UniV3TwapReference, **ArbitrageFundingRouter as arbitrage payee
+   of all three splitters** (the script asserts it). Output: `deployments/robinhood-4663.json`.
+3. Verify every source on the explorer.
+4. Team Safe and Arbitrage Safe: `safe-team-setup.json`, `safe-arbitrage-setup.json` (accept ownership).
+5. 💸 Team Safe: `safe-1-launch.json` → `MilordAtomicLaunch.launch{value: Hookr fee}` creates MILORD and the pool in
+   one transaction and reverts on any mismatch (ATOMIC_LAUNCH.md).
+6. Read-only: `node offchain/record-launch.mjs deployments/robinhood-4663.json <helper> <StateView>`; regenerate the
+   Safe batches with the familyId; Team Safe `safe-2-accept.json` (accept family, sweep, `setInitialAdapter`).
+7. Collect the lock signatures at once; execute `safe-3-lock-DO-NOT-EXECUTE.json` only with Bobo's go-ahead and
+   before `principalLockedUntil` (LOCK_PROCEDURE.md; `keeper:lock-watch` alerts).
 
-## 2. pARB on Robinhood Chain (same chain, id 4663)
+## 2. Services and engine
 
-The order below is what `script/MilordDeployer.sol` does in one run; a mainnet script needs a separate
-approval and should be a copy of `DeployRobinhood.s.sol` with the chain guard changed.
+1. milord-auto: keeper + epoch publisher + quote server; milord-watch: root checker + monitor; milord-engine:
+   robinhood-mode engine + bridge status (OPERATIONS_PLAN.md §1, §4, §5).
+2. Check: all `/healthz` 200, one test alert delivered, `monitor` shows no finding.
+3. 💸 First conversion and first exit by a team wallet; check escrow, fees, NFT, votes.
 
-1. Deploy `PMFIArbVaultV3("PMFI Arb (MILORD)", "pARB-M", USDG, reportSigner, feeRecipient = Team Safe, servicer, cap, 0)`
-   (constructor reverts unless the asset has 6 decimals).
-2. Deploy `ShareDistributor(owner = Team Safe, vault, publisher)`.
-3. Deploy `ParbFundingAdapter(owner = Team Safe, USDG, vault, distributor)`.
-4. Safe on vault: `setDepositorRestricted(true)`, `setAllowedDepositor(adapter, true)`, review idle/cooldown params,
-   `transferOwnership(Team Safe)` (V3 uses Ownable; deployer → Safe).
-5. Safe on adapter: `setOperator(opsKey)`. Safe on distributor: `setActivationDelay(1 days)`.
-6. Reporter env: `ARB_VAULT_DOMAIN_SALT=PMFIArbVaultV3.milord.v1`, `ARB_VAULT_CHAIN_ID=4663`,
-   `ARB_VAULT_RPC_URL`, `ARB_VAULT_ASSET=<USDG>`, `ARB_VAULT_V2_ADDRESS=<V3 vault>`.
-7. Verify; record in `deployments/robinhood-mainnet.json`.
+## 3. Weekly loop (automatic; people only watch and veto)
 
-## 3. Launch sequence
+1. Keeper, every 5 min: Hookr tax queues `payCreator` → splitters `distribute` → LP fee collection → bounded
+   buyback-and-burn → `router.execute` (ETH → USDG within caps and the TWAP bound → vault deposit request) →
+   `adapter.settle` after a report → `activateRoot` after the delay.
+2. Engine: trades with deployable capital; signs NAV reports (gross USDG: vault + servicer + venues + positions at
+   cost + bridges and recalls in transit, each once); returns liquidity when redemptions exceed the idle buffer.
+3. Publisher after Monday 00:00 UTC + grace: deterministic root, `proposeRoot`; root checker recomputes from its own
+   RPC; Team Safe vetoes a mismatch within the 1-day delay.
+4. Monitor alerts on anything stuck (services README, "Monitor alerts").
 
-1. 💸 Create the pool chosen in D1 and seed liquidity from the allocation Safe.
-2. Start the quote service pointed at the pool TWAP; test a quote end-to-end with a team wallet.
-3. 💸 First conversion by a team wallet; check escrow, fee split, NFT, votes.
-4. Freeze metadata once art is final.
-5. Enable the frontend.
-
-## 4. Weekly operations
-
-1. `distribute` all three splitters; execute buybacks within limits.
-2. 💸 Arbitrage Safe: swap ETH → USDG on Robinhood Chain, send to adapter.
-3. Ops: `adapter.fund(sourceRef, amount)` (sourceRef = hash of the splitter allocation logs and swap tx).
-4. Next vault report; `adapter.settle(batchId)`.
-5. After Monday 00:00 UTC + finality margin: run the epoch job, publish `epoch-N.json` (IPFS), `proposeRoot`.
-6. During the activation delay, a second person recomputes the root from public data; veto if it differs.
-7. Frontend shows new claims.
+## 4. Weekly human checks
+- Publish `epoch-N.json` to IPFS; a second person reads the root checker's result.
+- Review the monitor's resolved alerts, gas balances and the PPS series.
 
 ## 5. Emergency
 

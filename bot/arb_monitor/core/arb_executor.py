@@ -1394,7 +1394,11 @@ def execute_arb(
             return result
         log(f"✅ Both legs funded — proceeding to order placement")
     except Exception as _fe:
-        log(f"⚠️ fund_both_legs_for_trade raised ({_fe}) — attempting trade with existing platform balance")
+        # Never trade on whatever balance happens to be on-platform after an unexpected funding
+        # error: capital may be half-moved. "funding_failed" stops the cycle and cools the pair down.
+        result.error = f"funding_failed: fund_both_legs_for_trade raised: {_fe}"
+        log(f"❌ {result.error} — trade aborted")
+        return result
 
     # ── Pre-placement price refresh (stale quote guard) ───────────────────────
     # The VWAP gate ran earlier, but funding + sizing can add 10-20s of latency.

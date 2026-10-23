@@ -58,6 +58,28 @@ def get_db_conn():
     return None
 
 
+# Position lifecycle.
+#   open            both legs held; valued at cost basis
+#   pending_redeem  (robinhood mode) market resolved, winning leg's payout NOT yet observed as
+#                   venue cash; still valued at cost basis
+#   redeemed        (robinhood mode) payout observed in venue cash; no position value
+#   settled         legacy base-mode terminal state (unchanged)
+STATUS_OPEN = "open"
+STATUS_PENDING_REDEEM = "pending_redeem"
+STATUS_REDEEMED = "redeemed"
+STATUS_SETTLED = "settled"
+
+_SCHEMA_ADDITIONS_SQL = """
+    ALTER TABLE arb_positions
+        ADD COLUMN IF NOT EXISTS poly_entry_price DECIMAL(10, 6) DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS kalshi_entry_price DECIMAL(10, 6) DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS poly_side VARCHAR(3) DEFAULT 'YES',
+        ADD COLUMN IF NOT EXISTS resolved_venue VARCHAR(20) DEFAULT '',
+        ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS payout_usdc DECIMAL(20, 6)
+"""
+
+
 def init_arb_tables():
     """Create arb-specific DB tables if they don't exist."""
     conn = get_db_conn()
@@ -92,6 +114,12 @@ def init_arb_tables():
             ALTER TABLE arb_positions
             ADD COLUMN IF NOT EXISTS kalshi_side VARCHAR(3) NOT NULL DEFAULT 'YES'
         """)
+        # Columns written by upsert_position() but missing from the original CREATE TABLE,
+        # plus the robinhood-mode settlement lifecycle (open -> pending_redeem -> redeemed).
+        # Robinhood mode only: the live Base V2 database is left untouched.
+        from ..config import is_robinhood_funding
+        if is_robinhood_funding():
+            cur.execute(_SCHEMA_ADDITIONS_SQL)
 
         cur.execute("""
             CREATE TABLE IF NOT EXISTS arb_executions (
@@ -243,6 +271,15 @@ def upsert_position(
         return False
     try:
         cur = conn.cursor()
+        # H3: a pair_id whose previous position is no longer open (settled / redeemed /
+        # pending_redeem) must not absorb a NEW trade into a closed row (ON CONFLICT used to
+        # add shares to it while leaving status != 'open', so the new capital vanished from
+        # NAV). Archive the closed row under a unique id first; it keeps its PnL history.
+        cur.execute("""
+            UPDATE arb_positions
+            SET pair_id = pair_id || '#closed-' || id
+            WHERE pair_id = %s AND status <> 'open'
+        """, (pair_id,))
         cur.execute("""
             INSERT INTO arb_positions
                 (pair_id, poly_yes_token, poly_no_token, kalshi_ticker, kalshi_side, shares,
@@ -255,7 +292,8 @@ def upsert_position(
                 kalshi_side = EXCLUDED.kalshi_side,
                 poly_entry_price = EXCLUDED.poly_entry_price,
                 kalshi_entry_price = EXCLUDED.kalshi_entry_price,
-                poly_side = EXCLUDED.poly_side
+                poly_side = EXCLUDED.poly_side,
+                status = 'open'
         """, (pair_id, poly_yes_token, poly_no_token, kalshi_ticker, kalshi_side, shares,
               cost_basis_usdc, expiry_ts, poly_title, kalshi_title,
               poly_entry_price, kalshi_entry_price, poly_side))
@@ -289,6 +327,88 @@ def settle_position(pair_id: str, settled_pnl_usdc: float) -> bool:
     except Exception as e:
         log(f"❌ Error settling position: {e}")
         return False
+    finally:
+        conn.close()
+
+
+def mark_position_resolved(pair_id: str, resolved_venue: str, expected_payout_usdc: float) -> bool:
+    """open -> pending_redeem (robinhood mode). The position keeps being valued at cost basis
+    until mark_position_redeemed() records that its payout is in venue cash."""
+    if resolved_venue not in ("polymarket", "kalshi"):
+        raise ValueError(f"resolved_venue must be polymarket|kalshi, got {resolved_venue!r}")
+    conn = get_db_conn()
+    if not conn:
+        return False
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE arb_positions
+            SET status = 'pending_redeem', resolved_venue = %s, resolved_at = NOW(),
+                payout_usdc = %s
+            WHERE pair_id = %s AND status = 'open'
+        """, (resolved_venue, expected_payout_usdc, pair_id))
+        changed = cur.rowcount
+        conn.commit()
+        cur.close()
+        log(f"✅ Position resolved (pending redeem): pair_id={pair_id} venue={resolved_venue} "
+            f"expected_payout={expected_payout_usdc:.4f}")
+        return changed > 0
+    except Exception as e:
+        log(f"❌ Error marking position resolved: {e}")
+        return False
+    finally:
+        conn.close()
+
+
+def mark_position_redeemed(pair_id: str, payout_usdc: float) -> bool:
+    """pending_redeem -> redeemed. Call ONLY once the payout is visible in the venue cash
+    balance the reporter reads (otherwise NAV drops by the cost basis until it lands).
+    settled_pnl_usdc = payout - cost basis."""
+    conn = get_db_conn()
+    if not conn:
+        return False
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE arb_positions
+            SET status = 'redeemed', payout_usdc = %s,
+                settled_pnl_usdc = %s - cost_basis_usdc, settled_at = NOW()
+            WHERE pair_id = %s AND status = 'pending_redeem'
+        """, (payout_usdc, payout_usdc, pair_id))
+        changed = cur.rowcount
+        conn.commit()
+        cur.close()
+        log(f"✅ Position redeemed: pair_id={pair_id} payout={payout_usdc:.4f}")
+        return changed > 0
+    except Exception as e:
+        log(f"❌ Error marking position redeemed: {e}")
+        return False
+    finally:
+        conn.close()
+
+
+def get_positions_by_status(statuses: tuple) -> list[dict]:
+    """Minimal rows (pair_id, status, venue, shares, cost basis, tokens) for the given statuses."""
+    conn = get_db_conn()
+    if not conn:
+        return []
+    try:
+        cur = conn.cursor()
+        placeholders = ", ".join(["%s"] * len(statuses))
+        cur.execute(f"""
+            SELECT pair_id, status, COALESCE(resolved_venue, ''), shares, cost_basis_usdc,
+                   poly_yes_token, kalshi_ticker, COALESCE(kalshi_side, 'YES'), expiry_ts
+            FROM arb_positions
+            WHERE status IN ({placeholders})
+        """, tuple(statuses))
+        rows = cur.fetchall()
+        cur.close()
+        return [{"pair_id": r[0], "status": r[1], "resolved_venue": r[2], "shares": float(r[3]),
+                 "cost_basis_usdc": float(r[4]), "poly_yes_token": r[5], "kalshi_ticker": r[6],
+                 "kalshi_side": r[7], "expiry_ts": int(r[8] or 0)} for r in rows]
+    except Exception as e:
+        log(f"❌ Error fetching positions by status: {e}")
+        return []
     finally:
         conn.close()
 

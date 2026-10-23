@@ -7,14 +7,13 @@
 //   publishEpoch / checkRoot - propose the next root (publisher key) / recompute it independently and alert.
 import { keccak256, toUtf8Bytes } from "ethers";
 import { ownershipIntervals, eligibility, allocate, accumulate, buildTree, WEEK } from "../../lib/eligibility.mjs";
-import { isExpectedRevert } from "./runtime.mjs";
+import { isExpectedRevert, sendAndWait, chunkedLogs } from "./runtime.mjs";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 const msg = (e) => String(e?.shortMessage ?? e?.reason ?? e?.message ?? e);
-const wait = async (txp) => {
-  const tx = await txp;
-  return tx?.wait ? tx.wait() : tx;
-};
+// Every keeper/publisher transaction is bounded: not mined in TX_TIMEOUT_SECS (default 180) -> TxTimeout, alerted.
+const TX_TIMEOUT_MS = Number(process.env.TX_TIMEOUT_SECS ?? 180) * 1000;
+const wait = (txp) => sendAndWait(txp, { timeoutMs: TX_TIMEOUT_MS });
 
 // ───────────────────────────── keeper ─────────────────────────────
 
@@ -216,8 +215,9 @@ export function closedEpoch(genesis, now, settlementGrace = 6 * 3600) {
 }
 
 /** Read finalized inputs from chain. `toBlock` should be a finalized block number. */
-export async function readInputs({ nft, adapter, provider, fromBlock = 0, toBlock }) {
-  const logs = await nft.queryFilter(nft.filters.Transfer(), fromBlock, toBlock);
+export async function readInputs({ nft, adapter, provider, fromBlock = 0, toBlock, logStep }) {
+  // from the deployment block (deployments file `startBlock`), in bounded ranges
+  const logs = await chunkedLogs((a, b) => nft.queryFilter(nft.filters.Transfer(), a, b), fromBlock, toBlock, { step: logStep });
   const ts = new Map();
   const transfers = [];
   for (const l of logs) {

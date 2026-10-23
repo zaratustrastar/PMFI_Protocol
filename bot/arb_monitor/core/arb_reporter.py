@@ -38,6 +38,7 @@ import time
 import struct as _struct
 
 from .arb_withdrawals import withdraw_from_platforms, get_pending_withdrawals_total_usdc
+from ..config import is_robinhood_funding, usdg_address, robinhood_chain_id
 
 # Defaults = the live Base V2 vault. A MILORD V3 vault on Robinhood Chain sets:
 #   ARB_VAULT_DOMAIN_SALT=PMFIArbVaultV3.milord.v1  ARB_VAULT_CHAIN_ID=4663
@@ -47,6 +48,58 @@ DOMAIN_SALT_TEXT = os.environ.get("ARB_VAULT_DOMAIN_SALT", "PMFIArbVaultV2.v1")
 BASE_CHAIN_ID = int(os.environ.get("ARB_VAULT_CHAIN_ID", "8453"))
 BASE_RPC = os.environ.get("ARB_VAULT_RPC_URL", os.environ.get("BASE_RPC_URL", "https://mainnet.base.org"))
 USDC_BASE = os.environ.get("ARB_VAULT_ASSET", "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
+
+
+class VaultConfigError(RuntimeError):
+    """Robinhood mode with an incomplete/inconsistent vault configuration. Raised instead of
+    silently falling back to the Base V2 defaults (which would sign for the wrong chain/asset)."""
+
+
+def load_vault_config() -> dict:
+    """(Re)read the vault chain settings from the environment into the module globals.
+
+    Base mode: legacy defaults, unchanged. Robinhood mode (ARB_FUNDING_CHAIN=robinhood):
+    ARB_VAULT_ASSET, ARB_VAULT_RPC_URL, ARB_VAULT_CHAIN_ID and ARB_VAULT_DOMAIN_SALT must all
+    be set; the chain id must not be Base's and must equal ROBINHOOD_CHAIN_ID; the vault asset
+    must equal ARB_USDG_ADDRESS (the token the funder moves). Any violation raises.
+    """
+    global DOMAIN_SALT_TEXT, BASE_CHAIN_ID, BASE_RPC, USDC_BASE
+    env = os.environ
+    if is_robinhood_funding():
+        need = ("ARB_VAULT_ASSET", "ARB_VAULT_RPC_URL", "ARB_VAULT_CHAIN_ID", "ARB_VAULT_DOMAIN_SALT")
+        missing = [k for k in need if not env.get(k, "").strip()]
+        if missing:
+            raise VaultConfigError(
+                f"ARB_FUNDING_CHAIN=robinhood but {', '.join(missing)} unset — refusing to fall back to Base V2"
+            )
+        try:
+            chain = int(env["ARB_VAULT_CHAIN_ID"])
+        except ValueError as e:
+            raise VaultConfigError(f"ARB_VAULT_CHAIN_ID not an integer: {e}") from e
+        if chain == 8453:
+            raise VaultConfigError("robinhood mode with ARB_VAULT_CHAIN_ID=8453 (Base)")
+        if chain != robinhood_chain_id():
+            raise VaultConfigError(
+                f"ARB_VAULT_CHAIN_ID={chain} != ROBINHOOD_CHAIN_ID={robinhood_chain_id()} (funder chain)"
+            )
+        asset = env["ARB_VAULT_ASSET"].strip()
+        if asset.lower() != usdg_address().lower():
+            raise VaultConfigError(f"ARB_VAULT_ASSET={asset} != ARB_USDG_ADDRESS={usdg_address()}")
+        DOMAIN_SALT_TEXT = env["ARB_VAULT_DOMAIN_SALT"].strip()
+        BASE_CHAIN_ID = chain
+        BASE_RPC = env["ARB_VAULT_RPC_URL"].strip()
+        USDC_BASE = asset
+    else:
+        DOMAIN_SALT_TEXT = env.get("ARB_VAULT_DOMAIN_SALT", "PMFIArbVaultV2.v1")
+        BASE_CHAIN_ID = int(env.get("ARB_VAULT_CHAIN_ID", "8453"))
+        BASE_RPC = env.get("ARB_VAULT_RPC_URL", env.get("BASE_RPC_URL", "https://mainnet.base.org"))
+        USDC_BASE = env.get("ARB_VAULT_ASSET", "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
+    return {"salt": DOMAIN_SALT_TEXT, "chain_id": BASE_CHAIN_ID, "rpc": BASE_RPC, "asset": USDC_BASE}
+
+
+# Robinhood mode validates lazily: run_reporter_tick() raises VaultConfigError, and
+# _read_vault_state() / build_report_payload() fail closed, on an incomplete configuration.
+# (Not at import time: arb_funder / tests import this module before the vault env is set.)
 
 # report() external ABI — 4-field struct only.
 # vault/chainId/domainSalt are hardcoded inside the contract; the caller omits them.
@@ -64,9 +117,35 @@ REPORT_DEADLINE_BUFFER = 3600  # 1 hour
 DEFAULT_MAX_DEPOSITS = 50
 DEFAULT_MAX_REDEEMS = 50
 
-# Local cooldown guard — prevents hammering report() when on-chain reads return 0
+# Local cooldown guard — prevents hammering report() when on-chain reads return 0.
+# Set only after a report() tx is MINED with status 1 (M3).
 _last_local_report_ts: float = 0.0
 _LOCAL_REPORT_COOLDOWN = int(os.environ.get("ARB_LOCAL_REPORT_COOLDOWN", str(6 * 3600)))
+# A broadcast report whose receipt did not arrive in time: retry no sooner than this.
+_pending_report_until: float = 0.0
+
+
+def _report_gas_limit() -> int:
+    return int(os.environ.get("ARB_REPORT_GAS_LIMIT", "500000"))
+
+
+def _report_receipt_timeout() -> int:
+    return int(os.environ.get("ARB_REPORT_RECEIPT_TIMEOUT_SECS", "120"))
+
+
+def _report_pending_guard_secs() -> int:
+    return int(os.environ.get("ARB_REPORT_PENDING_GUARD_SECS", "900"))
+
+
+# Why the last build_report_payload() returned None (for logs, monitoring and tests).
+LAST_ABORT_REASON: str = ""
+
+
+def _abort(reason: str):
+    global LAST_ABORT_REASON
+    LAST_ABORT_REASON = reason
+    log(f"🛑 Report aborted: {reason}")
+    return None
 
 
 def log(msg: str):
@@ -139,11 +218,19 @@ def _sign_report(
     nonce: int,
     vault_address: str,
     private_key: str,
+    reported_assets_raw: int | None = None,
 ) -> str:
-    """Return hex signature for ReportDataV2."""
-    from eth_account import Account
+    """Return hex signature for ReportDataV2.
 
-    reported_assets_wei = int(reported_assets_usdc * 1e6)
+    reported_assets_raw (int, 6-decimal raw units) is what gets signed when given. The float
+    path is kept for callers/fixtures; it converts exactly (H4: int(x*1e6) truncated 249 raw
+    to 248).
+    """
+    from eth_account import Account
+    from .arb_nav import usdc_to_raw
+
+    reported_assets_wei = (int(reported_assets_raw) if reported_assets_raw is not None
+                           else usdc_to_raw(reported_assets_usdc))
     domain_salt = _keccak256_text(DOMAIN_SALT_TEXT)
 
     struct_hash = _abi_encode_report_struct(
@@ -225,15 +312,102 @@ def _call_view_tuple_uints_and_bools(to: str, selector_hex: str) -> tuple:
     )
 
 
-def _read_vault_state(vault_address: str) -> dict:
-    """Read vault state via getVaultState() - single call using real contract ABI.
+def _eth_call(to: str, data_hex: str, block: str = "latest") -> str:
+    """eth_call at an explicit block tag (H6: one pinned block per report computation)."""
+    if not data_hex.startswith("0x"):
+        data_hex = "0x" + data_hex
+    return _rpc("eth_call", [{"to": to, "data": data_hex}, block])
+
+
+def _decode_word(raw, what: str) -> int:
+    """First 32-byte word of an eth_call result. Empty / short results raise (fail closed:
+    a missing getter must never read as 0)."""
+    if not isinstance(raw, str) or not raw.startswith("0x") or len(raw) <= 2:
+        raise RuntimeError(f"{what}: unusable eth_call result {raw!r}")
+    return int(raw[2:66], 16)
+
+
+def _pin_block() -> str:
+    """Robinhood mode: verify the vault RPC is on ARB_VAULT_CHAIN_ID and return the current
+    block number (hex tag) used for every chain-4663 read of this report."""
+    chain = int(_rpc("eth_chainId", []), 16)
+    if chain != BASE_CHAIN_ID:
+        raise RuntimeError(f"vault RPC is on chain {chain}, expected {BASE_CHAIN_ID}")
+    bn = _rpc("eth_blockNumber", [])
+    if not isinstance(bn, str) or not bn.startswith("0x") or int(bn, 16) <= 0:
+        raise RuntimeError(f"bad eth_blockNumber {bn!r}")
+    return bn
+
+
+def _read_token_balance_raw(wallet: str, block: str = "latest", token: str | None = None) -> int:
+    """balanceOf(wallet) of the vault asset (USDC on Base / USDG on 4663), raw units."""
+    padded = "000000000000000000000000" + wallet.lower().replace("0x", "")
+    return _decode_word(_eth_call(token or USDC_BASE, "0x70a08231" + padded, block), f"balanceOf({wallet})")
+
+
+# PMFIArbVaultV3 has no getVaultState(): read its public getters one by one (same block).
+_V3_UINT_GETTERS = {
+    "official_pps":                "officialPPS()",
+    "last_report_nonce":           "lastReportNonce()",
+    "last_report_timestamp":       "lastReportTimestamp()",
+    "report_cooldown":             "reportCooldown()",
+    "pending_redeem_shares":       "totalPendingRedeemShares()",
+    "pending_deposit_assets_raw":  "totalPendingDepositAssets()",
+    "claimable_redeem_assets_raw": "totalClaimableRedeemAssets()",
+    "idle_balance_raw":            "idleBalance()",
+    "max_pps_move_bps":            "maxPpsMoveBps()",
+    "last_reported_backing_raw":   "lastReportedBackingAssets()",
+    "total_supply":                "totalSupply()",
+}
+_V3_BOOL_GETTERS = {"paused": "paused()", "shutdown": "shutdown()"}
+_V3_ADDR_GETTERS = {"asset": "usdc()", "report_signer": "reportSigner()"}
+
+
+def _read_vault_state_v3(vault_address: str, block: str) -> dict:
+    out = {}
+    for key, sig in _V3_UINT_GETTERS.items():
+        out[key] = _decode_word(_eth_call(vault_address, _keccak256_text(sig)[:4].hex(), block), sig)
+    for key, sig in _V3_BOOL_GETTERS.items():
+        out[key] = bool(_decode_word(_eth_call(vault_address, _keccak256_text(sig)[:4].hex(), block), sig))
+    for key, sig in _V3_ADDR_GETTERS.items():
+        word = _decode_word(_eth_call(vault_address, _keccak256_text(sig)[:4].hex(), block), sig)
+        out[key] = "0x" + f"{word:064x}"[-40:]
+    if out["asset"].lower() != USDC_BASE.lower():
+        raise RuntimeError(f"vault.usdc()={out['asset']} != ARB_VAULT_ASSET={USDC_BASE}")
+    out["vault_balance_raw"] = _read_token_balance_raw(vault_address, block)
+    out["idle_balance_usdc"] = out["idle_balance_raw"] / 1e6
+    out["block"] = block
+    out["ok"] = True
+    log(
+        f"Vault state (V3 @ {block}): pps={out['official_pps']} idle={out['idle_balance_usdc']:.6f} "
+        f"balance={out['vault_balance_raw']} pending_redeem={out['pending_redeem_shares']} "
+        f"last_ts={out['last_report_timestamp']} nonce={out['last_report_nonce']} "
+        f"cooldown={out['report_cooldown']}s paused={out['paused']} shutdown={out['shutdown']}"
+    )
+    return out
+
+
+def _read_vault_state(vault_address: str, block: str | None = None) -> dict:
+    """Read vault state.
+
+    Base mode (V2): getVaultState() — one call using the real contract ABI.
+    Robinhood mode (V3): individual public getters, all at one block (pinned when not given).
 
     getVaultState() returns 12-element tuple per ABI:
       [0] officialPPS  [1] circulatingSupply  [2] idleBal
       [3] lastReportedBacking  [4] highWaterMarkAssets  [5] pendingDepositAssets
       [6] claimableRedeemAssets  [7] pendingRedeemShares
       [8] lastReportTimestamp  [9] lastReportNonce  [10] paused  [11] shutdown
+
+    Fails closed: {"ok": False, "error": ...} when anything cannot be read.
     """
+    if is_robinhood_funding():
+        try:
+            load_vault_config()
+            return _read_vault_state_v3(vault_address, block or _pin_block())
+        except Exception as e:
+            log(f"WARNING Could not read V3 vault state: {e}")
+            return {"ok": False, "error": str(e)}
     try:
         from eth_abi import decode as abi_decode
 
@@ -278,12 +452,19 @@ def _read_vault_state(vault_address: str) -> dict:
             "report_cooldown":       cooldown,
             "official_pps":          official_pps,
             "idle_balance_usdc":     idle_balance / 1e6,
+            "idle_balance_raw":      idle_balance,
             "pending_redeem_shares": pending_redeem,
+            "pending_deposit_assets_raw":  decoded[5],
+            "claimable_redeem_assets_raw": decoded[6],
+            # M3: exposed so run_reporter_tick's paused check actually works (V2 report()
+            # is whenNotPaused, so a paused vault would only burn gas on a revert).
+            "paused":   bool(decoded[10]),
+            "shutdown": bool(decoded[11]),
             "ok": True,
         }
     except Exception as e:
         log(f"WARNING Could not read vault state: {e}")
-        return {"ok": False}
+        return {"ok": False, "error": str(e)}
 
 
 def _read_usdc_balance(wallet: str) -> float:
@@ -298,102 +479,156 @@ def _read_usdc_balance(wallet: str) -> float:
 # reportedAssets computation
 # ─────────────────────────────────────────────────────────────────────────────
 
-def compute_reported_assets(vault_address: str) -> dict:
-    """Compute reportedAssets for report().
+def compute_reported_assets(vault_address: str, vault_state: dict | None = None,
+                            block: str | None = None) -> dict:
+    """Compute reportedAssets for report() — GROSS, in exact raw units.
 
-    Formula:
-        vault_idle + servicer_on_base + poly_cash + kalshi_cash + opinion_cash
-        + open_position_value  (open arb positions @ $0.99/share)
+    The contract requires reportedAssets >= asset.balanceOf(vault) and itself subtracts
+    totalPendingDepositAssets + totalClaimableRedeemAssets, so reportedAssets must be the
+    vault's ENTIRE asset balance plus every off-vault asset, each exactly once:
 
-    Open position valuation: each arb pair = N contracts where one side resolves
-    to $1 and the other to $0, so the floor value is $1/pair. $0.99 shaves 1 cent
-    for conservatism — no live API calls needed, DB read only.
+        vault balance (incl. pending deposits / claimable redeems — contract deducts them)
+      + servicer cash   base mode: USDC on Base
+                        robinhood: USDG on 4663 + USDC on Base + pending recalls + bridges
+      + venue cash      Polymarket + Kalshi (+ Opinion only when enabled)
+      + positions       open (+ pending_redeem in robinhood mode) at cost basis
 
-    settled_pnl intentionally excluded: when a position settles and the winning
-    side is claimed from the platform, the full proceeds land in platform cash
-    (poly_cash / kalshi_cash / opinion_cash). Adding settled_pnl on top would
-    double-count the profit portion of those proceeds.
+    Robinhood mode: all chain-4663 reads (vault balance, servicer USDG) use one pinned block.
+    Every component is read strictly: on ANY failure the result has ok=False, the failed
+    components listed in "failures", and reported_assets_raw=None — never a silent 0 (C3).
 
-    No haircut applied: positions are already conservatively priced at $0.99
-    (below the $1 guarantee), and cash balances are exact on-chain / API reads.
-
-    Returns:
-        {
-            "reported_assets_usdc":  float,
-            "vault_idle_usdc":       float,
-            "servicer_on_base":      float,
-            "poly_cash":             float,
-            "kalshi_cash":           float,
-            "opinion_cash":          float,
-            "open_position_value":   float,
-            "open_position_count":   int,
-            "raw_total_usdc":        float,
-        }
+    settled_pnl intentionally excluded: realised proceeds are in venue cash already.
+    No USDG/USDC peg haircut in robinhood mode: USDG is the vault's unit of account.
     """
-    from .arb_nav import (
-        _get_servicer_balances,
-        _get_servicer_wallet_usdc_on_base,
-        _load_open_positions,
-    )
+    from . import arb_nav as nav
 
-    log("Computing reportedAssets (cash + open positions @ $0.99/share)...")
+    rh = is_robinhood_funding()
+    failures: list[str] = []
+    comp: dict[str, int] = {}
+    breakdown = None
+    positions: list = []
 
-    # Vault idle USDC (in-contract, not yet deployed)
-    vault_idle = 0.0
-    try:
-        vault_state = _read_vault_state(vault_address)
-        if vault_state["ok"]:
-            vault_idle = _read_usdc_balance(vault_address)  # raw vault USDC; contract deducts pendingDeposits+claimableRedeems itself
-            log(f"  vault idle USDC: {vault_idle:.4f}")
-    except Exception as e:
-        log(f"  ⚠️ Could not read vault idle: {e}")
+    def _try(name, fn):
+        try:
+            return fn()
+        except nav.NavReadError as e:
+            failures.append(f"{e.component}: {e.detail}")
+        except Exception as e:
+            failures.append(f"{name}: {e}")
+        return None
 
-    # Servicer wallet free USDC on Base
-    servicer_on_base = _get_servicer_wallet_usdc_on_base()
-    log(f"  servicer on Base: {servicer_on_base:.4f}")
+    log("Computing reportedAssets (gross: vault balance + servicer + venues + positions)...")
 
-    # Platform cash balances
-    poly_cash, kalshi_cash, opinion_cash = _get_servicer_balances()
-    log(f"  poly_cash={poly_cash:.4f} kalshi_cash={kalshi_cash:.4f} opinion_cash={opinion_cash:.4f}")
+    if rh and block is None:
+        block = _try("block", _pin_block)
+    blk = block or "latest"
 
-    # Open positions @ $0.99/share — DB read only, no live API calls.
-    # One leg resolves to $1, other to $0 → floor value = $1/pair; $0.99 is conservative.
-    # settled_pnl excluded: settled proceeds already land in platform cash balances.
-    open_positions = _load_open_positions()
-    open_position_value = sum(pos.cost_basis_usdc for pos in open_positions)
-    log(
-        f"  open_positions={len(open_positions)} positions, "
-        f"value={open_position_value:.4f} USDC (@ $0.99/share)"
-    )
+    # Vault balance (gross — the contract deducts pending deposits / claimable redeems)
+    if vault_state and vault_state.get("ok") and "vault_balance_raw" in vault_state \
+            and vault_state.get("block") == blk:
+        comp["vault"] = int(vault_state["vault_balance_raw"])
+    elif not (rh and block is None):
+        v = _try("vault_balance", lambda: _read_token_balance_raw(vault_address, blk))
+        if v is not None:
+            comp["vault"] = v
 
-    raw_total = (
-        vault_idle
-        + servicer_on_base
-        + poly_cash
-        + kalshi_cash
-        + opinion_cash
-        + open_position_value
-    )
+    # Servicer cash (+ in-transit in robinhood mode)
+    if rh:
+        wallet = os.environ.get("ARB_SERVICER_WALLET", "")
+        if not wallet:
+            failures.append("servicer_wallet: ARB_SERVICER_WALLET not set")
+        elif block is not None:
+            usdg = _try("servicer_usdg_rh", lambda: _read_token_balance_raw(wallet, blk))
+            if usdg is not None:
+                breakdown = _try("servicer", lambda: nav._get_servicer_cash_breakdown(
+                    strict=True, usdg_raw=usdg, apply_peg=False))
+                if breakdown is not None:
+                    comp["servicer"] = int(breakdown["total_raw"])
+    else:
+        v = _try("servicer_usdc_base", nav._get_servicer_wallet_usdc_on_base_raw)
+        if v is not None:
+            comp["servicer"] = v
 
-    reported_assets = max(0.0, raw_total)
+    venues = _try("venue_cash", lambda: nav.get_venue_cash_raw(strict=True))
+    if venues is not None:
+        comp["poly"], comp["kalshi"], comp["opinion"] = venues["polymarket"], venues["kalshi"], venues["opinion"]
 
-    log(
-        f"reportedAssets: vault_idle={vault_idle:.4f} + servicer={servicer_on_base:.4f} "
-        f"+ poly={poly_cash:.4f} + kalshi={kalshi_cash:.4f} + opinion={opinion_cash:.4f} "
-        f"+ positions={open_position_value:.4f} = {reported_assets:.4f} USDC"
-    )
+    pos = _try("positions", lambda: nav._load_value_positions(strict=True))
+    if pos is not None:
+        positions = pos
+        comp["positions"] = nav.positions_value_raw(positions)
 
-    return {
-        "reported_assets_usdc":  round(reported_assets, 6),
-        "vault_idle_usdc":       round(vault_idle, 6),
-        "servicer_on_base":      round(servicer_on_base, 6),
-        "poly_cash":             round(poly_cash, 6),
-        "kalshi_cash":           round(kalshi_cash, 6),
-        "opinion_cash":          round(opinion_cash, 6),
-        "open_position_value":   round(open_position_value, 6),
-        "open_position_count":   len(open_positions),
-        "raw_total_usdc":        round(raw_total, 6),
+    ok = not failures
+    raw_total = sum(comp.values()) if ok else None
+    f6 = lambda k: round(comp.get(k, 0) / 1e6, 6)
+    out = {
+        "ok":                    ok,
+        "failures":              failures,
+        "block":                 blk,
+        "reported_assets_raw":   raw_total,
+        "components_raw":        dict(comp),
+        "reported_assets_usdc":  round(raw_total / 1e6, 6) if ok else None,
+        "vault_idle_usdc":       f6("vault"),
+        "servicer_on_base":      f6("servicer"),
+        "poly_cash":             f6("poly"),
+        "kalshi_cash":           f6("kalshi"),
+        "opinion_cash":          f6("opinion"),
+        "open_position_value":   f6("positions"),
+        "open_position_count":   len(positions),
+        "raw_total_usdc":        round(raw_total / 1e6, 6) if ok else None,
+        "positions":             positions,
     }
+    if breakdown is not None:
+        out["servicer_breakdown"] = {k: v for k, v in breakdown.items()}
+    if ok:
+        log(
+            f"reportedAssets @ {blk}: vault={comp['vault']} + servicer={comp['servicer']} "
+            f"+ poly={comp['poly']} + kalshi={comp['kalshi']} + opinion={comp['opinion']} "
+            f"+ positions={comp['positions']} = {raw_total} raw ({raw_total / 1e6:.6f})"
+        )
+    else:
+        log(f"❌ reportedAssets NOT computed — failed components: {failures}")
+    return out
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Robinhood-mode pre-report guards
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _expiry_grace_secs() -> int:
+    return int(os.environ.get("ARB_REPORT_EXPIRY_GRACE_SECS", str(6 * 3600)))
+
+
+def _robinhood_report_guards(assets: dict) -> str | None:
+    """Conditions under which reportedAssets is known to be inexact. Returns a reason or None.
+
+    1. A Polymarket recall recorded as pending whose ETA has not passed: the withdraw script
+       only returns once the USDG landed, so it is in the servicer balance AND the ledger.
+    2. A pending_redeem position whose winning leg is on Kalshi: Kalshi credits payouts to
+       cash automatically, so cash and the position would both be counted until the position
+       is marked redeemed (mark_position_redeemed) — there is no verified Kalshi settlement
+       reader yet (see arb_settlement.observe_venue_payout).
+    3. An 'open' position past expiry + grace: same double-count risk if Kalshi settled it.
+    """
+    from . import arb_withdrawals as _w
+    now = int(time.time())
+    try:
+        rows = _w._load_ledger()
+    except Exception as e:
+        return f"withdrawal ledger unreadable: {e}"
+    # Only legacy heuristic rows (no destination-balance snapshot). Rows carrying
+    # dest_balance_before are settled by balance delta, so they are never double counted.
+    settling = [r for r in rows if r.get("status") == "pending" and r.get("dest") == "rh_usdg"
+                and r.get("dest_balance_before") is None and int(r.get("eta_at") or 0) > now]
+    if settling:
+        return (f"{len(settling)} Polymarket recall(s) landing (ETA not passed: "
+                f"{[r.get('reference') for r in settling]}) — would double count")
+    for p in assets.get("positions") or []:
+        if p.status == "pending_redeem" and p.resolved_venue == "kalshi":
+            return f"position {p.pair_id} resolved on Kalshi; payout not reconciled (mark_position_redeemed)"
+        if p.status == "open" and p.expiry_ts and now > p.expiry_ts + _expiry_grace_secs():
+            return f"position {p.pair_id} still open {now - p.expiry_ts}s past expiry — settlement not reconciled"
+    return None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -404,27 +639,48 @@ def build_report_payload(vault_address: str, signer_key: str, force: bool = Fals
     """Build and sign a ReportDataV2 payload for the contract's report() function.
 
     Args:
-        vault_address: deployed V2 vault address
+        vault_address: deployed V2 (base mode) / V3 (robinhood mode) vault address
         signer_key:    ARB_NAV_SIGNER_PRIVATE_KEY
         force:         if True, bypasses the internal cooldown check. Use when
                        run_reporter_tick has already decided to fire early due to
                        redemption pressure. The contract-level cooldown is still
                        enforced on-chain — this only skips the local guard.
 
-    Returns the payload dict or None if vault/key missing or cooldown not elapsed.
+    Returns the payload dict, or None (reason in LAST_ABORT_REASON) if vault/key missing,
+    cooldown not elapsed, vault paused, or ANY reportedAssets component failed to read.
     """
+    global LAST_ABORT_REASON
+    LAST_ABORT_REASON = ""
     if not vault_address:
         log("⚠️ ARB_VAULT_V2_ADDRESS not set — cannot build report")
-        return None
+        return _abort("ARB_VAULT_V2_ADDRESS not set")
     if not signer_key:
         log("⚠️ ARB_NAV_SIGNER_PRIVATE_KEY not set — cannot sign report")
-        return None
+        return _abort("ARB_NAV_SIGNER_PRIVATE_KEY not set")
+
+    rh = is_robinhood_funding()
+    block = "latest"
+    if rh:
+        try:
+            load_vault_config()
+            block = _pin_block()
+        except Exception as e:
+            return _abort(f"vault chain/config check failed: {e}")
 
     # Read vault state (needed for nonce regardless of cooldown check)
-    vault_state = _read_vault_state(vault_address)
+    vault_state = _read_vault_state(vault_address, block) if rh else _read_vault_state(vault_address)
     if not vault_state["ok"]:
         log("⚠️ Could not read vault state — skipping report")
-        return None
+        return _abort(f"vault state unreadable: {vault_state.get('error', '')}")
+
+    if vault_state.get("paused") and not (rh and vault_state.get("shutdown")):
+        return _abort("vault is paused")
+
+    if rh:
+        from eth_account import Account
+        signer_addr = Account.from_key(signer_key).address
+        if vault_state.get("report_signer", "").lower() != signer_addr.lower():
+            return _abort(f"signer key {signer_addr} != vault.reportSigner() {vault_state.get('report_signer')}")
 
     last_ts  = vault_state["last_report_timestamp"]
     cooldown = vault_state["report_cooldown"]
@@ -433,14 +689,25 @@ def build_report_payload(vault_address: str, signer_key: str, force: bool = Fals
     if not force and last_ts > 0 and (now - last_ts) < cooldown:
         remaining = cooldown - (now - last_ts)
         log(f"⏳ Report cooldown: {remaining}s remaining — skip")
-        return None
+        return _abort(f"cooldown {remaining}s remaining")
 
     reason = "forced (early trigger)" if force else "cooldown elapsed"
     log(f"✅ Building report — reason: {reason} (last={last_ts}, cooldown={cooldown}s)")
 
-    # Compute conservative assets
-    assets_data = compute_reported_assets(vault_address)
-    reported_assets = assets_data["reported_assets_usdc"]
+    # Compute assets — any failed component aborts the report (C3)
+    assets_data = compute_reported_assets(vault_address, vault_state=vault_state,
+                                          block=block if rh else None)
+    if not assets_data["ok"]:
+        return _abort("reportedAssets component read failed: " + "; ".join(assets_data["failures"]))
+    reported_raw = assets_data["reported_assets_raw"]
+    reported_assets = reported_raw / 1e6
+
+    if rh:
+        guard = _robinhood_report_guards(assets_data)
+        if guard:
+            return _abort(guard)
+        if reported_raw < vault_state["vault_balance_raw"]:   # contract would revert
+            return _abort(f"reportedAssets {reported_raw} < vault balance {vault_state['vault_balance_raw']}")
 
     # Build nonce (strictly > last)
     nonce = vault_state["last_report_nonce"] + 1
@@ -455,10 +722,13 @@ def build_report_payload(vault_address: str, signer_key: str, force: bool = Fals
         nonce=nonce,
         vault_address=vault_address,
         private_key=signer_key,
+        reported_assets_raw=reported_raw,
     )
 
+    breakdown = {k: v for k, v in assets_data.items() if k != "positions"}
     payload = {
         "reported_assets_usdc": reported_assets,
+        "reported_assets_raw":  reported_raw,
         "timestamp":            timestamp,
         "deadline":             deadline,
         "nonce":                nonce,
@@ -466,11 +736,12 @@ def build_report_payload(vault_address: str, signer_key: str, force: bool = Fals
         "chain_id":             BASE_CHAIN_ID,
         "domain_salt":          DOMAIN_SALT_TEXT,
         "signature":            signature,
-        "breakdown":            assets_data,
+        "block":                block,
+        "breakdown":            breakdown,
     }
 
     log(
-        f"✅ Report payload built: reportedAssets={reported_assets:.4f} USDC "
+        f"✅ Report payload built: reportedAssets={reported_raw} raw ({reported_assets:.6f}) "
         f"nonce={nonce} deadline={deadline}"
     )
     return payload
@@ -503,8 +774,12 @@ def _abi_encode_report_call(payload: dict, max_deposits: int, max_redeems: int) 
 
     selector = _keccak256_text(REPORT_SELECTOR)[:4]
 
+    from .arb_nav import usdc_to_raw
+
     sig_bytes = bytes.fromhex(payload["signature"].replace("0x", ""))
-    reported_assets_wei = int(payload["reported_assets_usdc"] * 1e6)
+    # H4: the exact raw amount that was signed (int(x * 1e6) truncated, e.g. 249 -> 248).
+    reported_assets_wei = (int(payload["reported_assets_raw"]) if payload.get("reported_assets_raw") is not None
+                           else usdc_to_raw(payload["reported_assets_usdc"]))
 
     # 4-field tuple — matches deployed ReportData struct exactly
     report_tuple = (
@@ -522,16 +797,38 @@ def _abi_encode_report_call(payload: dict, max_deposits: int, max_redeems: int) 
     return selector + encoded_args
 
 
+def _get_receipt_status(tx_hash: str, timeout: int, poll_interval: int = 6) -> int | None:
+    """1 = mined OK, 0 = mined but reverted, None = not mined within timeout."""
+    deadline = time.time() + timeout
+    while True:
+        try:
+            receipt = _rpc("eth_getTransactionReceipt", [tx_hash])
+            if receipt is not None:
+                return int(receipt.get("status", "0x0"), 16)
+        except Exception as e:
+            log(f"⚠️ Receipt poll error: {e}")
+        if time.time() >= deadline:
+            return None
+        time.sleep(poll_interval)
+
+
 def submit_report(
     payload: dict,
     signer_key: str,
     max_deposits: int = DEFAULT_MAX_DEPOSITS,
     max_redeems: int  = DEFAULT_MAX_REDEEMS,
 ) -> str | None:
-    """Sign and broadcast the report() transaction to Base mainnet.
+    """Simulate, sign and broadcast the report() transaction, then wait for its receipt.
+
+    M3: the call is first simulated with eth_call from the signer; a revert means nothing is
+    broadcast and no cooldown is set. The local 6h cooldown is set ONLY when the receipt shows
+    status 1. A reverted receipt returns None (no cooldown). A receipt that does not arrive
+    within ARB_REPORT_RECEIPT_TIMEOUT_SECS sets a short ARB_REPORT_PENDING_GUARD_SECS guard
+    and returns the tx hash. Gas limit: ARB_REPORT_GAS_LIMIT (default 500000).
 
     Returns tx hash string or None on failure.
     """
+    global _last_local_report_ts, _pending_report_until
     from eth_account import Account
 
     vault_address = payload["vault_address"]
@@ -542,6 +839,13 @@ def submit_report(
     except Exception as e:
         log(f"❌ ABI encode error: {e}")
         return None
+    data_hex = "0x" + call_data.hex()
+
+    try:
+        _rpc("eth_call", [{"from": account.address, "to": vault_address, "data": data_hex}, "latest"])
+    except Exception as e:
+        log(f"❌ report() simulation reverted — not broadcasting, no cooldown set: {e}")
+        return None
 
     gas_price = _get_gas_price()
     # Bump 20% to ensure inclusion
@@ -550,8 +854,8 @@ def submit_report(
 
     tx = {
         "to":       vault_address,
-        "data":     "0x" + call_data.hex(),
-        "gas":      500_000,
+        "data":     data_hex,
+        "gas":      _report_gas_limit(),
         "gasPrice": gas_price,
         "nonce":    nonce,
         "chainId":  BASE_CHAIN_ID,
@@ -564,14 +868,23 @@ def submit_report(
         raw_hex = "0x" + signed.raw_transaction.hex()
         tx_hash = _rpc("eth_sendRawTransaction", [raw_hex])
         log(f"✅ report() tx sent: {tx_hash}")
-        _save_report_snapshot(payload, tx_hash)
-        global _last_local_report_ts
-        _last_local_report_ts = time.time()
-        log(f"Local report guard set: cooldown {_LOCAL_REPORT_COOLDOWN}s started")
-        return tx_hash
     except Exception as e:
         log(f"❌ report() tx failed: {e}")
         return None
+
+    status = _get_receipt_status(tx_hash, _report_receipt_timeout())
+    if status == 1:
+        _save_report_snapshot(payload, tx_hash)
+        _last_local_report_ts = time.time()
+        log(f"Local report guard set: cooldown {_LOCAL_REPORT_COOLDOWN}s started")
+        return tx_hash
+    if status == 0:
+        log(f"❌ report() tx {tx_hash} REVERTED on-chain — no cooldown set")
+        return None
+    _pending_report_until = time.time() + _report_pending_guard_secs()
+    log(f"⏰ report() tx {tx_hash} not mined in {_report_receipt_timeout()}s — "
+        f"retry guard {_report_pending_guard_secs()}s (no 6h cooldown)")
+    return tx_hash
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -680,6 +993,34 @@ def _refill_buffer_tx(
     return tx_hash
 
 
+# Per-venue recall cooldown (C4). In memory; the ledger check below survives restarts.
+_last_recall_ts: dict = {}
+
+
+def _recall_cooldown_secs() -> int:
+    return int(os.environ.get("ARB_RECALL_COOLDOWN_SECS", "1800"))
+
+
+def _in_flight_home_usdc() -> float:
+    """Money already on its way back to the servicer: pending venue recalls + Base→home
+    bridges (robinhood mode). Raises if a ledger cannot be read."""
+    from . import arb_withdrawals as _w
+    from .arb_nav import assert_ledgers_readable
+    assert_ledgers_readable()
+    counted = getattr(_w, "COUNTED_STATUSES", ("pending",))
+    total = _w.get_pending_withdrawal_usdc()
+    for row in _w._load_ledger(_w.BRIDGE_LEDGER_PATH):
+        if row.get("status") in counted and row.get("direction") == "base_to_rh":
+            total += float(row.get("amount_usdc") or 0.0)
+    return round(total, 6)
+
+
+def _venues_with_pending_recall() -> set:
+    from . import arb_withdrawals as _w
+    counted = getattr(_w, "COUNTED_STATUSES", ("pending",))
+    return {str(r.get("platform")) for r in _w._load_ledger() if r.get("status") in counted}
+
+
 def run_withdrawal_waterfall(vault_address: str, servicer_key: str) -> None:
     """Satisfy pending redemption shortfall via ordered funding layers.
 
@@ -749,6 +1090,14 @@ def run_withdrawal_waterfall(vault_address: str, servicer_key: str) -> None:
             nonce     = _get_nonce(account.address)
             tx_hash   = _refill_buffer_tx(vault_address, account, sweep_amount, gas_price, nonce)
             log(f"✅ Waterfall Step 2/3: refillBuffer tx={tx_hash}")
+            if is_robinhood_funding():
+                # journal the servicer outflow so delta-based arrival detection does not mistake it
+                # for (or let it hide) a recall landing in the same window
+                try:
+                    from . import arb_ledger
+                    arb_ledger.record_cashflow(BASE_CHAIN_ID, USDC_BASE, -sweep_amount, "vault_refill", tx_hash)
+                except Exception as e:
+                    log(f"⚠️ Waterfall: refill not journaled ({e}); recall arrivals may go stale until reconciled")
             shortfall -= sweep_amount
         except Exception as e:
             log(f"❌ Waterfall Step 2/3 sweep failed: {e}")
@@ -759,6 +1108,9 @@ def run_withdrawal_waterfall(vault_address: str, servicer_key: str) -> None:
         )
 
     # ── Step 3.5: Pull cash from trading platforms if servicer sweep insufficient ─
+    # C4: recalls already in flight (pending withdrawals + Base→home bridges) are subtracted,
+    # and a venue with a pending recall or one issued within ARB_RECALL_COOLDOWN_SECS is not
+    # asked again — previously the full shortfall was re-requested on every tick.
     if shortfall >= ARB_WATERFALL_MIN_SHORTFALL:
         log(
             f"🔄 Waterfall Step 3.5: shortfall {shortfall:.4f} remains after servicer sweep — "
@@ -767,35 +1119,56 @@ def run_withdrawal_waterfall(vault_address: str, servicer_key: str) -> None:
         try:
             from .arb_nav import _get_servicer_balances
 
-            poly_cash, kalshi_cash, opinion_cash = _get_servicer_balances()
-            total_platform_cash = poly_cash + kalshi_cash + opinion_cash
-            log(
-                f"💧 Platform cash: poly={poly_cash:.4f} kalshi={kalshi_cash:.4f} "
-                f"opinion={opinion_cash:.4f} total={total_platform_cash:.4f} USDC"
-            )
+            try:
+                in_flight = _in_flight_home_usdc()
+                busy = _venues_with_pending_recall()
+            except Exception as e:
+                raise RuntimeError(f"recall ledger unreadable ({e}) — no new recall (avoids duplicates)")
+            uncovered = shortfall - in_flight
+            log(f"ℹ️ Waterfall Step 3.5: in-flight recalls/bridges={in_flight:.4f} → uncovered={uncovered:.4f}")
 
-            initiated = withdraw_from_platforms(
-                shortfall_usdc=shortfall,
-                poly_cash=poly_cash,
-                kalshi_cash=kalshi_cash,
-                opinion_cash=opinion_cash,
-                servicer_wallet=account.address,
-            )
-            log(
-                f"✅ Waterfall Step 3.5: initiated {initiated:.4f} USDC of platform withdrawals "
-                f"(funds in transit — will arrive in 5–30 min depending on platform)"
-            )
-           
+            if uncovered < ARB_WATERFALL_MIN_SHORTFALL:
+                log("✅ Waterfall Step 3.5: in-flight recalls cover the shortfall — no new recall")
+            else:
+                poly_cash, kalshi_cash, opinion_cash = _get_servicer_balances()   # 0 = do not recall from it
+                total_platform_cash = poly_cash + kalshi_cash + opinion_cash
+                log(
+                    f"💧 Platform cash: poly={poly_cash:.4f} kalshi={kalshi_cash:.4f} "
+                    f"opinion={opinion_cash:.4f} total={total_platform_cash:.4f} USDC"
+                )
+                now = time.time()
+                cash = {"polymarket": poly_cash, "kalshi": kalshi_cash, "opinion": opinion_cash}
+                for venue in cash:
+                    if venue in busy or now - _last_recall_ts.get(venue, 0.0) < _recall_cooldown_secs():
+                        if cash[venue] > 0:
+                            log(f"⏳ Waterfall Step 3.5: {venue} recall pending/cooling down — skipped")
+                        cash[venue] = 0.0
+
+                if not any(v > 1.0 for v in cash.values()):
+                    log("ℹ️ Waterfall Step 3.5: no eligible venue this tick")
+                else:
+                    for venue, v in cash.items():
+                        if v > 1.0:
+                            _last_recall_ts[venue] = now
+                    initiated = withdraw_from_platforms(
+                        shortfall_usdc=uncovered,
+                        poly_cash=cash["polymarket"],
+                        kalshi_cash=cash["kalshi"],
+                        opinion_cash=cash["opinion"],
+                        servicer_wallet=account.address,
+                    )
+                    log(
+                        f"✅ Waterfall Step 3.5: initiated {initiated:.4f} USDC of platform withdrawals "
+                        f"(funds in transit — will arrive in 5–30 min depending on platform)"
+                    )
+                    if initiated >= uncovered * 0.9:
+                        log(f"ℹ️ Step 3.5 expected to cover shortfall — Step 4 unwind deferred")
+
             pending_inflight = get_pending_withdrawals_total_usdc()
             log(
                 f"ℹ️ Waterfall Step 3.5: pending in-flight platform withdrawals="
                 f"{pending_inflight:.4f} USDC"
             )
-
-            # We don't immediately reduce the shortfall (funds haven't arrived yet),
-            # but we log the expectation so Step 4 can be informational rather than critical
-            if initiated >= shortfall * 0.9:
-                log(f"ℹ️ Step 3.5 expected to cover shortfall — Step 4 unwind deferred")
         except Exception as e:
             log(f"⚠️ Waterfall Step 3.5 platform withdrawals error: {e}")
 
@@ -1274,6 +1647,11 @@ def run_reporter_tick():
     if not vault_address:
         return  # V2 not deployed yet — silent skip
 
+    # M5: robinhood mode refuses to run on a missing/inconsistent vault config (raises
+    # VaultConfigError) instead of silently using the Base V2 defaults.
+    if is_robinhood_funding():
+        load_vault_config()
+
     # ── 1. Withdrawal funding waterfall ───────────────────────────────────────
     try:
         run_withdrawal_waterfall(vault_address, servicer_key)
@@ -1308,6 +1686,9 @@ def run_reporter_tick():
         if _last_local_report_ts > 0 and _local_elapsed < _LOCAL_REPORT_COOLDOWN:
             log(f"Local cooldown guard: {int(_LOCAL_REPORT_COOLDOWN - _local_elapsed)}s remaining — skip")
             return
+        if time.time() < _pending_report_until:
+            log(f"Previous report tx unconfirmed — retry guard {int(_pending_report_until - time.time())}s remaining — skip")
+            return
 
         vault_state = _read_vault_state(vault_address)
         if not vault_state["ok"]:
@@ -1319,7 +1700,8 @@ def run_reporter_tick():
         now       = int(time.time())
         elapsed   = now - last_ts if last_ts > 0 else cooldown + 1
 
-        if vault_state.get("paused"):
+        # V2 report() is whenNotPaused; V3 allows report() while paused only in shutdown.
+        if vault_state.get("paused") and not (is_robinhood_funding() and vault_state.get("shutdown")):
             log("⚠️ Report: vault is paused — skip")
             return
 

@@ -1,31 +1,53 @@
-# Testnet / local deployment of the three services. Mainnet only after owner approval (ALLOW_MAINNET=yes).
-#   cd milord && docker compose -f offchain/services/docker-compose.yml --env-file offchain/services/.env up -d
+# Testnet / local deployment of the four services. Mainnet only after owner approval (ALLOW_MAINNET=yes).
+#   cd milord && docker compose -f offchain/services/docker-compose.yml up -d --build
+# Each service reads only its own env file (copy the *.env.example files next to this one; never commit them), so the
+# keeper key never reaches the publisher and no key reaches the root checker or the monitor.
+# The deployments file (DEPLOYMENTS_HOST_FILE, default ../../deployments/robinhood-46630.json written by
+# DeployRobinhood.s.sol and completed by offchain/record-launch.mjs) is mounted read-only.
+# Memory: each container is capped at 192 MB (4 x 192 MB = 768 MB worst case); measure real use on testnet.
+x-service: &service
+  build: { context: ../.., dockerfile: offchain/services/Dockerfile }
+  restart: unless-stopped
+  mem_limit: 192m
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "5" } }
+  environment: &env { DEPLOYMENTS_FILE: /app/deployments.json }
+
 services:
   keeper:
-    build: { context: ../.., dockerfile: offchain/services/Dockerfile }
+    <<: *service
     command: ["node", "offchain/services/keeper.mjs"]
-    env_file: .env
-    environment: { HEALTH_PORT: "9101", INTERVAL_SECS: "${KEEPER_INTERVAL_SECS:-300}" }
-    volumes: ["keeper-state:/data", "${DEPLOYMENTS_HOST_FILE:-../../sim/deployments.local.json}:/app/deployments.json:ro"]
+    env_file: [common.env, keeper.env]
+    environment: { <<: *env, HEALTH_PORT: "9101" }
+    volumes: ["keeper-state:/data", "${DEPLOYMENTS_HOST_FILE:-../../deployments/robinhood-46630.json}:/app/deployments.json:ro"]
     ports: ["127.0.0.1:9101:9101"]
-    restart: unless-stopped
   epoch-publisher:
-    build: { context: ../.., dockerfile: offchain/services/Dockerfile }
+    <<: *service
     command: ["node", "offchain/services/epoch-publisher.mjs"]
-    env_file: .env
-    environment: { HEALTH_PORT: "9102", INTERVAL_SECS: "${PUBLISHER_INTERVAL_SECS:-900}" }
-    volumes: ["publisher-state:/data", "${DEPLOYMENTS_HOST_FILE:-../../sim/deployments.local.json}:/app/deployments.json:ro"]
+    env_file: [common.env, publisher.env]
+    environment: { <<: *env, HEALTH_PORT: "9102" }
+    volumes: ["publisher-state:/data", "${DEPLOYMENTS_HOST_FILE:-../../deployments/robinhood-46630.json}:/app/deployments.json:ro"]
     ports: ["127.0.0.1:9102:9102"]
-    restart: unless-stopped
   root-checker:
-    build: { context: ../.., dockerfile: offchain/services/Dockerfile }
+    <<: *service
     command: ["node", "offchain/services/root-checker.mjs"]
-    env_file: .env
-    # independent RPC provider; no private key is passed to this container
-    environment: { HEALTH_PORT: "9103", INTERVAL_SECS: "${CHECKER_INTERVAL_SECS:-600}", RPC_URL: "${CHECKER_RPC_URL}", KEEPER_PRIVATE_KEY: "", PUBLISHER_PRIVATE_KEY: "" }
-    volumes: ["${DEPLOYMENTS_HOST_FILE:-../../sim/deployments.local.json}:/app/deployments.json:ro"]
+    # independent RPC provider (checker.env sets RPC_URL); no private key
+    env_file: [common.env, checker.env]
+    environment: { <<: *env, HEALTH_PORT: "9103" }
+    volumes: ["checker-state:/data", "${DEPLOYMENTS_HOST_FILE:-../../deployments/robinhood-46630.json}:/app/deployments.json:ro"]
     ports: ["127.0.0.1:9103:9103"]
-    restart: unless-stopped
+  monitor:
+    <<: *service
+    command: ["node", "offchain/services/monitor.mjs"]
+    # read-only; its own RPC provider (monitor.env); polls the other three over the compose network
+    env_file: [common.env, monitor.env]
+    environment:
+      <<: *env
+      HEALTH_PORT: "9104"
+      MONITOR_HEALTH_URLS: "keeper=http://keeper:9101/healthz,epoch-publisher=http://epoch-publisher:9102/healthz,root-checker=http://root-checker:9103/healthz"
+    volumes: ["monitor-state:/data", "${DEPLOYMENTS_HOST_FILE:-../../deployments/robinhood-46630.json}:/app/deployments.json:ro"]
+    ports: ["127.0.0.1:9104:9104"]
 volumes:
   keeper-state:
   publisher-state:
+  checker-state:
+  monitor-state:

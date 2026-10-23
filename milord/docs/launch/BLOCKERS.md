@@ -1,3 +1,18 @@
+# Blocker matrix update (2026-10-23, autonomous pipeline round)
+
+B13 is **closed**: VPS run at 406cc2a, 33/33 in both passes, pre-emption regression green; PR #1 fast-forwarded.
+Per-component evidence: READINESS_MATRIX.md. New and changed items:
+
+| # | Severity | Item | Status | What clears it |
+|---|---|---|---|---|
+| B21 | High | Polymarket CTF redemption and venue payout observation not implemented (`request_venue_redemption`, `observe_venue_payout` raise `NotImplementedError`); settled positions are held at cost and payouts recorded by hand | open | implement against the CTF contracts; test on a fork of Polygon |
+| B22 | High | `trading_bot/safe_proxy_withdraw_parb.ts:655` bridges the whole EOA balance instead of the requested amount | open (Python records the measured amount) | fix the script; small approved test |
+| B9 | High (was Medium) | Funding/withdrawal routes: code hardened (allowlists, receipts, intents, delta arrival), routes still unverified | Code | Across/Relay USDG on 4663, Polymarket USDG deposit, Kalshi Base legs confirmed with approved small amounts; fill `ARB_BRIDGE_ALLOWLIST` |
+| B7 | Medium | WETH/USDG pool for the router | Code: `offchain/check-funding-pool.mjs` (read-only) | VPS run exits 0 |
+| B23 | Medium | No hosts: milord-auto, milord-engine, milord-watch (OPERATIONS_PLAN.md) | open | Bobo approves sizing; provision; testnet week |
+| B24 | Low | V3 reporter getter names checked against source only | open | first report on a testnet V3 vault |
+| B25 | Low | Display NAV endpoint (`/api/arb-vault/nav`, base mode) still treats read errors as 0 | open | not used for signing; fix with the base engine owner |
+
 # Blocker matrix (2026-10-21, production-readiness round)
 
 No deployment, broadcast, lock or real funds. The Anti-Snipe 40% / 60-minute setting is a candidate, not a decision.

@@ -4,6 +4,8 @@ pragma solidity 0.8.26;
 import {Script, console2} from "forge-std/Script.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {MilordDeployer} from "./MilordDeployer.sol";
+import {UniV3SwapVenue, IUniswapV3PoolSwap, IWETH9} from "../src/automation/UniV3SwapVenue.sol";
+import {UniV3TwapReference, IUniswapV3PoolOracle} from "../src/automation/UniV3TwapReference.sol";
 
 /// @notice Robinhood Chain deployment from environment configuration.
 ///
@@ -14,9 +16,16 @@ import {MilordDeployer} from "./MilordDeployer.sol";
 ///     forge script script/DeployRobinhood.s.sol --rpc-url $ROBINHOOD_TESTNET_RPC --sender $DEPLOYER
 ///
 ///   Required env: MILORD_OWNER_SAFE, MILORD_TEAM_SAFE, MILORD_ARB_SAFE, MILORD_SERVICER,
-///   MILORD_QUOTE_SIGNER, MILORD_REPORT_SIGNER, MILORD_OPERATOR, MILORD_TOKEN_HOLDER,
-///   MILORD_VAULT_ASSET (USDG on the target chain), MILORD_SWAP_ADAPTER, MILORD_BASE_URI,
-///   MILORD_CHARACTERISTICS (8 comma-separated labels), MILORD_VAULT_CAP (asset units).
+///   MILORD_QUOTE_SIGNER, MILORD_REPORT_SIGNER, MILORD_OPERATOR (keeper key), MILORD_PUBLISHER (epoch publisher key),
+///   MILORD_ROUTER_PAUSER (monitor key), MILORD_VAULT_ASSET (USDG), MILORD_BASE_URI,
+///   MILORD_CHARACTERISTICS (8 comma-separated labels), MILORD_VAULT_CAP (asset units),
+///   MILORD_FUNDING_POOL (Uniswap V3 WETH/USDG pool), MILORD_WETH,
+///   and either MILORD_PREDICTED_TOKEN (atomic launch: MilordAtomicLaunch.predictedToken()) or MILORD_TOKEN_HOLDER.
+///   Optional: MILORD_SWAP_ADAPTER (normally unset until the Hookr market opens), MILORD_ROUTER_MIN_WEI /
+///   _MAX_WEI / _DAILY_WEI (default 0.05 / 2 / 10 ETH), MILORD_ROUTER_SLIPPAGE_BPS (100), MILORD_ROUTER_INTERVAL (3600),
+///   MILORD_TWAP_WINDOW (1800 s), MILORD_TWAP_MAX_TICKS (100), MILORD_DEPLOYMENTS_OUT (./deployments/robinhood-<chain>.json).
+///   The three splitters' arbitrage share always goes to ArbitrageFundingRouter (never a manual Safe transfer);
+///   the router belongs to the Arbitrage Funding Safe after it accepts ownership.
 ///   No private keys are read from env; sign with --ledger / --account.
 contract DeployRobinhood is Script, MilordDeployer {
     uint256 constant ROBINHOOD_TESTNET = 46630;
@@ -25,7 +34,10 @@ contract DeployRobinhood is Script, MilordDeployer {
     function run() external returns (Deployment memory d) {
         require(block.chainid != ROBINHOOD_MAINNET, "mainnet deployment not approved");
         require(block.chainid == ROBINHOOD_TESTNET, "Robinhood Chain testnet only");
+        return _run();
+    }
 
+    function _run() internal returns (Deployment memory d) {
         Config memory c;
         c.owner = vm.envAddress("MILORD_OWNER_SAFE");
         c.teamSafe = vm.envAddress("MILORD_TEAM_SAFE");
@@ -34,6 +46,8 @@ contract DeployRobinhood is Script, MilordDeployer {
         c.quoteSigner = vm.envAddress("MILORD_QUOTE_SIGNER");
         c.reportSigner = vm.envAddress("MILORD_REPORT_SIGNER");
         c.operator = vm.envAddress("MILORD_OPERATOR");
+        c.publisher = vm.envAddress("MILORD_PUBLISHER");
+        require(c.publisher != c.operator, "keeper and publisher need separate keys (nonces)");
         c.token = vm.envOr("MILORD_PREDICTED_TOKEN", address(0)); // atomic launch: MilordAtomicLaunch.predictedToken()
         c.tokenHolder = c.token == address(0) ? vm.envAddress("MILORD_TOKEN_HOLDER") : address(0);
         c.asset = vm.envAddress("MILORD_VAULT_ASSET");
@@ -45,11 +59,72 @@ contract DeployRobinhood is Script, MilordDeployer {
         // proposed production splitter bounds (docs/OPEN_DECISIONS.md P2)
         c.splitterMin = [uint16(6000), 4000, 2500];
         c.splitterMax = [uint16(8000), 6000, 4000];
+        // ETH -> USDG -> pARB automation (docs/launch/SAFE_CONFIGURATION.md §3). Required: without it the splitters
+        // would pay the Arbitrage Safe and funding would be manual.
+        address pool = vm.envAddress("MILORD_FUNDING_POOL");
+        address weth = vm.envAddress("MILORD_WETH");
+        c.routerAmounts = [
+            vm.envOr("MILORD_ROUTER_MIN_WEI", uint256(0.05 ether)),
+            vm.envOr("MILORD_ROUTER_MAX_WEI", uint256(2 ether)),
+            vm.envOr("MILORD_ROUTER_DAILY_WEI", uint256(10 ether))
+        ];
+        c.routerSlippageBps = uint16(vm.envOr("MILORD_ROUTER_SLIPPAGE_BPS", uint256(100)));
+        c.routerInterval = uint32(vm.envOr("MILORD_ROUTER_INTERVAL", uint256(1 hours)));
+        c.routerPauser = vm.envAddress("MILORD_ROUTER_PAUSER");
+        uint32 window = uint32(vm.envOr("MILORD_TWAP_WINDOW", uint256(30 minutes)));
+        int24 maxTicks = int24(int256(vm.envOr("MILORD_TWAP_MAX_TICKS", uint256(100))));
 
         console2.log("vault asset", c.asset, IERC20Metadata(c.asset).symbol());
+        uint256 startBlock = block.number;
         vm.startBroadcast();
         (, c.deployer,) = vm.readCallers(); // the broadcasting account
+        UniV3SwapVenue venue = new UniV3SwapVenue(IUniswapV3PoolSwap(pool), IWETH9(weth));
+        require(venue.token() == c.asset, "funding pool is not WETH/vault asset");
+        c.fundingVenue = address(venue);
+        c.fundingReference = address(new UniV3TwapReference(IUniswapV3PoolOracle(pool), weth, window, maxTicks));
         d = _deployMilord(c);
         vm.stopBroadcast();
+        require(address(d.router) != address(0), "router not deployed");
+        _record(c, d, pool, weth, startBlock);
+    }
+
+    /// Writes the addresses the services read (offchain/services: DEPLOYMENTS_FILE). The Hookr keys (familyId, poolId,
+    /// tax queues) are added after the launch by offchain/record-launch.mjs.
+    function _record(Config memory c, Deployment memory d, address pool, address weth, uint256 startBlock) internal {
+        string memory k = "robinhood";
+        vm.serializeUint(k, "chainId", block.chainid);
+        vm.serializeUint(k, "startBlock", startBlock);
+        vm.serializeAddress(k, "MILORD", address(d.token));
+        vm.serializeAddress(k, "Milords", address(d.nft));
+        vm.serializeAddress(k, "MilordConverter", address(d.converter));
+        vm.serializeAddress(k, "EntryFeeSplitter", address(d.entrySplit));
+        vm.serializeAddress(k, "RoyaltySplitter", address(d.royaltySplit));
+        vm.serializeAddress(k, "TradingTaxSplitter", address(d.taxSplit));
+        vm.serializeAddress(k, "BuybackBurner", address(d.burner));
+        vm.serializeAddress(k, "StrategyRegistry", address(d.registry));
+        vm.serializeAddress(k, "MilordGovernor", address(d.governor));
+        vm.serializeAddress(k, "pARBVault", address(d.vault));
+        vm.serializeAddress(k, "ShareDistributor", address(d.distributor));
+        vm.serializeAddress(k, "ParbFundingAdapter", address(d.adapter));
+        vm.serializeAddress(k, "ArbitrageFundingRouter", address(d.router));
+        vm.serializeAddress(k, "FundingVenue", c.fundingVenue);
+        vm.serializeAddress(k, "TwapReference", c.fundingReference);
+        vm.serializeAddress(k, "WethUsdgPool", pool);
+        vm.serializeAddress(k, "WETH", weth);
+        vm.serializeAddress(k, "USDG", c.asset);
+        vm.serializeAddress(k, "owner", c.owner);
+        vm.serializeAddress(k, "teamSafe", c.teamSafe);
+        vm.serializeAddress(k, "arbitrageSafe", c.arbitrageSafe);
+        vm.serializeAddress(k, "servicer", c.servicer);
+        vm.serializeAddress(k, "quoteSigner", c.quoteSigner);
+        vm.serializeAddress(k, "reportSigner", c.reportSigner);
+        vm.serializeAddress(k, "publisher", c.publisher);
+        vm.serializeAddress(k, "routerPauser", c.routerPauser);
+        string memory json = vm.serializeAddress(k, "operator", c.operator);
+        string memory out = vm.envOr(
+            "MILORD_DEPLOYMENTS_OUT", string.concat("./deployments/robinhood-", vm.toString(block.chainid), ".json")
+        );
+        vm.writeJson(json, out);
+        console2.log("wrote", out);
     }
 }

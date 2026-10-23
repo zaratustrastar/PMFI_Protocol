@@ -24,7 +24,14 @@ from ..config import (
     across_api_url,
     relay_api_url,
     rh_sweep_min_usdc,
+    usdc_base_address,
+    usdc_polygon_address,
+    bridge_max_fee_bps,
+    arrival_tolerance_bps,
+    inflight_stale_secs,
 )
+from . import arb_ledger as _L
+from .arb_http import request_json
 
 POLY_CLOB_URL = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
 RELAY_API_URL = "https://api.relay.link"
@@ -63,29 +70,53 @@ def _ensure_ledger_dir(path: str | None = None) -> None:
     os.makedirs(os.path.dirname(path or WITHDRAWAL_LEDGER_PATH), exist_ok=True)
 
 
+# All ledger access goes through arb_ledger (fcntl lock around every load-modify-save).
+# _load_ledger/_save_ledger keep their legacy signatures for callers and tests.
+
 def _load_ledger(path: str | None = None) -> list[dict[str, Any]]:
     path = path or WITHDRAWAL_LEDGER_PATH
     try:
-        if not os.path.exists(path):
-            return []
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data if isinstance(data, list) else []
+        return _L.read_rows(path)
     except Exception as e:
-        log(f"⚠️ Could not load withdrawal ledger: {e}")
+        log(f"⚠️ Could not load ledger {path}: {e}")
         return []
 
 
 def _save_ledger(rows: list[dict[str, Any]], path: str | None = None) -> None:
     path = path or WITHDRAWAL_LEDGER_PATH
     try:
-        _ensure_ledger_dir(path)
-        tmp = path + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(rows, f, indent=2, sort_keys=True)
-        os.replace(tmp, path)
+        _L.write_rows(path, rows)
     except Exception as e:
-        log(f"⚠️ Could not save withdrawal ledger: {e}")
+        log(f"⚠️ Could not save ledger {path}: {e}")
+
+
+def get_ledger_snapshot() -> dict:
+    """Read-only, lock-consistent copy of every funding ledger (for NAV / monitoring)."""
+    return {
+        "withdrawals": _L.read_rows(WITHDRAWAL_LEDGER_PATH),
+        "bridges": _L.read_rows(BRIDGE_LEDGER_PATH),
+        "venue_deposits": _L.read_rows(_L.venue_deposit_path()),
+        "intents": _L.read_rows(_L.intents_path()),
+        "taken_at": int(time.time()),
+    }
+
+
+# Rows in these states still represent money owed to the servicer (counted in NAV / liquidity).
+COUNTED_STATUSES = ("pending", "stale")
+
+
+def _dest_chain_token(dest: str | None) -> tuple[int, str]:
+    if dest == "rh_usdg":
+        return robinhood_chain_id(), usdg_address()
+    return BASE_CHAIN_ID, usdc_base_address()
+
+
+def _arrived(balance: float, before: float, amount: float, out: float, inn: float) -> tuple[bool, float]:
+    """Delta-based arrival: balance rose by >= amount − fee tolerance once our own known
+    outflows are added back and other known inflows are taken out."""
+    adjusted = balance - before + out - inn
+    need = amount * (1 - arrival_tolerance_bps() / 10_000) - 0.01
+    return adjusted >= need, adjusted
 
 
 def record_withdrawal_intent(
@@ -94,146 +125,228 @@ def record_withdrawal_intent(
     reference: str,
     eta_seconds: int,
     dest: str | None = None,
+    dest_balance_before: float | None = None,
+    idem_key: str | None = None,
 ) -> None:
     """dest (robinhood mode): "rh_usdg" = lands as USDG on 4663, "base_usdc" = lands as USDC
-    on Base and is then bridged home by sweep_base_usdc_to_robinhood(). None = legacy."""
-    rows = _load_ledger()
-    now = int(time.time())
+    on Base and is then bridged home by sweep_base_usdc_to_robinhood(). None = legacy.
+
+    dest_balance_before: destination balance snapshot taken BEFORE the recall was requested;
+    rows that carry it are settled by balance delta (not by ETA). ETA is only an alert threshold.
+    """
+    now = time.time()
     row = {
         "platform": platform,
         "amount_usdc": round(float(amount_usdc), 6),
         "reference": str(reference),
         "status": "pending",
-        "created_at": now,
-        "eta_at": now + max(60, int(eta_seconds)),
+        "created_at": int(now),
+        "eta_at": int(now) + max(60, int(eta_seconds)),
         "completed_at": None,
         "failed_at": None,
     }
     if dest:
         row["dest"] = dest
-    rows.append(row)
-    _save_ledger(rows)
+    if dest_balance_before is not None:
+        row["dest_balance_before"] = round(float(dest_balance_before), 6)
+        row["snapshot_ts"] = now
+    if idem_key:
+        row["idem_key"] = idem_key
+    _L.append_row(WITHDRAWAL_LEDGER_PATH, row)
     log(
         f"📝 Recorded withdrawal intent: platform={platform} amount={amount_usdc:.4f} "
         f"ref={reference} eta={eta_seconds}s"
     )
 
 
+def update_withdrawal(idem_key: str, **fields) -> None:
+    def fn(rows):
+        for row in rows:
+            if row.get("idem_key") == idem_key:
+                row.update(fields)
+    _L.update_rows(WITHDRAWAL_LEDGER_PATH, fn)
+
+
 def mark_withdrawal_failed(reference: str) -> None:
-    rows = _load_ledger()
     now = int(time.time())
-    changed = False
-    for row in rows:
-        if row.get("reference") == reference and row.get("status") == "pending":
-            row["status"] = "failed"
-            row["failed_at"] = now
-            changed = True
-    if changed:
-        _save_ledger(rows)
+
+    def fn(rows):
+        for row in rows:
+            if (row.get("reference") == reference or row.get("idem_key") == reference) \
+                    and row.get("status") == "pending":
+                row["status"] = "failed"
+                row["failed_at"] = now
+    _L.update_rows(WITHDRAWAL_LEDGER_PATH, fn)
 
 
 def mark_withdrawals_arrived(servicer_balance_usdc: float, base_usdc_balance: float | None = None) -> float:
-    """
-    Best-effort completion logic:
-    if ETA has passed, mark pending recalls as completed up to current servicer balance.
-    Conservative but much better than leaving recalls pending forever.
+    """Settle pending recalls that have landed. Returns the amount settled.
 
     servicer_balance_usdc is servicer cash on the funding chain (USDG on 4663 in robinhood
     mode). Rows with dest="base_usdc" are compared against base_usdc_balance instead and are
     skipped when it is not given.
+
+    * Rows with a dest_balance_before snapshot (robinhood mode): delta-based — the destination
+      balance must have risen by the amount (minus ARB_ARRIVAL_TOLERANCE_BPS) since the snapshot,
+      after adding back our own journaled outflows and removing other known inflows. Oldest
+      first; a delta consumed by one row is not reused by the next. No ETA gate.
+    * Legacy rows (no snapshot, base mode): unchanged — after ETA, balance >= amount.
     """
-    rows = _load_ledger()
-    if not rows:
-        return 0.0
+    now = time.time()
+    journal = _L.read_rows(_L.cashflow_path())
+    inflows: list = []
 
-    now = int(time.time())
-    changed = False
-    completed_total = 0.0
-
-    for row in rows:
-        if row.get("status") != "pending":
-            continue
-        if now < int(row.get("eta_at", 0)):
-            continue
-        amt = float(row.get("amount_usdc", 0.0))
-        if row.get("dest") == "base_usdc":
-            if base_usdc_balance is None:
+    def fn(rows):
+        total = 0.0
+        consumed: dict = {}
+        for row in sorted(rows, key=lambda r: float(r.get("snapshot_ts") or r.get("created_at") or 0)):
+            st = row.get("status")
+            amt = float(row.get("amount_usdc", 0.0))
+            if row.get("dest_balance_before") is None:
+                if st != "pending" or now < int(row.get("eta_at", 0)):
+                    continue
+                if row.get("dest") == "base_usdc":
+                    if base_usdc_balance is None:
+                        continue
+                    balance = base_usdc_balance
+                else:
+                    balance = servicer_balance_usdc
+                if balance + 1e-9 >= amt:
+                    row["status"] = "completed"
+                    row["completed_at"] = int(now)
+                    total += amt
                 continue
-            balance = base_usdc_balance
-        else:
-            balance = servicer_balance_usdc
-        if balance + 1e-9 >= amt:
-            row["status"] = "completed"
-            row["completed_at"] = now
-            completed_total += amt
-            changed = True
+            if st not in COUNTED_STATUSES:
+                continue
+            balance = base_usdc_balance if row.get("dest") == "base_usdc" else servicer_balance_usdc
+            if balance is None:
+                continue
+            chain, token = _dest_chain_token(row.get("dest"))
+            out, inn = _L.flows_since(chain, token, float(row.get("snapshot_ts") or 0), journal)
+            inn += consumed.get((chain, token.lower()), 0.0)
+            ok, adjusted = _arrived(balance, float(row["dest_balance_before"]), amt, out, inn)
+            if ok:
+                row["status"] = "completed"
+                row["completed_at"] = int(now)
+                row["arrival_delta_usdc"] = round(adjusted, 6)
+                total += amt
+                consumed[(chain, token.lower())] = consumed.get((chain, token.lower()), 0.0) + amt
+                inflows.append((chain, token, amt, row.get("reference")))
+        return total
 
-    if changed:
-        _save_ledger(rows)
-    return completed_total
+    total = _L.update_rows(WITHDRAWAL_LEDGER_PATH, fn)
+    for chain, token, amt, ref in inflows:
+        _L.record_cashflow(chain, token, amt, "recall_arrived", ref)
+    return total
 
 
 def get_pending_withdrawal_usdc() -> float:
-    rows = _load_ledger()
+    """Pending recalls still owed. Robinhood mode: rows older than ARB_INFLIGHT_STALE_SECS become
+    "stale" — still counted, alerted, never dropped. Base mode keeps the legacy 24h expiry."""
     now = int(time.time())
-    total = 0.0
-    changed = False
+    stale_after = inflight_stale_secs()
+    rh = is_robinhood_funding()
 
-    for row in rows:
-        if row.get("status") != "pending":
-            continue
-        eta_at = int(row.get("eta_at", 0))
-        created_at = int(row.get("created_at", 0))
-        # Expire stale pending recalls after 24h so they don't block forever
-        if now > created_at + 86400:
-            row["status"] = "failed"
-            row["failed_at"] = now
-            changed = True
-            continue
-        total += float(row.get("amount_usdc", 0.0))
+    def fn(rows):
+        total = 0.0
+        for row in rows:
+            st = row.get("status")
+            amt = float(row.get("amount_usdc", 0.0) or 0.0)
+            if st == "stale":
+                total += amt
+                continue
+            if st != "pending":
+                continue
+            if now > int(row.get("created_at", 0)) + stale_after:
+                if rh:
+                    row["status"] = "stale"
+                    row["stale_at"] = now
+                    log(f"🚨 STALE recall {row.get('platform')} {amt:.4f} ref={row.get('reference')} "
+                        f"pending > {stale_after}s — still counted, manual review needed")
+                    total += amt
+                else:
+                    row["status"] = "failed"
+                    row["failed_at"] = now
+                continue
+            total += amt
+        return total
 
-    if changed:
-        _save_ledger(rows)
-
-    return round(total, 6)
+    return round(_L.update_rows(WITHDRAWAL_LEDGER_PATH, fn), 6)
 
 
 def get_pending_withdrawal_usdc_by_dest() -> dict:
-    """Pending recall totals split by landing place: {"base_usdc": x, "servicer": y}."""
-    get_pending_withdrawal_usdc()  # applies the 24h stale expiry
+    """Pending (incl. stale) recall totals split by landing place: {"base_usdc": x, "servicer": y}."""
+    get_pending_withdrawal_usdc()  # applies the stale transition
     out = {"base_usdc": 0.0, "servicer": 0.0}
     for row in _load_ledger():
-        if row.get("status") != "pending":
+        if row.get("status") not in COUNTED_STATUSES:
             continue
         key = "base_usdc" if row.get("dest") == "base_usdc" else "servicer"
         out[key] += float(row.get("amount_usdc") or 0.0)
     return {k: round(v, 6) for k, v in out.items()}
 
 
-def _complete_base_withdrawals_upto(amount_usdc: float) -> float:
-    """Mark pending dest=base_usdc recalls completed (oldest first) up to amount_usdc."""
-    rows = _load_ledger()
-    now = int(time.time())
-    left = float(amount_usdc)
-    done = 0.0
-    for row in sorted(rows, key=lambda r: int(r.get("created_at") or 0)):
-        if row.get("status") != "pending" or row.get("dest") != "base_usdc":
+def get_pending_withdrawals_split() -> dict:
+    """Pending (incl. stale) recalls split for NAV:
+      servicer            — lands in servicer funding-chain cash (rh_usdg / legacy)
+      base_usdc_tracked   — Kalshi recalls with a balance snapshot: settled by delta, so while
+                            pending they are NOT yet in the Base balance → count in full
+      base_usdc_legacy    — snapshot-less base_usdc rows (keep max(0, legacy − base_usdc) netting)
+    """
+    get_pending_withdrawal_usdc()
+    out = {"servicer": 0.0, "base_usdc_tracked": 0.0, "base_usdc_legacy": 0.0}
+    for row in _load_ledger():
+        if row.get("status") not in COUNTED_STATUSES:
             continue
         amt = float(row.get("amount_usdc") or 0.0)
-        if amt > left + 1e-9:
-            break
-        row["status"] = "completed"
-        row["completed_at"] = now
-        left -= amt
-        done += amt
-    if done > 0:
-        _save_ledger(rows)
-    return round(done, 6)
+        if row.get("dest") != "base_usdc":
+            out["servicer"] += amt
+        elif row.get("dest_balance_before") is not None:
+            out["base_usdc_tracked"] += amt
+        else:
+            out["base_usdc_legacy"] += amt
+    return {k: round(v, 6) for k, v in out.items()}
+
+
+def _complete_base_withdrawals_upto(amount_usdc: float) -> float:
+    """Legacy rows only (no balance snapshot): mark pending dest=base_usdc recalls completed
+    (oldest first) up to amount_usdc. Snapshot rows are settled by mark_withdrawals_arrived."""
+    now = int(time.time())
+
+    def fn(rows):
+        left = float(amount_usdc)
+        done = 0.0
+        for row in sorted(rows, key=lambda r: int(r.get("created_at") or 0)):
+            if row.get("status") != "pending" or row.get("dest") != "base_usdc" \
+                    or row.get("dest_balance_before") is not None:
+                continue
+            amt = float(row.get("amount_usdc") or 0.0)
+            if amt > left + 1e-9:
+                break
+            row["status"] = "completed"
+            row["completed_at"] = now
+            left -= amt
+            done += amt
+        return done
+
+    return round(_L.update_rows(WITHDRAWAL_LEDGER_PATH, fn), 6)
 
 
 # ---------------------------------------------------------------------------
-# Bridge in-transit ledger (robinhood mode)
+# Bridge / venue-deposit in-transit ledgers (robinhood mode)
 # ---------------------------------------------------------------------------
+# Row lifecycle: written only after the value-moving tx's receipt is status 1 (receipt="success")
+# or the receipt wait timed out (receipt="unconfirmed", still counted, flagged). Reverted txs are
+# never recorded. status: pending → completed | refunded | reverted, or → stale (still counted).
+
+_DIRECTION_ORIGIN = {
+    "rh_to_base": "rh", "rh_to_polymarket": "rh", "base_to_rh": "base",
+}
+
+
+def _chain_token_for(side: str) -> tuple[int, str]:
+    return (robinhood_chain_id(), usdg_address()) if side == "rh" else (BASE_CHAIN_ID, usdc_base_address())
+
 
 def record_bridge_transfer(
     direction: str,
@@ -242,110 +355,343 @@ def record_bridge_transfer(
     amount_usdc: float,
     origin_chain_id: int,
     eta_seconds: int | None = None,
+    *,
+    tx_hash: str | None = None,
+    receipt: str | None = None,
+    dest_balance_before: float | None = None,
+    expected_out_usdc: float | None = None,
+    idem_key: str | None = None,
 ) -> None:
     """Record money that has left a servicer balance and not yet landed anywhere we read.
 
     direction: "rh_to_base" | "base_to_rh" | "rh_to_polymarket"
     provider:  "across" | "relay" | "polymarket_bridge"
     amount_usdc: amount that LEFT the origin balance (fees show up as a loss on arrival).
+    Idempotent on idem_key (reconciliation may try to ledger the same intent twice).
     """
-    rows = _load_ledger(BRIDGE_LEDGER_PATH)
-    now = int(time.time())
-    rows.append({
+    now = time.time()
+    row = {
         "direction": direction,
         "provider": provider,
         "reference": str(reference),
         "amount_usdc": round(float(amount_usdc), 6),
         "origin_chain_id": int(origin_chain_id),
         "status": "pending",
-        "created_at": now,
-        "eta_at": now + int(eta_seconds if eta_seconds is not None else BRIDGE_DEFAULT_ETA_SECS),
+        "created_at": int(now),
+        "eta_at": int(now) + int(eta_seconds if eta_seconds is not None else BRIDGE_DEFAULT_ETA_SECS),
         "completed_at": None,
-    })
-    _save_ledger(rows, BRIDGE_LEDGER_PATH)
-    log(f"📝 Bridge in-transit: {direction} via {provider} {amount_usdc:.4f} ref={reference}")
+    }
+    for k, v in (("tx_hash", tx_hash), ("receipt", receipt), ("expected_out_usdc", expected_out_usdc),
+                 ("idem_key", idem_key)):
+        if v is not None:
+            row[k] = v
+    if dest_balance_before is not None:
+        row["dest_balance_before"] = round(float(dest_balance_before), 6)
+        row["snapshot_ts"] = now
+
+    def fn(rows):
+        if idem_key and any(r.get("idem_key") == idem_key for r in rows):
+            return False
+        rows.append(row)
+        return True
+
+    if _L.update_rows(BRIDGE_LEDGER_PATH, fn):
+        flag = " [RECEIPT UNCONFIRMED]" if receipt == "unconfirmed" else ""
+        log(f"📝 Bridge in-transit: {direction} via {provider} {amount_usdc:.4f} ref={reference}{flag}")
 
 
 def mark_bridge_arrived(reference: str, status: str = "completed") -> None:
-    rows = _load_ledger(BRIDGE_LEDGER_PATH)
-    changed = False
-    for row in rows:
-        if row.get("reference") == str(reference) and row.get("status") == "pending":
-            row["status"] = status
-            row["completed_at"] = int(time.time())
-            changed = True
-    if changed:
-        _save_ledger(rows, BRIDGE_LEDGER_PATH)
+    now = int(time.time())
+    hit: list = []
+
+    def fn(rows):
+        for row in rows:
+            if row.get("reference") == str(reference) and row.get("status") in COUNTED_STATUSES:
+                row["status"] = status
+                row["completed_at"] = now
+                hit.append(dict(row))
+    _L.update_rows(BRIDGE_LEDGER_PATH, fn)
+    for row in hit:
         log(f"✅ Bridge {reference} → {status}")
+        _journal_bridge_settlement(row, status)
+
+
+def _journal_bridge_settlement(row: dict, status: str) -> None:
+    """Known servicer inflow when a bridge lands (dest side) or is refunded/reverted (origin side)."""
+    try:
+        direction = row.get("direction")
+        origin = _DIRECTION_ORIGIN.get(direction)
+        if origin is None:
+            return
+        amt = float(row.get("amount_usdc") or 0.0)
+        if status == "completed":
+            if direction == "rh_to_polymarket":
+                return   # lands on Polymarket, not in a servicer balance
+            dest = "base" if origin == "rh" else "rh"
+            chain, token = _chain_token_for(dest)
+            _L.record_cashflow(chain, token, float(row.get("expected_out_usdc") or amt), "bridge_arrived",
+                               row.get("reference"))
+        elif status in ("refunded", "reverted"):
+            chain, token = _chain_token_for(origin)
+            _L.record_cashflow(chain, token, amt, f"bridge_{status}", row.get("reference"))
+    except Exception as e:
+        log(f"⚠️ Could not journal bridge settlement: {e}")
+
+
+def record_venue_deposit(
+    venue: str,
+    reference: str,
+    amount_usdc: float,
+    chain_id: int,
+    *,
+    dest_balance_before: float | None = None,
+    receipt: str | None = None,
+    tx_hash: str | None = None,
+    idem_key: str | None = None,
+    eta_seconds: int | None = None,
+) -> None:
+    """Direct venue deposit (e.g. Base USDC → Kalshi) in transit until the venue balance moves."""
+    now = time.time()
+    row = {
+        "venue": venue, "reference": str(reference), "amount_usdc": round(float(amount_usdc), 6),
+        "chain_id": int(chain_id), "status": "pending", "created_at": int(now),
+        "eta_at": int(now) + int(eta_seconds if eta_seconds is not None else BRIDGE_DEFAULT_ETA_SECS),
+        "completed_at": None, "receipt": receipt, "tx_hash": tx_hash, "idem_key": idem_key,
+    }
+    if dest_balance_before is not None:
+        row["dest_balance_before"] = round(float(dest_balance_before), 6)
+        row["snapshot_ts"] = now
+
+    def fn(rows):
+        if idem_key and any(r.get("idem_key") == idem_key for r in rows):
+            return False
+        rows.append(row)
+        return True
+
+    if _L.update_rows(_L.venue_deposit_path(), fn):
+        log(f"📝 Venue deposit in-transit: {venue} {amount_usdc:.4f} ref={reference}"
+            + (" [RECEIPT UNCONFIRMED]" if receipt == "unconfirmed" else ""))
+
+
+def mark_venue_deposit_arrived(reference: str, status: str = "completed") -> None:
+    now = int(time.time())
+
+    def fn(rows):
+        for row in rows:
+            if row.get("reference") == str(reference) and row.get("status") in COUNTED_STATUSES:
+                row["status"] = status
+                row["completed_at"] = now
+    _L.update_rows(_L.venue_deposit_path(), fn)
+
+
+def inflight_rows_for(direction: str | None = None, venue: str | None = None) -> list:
+    """Counted in-transit rows for a bridge direction or a venue (used to refuse duplicate sends)."""
+    if venue is not None:
+        return [r for r in _L.read_rows(_L.venue_deposit_path())
+                if r.get("venue") == venue and r.get("status") in COUNTED_STATUSES]
+    return [r for r in _load_ledger(BRIDGE_LEDGER_PATH)
+            if r.get("direction") == direction and r.get("status") in COUNTED_STATUSES]
 
 
 def _bridge_status(row: dict) -> str:
     """Return "filled" | "refunded" | "pending" from the provider's status API."""
     provider = row.get("provider")
     if provider == "across":
-        resp = requests.get(f"{across_api_url()}/deposit/status", params={
+        data = request_json("GET", f"{across_api_url()}/deposit/status", params={
             "originChainId": row.get("origin_chain_id"),
-            "depositTxHash": row.get("reference"),
+            "depositTxHash": row.get("tx_hash") or row.get("reference"),
         }, timeout=10)
-        resp.raise_for_status()
-        st = str(resp.json().get("status", "")).lower()
+        st = str(data.get("status", "")).lower()
         return "filled" if st == "filled" else "refunded" if st in ("refunded", "expired") else "pending"
     if provider == "relay":
-        resp = requests.get(f"{relay_api_url()}/intents/status/v2",
+        data = request_json("GET", f"{relay_api_url()}/intents/status/v2",
                             params={"requestId": row.get("reference")}, timeout=10)
-        resp.raise_for_status()
-        st = str(resp.json().get("status", "")).lower()
+        st = str(data.get("status", "")).lower()
         return "filled" if st == "success" else "refunded" if st in ("refund", "failure") else "pending"
-    # No status API (Polymarket deposit address): assume landed after its ETA.
+    # No status API and no balance snapshot. Robinhood mode: never assumed landed (ETA is only an
+    # alert; the row stays counted until a balance delta or an operator resolves it).
+    if is_robinhood_funding():
+        return "pending"
     return "filled" if int(time.time()) >= int(row.get("eta_at") or 0) else "pending"
 
 
+def _receipt_of(row: dict, chain_key: str) -> str | None:
+    """"success" | "failed" | None for a row's tx hash (None = unknown / no receipt yet)."""
+    tx_hash = row.get("tx_hash")
+    if not tx_hash:
+        return None
+    try:
+        from .arb_funder import _rpc, rpc_for_chain
+        rec = _rpc("eth_getTransactionReceipt", [tx_hash], rpc_for_chain(int(row.get(chain_key))))
+    except Exception as e:
+        log(f"⚠️ Receipt check failed for {tx_hash}: {e}")
+        return None
+    if not rec:
+        return None
+    return "success" if int(str(rec.get("status", "0x0")), 16) == 1 else "failed"
+
+
+def _age_alerts(row: dict, label: str) -> bool:
+    """Overdue / stale alerts. Returns True when the row was moved to "stale" (still counted)."""
+    now = int(time.time())
+    if row.get("status") == "pending" and now > int(row.get("created_at") or 0) + inflight_stale_secs():
+        row["status"] = "stale"
+        row["stale_at"] = now
+        log(f"🚨 STALE {label} {row.get('amount_usdc')} ref={row.get('reference')} — still counted, manual review needed")
+        return True
+    if now > int(row.get("eta_at") or 0):
+        log(f"⏰ {label} ref={row.get('reference')} overdue (ETA passed) — still counted")
+    return False
+
+
 def reconcile_bridge_transfers() -> None:
-    """Clear pending bridge rows that the provider reports as filled (or refunded to origin)."""
-    for row in _load_ledger(BRIDGE_LEDGER_PATH):
-        if row.get("status") != "pending":
+    """Clear in-transit rows that have provably landed; never drop value silently.
+
+    * receipt-unconfirmed rows: re-check the receipt (a reverted tx is marked "reverted");
+    * Across / Relay: provider status API (filled / refunded);
+    * Polymarket deposit rows with a balance snapshot: Polymarket balance delta;
+    * legacy rows with no API and no snapshot: ETA (unchanged);
+    * anything older than ARB_INFLIGHT_STALE_SECS becomes "stale" (still counted, alerted).
+    Venue deposits (Base USDC → Kalshi) are reconciled the same way against the Kalshi balance.
+    """
+    venue_bal: dict = {}
+
+    def platform_balance(venue: str):
+        if venue not in venue_bal:
+            try:
+                from .arb_funder import _get_platform_balance
+                venue_bal[venue] = _get_platform_balance(venue, raise_on_error=True)
+            except Exception as e:
+                log(f"⚠️ {venue} balance unreadable — deposits kept in transit: {e}")
+                venue_bal[venue] = None
+        return venue_bal[venue]
+
+    consumed: dict = {}
+    for row in sorted(_load_ledger(BRIDGE_LEDGER_PATH), key=lambda r: int(r.get("created_at") or 0)):
+        if row.get("status") not in COUNTED_STATUSES:
             continue
+        ref = row.get("reference")
+        if row.get("receipt") == "unconfirmed":
+            rs = _receipt_of(row, "origin_chain_id")
+            if rs == "failed":
+                mark_bridge_arrived(ref, status="reverted")
+                continue
+            if rs == "success":
+                _set_row_fields(BRIDGE_LEDGER_PATH, ref, receipt="success")
         try:
-            st = _bridge_status(row)
+            if row.get("provider") in ("across", "relay"):
+                st = _bridge_status(row)
+            elif row.get("dest_balance_before") is not None:
+                bal = platform_balance("polymarket")
+                st = "pending"
+                if bal is not None:
+                    amt = float(row.get("amount_usdc") or 0)
+                    ok, _ = _arrived(bal, float(row["dest_balance_before"]), amt, 0.0,
+                                     consumed.get("polymarket", 0.0))
+                    if ok:
+                        consumed["polymarket"] = consumed.get("polymarket", 0.0) + amt
+                        st = "filled"
+            else:
+                st = _bridge_status(row)
         except Exception as e:
-            log(f"⚠️ Bridge status check failed for {row.get('reference')}: {e} (kept in-transit)")
-            continue
+            log(f"⚠️ Bridge status check failed for {ref}: {e} (kept in-transit)")
+            st = "pending"
         if st == "filled":
-            mark_bridge_arrived(row["reference"])
+            mark_bridge_arrived(ref)
         elif st == "refunded":
-            mark_bridge_arrived(row["reference"], status="refunded")
-        elif int(time.time()) > int(row.get("created_at") or 0) + 86400:
-            log(f"🚨 Bridge {row.get('reference')} pending > 24h — manual review needed (still counted)")
+            mark_bridge_arrived(ref, status="refunded")
+        else:
+            _alert_and_maybe_stale(BRIDGE_LEDGER_PATH, ref, "bridge")
+
+    consumed = {}
+    for row in sorted(_L.read_rows(_L.venue_deposit_path()), key=lambda r: int(r.get("created_at") or 0)):
+        if row.get("status") not in COUNTED_STATUSES:
+            continue
+        ref = row.get("reference")
+        if row.get("receipt") == "unconfirmed":
+            rs = _receipt_of(row, "chain_id")
+            if rs == "failed":
+                mark_venue_deposit_arrived(ref, status="reverted")
+                chain, token = BASE_CHAIN_ID, usdc_base_address()
+                _L.record_cashflow(chain, token, float(row.get("amount_usdc") or 0), "deposit_reverted", ref)
+                continue
+            if rs == "success":
+                _set_row_fields(_L.venue_deposit_path(), ref, receipt="success")
+        venue = row.get("venue")
+        bal = platform_balance(venue) if row.get("dest_balance_before") is not None else None
+        if bal is not None:
+            amt = float(row.get("amount_usdc") or 0)
+            ok, _ = _arrived(bal, float(row["dest_balance_before"]), amt, 0.0, consumed.get(venue, 0.0))
+            if ok:
+                consumed[venue] = consumed.get(venue, 0.0) + amt
+                mark_venue_deposit_arrived(ref)
+                continue
+        _alert_and_maybe_stale(_L.venue_deposit_path(), ref, f"{venue} deposit")
+
+
+def _set_row_fields(path: str, reference: str, **fields) -> None:
+    def fn(rows):
+        for r in rows:
+            if r.get("reference") == reference and r.get("status") in COUNTED_STATUSES:
+                r.update(fields)
+    _L.update_rows(path, fn)
+
+
+def _alert_and_maybe_stale(path: str, reference: str, label: str) -> None:
+    def fn(rows):
+        for r in rows:
+            if r.get("reference") == reference and r.get("status") in COUNTED_STATUSES:
+                _age_alerts(r, label)
+    _L.update_rows(path, fn)
 
 
 def get_inflight_bridge_usdc() -> float:
-    total = 0.0
+    """All value in transit between servicer balances and venues: bridge rows + direct venue
+    deposits, pending or stale (stale is alerted, never dropped). Also counts write-ahead intents
+    whose value tx was broadcast but whose in-transit row was not written yet (crash window)."""
+    return round(sum(get_inflight_breakdown().values()), 6)
+
+
+def get_inflight_breakdown() -> dict:
+    out = {"bridges": 0.0, "venue_deposits": 0.0, "unledgered_intents": 0.0}
     for row in _load_ledger(BRIDGE_LEDGER_PATH):
-        if row.get("status") == "pending":
-            total += float(row.get("amount_usdc") or 0.0)
-    return round(total, 6)
+        if row.get("status") in COUNTED_STATUSES:
+            out["bridges"] += float(row.get("amount_usdc") or 0.0)
+    for row in _L.read_rows(_L.venue_deposit_path()):
+        if row.get("status") in COUNTED_STATUSES:
+            out["venue_deposits"] += float(row.get("amount_usdc") or 0.0)
+    for row in _L.read_rows(_L.intents_path()):
+        if row.get("status") in _L.INTENT_MONEY_LEFT and not row.get("ledgered"):
+            out["unledgered_intents"] += float(row.get("amount_usdc") or 0.0)
+    return {k: round(v, 6) for k, v in out.items()}
 
 
 def sweep_base_usdc_to_robinhood(servicer_wallet: str, private_key: str) -> float:
     """Robinhood mode: bridge servicer USDC on Base (Kalshi withdrawals, stranded bridge output)
     back to USDG on 4663. Skipped while a 4663→Base bridge is in flight (that USDC is about to be
-    forwarded to Kalshi). Returns the USDC amount bridged."""
+    forwarded to Kalshi) or while a previous sweep's outcome is unknown. Returns the USDC amount bridged."""
     if not is_robinhood_funding() or not servicer_wallet or not private_key:
         return 0.0
-    if any(r.get("status") == "pending" and r.get("direction") == "rh_to_base"
-           for r in _load_ledger(BRIDGE_LEDGER_PATH)):
+    if inflight_rows_for(direction="rh_to_base"):
         log("ℹ️ 4663→Base bridge in flight — Base USDC sweep skipped")
         return 0.0
-    from .arb_funder import _get_usdc_balance, _bridge_base_usdc_to_usdg, _NonceTracker
+    if _L.unresolved_intents(kinds=("base_to_rh", "rh_to_base")):
+        log("🚨 Unresolved bridge intent — Base USDC sweep skipped until reconciliation resolves it")
+        return 0.0
+    from .arb_funder import _get_usdc_balance, _bridge_base_usdc_to_usdg, _NonceTracker, get_servicer_cash_usdc
     base_usdc = _get_usdc_balance(servicer_wallet)
+    # Settle delta-tracked Kalshi recalls that already landed on Base before moving that USDC on.
+    try:
+        mark_withdrawals_arrived(get_servicer_cash_usdc(servicer_wallet), base_usdc)
+    except Exception as e:
+        log(f"⚠️ Recall arrival check before sweep failed: {e}")
     if base_usdc < rh_sweep_min_usdc():
         return 0.0
     amount = round(base_usdc, 6)
-    res = _bridge_base_usdc_to_usdg(private_key, servicer_wallet, amount, _NonceTracker(servicer_wallet))
-    # This USDC is now leaving Base: any Kalshi recall that landed there is no longer
-    # "pending withdrawal" but "bridge in-transit" (counted once, by the bridge row).
+    # The bridge op writes the base_to_rh in-transit row itself (after a status-1 receipt).
+    _bridge_base_usdc_to_usdg(private_key, servicer_wallet, amount, _NonceTracker(servicer_wallet))
+    # Legacy (snapshot-less) Kalshi recalls that landed on Base are now "bridge in-transit".
     _complete_base_withdrawals_upto(amount)
-    record_bridge_transfer("base_to_rh", res["provider"], res["reference"], amount, BASE_CHAIN_ID)
     return amount
 
 
@@ -442,75 +788,80 @@ def _relay_bridge_polygon_to_base(
     private_key: str,
     dest_address: str,
 ) -> tuple[bool, str]:
+    """USDC.e on Polygon → USDC on Base via Relay (EXACT_INPUT).
+
+    Same fail-closed checks as the Robinhood bridge path (arb_allowlist): allowlisted (chain, token),
+    approvals exact (<= input) to an allowlisted spender, deposit `to` allowlisted, no native value,
+    recipient/destination must match when the quote states them, fee <= ARB_BRIDGE_MAX_FEE_BPS.
+    Every quoted tx is sent in nonce order and its receipt checked (the old code returned after the
+    first item, i.e. after the approval). Quote is fetched with timeout + bounded retries.
+    """
+    from . import arb_allowlist as AL
     try:
         from eth_account import Account
 
         account = Account.from_key(private_key)
-        amount_raw = int(amount_usdc * 1_000_000)
-
-        usdc_polygon = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+        amount_raw = int(round(amount_usdc * 1_000_000))
+        usdc_polygon = usdc_polygon_address()
         polygon_chain_id = 137
-
-        log(f"🌉 Getting Relay quote: {amount_usdc:.4f} USDC Polygon → Base → {dest_address}")
-
-        quote_resp = requests.post(
-            f"{RELAY_API_URL}/quote",
-            json={
-                "user": account.address,
-                "originChainId": polygon_chain_id,
-                "destinationChainId": BASE_CHAIN_ID,
-                "originCurrency": usdc_polygon,
-                "destinationCurrency": USDC_BASE,
-                "amount": str(amount_raw),
-                "recipient": dest_address,
-                "tradeType": "EXACT_INPUT",
-            },
-            timeout=20,
-        )
-        quote_resp.raise_for_status()
-        quote = quote_resp.json()
-
-        steps = quote.get("steps", [])
-        if not steps:
-            return False, f"Relay quote returned no steps: {list(quote.keys())}"
-
         polygon_rpc = os.environ.get("POLYGON_RPC_URL", "https://polygon-rpc.com")
 
-        for step in steps:
+        log(f"🌉 Getting Relay quote: {amount_usdc:.4f} USDC Polygon → Base → {dest_address}")
+        quote = request_json("POST", f"{relay_api_url()}/quote", json_body={
+            "user": account.address,
+            "originChainId": polygon_chain_id,
+            "destinationChainId": BASE_CHAIN_ID,
+            "originCurrency": usdc_polygon,
+            "destinationCurrency": usdc_base_address(),
+            "amount": str(amount_raw),
+            "recipient": dest_address,
+            "tradeType": "EXACT_INPUT",
+        }, timeout=20)
+
+        from .arb_funder import _relay_route_fields, _to_int
+        txs = []
+        for step in quote.get("steps", []):
             for item in step.get("items", []):
-                tx_data = item.get("data", {})
-                if not tx_data:
-                    continue
+                data = item.get("data") or {}
+                if data.get("to"):
+                    txs.append(data)
+        if not txs:
+            return False, f"Relay quote returned no executable steps: {list(quote.keys())}"
+        cur_out = (quote.get("details") or {}).get("currencyOut") or {}
+        out_raw = _to_int(cur_out.get("minimumAmount") or cur_out.get("amount"))
+        max_fee = bridge_max_fee_bps()
+        if out_raw <= 0 or out_raw * 10_000 < amount_raw * (10_000 - max_fee):
+            return False, f"Relay quote fee unverifiable or above {max_fee} bps (in={amount_raw} out={out_raw})"
+        AL.validate_bridge_txs(txs, polygon_chain_id, usdc_polygon, amount_raw)
+        AL.validate_route(_relay_route_fields(quote), recipient=dest_address,
+                          origin_chain=polygon_chain_id, origin_token=usdc_polygon,
+                          dest_chain=BASE_CHAIN_ID, dest_token=usdc_base_address())
 
-                nonce_raw = _rpc_call(polygon_rpc, "eth_getTransactionCount", [account.address, "pending"])
-                nonce = int(nonce_raw, 16)
-
-                gas_price_raw = _rpc_call(polygon_rpc, "eth_gasPrice", [])
-                gas_price = int(int(gas_price_raw, 16) * 1.3)
-
-                tx = {
-                    "to": tx_data.get("to", ""),
-                    "data": tx_data.get("data", "0x"),
-                    "value": int(tx_data.get("value", "0x0"), 16),
-                    "gas": int(tx_data.get("gas", "0x30d40"), 16),
-                    "gasPrice": gas_price,
-                    "nonce": nonce,
-                    "chainId": polygon_chain_id,
-                }
-                signed = account.sign_transaction(tx)
-                tx_hash = _rpc_call(
-                    polygon_rpc,
-                    "eth_sendRawTransaction",
-                    ["0x" + signed.raw_transaction.hex()],
-                )
-                log(f"✅ Relay bridge tx submitted: {tx_hash}")
-                return True, tx_hash
-
-        return False, "No executable tx found in Relay quote steps"
+        nonce = int(_rpc_call(polygon_rpc, "eth_getTransactionCount", [account.address, "pending"]), 16)
+        gas_price = int(int(_rpc_call(polygon_rpc, "eth_gasPrice", []), 16) * 1.3)
+        tx_hash = None
+        for i, tx_data in enumerate(txs):
+            tx = {
+                "to": tx_data["to"],
+                "data": tx_data.get("data", "0x"),
+                "value": 0,
+                "gas": _to_int(tx_data.get("gas"), 200_000),
+                "gasPrice": gas_price,
+                "nonce": nonce + i,
+                "chainId": polygon_chain_id,
+            }
+            signed = account.sign_transaction(tx)
+            raw = signed.raw_transaction if hasattr(signed, "raw_transaction") else signed.rawTransaction
+            tx_hash = _rpc_call(polygon_rpc, "eth_sendRawTransaction", ["0x" + raw.hex()])
+            from .arb_funder import _wait_for_receipt
+            st = _wait_for_receipt(tx_hash, polygon_rpc)
+            if st == "failed":
+                return False, f"Relay tx {i} reverted: {tx_hash}"
+            log(f"✅ Relay bridge tx {i + 1}/{len(txs)} submitted: {tx_hash} (receipt={st})")
+        return True, tx_hash
 
     except Exception as e:
         return False, str(e)
-
 
 
 def get_pending_withdrawals_total_usdc() -> float:
@@ -525,6 +876,9 @@ def get_pending_withdrawals_total_usdc() -> float:
     total = 0.0
 
     for row in rows:
+        if row.get("status") == "stale":
+            total += float(row.get("amount_usdc") or 0.0)   # stale = still owed, never dropped
+            continue
         if row.get("status") != "pending":
             continue
 
@@ -697,7 +1051,12 @@ def withdraw_from_kalshi(
             "address": dest_address,
         }
 
-        resp = requests.post(url, headers=headers, json=payload, timeout=15)
+        try:
+            # Not retried: a withdrawal POST is not idempotent.
+            resp = requests.post(url, headers=headers, json=payload, timeout=15)
+        except Exception as post_err:
+            log(f"❌ Kalshi withdrawal POST outcome unknown: {post_err}")
+            return False, f"ambiguous: Kalshi withdrawal POST outcome unknown: {post_err}", 0.0
 
         if resp.status_code not in (200, 201):
             return False, f"Kalshi /withdrawals HTTP {resp.status_code}: {resp.text[:200]}", 0.0
@@ -929,6 +1288,93 @@ def withdraw_from_opinion(
         return False, str(e), 0.0
 
 
+def _try(fn, label: str):
+    try:
+        return fn()
+    except Exception as e:
+        log(f"⚠️ {label} unreadable: {e}")
+        return None
+
+
+def _rh_recall_polymarket(target: float, servicer_wallet: str) -> float:
+    """Robinhood-mode Polymarket recall with a write-ahead ledger row.
+
+    The row is written BEFORE the Safe/Relay script runs (so a crash mid-script still leaves the
+    recall counted) with a snapshot of servicer USDG on 4663; it is settled by USDG balance delta
+    (immediately if the script's fill is already visible). The amount recorded is what actually
+    moved: if USDG rose by more than requested (safe_proxy_withdraw_parb.ts bridges the whole EOA
+    balance), the larger measured amount is recorded. Returns the amount initiated.
+    """
+    from .arb_funder import get_servicer_cash_usdc, _get_usdc_balance
+    usdg_before = _try(lambda: get_servicer_cash_usdc(servicer_wallet), "servicer USDG")
+    if usdg_before is None:
+        log("⚠️ Polymarket recall skipped: cannot snapshot servicer USDG (retry next tick)")
+        return 0.0
+    base_now = _try(lambda: _get_usdc_balance(servicer_wallet), "servicer Base USDC")
+    _try(lambda: mark_withdrawals_arrived(usdg_before, base_now), "earlier recall arrivals")
+    poly_before = _try(_poly_get_balance, "Polymarket balance")
+
+    key = _L.new_key("recall_polymarket")
+    record_withdrawal_intent("polymarket", target, key, POLY_ESTIMATED_SETTLEMENT_SECS,
+                             dest="rh_usdg", dest_balance_before=usdg_before, idem_key=key)
+    ok, ref, amount = withdraw_from_polymarket(target)
+    if ok:
+        after = _try(lambda: get_servicer_cash_usdc(servicer_wallet), "servicer USDG after recall")
+        sent = float(amount)
+        if after is not None and (after - usdg_before) > sent * 1.001 + 0.01:
+            log(f"⚠️ Recall moved {after - usdg_before:.4f} USDG, more than the {sent:.4f} requested — recording actual")
+            sent = after - usdg_before
+        update_withdrawal(key, reference=str(ref), amount_usdc=round(sent, 6), requested_usdc=round(target, 6))
+        if after is not None:
+            _try(lambda: mark_withdrawals_arrived(after, base_now), "recall arrival")
+        log(f"✅ Polymarket withdrawal initiated: {sent:.4f} USDC (tx={ref})")
+        return round(sent, 6)
+
+    poly_after = _try(_poly_get_balance, "Polymarket balance after failed recall")
+    if poly_before is not None and poly_after is not None \
+            and poly_before - poly_after >= target * 0.99 - 0.01:
+        # Money left Polymarket but the script did not confirm the bridge: keep it counted.
+        update_withdrawal(key, recall_error=str(ref)[:300], receipt="unconfirmed")
+        log(f"🚨 Polymarket recall reported failure but {poly_before - poly_after:.4f} left Polymarket — "
+            f"kept in transit (ref={key}), manual review needed")
+        return 0.0
+    mark_withdrawal_failed(key)
+    log(f"⚠️ Polymarket withdrawal failed (nothing left Polymarket): {ref}")
+    return 0.0
+
+
+def _rh_recall_kalshi(target: float, servicer_wallet: str) -> float:
+    """Robinhood-mode Kalshi recall: write-ahead row with a Base USDC snapshot, keyed on the
+    Kalshi withdrawal id once known, settled by Base USDC balance delta."""
+    from .arb_funder import get_servicer_cash_usdc, _get_usdc_balance
+    base_before = _try(lambda: _get_usdc_balance(servicer_wallet), "servicer Base USDC")
+    if base_before is None:
+        log("⚠️ Kalshi recall skipped: cannot snapshot servicer Base USDC (retry next tick)")
+        return 0.0
+    usdg_now = _try(lambda: get_servicer_cash_usdc(servicer_wallet), "servicer USDG")
+    if usdg_now is not None:
+        _try(lambda: mark_withdrawals_arrived(usdg_now, base_before), "earlier recall arrivals")
+    kalshi_before = _try(_kalshi_get_balance, "Kalshi balance")
+
+    key = _L.new_key("recall_kalshi")
+    record_withdrawal_intent("kalshi", target, key, KALSHI_ESTIMATED_SETTLEMENT_SECS,
+                             dest="base_usdc", dest_balance_before=base_before, idem_key=key)
+    ok, ref, amount = withdraw_from_kalshi(target, servicer_wallet)
+    if ok:
+        update_withdrawal(key, reference=str(ref), kalshi_withdrawal_id=str(ref), amount_usdc=round(float(amount), 6))
+        log(f"✅ Kalshi withdrawal initiated: {amount:.4f} USDC (id={ref})")
+        return round(float(amount), 6)
+    if str(ref).startswith("ambiguous"):
+        kalshi_after = _try(_kalshi_get_balance, "Kalshi balance after ambiguous withdrawal")
+        if kalshi_before is None or kalshi_after is None or kalshi_before - kalshi_after >= target * 0.99 - 0.01:
+            update_withdrawal(key, recall_error=str(ref)[:300], receipt="unconfirmed")
+            log(f"🚨 Kalshi withdrawal outcome unknown — kept in transit (ref={key}), manual review needed")
+            return 0.0
+    mark_withdrawal_failed(key)
+    log(f"⚠️ Kalshi withdrawal failed: {ref}")
+    return 0.0
+
+
 def withdraw_from_platforms(
     shortfall_usdc: float,
     poly_cash: float,
@@ -948,41 +1394,48 @@ def withdraw_from_platforms(
     )
 
     rh_mode = is_robinhood_funding()
-    if not opinion_enabled() and opinion_cash:
-        log(f"ℹ️ Opinion disabled (ARB_OPINION_ENABLED=false) — ignoring opinion_cash={opinion_cash:.4f}")
+    if (rh_mode or not opinion_enabled()) and opinion_cash:
+        # MILORD V1: Opinion is fully disabled in robinhood mode regardless of ARB_OPINION_ENABLED.
+        log(f"ℹ️ Opinion disabled — ignoring opinion_cash={opinion_cash:.4f}")
         opinion_cash = 0.0
 
     if remaining > 0 and poly_cash > 1.0:
         target = min(poly_cash * 0.9, remaining)
         log(f"📤 Polymarket withdrawal target: {target:.4f} USDC")
-        ok, ref, amount = withdraw_from_polymarket(target)
-        if ok:
-            # Robinhood mode: the script only reports success once the Relay fill landed as
-            # USDG on 4663, so a short ETA is enough before arrival is checked against USDG.
-            record_withdrawal_intent("polymarket", amount, ref, 60 if rh_mode else 600,
-                                     dest="rh_usdg" if rh_mode else None)
-            log(f"✅ Polymarket withdrawal initiated: {amount:.4f} USDC (tx={ref})")
+        if rh_mode:
+            amount = _rh_recall_polymarket(target, servicer_wallet)
             total_initiated += amount
             remaining -= amount
         else:
-            mark_withdrawal_failed(ref)
-            log(f"⚠️ Polymarket withdrawal failed: {ref}")
+            ok, ref, amount = withdraw_from_polymarket(target)
+            if ok:
+                record_withdrawal_intent("polymarket", amount, ref, 600)
+                log(f"✅ Polymarket withdrawal initiated: {amount:.4f} USDC (tx={ref})")
+                total_initiated += amount
+                remaining -= amount
+            else:
+                mark_withdrawal_failed(ref)
+                log(f"⚠️ Polymarket withdrawal failed: {ref}")
 
     if remaining > 0 and kalshi_cash > 1.0:
         target = min(kalshi_cash * 0.9, remaining)
         log(f"📤 Kalshi withdrawal target: {target:.4f} USDC")
-        # Robinhood mode: Kalshi still pays USDC on Base to the servicer EOA; run_tend_tick's
-        # sweep_base_usdc_to_robinhood() then bridges it to USDG on 4663.
-        ok, ref, amount = withdraw_from_kalshi(target, servicer_wallet)
-        if ok:
-            record_withdrawal_intent("kalshi", amount, ref, KALSHI_ESTIMATED_SETTLEMENT_SECS,
-                                     dest="base_usdc" if rh_mode else None)
-            log(f"✅ Kalshi withdrawal initiated: {amount:.4f} USDC (id={ref})")
+        if rh_mode:
+            # Kalshi still pays USDC on Base to the servicer EOA; run_tend_tick's
+            # sweep_base_usdc_to_robinhood() then bridges it to USDG on 4663.
+            amount = _rh_recall_kalshi(target, servicer_wallet)
             total_initiated += amount
             remaining -= amount
         else:
-            mark_withdrawal_failed(ref)
-            log(f"⚠️ Kalshi withdrawal failed: {ref}")
+            ok, ref, amount = withdraw_from_kalshi(target, servicer_wallet)
+            if ok:
+                record_withdrawal_intent("kalshi", amount, ref, KALSHI_ESTIMATED_SETTLEMENT_SECS)
+                log(f"✅ Kalshi withdrawal initiated: {amount:.4f} USDC (id={ref})")
+                total_initiated += amount
+                remaining -= amount
+            else:
+                mark_withdrawal_failed(ref)
+                log(f"⚠️ Kalshi withdrawal failed: {ref}")
 
     if remaining > 0 and opinion_cash > 1.0:
         target = min(opinion_cash * 0.9, remaining)

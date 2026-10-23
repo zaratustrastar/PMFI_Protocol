@@ -1,8 +1,8 @@
 # Production deployment order, rollback and incident plan
 
 Nothing here has been executed on a public network. Every 💸 step spends funds and every step on 4663 needs
-the owner's explicit approval. Scripts refuse chain 4663 today (`DeployRobinhood.s.sol:26`,
-`HookrPostLaunch.s.sol`). No secrets are stored in the repo; keys are supplied by the signer at run time.
+the owner's explicit approval. Scripts refuse chain 4663 today (`DeployRobinhood.s.sol`, `HookrPostLaunch.s.sol`;
+`DeployAtomicLaunch.s.sol` accepts 4663 only on a local fork with the public Anvil key). No secrets are stored in the repo; keys are supplied by the signer at run time.
 
 ## Phase A: Robinhood Chain testnet (46630) dry run
 
@@ -22,18 +22,18 @@ simulation.
 
 | # | Step | Script / tool | Signer |
 |---|---|---|---|
-| 1 | Deploy MILORD token (6,767,000,000 to the allocation Safe), splitters, NFT, converter, registry, governor, BuybackBurner (adapter unset) | `DeployRobinhood.s.sol` (mainnet guard lifted only for this run) | deployer EOA, no admin rights kept |
-| 2 | Deploy V3 vault (USDG, 0% fee), ShareDistributor, ParbFundingAdapter; restrict depositors to the adapter | same script | deployer |
-| 3 | Verify all sources; record `deployments/robinhood-mainnet.json` | explorer | — |
-| 4 | Safe: `nft.setConverter`, registry 8 placeholders + pArbitrage, operators, quote signer | Safe batch | Team Safe |
-| 5 | 💸 Hookr launch: existing-token launch of MILORD, one ETH pool, tax 1.5/1.5, recipients TradingTaxSplitter, commission 20%, core blocks off, decay per R-01 | Hookr UI/launcher | allocation Safe |
-| 5b | (path B) 💸 Hookr launch with all 6,767,000,000 MILORD, then `transferFamily` + `HookrFamilyLock.lock(familyId, HookrLockFeeCollector, forever)`, **only after the owner's go-ahead to execute the lock** | `offchain/safe-launch-batch.mjs` → Safe Transaction Builder | allocation Safe |
-| 6 | Read back the pool: hook, blocks, tax, recipients, commission, tick, liquidity, lock | script / explorer | — |
-| 7 | Deploy V4SwapAdapter for the Hookr key and `burner.setInitialAdapter` | `HookrPostLaunch.s.sol` + Safe | Team Safe |
-| 8 | Start the quote service on the pool TWAP (first 30 minutes: bounded bootstrap at the highest price since open, see ENTRY_FEE_PRICING.md) | `offchain/quote-server.mjs` | quote signer (KMS) |
-| 9 | 💸 First conversion and first redemption by a team wallet; check escrow, fees, NFT, votes | website | team wallet |
-| 10 | Turn on the website with the official pool link (`?hookr=`) and marketplace link (`?market=`) | frontend | — |
-| 11 | First weekly close (runbook §4) with a second person recomputing the root | ops | Arbitrage Safe, ops |
+| 1 | Deploy `MilordAtomicLaunch` (owner Team Safe, flat launch); record `predictedToken()` | `DeployAtomicLaunch.s.sol` (guard lifted only for this run) | deployer, no rights kept |
+| 2 | Deploy the protocol against the predicted token: splitters, NFT, converter, BuybackBurner, registry, governor, V3 vault (USDG), ShareDistributor, ParbFundingAdapter, swap venue, TWAP reference, ArbitrageFundingRouter (payee of all three splitters) | `DeployRobinhood.s.sol` with `MILORD_PREDICTED_TOKEN` → `deployments/robinhood-4663.json` | deployer |
+| 3 | Verify all sources | explorer | — |
+| 4 | Accept ownerships | `safe-team-setup.json`, `safe-arbitrage-setup.json` | Team Safe, Arbitrage Safe |
+| 5 | 💸 Launch: MILORD created and launched on Hookr in one transaction, every frozen term verified | `safe-1-launch.json` | Team Safe |
+| 6 | Record the launch (read-only) | `offchain/record-launch.mjs` | — |
+| 7 | Accept the family, sweep, `setInitialAdapter` (adapter from `HookrPostLaunch.s.sol`) | `safe-2-accept.json` | Team Safe |
+| 8 | Permanent lock, **only after the owner's go-ahead**, before `principalLockedUntil` | `safe-3-lock-DO-NOT-EXECUTE.json` | Team Safe |
+| 9 | Start services, quote server and engine | OPERATIONS_PLAN.md §5 | hot keys on their hosts |
+| 10 | 💸 First conversion and exit by a team wallet | website | team wallet |
+| 11 | Website on with the official pool and marketplace links | frontend | — |
+| 12 | First automatic weekly cycle watched end to end; second person checks the root | MAINNET_RUNBOOK §3 | ops |
 
 ## Rollback
 

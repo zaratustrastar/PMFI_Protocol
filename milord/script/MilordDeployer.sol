@@ -29,7 +29,8 @@ abstract contract MilordDeployer {
         address servicer; // arbitrage engine wallet that receives tend() capital
         address quoteSigner;
         address reportSigner;
-        address operator; // buyback, funding and root-publishing ops key
+        address operator; // keeper key: buyback operator and funding-adapter operator
+        address publisher; // ShareDistributor root publisher; 0 = operator (local only: production uses its own key)
         address tokenHolder; // receives the 6.767B MILORD (ignored when `token` is set)
         // Atomic launch: MilordAtomicLaunch.predictedToken(). MILORD is created later, inside the Safe's launch
         // transaction, so nothing here may call the token; the constructors below only store its address.
@@ -81,7 +82,7 @@ abstract contract MilordDeployer {
         d.vault = new PMFIArbVaultV3(
             "PMFI Arb (MILORD)", "pARB", c.asset, c.reportSigner, c.teamSafe, c.servicer, c.vaultCap, 0
         );
-        d.distributor = new ShareDistributor(me, IERC20(address(d.vault)), c.operator);
+        d.distributor = new ShareDistributor(me, IERC20(address(d.vault)), c.publisher != address(0) ? c.publisher : c.operator);
         d.adapter = new ParbFundingAdapter(me, IERC20(c.asset), IParbVault(address(d.vault)), address(d.distributor));
         d.adapter.setOperator(c.operator, true);
         d.vault.setDepositorRestricted(true);
