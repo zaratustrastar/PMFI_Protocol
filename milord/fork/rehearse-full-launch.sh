@@ -16,8 +16,7 @@
 # Fails closed: any refused check, failed forge run or recorder result other than "complete" stops it (exit 1).
 # Usage (from milord/): ./fork/rehearse-full-launch.sh
 # Env: FORK_PORT (8550), ROBINHOOD_RPC, FORK_BLOCK, FORK_KEEP=yes (leave the fork running for a service/frontend soak),
-#      FORK_BUILD=ci|local (ci: CI artifacts for HEAD, as
-#      fork/rehearse-atomic-deploy.sh; local: fresh optimized build, workstation only, ~6 GB RAM)
+#      FORK_BUILD=ci|local (ci: CI artifacts for HEAD, downloaded with gh when missing; local: fresh optimized build, workstation only, ~6 GB RAM)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 unset PRIVATE_KEY ETH_PRIVATE_KEY DEPLOYER_PRIVATE_KEY ETH_KEYSTORE ETH_PASSWORD ETH_FROM MNEMONIC 2>/dev/null || true
@@ -69,8 +68,18 @@ if [ "${FORK_BUILD:-ci}" = "local" ]; then
 else
   [ "${FORK_BUILD:-ci}" = ci ] || die 'FORK_BUILD must be ci or local'
   HEAD_SHA=$(git rev-parse --verify HEAD) || die "no Git HEAD"
-  [ "$(cat out/.ci-commit 2>/dev/null)" = "$HEAD_SHA" ] || die 'CI artifact commit mismatch; download artifacts for HEAD (./fork/run-fork-tests.sh does)'
   [ -z "$(git status --porcelain --untracked-files=normal -- .)" ] || die 'dirty milord tree: CI artifacts may be stale'
+  if [ "$(cat out/.ci-commit 2>/dev/null)" != "$HEAD_SHA" ]; then
+    # same download as fork/run-fork-tests.sh: only a successful milord-ci run for exactly this commit
+    command -v gh >/dev/null || die "no CI artifacts for $HEAD_SHA in out/ and gh is not installed"
+    RUN=$(gh run list -R zaratustrastar/PMFI_Protocol --workflow milord-ci --commit "$HEAD_SHA" --status success --json databaseId --jq '.[0].databaseId')
+    [ -n "$RUN" ] || die "no successful milord-ci run for $HEAD_SHA yet (wait for CI)"
+    say "downloading CI production artifacts (run $RUN) for $HEAD_SHA"
+    rm -rf out cache
+    gh run download "$RUN" -R zaratustrastar/PMFI_Protocol -n milord-production-out -D . || die "artifact download failed"
+    echo "$HEAD_SHA" > out/.ci-commit
+  fi
+  [ "$(cat out/.ci-commit 2>/dev/null)" = "$HEAD_SHA" ] || die 'CI artifact commit mismatch'
   [ -f cache/solidity-files-cache.json ] || die "no production artifacts in out/"
   export FOUNDRY_SOLC="$PWD/sim/no-compile-solc.sh" FOUNDRY_OFFLINE=true
   unset FOUNDRY_PROFILE
