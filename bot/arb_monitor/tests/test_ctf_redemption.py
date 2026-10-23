@@ -35,6 +35,11 @@ class Recovery(unittest.TestCase):
         self.fail_submit=True
         with self.assertRaises(TimeoutError):self.tick()
         self.assertEqual(self.tick(),'unknown_submission');self.assertEqual(self.calls.count('submit'),1)
+    def test_second_pair_waits_for_first_cash_reconciliation(self):
+        self.tick()
+        self.pos={**self.pos,'pair_id':'q'}
+        self.assertEqual(self.tick(),'waiting_other_redemption')
+        self.assertEqual(self.calls.count('submit'),1)
     def test_pending_receipt(self):
         self.pending=True;self.assertEqual(self.tick(),'pending_receipt');self.assertEqual(self.tick(),'pending_receipt')
         self.assertEqual(self.calls.count('submit'),1);self.assertFalse(self.marks)

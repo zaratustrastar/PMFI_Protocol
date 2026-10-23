@@ -92,7 +92,7 @@ withdrawal was run. Legacy USDC.e routing remains unverified for current pUSD wa
   and a separate route-verification gate. Durable uncertain submissions never retry;
   confirmed payout/transfer/token-balance evidence and NAV cash must agree. See
   `../CTF_RECOVERY.md` for custody, recovery, supported collateral and route limits.
-  Offline Python suite: 155 tests, 2 existing expected failures. Trading JS: 25/25;
+  Offline Python suite: 156 tests, 2 existing expected failures. Trading JS: 25/25;
   phase-1 JS: 25/25. Tests do not certify the current live venue adapters.
 
 The public RPC prunes historical state: an older pinned block can stop working

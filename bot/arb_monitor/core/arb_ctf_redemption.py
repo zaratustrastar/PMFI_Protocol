@@ -103,6 +103,10 @@ def tick(position, *, send=transport, kalshi=kalshi_payout, cash=None, mark=None
         if row and row['status'] == 'reconciled':
             return 'reconciled'
         if row is None:
+            # Receipt cash deltas are Safe-wide. Keep one recovery in flight so
+            # another redemption cannot invalidate the first payout's snapshot.
+            if any(r['status'] != 'reconciled' for r in rows):
+                return 'waiting_other_redemption'
             k = kalshi(position)
             if k is None:
                 return 'waiting_kalshi'

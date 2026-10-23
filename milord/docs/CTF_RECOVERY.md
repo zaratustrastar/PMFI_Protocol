@@ -12,7 +12,7 @@ outcome), extinguished conditional tokens, and venue cash visible to NAV before
 removing position cost basis. Fractional condition payouts use integer arithmetic.
 Pending recoveries block signing a NAV, including Polymarket winners. Open positions
 with Kalshi settlement evidence also block signing. Recovery and NAV reads share a
-file lock; all workers must share the journal directory on one host. Cross-host
+file lock and allow only one recovery in flight per journal; all workers must share the journal directory on one host. Cross-host
 coordination is not implemented.
 
 Configuration, only after a separately approved and verified route:
