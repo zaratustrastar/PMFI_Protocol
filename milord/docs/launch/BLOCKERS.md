@@ -85,3 +85,11 @@ fail closed on inconsistent data and distinguish incomplete service configuratio
 B22 exact-amount code fix and 17 deterministic regressions implemented. Still needs
 review of the shared Base withdrawal path and an explicitly approved venue test;
 current pUSD collateral conversion is not proven by these tests.
+
+B5 is resolved for this local Codex environment: read-only public Robinhood access
+and private forks worked. Historical state is pruned; archival replay is not assured.
+New real-contract funding tests passed 3/3. B21 now has offline-tested direct CTF
+recovery and NAV guards, but remains **live-integration blocked** pending dedicated
+custody/account verification and the actual collateral/adapter/redemption route.
+B9 and B6 remain open. Optimized launch rehearsal validates launch evidence, not
+full service deployment; missing StateView/service configuration is still explicit.

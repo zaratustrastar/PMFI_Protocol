@@ -8,7 +8,7 @@ from arb_monitor.core import arb_ctf_redemption as C
 class Recovery(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
-        self.env=patch.dict(os.environ,{'ARB_CTF_JOURNAL':self.tmp.name+'/journal.json'});self.env.start();self.addCleanup(self.env.stop)
+        self.env=patch.dict(os.environ,{'ARB_CTF_JOURNAL':self.tmp.name+'/journal.json','ARB_CTF_ROUTE_VERIFIED':'true'});self.env.start();self.addCleanup(self.env.stop)
         self.pos=dict(pair_id='p',shares=10,cost_basis_usdc=9,poly_yes_token='1',kalshi_ticker='K',kalshi_side='NO',status='pending_redeem')
         self.calls=[];self.marks=[];self.visible=100;self.paid=10;self.pending=False;self.fail_submit=False;self.fail_db=False
     def send(self,action,**kw):
@@ -26,6 +26,11 @@ class Recovery(unittest.TestCase):
         self.assertEqual(self.tick(),'waiting_cash_visibility');self.visible=110
         self.assertEqual(self.tick(),'reconciled');self.assertEqual(self.tick(),'reconciled')
         self.assertEqual(self.calls.count('submit'),1);self.assertEqual(len(self.marks),1)
+    def test_unverified_route_does_not_create_uncertain_submission(self):
+        with patch.dict(os.environ,{'ARB_CTF_ROUTE_VERIFIED':'false'}):
+            self.assertEqual(self.tick(),'route_unverified')
+        self.assertNotIn('submit',self.calls)
+        self.assertEqual(self.tick(),'waiting_cash_visibility')
     def test_unknown_submit_never_retries(self):
         self.fail_submit=True
         with self.assertRaises(TimeoutError):self.tick()

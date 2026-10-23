@@ -5,7 +5,7 @@
 #   3. offchain/record-launch.mjs reads the result back (read-only) into a temporary deployments file.
 # Everything happens inside the local fork: nothing reaches Robinhood Chain. The fork URL must be 127.0.0.1, answer as
 # Anvil and report a fork, exactly as in run-fork-tests.sh. Production artifacts from CI (no via-IR compile) unless
-# FORK_BUILD=lowmem.
+# FORK_BUILD=local (fresh optimized workstation build; not for low-memory VPS).
 #
 # Usage (from milord/): ./fork/rehearse-atomic-deploy.sh      Env: FORK_PORT (8549), ROBINHOOD_RPC, FORK_BLOCK, FORK_BUILD
 set -euo pipefail
@@ -37,14 +37,17 @@ trap 'cleanup; exit 130' INT TERM
 for A in "$SAFE" "$TAXR" "$LAUNCHER"; do [[ "$A" =~ ^0x[0-9a-fA-F]{40}$ ]] || die "malformed address $A"; done
 [ "$SAFE" != "$TAXR" ] || die 'stand-ins must be distinct'
 export FOUNDRY_BROADCAST="$TMP/broadcast"
-if [ "${FORK_BUILD:-ci}" = "lowmem" ]; then
-  export FOUNDRY_PROFILE=lowmem
+if [ "${FORK_BUILD:-ci}" = "local" ]; then
+  unset FOUNDRY_PROFILE FOUNDRY_SOLC FOUNDRY_OFFLINE
+  forge build
+elif [ "${FORK_BUILD:-ci}" = "lowmem" ]; then
+  die "lowmem helper exceeds EIP-170; use CI artifacts or FORK_BUILD=local on a workstation"
 else
-  [ "${FORK_BUILD:-ci}" = ci ] || die 'FORK_BUILD must be ci or lowmem'
+  [ "${FORK_BUILD:-ci}" = ci ] || die 'FORK_BUILD must be ci or local'
   HEAD_SHA=$(git rev-parse --verify HEAD) || die "cannot verify artifact commit mismatch: no Git HEAD"
   [ "$(cat out/.ci-commit 2>/dev/null)" = "$HEAD_SHA" ] || die 'CI artifact commit mismatch; download artifacts for HEAD'
   [ -z "$(git status --porcelain --untracked-files=normal -- .)" ] || die 'dirty milord tree: CI artifacts may be stale'
-  [ -d out ] && [ -f cache/solidity-files-cache.json ] || die "no production artifacts in out/: run ./fork/run-fork-tests.sh first (it downloads them) or FORK_BUILD=lowmem"
+  [ -d out ] && [ -f cache/solidity-files-cache.json ] || die "no production artifacts in out/: run ./fork/run-fork-tests.sh first (it downloads them) or FORK_BUILD=local"
   export FOUNDRY_SOLC="$PWD/sim/no-compile-solc.sh" FOUNDRY_OFFLINE=true
   unset FOUNDRY_PROFILE
 fi

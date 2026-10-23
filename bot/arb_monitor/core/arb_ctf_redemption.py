@@ -120,6 +120,8 @@ def tick(position, *, send=transport, kalshi=kalshi_payout, cash=None, mark=None
             row.update(updates)
             ledger.update_rows(journal_path(), lambda rs: next(r for r in rs if r['pair_id'] == pair).update(updates))
         if row['status'] == 'prepared':
+            if os.environ.get('ARB_CTF_ROUTE_VERIFIED') != 'true':
+                return 'route_unverified'
             save(status='sending')
             result = send('submit', plan=row['plan'])
             tx = result['txHash']
