@@ -75,3 +75,10 @@ The VPS can now fork Robinhood Chain, and `test/fork/` tests B1–B4 against the
 | B12 | Low | Robinhood Chain `finalized` block tag support for the epoch publisher (falls back to 64 confirmations) | fork / docs | check RPC |
 
 Not blockers (done and tested locally): permanent-lock fee path, LP fee burn, automation router with caps / TWAP / pause / sweep-to-owner, keeper / epoch publisher / root checker services with failure tests, funding bot USDG mode, Safe batches (lock batch prepared, not executed).
+
+## Codex update (2026-10-23)
+B7 read-only preflight corrected and passed at block 95,960,925: WETH proxy calls,
+factory identity, 30-minute TWAP and tick-crossing QuoterV2 simulations for
+0.05/0.25/1/2 ETH. Execution funding fork evidence is tracked separately. This does
+not clear B9 or guarantee future liquidity. Atomic recorder and rehearsal now
+fail closed on inconsistent data and distinguish incomplete service configuration.

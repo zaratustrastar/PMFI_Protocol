@@ -9,7 +9,7 @@ name: milord-ci
 
 on:
   push:
-    branches: [main, "milord/**"]
+    branches: [main, "milord/**", "codex/**"]
     paths: ["milord/**", "bot/arb_monitor/**", ".github/workflows/milord-ci.yml"]
   pull_request:
     paths: ["milord/**", "bot/arb_monitor/**", ".github/workflows/milord-ci.yml"]
@@ -87,6 +87,7 @@ jobs:
           cache: npm
           cache-dependency-path: milord/package-lock.json
       - run: npm ci
+      - run: node --test offchain/test/*.test.mjs
       - run: node offchain/test-twap.mjs
       - run: node offchain/test-option-d.mjs
       - run: node offchain/test-eligibility.mjs

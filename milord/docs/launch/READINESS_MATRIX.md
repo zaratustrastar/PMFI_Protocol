@@ -47,3 +47,23 @@ Columns: **Impl** = code exists. **Integ** = wired into the deploy scripts and t
 
 Still not executable from the repo: venue-route verification (needs small real transfers, which need approval);
 CTF redemption; provisioning the hosts.
+
+## Codex hardening evidence (2026-10-23)
+
+Starting point: 5ef8492. The handoff's VPS 33/33 Hookr tests in both modes at block
+95,946,910 are prior evidence, not rerun here. Corrected funding preflight passed
+read-only at block 95,960,925: proxy WETH calls with nonzero sender, factory/pool
+identity, decimals, history and all four QuoterV2 simulations against the exact
+integer router minimum. 2 ETH quoted 4,797.831415 USDG vs minimum 4,750.049672.
+Quotes are snapshots, not execution or venue-route evidence.
+
+New offline regressions: 24/24 (funding check, launch recorder, rehearsal failures).
+Existing offchain tests: TWAP 9 groups, Option D 4, eligibility passed, services 29/29.
+Recorder exit 0 means launch evidence validated and required service fields present;
+exit 2 records validated launch evidence with explicit missing configuration;
+exit 1 refuses inconsistent evidence. This is not a production-readiness certificate.
+The stand-in atomic rehearsal intentionally exits 2 because it does not deploy the
+services' protocol contracts. It retains a JSON record alongside its log.
+
+B6 independent audit, B8 price-reference decision, B9 venue/bridge validation,
+B10 owner parameters, infrastructure, testnet week and restore drills remain open.
