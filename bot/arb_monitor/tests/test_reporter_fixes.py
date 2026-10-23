@@ -311,11 +311,11 @@ class SettlementTests(unittest.TestCase):
         settle.assert_called_once()
         resolve.assert_not_called()
 
-    def test_redemption_hooks_are_explicitly_unimplemented(self):
-        with self.assertRaises(NotImplementedError):
-            arb_settlement.request_venue_redemption(dict(self.POS), "polymarket")
-        with self.assertRaises(NotImplementedError):
-            arb_settlement.observe_venue_payout(dict(self.POS), "kalshi")
+    def test_redemption_disabled_without_explicit_route_configuration(self):
+        from arb_monitor.core import arb_ctf_redemption as ctf
+        with mock.patch.object(ctf, "enabled", return_value=False), mock.patch.object(ctf, "tick") as tick:
+            self.assertIsNone(arb_settlement.request_venue_redemption(dict(self.POS), "polymarket"))
+            tick.assert_not_called()
 
 
 class BaseModeCompatTests(unittest.TestCase):

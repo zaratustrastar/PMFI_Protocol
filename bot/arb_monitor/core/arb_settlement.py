@@ -10,10 +10,11 @@ observed at a venue.
     no unrealised gain is booked, and the gain is realised when cash lands.
   * EARLY_EXIT (combined bid >= 1.00) is only a recommendation: nothing is sold, so the
     position stays 'open' at cost basis.
-  * Turning resolution into cash is NOT implemented (unverified external paths):
+  * Automatic Safe/CTF recovery is opt-in via arb_ctf_redemption; live route unverified.
+    Legacy disabled-mode hooks:
       request_venue_redemption()  — Polymarket CTF redeemPositions / Kalshi settlement
       observe_venue_payout()      — evidence that the payout reached venue cash
-    Both are hooks. Until observe_venue_payout() can confirm a payout, an operator records
+    Until automatic recovery is configured and verified, an operator records
     it with arb_positions_db.mark_position_redeemed(pair_id, payout_usdc). The reporter
     refuses to sign while a Kalshi-won position is pending_redeem (Kalshi auto-credits cash,
     which would otherwise be counted twice).
@@ -26,23 +27,22 @@ def log(msg):
     print(f"🏁 [ArbSettlement] {msg}", flush=True)
 
 
-def request_venue_redemption(position: dict, venue: str) -> None:
-    """HOOK (not implemented): turn a resolved winning leg into venue cash.
-
-    Polymarket: CTF redeemPositions from the proxy/Safe on Polygon. Kalshi: settles
-    automatically. Left unimplemented on purpose — the transaction path is unverified.
-    """
-    raise NotImplementedError(
-        f"request_venue_redemption({position.get('pair_id')}, {venue}): CTF/Kalshi redemption "
-        "path not implemented — redeem manually, then call mark_position_redeemed()"
-    )
+def request_venue_redemption(position: dict, venue: str):
+    from . import arb_ctf_redemption as ctf
+    if not ctf.enabled():
+        log('CTF automatic redemption disabled pending isolated custody and route verification')
+        return None
+    return ctf.tick(position)
 
 
 def observe_venue_payout(position: dict, venue: str):
-    """HOOK (not implemented): return the payout (USDC) once it is visible in venue cash,
-    else None. Must use venue evidence (Kalshi /portfolio/settlements, Polymarket redeem
-    receipt) — never a price."""
-    raise NotImplementedError("observe_venue_payout: no verified venue settlement reader")
+    from decimal import Decimal
+    from . import arb_ctf_redemption as ctf
+    from . import arb_ledger
+    for row in arb_ledger.read_rows(ctf.journal_path(), strict=True):
+        if row['pair_id'] == position['pair_id'] and row['status'] == 'reconciled':
+            return Decimal(row['payout_raw']) / Decimal(1000000)
+    return None
 
 
 def _detect(pos: dict):
@@ -122,6 +122,23 @@ def _check_robinhood(positions) -> int:
 
 def check_and_settle_positions():
     from ..config import is_robinhood_funding
+    from . import arb_ctf_redemption as ctf
+    if ctf.enabled():
+        from .arb_positions_db import get_positions_by_status
+        count = 0
+        positions = get_positions_by_status(('open','pending_redeem'))
+        # CTF redeems a whole selected token balance. Never assign shared holdings twice.
+        for pos in positions:
+            if sum(p['poly_yes_token'] == pos['poly_yes_token'] or p['kalshi_ticker'] == pos['kalshi_ticker'] for p in positions) != 1:
+                log(f"{pos['pair_id']}: shared market holdings require reconciliation")
+                continue
+            try:
+                result = request_venue_redemption(pos, 'polymarket')
+                count += result == 'reconciled'
+                log(f"{pos['pair_id']}: {result}")
+            except Exception as e:
+                log(f"{pos['pair_id']}: redemption blocked: {type(e).__name__}")
+        return count
     positions = get_open_positions()
     if not positions:
         return 0

@@ -47,3 +47,54 @@ Columns: **Impl** = code exists. **Integ** = wired into the deploy scripts and t
 
 Still not executable from the repo: venue-route verification (needs small real transfers, which need approval);
 CTF redemption; provisioning the hosts.
+
+## Codex hardening evidence (2026-10-23)
+
+Starting point: 5ef8492. The handoff's VPS 33/33 Hookr tests in both modes at block
+95,946,910 are prior evidence, not rerun here. Corrected funding preflight passed
+read-only at block 95,960,925: proxy WETH calls with nonzero sender, factory/pool
+identity, decimals, history and all four QuoterV2 simulations against the exact
+integer router minimum. 2 ETH quoted 4,797.831415 USDG vs minimum 4,750.049672.
+Quotes are snapshots, not execution or venue-route evidence.
+
+New offline regressions: 24/24 (funding check, launch recorder, rehearsal failures).
+Existing offchain tests: TWAP 9 groups, Option D 4, eligibility passed, services 29/29.
+Recorder exit 0 means launch evidence validated and required service fields present;
+exit 2 records validated launch evidence with explicit missing configuration;
+exit 1 refuses inconsistent evidence. This is not a production-readiness certificate.
+The stand-in atomic rehearsal intentionally exits 2 because it does not deploy the
+services' protocol contracts. It retains a JSON record alongside its log.
+
+B6 independent audit, B8 price-reference decision, B9 venue/bridge validation,
+B10 owner parameters, infrastructure, testnet week and restore drills remain open.
+
+B22 code correction: the withdrawal CLI now refuses insufficient proxy funds instead
+of silently reducing the request; takes before/after raw EOA balances; bridges only
+the exact requested delta; checks quote input and exact allowance; refuses uncertain
+submission retries. Existing EOA funds are excluded. 17 offline boundary regressions
+pass. This changes shared withdrawal safety in Base and Robinhood modes; no live
+withdrawal was run. Legacy USDC.e routing remains unverified for current pUSD wallets.
+
+### Continued engineering evidence
+
+- New private-fork funding tests: 3/3 at Robinhood block 95,960,925. Real WETH,
+  USDG, V3 pool and TWAP; local V3 vault/router/adapter; 0.05 and 2 ETH funding,
+  pending deposits, signed test report, share delivery, duplicate-settlement refusal,
+  slippage rollback and authorization. No bridge or venue is covered by this result.
+- Optimized atomic rehearsal at block 95,988,110 deployed and launched locally,
+  and returned the intended exit 2: launch validated, StateView/services incomplete.
+  The lowmem helper is 34,221 bytes and cannot deploy under EIP-170; it is now
+  refused explicitly. Use CI production artifacts on VPS, or `FORK_BUILD=local`
+  for a fresh optimized workstation build. No contract-size limit was relaxed.
+- Local production and lowmem Foundry: each 170 passed, 5 skipped without a fork.
+  End-to-end Anvil simulation 46/46; real-v4 entry-price integration 19/19.
+- B21 direct binary CTF recovery implemented behind explicit MILORD-only enablement
+  and a separate route-verification gate. Durable uncertain submissions never retry;
+  confirmed payout/transfer/token-balance evidence and NAV cash must agree. See
+  `../CTF_RECOVERY.md` for custody, recovery, supported collateral and route limits.
+  Offline Python suite: 156 tests, 2 existing expected failures. Trading JS: 25/25;
+  phase-1 JS: 25/25. Tests do not certify the current live venue adapters.
+
+The public RPC prunes historical state: an older pinned block can stop working
+between runs. Record the actual latest block used, or supply an archival endpoint;
+do not silently describe a new block as a replay of prior evidence.

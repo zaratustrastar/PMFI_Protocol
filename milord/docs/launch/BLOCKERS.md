@@ -75,3 +75,21 @@ The VPS can now fork Robinhood Chain, and `test/fork/` tests B1–B4 against the
 | B12 | Low | Robinhood Chain `finalized` block tag support for the epoch publisher (falls back to 64 confirmations) | fork / docs | check RPC |
 
 Not blockers (done and tested locally): permanent-lock fee path, LP fee burn, automation router with caps / TWAP / pause / sweep-to-owner, keeper / epoch publisher / root checker services with failure tests, funding bot USDG mode, Safe batches (lock batch prepared, not executed).
+
+## Codex update (2026-10-23)
+B7 read-only preflight corrected and passed at block 95,960,925: WETH proxy calls,
+factory identity, 30-minute TWAP and tick-crossing QuoterV2 simulations for
+0.05/0.25/1/2 ETH. Execution funding fork evidence is tracked separately. This does
+not clear B9 or guarantee future liquidity. Atomic recorder and rehearsal now
+fail closed on inconsistent data and distinguish incomplete service configuration.
+B22 exact-amount code fix and 17 deterministic regressions implemented. Still needs
+review of the shared Base withdrawal path and an explicitly approved venue test;
+current pUSD collateral conversion is not proven by these tests.
+
+B5 is resolved for this local Codex environment: read-only public Robinhood access
+and private forks worked. Historical state is pruned; archival replay is not assured.
+New real-contract funding tests passed 3/3. B21 now has offline-tested direct CTF
+recovery and NAV guards, but remains **live-integration blocked** pending dedicated
+custody/account verification and the actual collateral/adapter/redemption route.
+B9 and B6 remain open. Optimized launch rehearsal validates launch evidence, not
+full service deployment; missing StateView/service configuration is still explicit.

@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {requestedRaw,bridgeAmount,validateApproval} from '../withdrawal_bounds.mjs';
+test('existing EOA funds untouched',()=>assert.equal(bridgeAmount(10000000n,100000000n,90000000n,100000000n),10000000n));
+for(const s of ['NaN','Infinity','1e2','10garbage','-5','0','5001','5.0000001']) test(`refuse ${s}`,()=>assert.throws(()=>requestedRaw(s)));
+test('exact six decimal boundary',()=>assert.equal(requestedRaw('5.000001'),5000001n));
+for(const after of [90n,99n,101n]) test(`delta ${after} refused`,()=>assert.throws(()=>bridgeAmount(10n,20n,90n,after)));
+test('insufficient proxy cannot silently cap',()=>assert.throws(()=>bridgeAmount(10n,9n,0n,10n)));
+const token='0x'+'11'.repeat(20),spender='0x'+'22'.repeat(20);
+const tx=amount=>({to:token,value:'0',data:'0x095ea7b3'+'0'.repeat(24)+spender.slice(2)+amount.toString(16).padStart(64,'0')});
+test('exact allowance accepted',()=>validateApproval(tx(100n),token,spender,100n));
+test('unlimited allowance refused',()=>assert.throws(()=>validateApproval(tx(2n**256n-1n),token,spender,100n)));
+test('other spender refused',()=>assert.throws(()=>validateApproval(tx(100n),token,token,100n)));

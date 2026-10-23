@@ -9,10 +9,10 @@ name: milord-ci
 
 on:
   push:
-    branches: [main, "milord/**"]
-    paths: ["milord/**", "bot/arb_monitor/**", ".github/workflows/milord-ci.yml"]
+    branches: [main, "milord/**", "codex/**"]
+    paths: ["milord/**", "bot/arb_monitor/**", "trading_bot/safe_proxy_withdraw_parb.ts", "trading_bot/withdrawal_bounds.mjs", "trading_bot/ctf_redemption.mjs", "package-lock.json", "trading_bot/tests/**", ".github/workflows/milord-ci.yml"]
   pull_request:
-    paths: ["milord/**", "bot/arb_monitor/**", ".github/workflows/milord-ci.yml"]
+    paths: ["milord/**", "bot/arb_monitor/**", "trading_bot/safe_proxy_withdraw_parb.ts", "trading_bot/withdrawal_bounds.mjs", "trading_bot/ctf_redemption.mjs", "package-lock.json", "trading_bot/tests/**", ".github/workflows/milord-ci.yml"]
   workflow_dispatch:
 
 permissions:
@@ -87,6 +87,11 @@ jobs:
           cache: npm
           cache-dependency-path: milord/package-lock.json
       - run: npm ci
+      - run: npm ci --ignore-scripts
+        working-directory: .
+      - run: node --test ../trading_bot/tests/*.test.mjs
+      - run: ../node_modules/.bin/tsc --noEmit --skipLibCheck --strictNullChecks --target es2022 --module nodenext --moduleResolution nodenext ../trading_bot/safe_proxy_withdraw_parb.ts
+      - run: node --test offchain/test/*.test.mjs
       - run: node offchain/test-twap.mjs
       - run: node offchain/test-option-d.mjs
       - run: node offchain/test-eligibility.mjs

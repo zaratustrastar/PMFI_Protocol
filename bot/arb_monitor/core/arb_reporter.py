@@ -481,6 +481,15 @@ def _read_usdc_balance(wallet: str) -> float:
 
 def compute_reported_assets(vault_address: str, vault_state: dict | None = None,
                             block: str | None = None) -> dict:
+    from . import arb_ctf_redemption as ctf
+    if ctf.enabled():
+        with ctf.nav_lock():
+            return _compute_reported_assets(vault_address, vault_state, block)
+    return _compute_reported_assets(vault_address, vault_state, block)
+
+
+def _compute_reported_assets(vault_address: str, vault_state: dict | None = None,
+                            block: str | None = None) -> dict:
     """Compute reportedAssets for report() — GROSS, in exact raw units.
 
     The contract requires reportedAssets >= asset.balanceOf(vault) and itself subtracts
@@ -611,6 +620,7 @@ def _robinhood_report_guards(assets: dict) -> str | None:
     3. An 'open' position past expiry + grace: same double-count risk if Kalshi settled it.
     """
     from . import arb_withdrawals as _w
+    from . import arb_ctf_redemption as ctf
     now = int(time.time())
     try:
         rows = _w._load_ledger()
@@ -624,8 +634,17 @@ def _robinhood_report_guards(assets: dict) -> str | None:
         return (f"{len(settling)} Polymarket recall(s) landing (ETA not passed: "
                 f"{[r.get('reference') for r in settling]}) — would double count")
     for p in assets.get("positions") or []:
-        if p.status == "pending_redeem" and p.resolved_venue == "kalshi":
-            return f"position {p.pair_id} resolved on Kalshi; payout not reconciled (mark_position_redeemed)"
+        if ctf.enabled() and p.status == "open":
+            # Cash was read before this check: an already credited settlement must
+            # never coexist with the open position's cost basis in a signed NAV.
+            try:
+                from dataclasses import asdict
+                if ctf.kalshi_payout(asdict(p)) is not None:
+                    return f"position {p.pair_id}: Kalshi settlement awaiting CTF reconciliation"
+            except Exception:
+                return f"position {p.pair_id}: settlement evidence unavailable"
+        if p.status == "pending_redeem" and (p.resolved_venue == "kalshi" or ctf.enabled()):
+            return f"position {p.pair_id} resolved on {("Kalshi" if p.resolved_venue == "kalshi" else p.resolved_venue)}; payout not reconciled (mark_position_redeemed)"
         if p.status == "open" and p.expiry_ts and now > p.expiry_ts + _expiry_grace_secs():
             return f"position {p.pair_id} still open {now - p.expiry_ts}s past expiry — settlement not reconciled"
     return None
