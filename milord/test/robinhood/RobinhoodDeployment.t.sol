@@ -104,12 +104,10 @@ contract RobinhoodDeploymentTest is SingleChainFixture {
 
     function test_deployScriptRefusesMainnet() public {
         DeployRobinhood s = new DeployRobinhood();
-        vm.chainId(4663);
-        vm.expectRevert(bytes("mainnet deployment not approved"));
-        s.run();
         vm.chainId(8453);
-        vm.expectRevert(bytes("Robinhood Chain testnet only"));
+        vm.expectRevert(bytes("Robinhood Chain (46630 / 4663) only"));
         s.run();
+        // 4663 is gated by the configuration hash: see the end of test_deployScriptOnTestnetFromEnv (shared env).
     }
 
     function test_deployScriptOnTestnetFromEnv() public {
@@ -156,5 +154,19 @@ contract RobinhoodDeploymentTest is SingleChainFixture {
         vm.setEnv("MILORD_PUBLISHER", vm.toString(operator));
         vm.expectRevert(bytes("keeper and publisher need separate keys (nonces)"));
         s.run();
+        vm.setEnv("MILORD_PUBLISHER", vm.toString(makeAddr("publisher")));
+
+        // Robinhood mainnet (4663): never without the owner's approval of this exact configuration hash.
+        vm.chainId(4663);
+        vm.setEnv("MILORD_MAINNET_APPROVAL", vm.toString(bytes32(uint256(1))));
+        vm.expectRevert(bytes("mainnet deployment not approved for this configuration hash"));
+        s.run();
+        // private-fork mode only with the public Anvil account #0 as broadcaster
+        vm.setEnv("MILORD_LOCAL_FORK", "yes");
+        vm.expectRevert(bytes("local fork: broadcast with the public Anvil account #0 only"));
+        s.run();
+        vm.setEnv("MILORD_LOCAL_FORK", "no");
+        vm.setEnv("MILORD_MAINNET_APPROVAL", vm.toString(bytes32(0)));
+        vm.chainId(ROBINHOOD_TESTNET);
     }
 }
