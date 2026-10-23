@@ -19,7 +19,9 @@ class _Base(unittest.TestCase):
     def setUp(self):
         self.net = F.FakeNet(arb_funder.BASE_RPC)
         for p in self.net.patches() + [
-            mock.patch.dict(os.environ, self.env(), clear=True),
+            # Bridge contracts must be allowlisted (empty ARB_BRIDGE_ALLOWLIST refuses every bridge tx).
+            mock.patch.dict(os.environ, {**self.env(), "ARB_BRIDGE_ALLOWLIST":
+                                         f"4663:{F.SPOKE},4663:{F.RELAY_DEPOSITORY},8453:{F.SPOKE}"}, clear=True),
             mock.patch("time.sleep"),
             mock.patch.object(arb_funder, "ARB_DEPOSIT_WAIT_SECS", 0),
             mock.patch.object(arb_funder, "POLY_BASE_DEPOSIT_ADDR", F.POLY_BASE_ADDR),

@@ -281,3 +281,81 @@ def rh_sweep_min_usdc() -> float:
 
 def peg_max_deviation_bps() -> int:
     return int(os.environ.get("ARB_PEG_MAX_DEVIATION_BPS", "0"))
+
+
+# ---------------------------------------------------------------------------
+# MILORD V1 funding safety (allowlists, receipts, retries, in-transit ledgers)
+# ---------------------------------------------------------------------------
+# All read at call time. Only the bridge allowlist and the venue deposit chain/token
+# declarations are *required* in robinhood mode (validate_funding_config() reports them).
+#
+#   ARB_USDC_BASE_ADDRESS          USDC on Base (default: the address already used by the bot)
+#   ARB_USDC_POLYGON_ADDRESS       USDC.e on Polygon (default: the address already used by the bot)
+#   ARB_ALLOWED_TOKENS_EXTRA       extra "chainId:0xtoken" pairs (e.g. native Polygon USDC), comma-separated
+#   ARB_BRIDGE_ALLOWLIST           "chainId:0xcontract" bridge spenders/routers/deposit targets, comma-
+#                                  separated. EMPTY = every bridge tx is refused.
+#   ARB_BRIDGE_ALLOW_NATIVE_VALUE  true to allow bridge txs that carry ETH value (default false)
+#   POLY_RH_DEPOSIT_CHAIN_ID / POLY_RH_DEPOSIT_TOKEN          chain + token POLY_RH_DEPOSIT_ADDR accepts
+#   KALSHI_BASE_DEPOSIT_CHAIN_ID / KALSHI_BASE_DEPOSIT_TOKEN  chain + token KALSHI_BASE_DEPOSIT_ADDR accepts
+#   ARB_TX_RECEIPT_TIMEOUT_SECS    wait for a funding tx receipt (default 90)
+#   ARB_TX_RECEIPT_POLL_SECS       receipt poll interval (default 3)
+#   ARB_HTTP_TIMEOUT_SECS / ARB_HTTP_RETRIES / ARB_HTTP_BACKOFF_SECS   quote/status API calls (15 / 2 / 1.0)
+#   ARB_ARRIVAL_TOLERANCE_BPS      fee tolerance for delta-based arrival (default = ARB_BRIDGE_MAX_FEE_BPS)
+#   ARB_INFLIGHT_STALE_SECS        in-transit rows older than this become "stale" (still counted) (86400)
+USDC_BASE_DEFAULT = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+USDC_POLYGON_DEFAULT = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"   # USDC.e (already used by arb_withdrawals)
+
+
+def usdc_base_address() -> str:
+    return os.environ.get("ARB_USDC_BASE_ADDRESS", "") or USDC_BASE_DEFAULT
+
+
+def usdc_polygon_address() -> str:
+    return os.environ.get("ARB_USDC_POLYGON_ADDRESS", "") or USDC_POLYGON_DEFAULT
+
+
+def allowed_tokens_extra_raw() -> str:
+    return os.environ.get("ARB_ALLOWED_TOKENS_EXTRA", "")
+
+
+def bridge_allowlist_raw() -> str:
+    return os.environ.get("ARB_BRIDGE_ALLOWLIST", "")
+
+
+def bridge_allow_native_value() -> bool:
+    return os.environ.get("ARB_BRIDGE_ALLOW_NATIVE_VALUE", "false").strip().lower() == "true"
+
+
+def venue_deposit_declaration(venue: str) -> tuple[str, str]:
+    """(declared_chain_id, declared_token) for a venue deposit address; "" when not declared."""
+    prefix = {"polymarket": "POLY_RH_DEPOSIT", "kalshi": "KALSHI_BASE_DEPOSIT"}[venue]
+    return (os.environ.get(f"{prefix}_CHAIN_ID", "").strip(), os.environ.get(f"{prefix}_TOKEN", "").strip())
+
+
+def tx_receipt_timeout_secs() -> float:
+    return float(os.environ.get("ARB_TX_RECEIPT_TIMEOUT_SECS", "90"))
+
+
+def tx_receipt_poll_secs() -> float:
+    return float(os.environ.get("ARB_TX_RECEIPT_POLL_SECS", "3"))
+
+
+def http_timeout_secs() -> float:
+    return float(os.environ.get("ARB_HTTP_TIMEOUT_SECS", "15"))
+
+
+def http_retries() -> int:
+    return int(os.environ.get("ARB_HTTP_RETRIES", "2"))
+
+
+def http_backoff_secs() -> float:
+    return float(os.environ.get("ARB_HTTP_BACKOFF_SECS", "1.0"))
+
+
+def arrival_tolerance_bps() -> int:
+    v = os.environ.get("ARB_ARRIVAL_TOLERANCE_BPS", "")
+    return int(v) if v else bridge_max_fee_bps()
+
+
+def inflight_stale_secs() -> int:
+    return int(os.environ.get("ARB_INFLIGHT_STALE_SECS", "86400"))

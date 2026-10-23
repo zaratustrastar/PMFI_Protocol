@@ -247,7 +247,7 @@ async function closeWeek(label, start, end, pnlBps, notes) {
 
   // epoch publisher after the settlement grace: finalized transfers + settled batches -> deterministic root
   await setTime(end + GRACE + 60);
-  const inputs = await readInputs({ nft, adapter, provider, toBlock: await provider.getBlockNumber() });
+  const inputs = await readInputs({ nft, adapter, provider, fromBlock: Number(D.startBlock ?? 0), toBlock: await provider.getBlockNumber() });
   const pub = await publishEpoch({ distributor: dist.connect(operator), inputs, genesis: T0, now: await now(), settlementGrace: GRACE, excluded: [D.MilordConverter], save: (e) => { lastEpoch = e; } });
   await observe();
   const chk = await checkRoot({ distributor: dist, parb: vault, inputs, genesis: T0, settlementGrace: GRACE, excluded: [D.MilordConverter] });
@@ -444,6 +444,65 @@ await step(22, "negative-return report", { pps: weeks[2].ppsUsdg });
 await step(23, "fee-funded deposit after the PPS change", { usdg: weeks[2].usdgDepositedThisWeek });
 await step(24, "shares minted at the new PPS", { shares: weeks[2].parbMintedThisWeek, pps: weeks[2].ppsUsdg });
 
+// Week 4 (operations): a pARB holder redeems, the arbitrage engine returns liquidity to the vault, capital moves
+// between the vault and the servicer do not move the PPS, and restarted services repeat nothing.
+const W4 = W3 + WEEK;
+await setTime(W4 + DAY);
+// every NFT holder claims their pARB and redeems half of it: together more than the vault's idle buffer, so the queue must wait
+// for the engine to return capital (FIFO; a request the buffer cannot cover stops processing, it is never paid short)
+const redeemers = [];
+const ppsBeforeOps = await vault.officialPPS();
+for (const w of [...new Set([...holders, ...newcomers, BUYER])]) {
+  const key = w.address.toLowerCase();
+  const pr = proofFor(lastTree, key);
+  if (pr && pr.cumulative > (await dist.claimed(key))) await send(dist.claim(key, pr.cumulative, pr.proof));
+  const sh = (await vault.balanceOf(w.address)) / 2n;
+  if (sh === 0n) continue;
+  const before = await usdg.balanceOf(w.address);
+  await send(vault.connect(w).requestRedeem(sh, w.address));
+  redeemers.push({ w, shares: sh, id: Number(await vault.redeemRequestCount()) - 1, before });
+}
+const redeemShares = redeemers.reduce((x, r) => x + r.shares, 0n);
+const needed = redeemers.reduce((x, r) => x + (r.shares * ppsBeforeOps) / 10n ** 18n, 0n);
+const idleAtRequest = await vault.idleBalance();
+await setTime(W4 + DAY + 3600);
+const navBeforeReturn = await report("week 4 redeems requested");
+const processedFirst = (await Promise.all(redeemers.map(async (r) => Number((await vault.redeemRequests(r.id)).status)))).filter((x) => x !== 0).length;
+// the engine's liquidity step (bot/arb_monitor/core/arb_liquidity.py): return what the queue still needs, plus margin
+const stillNeeded = (await vault.totalPendingRedeemShares()) * (await vault.officialPPS()) / 10n ** 18n;
+const idleNow = await vault.idleBalance();
+const returned = stillNeeded > idleNow ? stillNeeded - idleNow + 1_000_000n : 0n;
+if (returned > 0n) {
+  await send(usdg.connect(servicer).approve(D.pARBVault, returned));
+  await send(vault.connect(servicer).refillBuffer(returned));
+}
+await setTime(W4 + DAY + 7200);
+const navAfterReturn = await report("week 4 liquidity returned");
+const ppsAfterOps = await vault.officialPPS();
+let usdgReceived = 0n, claimableTotal = 0n, allClaimable = true, paidExact = true;
+for (const r of redeemers) {
+  const req = await vault.redeemRequests(r.id);
+  if (Number(req.status) !== 1) { allClaimable = false; continue; }
+  claimableTotal += req.claimableAssets;
+  await send(vault.connect(r.w).claimRedeem(r.id, r.w.address));
+  const got = (await usdg.balanceOf(r.w.address)) - r.before;
+  usdgReceived += got;
+  if (got !== req.claimableAssets) paidExact = false;
+}
+await step(27, "pARB redemptions: requests exceed the idle buffer, engine returns liquidity, report, claims", {
+  requests: redeemers.length, shares: fmtE(redeemShares), neededUsdg: fmtU(needed), idleAtRequestUsdg: fmtU(idleAtRequest),
+  processedOnFirstReport: processedFirst, returnedByEngineUsdg: fmtU(returned), usdgReceived: fmtU(usdgReceived), ppsBefore: fmtU(ppsBeforeOps), ppsAfter: fmtU(ppsAfterOps),
+});
+// restart: a keeper and publisher started with empty state re-read the chain and repeat nothing
+const restartKeeper = await keeperTick(keeperContracts, keeperOpts);
+const restartInputs = await readInputs({ nft, adapter, provider, fromBlock: Number(D.startBlock ?? 0), toBlock: await provider.getBlockNumber() });
+const restartPub = await publishEpoch({ distributor: dist.connect(operator), inputs: restartInputs, genesis: T0, now: await now(), settlementGrace: GRACE, excluded: [D.MilordConverter] });
+const restartChk = await checkRoot({ distributor: dist, parb: vault, inputs: restartInputs, genesis: T0, settlementGrace: GRACE, excluded: [D.MilordConverter] });
+await step(28, "services restarted with empty state: nothing repeated", {
+  keeper: restartKeeper.results.map((x) => `${x.step}:${x.status}`), publisher: restartPub.action, publisherReason: restartPub.reason ?? null, rootChecks: restartChk.length,
+});
+const opsChecks = { redeemers, redeemShares, needed, idleAtRequest, returned, processedFirst, ppsBeforeOps, ppsAfterOps, navBeforeReturn, navAfterReturn, usdgReceived, claimableTotal, allClaimable, paidExact, restartKeeper, restartPub, restartChk };
+
 // ───────────── 26. reconciliation and invariants ─────────────
 const checks = [];
 const ok = (name, cond, detail) => { checks.push({ name, pass: !!cond, ...(detail ? { detail } : {}) }); if (!cond) console.error("CHECK FAILED:", name, detail ?? ""); };
@@ -493,10 +552,21 @@ ok("royalty received only when paid, split 50/50", (await royaltySplit.totalDist
   const [maxSwap, slip] = [await arbRouter.maxSwapWei(), await arbRouter.maxSlippageBps()];
   ok("router: every swap within the per-tx cap and at most maxSlippage below the 30-min V3 TWAP", ev.length > 0 && ev.every((e) => e.args.ethIn <= maxSwap && e.args.assetOut >= e.args.minOut && e.args.minOut === ((e.args.ethIn * e.args.price) / 10n ** 18n) * (10000n - slip) / 10000n), `${ev.length} swaps, slippage cap ${slip} bps`);
 }
+{
+  const o = opsChecks;
+  ok("redemption: requests exceeded the idle buffer and the excess waited for liquidity (not paid short)", o.needed > o.idleAtRequest && o.processedFirst < o.redeemers.length && o.returned > 0n, `${o.processedFirst}/${o.redeemers.length} on the first report`);
+  ok("redemption: all processed once the engine returned liquidity, each paid shares x PPS", o.allClaimable && o.paidExact && o.redeemers.every(() => true) && o.usdgReceived === o.redeemers.reduce((x, r) => x + (r.shares * o.ppsAfterOps) / 10n ** 18n, 0n), `${o.redeemers.length} requests, ${fmtU(o.usdgReceived)} USDG`);
+  ok("capital moved between the servicer and the vault creates no profit or loss (PPS unchanged, no P&L applied)", o.ppsBeforeOps === o.ppsAfterOps, `${fmtU(o.ppsBeforeOps)} -> ${fmtU(o.ppsAfterOps)}`);
+  ok("gross NAV unchanged by the liquidity return (vault + servicer counted once)", o.navBeforeReturn === o.navAfterReturn, `${fmtU(o.navBeforeReturn)} / ${fmtU(o.navAfterReturn)}`);
+  ok("restarted keeper: no failed step", o.restartKeeper.failed === 0);
+  ok("restarted publisher: proposes nothing already published", o.restartPub.action === "none", o.restartPub.reason);
+  ok("restarted root checker: every root matches", o.restartChk.every((x) => x.match));
+}
 ok("root checker recomputed every proposed root identically", rootChecks.length > 0 && rootChecks.every((x) => x.match), `${rootChecks.length} checks`);
 ok("keeper passes ran without failed steps", keeperLog.every((k) => !k.steps.some((x) => x.endsWith(":failed"))), `${keeperLog.length} passes`);
 ok("buyback burns recorded == supply reduction from buybacks", buyBurns > 0n && (await burner.buybackCount()) >= 1n);
-ok("USDG has 6 decimals and NAV = vault + servicer USDG", Number(await usdg.decimals()) === 6 && ppsSeries.at(-1).navUsdg === fmtU((await usdg.balanceOf(D.pARBVault)) + (await usdg.balanceOf(servicer.address))));
+// the last report counted vault + servicer USDG; only the redemption claimed after it has left since
+ok("USDG has 6 decimals and NAV = vault + servicer USDG", Number(await usdg.decimals()) === 6 && ppsSeries.at(-1).navUsdg === fmtU((await usdg.balanceOf(D.pARBVault)) + (await usdg.balanceOf(servicer.address)) + opsChecks.usdgReceived));
 {
   const navNow = (await usdg.balanceOf(D.pARBVault)) + (await usdg.balanceOf(servicer.address));
   const implied = ((await vault.officialPPS()) * ((await vault.totalSupply()) - (await vault.balanceOf("0x000000000000000000000000000000000000dEaD")))) / 10n ** 18n;

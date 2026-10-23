@@ -1,23 +1,24 @@
 # Mainnet launch checklist
 
-Tick every line before any 💸 transaction. Status today in brackets.
+Tick every line before any 💸 transaction. Status today in brackets. The consolidated go/no-go list is
+OPERATIONS_PLAN.md §7; the evidence per component is READINESS_MATRIX.md.
 
 ## Owner approvals [NEEDS APPROVAL]
 
 - [x] Opening FDV 10 ETH, 0 ETH seeded, MILORD-only position (Bobo, 2026-10-14)
 - [x] 100% of supply (6,767,000,000 MILORD) in the founding position, 0 outside; no migration reserve (Bobo, 2026-10-14, final)
-- [ ] Range top ≈1,000× (ticks 134220–203280), "subject to technical feasibility": feasible, confirm
-- [ ] LP fee (0.3% proposed)
+- [x] Range top ≈1,000× (ticks 134220–203280), fork-verified
+- [x] LP fee 0.3% (Bobo, 2026-10-14)
 - [x] Lock architecture approved: permanent HookrFamilyLock, beneficiary HookrLockFeeCollector (LP_LOCK.md)
 - [ ] Owner go-ahead to EXECUTE the lock (irreversible)
-- [ ] Hookr fork verification passes (HOOKR_VERIFICATION.md; BLOCKERS.md B1-B5)
+- [x] Hookr fork verification passes (B1-B5, B13; VPS 2026-10-23: 33/33 both passes at 406cc2a)
 - [ ] Safe signers, thresholds and router bounds confirmed (SAFE_CONFIGURATION.md)
 - [ ] Services deployed on testnet with alerts wired (offchain/services/README.md)
 - [ ] ArbitrageFundingRouter as the arbitrage payee, its caps and slippage (PARB_AUTOMATION.md)
 - [ ] Deployment gas and transaction expenses (explicit approval required)
-- [ ] Hookr commission (20%, the minimum, proposed)
-- [ ] Launch-tax handling (R-01): decay = 0 if flat; anything above 1.5% needs explicit approval
-- [ ] Tax recipient: TradingTaxSplitter instead of Revenue Router (proposed)
+- [x] Hookr commission 20% (approved; fork-verified)
+- [ ] Anti-Snipe: flat launch (default) or the unapproved 40%/60 min candidate. Optional atomic dev buy: separate, unapproved
+- [x] Tax recipient: TradingTaxSplitter (keeper pays it from the Hookr tax queues)
 - [x] Kalshi kept; Opinion disabled for V1, adapter preserved (Bobo, 2026-10-14)
 - [ ] Mainnet deployment itself
 
@@ -43,22 +44,24 @@ Tick every line before any 💸 transaction. Status today in brackets.
 - [ ] WETH/USDG V3 pool depth checked on the day; swap route for the Arbitrage Safe chosen
 - [ ] Polymarket USDG deposit on 4663 confirmed with a small amount (approval needed: real funds)
 - [ ] Polymarket withdrawal destination confirmed
-- [ ] Funding bot changes (ARBITRAGE_FUNDING_READINESS §3) implemented, NAV counts in-transit, tested small
+- [x] Funding bot USDG mode hardened (allowlists, receipts, intents, delta arrival), NAV counts in-transit once
+- [ ] Routes confirmed with approved small amounts (B9); CTF redemption (B21); TS full-balance bridge fixed (B22)
 
 ## Contracts [TESTED locally, not audited]
 
-- [x] 139 Foundry tests pass (100% allocation)
-- [x] 36/36 end-to-end checks pass (100% allocation)
-- [ ] Robinhood fork test of the full path passes
+- [x] 179 Foundry tests pass (2026-10-23)
+- [x] 46/46 end-to-end checks pass, incl. redemptions with liquidity return and service restarts
+- [x] Robinhood fork suite passes (33/33, VPS)
 - [ ] Testnet dry run done
 - [ ] External audit, findings resolved
 - [ ] Sources verified on the explorer after deployment
 
 ## Automation (PARB_AUTOMATION.md)
 
-- [ ] ArbitrageFundingRouter built, tested, set as arbitrage payee in the three splitters
-- [ ] Production epoch job (finalized blocks, IPFS data, `proposeRoot`) and independent root watcher
-- [ ] Keeper for the permissionless steps (Hookr payout, distribute, settle, activateRoot, burnHeldTokens, collectFees)
+- [x] ArbitrageFundingRouter built, tested, set as arbitrage payee in the three splitters by `DeployRobinhood.s.sol`
+- [x] Epoch publisher and independent root checker (services); [ ] IPFS publication of epoch files
+- [x] Keeper (tax queues, distribute, collect, buyback, router, settle, activateRoot, lock watch); [ ] run on testnet
+- [x] Monitor service; [ ] deployed with a webhook and drilled
 
 ## Operations
 

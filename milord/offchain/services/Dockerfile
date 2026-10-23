@@ -6,6 +6,8 @@ COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev --ignore-scripts || npm install --omit=dev --ignore-scripts
 COPY offchain/lib ./offchain/lib
 COPY offchain/services ./offchain/services
+# /data must exist and belong to node before the volume is created from it, or state writes fail as EACCES
+RUN mkdir -p /data && chown node:node /data
 USER node
 ENV STATE_DIR=/data NODE_ENV=production
 VOLUME ["/data"]

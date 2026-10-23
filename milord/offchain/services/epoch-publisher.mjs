@@ -24,7 +24,7 @@ await runLoop({
   metrics,
   tick: async () => {
     const fin = await retry(() => finalizedBlock(provider, cfg.confirmations));
-    const inputs = await retry(() => readInputs({ ...contracts, provider, toBlock: fin.number }));
+    const inputs = await retry(() => readInputs({ ...contracts, provider, fromBlock: cfg.startBlock, toBlock: fin.number, logStep: cfg.logStep }));
     const r = await retry(() =>
       publishEpoch({
         distributor: contracts.distributor, inputs, genesis: cfg.genesis, now: fin.timestamp,

@@ -71,8 +71,8 @@ No bot or keeper key is a signer or module on any Safe. No Safe module, delegate
 ## 4. Safe transactions (encoded by `offchain/safe-launch-batch.mjs`, never sent by it)
 1. **Team Safe**: `acceptOwnership()` on every Ownable2Step contract, `BuybackBurner.setInitialAdapter(V4SwapAdapter)`.
 2. **Arbitrage Funding Safe**: `ArbitrageFundingRouter.acceptOwnership()`.
-3. **Allocation Safe**: `MILORD.approve(HookrLauncher, 6,767,000,000e18)`, then `HookrLauncher.launch(...)` (BLOCKED: see HOOKR_COMPATIBILITY.md), then burn the 24,920-wei rounding remainder if the launcher returns it.
-4. **Family owner Safe, DO NOT EXECUTE until approved**: `HookrLauncher.transferFamily(familyId, HookrFamilyLock, 0)`, `HookrFamilyLock.lock(familyId, HookrLockFeeCollector, 2^64-1)`.
+3. **Team Safe**: `MilordAtomicLaunch.launch{value: Hookr launch fee}(TradingTaxSplitter, deadline)` (`safe-1-launch.json`): creates MILORD, launches it with 100% of supply, burns the rounding dust and verifies every frozen term in one transaction; then `safe-2-accept.json` (`acceptFamily`, `sweep`, `setInitialAdapter`). There is no allocation Safe: no wallet ever holds MILORD outside the pool.
+4. **Team Safe (family owner), DO NOT EXECUTE until approved**: `HookrLauncher.transferFamily(familyId, HookrFamilyLock, 0)`, `HookrFamilyLock.lock(familyId, HookrLockFeeCollector, 2^64-1)`.
 
 ## 5. Emergency playbook
 | Event | Who | Action |

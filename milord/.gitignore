@@ -6,3 +6,5 @@ out-lowmem/
 cache-lowmem/
 fork/logs/
 hookr-verify/out/
+deployments/*.json
+offchain/services/*.env

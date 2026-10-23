@@ -21,9 +21,11 @@ Signing follows the same ABI-encoded struct hash pattern as the PMFI pARB Vault 
 then prefixed with eth_sign ("\x19Ethereum Signed Message:\n32").
 """
 
+import json
 import os
 import time
 from dataclasses import dataclass
+from decimal import Decimal, ROUND_DOWN
 from typing import Optional
 from ..adapters.polymarket import get_best_prices as poly_get_best_prices
 from ..adapters.kalshi import get_best_prices as kalshi_get_best_prices
@@ -47,6 +49,34 @@ NAV_VALIDITY_WINDOW = 30  # 30-second deadline window (contract MAX_NAV_AGE = 30
 # ARB_PEG_MAX_DEVIATION_BPS > 0. Set by the host process or passed to compute_nav().
 PEG_PRICE_SOURCE = None
 
+# Position statuses that still carry value (cash NOT yet observed at a venue).
+#   open            — both legs held
+#   pending_redeem  — market resolved, winning leg not yet paid out (robinhood mode only)
+# 'redeemed' (cash observed at the venue) and legacy 'settled' carry no position value.
+VALUE_BEARING_STATUSES_RH = ("open", "pending_redeem")
+
+
+class NavReadError(RuntimeError):
+    """A NAV component could not be read. Strict callers (the V2/V3 reporter) must abort
+    instead of treating the component as 0 — a silent 0 under-reports assets and moves PPS."""
+
+    def __init__(self, component: str, detail: str):
+        super().__init__(f"{component}: {detail}")
+        self.component = component
+        self.detail = detail
+
+
+def usdc_to_raw(amount) -> int:
+    """6-decimal amount -> integer raw units, exact for anything that came from raw/1e6.
+
+    int(x * 1e6) truncates (0.000249 * 1e6 = 248.999…); going through str() recovers the
+    shortest decimal repr, so 249 raw round-trips to 249. Sub-micro dust is rounded DOWN.
+    """
+    if isinstance(amount, int):
+        return amount * 1_000_000
+    d = Decimal(str(amount)).quantize(Decimal("0.000001"), rounding=ROUND_DOWN)
+    return int(d * 1_000_000)
+
 
 @dataclass
 class ArbPosition:
@@ -61,6 +91,8 @@ class ArbPosition:
     # Which side was bought on Kalshi ("YES" or "NO")
     # Determines whether to use kalshi_yes_bid or kalshi_no_bid for liquid value.
     kalshi_side: str = "YES"
+    # robinhood mode: venue whose leg won once status == "pending_redeem" ("polymarket"|"kalshi")
+    resolved_venue: str = ""
 
 
 @dataclass
@@ -130,25 +162,58 @@ def fetch_position_liquid_value(position: ArbPosition) -> LiquidPositionValue:
 
 
 def _load_open_positions() -> list[ArbPosition]:
-    """Load open arb positions from the database."""
+    """Load value-bearing arb positions from the database (lenient: errors -> []).
+
+    Base mode: status = 'open' (legacy query, unchanged). Robinhood mode also loads
+    'pending_redeem' (resolved, payout not yet observed at the venue) — still valued.
+    Reporter callers use _load_value_positions(strict=True) instead.
+    """
+    try:
+        return _load_value_positions(strict=False)
+    except NavReadError as e:   # pragma: no cover - strict=False never raises
+        log(f"❌ Error loading positions: {e}")
+        return []
+
+
+def _load_value_positions(strict: bool = True) -> list[ArbPosition]:
+    """Positions whose value is not yet in any cash balance.
+
+    strict=True: a DB error raises NavReadError (and, in robinhood mode, so does a missing
+    DATABASE_URL — positions cannot be assumed to be zero). strict=False keeps the legacy
+    "log and return []" behaviour.
+    """
+    rh = is_robinhood_funding()
     database_url = os.environ.get("DATABASE_URL", "")
     if not database_url:
+        if strict and rh:
+            raise NavReadError("positions", "DATABASE_URL not set — open positions unknown")
         log("⚠️ DATABASE_URL not set — returning empty position list")
         return []
     try:
         import psycopg2
         conn = psycopg2.connect(database_url)
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT pair_id, poly_yes_token, kalshi_ticker, shares, cost_basis_usdc,
-                   expiry_ts, status, COALESCE(settled_pnl_usdc, 0),
-                   COALESCE(kalshi_side, 'YES')
-            FROM arb_positions
-            WHERE status = 'open'
-        """)
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
+        try:
+            cur = conn.cursor()
+            if rh:
+                cur.execute("""
+                    SELECT pair_id, poly_yes_token, kalshi_ticker, shares, cost_basis_usdc,
+                           expiry_ts, status, COALESCE(settled_pnl_usdc, 0),
+                           COALESCE(kalshi_side, 'YES'), COALESCE(resolved_venue, '')
+                    FROM arb_positions
+                    WHERE status IN ('open', 'pending_redeem')
+                """)
+            else:
+                cur.execute("""
+                    SELECT pair_id, poly_yes_token, kalshi_ticker, shares, cost_basis_usdc,
+                           expiry_ts, status, COALESCE(settled_pnl_usdc, 0),
+                           COALESCE(kalshi_side, 'YES')
+                    FROM arb_positions
+                    WHERE status = 'open'
+                """)
+            rows = cur.fetchall()
+            cur.close()
+        finally:
+            conn.close()
         positions = []
         for row in rows:
             positions.append(ArbPosition(
@@ -157,16 +222,25 @@ def _load_open_positions() -> list[ArbPosition]:
                 kalshi_ticker=row[2],
                 shares=float(row[3]),
                 cost_basis_usdc=float(row[4]),
-                expiry_ts=int(row[5]),
+                expiry_ts=int(row[5] or 0),
                 status=row[6],
                 settled_pnl_usdc=float(row[7]),
                 kalshi_side=row[8] if row[8] in ("YES", "NO") else "YES",
+                resolved_venue=(row[9] if rh and len(row) > 9 else "") or "",
             ))
-        log(f"Loaded {len(positions)} open positions from DB")
+        log(f"Loaded {len(positions)} value-bearing positions from DB")
         return positions
     except Exception as e:
+        if strict:
+            raise NavReadError("positions", f"DB read failed: {e}") from e
         log(f"❌ Error loading positions: {e}")
         return []
+
+
+def positions_value_raw(positions: list) -> int:
+    """Sum of cost basis in raw 6-decimal units. Open AND pending_redeem positions are valued
+    at cost basis until their cash is observed at a venue (no unrealised gain is booked)."""
+    return sum(usdc_to_raw(p.cost_basis_usdc) for p in positions)
 
 
 def _get_opinion_cash() -> float:
@@ -188,6 +262,44 @@ def _get_opinion_cash() -> float:
     except Exception as e:
         log(f"⚠️ Opinion cash could not be fetched from any endpoint — opinion_cash = 0 ({e})")
         return 0.0
+
+
+def _get_opinion_cash_raw() -> int:
+    """Strict Opinion balance (only called when Opinion is enabled). Raises NavReadError."""
+    try:
+        from ..adapters.opinion_clob import get_balance as opinion_sdk_balance
+        return usdc_to_raw(opinion_sdk_balance())
+    except Exception as e:
+        raise NavReadError("opinion_cash", str(e)) from e
+
+
+def _get_servicer_wallet_usdc_on_base_raw() -> int:
+    """Strict base-mode servicer USDC on Base, raw units. Unset wallet -> 0 (legacy:
+    nothing is tracked). HTTP / RPC error -> NavReadError."""
+    servicer_wallet = os.environ.get("ARB_SERVICER_WALLET", "")
+    if not servicer_wallet:
+        log("ℹ️ ARB_SERVICER_WALLET not set — servicer_on_base = 0")
+        return 0
+    rpc_url = os.environ.get("BASE_RPC_URL", "https://mainnet.base.org")
+    usdc_address = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+    try:
+        import requests as _req
+        padded = "000000000000000000000000" + servicer_wallet.lower().replace("0x", "")
+        resp = _req.post(rpc_url, json={
+            "jsonrpc": "2.0", "method": "eth_call",
+            "params": [{"to": usdc_address, "data": "0x70a08231" + padded}, "latest"], "id": 1,
+        }, timeout=10)
+        if resp.status_code != 200:
+            raise RuntimeError(f"HTTP {resp.status_code}")
+        body = resp.json()
+        if "error" in body or "result" not in body:
+            raise RuntimeError(f"RPC error {body.get('error')}")
+        raw = body["result"]
+        if not raw or raw == "0x":
+            raise RuntimeError("empty balanceOf result")
+        return int(raw, 16)
+    except Exception as e:
+        raise NavReadError("servicer_usdc_base", str(e)) from e
 
 
 def _get_servicer_wallet_usdc_on_base() -> float:
@@ -258,7 +370,37 @@ def _peg_factor(price_source=None) -> float:
     return 1.0
 
 
-def _get_servicer_cash_breakdown(peg_price_source=None) -> dict:
+def _assert_ledger_readable(path: str, name: str) -> None:
+    """arb_withdrawals._load_ledger() turns a corrupt file into [] (= nothing in transit).
+    Strict callers check the file themselves so a corrupt ledger aborts instead."""
+    if not path or not os.path.exists(path):
+        return
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        raise NavReadError(name, f"ledger {path} unreadable: {e}") from e
+    if not isinstance(data, list):
+        raise NavReadError(name, f"ledger {path} is not a list")
+
+
+def assert_ledgers_readable() -> None:
+    """Strict check of every funding ledger NAV depends on (withdrawals, bridges and — when the
+    funding side provides them — venue deposits and write-ahead intents). Raises NavReadError."""
+    from . import arb_withdrawals as _w
+    paths = [(getattr(_w, "WITHDRAWAL_LEDGER_PATH", ""), "withdrawal_ledger"),
+             (getattr(_w, "BRIDGE_LEDGER_PATH", ""), "bridge_ledger")]
+    try:
+        from . import arb_ledger as _L
+        paths += [(_L.venue_deposit_path(), "venue_deposit_ledger"), (_L.intents_path(), "intent_ledger")]
+    except ImportError:
+        pass
+    for path, name in paths:
+        _assert_ledger_readable(path, name)
+
+
+def _get_servicer_cash_breakdown(peg_price_source=None, strict: bool = False,
+                                 usdg_raw: Optional[int] = None, apply_peg: bool = True) -> dict:
     """Robinhood mode servicer cash incl. in-transit money (§4 of ARBITRAGE_FUNDING_READINESS):
 
       servicer USDG on 4663 (× peg factor) + servicer USDC still on Base
@@ -266,8 +408,15 @@ def _get_servicer_cash_breakdown(peg_price_source=None) -> dict:
 
     Pending Kalshi recalls land as USDC on Base first; the part already visible in the Base
     balance is not counted twice (pending_base − base_usdc, floored at 0).
+
+    strict=True (reporter): every read error raises NavReadError instead of becoming 0, and
+    a missing ARB_SERVICER_WALLET is an error. usdg_raw lets the reporter pass the servicer
+    USDG balance it read at its pinned 4663 block. apply_peg=False: the V3 vault's unit of
+    account IS USDG, so USDG held by the servicer is never haircut against itself (a haircut
+    here would turn every vault→servicer tend into an artificial loss).
     """
     from .arb_funder import get_servicer_cash_usdc, _get_usdc_balance
+    from . import arb_withdrawals as _w
     from .arb_withdrawals import (
         mark_withdrawals_arrived,
         get_pending_withdrawal_usdc_by_dest,
@@ -279,29 +428,59 @@ def _get_servicer_cash_breakdown(peg_price_source=None) -> dict:
            "bridges_in_transit": 0.0, "peg_factor": 1.0, "total": 0.0}
     wallet = os.environ.get("ARB_SERVICER_WALLET", "")
     if not wallet:
+        if strict:
+            raise NavReadError("servicer_wallet", "ARB_SERVICER_WALLET not set")
         log("ℹ️ ARB_SERVICER_WALLET not set — servicer cash = 0")
         return out
     try:
-        out["servicer_usdg_rh"] = get_servicer_cash_usdc(wallet)
+        out["servicer_usdg_rh"] = (usdg_raw / 1_000_000) if usdg_raw is not None else get_servicer_cash_usdc(wallet)
     except Exception as e:
+        if strict:
+            raise NavReadError("servicer_usdg_rh", str(e)) from e
         log(f"⚠️ Error reading servicer USDG on Robinhood Chain: {e}")
     try:
         out["servicer_usdc_base"] = _get_usdc_balance(wallet)
     except Exception as e:
+        if strict:
+            raise NavReadError("servicer_usdc_base", str(e)) from e
         log(f"⚠️ Error reading servicer USDC on Base: {e}")
     try:
+        if strict:
+            assert_ledgers_readable()
         reconcile_bridge_transfers()
         mark_withdrawals_arrived(out["servicer_usdg_rh"], out["servicer_usdc_base"])
         pending = get_pending_withdrawal_usdc_by_dest()
-        out["pending_withdrawals"] = pending["servicer"] + max(0.0, pending["base_usdc"] - out["servicer_usdc_base"])
+        # Base-landing recalls WITH a balance snapshot are settled by balance delta in
+        # mark_withdrawals_arrived (just called), so a still-pending one has not landed: count
+        # it in full. Only legacy snapshot-less rows keep the "already visible on Base" offset
+        # (which under-counts when unrelated USDC sits on Base).
+        split_fn = getattr(_w, "get_pending_withdrawals_split", None)
+        if split_fn is not None:
+            split = split_fn()
+            servicer_p, base_snap, base_legacy = (split["servicer"], split["base_usdc_tracked"],
+                                                  split["base_usdc_legacy"])
+        else:   # older arb_withdrawals without the split reader
+            servicer_p, base_snap, base_legacy = pending["servicer"], 0.0, pending["base_usdc"]
+        out["pending_withdrawals"] = (servicer_p + base_snap
+                                      + max(0.0, base_legacy - out["servicer_usdc_base"]))
         out["bridges_in_transit"] = get_inflight_bridge_usdc()
+    except NavReadError:
+        raise
     except Exception as e:
+        if strict:
+            raise NavReadError("in_transit_ledgers", str(e)) from e
         log(f"⚠️ Error reading in-transit ledgers: {e}")
-    out["peg_factor"] = _peg_factor(peg_price_source)
+    out["peg_factor"] = _peg_factor(peg_price_source) if apply_peg else 1.0
     out["total"] = (
         out["servicer_usdg_rh"] * out["peg_factor"] + out["servicer_usdc_base"]
         + out["pending_withdrawals"] + out["bridges_in_transit"]
     )
+    # Exact raw total (reporter). With peg_factor 1.0 every term is a 6-decimal amount.
+    out["total_raw"] = (
+        usdc_to_raw(out["servicer_usdg_rh"] * out["peg_factor"]) if out["peg_factor"] != 1.0
+        else (usdg_raw if usdg_raw is not None else usdc_to_raw(out["servicer_usdg_rh"]))
+    ) + usdc_to_raw(out["servicer_usdc_base"]) + usdc_to_raw(out["pending_withdrawals"]) \
+        + usdc_to_raw(out["bridges_in_transit"])
     log(
         f"Servicer (robinhood): usdg={out['servicer_usdg_rh']:.4f} ×{out['peg_factor']:.4f} "
         f"base_usdc={out['servicer_usdc_base']:.4f} pending_withdrawals={out['pending_withdrawals']:.4f} "
@@ -310,89 +489,141 @@ def _get_servicer_cash_breakdown(peg_price_source=None) -> dict:
     return out
 
 
-def _get_servicer_balances() -> tuple[float, float, float]:
+def _get_poly_cash_raw(require_configured: bool = False) -> int:
+    """Strict Polymarket collateral balance in raw 6-decimal units.
+
+    Not configured (no POLY_API_KEY) -> 0, or NavReadError when require_configured.
+    Proxy (sig_type=2) read error -> NavReadError. The EOA (sig_type=0) read is diagnostic:
+    it is only used when the proxy balance is 0, and its failure is not fatal (legacy).
+    """
+    poly_api_key        = os.environ.get("POLY_API_KEY", "")
+    poly_api_secret     = os.environ.get("POLY_API_SECRET", "")
+    poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
+    if not poly_api_key:
+        if require_configured:
+            raise NavReadError("poly_cash", "POLY_API_KEY not set — Polymarket cash unknown")
+        log("ℹ️ POLY_API_KEY not set — poly_cash = 0")
+        return 0
+    try:
+        from .clob_compat import (
+            make_client, ApiCreds, BalanceAllowanceParams, AssetType, SDK_VERSION,
+        )
+        clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
+        private_key        = os.environ.get("POLY_PRIVATE_KEY", "")
+        poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
+        creds = ApiCreds(
+            api_key=poly_api_key.strip(),
+            api_secret=poly_api_secret.strip(),
+            api_passphrase=poly_api_passphrase.strip(),
+        )
+        client = make_client(
+            host=clob_url,
+            key=private_key,
+            chain_id=137,
+            creds=creds,
+            signature_type=2,
+            funder=poly_proxy_address,
+        )
+        result = client.get_balance_allowance(
+            BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=2)
+        )
+        log(f"🔍 [NAV] sig_type=2 (GNOSIS_SAFE) response: {result}")
+        if not isinstance(result, dict) or "balance" not in result:
+            raise RuntimeError(f"no balance field in response {result!r}")
+        raw = result.get("balance", "0")
+        poly_raw = int(Decimal(str(raw)))
+        log(f"Poly servicer cash (proxy): {poly_raw / 1_000_000:.6f} USDC (raw={raw})")
+    except Exception as e:
+        raise NavReadError("poly_cash", str(e)) from e
+
+    # Diagnostic: also query sig_type=0 (EOA) to locate funds
+    try:
+        client_eoa = make_client(host=clob_url, key=private_key, chain_id=137, creds=creds, signature_type=0)
+        result_eoa = client_eoa.get_balance_allowance(
+            BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
+        )
+        log(f"🔍 [NAV] sig_type=0 (EOA) response: {result_eoa}")
+        raw_eoa = result_eoa.get("balance", "0")
+        eoa_raw = int(Decimal(str(raw_eoa)))
+        log(f"Poly servicer cash (EOA): {eoa_raw / 1_000_000:.6f} USDC (raw={raw_eoa})")
+        if poly_raw == 0 and eoa_raw > 0:
+            log(f"ℹ️ [NAV] Funds found in EOA account — using EOA balance for NAV")
+            poly_raw = eoa_raw
+    except Exception as eoa_err:
+        log(f"⚠️ [NAV] EOA balance check failed: {eoa_err}")
+    return poly_raw
+
+
+def _get_kalshi_cash_raw(require_configured: bool = False) -> int:
+    """Strict Kalshi cash (API returns cents) in raw 6-decimal units (cents × 10_000)."""
+    from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
+    if not kalshi_auth_available():
+        if require_configured:
+            raise NavReadError("kalshi_cash", "Kalshi credentials not configured — Kalshi cash unknown")
+        log("ℹ️ Kalshi credentials not configured (KALSHI_API_KEY_ID / KALSHI_PRIVATE_KEY_PATH) — kalshi_cash = 0")
+        return 0
+    try:
+        import requests
+        from ..config import KALSHI_BASE_URL
+        url = f"{KALSHI_BASE_URL}/portfolio/balance"
+        headers = get_kalshi_headers("GET", url)
+        if not headers:
+            raise RuntimeError("Kalshi RSA signing failed")
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.status_code != 200:
+            raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:100]}")
+        data = resp.json()
+        if "balance" not in data:
+            raise RuntimeError(f"no balance field in response {data!r}"[:200])
+        cents = Decimal(str(data["balance"]))
+        kalshi_raw = int(cents * 10_000)
+        log(f"Kalshi servicer cash: {kalshi_raw / 1_000_000} USDC")
+        return kalshi_raw
+    except Exception as e:
+        raise NavReadError("kalshi_cash", str(e)) from e
+
+
+def get_venue_cash_raw(strict: bool = True) -> dict:
+    """{"polymarket", "kalshi", "opinion"} cash in raw 6-decimal units.
+
+    strict=True: any read error raises NavReadError (component named). In robinhood mode a
+    venue that is not configured is also an error (its cash cannot be assumed 0); Opinion is
+    only read when enabled (disabled -> 0 by design).
+    """
+    req = strict and is_robinhood_funding()
+    out = {"polymarket": 0, "kalshi": 0, "opinion": 0}
+    out["polymarket"] = _get_poly_cash_raw(require_configured=req)
+    out["kalshi"] = _get_kalshi_cash_raw(require_configured=req)
+    if opinion_enabled():
+        out["opinion"] = _get_opinion_cash_raw() if strict else usdc_to_raw(_get_opinion_cash())
+    else:
+        log("ℹ️ Opinion disabled (ARB_OPINION_ENABLED=false) — opinion_cash = 0")
+    return out
+
+
+def _get_servicer_balances(strict: bool = False) -> tuple[float, float, float]:
     """Get servicer wallet cash balances on Polymarket, Kalshi, and Opinion Labs.
 
     Returns (poly_cash_usdc, kalshi_cash_usdc, opinion_cash_usdc).
     These are queried from the respective APIs and represent uninvested USDC.
+
+    strict=False (legacy, display NAV): a failed read logs and counts 0.
+    strict=True: a failed read raises NavReadError.
     """
+    if strict:
+        raw = get_venue_cash_raw(strict=True)
+        return raw["polymarket"] / 1_000_000, raw["kalshi"] / 1_000_000, raw["opinion"] / 1_000_000
+
     poly_cash = 0.0
     kalshi_cash = 0.0
-
-    poly_api_key        = os.environ.get("POLY_API_KEY", "")
-    poly_api_secret     = os.environ.get("POLY_API_SECRET", "")
-    poly_api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "")
-    if poly_api_key:
-        try:
-            from .clob_compat import (
-                make_client, ApiCreds, BalanceAllowanceParams, AssetType, SDK_VERSION,
-            )
-            clob_url           = os.environ.get("POLY_CLOB_URL", "https://clob.polymarket.com")
-            private_key        = os.environ.get("POLY_PRIVATE_KEY", "")
-            poly_proxy_address = os.environ.get("POLY_PROXY_ADDRESS", "") or None
-            creds = ApiCreds(
-                api_key=poly_api_key.strip(),
-                api_secret=poly_api_secret.strip(),
-                api_passphrase=poly_api_passphrase.strip(),
-            )
-            client = make_client(
-                host=clob_url,
-                key=private_key,
-                chain_id=137,
-                creds=creds,
-                signature_type=2,
-                funder=poly_proxy_address,
-            )
-            result = client.get_balance_allowance(
-                BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=2)
-            )
-            log(f"🔍 [NAV] sig_type=2 (GNOSIS_SAFE) response: {result}")
-            raw = result.get("balance", "0")
-            bal_raw = float(raw)
-            poly_cash = bal_raw / 1_000_000
-            log(f"Poly servicer cash (proxy): {poly_cash:.6f} USDC (raw={raw})")
-
-            # Diagnostic: also query sig_type=0 (EOA) to locate funds
-            try:
-                client_eoa = make_client(host=clob_url, key=private_key, chain_id=137, creds=creds, signature_type=0)
-                result_eoa = client_eoa.get_balance_allowance(
-                    BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0)
-                )
-                log(f"🔍 [NAV] sig_type=0 (EOA) response: {result_eoa}")
-                raw_eoa = result_eoa.get("balance", "0")
-                bal_eoa = float(raw_eoa) / 1_000_000
-                log(f"Poly servicer cash (EOA): {bal_eoa:.6f} USDC (raw={raw_eoa})")
-                if poly_cash == 0 and bal_eoa > 0:
-                    log(f"ℹ️ [NAV] Funds found in EOA account — using EOA balance for NAV")
-                    poly_cash = bal_eoa
-            except Exception as eoa_err:
-                log(f"⚠️ [NAV] EOA balance check failed: {eoa_err}")
-        except Exception as e:
-            log(f"⚠️ Error fetching poly servicer balance: {e}")
-    else:
-        log("ℹ️ POLY_API_KEY not set — poly_cash = 0")
-
-    from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
-    if kalshi_auth_available():
-        try:
-            import requests
-            from ..config import KALSHI_BASE_URL
-            url = f"{KALSHI_BASE_URL}/portfolio/balance"
-            headers = get_kalshi_headers("GET", url)
-            if headers:
-                resp = requests.get(url, headers=headers, timeout=10)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    kalshi_cash = float(data.get("balance", 0)) / 100.0
-                    log(f"Kalshi servicer cash: {kalshi_cash} USDC")
-                else:
-                    log(f"⚠️ Kalshi balance HTTP {resp.status_code}: {resp.text[:100]}")
-            else:
-                log("⚠️ Kalshi RSA signing failed — kalshi_cash = 0")
-        except Exception as e:
-            log(f"⚠️ Error fetching kalshi servicer balance: {e}")
-    else:
-        log("ℹ️ Kalshi credentials not configured (KALSHI_API_KEY_ID / KALSHI_PRIVATE_KEY_PATH) — kalshi_cash = 0")
+    try:
+        poly_cash = _get_poly_cash_raw() / 1_000_000
+    except NavReadError as e:
+        log(f"⚠️ Error fetching poly servicer balance: {e.detail}")
+    try:
+        kalshi_cash = _get_kalshi_cash_raw() / 1_000_000
+    except NavReadError as e:
+        log(f"⚠️ Error fetching kalshi servicer balance: {e.detail}")
 
     if opinion_enabled():
         opinion_cash = _get_opinion_cash()

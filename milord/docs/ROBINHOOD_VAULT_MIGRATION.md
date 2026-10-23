@@ -47,7 +47,10 @@ turned into shares twice. Covered end to end in `test/robinhood/FeeToParbFlow.t.
 
 The reward bridge is gone, but the engine trades on Polymarket (Polygon), Opinion (BSC) and Kalshi. Its
 capital currently leaves and returns through Base USDC. These paths must gain a Robinhood USDG leg before the
-new vault can fund the engine. **Not changed here**: they move real funds and the routes are not verified.
+new vault can fund the engine. **Update 2026-10-23:** the robinhood funding mode exists (`ARB_FUNDING_CHAIN=robinhood`):
+USDG on 4663 ↔ Base USDC ↔ venues, with allowlists, receipts, write-ahead intents and delta-based arrival
+(READINESS_MATRIX.md rows 3–4). The table below is the original gap list; what remains open is route verification
+(B9), CTF redemption (B21) and the TS full-balance bridge (B22). Opinion stays disabled.
 
 | File:line | Today | Needs |
 |---|---|---|
@@ -75,9 +78,12 @@ balances at market and log the rate.
 |---|---|
 | Chain id | 4663 mainnet, 46630 testnet |
 | Vault asset | USDG (6 decimals, address to confirm) |
-| Reporter | `ARB_VAULT_DOMAIN_SALT=PMFIArbVaultV3.milord.v1`, `ARB_VAULT_CHAIN_ID=4663`, `ARB_VAULT_RPC_URL`, `ARB_VAULT_ASSET`, `ARB_VAULT_V2_ADDRESS=<V3 vault>` |
+| Reporter | `ARB_VAULT_DOMAIN_SALT=PMFIArbVaultV3.milord.v1`, `ARB_VAULT_CHAIN_ID=4663`, `ARB_VAULT_RPC_URL`, `ARB_VAULT_ASSET` (= `ARB_USDG_ADDRESS`), `ARB_VAULT_V2_ADDRESS=<V3 vault>`; refuses to start on missing values or Base settings; `ARB_REPORT_GAS_LIMIT`, `ARB_RECALL_COOLDOWN_SECS` (1800) |
+| Funding (required) | `ARB_FUNDING_CHAIN=robinhood`, `ROBINHOOD_CHAIN_ID`, `ARB_USDG_ADDRESS`, `ARB_BRIDGE_ALLOWLIST` (`chainId:0xaddr,…`, empty refuses every bridge tx), `POLY_RH_DEPOSIT_ADDR/_CHAIN_ID/_TOKEN`, `KALSHI_BASE_DEPOSIT_ADDR/_CHAIN_ID/_TOKEN` |
+| Funding (tunable) | `ARB_TX_RECEIPT_TIMEOUT_SECS` (90), `ARB_HTTP_TIMEOUT_SECS` (15), `ARB_HTTP_RETRIES` (2), `ARB_ARRIVAL_TOLERANCE_BPS`, `ARB_INFLIGHT_STALE_SECS` (86400), `ARB_ALLOWED_TOKENS_EXTRA`, ledger paths `ARB_INTENT_LEDGER_PATH`, `ARB_CASHFLOW_JOURNAL_PATH`, `ARB_VENUE_DEPOSIT_LEDGER_PATH` |
+| Bridge status for the monitor | `ARB_BRIDGE_STATUS_HOST` (127.0.0.1), `ARB_BRIDGE_STATUS_PORT` (9110) |
 | Registry strategy | `pArbitrage` at (4663, vault, vault) |
-| Testnet deploy env | `MILORD_OWNER_SAFE`, `MILORD_TEAM_SAFE`, `MILORD_ARB_SAFE`, `MILORD_SERVICER`, `MILORD_QUOTE_SIGNER`, `MILORD_REPORT_SIGNER`, `MILORD_OPERATOR`, `MILORD_TOKEN_HOLDER`, `MILORD_VAULT_ASSET`, `MILORD_SWAP_ADAPTER`, `MILORD_BASE_URI`, `MILORD_CHARACTERISTICS`, `MILORD_VAULT_CAP` |
+| Testnet deploy env | see the header of `script/DeployRobinhood.s.sol` (adds `MILORD_PUBLISHER`, `MILORD_FUNDING_POOL`, `MILORD_WETH`, `MILORD_ROUTER_PAUSER`, `MILORD_PREDICTED_TOKEN` and the router bounds) |
 
 ## 5. Tests added
 

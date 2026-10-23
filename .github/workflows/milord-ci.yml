@@ -10,9 +10,9 @@ name: milord-ci
 on:
   push:
     branches: [main, "milord/**"]
-    paths: ["milord/**", ".github/workflows/milord-ci.yml"]
+    paths: ["milord/**", "bot/arb_monitor/**", ".github/workflows/milord-ci.yml"]
   pull_request:
-    paths: ["milord/**", ".github/workflows/milord-ci.yml"]
+    paths: ["milord/**", "bot/arb_monitor/**", ".github/workflows/milord-ci.yml"]
   workflow_dispatch:
 
 permissions:
@@ -89,7 +89,26 @@ jobs:
       - run: npm ci
       - run: node offchain/test-twap.mjs
       - run: node offchain/test-option-d.mjs
-      - run: node --test offchain/services/test/services.test.mjs
+      - run: node offchain/test-eligibility.mjs
+      - run: node --test offchain/services/test/services.test.mjs offchain/services/test/monitor.test.mjs
+      - name: Services image builds
+        run: docker build -f offchain/services/Dockerfile -t milord-services:ci .
+
+  engine:
+    name: arbitrage engine unit tests (bot/arb_monitor)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      # the tests use fakes and the standard library; eth-account is needed for report signing
+      - run: pip install eth-account==0.14.0 pycryptodome==3.24.1 requests python-dotenv
+      - run: python3 -m unittest discover -s bot/arb_monitor/tests -v
 
   simulation:
     name: anvil end-to-end simulation (production artifacts)
@@ -113,7 +132,7 @@ jobs:
           path: milord
       # MILORD_PREBUILT=1: the runs must use the downloaded production artifacts and refuse to compile,
       # exactly as on a low-memory VPS.
-      - name: Simulation (39 checks)
+      - name: Simulation (46 checks)
         run: ./sim/run-local.sh
         env:
           MILORD_PREBUILT: "1"

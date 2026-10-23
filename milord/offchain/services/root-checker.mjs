@@ -25,7 +25,7 @@ await runLoop({
     // pending roots may reference batches up to 'latest'; read inputs at latest for the comparison,
     // and confirm again at the finalized block before any veto decision.
     const fin = await retry(() => finalizedBlock(provider, cfg.confirmations));
-    const inputs = await retry(() => readInputs({ ...contracts, provider, toBlock: fin.number }));
+    const inputs = await retry(() => readInputs({ ...contracts, provider, fromBlock: cfg.startBlock, toBlock: fin.number, logStep: cfg.logStep }));
     const r = await checkRoot({ distributor: contracts.distributor, parb, inputs, genesis: cfg.genesis, settlementGrace: cfg.settlementGrace, excluded: [cfg.D.MilordConverter], alerter });
     for (const x of r) metrics.set(`${x.which}_root_ok`, x.match ? 1 : 0);
     console.log(JSON.stringify({ checker: r }));

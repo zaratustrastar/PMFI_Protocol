@@ -51,12 +51,15 @@ export function loadConfig(env = process.env) {
     stateDir: env.STATE_DIR ?? "./state",
     minBuybackWei: BigInt(env.MIN_BUYBACK_WEI ?? "10000000000000000"),
     buybackMaxBelowTwapBps: num("BUYBACK_MAX_BELOW_TWAP_BPS", 1000),
+    startBlock: num("START_BLOCK", D.startBlock ?? 0), // first block to index (deployment block)
+    logStep: num("LOG_BLOCK_RANGE", 10_000),
     hookrSettle: env.HOOKR_SETTLE === "mock", // local mock tax hook only; on mainnet the Hookr tax queues below
     minTaxPayoutWei: BigInt(env.MIN_TAX_PAYOUT_WEI ?? "1000000000000000"),
   };
 }
 
 export function connect(cfg, keyEnv) {
+  if (cfg.hookrSettle && (cfg.chainId === 4663 || cfg.chainId === 46630)) throw new Error("HOOKR_SETTLE=mock is for the local simulation only");
   if (cfg.chainId === 4663 && process.env.ALLOW_MAINNET !== "yes") throw new Error("Robinhood mainnet: set ALLOW_MAINNET=yes only after owner approval");
   const provider = new JsonRpcProvider(cfg.rpcUrl, cfg.chainId, { staticNetwork: true });
   const key = keyEnv ? process.env[keyEnv] : undefined;

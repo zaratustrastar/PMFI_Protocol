@@ -8,6 +8,15 @@ import {RevenueSplitter} from "../../src/robinhood/RevenueSplitter.sol";
 import {Mock18DecimalStable} from "../../src/mocks/Mock18DecimalStable.sol";
 import {DeployRobinhood} from "../../script/DeployRobinhood.s.sol";
 
+contract MockWethUsdgPool {
+    address public token0;
+    address public token1;
+
+    constructor(address a, address b) {
+        (token0, token1) = a < b ? (a, b) : (b, a);
+    }
+}
+
 /// Deployment of the whole protocol, including pARB and its distributor, on Robinhood Chain.
 contract RobinhoodDeploymentTest is SingleChainFixture {
     function test_everythingOnOneChain_wiredToUsdg() public view {
@@ -117,10 +126,35 @@ contract RobinhoodDeploymentTest is SingleChainFixture {
         vm.setEnv("MILORD_BASE_URI", "ipfs://x/");
         vm.setEnv("MILORD_CHARACTERISTICS", "C1,C2,C3,C4,C5,C6,C7,C8");
         vm.setEnv("MILORD_VAULT_CAP", "1000000000000");
+        address weth = makeAddr("weth");
+        vm.setEnv("MILORD_FUNDING_POOL", vm.toString(address(new MockWethUsdgPool(weth, address(usdg)))));
+        vm.setEnv("MILORD_WETH", vm.toString(weth));
+        vm.setEnv("MILORD_PUBLISHER", vm.toString(makeAddr("publisher")));
+        vm.setEnv("MILORD_ROUTER_PAUSER", vm.toString(makeAddr("monitor")));
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "./deployments/test-robinhood.json");
         DeployRobinhood s = new DeployRobinhood();
         Deployment memory x = s.run();
         assertEq(address(x.vault.usdc()), address(usdg));
         assertEq(x.vault.owner(), safe);
         assertEq(x.converter.pendingOwner(), safe);
+
+        // Fee -> USDG -> pARB is automatic: every splitter's arbitrage share goes to the router, never to a Safe.
+        address router = address(x.router);
+        assertTrue(router != address(0), "router deployed");
+        assertEq(x.entrySplit.payee(0).account, router, "entry fee 70% -> router");
+        assertEq(x.royaltySplit.payee(1).account, router, "royalty 50% -> router");
+        assertEq(x.taxSplit.payee(2).account, router, "trading tax 1/3 -> router");
+        assertTrue(x.adapter.isOperator(router), "router may fund the vault");
+        assertEq(x.router.pendingOwner(), arbSafe, "router offered to the Arbitrage Funding Safe");
+        assertTrue(x.router.isPauser(makeAddr("monitor")));
+        assertEq(x.distributor.publisher(), makeAddr("publisher"), "publisher has its own key");
+        assertEq(x.router.minSwapWei(), 0.05 ether);
+        assertEq(x.router.maxSwapWei(), 2 ether);
+        assertEq(x.router.dailyCapWei(), 10 ether);
+
+        // Refusals: no funding pool (would silently fall back to manual Safe funding) and a shared keeper/publisher key.
+        vm.setEnv("MILORD_PUBLISHER", vm.toString(operator));
+        vm.expectRevert(bytes("keeper and publisher need separate keys (nonces)"));
+        s.run();
     }
 }

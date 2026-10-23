@@ -17,7 +17,7 @@ remappings = [
   "permit2/=node_modules/@uniswap/v4-periphery/lib/permit2/",
   "solmate/=node_modules/@uniswap/v4-core/lib/solmate/",
 ]
-fs_permissions = [{ access = "read-write", path = "./sim" }, { access = "read", path = "./" }]
+fs_permissions = [{ access = "read-write", path = "./sim" }, { access = "read-write", path = "./deployments" }, { access = "read", path = "./" }]
 
 # Low-memory development builds (e.g. a 4 GB VPS): FOUNDRY_PROFILE=lowmem forge test --skip script
 # Not for gas numbers or releases: production artifacts come from the default (via-IR, optimized) profile in CI.

@@ -49,7 +49,7 @@
   },
   {
     "name": "5a push 10x and restore inside one block: zero weight, quote unchanged",
-    "block": 205,
+    "block": 206,
     "quoteBefore": "0.07389808041776",
     "quoteAfter": "0.07389808041776",
     "attackerMilordGained": "-2039204.420471372462488809"
@@ -93,6 +93,6 @@
   },
   {
     "name": "10 redeem works while the price service refuses every quote",
-    "redeemGas": "259938"
+    "redeemGas": "214988"
   }
 ]
