@@ -70,6 +70,21 @@ contract DeployRobinhood is Script, MilordDeployer {
         require(c.token != address(0) && c.token.code.length == 0, "mainnet: MILORD_PREDICTED_TOKEN required and must not exist yet (atomic launch)");
     }
 
+    /// Where the deployments manifest goes. foundry.toml lets vm.writeJson write only under ./deployments (and ./sim),
+    /// so any other path would fail AFTER the broadcast; it is refused here first. On mainnet an existing manifest is
+    /// never overwritten.
+    function manifestPath() public returns (string memory out) {
+        out = vm.envOr("MILORD_DEPLOYMENTS_OUT", string.concat("./deployments/robinhood-", vm.toString(block.chainid), ".json"));
+        require(
+            (vm.indexOf(out, "./deployments/") == 0 || vm.indexOf(out, "deployments/") == 0)
+                && vm.indexOf(out, "..") == type(uint256).max,
+            "MILORD_DEPLOYMENTS_OUT must be a file under ./deployments (foundry fs_permissions)"
+        );
+        if (block.chainid == ROBINHOOD_MAINNET && keccak256(bytes(vm.envOr("MILORD_LOCAL_FORK", string("no")))) != keccak256("yes")) {
+            require(!vm.exists(out), "mainnet: deployments manifest already exists; never overwritten");
+        }
+    }
+
     function _run() internal returns (Deployment memory d) {
         Config memory c;
         c.owner = vm.envAddress("MILORD_OWNER_SAFE");
@@ -108,6 +123,7 @@ contract DeployRobinhood is Script, MilordDeployer {
         int24 maxTicks = int24(int256(vm.envOr("MILORD_TWAP_MAX_TICKS", uint256(100))));
 
         _gate(c, pool, weth, window, maxTicks);
+        manifestPath(); // refuse an unwritable or protected manifest path before anything is broadcast
         console2.log("vault asset", c.asset, IERC20Metadata(c.asset).symbol());
         uint256 startBlock = block.number;
         vm.startBroadcast();
@@ -155,9 +171,7 @@ contract DeployRobinhood is Script, MilordDeployer {
         vm.serializeAddress(k, "publisher", c.publisher);
         vm.serializeAddress(k, "routerPauser", c.routerPauser);
         string memory json = vm.serializeAddress(k, "operator", c.operator);
-        string memory out = vm.envOr(
-            "MILORD_DEPLOYMENTS_OUT", string.concat("./deployments/robinhood-", vm.toString(block.chainid), ".json")
-        );
+        string memory out = manifestPath();
         vm.writeJson(json, out);
         console2.log("wrote", out);
     }

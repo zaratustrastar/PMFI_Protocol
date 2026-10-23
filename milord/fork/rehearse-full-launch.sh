@@ -46,12 +46,17 @@ mkdir -p fork/logs
 STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 LOG="fork/logs/full-rehearsal-$STAMP.log"
 TMP=$(mktemp -d)
+# DeployRobinhood writes its manifest with vm.writeJson, which foundry.toml allows only under ./deployments (and
+# ./sim). A unique, git-ignored temporary file there; mktemp never reuses an existing name, so no release manifest
+# (deployments/robinhood-<chain>.json) can be overwritten. Moved into $TMP right after the script; removed on exit.
+MANIFEST=""
 ANVIL_PID=""
 say() { echo "$*" | tee -a "$LOG"; }
 die() { say "REFUSED: $*"; exit 1; }
 cleanup() {
   if [ -n "$ANVIL_PID" ]; then kill "$ANVIL_PID" 2>/dev/null || true; wait "$ANVIL_PID" 2>/dev/null || true; fi
   rm -rf "$TMP"
+  if [ -n "$MANIFEST" ]; then rm -f -- "$MANIFEST"; fi
 }
 trap cleanup EXIT
 trap 'cleanup; exit 130' INT TERM
@@ -114,15 +119,19 @@ PRED=$(cast call --rpc-url "$FORK_URL" "$HELPER" "predictedToken()(address)")
 say "helper $HELPER, predicted MILORD $PRED"
 
 say "== 2. DeployRobinhood.s.sol (whole protocol against the predicted token)"
+MANIFEST=$(mktemp --suffix=.json deployments/.rehearsal-full-XXXXXXXX) || die "cannot create a manifest file in ./deployments"
+case "$MANIFEST" in deployments/.rehearsal-full-*.json) ;; *) die "unexpected manifest path $MANIFEST" ;; esac
 MILORD_LOCAL_FORK=yes MILORD_OWNER_SAFE=$TEAM_SAFE MILORD_TEAM_SAFE=$TEAM_SAFE MILORD_ARB_SAFE=$ARB_SAFE \
 MILORD_SERVICER=$SERVICER MILORD_QUOTE_SIGNER=$QUOTE_SIGNER MILORD_REPORT_SIGNER=$REPORT_SIGNER \
 MILORD_OPERATOR=$KEEPER MILORD_PUBLISHER=$PUBLISHER MILORD_ROUTER_PAUSER=$PAUSER \
 MILORD_PREDICTED_TOKEN=$PRED MILORD_VAULT_ASSET=$USDG MILORD_FUNDING_POOL=$FUNDING_POOL MILORD_WETH=$WETH \
 MILORD_BASE_URI="ipfs://rehearsal/" MILORD_CHARACTERISTICS="a,b,c,d,e,f,g,h" MILORD_VAULT_CAP=1000000000000 \
-MILORD_DEPLOYMENTS_OUT="$TMP/deployments.json" \
+MILORD_DEPLOYMENTS_OUT="./$MANIFEST" \
   forge script script/DeployRobinhood.s.sol --rpc-url "$FORK_URL" --broadcast --private-key $ANVIL0_KEY --slow >>"$LOG" 2>&1 \
   || die "DeployRobinhood failed (see $LOG)"
-[ -f "$TMP/deployments.json" ] || die "DeployRobinhood wrote no deployments file"
+[ -s "$MANIFEST" ] || die "DeployRobinhood wrote no deployments file"
+mv -- "$MANIFEST" "$TMP/deployments.json"
+MANIFEST=""
 grep -A1 "configuration hash" "$LOG" | tail -1 | tee -a "$LOG" >/dev/null
 
 flows() { REHEARSAL_RPC="$FORK_URL" REHEARSAL_TMP="$TMP" STATE_VIEW=$STATE_VIEW node fork/rehearse-flows.mjs "$@" 2>&1 | tee -a "$LOG"; }

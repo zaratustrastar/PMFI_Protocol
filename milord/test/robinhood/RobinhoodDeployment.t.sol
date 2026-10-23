@@ -167,6 +167,30 @@ contract RobinhoodDeploymentTest is SingleChainFixture {
         s.run();
         vm.setEnv("MILORD_LOCAL_FORK", "no");
         vm.setEnv("MILORD_MAINNET_APPROVAL", vm.toString(bytes32(0)));
+
+        // Manifest path (regression: the fork rehearsal pointed it at /tmp, which fs_permissions refuses, and the run
+        // failed only after the whole simulation). Refused up front unless under ./deployments; never overwritten on
+        // mainnet.
+        string memory bad = "MILORD_DEPLOYMENTS_OUT must be a file under ./deployments (foundry fs_permissions)";
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "/tmp/tmp.u90AZ1gvYu/deployments.json");
+        vm.expectRevert(bytes(bad));
+        s.manifestPath();
+        vm.chainId(ROBINHOOD_TESTNET);
+        vm.expectRevert(bytes(bad)); // the whole run stops before broadcasting anything
+        s.run();
+        vm.chainId(4663);
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "./deployments/../sim/x.json");
+        vm.expectRevert(bytes(bad));
+        s.manifestPath();
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "./deployments/README.md"); // an existing file
+        vm.expectRevert(bytes("mainnet: deployments manifest already exists; never overwritten"));
+        s.manifestPath();
+        vm.setEnv("MILORD_LOCAL_FORK", "yes"); // the rehearsal's own mktemp file already exists (empty)
+        assertEq(s.manifestPath(), "./deployments/README.md");
+        vm.setEnv("MILORD_LOCAL_FORK", "no");
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "./deployments/.rehearsal-full-test.json");
+        assertEq(s.manifestPath(), "./deployments/.rehearsal-full-test.json");
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "./deployments/test-robinhood.json");
         vm.chainId(ROBINHOOD_TESTNET);
     }
 }
