@@ -13,6 +13,7 @@ import { createWalletClient, createPublicClient, http, encodeFunctionData, parse
 import { privateKeyToAccount } from 'viem/accounts';
 import { polygon } from 'viem/chains';
 import { RelayClient, RelayerTxType } from '@polymarket/builder-relayer-client';
+import { deriveSafe } from '@polymarket/builder-relayer-client/dist/builder/derive.js';
 import { BuilderConfig } from '@polymarket/builder-signing-sdk';
 import * as dotenv from 'dotenv';
 import { requestedRaw, bridgeAmount as boundedBridgeAmount, validateApproval } from './withdrawal_bounds.mjs';
@@ -503,6 +504,7 @@ async function executeApproveTx(
     log('INFO', 'Using Relay-provided approve transaction...');
     try {
       const approveHash = await wallet.sendTransaction({
+        type: 'legacy',
         to: quote.approveTx.to as Hex,
         data: quote.approveTx.data as Hex,
         value: BigInt(quote.approveTx.value || '0'),
@@ -539,6 +541,7 @@ async function executeApproveTx(
 
     try {
       const approveHash = await wallet.sendTransaction({
+        type: 'legacy',
         to: USDC_E_POLYGON as Hex,
         data: approveData as Hex,
         gas: BigInt(100_000),
@@ -611,6 +614,8 @@ async function withdrawAndBridge(
   const account = privateKeyToAccount(cleanKey as Hex);
   const eoaAddress = account.address;
   
+  const expectedSafe = deriveSafe(eoaAddress,client.contractConfig.SafeContracts.SafeFactory);
+  if (expectedSafe.toLowerCase() !== POLYMARKET_PROXY_ADDRESS.toLowerCase()) return {success:false,error:'Configured proxy differs from signer-derived Safe'};
   const eoaBefore = await getEOABalanceRaw(eoaAddress);
 
   // Step 1: Withdraw from Safe proxy to EOA
@@ -691,6 +696,7 @@ async function withdrawAndBridge(
       }
       
       const bridgeTxHash = await wallet.sendTransaction({
+        type: 'legacy',
         to: currentQuote.depositTx.to as Hex,
         data: currentQuote.depositTx.data as Hex,
         value: BigInt(currentQuote.depositTx.value || '0'),
@@ -854,19 +860,11 @@ async function main(): Promise<void> {
       log('INFO', `EOA: ${eoaAddress}`);
       log('INFO', `Destination: ${TREASURY_ADDRESS}`);
       
-      // Check EOA balance
-      const eoaBalance = await getEOABalance(eoaAddress);
-      log('INFO', `EOA USDC.e balance: $${eoaBalance.toFixed(6)}`);
-      
-      const MIN_BRIDGE_AMOUNT = 5.0;
-      if (eoaBalance < MIN_BRIDGE_AMOUNT) {
-        log('ERROR', `EOA balance $${eoaBalance.toFixed(2)} below minimum bridge amount ($${MIN_BRIDGE_AMOUNT})`);
-        process.exit(1);
-      }
-      
-      const bridgeAmount = eoaBalance;
-      log('INFO', `Will bridge: $${bridgeAmount.toFixed(6)}`);
-      
+      const bridgeRaw = requestedRaw(args[1] || '0');
+      if (await getEOABalanceRaw(eoaAddress) < bridgeRaw) throw new Error('Insufficient EOA balance');
+      const bridgeAmount = Number(formatUnits(bridgeRaw,6));
+      log('INFO', `Will bridge explicit recovery amount: $${bridgeAmount.toFixed(6)}`);
+
       // Get bridge quote
       const quote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeRaw);
       if (!quote) {
@@ -924,6 +922,7 @@ async function main(): Promise<void> {
           }
           
           const bridgeTxHash = await wallet.sendTransaction({
+        type: 'legacy',
             to: currentQuote.depositTx.to as Hex,
             data: currentQuote.depositTx.data as Hex,
             value: BigInt(currentQuote.depositTx.value || '0'),
@@ -969,11 +968,7 @@ async function main(): Promise<void> {
         } catch (error: unknown) {
           const errMsg = error instanceof Error ? error.message : String(error);
           log('ERROR', `Bridge deposit failed (attempt ${attempt}): ${errMsg}`);
-          if (attempt < BRIDGE_MAX_ATTEMPTS) {
-            log('INFO', 'Will retry with fresh quote in 5s...');
-            await new Promise(r => setTimeout(r, 5000));
-            continue;
-          }
+          log('ERROR', 'Submission outcome unknown; reconcile before retry');
           process.exit(1);
         }
       }
@@ -990,7 +985,7 @@ async function main(): Promise<void> {
       console.log('Commands:');
       console.log('  info                    Show proxy info and balances');
       console.log('  withdraw <amount>       Withdraw to vault (--dry-run for simulation)');
-      console.log('  bridge                  Bridge EOA balance directly to vault (skip Step 1)');
+      console.log('  bridge <amount>         Bridge explicit recovery amount (skip Step 1)');
       console.log('  test                    Test RelayClient connection');
   }
 }
