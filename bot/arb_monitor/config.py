@@ -211,3 +211,73 @@ POLY_BASE_DEPOSIT_ADDR = os.environ.get("POLY_BASE_DEPOSIT_ADDR", "")
 KALSHI_BASE_DEPOSIT_ADDR = os.environ.get("KALSHI_BASE_DEPOSIT_ADDR", "")
 OPINION_BASE_DEPOSIT_ADDR = os.environ.get("OPINION_BASE_DEPOSIT_ADDR", "")
 OPINION_BSC_DEPOSIT_ADDR = os.environ.get("OPINION_BSC_DEPOSIT_ADDR", "")
+
+# ---------------------------------------------------------------------------
+# MILORD V1: funding chain switch (Robinhood Chain 4663 + USDG) and Opinion flag
+# ---------------------------------------------------------------------------
+# Read at call time (not import time) so one process can be reconfigured/tested
+# without reloading modules. Defaults keep the legacy Base V2 behaviour exactly
+# (Opinion stays on there); in robinhood mode (MILORD V1) Opinion is OFF unless
+# ARB_OPINION_ENABLED=true. No secrets are read here.
+#
+#   ARB_FUNDING_CHAIN          base | robinhood                  (default base)
+#   ROBINHOOD_RPC_URL          Robinhood Chain RPC (falls back to ARB_VAULT_RPC_URL)
+#   ROBINHOOD_CHAIN_ID         4663
+#   ARB_USDG_ADDRESS           USDG on 4663 (6 decimals)
+#   POLY_RH_DEPOSIT_ADDR       Polymarket bridge deposit address that accepts USDG on 4663
+#   ACROSS_API_URL             Across swap/deposit API (primary bridge for 4663 <-> Base)
+#   RELAY_API_URL              Relay API (fallback bridge)
+#   ARB_BRIDGE_MAX_FEE_BPS     reject any bridge quote costing more than this (default 50 = 0.5%)
+#   ARB_RH_SWEEP_MIN_USDC      min Base USDC to bridge back to USDG on 4663 (default 5)
+#   ARB_PEG_MAX_DEVIATION_BPS  USDG/USDC peg haircut threshold, 0 = no haircut (default 0)
+#   ARB_OPINION_ENABLED        true | false   (default: false in robinhood mode, true in base mode)
+USDG_ROBINHOOD_DEFAULT = "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168"
+
+
+def arb_funding_chain() -> str:
+    return os.environ.get("ARB_FUNDING_CHAIN", "base").strip().lower() or "base"
+
+
+def is_robinhood_funding() -> bool:
+    return arb_funding_chain() == "robinhood"
+
+
+def opinion_enabled() -> bool:
+    default = "false" if is_robinhood_funding() else "true"
+    return os.environ.get("ARB_OPINION_ENABLED", default).strip().lower() == "true"
+
+
+def robinhood_chain_id() -> int:
+    return int(os.environ.get("ROBINHOOD_CHAIN_ID", "4663"))
+
+
+def robinhood_rpc_url() -> str:
+    return os.environ.get("ROBINHOOD_RPC_URL", "") or os.environ.get("ARB_VAULT_RPC_URL", "")
+
+
+def usdg_address() -> str:
+    return os.environ.get("ARB_USDG_ADDRESS", USDG_ROBINHOOD_DEFAULT)
+
+
+def poly_rh_deposit_addr() -> str:
+    return os.environ.get("POLY_RH_DEPOSIT_ADDR", "")
+
+
+def across_api_url() -> str:
+    return os.environ.get("ACROSS_API_URL", "https://app.across.to/api").rstrip("/")
+
+
+def relay_api_url() -> str:
+    return os.environ.get("RELAY_API_URL", "https://api.relay.link").rstrip("/")
+
+
+def bridge_max_fee_bps() -> int:
+    return int(os.environ.get("ARB_BRIDGE_MAX_FEE_BPS", "50"))
+
+
+def rh_sweep_min_usdc() -> float:
+    return float(os.environ.get("ARB_RH_SWEEP_MIN_USDC", "5"))
+
+
+def peg_max_deviation_bps() -> int:
+    return int(os.environ.get("ARB_PEG_MAX_DEVIATION_BPS", "0"))

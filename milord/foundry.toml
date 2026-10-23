@@ -1,0 +1,41 @@
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["node_modules"]
+solc_version = "0.8.26"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+remappings = [
+  "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+  "forge-std/=node_modules/forge-std/src/",
+  "@uniswap/v4-core/=node_modules/@uniswap/v4-core/",
+  "@uniswap/v4-periphery/=node_modules/@uniswap/v4-periphery/",
+  "permit2/=node_modules/@uniswap/v4-periphery/lib/permit2/",
+  "solmate/=node_modules/@uniswap/v4-core/lib/solmate/",
+]
+fs_permissions = [{ access = "read-write", path = "./sim" }, { access = "read", path = "./" }]
+
+# Low-memory development builds (e.g. a 4 GB VPS): FOUNDRY_PROFILE=lowmem forge test --skip script
+# Not for gas numbers or releases: production artifacts come from the default (via-IR, optimized) profile in CI.
+# script/DeployLocal.s.sol needs via-IR; use CI-built artifacts for the local simulation.
+# Separate output folders, so a lowmem build never overwrites production artifacts in out/ and cache/.
+[profile.lowmem]
+via_ir = false
+optimizer = false
+out = "out-lowmem"
+cache_path = "cache-lowmem"
+
+[fuzz]
+runs = 512
+
+[invariant]
+runs = 128
+depth = 64
+fail_on_revert = false
+
+[lint]
+lint_on_build = false

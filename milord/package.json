@@ -1,0 +1,26 @@
+{
+  "name": "milord",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.1.0",
+    "@openzeppelin/merkle-tree": "^1.0.7",
+    "ethers": "^6.13.4",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4"
+  },
+  "devDependencies": {
+    "@uniswap/v3-core": "^1.0.1",
+    "@uniswap/v4-core": "^1.0.2",
+    "@uniswap/v4-periphery": "^1.0.3"
+  }
+}

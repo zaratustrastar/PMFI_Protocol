@@ -1,0 +1,11 @@
+{
+  "vault": "0x000000000000000000000000000000000000a3a3",
+  "chainId": 46630,
+  "salt": "PMFIArbVaultV3.milord.v1",
+  "timestamp": 1800000000,
+  "deadline": 1800000600,
+  "nonce": 1,
+  "reportedAssets": 0,
+  "signer": "0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A",
+  "signature": "0x46a1129df80f9e532be5db7bbb2d4e0c15755c5bbb3296c225157bc7e190568e2f56f232d92331f78801a84451e57a97b2e045fa91e42e3df172727cd99df9071c"
+}

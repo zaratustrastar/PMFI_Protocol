@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from ..config import ARB_IDLE_TARGET_BPS, ARB_SAFETY_BUFFER_USDC
+from ..config import ARB_IDLE_TARGET_BPS, ARB_SAFETY_BUFFER_USDC, is_robinhood_funding
 
 
 def log(msg: str):
@@ -56,9 +56,16 @@ def compute_liquidity_state(vault_address: str, servicer_wallet: str) -> Liquidi
         state.pending_redeem_value = (pending_redeem_shares * official_pps_raw) / 1e18 / 1e6
 
         servicer_usdc = 0.0
+        base_usdc = None
         if servicer_wallet:
             try:
-                servicer_usdc = _read_usdc_balance(servicer_wallet)
+                if is_robinhood_funding():
+                    # Servicer cash = USDG on 4663; Base USDC only matters for Kalshi recalls.
+                    from .arb_funder import get_servicer_cash_usdc, _get_usdc_balance
+                    servicer_usdc = get_servicer_cash_usdc(servicer_wallet)
+                    base_usdc = _get_usdc_balance(servicer_wallet)
+                else:
+                    servicer_usdc = _read_usdc_balance(servicer_wallet)
             except Exception as e:
                 log(f"⚠️ Could not read servicer balance: {e}")
         state.free_cash = servicer_usdc
@@ -79,7 +86,7 @@ def compute_liquidity_state(vault_address: str, servicer_wallet: str) -> Liquidi
 
         # First reconcile mature recalls against current servicer balance, then read pending amount.
         try:
-            mark_withdrawals_arrived(servicer_usdc)
+            mark_withdrawals_arrived(servicer_usdc, base_usdc)
             state.pending_withdrawals = max(0.0, get_pending_withdrawal_usdc())
         except Exception as e:
             log(f"⚠️ Could not read pending recalls: {e}")

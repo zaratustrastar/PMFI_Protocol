@@ -1,0 +1,173 @@
+{
+  "config": {
+    "supply": 6767000000,
+    "milordInLiquidity": 6767000000,
+    "milordOutside": 0,
+    "ethSeeded": 0,
+    "tickLower": 134220,
+    "tickUpper": 203280,
+    "tickSpacing": 60,
+    "lpFee": 0.003,
+    "tax": 0.015,
+    "openingEthPerMillion": 0.0014863,
+    "openingFdvEth": 10.058,
+    "rangeTopEthPerMillion": 1.483,
+    "rangeTopFdvEth": 10037
+  },
+  "maxPurchasable": {
+    "milord": 6767000000,
+    "grossEthToBuyAll": 323.5,
+    "note": "no wallet or transaction limits; one swap can buy any amount up to the whole position; above the range top the pool holds only ETH"
+  },
+  "oneMilordAtOpen": {
+    "milord": 1000000,
+    "grossEth": 0.001514,
+    "plusMinimumEntryFeeEth": 0.002
+  },
+  "tenPercentFeePathStartsAt": {
+    "fdvEth": 135.34,
+    "grossEthOfNetBuysNeeded": 28.2
+  },
+  "buys": [
+    {
+      "ethIn": 0.002,
+      "milordOut": 1321223,
+      "pctOfSupply": 0.02,
+      "nftsWorth": 1,
+      "avgEthPerMillion": 0.001514,
+      "priceAfterEthPerMillion": 0.001487,
+      "priceChangePct": 0.04,
+      "fdvAfterEth": 10.06
+    },
+    {
+      "ethIn": 0.01,
+      "milordOut": 6601123,
+      "pctOfSupply": 0.098,
+      "nftsWorth": 6,
+      "avgEthPerMillion": 0.001515,
+      "priceAfterEthPerMillion": 0.001489,
+      "priceChangePct": 0.19,
+      "fdvAfterEth": 10.08
+    },
+    {
+      "ethIn": 0.05,
+      "milordOut": 32881373,
+      "pctOfSupply": 0.486,
+      "nftsWorth": 32,
+      "avgEthPerMillion": 0.001521,
+      "priceAfterEthPerMillion": 0.0015,
+      "priceChangePct": 0.95,
+      "fdvAfterEth": 10.15
+    },
+    {
+      "ethIn": 0.1,
+      "milordOut": 65454764,
+      "pctOfSupply": 0.967,
+      "nftsWorth": 65,
+      "avgEthPerMillion": 0.001528,
+      "priceAfterEthPerMillion": 0.001515,
+      "priceChangePct": 1.9,
+      "fdvAfterEth": 10.25
+    },
+    {
+      "ethIn": 0.25,
+      "milordOut": 161369720,
+      "pctOfSupply": 2.385,
+      "nftsWorth": 161,
+      "avgEthPerMillion": 0.001549,
+      "priceAfterEthPerMillion": 0.001557,
+      "priceChangePct": 4.78,
+      "fdvAfterEth": 10.54
+    },
+    {
+      "ethIn": 0.5,
+      "milordOut": 315455054,
+      "pctOfSupply": 4.662,
+      "nftsWorth": 315,
+      "avgEthPerMillion": 0.001585,
+      "priceAfterEthPerMillion": 0.00163,
+      "priceChangePct": 9.68,
+      "fdvAfterEth": 11.03
+    },
+    {
+      "ethIn": 1,
+      "milordOut": 603660290,
+      "pctOfSupply": 8.921,
+      "nftsWorth": 603,
+      "avgEthPerMillion": 0.001657,
+      "priceAfterEthPerMillion": 0.001781,
+      "priceChangePct": 19.8,
+      "fdvAfterEth": 12.05
+    },
+    {
+      "ethIn": 2,
+      "milordOut": 1111321757,
+      "pctOfSupply": 16.423,
+      "nftsWorth": 1111,
+      "avgEthPerMillion": 0.0018,
+      "priceAfterEthPerMillion": 0.002102,
+      "priceChangePct": 41.4,
+      "fdvAfterEth": 14.22
+    },
+    {
+      "ethIn": 5,
+      "milordOut": 2243205927,
+      "pctOfSupply": 33.149,
+      "nftsWorth": 2243,
+      "avgEthPerMillion": 0.002229,
+      "priceAfterEthPerMillion": 0.003224,
+      "priceChangePct": 116.9,
+      "fdvAfterEth": 21.82
+    },
+    {
+      "ethIn": 10,
+      "milordOut": 3396228527,
+      "pctOfSupply": 50.188,
+      "nftsWorth": 3396,
+      "avgEthPerMillion": 0.002944,
+      "priceAfterEthPerMillion": 0.005626,
+      "priceChangePct": 278.5,
+      "fdvAfterEth": 38.07
+    },
+    {
+      "ethIn": 25,
+      "milordOut": 4910711257,
+      "pctOfSupply": 72.569,
+      "nftsWorth": 4910,
+      "avgEthPerMillion": 0.005091,
+      "priceAfterEthPerMillion": 0.01682,
+      "priceChangePct": 1031.48,
+      "fdvAfterEth": 113.8
+    },
+    {
+      "ethIn": 50,
+      "milordOut": 5768102711,
+      "pctOfSupply": 85.239,
+      "nftsWorth": 5768,
+      "avgEthPerMillion": 0.008668,
+      "priceAfterEthPerMillion": 0.04876,
+      "priceChangePct": 3180.43,
+      "fdvAfterEth": 329.94
+    },
+    {
+      "ethIn": 100,
+      "milordOut": 6319810077,
+      "pctOfSupply": 93.392,
+      "nftsWorth": 6319,
+      "avgEthPerMillion": 0.01582,
+      "priceAfterEthPerMillion": 0.1625,
+      "priceChangePct": 10830.71,
+      "fdvAfterEth": 1099.38
+    },
+    {
+      "ethIn": 200,
+      "milordOut": 6637228839,
+      "pctOfSupply": 98.082,
+      "nftsWorth": 6637,
+      "avgEthPerMillion": 0.03013,
+      "priceAfterEthPerMillion": 0.5892,
+      "priceChangePct": 39540.84,
+      "fdvAfterEth": 3986.96
+    }
+  ]
+}

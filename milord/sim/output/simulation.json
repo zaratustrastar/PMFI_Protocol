@@ -1,0 +1,1635 @@
+{
+  "generatedAt": "2026-10-14T19:44:38.143Z",
+  "disclaimer": "SIMULATED. Local chain with hypothetical SCENARIO inputs, illustrative (unapproved) launch parameters, a mock of Hookr's tax hook, mock USDG and scenario P&L. Not actual financial performance, not a forecast, not proposed production values.",
+  "scenario": {
+    "firstBuyEth": "1000000000000000000",
+    "launchTraderBuysEth": [
+      "500000000000000000",
+      "1000000000000000000",
+      "500000000000000000",
+      "1000000000000000000",
+      "500000000000000000"
+    ],
+    "week2WhaleBuyEth": "30000000000000000000",
+    "royaltySaleEth": "500000000000000000",
+    "pnlBpsWeek2": 200,
+    "pnlBpsWeek3": -300
+  },
+  "launch": "final allocation: 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, 0 ETH, ~10 ETH opening FDV, range to ~1,000x; 1.5%/1.5% tax; 0.3% LP fee; 20% Hookr commission (to verify on Hookr); position locked forever, LP fees to buyback-and-burn",
+  "start": {
+    "milordSupply": 6767000000,
+    "activeNFTs": 0,
+    "holders": 0,
+    "milordInPool": 6767000000,
+    "milordOutsideLiquidity": 0,
+    "poolEth": 0,
+    "vaultShares": 1,
+    "openingWeiPerMillion": 0.001486288643256,
+    "launch": "final allocation: 100% of supply (6,767,000,000 MILORD) in one MILORD-only position, 0 ETH, ~10 ETH opening FDV, range to ~1,000x; 1.5%/1.5% tax; 0.3% LP fee; 20% Hookr commission (to verify on Hookr); position locked forever, LP fees to buyback-and-burn",
+    "launchDustBurnedWei": "24920"
+  },
+  "weeks": [
+    {
+      "label": "week 1",
+      "start": 1792368000,
+      "end": 1792972800,
+      "notes": "launch, first-hour buys, 100 Milords, one royalty-paying sale, one without",
+      "milordSupply": 6751273772.440382,
+      "milordEscrowed": 100000000,
+      "milordInPool": 5015701613.476478,
+      "milordCirculating": 1635572158.9639044,
+      "milordBurnedTotal": 15726227.559617728,
+      "burnedOnExitTotal": 0,
+      "burnedByBuybackTotal": 14375422.710793931,
+      "burnedByBuybackThisWeek": 14375422.710793931,
+      "activeNFTs": 100,
+      "inventoryNFTs": 0,
+      "totalMinted": 100,
+      "conversionsTotal": 100,
+      "redemptionsTotal": 0,
+      "ethTradingVolumeTotal": 6.086536291172719,
+      "hookrCommissionTotal": 0.01841974149172432,
+      "projectTaxTotal": 0.07367896596689737,
+      "ethEntryFeesTotal": 0.2,
+      "royaltiesTotal": 0.0335,
+      "teamRevenueEthTotal": 0.1013071993567669,
+      "lpFeesEthTotal": 0.014339348730473545,
+      "lpFeesMilordTotal": 1350804.8488237977,
+      "arbitrageFundingEthTotal": 0.1811526741011708,
+      "burnBudgetEthTotal": 0.03890391598383713,
+      "ethSwappedThisWeek": 0.1811526741011708,
+      "routerHeldEth": 0.000154525255596081,
+      "usdgDepositedThisWeek": 453.080421,
+      "pnlUsdgThisWeek": 0,
+      "parbMintedThisWeek": 453.080421,
+      "parbMintedTotal": 453.080421,
+      "ppsUsdg": 1,
+      "navUsdg": 453.080421,
+      "parbAllocatedThisWeek": 453.080421,
+      "dustCarried": 2e-17,
+      "eligibleWallets": 42,
+      "epochAction": "proposed",
+      "epochReason": null,
+      "cumulativeAllocated": 453.080421,
+      "claimedTotal": 217.78176050593117,
+      "unclaimed": 235.29866049406883,
+      "weiPerMillionSpot": 0.002646805169103,
+      "merkleRoot": "0x2e6b406555be4bfabf1fa1da104eb3e1b7b6c7ac7e354359f9d1f2cf2a959a77",
+      "tracked": {
+        "seller_alice": {
+          "weightSeconds": 1540799,
+          "allocatedThisWeek": 13.900960749169254,
+          "cumulative": 13.900960749169254,
+          "pARBBalance": 13.900960749169254,
+          "nftsHeld": 3
+        },
+        "buyer": {
+          "weightSeconds": 0,
+          "allocatedThisWeek": 0,
+          "cumulative": 0,
+          "pARBBalance": 0,
+          "nftsHeld": 0
+        },
+        "redeemer_carol": {
+          "weightSeconds": 1533600,
+          "allocatedThisWeek": 13.836011968417665,
+          "cumulative": 13.836011968417665,
+          "pARBBalance": 13.836011968417665,
+          "nftsHeld": 3
+        }
+      }
+    },
+    {
+      "label": "week 2",
+      "start": 1792972800,
+      "end": 1793577600,
+      "notes": "redemption day 1.5, large buy, 10 conversions (10% fee path), sale day 3.5, +2% SCENARIO P&L",
+      "milordSupply": 6713251320.059347,
+      "milordEscrowed": 109000000,
+      "milordInPool": 2717968760.5741744,
+      "milordCirculating": 3886282559.4851723,
+      "milordBurnedTotal": 53748679.94065304,
+      "burnedOnExitTotal": 100000,
+      "burnedByBuybackTotal": 48362937.01679854,
+      "burnedByBuybackThisWeek": 33987514.30600461,
+      "activeNFTs": 109,
+      "inventoryNFTs": 0,
+      "totalMinted": 109,
+      "conversionsTotal": 110,
+      "redemptionsTotal": 1,
+      "ethTradingVolumeTotal": 55.232494310280536,
+      "hookrCommissionTotal": 0.1675708434269238,
+      "projectTaxTotal": 0.6702833737076953,
+      "ethEntryFeesTotal": 0.226027791527597,
+      "royaltiesTotal": 0.0335,
+      "teamRevenueEthTotal": 0.3079637859150539,
+      "lpFeesEthTotal": 0.10462148447661296,
+      "lpFeesMilordTotal": 5285742.923854497,
+      "arbitrageFundingEthTotal": 0.3972251804112765,
+      "burnBudgetEthTotal": 0.32809396127075857,
+      "ethSwappedThisWeek": 0.21607250631010572,
+      "routerHeldEth": 0.001149722114816208,
+      "usdgDepositedThisWeek": 540.386867,
+      "pnlUsdgThisWeek": 8.155447,
+      "parbMintedThisWeek": 530.832414373688,
+      "parbMintedTotal": 983.912835373688,
+      "ppsUsdg": 1.017999,
+      "navUsdg": 1001.622735,
+      "parbAllocatedThisWeek": 530.832414373688,
+      "dustCarried": 4.2e-17,
+      "eligibleWallets": 53,
+      "epochAction": "proposed",
+      "epochReason": null,
+      "cumulativeAllocated": 983.912835373688,
+      "claimedTotal": 476.19631153768387,
+      "unclaimed": 507.71652383600417,
+      "weiPerMillionSpot": 0.008402216667018,
+      "merkleRoot": "0xabfa79daaa005934eacd383ad6cbbd3dc51e017baa8c3ee9aed6a4ffbce7aa31",
+      "tracked": {
+        "seller_alice": {
+          "weightSeconds": 1512000,
+          "allocatedThisWeek": 12.500329563298143,
+          "cumulative": 26.4012903124674,
+          "pARBBalance": 26.4012903124674,
+          "nftsHeld": 2
+        },
+        "buyer": {
+          "weightSeconds": 302400,
+          "allocatedThisWeek": 2.5000659126596285,
+          "cumulative": 2.5000659126596285,
+          "pARBBalance": 2.5000659126596285,
+          "nftsHeld": 1
+        },
+        "redeemer_carol": {
+          "weightSeconds": 1339200,
+          "allocatedThisWeek": 11.071720470349783,
+          "cumulative": 24.907732438767447,
+          "pARBBalance": 24.907732438767447,
+          "nftsHeld": 2
+        }
+      }
+    },
+    {
+      "label": "week 3",
+      "start": 1793577600,
+      "end": 1794182400,
+      "notes": "-3% SCENARIO P&L, then a new fee deposit priced at the lower PPS; 5 conversions; inactive strategy 2",
+      "milordSupply": 6709846307.925279,
+      "milordEscrowed": 114000000,
+      "milordInPool": 3119519264.064464,
+      "milordCirculating": 3476327043.8608146,
+      "milordBurnedTotal": 57153692.074721165,
+      "burnedOnExitTotal": 100000,
+      "burnedByBuybackTotal": 50538082.60399359,
+      "burnedByBuybackThisWeek": 2175145.5871950476,
+      "activeNFTs": 114,
+      "inventoryNFTs": 0,
+      "totalMinted": 114,
+      "conversionsTotal": 115,
+      "redemptionsTotal": 1,
+      "ethTradingVolumeTotal": 58.254477840015774,
+      "hookrCommissionTotal": 0.17681418397738397,
+      "projectTaxTotal": 0.707256735909536,
+      "ethEntryFeesTotal": 0.236027791527597,
+      "royaltiesTotal": 0.0335,
+      "teamRevenueEthTotal": 0.32328700753692746,
+      "lpFeesEthTotal": 0.10479064734813334,
+      "lpFeesMilordTotal": 6515609.47072757,
+      "arbitrageFundingEthTotal": 0.41764054806967965,
+      "burnBudgetEthTotal": 0.3405900431003726,
+      "ethSwappedThisWeek": 0.020415367658403096,
+      "routerHeldEth": 0.000057576078286618,
+      "usdgDepositedThisWeek": 51.056076,
+      "pnlUsdgThisWeek": -27.043813,
+      "parbMintedThisWeek": 51.54508421393763,
+      "parbMintedTotal": 1035.4579195876256,
+      "ppsUsdg": 0.990513,
+      "navUsdg": 1025.634998,
+      "parbAllocatedThisWeek": 51.54508421393763,
+      "dustCarried": 1.6e-17,
+      "eligibleWallets": 56,
+      "epochAction": "proposed",
+      "epochReason": null,
+      "cumulativeAllocated": 1035.4579195876256,
+      "claimedTotal": 501.11804104150383,
+      "unclaimed": 534.3398785461218,
+      "weiPerMillionSpot": 0.006503941411376,
+      "merkleRoot": "0x7df85675f8f8a0571f7733389ad2de97e5774ae4d92280f7d05b85c5ce0bf4bd",
+      "tracked": {
+        "seller_alice": {
+          "weightSeconds": 1209600,
+          "allocatedThisWeek": 0.9162601343473259,
+          "cumulative": 27.317550446814725,
+          "pARBBalance": 27.317550446814725,
+          "nftsHeld": 2
+        },
+        "buyer": {
+          "weightSeconds": 604800,
+          "allocatedThisWeek": 0.45813006717366295,
+          "cumulative": 2.9581959798332913,
+          "pARBBalance": 2.9581959798332913,
+          "nftsHeld": 1
+        },
+        "redeemer_carol": {
+          "weightSeconds": 1209600,
+          "allocatedThisWeek": 0.9162601343473259,
+          "cumulative": 25.823992573114776,
+          "pARBBalance": 25.823992573114776,
+          "nftsHeld": 2
+        }
+      }
+    }
+  ],
+  "timeline": [
+    {
+      "step": 1,
+      "t": 1792367400,
+      "text": "deployment: 100% of supply into the founding position, rounding remainder burned",
+      "milordInLiquidity": 6767000000,
+      "milordOutside": 0,
+      "remainderBurnedWei": "24920"
+    },
+    {
+      "step": 2,
+      "t": 1792367400,
+      "text": "Hookr-style MILORD/ETH market open (empty of ETH)",
+      "tick": 203280
+    },
+    {
+      "step": 3,
+      "t": 1792367400,
+      "text": "MILORD-only position minted into the (mock) Hookr family and locked forever; LP fee beneficiary = HookrLockFeeCollector",
+      "positionId": 1
+    },
+    {
+      "step": "3b",
+      "t": 1792367400,
+      "text": "no wallet holds MILORD outside the pool, so the first trade can only be a buy",
+      "outside": {
+        "deployer": 0,
+        "team": 0,
+        "arbitrage": 0,
+        "operator": 0
+      }
+    },
+    {
+      "step": 4,
+      "t": 1792368060,
+      "text": "first buy: 1 ETH -> MILORD",
+      "milordOut": 603660290.4751858
+    },
+    {
+      "step": "4b",
+      "t": 1792368300,
+      "text": "entry quote 5 minutes after open: bounded bootstrap (highest price since open), fee = 0.002 ETH minimum",
+      "mode": "bootstrap",
+      "weiPerMillion": 0.001780640506687,
+      "fee": 0.002
+    },
+    {
+      "step": 5,
+      "t": 1792371001,
+      "text": "additional buys in the first hour",
+      "buys": 5
+    },
+    {
+      "step": 10,
+      "t": 1792410300,
+      "text": "40 users bought their MILORD in the pool (2-3M each)"
+    },
+    {
+      "step": 11,
+      "t": 1792530001,
+      "text": "100 conversions with TWAP-signed quotes",
+      "feesEth": 0.2,
+      "minimumApplied": 100
+    },
+    {
+      "step": 12,
+      "t": 1792530001,
+      "text": "100 Milords issued",
+      "active": 100
+    },
+    {
+      "step": 5,
+      "t": 1792540800,
+      "text": "two traders sold half their MILORD"
+    },
+    {
+      "step": 18,
+      "t": 1792713600,
+      "text": "secondary sale paying 6.7% royalty, and a private transfer paying none",
+      "royaltyEth": 0.0335
+    },
+    {
+      "step": 13,
+      "t": 1792998066,
+      "text": "entry fees split 70/30; tax split after commission; buyback burned; ETH -> USDG; deposit; report; pARB minted; root published; claims"
+    },
+    {
+      "step": 20,
+      "t": 1793102400,
+      "text": "redemption: 900,000 MILORD returned, 100,000 burned",
+      "returned": 900000,
+      "burned": 100000
+    },
+    {
+      "step": 18,
+      "t": 1793275200,
+      "text": "Alice sells one Milord to a new buyer on day 3.5 (private sale, no royalty)"
+    },
+    {
+      "step": 21,
+      "t": 1793602867,
+      "text": "positive-return report",
+      "pps": 1.017999
+    },
+    {
+      "step": 25,
+      "t": 1793664000,
+      "text": "second strategy registered, inactive; collection and token unchanged",
+      "strategyId": 2
+    },
+    {
+      "step": 22,
+      "t": 1794207667,
+      "text": "negative-return report",
+      "pps": 0.990513
+    },
+    {
+      "step": 23,
+      "t": 1794207667,
+      "text": "fee-funded deposit after the PPS change",
+      "usdg": 51.056076
+    },
+    {
+      "step": 24,
+      "t": 1794207667,
+      "text": "shares minted at the new PPS",
+      "shares": 51.54508421393763,
+      "pps": 0.990513
+    }
+  ],
+  "priceSeries": [
+    {
+      "t": 1792367400,
+      "label": "open",
+      "weiPerMillion": 0.001486288643256
+    },
+    {
+      "t": 1792368060,
+      "label": "first buy",
+      "weiPerMillion": 0.001780640506687
+    },
+    {
+      "t": 1792371001,
+      "label": "launch buys",
+      "weiPerMillion": 0.003020271465415
+    },
+    {
+      "t": 1792530001,
+      "label": "after conversions",
+      "weiPerMillion": 0.003147299100725
+    },
+    {
+      "t": 1792998066,
+      "label": "week 1 close",
+      "weiPerMillion": 0.002646805169103
+    },
+    {
+      "t": 1793145600,
+      "label": "week 2 large buy",
+      "weiPerMillion": 0.02585849965591
+    },
+    {
+      "t": 1793602867,
+      "label": "week 2 close",
+      "weiPerMillion": 0.008402216667018
+    },
+    {
+      "t": 1794207667,
+      "label": "week 3 close",
+      "weiPerMillion": 0.006503941411376
+    }
+  ],
+  "ppsSeries": [
+    {
+      "t": 1792972801,
+      "label": "week 1",
+      "pps": 1,
+      "navUsdg": 453.080421,
+      "supply": 1
+    },
+    {
+      "t": 1793577601,
+      "label": "week 2",
+      "pps": 1.017999,
+      "navUsdg": 1001.622735,
+      "supply": 454.080421
+    },
+    {
+      "t": 1794182401,
+      "label": "week 3",
+      "pps": 0.990513,
+      "navUsdg": 1025.634998,
+      "supply": 984.912835373688
+    }
+  ],
+  "quoteRefusals": [],
+  "owners": [
+    {
+      "address": "0x3e03215f1a66d70ef6ff595b560d864db1192e35",
+      "cumulativePARB": 30.243258503396664,
+      "claimed": 0
+    },
+    {
+      "address": "0xdfbbb8958ca5d7fc5bfc1565c17415bedd631371",
+      "cumulativePARB": 30.178309722645075,
+      "claimed": 0
+    },
+    {
+      "address": "0xd6690c88e2d56265ad2cbea080da3a317dd68a37",
+      "cumulativePARB": 30.14583082131076,
+      "claimed": 30.14583082131076
+    },
+    {
+      "address": "0x6dac40b112349f451b3b2c46c9ad54f44a168f25",
+      "cumulativePARB": 30.04839411730782,
+      "claimed": 0
+    },
+    {
+      "address": "0x81d6f7a9124bd99ce9bedca2e0832088aa720852",
+      "cumulativePARB": 30.015915215973504,
+      "claimed": 30.015915215973504
+    },
+    {
+      "address": "0x06b1045f30b1a4f047758162d60ae25dd575db2f",
+      "cumulativePARB": 29.98344533655623,
+      "claimed": 0
+    },
+    {
+      "address": "0x6eef0176f6a88c9028b14cfcd337644097218f94",
+      "cumulativePARB": 29.950957413304877,
+      "claimed": 29.950957413304877
+    },
+    {
+      "address": "0xe9920b06420e8c15e883dee3519db78a8798cb99",
+      "cumulativePARB": 29.918469490053525,
+      "claimed": 0
+    },
+    {
+      "address": "0xda1268674a562a8f85a63e69e5cc1f01487abbb5",
+      "cumulativePARB": 29.88600863255329,
+      "claimed": 29.88600863255329
+    },
+    {
+      "address": "0xe058bae8beab655395963194fa029e69e02df5aa",
+      "cumulativePARB": 29.853520709301936,
+      "claimed": 0
+    },
+    {
+      "address": "0xa812d1b771a692f4e91b3ecee0ba5883bf951046",
+      "cumulativePARB": 29.82104180796762,
+      "claimed": 29.82104180796762
+    },
+    {
+      "address": "0x327b7b4b4d9b10394cf09d8a2af61ae42b2b4f2a",
+      "cumulativePARB": 29.78856290663331,
+      "claimed": 0
+    },
+    {
+      "address": "0x07745d8db575a03dced87a64ef70654d0d1fe530",
+      "cumulativePARB": 29.756084005298995,
+      "claimed": 29.756084005298995
+    },
+    {
+      "address": "0x608f38d4055421e26c86526155acf498130b977d",
+      "cumulativePARB": 29.72360510396468,
+      "claimed": 0
+    },
+    {
+      "address": "0xf5d4925ce1e92d5a1adfcf1a1b63a7e56bd16a85",
+      "cumulativePARB": 29.691126202630368,
+      "claimed": 29.691126202630368
+    }
+  ],
+  "conversions": [
+    {
+      "id": 1,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 2,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 3,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 4,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 5,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 6,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 7,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 8,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 9,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 10,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 11,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 12,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 13,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 14,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 15,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 16,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 17,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 18,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 19,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 20,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 21,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 22,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 23,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 24,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 25,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 26,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 27,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 28,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 29,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 30,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 31,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 32,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 33,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 34,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 35,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 36,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 37,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 38,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 39,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 40,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 41,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 42,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 43,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 44,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 45,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 46,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 47,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 48,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 49,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 50,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 51,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 52,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 53,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 54,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 55,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 56,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 57,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 58,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 59,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 60,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 61,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 62,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 63,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 64,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 65,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 66,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 67,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 68,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 69,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 70,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 71,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 72,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 73,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 74,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 75,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 76,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 77,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 78,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 79,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 80,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 81,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 82,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 83,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 84,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 85,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 86,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 87,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 88,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 89,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 90,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 91,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 92,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 93,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 94,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 95,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 96,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 97,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 98,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 99,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 100,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.003147299100725,
+      "minimumApplied": true
+    },
+    {
+      "id": 3,
+      "feeEth": 0.00258895469278,
+      "weiPerMillion": 0.0258895469278,
+      "minimumApplied": false
+    },
+    {
+      "id": 101,
+      "feeEth": 0.002592063147691,
+      "weiPerMillion": 0.02592063147691,
+      "minimumApplied": false
+    },
+    {
+      "id": 102,
+      "feeEth": 0.002594915843216,
+      "weiPerMillion": 0.02594915843216,
+      "minimumApplied": false
+    },
+    {
+      "id": 103,
+      "feeEth": 0.002598031455443,
+      "weiPerMillion": 0.02598031455443,
+      "minimumApplied": false
+    },
+    {
+      "id": 104,
+      "feeEth": 0.002601150808462,
+      "weiPerMillion": 0.02601150808462,
+      "minimumApplied": false
+    },
+    {
+      "id": 105,
+      "feeEth": 0.002604273906764,
+      "weiPerMillion": 0.02604273906764,
+      "minimumApplied": false
+    },
+    {
+      "id": 106,
+      "feeEth": 0.002607400754846,
+      "weiPerMillion": 0.02607400754846,
+      "minimumApplied": false
+    },
+    {
+      "id": 107,
+      "feeEth": 0.00261053135721,
+      "weiPerMillion": 0.0261053135721,
+      "minimumApplied": false
+    },
+    {
+      "id": 108,
+      "feeEth": 0.002613665718364,
+      "weiPerMillion": 0.02613665718364,
+      "minimumApplied": false
+    },
+    {
+      "id": 109,
+      "feeEth": 0.002616803842821,
+      "weiPerMillion": 0.02616803842821,
+      "minimumApplied": false
+    },
+    {
+      "id": 110,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.008408099983445,
+      "minimumApplied": true
+    },
+    {
+      "id": 111,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.008413987419428,
+      "minimumApplied": true
+    },
+    {
+      "id": 112,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.008419878977854,
+      "minimumApplied": true
+    },
+    {
+      "id": 113,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.008424932168391,
+      "minimumApplied": true
+    },
+    {
+      "id": 114,
+      "feeEth": 0.002,
+      "weiPerMillion": 0.008430831390439,
+      "minimumApplied": true
+    }
+  ],
+  "reconciliation": {
+    "ethVolume": 58.254477840015774,
+    "taxBuy": 0.5317923469706789,
+    "taxSell": 0.3522785729162411,
+    "hookrCommission": 0.17681418397738397,
+    "projectTax": 0.707256735909536,
+    "taxToBurner": 0.2357993957522393,
+    "taxToTeam": 0.23572867007864834,
+    "taxToArbitrage": 0.23572867007864834,
+    "entryFees": 0.236027791527597,
+    "entryToArbitrage": 0.1652194540693179,
+    "entryToTeam": 0.0708083374582791,
+    "royalties": 0.0335,
+    "lpFeesEth": 0.10479064734813334,
+    "lpFeesMilord": 6515609.47072757,
+    "burnBudgetEth": 0.3405900431003726,
+    "burnSpentEth": 0.34048991116584265,
+    "milordBurnedByBuyback": 50538082.60399359,
+    "milordBurnedOnExit": 100000,
+    "arbitrageEth": 0.41769812414796625,
+    "ethSwappedToUsdg": 0.41764054806967965,
+    "routerHeldEth": 0.000057576078286618,
+    "usdgDeposited": 1044.523364,
+    "parbMinted": 1035.4579195876256,
+    "parbAllocated": 1035.4579195876256,
+    "parbClaimed": 501.11804104150383,
+    "parbUnallocated": 1.6e-17,
+    "supplyFinal": 6709846307.925279
+  },
+  "keeperLog": [
+    {
+      "label": "week 1 pass 1",
+      "t": 1792972801,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:done",
+        "split-1:done",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:done",
+        "router:done",
+        "settle:skipped",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 1 pass 2",
+      "t": 1792972802,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:done",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 1 pass 3",
+      "t": 1792998063,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:skipped",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:skipped",
+        "activate-root:done"
+      ]
+    },
+    {
+      "label": "week 2 pass 1",
+      "t": 1793577601,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:done",
+        "split-1:skipped",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:done",
+        "router:done",
+        "settle:skipped",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 2 pass 2",
+      "t": 1793577602,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:done",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 2 pass 3",
+      "t": 1793602863,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:skipped",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:skipped",
+        "activate-root:done"
+      ]
+    },
+    {
+      "label": "week 3 pass 1",
+      "t": 1794182400,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:done",
+        "split-1:skipped",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:done",
+        "router:done",
+        "settle:skipped",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 3 pass 2",
+      "t": 1794182401,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:done",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:done",
+        "activate-root:skipped"
+      ]
+    },
+    {
+      "label": "week 3 pass 3",
+      "t": 1794207663,
+      "steps": [
+        "hookr-settle:done",
+        "split-0:skipped",
+        "split-1:skipped",
+        "split-2:skipped",
+        "lp-fees-0:done",
+        "buyback:skipped",
+        "router:skipped",
+        "settle:skipped",
+        "activate-root:done"
+      ]
+    }
+  ],
+  "rootChecks": [
+    {
+      "label": "week 1",
+      "which": "pending",
+      "epoch": 1,
+      "match": true,
+      "expected": "0x2e6b406555be4bfabf1fa1da104eb3e1b7b6c7ac7e354359f9d1f2cf2a959a77",
+      "onchain": "0x2e6b406555be4bfabf1fa1da104eb3e1b7b6c7ac7e354359f9d1f2cf2a959a77"
+    },
+    {
+      "label": "week 2",
+      "which": "pending",
+      "epoch": 2,
+      "match": true,
+      "expected": "0xabfa79daaa005934eacd383ad6cbbd3dc51e017baa8c3ee9aed6a4ffbce7aa31",
+      "onchain": "0xabfa79daaa005934eacd383ad6cbbd3dc51e017baa8c3ee9aed6a4ffbce7aa31"
+    },
+    {
+      "label": "week 2",
+      "which": "active",
+      "epoch": 1,
+      "match": true,
+      "expected": "0x2e6b406555be4bfabf1fa1da104eb3e1b7b6c7ac7e354359f9d1f2cf2a959a77",
+      "onchain": "0x2e6b406555be4bfabf1fa1da104eb3e1b7b6c7ac7e354359f9d1f2cf2a959a77"
+    },
+    {
+      "label": "week 3",
+      "which": "pending",
+      "epoch": 3,
+      "match": true,
+      "expected": "0x7df85675f8f8a0571f7733389ad2de97e5774ae4d92280f7d05b85c5ce0bf4bd",
+      "onchain": "0x7df85675f8f8a0571f7733389ad2de97e5774ae4d92280f7d05b85c5ce0bf4bd"
+    },
+    {
+      "label": "week 3",
+      "which": "active",
+      "epoch": 2,
+      "match": true,
+      "expected": "0xabfa79daaa005934eacd383ad6cbbd3dc51e017baa8c3ee9aed6a4ffbce7aa31",
+      "onchain": "0xabfa79daaa005934eacd383ad6cbbd3dc51e017baa8c3ee9aed6a4ffbce7aa31"
+    }
+  ],
+  "checks": [
+    {
+      "name": "exact supply after burns: 6,767,000,000 - launch remainder - exit burns - buyback burns",
+      "pass": true,
+      "detail": "6709846307.925279"
+    },
+    {
+      "name": "no MILORD minted after deployment",
+      "pass": true
+    },
+    {
+      "name": "escrow == backed NFTs x 1,000,000 (no unbacked NFT)",
+      "pass": true
+    },
+    {
+      "name": "active NFTs == backed count",
+      "pass": true
+    },
+    {
+      "name": "redemption returned 900,000 and burned 100,000",
+      "pass": true
+    },
+    {
+      "name": "reissued ID came from inventory (identity kept)",
+      "pass": true
+    },
+    {
+      "name": "distributor balance + claimed == pARB minted from fee deposits",
+      "pass": true
+    },
+    {
+      "name": "allocated <= minted (no unminted pARB distributed)",
+      "pass": true
+    },
+    {
+      "name": "every batch minted usdg x 1e18 / processed PPS",
+      "pass": true,
+      "detail": "week 1:1 week 2:1.017999 week 3:0.990513"
+    },
+    {
+      "name": "week-3 deposit priced at the post-loss PPS, not $1",
+      "pass": true,
+      "detail": "0.990513"
+    },
+    {
+      "name": "same fee batch cannot be deposited twice",
+      "pass": true
+    },
+    {
+      "name": "a second claim of the same cumulative pays nothing",
+      "pass": true
+    },
+    {
+      "name": "no performance-fee shares (fee recipient holds no pARB)",
+      "pass": true
+    },
+    {
+      "name": "deposits are not profit: PPS unchanged by the week-1 deposit",
+      "pass": true
+    },
+    {
+      "name": "PPS rose in the positive week",
+      "pass": true
+    },
+    {
+      "name": "PPS fell in the negative week (not reset to $1)",
+      "pass": true
+    },
+    {
+      "name": "tax = 1.5% of taxed ETH volume (buys and sells)",
+      "pass": true,
+      "detail": "0.88407091988692 ETH on 58.93806132579466 ETH"
+    },
+    {
+      "name": "Hookr commission == 20% of tax; project == 80%",
+      "pass": true,
+      "detail": "0.17681418397738397 of 0.88407091988692"
+    },
+    {
+      "name": "project tax fully received by TradingTaxSplitter",
+      "pass": true
+    },
+    {
+      "name": "burn / team / arbitrage tax shares equal within 1 bp",
+      "pass": true,
+      "detail": "0.2357993957522393 / 0.23572867007864834 / 0.23572867007864834"
+    },
+    {
+      "name": "entry fees: converter total == splitter total, 70/30",
+      "pass": true
+    },
+    {
+      "name": "royalty received only when paid, split 50/50",
+      "pass": true
+    },
+    {
+      "name": "arbitrage ETH: router swapped + still held == allocated to it; all USDG deposited",
+      "pass": true,
+      "detail": "0.41764054806967965 swapped, 0.000057576078286618 held (below threshold)"
+    },
+    {
+      "name": "router: every swap within the per-tx cap and at most maxSlippage below the 30-min V3 TWAP",
+      "pass": true,
+      "detail": "3 swaps, slippage cap 100 bps"
+    },
+    {
+      "name": "root checker recomputed every proposed root identically",
+      "pass": true,
+      "detail": "5 checks"
+    },
+    {
+      "name": "keeper passes ran without failed steps",
+      "pass": true,
+      "detail": "9 passes"
+    },
+    {
+      "name": "buyback burns recorded == supply reduction from buybacks",
+      "pass": true
+    },
+    {
+      "name": "USDG has 6 decimals and NAV = vault + servicer USDG",
+      "pass": true
+    },
+    {
+      "name": "PPS x outstanding pARB == NAV (vault + servicer USDG) after settlement",
+      "pass": true,
+      "detail": "1025.63453 vs 1025.634998"
+    },
+    {
+      "name": "seller keeps week-1 pARB after selling",
+      "pass": true
+    },
+    {
+      "name": "buyer earns only from day 3.5 of week 2",
+      "pass": true
+    },
+    {
+      "name": "redeemer keeps earned pARB, earns nothing after redeeming",
+      "pass": true
+    },
+    {
+      "name": "100% of supply entered the position: deployer, team, arbitrage and operator held 0 MILORD at open",
+      "pass": true,
+      "detail": "remainder burned 24920 wei"
+    },
+    {
+      "name": "pool started with 0 ETH and the first trade was a buy",
+      "pass": true
+    },
+    {
+      "name": "launch entry: bounded bootstrap quote, never below spot, fee = 0.002 ETH minimum",
+      "pass": true
+    },
+    {
+      "name": "every entry fee == max(10% of the TWAP value of 1M MILORD, 0.002 ETH); both paths used",
+      "pass": true,
+      "detail": "100 at minimum, 10 at 10%"
+    },
+    {
+      "name": "second strategy inactive; collection unchanged",
+      "pass": true
+    },
+    {
+      "name": "LP fees: ETH to BuybackBurner, MILORD burned, separate from tax",
+      "pass": true,
+      "detail": "0.10479064734813334 ETH, 6515609.47072757 MILORD burned"
+    },
+    {
+      "name": "founding position locked forever, beneficiary = fee collector, release refused",
+      "pass": true
+    }
+  ],
+  "deployments": {
+    "ArbitrageFundingRouter": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
+    "BuybackBurner": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
+    "EntryFeeSplitter": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
+    "FundingVenue": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+    "HookrFamilyLock": "0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3",
+    "HookrTaxHook": "0x303552376ebDC9ef04d02c0e0Cc82435E6fcC0CC",
+    "LockFeeCollector": "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f",
+    "MILORD": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+    "MilordConverter": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
+    "MilordGovernor": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
+    "Milords": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
+    "ParbFundingAdapter": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+    "PoolManager": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "PositionManager": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+    "RoyaltySplitter": "0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E",
+    "ShareDistributor": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+    "StateView": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "StrategyRegistry": "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
+    "SwapRouter": "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
+    "TradingTaxSplitter": "0xf5059a5D33d5853360D16C683c16e67980206f36",
+    "TwapReference": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+    "USDG": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "V3Factory": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+    "V3Helper": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+    "V4Quoter": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+    "V4SwapAdapter": "0x162A433068F51e18b7d13932F27e66a3f99E6890",
+    "WETH": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    "WethUsdgPool": "0x25AAF240b93Aa2EF8f8d9Fa0eA076Ced74E001F2",
+    "arbitrageSafe": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+    "chainId": 31337,
+    "familyId": "0x1cb27d8c5b3ab3fcd1a8a9b3e2dbc327ae7eaa59fcd02cce69b9863c4a028e8c",
+    "hookrTreasury": "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+    "launchDustBurned": 24920,
+    "launchPositionId": 1,
+    "lpFee": 3000,
+    "milordForLiquidity": "6767000000000000000000000000",
+    "operator": "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+    "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "pARBVault": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+    "quoteSigner": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+    "reportSigner": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+    "teamSafe": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "tickLower": 134220,
+    "tickSpacing": 60,
+    "tickUpper": 203280
+  }
+}
