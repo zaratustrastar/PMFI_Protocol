@@ -15,6 +15,7 @@ import { polygon } from 'viem/chains';
 import { RelayClient, RelayerTxType } from '@polymarket/builder-relayer-client';
 import { BuilderConfig } from '@polymarket/builder-signing-sdk';
 import * as dotenv from 'dotenv';
+import { requestedRaw, bridgeAmount as boundedBridgeAmount, validateApproval } from './withdrawal_bounds.mjs';
 
 dotenv.config();
 
@@ -227,7 +228,7 @@ async function getProxyBalance(): Promise<number> {
   return Number(formatUnits(balanceRaw, 6));
 }
 
-async function getEOABalance(eoaAddress: string): Promise<number> {
+async function getEOABalanceRaw(eoaAddress: string): Promise<bigint> {
   const response = await fetch(POLYGON_RPC_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -254,8 +255,7 @@ async function getEOABalance(eoaAddress: string): Promise<number> {
     throw new Error(`RPC error: ${data.error.message}`);
   }
   
-  const balance = BigInt(data.result);
-  return Number(formatUnits(balance, 6));
+  return BigInt(data.result);
 }
 
 // =============================================================================
@@ -281,11 +281,11 @@ interface BridgeQuote {
 async function getRelayQuote(
   senderAddress: string,
   recipientAddress: string,
-  amountUsdc: number
+  amount6dec: bigint
 ): Promise<BridgeQuote | null> {
-  log('INFO', `Getting Relay quote: $${amountUsdc} from ${senderAddress} to ${recipientAddress}`);
+  log('INFO', `Getting Relay quote: ${amount6dec} raw from ${senderAddress} to ${recipientAddress}`);
   
-  const amount6dec = parseUnits(amountUsdc.toFixed(6), 6);
+
   
   try {
     const response = await fetch(`${RELAY_API_URL}/quote`, {
@@ -369,6 +369,9 @@ async function getRelayQuote(
       }
     }
 
+    if (BigInt(data.details?.currencyIn?.amount ?? '-1') !== amount6dec) throw new Error('quote input differs from requested amount');
+    if (BigInt(depositTx.value || '0') !== 0n || !/^0x[0-9a-fA-F]{40}$/.test(depositTx.to) || depositTx.to.toLowerCase() === USDC_E_POLYGON.toLowerCase()) throw new Error('invalid bridge deposit');
+    if (approveTx) validateApproval(approveTx,USDC_E_POLYGON,depositTx.to,amount6dec);
     return {
       requestId,
       amountIn: amount6dec,
@@ -592,22 +595,11 @@ async function withdrawAndBridge(
   log('INFO', `Proxy USDC balance: $${proxyBalance.toFixed(6)} (${proxyBalanceRaw} raw)`);
   
   // Convert requested amount to raw (6 decimals)
-  const requestedRaw = parseUnits(amountUsdc.toFixed(6), 6);
+
   
-  // Cap at available balance minus small dust buffer (100 units = 0.0001 USDC)
-  const DUST_BUFFER = BigInt(100);
-  const maxAvailable = proxyBalanceRaw > DUST_BUFFER ? proxyBalanceRaw - DUST_BUFFER : proxyBalanceRaw;
-  const sendRaw = requestedRaw <= maxAvailable ? requestedRaw : maxAvailable;
-  const sendUsdc = Number(formatUnits(sendRaw, 6));
-  
-  if (sendRaw <= BigInt(0)) {
-    return { success: false, error: `Insufficient balance: have $${proxyBalance.toFixed(6)}` };
-  }
-  
-  if (sendRaw < requestedRaw) {
-    log('INFO', `⚠️ Capping transfer: requested $${amountUsdc}, sending $${sendUsdc.toFixed(6)} (available minus dust)`);
-  }
-  
+  const sendRaw = requestedRaw(amountUsdc);
+  if (proxyBalanceRaw < sendRaw) return {success:false,error:'Insufficient proxy balance for exact requested withdrawal'};
+
   // Create RelayClient
   const client = await createRelayClient();
   
@@ -619,6 +611,8 @@ async function withdrawAndBridge(
   const account = privateKeyToAccount(cleanKey as Hex);
   const eoaAddress = account.address;
   
+  const eoaBefore = await getEOABalanceRaw(eoaAddress);
+
   // Step 1: Withdraw from Safe proxy to EOA
   log('INFO', '\n--- Step 1: Safe Proxy → EOA ---');
   const withdrawResult = await withdrawFromProxyToEOA(client, eoaAddress, sendRaw, dryRun);
@@ -639,24 +633,11 @@ async function withdrawAndBridge(
   // Step 2: Bridge from EOA to Base vault
   log('INFO', '\n--- Step 2: EOA → Relay Bridge → Base Vault ---');
   
-  // Check EOA balance - use ACTUAL balance for bridging (may include prior transfers)
-  const eoaBalance = await getEOABalance(eoaAddress);
-  log('INFO', `EOA USDC.e balance: $${eoaBalance.toFixed(6)}`);
-  
-  // Minimum bridge amount - Relay requires ~$5 minimum
-  const MIN_BRIDGE_AMOUNT = 5.0;
-  
-  if (eoaBalance < MIN_BRIDGE_AMOUNT) {
-    return { success: false, error: `EOA balance $${eoaBalance.toFixed(2)} below minimum bridge amount ($${MIN_BRIDGE_AMOUNT}). Accumulate more before bridging.` };
-  }
-  
-  // Use the FULL EOA balance for bridging (not just what Step 1 transferred)
-  // This handles cases where multiple transfers accumulated or prior Step 1s succeeded
-  const bridgeAmount = eoaBalance;
-  log('INFO', `Will bridge full EOA balance: $${bridgeAmount.toFixed(6)}`);
-  
-  // Get bridge quote using actual EOA balance
-  const quote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeAmount);
+  const eoaAfter = await getEOABalanceRaw(eoaAddress);
+  const bridgeRaw = boundedBridgeAmount(sendRaw,proxyBalanceRaw,eoaBefore,eoaAfter);
+  const bridgeAmount = Number(formatUnits(bridgeRaw,6));
+  log('INFO', `Will bridge requested amount only: $${bridgeAmount.toFixed(6)}`);
+  const quote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeRaw);
   if (!quote) {
     return { success: false, error: 'Failed to get Relay bridge quote' };
   }
@@ -691,7 +672,7 @@ async function withdrawAndBridge(
       
       if (attempt > 1) {
         log('INFO', 'Getting fresh bridge quote for retry...');
-        const freshQuote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeAmount);
+        const freshQuote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeRaw);
         if (!freshQuote) {
           log('ERROR', 'Failed to get fresh quote for retry');
           continue;
@@ -765,12 +746,7 @@ async function withdrawAndBridge(
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       log('ERROR', `Bridge deposit failed (attempt ${attempt}): ${errMsg}`);
-      if (attempt < MAX_BRIDGE_ATTEMPTS) {
-        log('INFO', 'Will retry with fresh quote in 5s...');
-        await new Promise(r => setTimeout(r, 5000));
-        continue;
-      }
-      return { success: false, error: `Bridge deposit failed after ${MAX_BRIDGE_ATTEMPTS} attempts: ${errMsg}` };
+      return { success: false, error: `Bridge submission outcome unknown; reconcile before retry: ${errMsg}` };
     }
   }
   
@@ -806,7 +782,7 @@ async function main(): Promise<void> {
       const balance = await getProxyBalance();
       log('INFO', `Proxy USDC.e: $${balance.toFixed(2)}`);
       
-      const eoaBalance = await getEOABalance(account.address);
+      const eoaBalance = Number(formatUnits(await getEOABalanceRaw(account.address),6));
       log('INFO', `EOA USDC.e: $${eoaBalance.toFixed(2)}`);
       
       // Check builder credentials
@@ -819,7 +795,7 @@ async function main(): Promise<void> {
     }
     
     case 'withdraw': {
-      const amountUsdc = parseFloat(args[1] || '0');
+      const amountUsdc = Number(formatUnits(requestedRaw(args[1] || '0'),6));
       const dryRun = args.includes('--dry-run');
       
       if (!amountUsdc || amountUsdc <= 0) {
@@ -892,7 +868,7 @@ async function main(): Promise<void> {
       log('INFO', `Will bridge: $${bridgeAmount.toFixed(6)}`);
       
       // Get bridge quote
-      const quote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeAmount);
+      const quote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeRaw);
       if (!quote) {
         log('ERROR', 'Failed to get Relay bridge quote');
         process.exit(1);
@@ -930,7 +906,7 @@ async function main(): Promise<void> {
           
           if (attempt > 1) {
             log('INFO', 'Getting fresh bridge quote for retry...');
-            const freshQuote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeAmount);
+            const freshQuote = await getRelayQuote(eoaAddress, TREASURY_ADDRESS, bridgeRaw);
             if (!freshQuote) {
               log('ERROR', 'Failed to get fresh quote for retry');
               continue;

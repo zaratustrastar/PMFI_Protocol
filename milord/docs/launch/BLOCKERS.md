@@ -82,3 +82,6 @@ factory identity, 30-minute TWAP and tick-crossing QuoterV2 simulations for
 0.05/0.25/1/2 ETH. Execution funding fork evidence is tracked separately. This does
 not clear B9 or guarantee future liquidity. Atomic recorder and rehearsal now
 fail closed on inconsistent data and distinguish incomplete service configuration.
+B22 exact-amount code fix and 17 deterministic regressions implemented. Still needs
+review of the shared Base withdrawal path and an explicitly approved venue test;
+current pUSD collateral conversion is not proven by these tests.

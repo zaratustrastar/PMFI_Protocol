@@ -67,3 +67,10 @@ services' protocol contracts. It retains a JSON record alongside its log.
 
 B6 independent audit, B8 price-reference decision, B9 venue/bridge validation,
 B10 owner parameters, infrastructure, testnet week and restore drills remain open.
+
+B22 code correction: the withdrawal CLI now refuses insufficient proxy funds instead
+of silently reducing the request; takes before/after raw EOA balances; bridges only
+the exact requested delta; checks quote input and exact allowance; refuses uncertain
+submission retries. Existing EOA funds are excluded. 17 offline boundary regressions
+pass. This changes shared withdrawal safety in Base and Robinhood modes; no live
+withdrawal was run. Legacy USDC.e routing remains unverified for current pUSD wallets.

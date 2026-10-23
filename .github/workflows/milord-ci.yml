@@ -10,9 +10,9 @@ name: milord-ci
 on:
   push:
     branches: [main, "milord/**", "codex/**"]
-    paths: ["milord/**", "bot/arb_monitor/**", ".github/workflows/milord-ci.yml"]
+    paths: ["milord/**", "bot/arb_monitor/**", "trading_bot/safe_proxy_withdraw_parb.ts", "trading_bot/withdrawal_bounds.mjs", "trading_bot/tests/**", ".github/workflows/milord-ci.yml"]
   pull_request:
-    paths: ["milord/**", "bot/arb_monitor/**", ".github/workflows/milord-ci.yml"]
+    paths: ["milord/**", "bot/arb_monitor/**", "trading_bot/safe_proxy_withdraw_parb.ts", "trading_bot/withdrawal_bounds.mjs", "trading_bot/tests/**", ".github/workflows/milord-ci.yml"]
   workflow_dispatch:
 
 permissions:
@@ -87,6 +87,7 @@ jobs:
           cache: npm
           cache-dependency-path: milord/package-lock.json
       - run: npm ci
+      - run: node --test ../trading_bot/tests/*.test.mjs
       - run: node --test offchain/test/*.test.mjs
       - run: node offchain/test-twap.mjs
       - run: node offchain/test-option-d.mjs
