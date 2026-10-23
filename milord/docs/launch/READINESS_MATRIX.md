@@ -98,3 +98,16 @@ withdrawal was run. Legacy USDC.e routing remains unverified for current pUSD wa
 The public RPC prunes historical state: an older pinned block can stop working
 between runs. Record the actual latest block used, or supply an archival endpoint;
 do not silently describe a new block as a replay of prior evidence.
+
+## Claude update (2026-10-23, milord/production-readiness)
+- B9 routes confirmed from official documentation and public route APIs (launch/B9_VENUE_ROUTES.md); live small
+  transfers still need owner approval. Robinhood-mode Polymarket recall goes through the Polymarket bridge
+  (pUSD → USDG on 4663), Kalshi recall is an operator task. Python 164 tests OK (2 expected failures);
+  trading_bot JS 31/31; offchain 30/30; services 30/30.
+- Row 6 gap closed in code: `./fork/rehearse-full-launch.sh` covers launch → tax queue → splitter → router → vault →
+  pARB → root → claim on one private fork with the real deploy scripts and Safe batches. Not run yet: the container
+  cannot reach the Robinhood RPC, so it needs the VPS.
+- Deploy scripts are hash-gated for 4663; runbook gates G0–G9 (MAINNET_RUNBOOK.md).
+- Quote server added to the service stack with `/healthz`; backup/restore scripts; production-testing guide
+  (launch/TESTNET_SERVICES.md).
+- B21: the direct-CTF transport does not match Polymarket's current pUSD adapters (BLOCKERS.md).

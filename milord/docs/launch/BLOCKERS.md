@@ -1,3 +1,17 @@
+# Blocker matrix update (2026-10-23, production-readiness round on milord/production-readiness)
+
+Built on Codex PR #4 (`4982bdb`). No deployment, broadcast, venue order, Safe signature or real funds.
+
+| # | Severity | Item | Status | What clears it |
+|---|---|---|---|---|
+| B9 | High | Venue and bridge routes for Robinhood USDG | **Routes confirmed in official docs and route APIs** (B9_VENUE_ROUTES.md): Polymarket bridge USDG(4663) ↔ pUSD both ways; Across USDG(4663) ↔ Base USDC both ways; Kalshi deposits USDC on Base, withdrawals only in the Kalshi app. Robinhood-mode recall now uses the Polymarket bridge (exact pUSD amount, gated) and a Kalshi operator task | VPS `node offchain/check-venue-routes.mjs`; owner-approved $10 Polymarket deposit and recall; MILORD's own Kalshi account and one $10 round trip; real addresses in `ARB_BRIDGE_ALLOWLIST` |
+| B21 | High | Polymarket redemption | **Still blocked, new finding**: since CLOB V2 Polymarket redeems through CtfCollateralAdapter / NegRiskCtfCollateralAdapter / the V2 Router, paying pUSD. Codex's transport calls ConditionalTokens directly and refuses neg-risk and V2 markets; it is disabled by default and fails closed | move the transport to the adapters; Polygon fork test; one approved small redemption |
+| B22 | High | Base withdrawal script | Codex fixed exact amounts. Review finding: the same script still moves USDC.e, not pUSD, and its new $5–$5,000 bound and removed retries also change the LIVE Base path once deployed to the PMFI host | owner decides when the Base engine takes the new script; robinhood mode no longer uses it |
+| B26 | High | Integrated launch rehearsal | **Fork pending**: `./fork/rehearse-full-launch.sh` runs every launch gate (G1–G7) with the real scripts and Safe batches, then trading, keeper, conversion, report, weekly root and claim on one private fork | VPS run passes at the release SHA |
+| B27 | Medium | Mainnet deploy approvals | **Code**: the three deploy scripts accept 4663 only on a private fork (Anvil #0) or with `MILORD_MAINNET_APPROVAL` = the owner-approved configuration hash (MAINNET_RUNBOOK.md §1–2) | owner approvals at launch time |
+| B23 | Medium | Hosts | open; testnet/fork-soak guide, backup and restore scripts ready (TESTNET_SERVICES.md) | owner approves sizing; testnet week; restore drill |
+| B6 | High | Independent security review | open | auditor engagement |
+
 # Blocker matrix update (2026-10-23, autonomous pipeline round)
 
 B13 is **closed**: VPS run at 406cc2a, 33/33 in both passes, pre-emption regression green; PR #1 fast-forwarded.

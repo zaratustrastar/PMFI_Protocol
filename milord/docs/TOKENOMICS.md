@@ -12,10 +12,11 @@ Nothing here is a promise of return. pARB value depends on arbitrage results, wh
 | Minting | none after deployment (no mint function exists) |
 | Burning | anyone can burn their own tokens; exit burns and buybacks reduce supply |
 | Transfer tax | 0% on ordinary transfers (no transfer hooks) |
-| Trading tax | up to 1.5% on buys and sells **at the pool level**, target ⅓ buyback-and-burn, ⅓ Team Safe, ⅓ Arbitrage Funding Safe; a launchpad commission reduces all three proportionally. Mechanism pending decision (see HOOKR_COMPATIBILITY). |
-
-Initial allocation of the 6.767B (liquidity, team, legacy PMFI holders, treasury) is **not specified** in the
-brief and is listed in OPEN_DECISIONS.
+| Trading tax | flat 1.5% on buys and 1.5% on sells, paid in ETH, enforced by the Hookr pool (immutable once launched). Hookr keeps 20%; the other 80% goes to TradingTaxSplitter: ⅓ BuybackBurner, ⅓ Team Safe, ⅓ ArbitrageFundingRouter (owned by the Arbitrage Funding Safe). |
+| Launch | one Hookr existing-token pool on Robinhood Chain, created atomically with the token (`MilordAtomicLaunch`): **100% of supply** in one MILORD-only founding position, 0 ETH, opening FDV ~10 ETH, range ticks 134,220–203,280 (up to ~1,000× the opening price), base LP fee 0.3%. No wallet keeps any MILORD. |
+| LP fees | the founding position is to be locked forever in Hookr's family lock (approved architecture; execution needs the owner's separate go-ahead). Its fees go to HookrLockFeeCollector: ETH to buyback-and-burn, MILORD burned. Principal can never be withdrawn once locked. |
+| Anti-Snipe, dev buy | off. Both are separate, unapproved decisions. |
+| Legacy PMFI | no migration contract or reserve: legacy PMFI is sold and the proceeds buy MILORD on the market for holders. |
 
 ## Milords
 
@@ -54,10 +55,14 @@ with a 0% performance fee. Shares are minted only by depositing USDG at the offi
 
 | Source | Paid in | Split | Ends as |
 |---|---|---|---|
-| Entry fee | ETH | 70% Arbitrage Safe / 30% Team Safe | Arbitrage share → USDG → pARB → holders |
-| Royalty | ETH/WETH | 50% Team / 50% Arbitrage | Arbitrage share → USDG → pARB → holders |
-| Trading tax | ETH (pool-dependent) | ⅓ BuybackBurner / ⅓ Team / ⅓ Arbitrage | burned MILORD; Arbitrage share → pARB |
+| Entry fee | ETH: max(10% × ETH value of 1M MILORD, 0.002 ETH) | 70% ArbitrageFundingRouter / 30% Team Safe | Arbitrage share → USDG → pARB → holders |
+| Royalty | ETH/WETH | 50% Team / 50% ArbitrageFundingRouter | Arbitrage share → USDG → pARB → holders |
+| Trading tax | ETH, 1.5% buy / 1.5% sell; Hookr keeps 20% | 80% in thirds: BuybackBurner / Team Safe / ArbitrageFundingRouter | burned MILORD; Arbitrage share → pARB |
+| LP fees (locked position) | ETH and MILORD | ETH → BuybackBurner, MILORD burned | burned MILORD |
 | Exit burn | MILORD | 100% burned | lower supply |
+
+The router swaps its ETH to USDG within per-swap, daily and slippage bounds against a TWAP reference, and requests a
+vault deposit; settled pARB goes to ShareDistributor, which pays holders weekly by Merkle root (REWARD_DISTRIBUTION.md).
 
 Only fee revenue becomes pARB for holders. Principal deposited to convert is escrowed MILORD and is never
 counted as revenue or deposited in the vault.
