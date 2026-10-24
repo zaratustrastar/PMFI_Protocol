@@ -18,7 +18,8 @@ seconds and executes eligible opportunities in score order (highest first).
 import time
 import threading
 import os
-from ..adapters.oddpool import fetch_opportunities, ArbOpportunity
+from ..adapters.oddpool import ArbOpportunity
+from ..adapters.opportunity_feed import fetch_opportunities  # ARB_OPPORTUNITY_FEED: oddpool | prediction_com | compare
 from ..core.arb_executor import execute_arb
 from ..core.arb_funder import run_tend_tick, get_servicer_deployable_usdc, _get_platform_balance
 from ..core.arb_reporter import run_reporter_tick

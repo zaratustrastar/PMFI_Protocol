@@ -826,6 +826,16 @@ def _kalshi_taker_fee_pad(price: float, contracts: int) -> float:
     return (total_fee_cents / 100.0) / n
 
 
+def _poly_fee_pad(condition_id: Optional[str], price: float) -> float:
+    """Polymarket taker fee per contract (dollars) at `price`; 0 unless ARB_POLY_EXACT_FEES is on
+    (default on in robinhood mode). Unknown fee data → the most expensive category (fallback)."""
+    from .venue_fees import poly_exact_fees_enabled, poly_fee_info, poly_taker_fee_per_contract
+    if not poly_exact_fees_enabled():
+        return 0.0
+    rate, exponent, _src = poly_fee_info(condition_id)
+    return poly_taker_fee_per_contract(price, rate, exponent)
+
+
 def _venue2_fee_pad(venue2: str, price: float, contracts: int) -> float:
     if str(venue2 or "").lower() != "kalshi":
         return 0.0
@@ -1181,14 +1191,18 @@ def execute_arb(
     )
     _kalshi_pad = _venue2_fee_pad(venue2, matched_v2_vwap, matched_contracts)
     _eff_v2_vwap   = matched_v2_vwap + _kalshi_pad
-    gross_edge_pct = (1.0 - matched_poly_vwap - _eff_v2_vwap) * 100.0
+    # Polymarket CLOB V2 taker fee (core/venue_fees.py): rate × (p(1−p))^exponent per share from the
+    # market's /clob-markets fee data. Evaluated at the VWAP, which over-estimates the average fee
+    # (the curve is concave), so the gate stays conservative.
+    _poly_pad = _poly_fee_pad(poly_book.get("market") if isinstance(poly_book, dict) else None, matched_poly_vwap)
+    gross_edge_pct = (1.0 - matched_poly_vwap - _poly_pad - _eff_v2_vwap) * 100.0
     net_edge_pct   = gross_edge_pct - fee_pct
     required_edge  = min_edge_pct * 100.0 + ARB_VWAP_SAFETY_BUFFER_PCT
 
     log(
         f"📐 VWAP profitability @ {matched_contracts} contracts: "
         f"poly_vwap={matched_poly_vwap:.4f} {leg2_venue_label}_vwap={matched_v2_vwap:.4f} "
-        f"(+{_kalshi_pad*100:.2f}¢ pad → eff_v2_vwap={_eff_v2_vwap:.4f}) "
+        f"(+{_kalshi_pad*100:.2f}¢ pad → eff_v2_vwap={_eff_v2_vwap:.4f}, poly fee +{_poly_pad*100:.2f}¢) "
         f"gross_edge={gross_edge_pct:.4f}% fee={fee_pct:.4f}% "
         f"net_edge={net_edge_pct:.4f}% required={required_edge:.4f}%"
     )
