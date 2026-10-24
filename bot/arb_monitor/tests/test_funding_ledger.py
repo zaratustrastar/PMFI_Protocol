@@ -62,9 +62,9 @@ class DeltaArrivalTests(FF.FundingCase):
         def run(*a, **kw):
             seen["rows_during_script"] = self.withdrawal_rows()
             self.net.set_token(F.RH_RPC, F.USDG, F.SERVICER, 120)              # fill lands
-            return mock.Mock(returncode=0, stdout="TX: 0x" + "ab" * 32 + "\n✅ FULL WITHDRAWAL COMPLETE\n", stderr="")
+            return mock.Mock(returncode=0, stdout='{"txHash": "0x' + "ab" * 32 + '"}\n', stderr="")
         with mock.patch.object(W, "_poly_get_balance", return_value=100.0), \
-             mock.patch.dict(os.environ, {"POLY_PROXY_ADDRESS": F.POLY_BASE_ADDR}), \
+             mock.patch.dict(os.environ, {"POLY_PROXY_ADDRESS": F.POLY_BASE_ADDR, "ARB_POLY_WITHDRAW_ROUTE": "polymarket_bridge"}), \
              mock.patch.object(subprocess, "run", side_effect=run):
             got = W.withdraw_from_platforms(20.0, 100.0, 0.0, 0.0, F.SERVICER)
         self.assertEqual(got, 20.0)
@@ -80,20 +80,20 @@ class DeltaArrivalTests(FF.FundingCase):
 
         def run(*a, **kw):   # TS script bridged the whole EOA balance (35) instead of 20
             self.net.set_token(F.RH_RPC, F.USDG, F.SERVICER, 35)
-            return mock.Mock(returncode=0, stdout="✅ FULL WITHDRAWAL COMPLETE\n", stderr="")
+            return mock.Mock(returncode=0, stdout='{"txHash": "0x' + "cd" * 32 + '"}\n', stderr="")
         with mock.patch.object(W, "_poly_get_balance", return_value=100.0), \
-             mock.patch.dict(os.environ, {"POLY_PROXY_ADDRESS": F.POLY_BASE_ADDR}), \
+             mock.patch.dict(os.environ, {"POLY_PROXY_ADDRESS": F.POLY_BASE_ADDR, "ARB_POLY_WITHDRAW_ROUTE": "polymarket_bridge"}), \
              mock.patch.object(subprocess, "run", side_effect=run):
             got = W.withdraw_from_platforms(20.0, 100.0, 0.0, 0.0, F.SERVICER)
         self.assertAlmostEqual(got, 35.0)
         self.assertAlmostEqual(self.withdrawal_rows()[0]["amount_usdc"], 35.0)
 
     def test_failed_recall_kept_when_money_left_polymarket(self):
-        bal = iter([100.0, 100.0, 60.0])   # before (orchestrator), before (script check), after
+        bal = iter([100.0, 60.0])   # before, after (the bridge script reads no balance)
 
         with mock.patch.object(W, "_poly_get_balance", side_effect=lambda: next(bal)), \
-             mock.patch.dict(os.environ, {"POLY_PROXY_ADDRESS": F.POLY_BASE_ADDR}), \
-             mock.patch.object(subprocess, "run", return_value=mock.Mock(returncode=1, stdout="bridge step failed", stderr="")):
+             mock.patch.dict(os.environ, {"POLY_PROXY_ADDRESS": F.POLY_BASE_ADDR, "ARB_POLY_WITHDRAW_ROUTE": "polymarket_bridge"}), \
+             mock.patch.object(subprocess, "run", return_value=mock.Mock(returncode=1, stdout='{"error": "bridge step failed"}', stderr="")):
             got = W.withdraw_from_platforms(40.0, 100.0, 0.0, 0.0, F.SERVICER)
         self.assertEqual(got, 0.0)
         row = self.withdrawal_rows()[0]

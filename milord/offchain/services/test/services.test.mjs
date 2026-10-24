@@ -353,3 +353,14 @@ test("lock watch: silent when locked or far from the unlock block, warns, then c
     if (now >= until) assert.match(w[0].t, /WITHDRAWABLE/);
   }
 });
+
+test("chain 4663: ALLOW_MAINNET, or ALLOW_LOCAL_FORK with a loopback RPC only", async () => {
+  const { chainAllowed } = await import("../lib/config.mjs");
+  assert.equal(chainAllowed(46630, "https://rpc.testnet.chain.robinhood.com", {}), true);
+  assert.equal(chainAllowed(4663, "https://rpc.mainnet.chain.robinhood.com", {}), false);
+  assert.equal(chainAllowed(4663, "https://rpc.mainnet.chain.robinhood.com", { ALLOW_LOCAL_FORK: "yes" }), false);
+  assert.equal(chainAllowed(4663, "http://127.0.0.1:8550", { ALLOW_LOCAL_FORK: "yes" }), true);
+  assert.equal(chainAllowed(4663, "http://127.0.0.1.example.com:8550", { ALLOW_LOCAL_FORK: "yes" }), false);
+  assert.equal(chainAllowed(4663, "http://127.0.0.1:8550", {}), false);
+  assert.equal(chainAllowed(4663, "https://rpc.mainnet.chain.robinhood.com", { ALLOW_MAINNET: "yes" }), true);
+});

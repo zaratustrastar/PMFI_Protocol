@@ -554,6 +554,8 @@ def reconcile_bridge_transfers() -> None:
     * anything older than ARB_INFLIGHT_STALE_SECS becomes "stale" (still counted, alerted).
     Venue deposits (Base USDC → Kalshi) are reconciled the same way against the Kalshi balance.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('bridge reconciliation')
     venue_bal: dict = {}
 
     def platform_balance(venue: str):
@@ -670,6 +672,8 @@ def sweep_base_usdc_to_robinhood(servicer_wallet: str, private_key: str) -> floa
     """Robinhood mode: bridge servicer USDC on Base (Kalshi withdrawals, stranded bridge output)
     back to USDG on 4663. Skipped while a 4663→Base bridge is in flight (that USDC is about to be
     forwarded to Kalshi) or while a previous sweep's outcome is unknown. Returns the USDC amount bridged."""
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Base USDC sweep')
     if not is_robinhood_funding() or not servicer_wallet or not private_key:
         return 0.0
     if inflight_rows_for(direction="rh_to_base"):
@@ -715,8 +719,8 @@ def _poly_get_balance() -> float:
     if not poly_api_key:
         raise ValueError("POLY_API_KEY not set")
 
-    from py_clob_client.client import ClobClient
-    from py_clob_client.clob_types import ApiCreds, BalanceAllowanceParams, AssetType
+    # clob_compat prefers py-clob-client-v2: the V1 SDK stops working after the CLOB V2 cutover.
+    from .clob_compat import make_client, ApiCreds, BalanceAllowanceParams, AssetType
 
     creds = ApiCreds(
         api_key=poly_api_key.strip(),
@@ -724,7 +728,7 @@ def _poly_get_balance() -> float:
         api_passphrase=poly_api_passphrase.strip(),
     )
 
-    client = ClobClient(
+    client = make_client(
         POLY_CLOB_URL,
         key=private_key,
         chain_id=137,
@@ -749,7 +753,7 @@ def _poly_get_balance() -> float:
     bal = float(raw) / 1_000_000
 
     try:
-        client_eoa = ClobClient(
+        client_eoa = make_client(
             POLY_CLOB_URL,
             key=private_key,
             chain_id=137,
@@ -771,6 +775,8 @@ def _poly_get_balance() -> float:
     return bal
 
 def _rpc_call(rpc_url: str, method: str, params: list) -> str:
+    from .shadow_guard import assert_rpc_allowed
+    assert_rpc_allowed(method)
     resp = requests.post(
         rpc_url,
         json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
@@ -901,6 +907,8 @@ def withdraw_from_polymarket(
     amount_usdc: float,
     min_amount: float = 1.0,
 ) -> tuple[bool, str, float]:
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Polymarket withdrawal')
     import subprocess
     import re
 
@@ -1020,6 +1028,8 @@ def withdraw_from_kalshi(
     dest_address: str,
     min_amount: float = 1.0,
 ) -> tuple[bool, str, float]:
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Kalshi withdrawal')
     from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
 
     if not kalshi_auth_available():
@@ -1196,6 +1206,8 @@ def withdraw_from_opinion(
     dest_address: str,
     min_amount: float = 1.0,
 ) -> tuple[bool, str, float]:
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Opinion withdrawal')
     opinion_api_key = os.environ.get("OPINION_API_KEY", "")
     private_key = os.environ.get("POLY_PRIVATE_KEY", "")
 
@@ -1302,10 +1314,19 @@ def _rh_recall_polymarket(target: float, servicer_wallet: str) -> float:
     The row is written BEFORE the Safe/Relay script runs (so a crash mid-script still leaves the
     recall counted) with a snapshot of servicer USDG on 4663; it is settled by USDG balance delta
     (immediately if the script's fill is already visible). The amount recorded is what actually
-    moved: if USDG rose by more than requested (safe_proxy_withdraw_parb.ts bridges the whole EOA
-    balance), the larger measured amount is recorded. Returns the amount initiated.
+    moved: if USDG rose by more than requested, the larger measured amount is recorded. Returns the
+    amount initiated.
+
+    Route (arb_venue_routes, B9): Polymarket collateral is pUSD, so only the Polymarket bridge route
+    (ARB_POLY_WITHDRAW_ROUTE=polymarket_bridge: pUSD -> USDG on 4663) is used; the legacy USDC.e script
+    is refused here. Base mode does not use this function.
     """
     from .arb_funder import get_servicer_cash_usdc, _get_usdc_balance
+    from . import arb_venue_routes as routes
+    if routes.poly_recall_route() != routes.POLY_BRIDGE:
+        log("⚠️ Polymarket recall skipped: set ARB_POLY_WITHDRAW_ROUTE=polymarket_bridge (pUSD collateral; "
+            "the USDC.e relay script is not a valid robinhood route)")
+        return 0.0
     usdg_before = _try(lambda: get_servicer_cash_usdc(servicer_wallet), "servicer USDG")
     if usdg_before is None:
         log("⚠️ Polymarket recall skipped: cannot snapshot servicer USDG (retry next tick)")
@@ -1317,7 +1338,14 @@ def _rh_recall_polymarket(target: float, servicer_wallet: str) -> float:
     key = _L.new_key("recall_polymarket")
     record_withdrawal_intent("polymarket", target, key, POLY_ESTIMATED_SETTLEMENT_SECS,
                              dest="rh_usdg", dest_balance_before=usdg_before, idem_key=key)
-    ok, ref, amount = withdraw_from_polymarket(target)
+    ok, ref, amount, bridge_addr = routes.withdraw_polymarket_bridge(target)
+    if bridge_addr:
+        update_withdrawal(key, poly_bridge_address=bridge_addr)
+    if not ok and str(ref).startswith("ambiguous"):
+        update_withdrawal(key, recall_error=str(ref)[:300], receipt="unconfirmed")
+        log(f"🚨 Polymarket bridge recall outcome unknown — kept in transit (ref={key}, bridge={bridge_addr}); "
+            f"check GET bridge.polymarket.com/status/<bridge address> before any retry")
+        return 0.0
     if ok:
         after = _try(lambda: get_servicer_cash_usdc(servicer_wallet), "servicer USDG after recall")
         sent = float(amount)
@@ -1347,6 +1375,12 @@ def _rh_recall_kalshi(target: float, servicer_wallet: str) -> float:
     """Robinhood-mode Kalshi recall: write-ahead row with a Base USDC snapshot, keyed on the
     Kalshi withdrawal id once known, settled by Base USDC balance delta."""
     from .arb_funder import get_servicer_cash_usdc, _get_usdc_balance
+    from . import arb_venue_routes as routes
+    if not routes.kalshi_api_withdraw_allowed():
+        # Kalshi documents no API to create a crypto withdrawal (GET /portfolio/withdrawals only).
+        log(f"⚠️ Kalshi recall of {target:.4f} USDC needs an operator: withdraw USDC on Base to {servicer_wallet} "
+            f"in the Kalshi app (no documented withdrawal API; ARB_KALSHI_API_WITHDRAW_VERIFIED is not set)")
+        return 0.0
     base_before = _try(lambda: _get_usdc_balance(servicer_wallet), "servicer Base USDC")
     if base_before is None:
         log("⚠️ Kalshi recall skipped: cannot snapshot servicer Base USDC (retry next tick)")
@@ -1382,6 +1416,8 @@ def withdraw_from_platforms(
     opinion_cash: float,
     servicer_wallet: str,
 ) -> float:
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('venue withdrawal')
     if shortfall_usdc <= 0:
         return 0.0
 

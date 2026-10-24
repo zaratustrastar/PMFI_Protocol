@@ -10,9 +10,9 @@ name: milord-ci
 on:
   push:
     branches: [main, "milord/**", "codex/**"]
-    paths: ["milord/**", "bot/arb_monitor/**", "trading_bot/safe_proxy_withdraw_parb.ts", "trading_bot/withdrawal_bounds.mjs", "trading_bot/ctf_redemption.mjs", "package-lock.json", "trading_bot/tests/**", ".github/workflows/milord-ci.yml"]
+    paths: ["milord/**", "bot/arb_monitor/**", "trading_bot/safe_proxy_withdraw_parb.ts", "trading_bot/withdrawal_bounds.mjs", "trading_bot/ctf_redemption.mjs", "trading_bot/poly_bridge_withdraw.mjs", "package-lock.json", "trading_bot/tests/**", ".github/workflows/milord-ci.yml"]
   pull_request:
-    paths: ["milord/**", "bot/arb_monitor/**", "trading_bot/safe_proxy_withdraw_parb.ts", "trading_bot/withdrawal_bounds.mjs", "trading_bot/ctf_redemption.mjs", "package-lock.json", "trading_bot/tests/**", ".github/workflows/milord-ci.yml"]
+    paths: ["milord/**", "bot/arb_monitor/**", "trading_bot/safe_proxy_withdraw_parb.ts", "trading_bot/withdrawal_bounds.mjs", "trading_bot/ctf_redemption.mjs", "trading_bot/poly_bridge_withdraw.mjs", "package-lock.json", "trading_bot/tests/**", ".github/workflows/milord-ci.yml"]
   workflow_dispatch:
 
 permissions:

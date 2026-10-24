@@ -11,6 +11,7 @@ Security principles:
 import time
 import os
 import math
+from decimal import Decimal, ROUND_CEILING
 from typing import Optional
 
 # ── Route Polymarket CLOB through residential proxy (V1/V2 compatible) -------
@@ -103,6 +104,8 @@ def log_execution_to_db(
     order_id: str = "",
 ):
     """Log a per-leg execution event to arb_executions table."""
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('execution DB write')
     conn = _get_db_conn()
     if not conn:
         log(f"⚠️ Cannot log execution (no DB): leg={leg} venue={venue} side={side} price={price} success={success}")
@@ -134,6 +137,8 @@ def _place_poly_order(
     Accepts contract_count directly — avoids float/int drift from re-deriving
     via size_usdc/price inside this function.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Polymarket order')
     log(f"📤 [POLY] Placing {side} order: token={token_id[:16]}... price={price} contracts={contract_count}")
 
     poly_private_key = os.environ.get("POLY_PRIVATE_KEY", "")
@@ -244,6 +249,58 @@ def _place_poly_order(
         return False, "", err
 
 
+from .shadow_guard import execution_mode, shadow_capital_usdc  # noqa: E402  (ARB_EXECUTION_MODE)
+
+
+def _journal_shadow(opp, contracts, poly_px, v2_px, net_edge_pct, poly_usdc, v2_usdc) -> None:
+    """Append the would-be trade to ARB_SHADOW_JOURNAL_PATH, the only file shadow mode writes. No
+    default path: an unset journal is not written (never the live engine's data directory)."""
+    import json as _json
+    path = os.environ.get("ARB_SHADOW_JOURNAL_PATH", "")
+    if not path:
+        log("ℹ️ ARB_SHADOW_JOURNAL_PATH not set — shadow trade not journaled")
+        return
+    from .venue_eligibility import polymarket_trading_status
+    pm = polymarket_trading_status()
+    row = {
+        "polymarket_trading_available": pm["available"], "polymarket_status": pm.get("reason"),
+        "ts": int(time.time()), "pair_id": opp.pair_id, "source": "prediction_com" if str(opp.pair_id).startswith("pcom:") else "oddpool",
+        "kalshi_ticker": opp.kalshi_ticker, "kalshi_side": opp.kalshi_side, "contracts": contracts,
+        "poly_price": poly_px, "kalshi_price": v2_px, "net_edge_pct": round(net_edge_pct, 4),
+        "poly_usdc": round(poly_usdc, 4), "kalshi_usdc": round(v2_usdc, 4),
+    }
+    try:
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        with open(path, "a") as fh:
+            fh.write(_json.dumps(row) + "\n")
+    except OSError as e:
+        log(f"⚠️ shadow journal write failed: {e}")
+
+
+def _kalshi_price_dollars(price: float) -> str:
+    """Kalshi fixed-point dollar price string ("0.2900"), rounded UP to 1/10000.
+
+    The previous int(price * 100) truncated float noise downward (0.29 * 100 = 28.999… → 28¢),
+    placing the limit one cent BELOW the ask so the order could not fill. *_price_dollars also
+    supports Kalshi's sub-cent tick markets."""
+    d = Decimal(str(round(float(price), 6))).quantize(Decimal("0.0001"), rounding=ROUND_CEILING)
+    if not (Decimal("0") < d < Decimal("1")):
+        raise ValueError(f"Kalshi price out of range: {price}")
+    return f"{d:.4f}"
+
+
+def _kalshi_fill_count(order_obj: dict) -> int:
+    """Filled contracts from a Kalshi order object (fill_count_fp / fill_count; legacy quantity_matched)."""
+    for k in ("fill_count_fp", "fill_count", "quantity_matched"):
+        v = order_obj.get(k)
+        if v not in (None, ""):
+            try:
+                return int(Decimal(str(v)))
+            except Exception:
+                continue
+    return 0
+
+
 def _place_kalshi_order(
     ticker: str,
     side: str,
@@ -262,6 +319,8 @@ def _place_kalshi_order(
     Fails hard if KALSHI_API_KEY is missing.
     Never simulates success: a missing credential is an error, not a fake fill.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Kalshi order')
     log(f"📤 [KALSHI] Placing {side} order: ticker={ticker} price={price} size_usdc={size_usdc}")
 
     from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
@@ -283,34 +342,41 @@ def _place_kalshi_order(
             contracts = int(contract_count)
         else:
             contracts = int(size_usdc / price) if price > 0 else 0
-        # IOC: 5-second expiry so the order either fills immediately or dies fast.
-        # This prevents the order resting in the book while the already-placed
-        # Polymarket FOK leg waits — stale limit orders were the primary cause
-        # of Poly fills with no Kalshi counterpart.
-        ioc_expiry = int(time.time()) + 5
+        # Fill-or-kill (Kalshi time_in_force): the order fills completely at once or not at all,
+        # matching the Polymarket FOK leg. The previous 5-second IOC expiry could leave a partial
+        # Kalshi fill that the poll treated as a failure while the Polymarket leg was unwound.
+        # ARB_KALSHI_TIME_IN_FORCE=immediate_or_cancel restores IOC semantics.
+        tif = os.environ.get("ARB_KALSHI_TIME_IN_FORCE", "fill_or_kill").strip().lower()
+        price_field = "yes_price_dollars" if side == "YES" else "no_price_dollars"
         payload = {
             "ticker": ticker,
-            "client_order_id": f"arb_{int(time.time())}",
+            "client_order_id": f"arb_{int(time.time() * 1000)}",
             "type": "limit",
             "action": "buy",
             "side": side.lower(),
             "count": contracts,
-            "yes_price": int(price * 100) if side == "YES" else None,
-            "no_price": int(price * 100) if side == "NO" else None,
-            "expiration_ts": ioc_expiry,
+            price_field: _kalshi_price_dollars(price),
+            "time_in_force": tif,
         }
-        payload = {k: v for k, v in payload.items() if v is not None}
-        log(f"📤 [KALSHI] IOC order: expiry=+5s price={int(price*100)}¢ count={contracts}")
+        log(f"📤 [KALSHI] {tif} order: {price_field}={payload[price_field]} count={contracts}")
         # Use _KALSHI_SESSION (trust_env=False) to bypass proxy — Kalshi must be direct
         resp = _KALSHI_SESSION.post(url, json=payload, headers=headers, timeout=10)
         if resp.status_code in (200, 201):
             data = resp.json()
-            order_id = data.get("order", {}).get("order_id", "")
+            placed = data.get("order", {}) or {}
+            order_id = placed.get("order_id", "")
             if not order_id:
                 err = "no order_id in Kalshi placement response"
                 log(f"❌ [KALSHI] {err}")
                 return False, "", err
-            log(f"🔍 [KALSHI] IOC order accepted (id={order_id}), polling for fill (3×2s = 6s max)...")
+            # FOK/IOC orders are final in the placement response.
+            if _kalshi_fill_count(placed) >= contracts > 0 or placed.get("status") == "executed":
+                log(f"✅ [KALSHI] Order filled on placement: orderId={order_id} fill={_kalshi_fill_count(placed)}")
+                return True, order_id, ""
+            if placed.get("status") in ("canceled", "cancelled", "expired") and _kalshi_fill_count(placed) == 0:
+                log(f"⚠️ [KALSHI] Order {placed.get('status')!r} with no fill — triggering unwind")
+                return False, order_id, f"kalshi_order_{placed.get('status')}: orderId={order_id}"
+            log(f"🔍 [KALSHI] Order accepted (id={order_id}), polling for fill (3×2s = 6s max)...")
             # IOC: poll quickly — if it doesn't fill within the 5s expiry it will
             # cancel itself; 3 polls × 2s = 6s covers the expiry window cleanly.
             poll_url = f"{KALSHI_BASE_URL}/portfolio/orders/{order_id}"
@@ -328,7 +394,7 @@ def _place_kalshi_order(
                     pdata = pr.json()
                     order_obj   = pdata.get("order") or pdata
                     status      = order_obj.get("status", "")
-                    qty_matched = int(order_obj.get("quantity_matched") or 0)
+                    qty_matched = _kalshi_fill_count(order_obj)
                     log(
                         f"🔄 [KALSHI] Fill poll #{poll_attempt + 1}: "
                         f"status={status!r} qty_matched={qty_matched} target={contracts}"
@@ -378,6 +444,8 @@ def _unwind_poly_leg(
        offsetting SELL at market (best bid) to close the position and recover USDC.
     Returns True if unwind succeeded, False if manual intervention is required.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Polymarket unwind')
     log(f"🔄 [POLY] Auto-unwind for order={order_id} token={token_id[:16]}...")
 
     poly_private_key = os.environ.get("POLY_PRIVATE_KEY", "")
@@ -546,6 +614,8 @@ def _place_opinion_order(
 
     Returns (ok, order_id, error_msg). Never raises.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Opinion order')
     try:
         from ..adapters.opinion_clob import place_order as opinion_place_order
         return opinion_place_order(
@@ -575,6 +645,8 @@ def _cancel_leg2_order(
     Returns True if the cancel request succeeded (HTTP 200/204), False otherwise.
     Failure means the order may have already filled — flag for manual reconciliation.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('venue order cancel')
     if not order_id:
         log(f"⚠️ [LEG2 CANCEL] No order_id provided for {venue2} cancel — cannot cancel")
         return False
@@ -824,6 +896,16 @@ def _kalshi_taker_fee_pad(price: float, contracts: int) -> float:
     price_cents = px * 100.0
     total_fee_cents = math.ceil(0.07 * n * price_cents * (1.0 - price_cents / 100.0))
     return (total_fee_cents / 100.0) / n
+
+
+def _poly_fee_pad(condition_id: Optional[str], price: float) -> float:
+    """Polymarket taker fee per contract (dollars) at `price`; 0 unless ARB_POLY_EXACT_FEES is on
+    (default on in robinhood mode). Unknown fee data → the most expensive category (fallback)."""
+    from .venue_fees import poly_exact_fees_enabled, poly_fee_info, poly_taker_fee_per_contract
+    if not poly_exact_fees_enabled():
+        return 0.0
+    rate, exponent, _src = poly_fee_info(condition_id)
+    return poly_taker_fee_per_contract(price, rate, exponent)
 
 
 def _venue2_fee_pad(venue2: str, price: float, contracts: int) -> float:
@@ -1181,14 +1263,18 @@ def execute_arb(
     )
     _kalshi_pad = _venue2_fee_pad(venue2, matched_v2_vwap, matched_contracts)
     _eff_v2_vwap   = matched_v2_vwap + _kalshi_pad
-    gross_edge_pct = (1.0 - matched_poly_vwap - _eff_v2_vwap) * 100.0
+    # Polymarket CLOB V2 taker fee (core/venue_fees.py): rate × (p(1−p))^exponent per share from the
+    # market's /clob-markets fee data. Evaluated at the VWAP, which over-estimates the average fee
+    # (the curve is concave), so the gate stays conservative.
+    _poly_pad = _poly_fee_pad(poly_book.get("market") if isinstance(poly_book, dict) else None, matched_poly_vwap)
+    gross_edge_pct = (1.0 - matched_poly_vwap - _poly_pad - _eff_v2_vwap) * 100.0
     net_edge_pct   = gross_edge_pct - fee_pct
     required_edge  = min_edge_pct * 100.0 + ARB_VWAP_SAFETY_BUFFER_PCT
 
     log(
         f"📐 VWAP profitability @ {matched_contracts} contracts: "
         f"poly_vwap={matched_poly_vwap:.4f} {leg2_venue_label}_vwap={matched_v2_vwap:.4f} "
-        f"(+{_kalshi_pad*100:.2f}¢ pad → eff_v2_vwap={_eff_v2_vwap:.4f}) "
+        f"(+{_kalshi_pad*100:.2f}¢ pad → eff_v2_vwap={_eff_v2_vwap:.4f}, poly fee +{_poly_pad*100:.2f}¢) "
         f"gross_edge={gross_edge_pct:.4f}% fee={fee_pct:.4f}% "
         f"net_edge={net_edge_pct:.4f}% required={required_edge:.4f}%"
     )
@@ -1296,8 +1382,12 @@ def execute_arb(
             get_servicer_deployable_usdc,
             VENUE_MIN_DEPOSIT,
         )
-        _poly_bal, _v2_bal = get_platform_spot_balances(venue2)
-        _svc_dep = get_servicer_deployable_usdc()
+        if execution_mode() == "shadow":
+            # Notional capital: shadow mode reads no account balances (no credentials needed).
+            _poly_bal, _v2_bal, _svc_dep = 0.0, 0.0, shadow_capital_usdc()
+        else:
+            _poly_bal, _v2_bal = get_platform_spot_balances(venue2)
+            _svc_dep = get_servicer_deployable_usdc()
         _poly_min = VENUE_MIN_DEPOSIT.get("polymarket", 1.0)
         _v2_min   = VENUE_MIN_DEPOSIT.get(venue2, 1.0)
         log(
@@ -1361,6 +1451,25 @@ def execute_arb(
         f"leg1_usdc={leg1_usdc:.4f} leg2_usdc={leg2_usdc:.4f} "
         f"total_cost={leg1_usdc + leg2_usdc:.4f}"
     )
+
+    # ── Shadow mode: everything above ran against live books; stop before money moves ──
+    if execution_mode() == "shadow":
+        result.error = (
+            f"shadow_mode: would fund and place {contract_count} contracts | "
+            f"poly {('NO' if buying_poly_no else 'YES')}@{live_poly_ask} ({leg1_usdc:.2f}) + "
+            f"{venue2} {kalshi_side}@{live_kalshi_ask} ({leg2_usdc:.2f}) net_edge={net_edge_pct:.3f}%"
+        )
+        log(f"🫥 {result.error}")
+        _journal_shadow(opportunity, contract_count, live_poly_ask, live_kalshi_ask, net_edge_pct, leg1_usdc, leg2_usdc)
+        return result
+
+    # ── Live: Polymarket must be legally tradable from this host (fail closed) ──
+    from .venue_eligibility import polymarket_trading_status
+    _pm = polymarket_trading_status()
+    if not _pm["available"]:
+        result.error = f"polymarket_trading_unavailable: {_pm['reason']}"
+        log(f"🛑 {result.error}")
+        return result
 
     # ── Simultaneous funding: deposit BOTH legs in one nonce sequence ────────
     # Sends poly_deposit_tx and venue2_deposit_tx without waiting between them,
@@ -1628,6 +1737,8 @@ def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float, si
 
     Returns True if successful, False otherwise. Never raises.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Kalshi unwind')
     side_lower = side.lower() if side in ("YES", "NO") else "yes"
     log(f"🔄 [KALSHI] Best-effort unwind: ticker={ticker} shares={shares:.4f} side={side}")
 
@@ -1656,11 +1767,8 @@ def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float, si
             "count": contracts,
             "expiration_ts": int(time.time()) + 30,
         }
-        # Set the price field matching the side being sold
-        if side_lower == "yes":
-            payload["yes_price"] = sell_price_cents
-        else:
-            payload["no_price"] = sell_price_cents
+        # Set the price field matching the side being sold (fixed-point dollars)
+        payload[f"{side_lower}_price_dollars"] = _kalshi_price_dollars(sell_price_cents / 100)
 
         # Use _KALSHI_SESSION (trust_env=False) — bypass proxy for Kalshi
         resp = _KALSHI_SESSION.post(url, json=payload, headers=headers, timeout=10)

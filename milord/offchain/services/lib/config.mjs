@@ -58,9 +58,21 @@ export function loadConfig(env = process.env) {
   };
 }
 
+/**
+ * Chain 4663 is allowed only with ALLOW_MAINNET=yes (owner approval), or with ALLOW_LOCAL_FORK=yes when the RPC is a
+ * loopback address (a private Anvil fork such as fork/rehearse-full-launch.sh FORK_KEEP=yes). Other chains: always.
+ */
+export function chainAllowed(chainId, rpcUrl, env = process.env) {
+  if (Number(chainId) !== 4663) return true;
+  if (env.ALLOW_MAINNET === "yes") return true;
+  let host = "";
+  try { host = new URL(rpcUrl).hostname; } catch {}
+  return env.ALLOW_LOCAL_FORK === "yes" && ["127.0.0.1", "localhost", "[::1]"].includes(host);
+}
+
 export function connect(cfg, keyEnv) {
   if (cfg.hookrSettle && (cfg.chainId === 4663 || cfg.chainId === 46630)) throw new Error("HOOKR_SETTLE=mock is for the local simulation only");
-  if (cfg.chainId === 4663 && process.env.ALLOW_MAINNET !== "yes") throw new Error("Robinhood mainnet: set ALLOW_MAINNET=yes only after owner approval");
+  if (!chainAllowed(cfg.chainId, cfg.rpcUrl)) throw new Error("Robinhood mainnet: set ALLOW_MAINNET=yes only after owner approval (ALLOW_LOCAL_FORK=yes accepts a loopback RPC only)");
   const provider = new JsonRpcProvider(cfg.rpcUrl, cfg.chainId, { staticNetwork: true });
   const key = keyEnv ? process.env[keyEnv] : undefined;
   const signer = key ? new NonceManager(new Wallet(key, provider)) : null;

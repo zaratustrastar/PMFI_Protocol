@@ -104,12 +104,10 @@ contract RobinhoodDeploymentTest is SingleChainFixture {
 
     function test_deployScriptRefusesMainnet() public {
         DeployRobinhood s = new DeployRobinhood();
-        vm.chainId(4663);
-        vm.expectRevert(bytes("mainnet deployment not approved"));
-        s.run();
         vm.chainId(8453);
-        vm.expectRevert(bytes("Robinhood Chain testnet only"));
+        vm.expectRevert(bytes("Robinhood Chain (46630 / 4663) only"));
         s.run();
+        // 4663 is gated by the configuration hash: see the end of test_deployScriptOnTestnetFromEnv (shared env).
     }
 
     function test_deployScriptOnTestnetFromEnv() public {
@@ -156,5 +154,43 @@ contract RobinhoodDeploymentTest is SingleChainFixture {
         vm.setEnv("MILORD_PUBLISHER", vm.toString(operator));
         vm.expectRevert(bytes("keeper and publisher need separate keys (nonces)"));
         s.run();
+        vm.setEnv("MILORD_PUBLISHER", vm.toString(makeAddr("publisher")));
+
+        // Robinhood mainnet (4663): never without the owner's approval of this exact configuration hash.
+        vm.chainId(4663);
+        vm.setEnv("MILORD_MAINNET_APPROVAL", vm.toString(bytes32(uint256(1))));
+        vm.expectRevert(bytes("mainnet deployment not approved for this configuration hash"));
+        s.run();
+        // private-fork mode only with the public Anvil account #0 as broadcaster
+        vm.setEnv("MILORD_LOCAL_FORK", "yes");
+        vm.expectRevert(bytes("local fork: broadcast with the public Anvil account #0 only"));
+        s.run();
+        vm.setEnv("MILORD_LOCAL_FORK", "no");
+        vm.setEnv("MILORD_MAINNET_APPROVAL", vm.toString(bytes32(0)));
+
+        // Manifest path (regression: the fork rehearsal pointed it at /tmp, which fs_permissions refuses, and the run
+        // failed only after the whole simulation). Refused up front unless under ./deployments; never overwritten on
+        // mainnet.
+        string memory bad = "MILORD_DEPLOYMENTS_OUT must be a file under ./deployments (foundry fs_permissions)";
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "/tmp/tmp.u90AZ1gvYu/deployments.json");
+        vm.expectRevert(bytes(bad));
+        s.manifestPath();
+        vm.chainId(ROBINHOOD_TESTNET);
+        vm.expectRevert(bytes(bad)); // the whole run stops before broadcasting anything
+        s.run();
+        vm.chainId(4663);
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "./deployments/../sim/x.json");
+        vm.expectRevert(bytes(bad));
+        s.manifestPath();
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "./deployments/README.md"); // an existing file
+        vm.expectRevert(bytes("mainnet: deployments manifest already exists; never overwritten"));
+        s.manifestPath();
+        vm.setEnv("MILORD_LOCAL_FORK", "yes"); // the rehearsal's own mktemp file already exists (empty)
+        assertEq(s.manifestPath(), "./deployments/README.md");
+        vm.setEnv("MILORD_LOCAL_FORK", "no");
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "./deployments/.rehearsal-full-test.json");
+        assertEq(s.manifestPath(), "./deployments/.rehearsal-full-test.json");
+        vm.setEnv("MILORD_DEPLOYMENTS_OUT", "./deployments/test-robinhood.json");
+        vm.chainId(ROBINHOOD_TESTNET);
     }
 }
