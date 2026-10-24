@@ -4,6 +4,8 @@ cache/
 broadcast/
 out-lowmem/
 cache-lowmem/
+out-pilot/
+cache-pilot/
 fork/logs/
 fork/.polygon-redemption-*/
 hookr-verify/out/

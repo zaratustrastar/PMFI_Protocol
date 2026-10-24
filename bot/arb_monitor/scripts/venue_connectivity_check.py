@@ -287,11 +287,28 @@ def robinhood_rpc() -> dict:
     return {"name": name, "route": "direct", "ok": cid == 4663 and dec == 6, "detail": f"chainId={cid} USDG decimals={dec}"}
 
 
+def load_env_file(path: str) -> None:
+    """KEY=VALUE lines (optional `export`, quotes); existing variables win, like python-dotenv."""
+    with open(os.path.expanduser(path)) as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.removeprefix("export ").split("=", 1)
+            k, v = k.strip(), v.strip()
+            if len(v) >= 2 and v[0] == v[-1] and v[0] in "'\"":
+                v = v[1:-1]
+            os.environ.setdefault(k, v)
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--samples", type=int, default=3)
     p.add_argument("--skip-auth", action="store_true", help="skip the two authenticated reads")
+    p.add_argument("--env-file", help="load this env file first (values are never printed)")
     a = p.parse_args(argv)
+    if a.env_file:
+        load_env_file(a.env_file)
     import contextlib
     import io
     buf = io.StringIO()
