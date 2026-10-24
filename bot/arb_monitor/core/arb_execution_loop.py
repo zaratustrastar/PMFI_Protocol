@@ -398,6 +398,7 @@ def _execution_cycle():
         "cannot_compute_contracts",
         "opinion_token_unresolvable",  # categorical parent → child resolution failed
         "funding_insufficient",        # servicer pre-check refused before any TX sent
+        "shadow_mode",                 # ARB_EXECUTION_MODE=shadow: stopped before funding/orders
     )
 
     # ── Liquidity budget: caps total new deployment this cycle ────────────────

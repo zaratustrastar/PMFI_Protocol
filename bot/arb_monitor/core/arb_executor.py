@@ -245,6 +245,36 @@ def _place_poly_order(
         return False, "", err
 
 
+def execution_mode() -> str:
+    """ARB_EXECUTION_MODE: "live" places orders; "shadow" runs discovery, live-book checks, the VWAP
+    gate and sizing, journals the trade it would make, and stops before any funding transfer or order.
+    Default: shadow in robinhood mode (the pilot starts shadow until the owner switches it), live in
+    base mode (unchanged)."""
+    from ..config import is_robinhood_funding
+    default = "shadow" if is_robinhood_funding() else "live"
+    mode = os.environ.get("ARB_EXECUTION_MODE", default).strip().lower()
+    if mode not in ("live", "shadow"):
+        raise ValueError(f"ARB_EXECUTION_MODE={mode!r}; expected live or shadow")
+    return mode
+
+
+def _journal_shadow(opp, contracts, poly_px, v2_px, net_edge_pct, poly_usdc, v2_usdc) -> None:
+    import json as _json
+    path = os.environ.get("ARB_SHADOW_JOURNAL_PATH", os.path.expanduser("~/PolyNotifyBot/data/arb_shadow_trades.jsonl"))
+    row = {
+        "ts": int(time.time()), "pair_id": opp.pair_id, "source": "prediction_com" if str(opp.pair_id).startswith("pcom:") else "oddpool",
+        "kalshi_ticker": opp.kalshi_ticker, "kalshi_side": opp.kalshi_side, "contracts": contracts,
+        "poly_price": poly_px, "kalshi_price": v2_px, "net_edge_pct": round(net_edge_pct, 4),
+        "poly_usdc": round(poly_usdc, 4), "kalshi_usdc": round(v2_usdc, 4),
+    }
+    try:
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        with open(path, "a") as fh:
+            fh.write(_json.dumps(row) + "\n")
+    except OSError as e:
+        log(f"⚠️ shadow journal write failed: {e}")
+
+
 def _kalshi_price_dollars(price: float) -> str:
     """Kalshi fixed-point dollar price string ("0.2900"), rounded UP to 1/10000.
 
@@ -1407,6 +1437,17 @@ def execute_arb(
         f"leg1_usdc={leg1_usdc:.4f} leg2_usdc={leg2_usdc:.4f} "
         f"total_cost={leg1_usdc + leg2_usdc:.4f}"
     )
+
+    # ── Shadow mode: everything above ran against live books; stop before money moves ──
+    if execution_mode() == "shadow":
+        result.error = (
+            f"shadow_mode: would fund and place {contract_count} contracts | "
+            f"poly {('NO' if buying_poly_no else 'YES')}@{live_poly_ask} ({leg1_usdc:.2f}) + "
+            f"{venue2} {kalshi_side}@{live_kalshi_ask} ({leg2_usdc:.2f}) net_edge={net_edge_pct:.3f}%"
+        )
+        log(f"🫥 {result.error}")
+        _journal_shadow(opportunity, contract_count, live_poly_ask, live_kalshi_ask, net_edge_pct, leg1_usdc, leg2_usdc)
+        return result
 
     # ── Simultaneous funding: deposit BOTH legs in one nonce sequence ────────
     # Sends poly_deposit_tx and venue2_deposit_tx without waiting between them,
