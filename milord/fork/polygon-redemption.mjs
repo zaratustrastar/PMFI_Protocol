@@ -13,11 +13,21 @@
 // payout; redemption transaction from the transport's own calldata; receipt evidence + balances + cash checked by
 // the transport's own observePlan; a second prepare is refused (already redeemed). Plus a zero-payout loser and a
 // shared-holdings refusal on standard CTF.
-import {JsonRpcProvider,Interface,keccak256,toUtf8Bytes,ZeroHash,getAddress} from 'ethers';
+import {waitReceipt} from './polygon-receipts.mjs';
+import {JsonRpcProvider,FetchRequest,Interface,keccak256,toUtf8Bytes,ZeroHash,getAddress} from 'ethers';
 
 const {ADDR,preparePlan,observePlan,redemptionCall,makeReader}=await import(process.env.CTF_TRANSPORT);
 const RPC=process.env.FORK_URL;
-const p=new JsonRpcProvider(RPC,undefined,{staticNetwork:true,cacheTimeout:-1});
+// Every RPC request is bounded (a stalled upstream fetch inside Anvil surfaces as an error, not a hang).
+const RPC_TIMEOUT_MS=Number(process.env.FORK_RPC_TIMEOUT_MS || 120_000);
+const RECEIPT_TIMEOUT_MS=Number(process.env.FORK_RECEIPT_TIMEOUT_MS || 120_000);
+const CASE_TIMEOUT_MS=Number(process.env.FORK_CASE_TIMEOUT_MS || 600_000);
+const req=new FetchRequest(RPC);req.timeout=RPC_TIMEOUT_MS;
+const p=new JsonRpcProvider(req,undefined,{staticNetwork:true,cacheTimeout:-1});
+const t0=Date.now();
+let stage='startup';
+const progress=msg=>console.log(`[+${((Date.now()-t0)/1000).toFixed(1)}s] ${msg}`);
+const step=label=>{stage=label;progress(label);};
 // A fresh address per run (impersonated on the fork), so no mainnet history, approvals or balances leak in.
 const HOLDER=getAddress('0x'+keccak256(toUtf8Bytes(`milord-b21-holder-${Date.now()}-${Math.random()}`)).slice(26));
 const DEAD='0x000000000000000000000000000000000000dEaD';
@@ -35,19 +45,24 @@ const iface={
  pm:new Interface(['function safeTransferFrom(address,address,uint256,uint256,bytes)']),
 };
 
+const receiptOf=(hash,label)=>waitReceipt(p,hash,{label,timeoutMs:RECEIPT_TIMEOUT_MS});
 async function send(from,to,data,label) {
+ step(`${label}: sending from ${from} to ${to}`);
  const hash=await p.send('eth_sendTransaction',[{from,to,data,gas:'0x7a1200'}]);
- const r=await p.waitForTransaction(hash);
- if(Number(r.status)!==1) throw Error(`${label} reverted`);
+ progress(`${label}: tx ${hash}`);
+ const r=await receiptOf(hash,label);
+ progress(`${label}: block ${r.blockNumber} status ${r.status} gas ${r.gasUsed}`);
+ if(Number(r.status)!==1) throw Error(`${label} reverted (tx ${hash}, block ${r.blockNumber})`);
  return r;
 }
-async function call(from,to,data) {return p.send('eth_call',[{from,to,data},'latest']);}
+async function call(from,to,data) {step(`eth_call ${to} ${data.slice(0,10)}`);return p.send('eth_call',[{from,to,data},'latest']);}
 async function impersonate(addr,fn) {
  await p.send('anvil_impersonateAccount',[addr]);
  await p.send('anvil_setBalance',[addr,'0x56bc75e2d63100000']);
  try {return await fn();} finally {await p.send('anvil_stopImpersonatingAccount',[addr]);}
 }
 const reader=async()=>makeReader(p,await p.getBlockNumber());
+const prepare=async(cfg,what)=>{step(`${cfg.system}: prepare (read-only) ${what}`);const out=await preparePlan(await reader(),cfg,HOLDER);progress(`${cfg.system}: plan ${out.pending?'pending':`payout ${out.payoutRaw} approved ${out.approved}`}`);return out;};
 const nonce=label=>keccak256(toUtf8Bytes(`milord-b21-fork-${label}-${Date.now()}-${Math.random()}`));
 
 async function mintPusd(amount) {
@@ -61,15 +76,17 @@ async function expectRefusal(fn,re,label) {
 
 // Redeem a resolved position end to end through the transport's own plan, calldata and checks.
 async function redeemAndObserve(cfg,expectedPayout,label) {
- let plan=await preparePlan(await reader(),cfg,HOLDER);
+ let plan=await prepare(cfg,'after resolution');
  if(plan.pending) throw Error(`${label}: still pending after resolution`);
  if(plan.approved) throw Error(`${label}: expected a missing approval on a fresh account`);
  await send(HOLDER,plan.approvalTx.to,plan.approvalTx.data,`${label} approval`);
- plan=await preparePlan(await reader(),cfg,HOLDER);
+ plan=await prepare(cfg,'after approval');
  if(!plan.approved || plan.payoutRaw!==expectedPayout.toString()) throw Error(`${label}: plan ${JSON.stringify(plan)}`);
  const tx=redemptionCall(plan);
+ step(`${label}: simulate redemption`);
  await p.call({...tx,from:HOLDER});
  const receipt=await send(HOLDER,tx.to,tx.data,`${label} redemption`);
+ step(`${label}: observe receipt, balances and cash`);
  const seen=await observePlan(await reader(),plan,receipt);
  if(seen.payoutRaw!==expectedPayout.toString()) throw Error(`${label}: observed ${seen.payoutRaw}`);
  await expectRefusal(async()=>preparePlan(await reader(),cfg,HOLDER),/differs from tracked shares/,`${label} second redemption`);
@@ -88,7 +105,7 @@ async function ctfCase(label,keep,payouts,{shared=false}={}) {
  if(await r.ctfBalance(HOLDER,yes)!==AMT) throw Error(`${label}: split did not mint USDC.e-collateral CTF ids (position id derivation differs)`);
  if(!shared) await send(HOLDER,ADDR.ctf,iface.ctf.encodeFunctionData('safeTransferFrom',[HOLDER,DEAD,keep===0?no:yes,AMT,'0x']),'drop other side');
  const cfg={system:'ctf',conditionId:cid,outcome:keep,yesTokenId:yes.toString(),sharesRaw:AMT.toString()};
- const pending=await preparePlan(await reader(),cfg,HOLDER);
+ const pending=await prepare(cfg,'before resolution');
  if(!pending.pending) throw Error(`${label}: unresolved condition was not pending`);
  await send(HOLDER,ADDR.ctf,iface.ctf.encodeFunctionData('reportPayouts',[qid,payouts]),'reportPayouts');
  if(shared) {await expectRefusal(async()=>preparePlan(await reader(),cfg,HOLDER),/opposite outcome/,label);return {refused:'shared holdings'};}
@@ -112,7 +129,7 @@ async function negRiskCase(label) {
  if(await r.ctfBalance(HOLDER,yes)!==AMT) throw Error(`${label}: split did not mint wrapped-collateral ids`);
  await send(HOLDER,ADDR.ctf,iface.ctf.encodeFunctionData('safeTransferFrom',[HOLDER,DEAD,no,AMT,'0x']),'drop NO');
  const cfg={system:'ctf_negrisk',conditionId:cid,outcome:0,yesTokenId:yes.toString(),sharesRaw:AMT.toString()};
- if(!(await preparePlan(await reader(),cfg,HOLDER)).pending) throw Error(`${label}: unresolved question was not pending`);
+ if(!(await prepare(cfg,'before resolution')).pending) throw Error(`${label}: unresolved question was not pending`);
  await expectRefusal(async()=>preparePlan(await reader(),{...cfg,system:'ctf'},HOLDER),/does not match tracked YES/,`${label} declared as plain CTF`);
  await send(HOLDER,ADDR.negRiskAdapter,iface.nra.encodeFunctionData('reportOutcome',[qid,true]),'reportOutcome');
  return redeemAndObserve(cfg,AMT,label);
@@ -131,7 +148,7 @@ async function v2Case(label) {
  if(await r.pmBalance(HOLDER,yes)!==AMT) throw Error(`${label}: V2 YES id is not conditionId<<8`);
  await send(HOLDER,ADDR.positionManager,iface.pm.encodeFunctionData('safeTransferFrom',[HOLDER,DEAD,yes,AMT,'0x']),'drop YES');
  const cfg={system:'v2',conditionId:cid,outcome:1,yesTokenId:yes.toString(),sharesRaw:AMT.toString()};
- if(!(await preparePlan(await reader(),cfg,HOLDER)).pending) throw Error(`${label}: unresolved V2 condition was not pending`);
+ if(!(await prepare(cfg,'before resolution')).pending) throw Error(`${label}: unresolved V2 condition was not pending`);
  await send(HOLDER,mod,iface.module.encodeFunctionData('reportResult',[cid,[0n,1_000_000n]]),'reportResult');
  return redeemAndObserve(cfg,AMT,label);
 }
@@ -147,9 +164,11 @@ const cases=[
 await p.send('anvil_impersonateAccount',[HOLDER]);
 await p.send('anvil_setBalance',[HOLDER,'0x56bc75e2d63100000']);
 console.log(`fork ${RPC} block ${await p.getBlockNumber()} holder ${HOLDER}`);
+const withDeadline=(name,promise)=>{let timer;return Promise.race([promise.finally(()=>clearTimeout(timer)),new Promise((_,rej)=>{timer=setTimeout(()=>rej(Error(`timed out after ${CASE_TIMEOUT_MS} ms at stage: ${stage}`)),CASE_TIMEOUT_MS);})]);};
 for(const [name,fn] of cases) {
- try {const out=await fn();results.push({name,ok:true,...out});console.log(`PASS ${name} ${JSON.stringify(out)}`);}
- catch(e) {failed++;results.push({name,ok:false,error:e.message});console.log(`FAIL ${name}: ${e.message}`);}
+ step(`case ${name}: start`);
+ try {const out=await withDeadline(name,fn());results.push({name,ok:true,...out});console.log(`PASS ${name} ${JSON.stringify(out)}`);}
+ catch(e) {failed++;results.push({name,ok:false,stage,error:e.message});console.log(`FAIL ${name} at stage '${stage}': ${e.message}`);}
 }
 console.log(JSON.stringify({passed:results.length-failed,failed,results}));
 p.destroy();

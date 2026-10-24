@@ -14,6 +14,8 @@
 #   POLYGON_FORK_RPC=<url>   upstream Polygon RPC for Anvil (default https://polygon-bor-rpc.publicnode.com)
 #   FORK_PORT=8551           port for the runner's own Anvil (must be free)
 #   FORK_BLOCK=<n>           pin the fork block (default: latest)
+#   FORK_TEST_TIMEOUT=2400   whole-runner limit in seconds; per request, receipt and case limits are
+#                            FORK_RPC_TIMEOUT_MS / FORK_RECEIPT_TIMEOUT_MS (120000) and FORK_CASE_TIMEOUT_MS (600000)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 unset PRIVATE_KEY ETH_PRIVATE_KEY DEPLOYER_PRIVATE_KEY MILORD_POLY_PRIVATE_KEY POLY_PRIVATE_KEY ETH_KEYSTORE ETH_PASSWORD ETH_FROM MNEMONIC 2>/dev/null || true
@@ -69,8 +71,10 @@ TMP=$(mktemp -d fork/.polygon-redemption-XXXXXXXX)
 cp ../trading_bot/ctf_redemption.mjs "$TMP/ctf_redemption.mjs"
 say "transport: trading_bot/ctf_redemption.mjs at $(git rev-parse --short HEAD)$(git diff --quiet HEAD -- ../trading_bot/ctf_redemption.mjs || echo ' (uncommitted changes)')"
 set +e
-FORK_URL="$FORK_URL" CTF_TRANSPORT="$PWD/$TMP/ctf_redemption.mjs" "${LOWPRIO[@]}" node fork/polygon-redemption.mjs 2>&1 | tee -a "$LOG"
+FORK_URL="$FORK_URL" CTF_TRANSPORT="$PWD/$TMP/ctf_redemption.mjs" timeout --signal=TERM --kill-after=10 "${FORK_TEST_TIMEOUT:-2400}" \
+  "${LOWPRIO[@]}" node fork/polygon-redemption.mjs 2>&1 | tee -a "$LOG"
 STATUS=${PIPESTATUS[0]}
+[ "$STATUS" = 124 ] && say "runner exceeded FORK_TEST_TIMEOUT; the last [+Ns] line above is the stage it was in"
 set -e
 tail -1 "$LOG" > "fork/logs/polygon-redemption-$STAMP.summary.json"
 [ "$STATUS" = 0 ] && say "POLYGON REDEMPTION FORK TEST PASSED (log $LOG)" || say "POLYGON REDEMPTION FORK TEST FAILED (log $LOG)"
