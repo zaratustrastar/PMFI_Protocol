@@ -33,6 +33,7 @@ const HOLDER=getAddress('0x'+keccak256(toUtf8Bytes(`milord-b21-holder-${Date.now
 const DEAD='0x000000000000000000000000000000000000dEaD';
 const AMT=10_000_000n; // 10 pUSD
 const results=[];
+const approvedOperators=new Set(); // operators this run's HOLDER has approved
 let failed=0;
 
 const iface={
@@ -78,9 +79,17 @@ async function expectRefusal(fn,re,label) {
 async function redeemAndObserve(cfg,expectedPayout,label) {
  let plan=await prepare(cfg,'after resolution');
  if(plan.pending) throw Error(`${label}: still pending after resolution`);
- if(plan.approved) throw Error(`${label}: expected a missing approval on a fresh account`);
- await send(HOLDER,plan.approvalTx.to,plan.approvalTx.data,`${label} approval`);
- plan=await prepare(cfg,'after approval');
+ // One HOLDER runs every case, and setApprovalForAll persists: the first case per operator (adapter or Router)
+ // must see a genuinely missing approval and grant it; later cases on the same operator must see it as granted.
+ let approval='reused';
+ if(!approvedOperators.has(plan.operator)) {
+  if(plan.approved || !plan.approvalTx) throw Error(`${label}: a fresh account must require approval for ${plan.operator}`);
+  if(plan.approvalTx.to!==plan.ledger) throw Error(`${label}: approval targets ${plan.approvalTx.to}, expected ${plan.ledger}`);
+  await send(HOLDER,plan.approvalTx.to,plan.approvalTx.data,`${label} approval`);
+  approvedOperators.add(plan.operator);
+  approval='granted';
+  plan=await prepare(cfg,'after approval');
+ } else if(!plan.approved || plan.approvalTx) throw Error(`${label}: approval for ${plan.operator} was granted earlier in this run but is not seen`);
  if(!plan.approved || plan.payoutRaw!==expectedPayout.toString()) throw Error(`${label}: plan ${JSON.stringify(plan)}`);
  const tx=redemptionCall(plan);
  step(`${label}: simulate redemption`);
@@ -90,7 +99,7 @@ async function redeemAndObserve(cfg,expectedPayout,label) {
  const seen=await observePlan(await reader(),plan,receipt);
  if(seen.payoutRaw!==expectedPayout.toString()) throw Error(`${label}: observed ${seen.payoutRaw}`);
  await expectRefusal(async()=>preparePlan(await reader(),cfg,HOLDER),/differs from tracked shares/,`${label} second redemption`);
- return {payoutRaw:seen.payoutRaw,gasUsed:receipt.gasUsed.toString(),tx:receipt.hash};
+ return {payoutRaw:seen.payoutRaw,approval,cashRaw:seen.cashRaw,gasUsed:receipt.gasUsed.toString(),tx:receipt.hash};
 }
 
 async function ctfCase(label,keep,payouts,{shared=false}={}) {
