@@ -25,6 +25,17 @@ executor from the venues' own live order books:
     The provider's headline roi_pct is kept in `raw` for comparison only.
   - Staleness: the signal time is as_of − delay_seconds; signals older than
     ARB_STALE_QUOTE_SECONDS are dropped (the execution loop applies the same limit via fetched_at).
+    A body without as_of, or whose signal time is already too old, is dropped whole before any venue
+    lookup.
+
+Quota (API plans meter requests per second, per month and, for /v2/arb, per month separately):
+  - at most one /v2/arb request per PREDICTION_COM_MIN_POLL_SECONDS (default 30); in between the last
+    body is reused (and still passes the freshness check above);
+  - from the X-RateLimit-Remaining-{Second,Month,Arb-Month} headers the next request is spaced so the
+    remaining monthly calls last until the month ends (UTC), keeping PREDICTION_COM_QUOTA_RESERVE
+    calls (default 50) for manual checks; 0 remaining per second waits one second;
+  - a 429 waits Retry-After (seconds or an HTTP date; 60 s if absent) before the next request.
+QUOTA exposes the pacing state for monitoring.
 
 Scoring is the Oddpool scorer unchanged: score = net_cents/100 × deployable × time_factor.
 Nothing here places orders or touches custody; execution stays in core/arb_executor.py.
@@ -66,6 +77,9 @@ def _f(name: str, default: str) -> float:
 
 # Last rate-limit headers seen (X-RateLimit-*): exposed for monitoring and the connectivity check.
 RATE_LIMITS: dict = {}
+# Pacing state: next_allowed (epoch s), why, and the last 200 body with the time it was fetched.
+QUOTA: dict = {"next_allowed": 0.0, "why": "", "body": None, "body_at": 0.0}
+_QUOTA_LOCK = threading.Lock()
 STATS: dict = {}
 _STATS_LOCK = threading.Lock()
 
@@ -127,12 +141,66 @@ def _time_factor(days: float) -> Optional[float]:
 
 # ── Provider ────────────────────────────────────────────────────────────────────
 
+def _header(headers, name: str) -> Optional[float]:
+    for k, v in headers.items():
+        if k.lower() == name.lower():
+            try:
+                return float(v)
+            except (TypeError, ValueError):
+                return None
+    return None
+
+
+def _retry_after(headers, now: float) -> float:
+    raw = next((v for k, v in headers.items() if k.lower() == "retry-after"), None)
+    if raw is None:
+        return 60.0
+    try:
+        return max(0.0, float(raw))
+    except ValueError:
+        from email.utils import parsedate_to_datetime
+        try:
+            return max(0.0, parsedate_to_datetime(raw).timestamp() - now)
+        except (TypeError, ValueError):
+            return 60.0
+
+
+def _seconds_to_month_end(now: float) -> float:
+    d = datetime.fromtimestamp(now, tz=timezone.utc)
+    nxt = datetime(d.year + (d.month == 12), d.month % 12 + 1, 1, tzinfo=timezone.utc)
+    return max(1.0, nxt.timestamp() - now)
+
+
+def next_request_delay(headers, now: float) -> tuple[float, str]:
+    """Seconds until the next /v2/arb request may be sent, from the plan's rate-limit headers."""
+    delay, why = _f("PREDICTION_COM_MIN_POLL_SECONDS", "30"), "min poll interval"
+    reserve = _f("PREDICTION_COM_QUOTA_RESERVE", "50")
+    month_left = _seconds_to_month_end(now)
+    for name in ("X-RateLimit-Remaining-Arb-Month", "X-RateLimit-Remaining-Month"):
+        rem = _header(headers, name)
+        if rem is None:
+            continue
+        usable = rem - reserve
+        d = month_left if usable <= 0 else month_left / usable
+        if d > delay:
+            delay, why = d, f"{name}={int(rem)} (reserve {int(reserve)}) spread to month end"
+    if _header(headers, "X-RateLimit-Remaining-Second") == 0 and delay < 1:
+        delay, why = 1.0, "per-second limit"
+    return delay, why
+
+
 def fetch_arb_raw(session=None) -> dict:
-    """GET /v2/arb. Returns the JSON body; {} on 429 / missing key (logged, never raises for those)."""
+    """GET /v2/arb, paced to the plan's quota. Returns the JSON body (the last one while paced); {} on
+    429 / missing key (logged, never raises for those)."""
     key = api_key()
     if not key:
         log("⚠️ PREDICTION_COM_API_KEY not set — no Prediction.com opportunities")
         return {}
+    now = time.time()
+    with _QUOTA_LOCK:
+        if now < QUOTA["next_allowed"]:
+            log(f"⏳ quota pacing: next /arb request in {QUOTA['next_allowed'] - now:.0f}s ({QUOTA['why']})")
+            return QUOTA["body"] or {}
     params = {
         "platforms": os.environ.get("PREDICTION_COM_PLATFORMS", "polymarket,kalshi"),
         "limit": int(os.environ.get("PREDICTION_COM_LIMIT", "100")),
@@ -145,12 +213,21 @@ def fetch_arb_raw(session=None) -> dict:
     RATE_LIMITS.clear()
     RATE_LIMITS.update({k: v for k, v in resp.headers.items() if k.lower().startswith("x-ratelimit")})
     if resp.status_code == 429:
-        log(f"⏳ rate limited (429), retry-after={resp.headers.get('Retry-After')}; limits={RATE_LIMITS}")
+        wait = _retry_after(resp.headers, now)
+        with _QUOTA_LOCK:
+            QUOTA.update(next_allowed=now + wait, why="429 Retry-After", body=None, body_at=0.0)
+        log(f"⏳ rate limited (429), waiting {wait:.0f}s; limits={RATE_LIMITS}")
         return {}
+    delay, why = next_request_delay(resp.headers, now)
+    with _QUOTA_LOCK:
+        QUOTA.update(next_allowed=now + delay, why=why)
     if resp.status_code in (401, 403):
         raise RuntimeError(f"Prediction.com /arb refused ({resp.status_code}): check the API key and plan (Dev+)")
     resp.raise_for_status()
-    return resp.json()
+    body = resp.json()
+    with _QUOTA_LOCK:
+        QUOTA.update(body=body, body_at=now)
+    return body
 
 
 # ── Venue lookups (cached) ──────────────────────────────────────────────────────
@@ -349,8 +426,15 @@ def fetch_opportunities(session=None) -> list[ArbOpportunity]:
     entries = body.get("opportunities") or []
     if not entries:
         return []
-    as_of = _ts(body.get("as_of")) or time.time()
+    as_of = _ts(body.get("as_of"))
+    if as_of is None:
+        log("⚠️ /arb body has no as_of — freshness unknown, dropped")
+        return []
     signal_ts = as_of - float(body.get("delay_seconds") or 0)
+    max_age = float(os.environ.get("ARB_STALE_QUOTE_SECONDS", "120"))
+    if time.time() - signal_ts > max_age:
+        log(f"⏭ /arb signals are {time.time() - signal_ts:.0f}s old (> {max_age:.0f}s) — dropped")
+        return []
     with _STATS_LOCK:
         STATS.clear()
     out: list[ArbOpportunity] = []

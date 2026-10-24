@@ -185,6 +185,11 @@ class _Resp:
 
 
 class Provider(unittest.TestCase):
+    def setUp(self):
+        P.QUOTA.update(next_allowed=0.0, why="", body=None, body_at=0.0)
+
+    tearDown = setUp
+
     def test_request_shape_and_rate_limit_headers(self):
         calls = []
 
@@ -242,7 +247,8 @@ class Feed(unittest.TestCase):
         b = [_opp("t2", 1.5), _opp("t3", 3.0, "YES")]
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "cmp.jsonl")
-            env = {"ARB_OPPORTUNITY_FEED": "compare", "ARB_FEED_COMPARE_LOG": path, "ARB_FEED_COMPARE_PRIMARY": "prediction_com"}
+            env = {"ARB_OPPORTUNITY_FEED": "compare", "ARB_FEED_COMPARE_LOG": path, "ARB_FEED_COMPARE_PRIMARY": "prediction_com",
+                   "PREDICTION_COM_API_KEY": "k"}
             with mock.patch.dict(os.environ, env), \
                  mock.patch.object(FEED, "_fetch", lambda n: a if n == "oddpool" else b):
                 got = FEED.fetch_opportunities()

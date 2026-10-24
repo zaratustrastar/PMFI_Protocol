@@ -103,6 +103,8 @@ def log(msg: str):
 # ---------------------------------------------------------------------------
 
 def _rpc(method: str, params: list, rpc_url: str = BASE_RPC) -> str:
+    from .shadow_guard import assert_rpc_allowed
+    assert_rpc_allowed(method)
     import requests as _req
     resp = _req.post(rpc_url, json={
         "jsonrpc": "2.0", "method": method, "params": params, "id": 1
@@ -437,6 +439,8 @@ def _send_erc20_transfer(
     rpc_url: str = BASE_RPC,
 ) -> str:
     """Send `amount_usdc` USDC to `to_addr`. Returns tx hash."""
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('ERC-20 transfer')
     amount_raw = int(amount_usdc * 1_000_000)
     padded_to = "000000000000000000000000" + to_addr.lower().replace("0x", "")
     padded_amount = hex(amount_raw)[2:].zfill(64)
@@ -467,6 +471,8 @@ def _send_erc20_approve(
     rpc_url: str = BASE_RPC,
 ) -> str:
     """Approve `spender` to spend `amount_usdc` USDC. Returns tx hash."""
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('ERC-20 approval')
     amount_raw = int(amount_usdc * 1_000_000)
     padded_spender = "000000000000000000000000" + spender.lower().replace("0x", "")
     padded_amount = hex(amount_raw)[2:].zfill(64)
@@ -953,6 +959,8 @@ def _call_tend_if_ready(vault_address: str, private_key: str, servicer_wallet: s
         • Does NOT touch USDC reserved for pending redemptions
         • Does NOT process deposit/redeem queues
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('vault tend')
     from eth_hash.auto import keccak
     from eth_account import Account
 
@@ -1336,6 +1344,8 @@ def fund_both_legs_for_trade(
         (True, "")           — both platforms funded; safe to execute
         (False, error_str)   — cannot fund; error_str explains why
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('venue funding')
     if venue2 == "opinion" and not opinion_enabled():
         # "funding_insufficient" prefix = no capital moved, so the execution loop skips to the next pair.
         msg = "funding_insufficient: opinion_disabled (ARB_OPINION_ENABLED=false) — Opinion leg not funded"
@@ -1829,6 +1839,8 @@ def run_tend_tick() -> None:
 
     All errors are logged and suppressed — never raises.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('vault tend')
     ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     log(f"💓 [tend tick] starting — {ts}")
 
@@ -1931,6 +1943,8 @@ def reconcile_funding_intents() -> dict:
     * "unconfirmed" — receipt re-checked; a revert marks the intent and its row "reverted".
     Returns counts per outcome. A live intent always blocks a new op for the same key/destination.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('funding intent reconciliation')
     from .arb_withdrawals import mark_bridge_arrived, mark_venue_deposit_arrived
     counts = {"abandoned": 0, "confirmed": 0, "reverted": 0, "unconfirmed": 0, "still_pending": 0, "ledgered": 0}
     for row in _L.list_intents():
@@ -2005,6 +2019,10 @@ def run_startup_checks() -> list[str]:
     errs = AL.validate_funding_config(kalshi_deposit_addr=KALSHI_BASE_DEPOSIT_ADDR)
     for e in errs:
         log(f"🛑 Funding config: {e}")
+    from .shadow_guard import is_shadow
+    if is_shadow():
+        log("👁 shadow mode: write-ahead intent reconciliation skipped (it writes ledgers and sends transactions)")
+        return errs
     try:
         reconcile_funding_intents()
     except Exception as e:

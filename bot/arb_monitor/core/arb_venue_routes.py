@@ -38,6 +38,9 @@ def to_raw(amount_usdc: float) -> int:
 
 def poly_bridge(action: str, timeout: int = 240, **data) -> dict:
     """Run trading_bot/poly_bridge_withdraw.mjs. Returns its last JSON line; exit 3 means outcome unknown."""
+    if action not in ("quote", "status"):
+        from .shadow_guard import assert_not_shadow
+        assert_not_shadow(f"Polymarket bridge {action}")
     script = Path(__file__).resolve().parents[3] / "trading_bot" / "poly_bridge_withdraw.mjs"
     r = subprocess.run(["node", str(script)], input=json.dumps({"action": action, **data}),
                        capture_output=True, text=True, timeout=timeout)

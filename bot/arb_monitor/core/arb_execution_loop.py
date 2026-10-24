@@ -195,8 +195,67 @@ def _filter_opinion(opportunities: list) -> list:
     return kept
 
 
+def _shadow_cycle() -> dict:
+    """ARB_EXECUTION_MODE=shadow: the read-only cycle.
+
+    Runs feed fetch, the loop's own guards, then execute_arb() on a notional size, which re-reads the
+    live order books, applies the VWAP and fee gates, sizes the trade and journals it, and returns
+    before funding. Never calls the reporter, tend, funding-intent reconciliation, liquidity or
+    balance reads, the positions database, or anything that signs or sends.
+    """
+    from .shadow_guard import shadow_capital_usdc
+    from .venue_eligibility import polymarket_trading_status
+
+    stats = {"fetched": 0, "evaluated": 0, "passed_gates": 0, "skipped": 0}
+    if is_robinhood_funding():
+        from .arb_allowlist import validate_funding_config
+        for e in validate_funding_config():
+            log(f"👁 shadow: funding config would block live trading: {e}")
+    pm = polymarket_trading_status()
+    log(f"👁 shadow cycle: Polymarket trading available={pm['available']} ({pm['reason']})")
+
+    try:
+        opportunities = _filter_opinion(fetch_opportunities())
+    except Exception as e:
+        log(f"❌ shadow: failed to fetch opportunities: {e}")
+        return stats
+    stats["fetched"] = len(opportunities)
+    capital = shadow_capital_usdc()
+    max_eval = int(os.environ.get("ARB_SHADOW_MAX_EVAL", "10"))
+    stale_secs = int(os.environ.get("ARB_STALE_QUOTE_SECONDS", "120"))
+    for opp in opportunities:
+        if not _loop_running and threading.current_thread() is _loop_thread:
+            break
+        if stats["evaluated"] >= max_eval:
+            break
+        net_edge = getattr(opp, "net_edge_pct", opp.gross_edge_pct)
+        if (getattr(opp, "is_display_only", True)
+                or time.time() - getattr(opp, "fetched_at", 0.0) > stale_secs
+                or opp.days_to_expiry < ARB_MIN_DAYS_TO_EXPIRY
+                or net_edge < ARB_MIN_EDGE_PCT
+                or getattr(opp, "score", 0.0) < ARB_MIN_SCORE):
+            stats["skipped"] += 1
+            continue
+        # No positions-DB read: size on the scorer's fillable estimate and the notional capital.
+        size = min(max(0.0, getattr(opp, "fillable_size_usdc", ARB_MAX_PAIR_USDC)), ARB_MAX_PAIR_USDC, capital)
+        if size <= 0:
+            stats["skipped"] += 1
+            continue
+        stats["evaluated"] += 1
+        result = execute_arb(opp, size_usdc=size)
+        if (result.error or "").startswith("shadow_mode"):
+            stats["passed_gates"] += 1
+        log(f"👁 shadow {opp.pair_id}: {result.error or 'no result'}")
+    log(f"👁 shadow cycle complete: {stats}")
+    return stats
+
+
 def _execution_cycle():
     """Run a single execution cycle: fetch, prioritize, execute eligible opportunities."""
+    from .shadow_guard import is_shadow
+    if is_shadow():
+        _shadow_cycle()
+        return
     log("⚡ Starting execution cycle")
 
     # ── V2 Reporter: waterfall sweep + report() if cooldown/early-trigger ─────
@@ -399,6 +458,7 @@ def _execution_cycle():
         "opinion_token_unresolvable",  # categorical parent → child resolution failed
         "funding_insufficient",        # servicer pre-check refused before any TX sent
         "shadow_mode",                 # ARB_EXECUTION_MODE=shadow: stopped before funding/orders
+        "polymarket_trading_unavailable",  # geoblocked / eligibility unknown: refused before funding
     )
 
     # ── Liquidity budget: caps total new deployment this cycle ────────────────
@@ -677,7 +737,8 @@ def _execution_loop_worker():
     """Daemon thread: continuously run execution cycles."""
     global _loop_running
     log("🟢 Arb execution loop started")
-    if is_robinhood_funding():
+    from .shadow_guard import is_shadow
+    if is_robinhood_funding() and not is_shadow():
         run_startup_checks()
 
     while _loop_running:

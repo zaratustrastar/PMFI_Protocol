@@ -7,6 +7,9 @@ ARB_OPPORTUNITY_FEED:
                    and append one JSON line per cycle to ARB_FEED_COMPARE_LOG describing the overlap,
                    so the two can be compared on live data before Oddpool is switched off.
 
+Without PREDICTION_COM_API_KEY, Oddpool stays the feed: prediction_com mode falls back to oddpool, and
+compare mode fetches Oddpool only and trades from it whatever ARB_FEED_COMPARE_PRIMARY says.
+
 Both providers produce the same ArbOpportunity; the executor re-verifies every pair against the
 venues' live order books regardless of the source.
 """
@@ -74,13 +77,23 @@ def compare_summary(primary: str, a: list[ArbOpportunity], b: list[ArbOpportunit
     }
 
 
+def _prediction_com_configured() -> bool:
+    return bool(os.environ.get("PREDICTION_COM_API_KEY", "").strip())
+
+
 def fetch_opportunities() -> list[ArbOpportunity]:
     mode = feed_mode()
+    if mode == "prediction_com" and not _prediction_com_configured():
+        log("ℹ️ PREDICTION_COM_API_KEY not set — using Oddpool")
+        mode = "oddpool"
     if mode != "compare":
         return _fetch(mode)
     primary = os.environ.get("ARB_FEED_COMPARE_PRIMARY", "oddpool").strip().lower()
     if primary not in ("oddpool", "prediction_com"):
         raise ValueError(f"ARB_FEED_COMPARE_PRIMARY={primary!r}")
+    if not _prediction_com_configured():
+        log("ℹ️ PREDICTION_COM_API_KEY not set — compare mode runs on Oddpool only")
+        return _fetch("oddpool")
     res: dict[str, list] = {}
     for name in ("oddpool", "prediction_com"):
         try:
@@ -93,7 +106,10 @@ def fetch_opportunities() -> list[ArbOpportunity]:
         f"compare: oddpool={summary['oddpool_executable']} prediction_com={summary['prediction_com_executable']} "
         f"both={summary['both']} (trading from {primary})"
     )
-    path = os.environ.get("ARB_FEED_COMPARE_LOG", os.path.expanduser("~/PolyNotifyBot/data/arb_feed_compare.jsonl"))
+    path = os.environ.get("ARB_FEED_COMPARE_LOG", "")
+    if not path:
+        log("ℹ️ ARB_FEED_COMPARE_LOG not set — comparison not written")
+        return res[primary]
     try:
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         with open(path, "a") as fh:

@@ -254,6 +254,8 @@ def _sign_report(
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _rpc(method: str, params: list) -> object:
+    from .shadow_guard import assert_rpc_allowed
+    assert_rpc_allowed(method)
     import requests as _req
     resp = _req.post(BASE_RPC, json={
         "jsonrpc": "2.0", "method": method, "params": params, "id": 1
@@ -1660,6 +1662,8 @@ def run_reporter_tick():
 
     All errors are caught so a reporter failure never crashes the arb loop.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('vault NAV report')
     vault_address = os.environ.get("ARB_VAULT_V2_ADDRESS", "")
     signer_key    = os.environ.get("ARB_NAV_SIGNER_PRIVATE_KEY", "")
     servicer_key  = os.environ.get("POLY_PRIVATE_KEY", "")

@@ -554,6 +554,8 @@ def reconcile_bridge_transfers() -> None:
     * anything older than ARB_INFLIGHT_STALE_SECS becomes "stale" (still counted, alerted).
     Venue deposits (Base USDC → Kalshi) are reconciled the same way against the Kalshi balance.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('bridge reconciliation')
     venue_bal: dict = {}
 
     def platform_balance(venue: str):
@@ -670,6 +672,8 @@ def sweep_base_usdc_to_robinhood(servicer_wallet: str, private_key: str) -> floa
     """Robinhood mode: bridge servicer USDC on Base (Kalshi withdrawals, stranded bridge output)
     back to USDG on 4663. Skipped while a 4663→Base bridge is in flight (that USDC is about to be
     forwarded to Kalshi) or while a previous sweep's outcome is unknown. Returns the USDC amount bridged."""
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Base USDC sweep')
     if not is_robinhood_funding() or not servicer_wallet or not private_key:
         return 0.0
     if inflight_rows_for(direction="rh_to_base"):
@@ -771,6 +775,8 @@ def _poly_get_balance() -> float:
     return bal
 
 def _rpc_call(rpc_url: str, method: str, params: list) -> str:
+    from .shadow_guard import assert_rpc_allowed
+    assert_rpc_allowed(method)
     resp = requests.post(
         rpc_url,
         json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
@@ -901,6 +907,8 @@ def withdraw_from_polymarket(
     amount_usdc: float,
     min_amount: float = 1.0,
 ) -> tuple[bool, str, float]:
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Polymarket withdrawal')
     import subprocess
     import re
 
@@ -1020,6 +1028,8 @@ def withdraw_from_kalshi(
     dest_address: str,
     min_amount: float = 1.0,
 ) -> tuple[bool, str, float]:
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Kalshi withdrawal')
     from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
 
     if not kalshi_auth_available():
@@ -1196,6 +1206,8 @@ def withdraw_from_opinion(
     dest_address: str,
     min_amount: float = 1.0,
 ) -> tuple[bool, str, float]:
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Opinion withdrawal')
     opinion_api_key = os.environ.get("OPINION_API_KEY", "")
     private_key = os.environ.get("POLY_PRIVATE_KEY", "")
 
@@ -1404,6 +1416,8 @@ def withdraw_from_platforms(
     opinion_cash: float,
     servicer_wallet: str,
 ) -> float:
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('venue withdrawal')
     if shortfall_usdc <= 0:
         return 0.0
 

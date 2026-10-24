@@ -82,6 +82,8 @@ _SCHEMA_ADDITIONS_SQL = """
 
 def init_arb_tables():
     """Create arb-specific DB tables if they don't exist."""
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('positions DB schema write')
     conn = get_db_conn()
     if not conn:
         log("⚠️ Cannot init tables: no DB connection")
@@ -263,6 +265,8 @@ def upsert_position(
     kalshi_side: "YES" or "NO" — which side was purchased on Kalshi.
     This is critical for NAV liquid value calculation and unwind logic.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('positions DB write')
     if kalshi_side not in ("YES", "NO"):
         log(f"⚠️ Invalid kalshi_side={kalshi_side!r}, defaulting to 'YES'")
         kalshi_side = "YES"
@@ -310,6 +314,8 @@ def upsert_position(
 
 def settle_position(pair_id: str, settled_pnl_usdc: float) -> bool:
     """Mark an arb position as settled with final PnL."""
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('positions DB write')
     conn = get_db_conn()
     if not conn:
         return False
@@ -334,6 +340,8 @@ def settle_position(pair_id: str, settled_pnl_usdc: float) -> bool:
 def mark_position_resolved(pair_id: str, resolved_venue: str, expected_payout_usdc: float) -> bool:
     """open -> pending_redeem (robinhood mode). The position keeps being valued at cost basis
     until mark_position_redeemed() records that its payout is in venue cash."""
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('positions DB write')
     if resolved_venue not in ("polymarket", "kalshi"):
         raise ValueError(f"resolved_venue must be polymarket|kalshi, got {resolved_venue!r}")
     conn = get_db_conn()
@@ -364,6 +372,8 @@ def mark_position_redeemed(pair_id: str, payout_usdc: float) -> bool:
     """pending_redeem -> redeemed. Call ONLY once the payout is visible in the venue cash
     balance the reporter reads (otherwise NAV drops by the cost basis until it lands).
     settled_pnl_usdc = payout - cost basis."""
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('positions DB write')
     conn = get_db_conn()
     if not conn:
         return False

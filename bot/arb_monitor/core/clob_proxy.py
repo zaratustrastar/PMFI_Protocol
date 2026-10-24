@@ -6,7 +6,12 @@ Two transports reach clob*.polymarket.com and both must be patched:
     httpx.Client in py_clob_client_v2.http_helpers.helpers, which the requests patch never sees.
     That client is replaced by one with the same settings plus the proxy. The SDK only talks to the
     CLOB host, so proxying the whole client is equivalent to host matching.
-    POLY_CLOB_PROXY_SDK=false keeps the SDK direct (previous behaviour).
+    POLY_CLOB_PROXY_SDK=true routes the SDK through the proxy; the default is false (direct).
+
+Not applied at all when ARB_PUBLIC_DATA_ROUTE resolves to direct (the Robinhood pilot and shadow mode):
+public books and prices then go direct, and orders go from this host's own egress. A proxy is never
+used to make Polymarket order placement possible from a geoblocked location (core/venue_eligibility.py
+decides eligibility over the direct route).
 """
 
 import os
@@ -19,7 +24,8 @@ SDK_ROUTE = "direct"  # "proxy" once the V2 SDK's httpx client goes through the 
 
 
 def _redact(url: str) -> str:
-    return re.sub(r"//[^@]+@", "//<redacted>@", url)
+    from ..http_client import describe_proxy
+    return describe_proxy(url)[1]
 
 
 def patch_sdk_httpx(proxy_url: str) -> bool:
@@ -67,6 +73,17 @@ def install_proxy_patch():
         _PATCHED = True
         return
 
+    from ..http_client import describe_proxy, public_data_route
+    if public_data_route() == "direct":
+        print("[Arb/CLOBProxy] ARB_PUBLIC_DATA_ROUTE=direct -- proxy not applied, CLOB calls go direct", flush=True)
+        _PATCHED = True
+        return
+    ok, display = describe_proxy(proxy_url)
+    if not ok:
+        print(f"[Arb/CLOBProxy] {display} -- proxy not applied, CLOB calls go direct", flush=True)
+        _PATCHED = True
+        return
+
     if _under_proxychains():
         print(
             "[Arb/CLOBProxy] proxychains detected -- skipping patch "
@@ -98,7 +115,7 @@ def install_proxy_patch():
 
     HTTPAdapter.send = _poly_proxied_send
     _PATCHED = True
-    if os.environ.get("POLY_CLOB_PROXY_SDK", "true").strip().lower() == "true":
+    if os.environ.get("POLY_CLOB_PROXY_SDK", "false").strip().lower() == "true":
         patch_sdk_httpx(proxy_url)
 
     proxy_display = _redact(proxy_url)

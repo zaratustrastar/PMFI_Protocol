@@ -1,6 +1,6 @@
 """READ-ONLY connectivity, proxy-routing and account check for the Robinhood relaunch.
 
-    python3 -m bot.arb_monitor.scripts.venue_connectivity_check [--samples 3] [--skip-auth]
+    python3 -m bot.arb_monitor.scripts.venue_connectivity_check --env-file FILE [--samples 3] [--skip-auth]
 
 Run it on the VPS from the engine's checkout with the engine's environment loaded (the same .env
 the service uses), WITHOUT restarting or touching the running service. It only sends GET requests
@@ -18,7 +18,16 @@ What it reports (JSON on stdout):
   checks     each read-only request over that route: HTTP status, median latency over --samples,
              ok/failed and a short reason. Polymarket geoblock is checked both direct and over the
              CLOB proxy, which tells whether order placement is allowed from each egress.
-  verdict    ready | blocked, with the failing checks.
+  access     per venue, three separate answers: public_data (anonymous market data), authenticated_balance
+             (signed account read) and trade_execution (whether orders are authorized from this host).
+             Polymarket trade execution needs the DIRECT geoblock check to say blocked=false: a proxy is
+             never counted, since using one to place orders from a restricted location would circumvent
+             Polymarket's geo restrictions. Kalshi has no order-permission probe that places no order, so
+             its answer is inferred from the signed balance read plus exchange trading_active.
+  verdict    ready | blocked, shadow_ready (public data for both venues), live_ready, failing checks.
+
+A malformed proxy URL is reported as a sanitized diagnostic (scheme and the kind of error, never the
+host's credentials) and that proxy is not used.
 """
 
 import argparse
@@ -34,17 +43,38 @@ import requests
 
 
 def redact(url: str) -> str:
+    """scheme://host:port, or a sanitized 'malformed proxy URL (...)' diagnostic. Never credentials."""
     if not url:
         return ""
-    u = urlparse(url)
-    host = u.hostname or ""
-    return f"{u.scheme}://{host}{':' + str(u.port) if u.port else ''}"
+    from ..http_client import describe_proxy
+    return describe_proxy(url)[1]
+
+
+def well_formed(url: str) -> bool:
+    from ..http_client import describe_proxy
+    return bool(url) and describe_proxy(url)[0]
+
+
+_SECRET_VARS = ("PROXY_URL", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "POLY_CLOB_PROXY_URL", "OPINION_PROXY_URL",
+                "POLY_API_KEY", "POLY_API_SECRET", "POLY_API_PASSPHRASE", "POLY_PRIVATE_KEY", "KALSHI_API_KEY_ID",
+                "PREDICTION_COM_API_KEY", "ODDPOOL_API_KEY", "ARB_NAV_SIGNER_PRIVATE_KEY", "DATABASE_URL")
 
 
 def scrub(text: str) -> str:
-    """Remove any user:password@ from text (exception messages can quote a proxy URL)."""
+    """Remove user:password@ and every configured secret / proxy value (or its password part) from text:
+    exception messages can quote a proxy URL, malformed or not."""
     import re
-    return re.sub(r"//[^/@\s]+@", "//<redacted>@", text)
+    text = re.sub(r"//[^/@\s]+@", "//<redacted>@", text)
+    for var in _SECRET_VARS:
+        val = os.environ.get(var, "") or os.environ.get(var.lower(), "")
+        parts = [val]
+        m = re.match(r"[^:/]*://([^@/]*)@", val)
+        if m:
+            parts += [m.group(1)] + m.group(1).split(":", 1)
+        for part in parts:
+            if len(part) >= 6:
+                text = text.replace(part, "<redacted>")
+    return text
 
 
 def proxy_env() -> dict:
@@ -55,6 +85,8 @@ def proxy_env() -> dict:
 
 
 def probe_proxy(url: str) -> dict:
+    if not well_formed(url):
+        return {"endpoint": redact(url), "ok": False, "error": "malformed proxy URL; not used by the engine"}
     u = urlparse(url)
     port = u.port or (1080 if (u.scheme or "").startswith("socks") else 8080 if u.scheme == "http" else 443)
     res = {"endpoint": redact(url)}
@@ -77,17 +109,31 @@ def probe_proxy(url: str) -> dict:
 
 def engine_routing(env: dict) -> dict:
     """The route each engine call path takes, from the code (not from a guess)."""
+    from ..http_client import public_data_route
+    direct_public = public_data_route() == "direct"
+    raw_general = (os.environ.get("HTTP_PROXY") or os.environ.get("HTTPS_PROXY") or os.environ.get("PROXY_URL") or "")
+    raw_clob = os.environ.get("POLY_CLOB_PROXY_URL") or os.environ.get("PROXY_URL") or ""
     general = env.get("HTTP_PROXY") or env.get("HTTPS_PROXY") or env.get("PROXY_URL") or ""
     if env.get("proxychains"):
         general_label = "proxychains (all TCP at OS level)"
+    elif direct_public:
+        general_label = "direct (ARB_PUBLIC_DATA_ROUTE=direct)"
+    elif raw_general and not well_formed(raw_general):
+        general_label = "direct (malformed proxy URL ignored)"
     else:
         general_label = f"proxy {general}" if general else "direct"
     clob_proxy = env.get("POLY_CLOB_PROXY_URL") or env.get("PROXY_URL") or ""
-    sdk_on = os.environ.get("POLY_CLOB_PROXY_SDK", "true").strip().lower() == "true"
+    if direct_public:
+        clob_label, clob_proxy = "direct (ARB_PUBLIC_DATA_ROUTE=direct)", ""
+    elif raw_clob and not well_formed(raw_clob):
+        clob_label, clob_proxy = "direct (malformed proxy URL ignored)", ""
+    else:
+        clob_label = f"proxy {clob_proxy}" if clob_proxy else "direct"
+    sdk_on = os.environ.get("POLY_CLOB_PROXY_SDK", "false").strip().lower() == "true"
     std_env = env.get("HTTPS_PROXY") or env.get("ALL_PROXY") or ""
     return {
         "gamma (http_client session)": general_label,
-        "clob books/prices (requests, clob_proxy patch)": f"proxy {clob_proxy}" if clob_proxy else "direct",
+        "clob books/prices (requests, clob_proxy patch)": clob_label,
         "clob orders/balances (py-clob-client-v2 httpx)":
             (f"proxy {clob_proxy}" if clob_proxy and sdk_on else (f"proxy {std_env} (HTTPS_PROXY env)" if std_env else "direct")),
         "kalshi trading + market data (bypass_proxy / trust_env=False)": "direct",
@@ -164,34 +210,79 @@ def run(samples: int, skip_auth: bool) -> dict:
             report["proxy"]["endpoints"].append({"var": k, **probe_proxy(raw)})
 
     clob_proxy = os.environ.get("POLY_CLOB_PROXY_URL", "") or os.environ.get("PROXY_URL", "")
+    if not well_formed(clob_proxy):
+        clob_proxy = ""
     direct = _session()
     via_clob = _session(clob_proxy) if clob_proxy else None
     C = report["checks"]
     geo = "https://polymarket.com/api/geoblock"
-    C.append(http_check("polymarket geoblock", "direct", direct, geo, 1, judge=geoblock_judge))
+    geo_direct = http_check("polymarket geoblock", "direct", direct, geo, 1, judge=geoblock_judge)
+    C.append(geo_direct)
     if via_clob:
-        C.append(http_check("polymarket geoblock", f"proxy {redact(clob_proxy)}", via_clob, geo, 1, judge=geoblock_judge))
+        c = http_check("polymarket geoblock", f"proxy {redact(clob_proxy)}", via_clob, geo, 1, judge=geoblock_judge)
+        c.update(optional=True, note="informational only: a proxy egress never makes Polymarket trading available")
+        C.append(c)
 
     from .. import http_client
     gamma_route = report["routing"]["gamma (http_client session)"]
-    C.append(http_check("gamma markets", gamma_route, http_client._get_session(), f"{POLY_GAMMA_URL}/markets",
-                        samples, params={"limit": 1, "active": "true"}))
-    clob_sess = via_clob or direct
-    C.append(http_check("clob server time", "proxy " + redact(clob_proxy) if clob_proxy else "direct", clob_sess,
-                        f"{POLY_CLOB_URL}/time", samples))
+    gamma = http_check("gamma markets", gamma_route, http_client._get_session(), f"{POLY_GAMMA_URL}/markets",
+                       samples, params={"limit": 1, "active": "true"})
+    C.append(gamma)
+    clob_route = report["routing"]["clob books/prices (requests, clob_proxy patch)"]
+    clob_sess = via_clob if clob_route.startswith("proxy") else direct
+    clob_time = http_check("clob server time", clob_route, clob_sess, f"{POLY_CLOB_URL}/time", samples)
+    C.append(clob_time)
 
+    poly_auth = kalshi_auth = None
     if not skip_auth:
-        C.append(guarded("polymarket authenticated balance (V2 SDK)", poly_sdk_balance, samples))
-        C.append(guarded("kalshi authenticated balance", kalshi_signed_get, KALSHI_BASE_URL, samples))
-    C.append(http_check("kalshi exchange status", "direct", direct, f"{KALSHI_BASE_URL}/exchange/status", samples,
-                        judge=lambda r, b: (r.status_code == 200 and isinstance(b, dict) and bool(b.get("trading_active", True)),
-                                            f"trading_active={b.get('trading_active') if isinstance(b, dict) else None}")))
+        poly_auth = guarded("polymarket authenticated balance (V2 SDK)", poly_sdk_balance, samples)
+        kalshi_auth = guarded("kalshi authenticated balance", kalshi_signed_get, KALSHI_BASE_URL, samples)
+        C += [poly_auth, kalshi_auth]
+    k_status = http_check("kalshi exchange status", "direct", direct, f"{KALSHI_BASE_URL}/exchange/status", samples,
+                          judge=lambda r, b: (r.status_code == 200 and isinstance(b, dict) and bool(b.get("trading_active", True)),
+                                              f"trading_active={b.get('trading_active') if isinstance(b, dict) else None}"))
+    C.append(k_status)
     C.append(guarded("prediction.com /v2/arb", prediction_com, samples))
     C.append(guarded("robinhood rpc (chain id, USDG decimals)", robinhood_rpc))
 
+    report["access"] = access_summary(geo_direct, gamma, clob_time, poly_auth, kalshi_auth, k_status)
     failed = [f"{c['name']} ({c['route']})" for c in C if not c.get("ok") and not c.get("optional")]
-    report["verdict"] = {"result": "ready" if not failed else "blocked", "failed": failed}
+    acc = report["access"]
+    report["verdict"] = {
+        "result": "ready" if not failed else "blocked",
+        "shadow_ready": acc["polymarket"]["public_data"] and acc["kalshi"]["public_data"],
+        "live_ready": acc["polymarket"]["trade_execution"]["authorized"] and acc["kalshi"]["trade_execution"]["authorized"],
+        "failed": failed,
+    }
     return report
+
+
+def access_summary(geo_direct, gamma, clob_time, poly_auth, kalshi_auth, k_status) -> dict:
+    """Public data, authenticated balance and trade execution, kept apart for each venue."""
+    pm_geo_ok = bool(geo_direct.get("ok"))
+    pm_auth = None if poly_auth is None else bool(poly_auth.get("ok"))
+    k_auth = None if kalshi_auth is None else bool(kalshi_auth.get("ok"))
+    k_active = bool(k_status.get("ok"))
+    return {
+        "polymarket": {
+            "public_data": bool(gamma.get("ok")) and bool(clob_time.get("ok")),
+            "authenticated_balance": pm_auth,
+            "trade_execution": {
+                "authorized": pm_geo_ok and pm_auth is True,
+                "basis": ("direct-egress geoblock " + (geo_direct.get("detail") or "unanswered")
+                          + ("" if pm_auth is not None else "; balance read skipped")),
+                "live_execution": "allowed" if pm_geo_ok and pm_auth else "refused (fails closed)",
+            },
+        },
+        "kalshi": {
+            "public_data": k_active or k_status.get("status") == 200,
+            "authenticated_balance": k_auth,
+            "trade_execution": {
+                "authorized": k_auth is True and k_active,
+                "basis": "inferred from the signed balance read and exchange trading_active; no order is placed",
+            },
+        },
+    }
 
 
 def guarded(name: str, fn, *args) -> dict:
@@ -287,34 +378,29 @@ def robinhood_rpc() -> dict:
     return {"name": name, "route": "direct", "ok": cid == 4663 and dec == 6, "detail": f"chainId={cid} USDG decimals={dec}"}
 
 
-def load_env_file(path: str) -> None:
-    """KEY=VALUE lines (optional `export`, quotes); existing variables win, like python-dotenv."""
-    with open(os.path.expanduser(path)) as fh:
-        for line in fh:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            k, v = line.removeprefix("export ").split("=", 1)
-            k, v = k.strip(), v.strip()
-            if len(v) >= 2 and v[0] == v[-1] and v[0] in "'\"":
-                v = v[1:-1]
-            os.environ.setdefault(k, v)
+def load_env_file(path: str) -> list[str]:
+    """The file is authoritative: its values override the process environment and inherited engine
+    variables it does not set are dropped (same rules as run_pilot). Returns the dropped names."""
+    from ..run_pilot import isolate_env, parse_env_file
+    return isolate_env(parse_env_file(path))
 
 
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--samples", type=int, default=3)
     p.add_argument("--skip-auth", action="store_true", help="skip the two authenticated reads")
-    p.add_argument("--env-file", help="load this env file first (values are never printed)")
+    p.add_argument("--env-file", help="load this env file first; it overrides and replaces inherited engine "
+                                      "variables (values are never printed)")
     a = p.parse_args(argv)
-    if a.env_file:
-        load_env_file(a.env_file)
+    dropped = load_env_file(a.env_file) if a.env_file else []
     import contextlib
     import io
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):  # engine modules log to stdout; keep the JSON clean
         report = run(max(1, a.samples), a.skip_auth)
-    print(json.dumps(report, indent=2, default=str))
+    if dropped:
+        report["env_file"] = {"dropped_inherited_variables": dropped}
+    print(scrub(json.dumps(report, indent=2, default=str)))
     return 0 if report["verdict"]["result"] == "ready" else 1
 
 

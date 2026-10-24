@@ -34,7 +34,8 @@ class Secrets(unittest.TestCase):
 
 class Routing(unittest.TestCase):
     def test_kalshi_trading_stays_direct_with_proxy_url(self):
-        r = V.engine_routing({"PROXY_URL": "http://es.proxy:3128"})
+        with mock.patch.dict(os.environ, {"POLY_CLOB_PROXY_SDK": "true", "ARB_PUBLIC_DATA_ROUTE": "proxy"}):
+            r = V.engine_routing({"PROXY_URL": "http://es.proxy:3128"})
         self.assertEqual(r["kalshi trading + market data (bypass_proxy / trust_env=False)"], "direct")
         self.assertEqual(r["gamma (http_client session)"], "proxy http://es.proxy:3128")
         self.assertEqual(r["clob books/prices (requests, clob_proxy patch)"], "proxy http://es.proxy:3128")

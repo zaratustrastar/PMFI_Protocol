@@ -104,6 +104,8 @@ def log_execution_to_db(
     order_id: str = "",
 ):
     """Log a per-leg execution event to arb_executions table."""
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('execution DB write')
     conn = _get_db_conn()
     if not conn:
         log(f"⚠️ Cannot log execution (no DB): leg={leg} venue={venue} side={side} price={price} success={success}")
@@ -135,6 +137,8 @@ def _place_poly_order(
     Accepts contract_count directly — avoids float/int drift from re-deriving
     via size_usdc/price inside this function.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Polymarket order')
     log(f"📤 [POLY] Placing {side} order: token={token_id[:16]}... price={price} contracts={contract_count}")
 
     poly_private_key = os.environ.get("POLY_PRIVATE_KEY", "")
@@ -245,23 +249,21 @@ def _place_poly_order(
         return False, "", err
 
 
-def execution_mode() -> str:
-    """ARB_EXECUTION_MODE: "live" places orders; "shadow" runs discovery, live-book checks, the VWAP
-    gate and sizing, journals the trade it would make, and stops before any funding transfer or order.
-    Default: shadow in robinhood mode (the pilot starts shadow until the owner switches it), live in
-    base mode (unchanged)."""
-    from ..config import is_robinhood_funding
-    default = "shadow" if is_robinhood_funding() else "live"
-    mode = os.environ.get("ARB_EXECUTION_MODE", default).strip().lower()
-    if mode not in ("live", "shadow"):
-        raise ValueError(f"ARB_EXECUTION_MODE={mode!r}; expected live or shadow")
-    return mode
+from .shadow_guard import execution_mode, shadow_capital_usdc  # noqa: E402  (ARB_EXECUTION_MODE)
 
 
 def _journal_shadow(opp, contracts, poly_px, v2_px, net_edge_pct, poly_usdc, v2_usdc) -> None:
+    """Append the would-be trade to ARB_SHADOW_JOURNAL_PATH, the only file shadow mode writes. No
+    default path: an unset journal is not written (never the live engine's data directory)."""
     import json as _json
-    path = os.environ.get("ARB_SHADOW_JOURNAL_PATH", os.path.expanduser("~/PolyNotifyBot/data/arb_shadow_trades.jsonl"))
+    path = os.environ.get("ARB_SHADOW_JOURNAL_PATH", "")
+    if not path:
+        log("ℹ️ ARB_SHADOW_JOURNAL_PATH not set — shadow trade not journaled")
+        return
+    from .venue_eligibility import polymarket_trading_status
+    pm = polymarket_trading_status()
     row = {
+        "polymarket_trading_available": pm["available"], "polymarket_status": pm.get("reason"),
         "ts": int(time.time()), "pair_id": opp.pair_id, "source": "prediction_com" if str(opp.pair_id).startswith("pcom:") else "oddpool",
         "kalshi_ticker": opp.kalshi_ticker, "kalshi_side": opp.kalshi_side, "contracts": contracts,
         "poly_price": poly_px, "kalshi_price": v2_px, "net_edge_pct": round(net_edge_pct, 4),
@@ -317,6 +319,8 @@ def _place_kalshi_order(
     Fails hard if KALSHI_API_KEY is missing.
     Never simulates success: a missing credential is an error, not a fake fill.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Kalshi order')
     log(f"📤 [KALSHI] Placing {side} order: ticker={ticker} price={price} size_usdc={size_usdc}")
 
     from .kalshi_auth import get_kalshi_headers, kalshi_auth_available
@@ -440,6 +444,8 @@ def _unwind_poly_leg(
        offsetting SELL at market (best bid) to close the position and recover USDC.
     Returns True if unwind succeeded, False if manual intervention is required.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Polymarket unwind')
     log(f"🔄 [POLY] Auto-unwind for order={order_id} token={token_id[:16]}...")
 
     poly_private_key = os.environ.get("POLY_PRIVATE_KEY", "")
@@ -608,6 +614,8 @@ def _place_opinion_order(
 
     Returns (ok, order_id, error_msg). Never raises.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Opinion order')
     try:
         from ..adapters.opinion_clob import place_order as opinion_place_order
         return opinion_place_order(
@@ -637,6 +645,8 @@ def _cancel_leg2_order(
     Returns True if the cancel request succeeded (HTTP 200/204), False otherwise.
     Failure means the order may have already filled — flag for manual reconciliation.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('venue order cancel')
     if not order_id:
         log(f"⚠️ [LEG2 CANCEL] No order_id provided for {venue2} cancel — cannot cancel")
         return False
@@ -1372,8 +1382,12 @@ def execute_arb(
             get_servicer_deployable_usdc,
             VENUE_MIN_DEPOSIT,
         )
-        _poly_bal, _v2_bal = get_platform_spot_balances(venue2)
-        _svc_dep = get_servicer_deployable_usdc()
+        if execution_mode() == "shadow":
+            # Notional capital: shadow mode reads no account balances (no credentials needed).
+            _poly_bal, _v2_bal, _svc_dep = 0.0, 0.0, shadow_capital_usdc()
+        else:
+            _poly_bal, _v2_bal = get_platform_spot_balances(venue2)
+            _svc_dep = get_servicer_deployable_usdc()
         _poly_min = VENUE_MIN_DEPOSIT.get("polymarket", 1.0)
         _v2_min   = VENUE_MIN_DEPOSIT.get(venue2, 1.0)
         log(
@@ -1447,6 +1461,14 @@ def execute_arb(
         )
         log(f"🫥 {result.error}")
         _journal_shadow(opportunity, contract_count, live_poly_ask, live_kalshi_ask, net_edge_pct, leg1_usdc, leg2_usdc)
+        return result
+
+    # ── Live: Polymarket must be legally tradable from this host (fail closed) ──
+    from .venue_eligibility import polymarket_trading_status
+    _pm = polymarket_trading_status()
+    if not _pm["available"]:
+        result.error = f"polymarket_trading_unavailable: {_pm['reason']}"
+        log(f"🛑 {result.error}")
         return result
 
     # ── Simultaneous funding: deposit BOTH legs in one nonce sequence ────────
@@ -1715,6 +1737,8 @@ def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float, si
 
     Returns True if successful, False otherwise. Never raises.
     """
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow('Kalshi unwind')
     side_lower = side.lower() if side in ("YES", "NO") else "yes"
     log(f"🔄 [KALSHI] Best-effort unwind: ticker={ticker} shares={shares:.4f} side={side}")
 

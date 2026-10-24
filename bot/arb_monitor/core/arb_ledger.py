@@ -111,6 +111,8 @@ def _read_unlocked(path: str, strict: bool) -> list:
 
 
 def _write_unlocked(path: str, rows: list) -> None:
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow(f"ledger write {os.path.basename(path)}")
     tmp = f"{path}.tmp.{os.getpid()}.{threading.get_ident()}"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(rows, f, indent=2, sort_keys=True)

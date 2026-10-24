@@ -36,7 +36,7 @@ class OpinionFilterTests(unittest.TestCase):
             self.assertEqual(EL._filter_opinion(ops), ops)
 
     def test_cycle_never_prewarms_or_executes_opinion_in_robinhood_mode(self):
-        with mock.patch.dict(os.environ, {"ARB_FUNDING_CHAIN": "robinhood"}, clear=True), \
+        with mock.patch.dict(os.environ, {"ARB_FUNDING_CHAIN": "robinhood", "ARB_EXECUTION_MODE": "live"}, clear=True), \
              mock.patch.object(EL, "_STARTUP_ERRORS", []), \
              mock.patch.object(EL, "run_startup_checks", return_value=[]), \
              mock.patch.object(EL, "run_reporter_tick"), mock.patch.object(EL, "run_tend_tick"), \
@@ -65,7 +65,7 @@ class LiquidityGateTests(unittest.TestCase):
             EL._execution_cycle()
         return fetch.called, tend.called
 
-    RH = {"ARB_FUNDING_CHAIN": "robinhood"}
+    RH = {"ARB_FUNDING_CHAIN": "robinhood", "ARB_EXECUTION_MODE": "live"}
     BASE = {"ARB_FUNDING_CHAIN": "base"}
 
     def test_robinhood_blocks_when_not_ok(self):
@@ -147,6 +147,8 @@ class FundingExceptionAbortsTradeTests(unittest.TestCase):
              mock.patch.object(arb_funder, "get_platform_spot_balances", return_value=(1000.0, 1000.0)), \
              mock.patch.object(arb_funder, "get_servicer_deployable_usdc", return_value=1000.0), \
              mock.patch.object(arb_funder, "fund_both_legs_for_trade", side_effect=RuntimeError("rpc exploded")), \
+             mock.patch("arb_monitor.core.venue_eligibility.polymarket_trading_status",
+                        return_value={"available": True, "reason": "not geoblocked"}), \
              mock.patch.object(EX, "_place_poly_order") as p1, \
              mock.patch.object(EX, "_place_kalshi_order") as p2:
             res = EX.execute_arb(o, size_usdc=20.0)

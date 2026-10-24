@@ -16,10 +16,11 @@ broadcasts a transaction is marked **APPROVAL** and waits for the owner.
 | Vault-only deploy, hash-gated on 4663, restricted to named depositors, owned by the Safe | `milord/script/DeployVaultPilot.s.sol` (tests: `test/parb/VaultPilotDeploy.t.sol`) |
 | Prediction.com feed next to Oddpool (`ARB_OPPORTUNITY_FEED=oddpool\|prediction_com\|compare`) | `bot/arb_monitor/adapters/prediction_com.py`, `adapters/opportunity_feed.py` |
 | Polymarket CLOB V2 taker fee in the VWAP gate (per-market `fd.r`, `fd.e`) | `core/venue_fees.py`, `core/arb_executor.py` |
-| V2 SDK orders through the configured proxy (they bypassed it before) | `core/clob_proxy.py` |
+| Public data direct in the pilot (`ARB_PUBLIC_DATA_ROUTE`), malformed proxy URLs ignored with a sanitized log, V2 SDK proxy off by default | `http_client.py`, `core/clob_proxy.py` |
+| Polymarket eligibility from the direct-egress geoblock (cached 10 min, fails closed); never via a proxy | `core/venue_eligibility.py` |
 | Kalshi orders in fixed-point dollars, fill-or-kill, `fill_count` parsing | `core/arb_executor.py` |
-| Shadow mode: full pipeline on live books, stops before funding/orders | `ARB_EXECUTION_MODE` (default shadow in robinhood mode) |
-| Pilot runner, isolated ledgers, refuses Base and the live data dir | `bot/arb_monitor/run_pilot.py`, `bot/arb_monitor/pilot.env.example` |
+| Shadow mode: separate read-only cycle (feed → live books → fees → sizing → journal) plus a guard at every state-changing choke point | `core/shadow_guard.py`, `core/arb_execution_loop._shadow_cycle` |
+| Pilot runner: authoritative env file, inherited engine vars dropped, DB / ledgers / credentials compared with the production env | `bot/arb_monitor/run_pilot.py`, `bot/arb_monitor/pilot.env.example` |
 | Read-only proxy/API/account check | `bot/arb_monitor/scripts/venue_connectivity_check.py` |
 
 Unchanged and reused: the V3 vault accounting, reporter (ReportDataV2 bound to vault + chain 4663 + salt
@@ -47,10 +48,13 @@ python3 -m bot.arb_monitor.scripts.venue_connectivity_check --env-file /path/to/
 (cd milord && node offchain/check-venue-routes.mjs)                                                  # B9 bridge quotes
 ```
 
-The check prints JSON with: proxy endpoints (DNS, TCP connect), the route each engine call takes, Polymarket
-geoblock direct and through the proxy (order eligibility from each egress), Gamma, CLOB, the V2 SDK's
-authenticated balance, Kalshi's signed balance and exchange status, Prediction.com (status, rate-limit
-headers, signal age) and the Robinhood RPC (chain 4663, USDG decimals 6). Exit code 0 = `ready`.
+The check prints JSON with: proxy endpoints (DNS, TCP connect; a malformed URL is a sanitized diagnostic),
+the route each engine call takes, the direct Polymarket geoblock, Gamma, CLOB, the V2 SDK's authenticated
+balance, Kalshi's signed balance and exchange status, Prediction.com (status, rate-limit headers, signal age)
+and the Robinhood RPC (chain 4663, USDG decimals 6). `access` separates, per venue, public data, authenticated
+balance and trade execution; `verdict.shadow_ready` needs only public data. Polymarket trade execution is
+authorized only when the direct geoblock says `blocked=false`; a proxy result is informational. Exit code
+0 = `ready`.
 
 ## P1 Vault deployment
 
@@ -81,6 +85,12 @@ headers, signal age) and the Robinhood RPC (chain 4663, USDG decimals 6). Exit c
 cd bot && python3 -m arb_monitor.run_pilot --env-file /path/pilot.env --check
 cd bot && python3 -m arb_monitor.run_pilot --env-file /path/pilot.env           # ARB_EXECUTION_MODE=shadow
 ```
+
+In shadow mode the cycle never calls the reporter, tend, funding, bridges, withdrawals, approvals, intent
+reconciliation, balance reads, the positions database, order placement or cancellation, and no JSON-RPC
+`eth_send*` can be sent (`core/shadow_guard.py`; `tests/test_shadow_mode.py`). The only file written is
+`ARB_SHADOW_JOURNAL_PATH` (plus `ARB_FEED_COMPARE_LOG` in compare mode), and each row records whether
+Polymarket trading is available from this host.
 
 Run on a separate host or as a separate process with its own data dir and database (the runner refuses the live
 engine's `~/PolyNotifyBot/data`). Leave `ARB_OPPORTUNITY_FEED=compare` for at least a day:

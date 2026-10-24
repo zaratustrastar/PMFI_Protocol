@@ -28,6 +28,8 @@ def nav_lock():
 
 
 def transport(action, **data):
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow(f'CTF redemption transport {action}')
     script = Path(__file__).resolve().parents[3] / 'trading_bot' / 'ctf_redemption.mjs'
     result = subprocess.run(['node', str(script)], input=json.dumps({'action': action, **data}),
                             capture_output=True, text=True, timeout=180, check=True)
