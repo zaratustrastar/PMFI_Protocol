@@ -715,8 +715,8 @@ def _poly_get_balance() -> float:
     if not poly_api_key:
         raise ValueError("POLY_API_KEY not set")
 
-    from py_clob_client.client import ClobClient
-    from py_clob_client.clob_types import ApiCreds, BalanceAllowanceParams, AssetType
+    # clob_compat prefers py-clob-client-v2: the V1 SDK stops working after the CLOB V2 cutover.
+    from .clob_compat import make_client, ApiCreds, BalanceAllowanceParams, AssetType
 
     creds = ApiCreds(
         api_key=poly_api_key.strip(),
@@ -724,7 +724,7 @@ def _poly_get_balance() -> float:
         api_passphrase=poly_api_passphrase.strip(),
     )
 
-    client = ClobClient(
+    client = make_client(
         POLY_CLOB_URL,
         key=private_key,
         chain_id=137,
@@ -749,7 +749,7 @@ def _poly_get_balance() -> float:
     bal = float(raw) / 1_000_000
 
     try:
-        client_eoa = ClobClient(
+        client_eoa = make_client(
             POLY_CLOB_URL,
             key=private_key,
             chain_id=137,

@@ -11,6 +11,7 @@ Security principles:
 import time
 import os
 import math
+from decimal import Decimal, ROUND_CEILING
 from typing import Optional
 
 # ── Route Polymarket CLOB through residential proxy (V1/V2 compatible) -------
@@ -244,6 +245,30 @@ def _place_poly_order(
         return False, "", err
 
 
+def _kalshi_price_dollars(price: float) -> str:
+    """Kalshi fixed-point dollar price string ("0.2900"), rounded UP to 1/10000.
+
+    The previous int(price * 100) truncated float noise downward (0.29 * 100 = 28.999… → 28¢),
+    placing the limit one cent BELOW the ask so the order could not fill. *_price_dollars also
+    supports Kalshi's sub-cent tick markets."""
+    d = Decimal(str(round(float(price), 6))).quantize(Decimal("0.0001"), rounding=ROUND_CEILING)
+    if not (Decimal("0") < d < Decimal("1")):
+        raise ValueError(f"Kalshi price out of range: {price}")
+    return f"{d:.4f}"
+
+
+def _kalshi_fill_count(order_obj: dict) -> int:
+    """Filled contracts from a Kalshi order object (fill_count_fp / fill_count; legacy quantity_matched)."""
+    for k in ("fill_count_fp", "fill_count", "quantity_matched"):
+        v = order_obj.get(k)
+        if v not in (None, ""):
+            try:
+                return int(Decimal(str(v)))
+            except Exception:
+                continue
+    return 0
+
+
 def _place_kalshi_order(
     ticker: str,
     side: str,
@@ -283,34 +308,41 @@ def _place_kalshi_order(
             contracts = int(contract_count)
         else:
             contracts = int(size_usdc / price) if price > 0 else 0
-        # IOC: 5-second expiry so the order either fills immediately or dies fast.
-        # This prevents the order resting in the book while the already-placed
-        # Polymarket FOK leg waits — stale limit orders were the primary cause
-        # of Poly fills with no Kalshi counterpart.
-        ioc_expiry = int(time.time()) + 5
+        # Fill-or-kill (Kalshi time_in_force): the order fills completely at once or not at all,
+        # matching the Polymarket FOK leg. The previous 5-second IOC expiry could leave a partial
+        # Kalshi fill that the poll treated as a failure while the Polymarket leg was unwound.
+        # ARB_KALSHI_TIME_IN_FORCE=immediate_or_cancel restores IOC semantics.
+        tif = os.environ.get("ARB_KALSHI_TIME_IN_FORCE", "fill_or_kill").strip().lower()
+        price_field = "yes_price_dollars" if side == "YES" else "no_price_dollars"
         payload = {
             "ticker": ticker,
-            "client_order_id": f"arb_{int(time.time())}",
+            "client_order_id": f"arb_{int(time.time() * 1000)}",
             "type": "limit",
             "action": "buy",
             "side": side.lower(),
             "count": contracts,
-            "yes_price": int(price * 100) if side == "YES" else None,
-            "no_price": int(price * 100) if side == "NO" else None,
-            "expiration_ts": ioc_expiry,
+            price_field: _kalshi_price_dollars(price),
+            "time_in_force": tif,
         }
-        payload = {k: v for k, v in payload.items() if v is not None}
-        log(f"📤 [KALSHI] IOC order: expiry=+5s price={int(price*100)}¢ count={contracts}")
+        log(f"📤 [KALSHI] {tif} order: {price_field}={payload[price_field]} count={contracts}")
         # Use _KALSHI_SESSION (trust_env=False) to bypass proxy — Kalshi must be direct
         resp = _KALSHI_SESSION.post(url, json=payload, headers=headers, timeout=10)
         if resp.status_code in (200, 201):
             data = resp.json()
-            order_id = data.get("order", {}).get("order_id", "")
+            placed = data.get("order", {}) or {}
+            order_id = placed.get("order_id", "")
             if not order_id:
                 err = "no order_id in Kalshi placement response"
                 log(f"❌ [KALSHI] {err}")
                 return False, "", err
-            log(f"🔍 [KALSHI] IOC order accepted (id={order_id}), polling for fill (3×2s = 6s max)...")
+            # FOK/IOC orders are final in the placement response.
+            if _kalshi_fill_count(placed) >= contracts > 0 or placed.get("status") == "executed":
+                log(f"✅ [KALSHI] Order filled on placement: orderId={order_id} fill={_kalshi_fill_count(placed)}")
+                return True, order_id, ""
+            if placed.get("status") in ("canceled", "cancelled", "expired") and _kalshi_fill_count(placed) == 0:
+                log(f"⚠️ [KALSHI] Order {placed.get('status')!r} with no fill — triggering unwind")
+                return False, order_id, f"kalshi_order_{placed.get('status')}: orderId={order_id}"
+            log(f"🔍 [KALSHI] Order accepted (id={order_id}), polling for fill (3×2s = 6s max)...")
             # IOC: poll quickly — if it doesn't fill within the 5s expiry it will
             # cancel itself; 3 polls × 2s = 6s covers the expiry window cleanly.
             poll_url = f"{KALSHI_BASE_URL}/portfolio/orders/{order_id}"
@@ -328,7 +360,7 @@ def _place_kalshi_order(
                     pdata = pr.json()
                     order_obj   = pdata.get("order") or pdata
                     status      = order_obj.get("status", "")
-                    qty_matched = int(order_obj.get("quantity_matched") or 0)
+                    qty_matched = _kalshi_fill_count(order_obj)
                     log(
                         f"🔄 [KALSHI] Fill poll #{poll_attempt + 1}: "
                         f"status={status!r} qty_matched={qty_matched} target={contracts}"
@@ -1670,11 +1702,8 @@ def _kalshi_unwind_best_effort(ticker: str, shares: float, fill_price: float, si
             "count": contracts,
             "expiration_ts": int(time.time()) + 30,
         }
-        # Set the price field matching the side being sold
-        if side_lower == "yes":
-            payload["yes_price"] = sell_price_cents
-        else:
-            payload["no_price"] = sell_price_cents
+        # Set the price field matching the side being sold (fixed-point dollars)
+        payload[f"{side_lower}_price_dollars"] = _kalshi_price_dollars(sell_price_cents / 100)
 
         # Use _KALSHI_SESSION (trust_env=False) — bypass proxy for Kalshi
         resp = _KALSHI_SESSION.post(url, json=payload, headers=headers, timeout=10)
