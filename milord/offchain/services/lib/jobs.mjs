@@ -3,10 +3,10 @@
 //
 //   keeperTick   - permissionless upkeep: settle tax, split revenue, collect LP fees into buyback-and-burn,
 //                  bounded buyback, ETH -> USDG router, settle vault deposits, activate roots.
-//   computeEpochs - deterministic weekly pARB allocation from finalized NFT transfers and settled batches.
+//   computeEpochs - deterministic DAILY pARB allocation from finalized NFT transfers and settled batches.
 //   publishEpoch / checkRoot - propose the next root (publisher key) / recompute it independently and alert.
 import { keccak256, toUtf8Bytes } from "ethers";
-import { ownershipIntervals, eligibility, allocate, accumulate, buildTree, WEEK } from "../../lib/eligibility.mjs";
+import { ownershipIntervals, eligibility, allocate, accumulate, buildTree, assertUtcMidnight, EPOCH } from "../../lib/eligibility.mjs";
 import { isExpectedRevert, sendAndWait, chunkedLogs } from "./runtime.mjs";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -167,37 +167,65 @@ export async function payTaxQueue(name, q, opts = {}) {
 }
 
 // ───────────────────────────── epochs ─────────────────────────────
+//
+// Daily epochs: epoch k (k = 1, 2, ...) is the UTC day [genesis + (k-1) DAY, genesis + k DAY), genesis at 00:00 UTC.
+// A root's on-chain `epoch` is the last day it covers; every root is cumulative from genesis, so a late, missed or
+// vetoed day is covered by the next root and no allocation is ever lost or expires.
+//
+// Publication cadence. The distributor accepts one pending root at a time and keeps it under review for
+// activationDelay (1 day). Day k closes at its end + settlementGrace (6 h); the publisher proposes once that has passed
+// AND no pending root is still in its delay (proposeRoot activates a ready pending root first). With a 1-day delay
+// each root is therefore proposed at the moment the previous one becomes activatable, covering every day closed by
+// then. Nothing is skipped: a day that misses one root is in the next.
+
+const ZERO_ROOT = /^0x0*$/;
+
+/** Normalise a RootInfo returned by ethers (struct or tuple) or by a fake. */
+export function rootInfo(r) {
+  const root = r.root ?? r[0];
+  return {
+    root, set: !ZERO_ROOT.test(root), total: BigInt(r.totalCumulative ?? r[1]), epoch: Number(r.epoch ?? r[2]),
+    activatesAt: BigInt(r.activatesAt ?? r[3]), dataHash: r.dataHash ?? r[4],
+  };
+}
 
 /**
- * Deterministic weekly allocation. Epoch k (k = 1, 2, ...) covers [genesis + (k-1) WEEK, genesis + k WEEK).
- * Its amount is every pARB share settled into the distributor before `end + settlementGrace`, minus everything
- * already allocated in earlier epochs (so rounding dust and weeks with no eligible NFTs roll forward, and the
- * same shares are never allocated twice). Weights are NFT-seconds held during the epoch (converter excluded).
+ * Deterministic daily allocation. Epoch k's amount is every pARB share settled into the distributor before
+ * `end + settlementGrace`, minus everything already allocated in earlier epochs: rounding dust, zero-revenue days and
+ * days with no eligible NFT roll forward, a batch settled after a day's cutoff (late funding) belongs to the next
+ * day, and the same shares are never allocated twice. Weights are NFT-seconds held during the day (converter
+ * excluded): a Milord sold at 12:00 earns half the day for the seller, half for the buyer.
  *
- * transfers: finalized NFT Transfer events; batches: [{sharesMinted, settledAt}] from ParbFundingAdapter.
+ * Merkle trees are built for the last epoch only (trees: "all" builds every one); every epoch keeps its cumulative
+ * map and total. transfers: finalized NFT Transfer events; batches: [{sharesMinted, settledAt}] from ParbFundingAdapter.
  */
-export function computeEpochs({ transfers, batches, genesis, upToEpoch, settlementGrace = 6 * 3600, excluded = [] }) {
+export function computeEpochs({ transfers, batches, genesis, upToEpoch, settlementGrace = 6 * 3600, excluded = [], trees = "last" }) {
+  assertUtcMidnight(genesis);
   const intervals = ownershipIntervals(transfers);
+  const settledBatches = batches
+    .filter((b) => Number(b.settledAt) > 0)
+    .map((b) => ({ at: Number(b.settledAt), shares: BigInt(b.sharesMinted) }))
+    .sort((a, b) => a.at - b.at);
+  let next = 0;
+  let settled = 0n;
   let cumulative = new Map();
   let allocatedTotal = 0n;
   const epochs = [];
   for (let k = 1; k <= upToEpoch; k++) {
-    const start = genesis + (k - 1) * WEEK;
-    const end = start + WEEK;
+    const start = genesis + (k - 1) * EPOCH;
+    const end = start + EPOCH;
     const cutoff = end + settlementGrace;
-    const settled = batches
-      .filter((b) => Number(b.settledAt) > 0 && Number(b.settledAt) < cutoff)
-      .reduce((a, b) => a + BigInt(b.sharesMinted), 0n);
+    while (next < settledBatches.length && settledBatches[next].at < cutoff) settled += settledBatches[next++].shares;
     const amount = settled - allocatedTotal;
     const { weights, daily } = eligibility(intervals, { start, end, excluded });
     const { allocations, dust } = allocate(amount, weights);
     cumulative = accumulate(cumulative, allocations);
     const allocatedNow = [...allocations.values()].reduce((a, b) => a + b, 0n);
     allocatedTotal += allocatedNow;
-    const built = buildTree(cumulative);
+    const built = trees === "all" || (trees === "last" && k === upToEpoch) ? buildTree(cumulative) : null;
     epochs.push({
       epoch: k, start, end, cutoff, settled, amount, allocatedNow, dust, eligible: weights.size, weights, allocations,
-      cumulative: new Map(cumulative), total: built?.total ?? 0n, root: built?.root ?? null, tree: built?.tree ?? null,
+      cumulative: new Map(cumulative), total: allocatedTotal, root: built?.root ?? null, tree: built?.tree ?? null,
       values: built?.values ?? [], dataHash: built ? dataHashOf(k, built.values) : null, daily,
     });
   }
@@ -209,13 +237,14 @@ export function dataHashOf(epoch, values) {
   return keccak256(toUtf8Bytes(JSON.stringify({ epoch, values })));
 }
 
-/** Latest epoch whose cutoff (plus finality margin) has passed at time `now`. */
+/** Latest daily epoch whose cutoff (day end + settlement grace) has passed at time `now`. */
 export function closedEpoch(genesis, now, settlementGrace = 6 * 3600) {
-  return Math.max(0, Math.floor((now - genesis - settlementGrace) / WEEK));
+  return Math.max(0, Math.floor((now - genesis - settlementGrace) / EPOCH));
 }
 
-/** Read finalized inputs from chain. `toBlock` should be a finalized block number. */
-export async function readInputs({ nft, adapter, provider, fromBlock = 0, toBlock, logStep }) {
+/** Read finalized inputs from chain. `toBlock` should be a finalized block number. With `distributor`, also the
+ *  proposed and vetoed roots (so a vetoed root is never silently re-proposed, including after a restart). */
+export async function readInputs({ nft, adapter, distributor, provider, fromBlock = 0, toBlock, logStep }) {
   // from the deployment block (deployments file `startBlock`), in bounded ranges
   const logs = await chunkedLogs((a, b) => nft.queryFilter(nft.filters.Transfer(), a, b), fromBlock, toBlock, { step: logStep });
   const ts = new Map();
@@ -230,28 +259,62 @@ export async function readInputs({ nft, adapter, provider, fromBlock = 0, toBloc
     const b = await adapter.batch(i, { blockTag: toBlock });
     batches.push({ sharesMinted: b.sharesMinted, settledAt: Number(b.settledAt) });
   }
-  return { transfers, batches };
+  const out = { transfers, batches };
+  if (distributor?.filters?.RootVetoed) {
+    const q = (f) => chunkedLogs((a, b) => distributor.queryFilter(f, a, b), fromBlock, toBlock, { step: logStep });
+    const epochOf = new Map((await q(distributor.filters.RootProposed())).map((l) => [l.args.root, Number(l.args.epoch)]));
+    out.vetoes = (await q(distributor.filters.RootVetoed())).map((l) => ({ root: l.args.root, epoch: epochOf.get(l.args.root) ?? 0 }));
+  }
+  return out;
 }
 
 /**
- * Publisher: propose the root of the latest closed epoch if it allocates more than the active root and is not
- * already pending. Returns what it did. Writes the allocation file through `save` before proposing.
+ * Publisher: propose the cumulative root through the latest closed day. Returns what it did:
+ *   none     - nothing to do (no closed day, already pending/active, nothing new to allocate);
+ *   waiting  - a pending root is still in its review delay (it is never replaced), or the root is not yet funded;
+ *   blocked  - a root proposed after the active one was vetoed: the publisher stops until an operator investigates and
+ *              lists that root in `acknowledgedVetoes` (PUBLISHER_ACK_VETOES), so a disputed allocation is never
+ *              re-proposed automatically, including after a restart;
+ *   proposed - proposeRoot sent; the allocation file is written through `save` first.
+ * Stateless: every run recomputes from genesis and reads the distributor, so restarts and repeated runs are safe.
  */
-export async function publishEpoch({ distributor, inputs, genesis, now, settlementGrace, excluded, save = () => {} }) {
+export async function publishEpoch({ distributor, inputs, genesis, now, settlementGrace, excluded, save = () => {}, parb, acknowledgedVetoes = [], alerter }) {
+  assertUtcMidnight(genesis);
   const k = closedEpoch(genesis, now, settlementGrace);
-  if (k === 0) return { action: "none", reason: "no closed epoch yet" };
-  const epochs = computeEpochs({ ...inputs, genesis, upToEpoch: k, settlementGrace, excluded });
-  const e = epochs.at(-1);
-  const active = await distributor.active();
-  const pending = await distributor.pending();
-  const activeTotal = BigInt(active.totalCumulative ?? active[1]);
-  const activeEpoch = Number(active.epoch ?? active[2]);
-  if (Number(pending.epoch ?? pending[2]) === k && (pending.root ?? pending[0]) === e.root) return { action: "none", reason: "already pending", epoch: k };
-  if (activeEpoch >= k) return { action: "none", reason: "already active", epoch: k };
-  if (!e.root || e.total <= activeTotal) return { action: "none", reason: e.eligible === 0 ? "no eligible NFTs: shares roll forward" : "nothing new to allocate", epoch: k, carried: e.amount };
+  if (k === 0) return { action: "none", reason: "no closed day yet" };
+  const active = rootInfo(await distributor.active());
+  const pending = rootInfo(await distributor.pending());
+  const pendingReady = pending.set && BigInt(now) >= pending.activatesAt;
+  const base = pendingReady ? pending : active; // proposeRoot activates a ready pending root before anything else
+  if (base.epoch >= k) return { action: "none", reason: "already active", epoch: k };
+
+  const ack = new Set(acknowledgedVetoes.map((r) => r.toLowerCase()));
+  const vetoed = (inputs.vetoes ?? []).filter((v) => v.epoch > base.epoch && !ack.has(v.root.toLowerCase()));
+  if (vetoed.length) {
+    const reason = `root ${vetoed[0].root} (epoch ${vetoed[0].epoch}) was vetoed by the Team Safe: not re-proposing until it is investigated and acknowledged (PUBLISHER_ACK_VETOES)`;
+    if (alerter) await alerter.alert("critical", `publisher:vetoed:${vetoed[0].root}`, reason);
+    return { action: "blocked", reason, epoch: k };
+  }
+
+  const e = computeEpochs({ ...inputs, genesis, upToEpoch: k, settlementGrace, excluded }).at(-1);
+  if (pending.set && !pendingReady) {
+    if (pending.epoch === k && pending.root === e.root) return { action: "none", reason: "already pending", epoch: k };
+    return {
+      action: "waiting", epoch: k, pendingEpoch: pending.epoch, activatesAt: pending.activatesAt,
+      reason: `pending root for epoch ${pending.epoch} is in its review delay until ${pending.activatesAt}; days through ${k} go into the next root`,
+    };
+  }
+  if (!e.root || e.total <= base.total) {
+    return { action: "none", reason: e.eligible === 0 ? "no eligible NFTs: shares roll forward" : "nothing new to allocate", epoch: k, carried: e.amount };
+  }
+  if (parb) {
+    const covered = (await parb.balanceOf(distributor.target ?? distributor.address)) + BigInt(await distributor.totalClaimed());
+    if (e.total > covered) return { action: "waiting", reason: `root needs ${e.total} pARB, distributor covers ${covered}`, epoch: k };
+  }
   save(e);
+  if (distributor.proposeRoot.staticCall) await distributor.proposeRoot.staticCall(e.root, e.total, k, e.dataHash);
   await wait(distributor.proposeRoot(e.root, e.total, k, e.dataHash));
-  return { action: "proposed", epoch: k, root: e.root, total: e.total, dataHash: e.dataHash };
+  return { action: "proposed", epoch: k, root: e.root, total: e.total, dataHash: e.dataHash, covers: [base.epoch + 1, k] };
 }
 
 /**
@@ -261,28 +324,58 @@ export async function publishEpoch({ distributor, inputs, genesis, now, settleme
 export async function checkRoot({ distributor, parb, inputs, genesis, settlementGrace, excluded, alerter }) {
   const out = [];
   for (const which of ["pending", "active"]) {
-    const r = await distributor[which]();
-    const root = r.root ?? r[0];
-    if (/^0x0+$/.test(root)) continue;
-    const epoch = Number(r.epoch ?? r[2]);
-    const total = BigInt(r.totalCumulative ?? r[1]);
-    const dataHash = r.dataHash ?? r[4];
-    const e = computeEpochs({ ...inputs, genesis, upToEpoch: epoch, settlementGrace, excluded }).at(-1);
-    const match = e && e.root === root && e.total === total && e.dataHash === dataHash;
-    out.push({ which, epoch, match, expected: e?.root ?? null, onchain: root });
+    const r = rootInfo(await distributor[which]());
+    if (!r.set) continue;
+    const e = computeEpochs({ ...inputs, genesis, upToEpoch: r.epoch, settlementGrace, excluded }).at(-1);
+    const match = Boolean(e) && e.root === r.root && e.total === r.total && e.dataHash === r.dataHash;
+    out.push({ which, epoch: r.epoch, match, expected: e?.root ?? null, onchain: r.root });
     if (!match && alerter) {
-      await alerter.alert("critical", `root:${which}:${epoch}`,
+      await alerter.alert("critical", `root:${which}:${r.epoch}`,
         which === "pending"
-          ? `PENDING ROOT MISMATCH for epoch ${epoch}: on-chain ${root} (total ${total}), recomputed ${e?.root} (total ${e?.total}). Team Safe should call ShareDistributor.vetoPending() before it activates.`
-          : `ACTIVE ROOT MISMATCH for epoch ${epoch}: on-chain ${root}, recomputed ${e?.root}. Pause claims review required.`);
+          ? `PENDING ROOT MISMATCH for day ${r.epoch}: on-chain ${r.root} (total ${r.total}), recomputed ${e?.root} (total ${e?.total}). Team Safe should call ShareDistributor.vetoPending() before it activates at ${r.activatesAt}.`
+          : `ACTIVE ROOT MISMATCH for day ${r.epoch}: on-chain ${r.root}, recomputed ${e?.root}. Pause claims review required.`);
     }
   }
   if (parb) {
     const held = await parb.balanceOf(distributor.target ?? distributor.address);
     const claimed = await distributor.totalClaimed();
-    const p = await distributor.pending();
-    const need = BigInt(p.totalCumulative ?? p[1]);
+    const need = rootInfo(await distributor.pending()).total;
     if (need > held + claimed && alerter) await alerter.alert("critical", "solvency", `pending root needs ${need} pARB, distributor covers ${held + claimed}`);
   }
   return out;
+}
+
+/**
+ * Per-account reward state for the frontend, kept apart:
+ *   earned          pARB computed for the account through the latest closed day (in a root or not yet);
+ *   allocated       cumulative in the latest proposed root (pending or active);
+ *   active          cumulative in the active root: claimable = active - claimed (claimed is read on chain);
+ *   accruingSeconds NFT-seconds held since the latest closed day began closing (its pARB amount is set only when
+ *                   that day's revenue has settled and its cutoff has passed).
+ * Rewards are never sent automatically: an account (or anyone on its behalf) calls claim().
+ */
+export function rewardsStatus({ inputs, genesis, now, settlementGrace = 6 * 3600, excluded = [], active, pending }) {
+  const a = rootInfo(active);
+  const p = rootInfo(pending);
+  const k = closedEpoch(genesis, now, settlementGrace);
+  const epochs = k ? computeEpochs({ ...inputs, genesis, upToEpoch: k, settlementGrace, excluded, trees: "none" }) : [];
+  const at = (n) => (n > 0 && n <= epochs.length ? epochs[n - 1].cumulative : new Map());
+  const earned = at(k);
+  const allocated = at(p.set ? p.epoch : a.epoch);
+  const activeMap = at(a.epoch);
+  const openFrom = genesis + k * EPOCH;
+  const accruing = now > openFrom ? eligibility(ownershipIntervals(inputs.transfers), { start: openFrom, end: now, excluded }).weights : new Map();
+  const accounts = {};
+  for (const addr of new Set([...earned.keys(), ...accruing.keys()])) {
+    accounts[addr] = {
+      earned: String(earned.get(addr) ?? 0n), allocated: String(allocated.get(addr) ?? 0n), active: String(activeMap.get(addr) ?? 0n),
+      accruingSeconds: Number(accruing.get(addr) ?? 0n),
+    };
+  }
+  return {
+    asOf: now, genesis, epochSeconds: EPOCH, latestClosedEpoch: k, activeEpoch: a.epoch,
+    pendingEpoch: p.set ? p.epoch : null, pendingActivatesAt: p.set ? Number(p.activatesAt) : null,
+    totals: { earned: String(epochs.at(-1)?.total ?? 0n), allocated: String(p.set ? p.total : a.total), active: String(a.total) },
+    accounts,
+  };
 }

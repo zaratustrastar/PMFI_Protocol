@@ -11,13 +11,19 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 /// @notice Holds pARB minted for Milords holders and pays it out against a cumulative
 ///         Merkle root (one leaf per holder address: cumulative pARB ever allocated).
 ///
-///  - Cumulative leaves: claiming late or skipping weeks loses nothing; a claim pays
+///  - Daily epochs: epoch k is the UTC day [genesis + (k-1) days, genesis + k days), genesis at 00:00 UTC.
+///    A root covers every day up to and including `epoch`, so a late or missed publication is caught up
+///    by the next root and nothing is lost.
+///  - Cumulative leaves: claiming late or skipping days loses nothing and nothing expires; a claim pays
 ///    `cumulative - claimed[account]`. Allocations earned by a former holder stay with them.
 ///  - Solvency: a root can only be proposed if pARB held + pARB already claimed covers its
 ///    total cumulative allocation, and totals never decrease. The same pARB cannot be
 ///    allocated twice.
 ///  - Roots activate after `activationDelay`; the owner (team Safe) can veto a pending root
-///    during that window. Nobody can withdraw pARB except through claims.
+///    during that window. A new root cannot be proposed while a pending root is still in its
+///    delay: it would restart the review clock (with daily proposals and a 1-day delay, a root
+///    could then never activate). Proposing first activates a pending root whose delay has passed.
+///    Nobody can withdraw pARB except through claims.
 ///  - Leaf format = OpenZeppelin StandardMerkleTree ["address","uint256"].
 contract ShareDistributor is Ownable2Step, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -25,7 +31,7 @@ contract ShareDistributor is Ownable2Step, ReentrancyGuard {
     struct RootInfo {
         bytes32 root;
         uint256 totalCumulative;
-        uint64 epoch; // last UTC week included
+        uint64 epoch; // last UTC day included (daily epoch index, 1 = the genesis day)
         uint64 activatesAt;
         bytes32 dataHash; // hash/CID of the published allocation file
     }
@@ -55,6 +61,7 @@ contract ShareDistributor is Ownable2Step, ReentrancyGuard {
     error NotIncreasing();
     error InvalidProof();
     error NothingToClaim();
+    error PendingRootNotActivated(uint64 epoch, uint64 activatesAt);
 
     constructor(address owner_, IERC20 parb_, address publisher_) Ownable(owner_) {
         parb = parb_;
@@ -67,13 +74,14 @@ contract ShareDistributor is Ownable2Step, ReentrancyGuard {
     function proposeRoot(bytes32 root, uint256 totalCumulative, uint64 epoch, bytes32 dataHash) external {
         if (msg.sender != publisher) revert NotPublisher();
         _activateIfReady();
+        if (pending.root != bytes32(0)) revert PendingRootNotActivated(pending.epoch, pending.activatesAt);
         if (root == bytes32(0)) revert InvalidProof();
         if (totalCumulative < active.totalCumulative || epoch <= active.epoch) revert NotIncreasing();
         uint256 available = parb.balanceOf(address(this)) + totalClaimed;
         if (totalCumulative > available) revert Underfunded(totalCumulative, available);
 
         uint64 eta = uint64(block.timestamp + activationDelay);
-        pending = RootInfo(root, totalCumulative, epoch, eta, dataHash); // replaces any unactivated root
+        pending = RootInfo(root, totalCumulative, epoch, eta, dataHash); // the slot is empty (checked above)
         emit RootProposed(root, totalCumulative, epoch, eta, dataHash);
     }
 

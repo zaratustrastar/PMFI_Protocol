@@ -180,4 +180,5 @@ def base_env(**extra):
 
 
 def rh_env(**extra):
+    extra.setdefault("ARB_EXECUTION_MODE", "live")  # these tests exercise the live money paths
     return base_env(ARB_FUNDING_CHAIN="robinhood", ROBINHOOD_RPC_URL=RH_RPC, **extra)

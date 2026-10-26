@@ -1,16 +1,18 @@
 // Independent root checker: recomputes pending and active roots from finalized chain data with its own RPC
 // endpoint and alerts (critical) on any mismatch or insolvency, so the Team Safe can veto within the 1-day
-// activation delay. It holds NO key and cannot change anything on chain.
+// activation delay. Epochs are daily UTC days; a pending root covers every day through its epoch. It holds NO key and cannot change anything on chain.
 //   node offchain/services/root-checker.mjs
 // Env: RPC_URL (use a different provider from the publisher), DEPLOYMENTS_FILE, EPOCH_GENESIS,
 //      SETTLEMENT_GRACE_SECS, FINALITY_CONFIRMATIONS, INTERVAL_SECS, HEALTH_PORT, ALERT_WEBHOOK_URL.
 import { Contract } from "ethers";
 import { loadConfig, connect, finalizedBlock } from "./lib/config.mjs";
 import { checkRoot, readInputs } from "./lib/jobs.mjs";
+import { assertUtcMidnight } from "../lib/eligibility.mjs";
 import { createAlerter, createMetrics, startHealthServer, runLoop, retry } from "./lib/runtime.mjs";
 
 const cfg = loadConfig();
 if (!cfg.genesis) throw new Error("EPOCH_GENESIS is required");
+assertUtcMidnight(cfg.genesis);
 const { provider, contracts } = connect(cfg, null);
 const alerter = createAlerter({ service: "root-checker" });
 const metrics = createMetrics("root_checker");

@@ -275,7 +275,8 @@ log("8c price pushed past the founding range (no liquidity): quotes refused", { 
 // ── 10. redemption does not depend on pricing ──
 await assert.rejects(quote(), /entry waits/); // pricing is refusing right now
 const before = await token.balanceOf(alice.address);
-const rr = await wait(conv.connect(alice).redeem(c1.tokenId));
+// gas margin: the NFT's vote checkpoint can cost more in the mined block than in the estimate (timestamp clock)
+const rr = await wait(conv.connect(alice).redeem(c1.tokenId, { gasLimit: ((await conv.connect(alice).redeem.estimateGas(c1.tokenId)) * 13n) / 10n + 50_000n }));
 assert.ok((await token.balanceOf(alice.address)) > before);
 log("10 redeem works while the price service refuses every quote", { redeemGas: rr.gasUsed });
 

@@ -45,7 +45,7 @@
   {
     "name": "convert at 500 ETH FDV charges the TWAP fee",
     "fee": "0.007389808041776",
-    "convertGas": "260009"
+    "convertGas": "260021"
   },
   {
     "name": "5a push 10x and restore inside one block: zero weight, quote unchanged",
@@ -93,6 +93,6 @@
   },
   {
     "name": "10 redeem works while the price service refuses every quote",
-    "redeemGas": "214988"
+    "redeemGas": "259938"
   }
 ]

@@ -1,4 +1,5 @@
-"""MILORD Safe/CTF recovery. Explicit per-pair condition mapping; disabled by default.
+"""MILORD Safe/Polymarket recovery: pUSD redemption of CTF, neg-risk CTF and Protocol V2 positions.
+Explicit per-pair system and condition mapping; disabled by default.
 
 No price-based resolution. A sending intent is durable BEFORE submission. Unknown
 submission outcomes never retry automatically. A confirmed payout is not a complete
@@ -27,6 +28,8 @@ def nav_lock():
 
 
 def transport(action, **data):
+    from .shadow_guard import assert_not_shadow
+    assert_not_shadow(f'CTF redemption transport {action}')
     script = Path(__file__).resolve().parents[3] / 'trading_bot' / 'ctf_redemption.mjs'
     result = subprocess.run(['node', str(script)], input=json.dumps({'action': action, **data}),
                             capture_output=True, text=True, timeout=180, check=True)
@@ -41,17 +44,26 @@ def raw_shares(value):
     return int(d)
 
 
+SYSTEMS = ('ctf', 'ctf_negrisk', 'v2')
+
+
 def mapping(position):
+    """Per-pair position system and condition. Declared, never guessed; the transport re-derives the ids on chain.
+
+    MILORD_CTF_MARKETS_FILE: {"<pair_id>": {"system": "ctf" | "ctf_negrisk" | "v2", "conditionId": "0x..."}}
+    ctf/ctf_negrisk take the 32-byte CTF condition id; v2 takes the 31-byte Protocol V2 condition id.
+    """
     path = os.environ.get('MILORD_CTF_MARKETS_FILE')
     if not path:
-        raise ValueError('MILORD_CTF_MARKETS_FILE required; condition/collateral must not be guessed')
+        raise ValueError('MILORD_CTF_MARKETS_FILE required; position system and condition must not be guessed')
     data = json.loads(Path(path).read_text())[position['pair_id']]
+    if data.get('system') not in SYSTEMS:
+        raise ValueError('position system must be declared as ctf, ctf_negrisk or v2')
     side = 'YES' if position['kalshi_side'].upper() == 'NO' else 'NO'
     if position.get('poly_side', side).upper() != side:
         raise ValueError('inconsistent tracked sides')
-    return dict(conditionId=data['conditionId'], collateral=data['collateral'],
-                indexSet=1 if side == 'YES' else 2, yesTokenId=str(position['poly_yes_token']),
-                sharesRaw=str(raw_shares(position['shares'])))
+    return dict(system=data['system'], conditionId=data['conditionId'], outcome=0 if side == 'YES' else 1,
+                yesTokenId=str(position['poly_yes_token']), sharesRaw=str(raw_shares(position['shares'])))
 
 
 def kalshi_payout(position):
@@ -113,6 +125,8 @@ def tick(position, *, send=transport, kalshi=kalshi_payout, cash=None, mark=None
             plan = send('prepare', **prepare_mapping(position))
             if plan.get('pending'):
                 return 'waiting_ctf_resolution'
+            if not plan.get('approved'):
+                return 'approval_required'  # one-time Safe approval of the adapter/Router; never bundled here
             if int(plan['cashBefore']) != cash():
                 raise ValueError('CTF collateral does not match NAV venue cash')
             # Pending status must be durable before funds can move.

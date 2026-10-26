@@ -68,7 +68,7 @@ Sections: hero, intro (token / NFT / engine cards), the cycle, fees calculator, 
 | "The locked tokens and its wallet go with it" | Principal goes with the NFT (correct). The ERC-6551 wallet's assets also move — documented as a risk, not a feature promise. |
 | "PMFI earns a planned 20% of new profit" | 0% performance fee on the MILORD pARB instance. |
 | "Claim $MILORD … through a contract" (migration) | No migration contract; legacy holders handled manually, documented only. |
-| "Revenue distributions … under review" | Protocol fees fund pARB shares distributed weekly; no return is promised. |
+| "Revenue distributions … under review" | Protocol fees fund pARB shares allocated daily and claimed by holders; no return is promised. |
 
 ## 6. Hookr
 

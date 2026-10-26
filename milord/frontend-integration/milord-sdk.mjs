@@ -27,6 +27,7 @@ const A = {
     "function requestRedeem(uint256,address) returns (uint256)", "function lastReportTimestamp() view returns (uint256)"],
   dist: ["function claimed(address) view returns (uint256)", "function totalClaimed() view returns (uint256)",
     "function active() view returns (bytes32 root,uint256 totalCumulative,uint64 epoch,uint64 activatesAt,bytes32 dataHash)",
+    "function pending() view returns (bytes32 root,uint256 totalCumulative,uint64 epoch,uint64 activatesAt,bytes32 dataHash)",
     "function claim(address,uint256,bytes32[]) returns (uint256)"],
   burner: ["function totalBurnedFromBuybacks() view returns (uint256)", "function budget() view returns (uint256)"],
   adapter: ["function totalUsdcDeposited() view returns (uint256)", "function totalSharesMinted() view returns (uint256)"],
@@ -145,8 +146,13 @@ async function fetchQuote(m, quoteUrl) {
   return body;
 }
 
+// Votes checkpoints use block.timestamp: a node may estimate in a block with the last checkpoint's timestamp
+// (cheap update) while the transaction lands in a later one (new checkpoint), so estimates get a margin.
+const withMargin = async (fn, ...args) => ({ gasLimit: ((await fn.estimateGas(...args)) * 13n) / 10n + 50_000n });
+
 /** Ask the quote service, check its fee against the pool-based ceiling, then convert with maxFee = that fee.
  *  The wallet shows the exact ETH amount before signing. Approves MILORD if needed. */
+
 export async function wake(m, quoteUrl) {
   const body = await fetchQuote(m, quoteUrl);
   const fee = await m.conv.entryFeeFor(body.quote.weiPerMillion);
@@ -154,7 +160,7 @@ export async function wake(m, quoteUrl) {
   if (fee > ceiling) throw new Error(`Quoted fee ${formatEther(fee)} ETH is above the ${formatEther(ceiling)} ETH this page allows at the current pool price; nothing was sent. Try again in a few minutes.`);
   const principal = await m.conv.PRINCIPAL();
   if ((await m.token.allowance(m.account, m.D.MilordConverter)) < principal) await (await m.token.approve(m.D.MilordConverter, principal)).wait();
-  const tx = await m.conv.convert(body.quote, body.signature, fee, { value: fee });
+  const tx = await m.conv.convert(body.quote, body.signature, fee, { value: fee, ...(await withMargin(m.conv.convert, body.quote, body.signature, fee, { value: fee })) });
   return tx.wait();
 }
 
@@ -169,7 +175,7 @@ export async function myMilords(m, who = m.account) {
   return out;
 }
 
-export const redeem = async (m, id) => (await m.conv.redeem(id)).wait();
+export const redeem = async (m, id) => (await m.conv.redeem(id, await withMargin(m.conv.redeem, id))).wait();
 export const choose = async (m, id, a, b) => (await m.registry.select(id, a, b)).wait();
 
 export async function characteristics(m) {
@@ -179,20 +185,56 @@ export async function characteristics(m) {
   return list;
 }
 
-/** epoch = published epoch file {root, claims:{addr:{cumulative, proof}}}. */
-export async function rewards(m, epoch, who = m.account) {
+/**
+ * Daily pARB rewards for one address. Nothing arrives in a wallet automatically: pARB is paid only when
+ * claim() is called (by the holder or anyone on their behalf), and unclaimed pARB never expires.
+ *
+ * files (published by the epoch publisher):
+ *   active  - epochs/<k>.json of the ACTIVE root {root, claims:{addr:{cumulative, proof}}} (proofs for claim)
+ *   pending - epochs/<k>.json of the pending root, if any (shown as allocated, awaiting activation)
+ *   status  - rewards.json {latestClosedEpoch, accounts:{addr:{earned, allocated, active, accruingSeconds}}}
+ * A single epoch file is still accepted (the previous interface) and treated as `active`.
+ *
+ * Returns, in pARB (strings):
+ *   earned             computed through the latest closed UTC day, whether or not a root includes it yet
+ *   allocated          in the latest proposed root (active or pending)
+ *   awaitingActivation allocated in the pending root but not yet claimable (activates at `activatesAt`, unix s)
+ *   claimable          in the active root and not yet claimed: what claim() pays now
+ *   claimed            already paid to the address
+ *   accruingSeconds    NFT-seconds held in days not yet closed; their pARB is set when that day's revenue settles
+ * `cumulative` and `live` are kept for older callers (active cumulative; whether the active file matches the chain).
+ */
+export async function rewards(m, files, who = m.account) {
+  const f = files?.claims ? { active: files } : (files ?? {});
   const payTo = who.toLowerCase(); // same chain: pARB is paid to the holder address
-  const leaf = epoch?.claims?.[payTo];
-  const claimed = await m.dist.claimed(payTo);
-  const active = await m.dist.active();
-  const live = leaf && active.root === epoch.root;
-  const cumulative = leaf ? BigInt(leaf.cumulative) : 0n;
-  return { payTo, cumulative: formatEther(cumulative), claimed: formatEther(claimed), claimable: formatEther(live && cumulative > claimed ? cumulative - claimed : 0n), live, leaf };
+  const [claimed, active, pending] = await Promise.all([m.dist.claimed(payTo), m.dist.active(), m.dist.pending()]);
+  const leaf = f.active?.claims?.[payTo];
+  const live = Boolean(leaf) && f.active.root === active.root;
+  const st = f.status?.accounts?.[payTo];
+  const statusFresh = f.status && Number(f.status.activeEpoch) === Number(active.epoch);
+  const activeCum = live ? BigInt(leaf.cumulative) : statusFresh && st ? BigInt(st.active) : 0n;
+  const pendingSet = !/^0x0*$/.test(pending.root);
+  const pLeaf = pendingSet && f.pending?.root === pending.root ? f.pending.claims?.[payTo] : null;
+  const allocated = pLeaf ? BigInt(pLeaf.cumulative) : pendingSet && statusFresh && st ? BigInt(st.allocated) : activeCum;
+  const earnedRaw = st ? BigInt(st.earned) : allocated;
+  const earned = earnedRaw > allocated ? earnedRaw : allocated;
+  const claimable = live && activeCum > claimed ? activeCum - claimed : 0n;
+  return {
+    payTo,
+    earned: formatEther(earned), allocated: formatEther(allocated),
+    awaitingActivation: formatEther(allocated > activeCum ? allocated - activeCum : 0n),
+    activatesAt: pendingSet ? Number(pending.activatesAt) : null,
+    claimable: formatEther(claimable), claimed: formatEther(claimed),
+    accruingSeconds: st?.accruingSeconds ?? 0, latestClosedDay: f.status?.latestClosedEpoch ?? null,
+    cumulative: formatEther(activeCum), live, leaf,
+  };
 }
 
-export async function claim(m, epoch, who = m.account) {
-  const r = await rewards(m, epoch, who);
-  if (!r.leaf || !r.live) throw new Error("no active allocation for this address");
+/** Claim everything claimable for `who` from the active root (anyone may send it; pARB goes to `who`). */
+export async function claim(m, files, who = m.account) {
+  const r = await rewards(m, files, who);
+  if (!r.leaf || !r.live) throw new Error("no active allocation for this address yet");
+  if (r.claimable === "0.0") throw new Error("nothing claimable now");
   return (await m.dist.claim(r.payTo, r.leaf.cumulative, r.leaf.proof)).wait();
 }
 

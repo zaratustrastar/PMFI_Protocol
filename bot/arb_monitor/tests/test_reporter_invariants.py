@@ -201,9 +201,9 @@ class CapitalTransferInvariantTests(_World):
         def run(*a, **kw):                                       # script moves the money
             self.w.venue["polymarket"] -= 20 * U
             self.w.usdg(self.w.usdg() + 20 * U)
-            return mock.Mock(returncode=0, stdout="TX: 0x" + "ab" * 32 + "\n✅ FULL WITHDRAWAL COMPLETE\n", stderr="")
+            return mock.Mock(returncode=0, stdout='{"txHash": "0x' + "ab" * 32 + '"}\n', stderr="")
         with mock.patch.object(W, "_poly_get_balance", return_value=100.0), \
-             mock.patch.dict("os.environ", {"POLY_PROXY_ADDRESS": F.POLY_BASE_ADDR}), \
+             mock.patch.dict("os.environ", {"POLY_PROXY_ADDRESS": F.POLY_BASE_ADDR, "ARB_POLY_WITHDRAW_ROUTE": "polymarket_bridge"}), \
              mock.patch.object(subprocess, "run", side_effect=run):
             got = self._run_funding_path(lambda: W.withdraw_from_platforms(20.0, 100.0, 0.0, 0.0, F.SERVICER))
         self.assertEqual(got, 20.0)

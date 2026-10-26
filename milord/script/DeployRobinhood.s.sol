@@ -9,8 +9,14 @@ import {UniV3TwapReference, IUniswapV3PoolOracle} from "../src/automation/UniV3T
 
 /// @notice Robinhood Chain deployment from environment configuration.
 ///
-///   TESTNET (46630) only in this version. Mainnet (4663) is refused until the owner approves
-///   a mainnet deployment and the audit is done; see docs/MAINNET_RUNBOOK.md.
+///   Modes (docs/MAINNET_RUNBOOK.md):
+///   - TESTNET (46630).
+///   - PRIVATE FORK of Robinhood mainnet (4663) for fork/rehearse-full-launch.sh: MILORD_LOCAL_FORK=yes and the
+///     public Anvil account #0 as broadcaster (a key that must never hold mainnet funds).
+///   - MAINNET (4663): refused unless MILORD_MAINNET_APPROVAL equals this run's configuration hash (printed by a
+///     dry run without --broadcast) and the broadcaster is not the public Anvil key, every Safe is a deployed
+///     contract and the vault asset is USDG. The hash binds every address and parameter below, so an approval
+///     cannot be reused for a different configuration. Mainnet deployment is NOT approved yet.
 ///
 ///   Dry run (no broadcast) against a testnet RPC:
 ///     forge script script/DeployRobinhood.s.sol --rpc-url $ROBINHOOD_TESTNET_RPC --sender $DEPLOYER
@@ -31,10 +37,52 @@ contract DeployRobinhood is Script, MilordDeployer {
     uint256 constant ROBINHOOD_TESTNET = 46630;
     uint256 constant ROBINHOOD_MAINNET = 4663;
 
+    address internal constant ANVIL_0 = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+    address internal constant MAINNET_USDG = 0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168;
+    bytes32 public configHash;
+
     function run() external returns (Deployment memory d) {
-        require(block.chainid != ROBINHOOD_MAINNET, "mainnet deployment not approved");
-        require(block.chainid == ROBINHOOD_TESTNET, "Robinhood Chain testnet only");
+        require(block.chainid == ROBINHOOD_TESTNET || block.chainid == ROBINHOOD_MAINNET, "Robinhood Chain (46630 / 4663) only");
         return _run();
+    }
+
+    /// Mainnet and private-fork gates, after the configuration is read (the hash covers all of it).
+    function _gate(Config memory c, address pool, address weth, uint32 window, int24 maxTicks) internal {
+        configHash = keccak256(
+            abi.encode(
+                keccak256(abi.encode(block.chainid, c.owner, c.teamSafe, c.arbitrageSafe, c.servicer, c.quoteSigner, c.reportSigner)),
+                keccak256(abi.encode(c.operator, c.publisher, c.token, c.tokenHolder, c.asset, c.swapAdapter, c.routerPauser)),
+                keccak256(abi.encode(c.baseURI, c.characteristics, c.vaultCap, c.rootActivationDelay, c.splitterMin, c.splitterMax)),
+                keccak256(abi.encode(pool, weth, c.routerAmounts, c.routerSlippageBps, c.routerInterval, window, maxTicks))
+            )
+        );
+        console2.log("MILORD deployment configuration hash:");
+        console2.logBytes32(configHash);
+        if (block.chainid != ROBINHOOD_MAINNET) return;
+        if (keccak256(bytes(vm.envOr("MILORD_LOCAL_FORK", string("no")))) == keccak256("yes")) {
+            require(msg.sender == ANVIL_0, "local fork: broadcast with the public Anvil account #0 only");
+            return;
+        }
+        require(vm.envOr("MILORD_MAINNET_APPROVAL", bytes32(0)) == configHash, "mainnet deployment not approved for this configuration hash");
+        require(msg.sender != ANVIL_0, "mainnet: never the public Anvil key");
+        require(c.owner.code.length > 0 && c.teamSafe.code.length > 0 && c.arbitrageSafe.code.length > 0, "mainnet: Safes must be deployed contracts");
+        require(c.asset == MAINNET_USDG, "mainnet: vault asset must be USDG");
+        require(c.token != address(0) && c.token.code.length == 0, "mainnet: MILORD_PREDICTED_TOKEN required and must not exist yet (atomic launch)");
+    }
+
+    /// Where the deployments manifest goes. foundry.toml lets vm.writeJson write only under ./deployments (and ./sim),
+    /// so any other path would fail AFTER the broadcast; it is refused here first. On mainnet an existing manifest is
+    /// never overwritten.
+    function manifestPath() public returns (string memory out) {
+        out = vm.envOr("MILORD_DEPLOYMENTS_OUT", string.concat("./deployments/robinhood-", vm.toString(block.chainid), ".json"));
+        require(
+            (vm.indexOf(out, "./deployments/") == 0 || vm.indexOf(out, "deployments/") == 0)
+                && vm.indexOf(out, "..") == type(uint256).max,
+            "MILORD_DEPLOYMENTS_OUT must be a file under ./deployments (foundry fs_permissions)"
+        );
+        if (block.chainid == ROBINHOOD_MAINNET && keccak256(bytes(vm.envOr("MILORD_LOCAL_FORK", string("no")))) != keccak256("yes")) {
+            require(!vm.exists(out), "mainnet: deployments manifest already exists; never overwritten");
+        }
     }
 
     function _run() internal returns (Deployment memory d) {
@@ -74,6 +122,8 @@ contract DeployRobinhood is Script, MilordDeployer {
         uint32 window = uint32(vm.envOr("MILORD_TWAP_WINDOW", uint256(30 minutes)));
         int24 maxTicks = int24(int256(vm.envOr("MILORD_TWAP_MAX_TICKS", uint256(100))));
 
+        _gate(c, pool, weth, window, maxTicks);
+        manifestPath(); // refuse an unwritable or protected manifest path before anything is broadcast
         console2.log("vault asset", c.asset, IERC20Metadata(c.asset).symbol());
         uint256 startBlock = block.number;
         vm.startBroadcast();
@@ -121,9 +171,7 @@ contract DeployRobinhood is Script, MilordDeployer {
         vm.serializeAddress(k, "publisher", c.publisher);
         vm.serializeAddress(k, "routerPauser", c.routerPauser);
         string memory json = vm.serializeAddress(k, "operator", c.operator);
-        string memory out = vm.envOr(
-            "MILORD_DEPLOYMENTS_OUT", string.concat("./deployments/robinhood-", vm.toString(block.chainid), ".json")
-        );
+        string memory out = manifestPath();
         vm.writeJson(json, out);
         console2.log("wrote", out);
     }

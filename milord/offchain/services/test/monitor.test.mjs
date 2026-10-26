@@ -4,9 +4,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { monitorTick } from "../lib/monitor.mjs";
 import { createAlerter, runLoop, createMetrics, sendAndWait, chunkedLogs, withTimeout } from "../lib/runtime.mjs";
-import { WEEK } from "../../lib/eligibility.mjs";
+import { DAY } from "../../lib/eligibility.mjs";
 
-const T0 = 1_800_000_000;
+const T0 = 1_800_000_000 - (1_800_000_000 % DAY) + 12 * 3600; // 12:00 UTC
 const ROOT0 = { root: "0x" + "0".repeat(64), totalCumulative: 0n, epoch: 0n, activatesAt: 0n, dataHash: "0x" };
 const memState = () => {
   let s = {};
@@ -54,7 +54,7 @@ function harness() {
   const { w, c, fetchFn } = world();
   const alerter = createAlerter({ service: "monitor", webhook: null, throttleMs: 0 });
   const state = memState();
-  const genesis = T0 - 3 * WEEK;
+  const genesis = T0 - 12 * 3600 - 21 * DAY; // 00:00 UTC, 21 daily epochs ago
   const pass = () => monitorTick(c, { alerter, state, now: async () => w.now, fetchFn, genesis, settlementGrace: 6 * 3600 });
   const keys = (r) => r.active.map((x) => x.key).sort();
   return { w, c, alerter, pass, keys, genesis };
@@ -122,15 +122,31 @@ test("monitor: stale price, unsettled batch, unconfirmed bridge, unhealthy servi
   assert.ok(!h.keys(r).includes("failed-keeper")); // no new failures since the last pass
 });
 
-test("monitor: missed weekly epoch only when shares were settled and no root covers them", async () => {
+test("monitor: missed daily epoch only when shares were settled and no root covers them", async () => {
   const h = harness();
-  // epoch 2's cutoff has passed by more than the grace; one batch settled during epoch 1
+  // day 1's cutoff passed long ago; one batch settled during day 1
   h.w.batches.push({ fundedAt: BigInt(h.genesis + 3600), settledAt: BigInt(h.genesis + 7200), sharesMinted: 1000n });
   let r = await h.pass();
   assert.deepEqual(h.keys(r), ["epoch-missed"]);
-  h.w.active = { ...ROOT0, epoch: 2n, totalCumulative: 1000n };
+  h.w.active = { ...ROOT0, root: "0x" + "11".repeat(32), epoch: 2n, totalCumulative: 1000n };
   r = await h.pass();
   assert.deepEqual(h.keys(r), []);
+});
+
+test("monitor: a pending root in its review delay is not a missed day; an overdue activation is", async () => {
+  const h = harness();
+  h.w.batches.push({ fundedAt: BigInt(h.genesis + 3600), settledAt: BigInt(h.genesis + 19 * DAY), sharesMinted: 1000n });
+  h.w.active = { ...ROOT0, root: "0x" + "11".repeat(32), epoch: 18n, totalCumulative: 400n };
+  // the publisher proposed day 19 three hours ago; day 20 closed meanwhile and must wait for that root's activation
+  h.w.pending = { ...ROOT0, root: "0x" + "22".repeat(32), epoch: 19n, totalCumulative: 400n, activatesAt: BigInt(h.w.now + 21 * 3600) };
+  let r = await h.pass();
+  assert.deepEqual(h.keys(r), [], JSON.stringify(r.active));
+  // 7 h after it became activatable, still pending: keeper problem, and the publisher is now really behind
+  h.w.now = Number(h.w.pending.activatesAt) + 7 * 3600;
+  h.w.vault.last = h.w.now - 60;
+  h.w.router.last = BigInt(h.w.now - 60);
+  r = await h.pass();
+  assert.deepEqual(h.keys(r), ["epoch-missed", "root-not-activated"]);
 });
 
 test("monitor: a failing read is reported and the other checks still run", async () => {

@@ -36,7 +36,7 @@ class OpinionFilterTests(unittest.TestCase):
             self.assertEqual(EL._filter_opinion(ops), ops)
 
     def test_cycle_never_prewarms_or_executes_opinion_in_robinhood_mode(self):
-        with mock.patch.dict(os.environ, {"ARB_FUNDING_CHAIN": "robinhood"}, clear=True), \
+        with mock.patch.dict(os.environ, {"ARB_FUNDING_CHAIN": "robinhood", "ARB_EXECUTION_MODE": "live"}, clear=True), \
              mock.patch.object(EL, "_STARTUP_ERRORS", []), \
              mock.patch.object(EL, "run_startup_checks", return_value=[]), \
              mock.patch.object(EL, "run_reporter_tick"), mock.patch.object(EL, "run_tend_tick"), \
@@ -65,7 +65,7 @@ class LiquidityGateTests(unittest.TestCase):
             EL._execution_cycle()
         return fetch.called, tend.called
 
-    RH = {"ARB_FUNDING_CHAIN": "robinhood"}
+    RH = {"ARB_FUNDING_CHAIN": "robinhood", "ARB_EXECUTION_MODE": "live"}
     BASE = {"ARB_FUNDING_CHAIN": "base"}
 
     def test_robinhood_blocks_when_not_ok(self):
@@ -106,10 +106,38 @@ class LiquidityGateTests(unittest.TestCase):
 
 
 class FundingExceptionAbortsTradeTests(unittest.TestCase):
+    def _run(self, env, funder):
+        book = object()
+        o = opp("kalshi")
+        with mock.patch.dict(os.environ, env, clear=True), \
+             mock.patch.object(EX, "kalshi_resolve_market_ticker", return_value="KX-1-M"), \
+             mock.patch.object(EX, "poly_fetch_orderbook", return_value=book), \
+             mock.patch.object(EX, "kalshi_fetch_orderbook_depth", return_value=book), \
+             mock.patch.object(EX, "poly_extract_asks", return_value=[(0.40, 1000.0)]), \
+             mock.patch.object(EX, "kalshi_extract_asks", return_value=[(0.50, 1000.0)]), \
+             mock.patch.object(EX, "kalshi_get_best_prices", return_value={"no_best_ask": 0.50, "yes_best_ask": 0.5}), \
+             mock.patch.object(arb_funder, "get_platform_spot_balances", return_value=(1000.0, 1000.0)), \
+             mock.patch.object(arb_funder, "get_servicer_deployable_usdc", return_value=1000.0), \
+             mock.patch.object(arb_funder, "fund_both_legs_for_trade", funder), \
+             mock.patch.object(EX, "_journal_shadow") as journal, \
+             mock.patch.object(EX, "_place_poly_order") as p1, \
+             mock.patch.object(EX, "_place_kalshi_order") as p2:
+            res = EX.execute_arb(o, size_usdc=20.0)
+        return res, p1, p2, journal
+
+    def test_shadow_mode_is_the_robinhood_default_and_moves_nothing(self):
+        funder = mock.Mock()
+        res, p1, p2, journal = self._run({"ARB_FUNDING_CHAIN": "robinhood"}, funder)
+        self.assertTrue(res.error.startswith("shadow_mode"), res.error)
+        funder.assert_not_called()
+        p1.assert_not_called()
+        p2.assert_not_called()
+        journal.assert_called_once()
+
     def test_trade_aborted_when_funder_raises(self):
         book = object()
         o = opp("kalshi")
-        with mock.patch.dict(os.environ, {"ARB_FUNDING_CHAIN": "robinhood"}, clear=True), \
+        with mock.patch.dict(os.environ, {"ARB_FUNDING_CHAIN": "robinhood", "ARB_EXECUTION_MODE": "live"}, clear=True), \
              mock.patch.object(EX, "kalshi_resolve_market_ticker", return_value="KX-1-M"), \
              mock.patch.object(EX, "poly_fetch_orderbook", return_value=book), \
              mock.patch.object(EX, "kalshi_fetch_orderbook_depth", return_value=book), \
@@ -119,6 +147,8 @@ class FundingExceptionAbortsTradeTests(unittest.TestCase):
              mock.patch.object(arb_funder, "get_platform_spot_balances", return_value=(1000.0, 1000.0)), \
              mock.patch.object(arb_funder, "get_servicer_deployable_usdc", return_value=1000.0), \
              mock.patch.object(arb_funder, "fund_both_legs_for_trade", side_effect=RuntimeError("rpc exploded")), \
+             mock.patch("arb_monitor.core.venue_eligibility.polymarket_trading_status",
+                        return_value={"available": True, "reason": "not geoblocked"}), \
              mock.patch.object(EX, "_place_poly_order") as p1, \
              mock.patch.object(EX, "_place_kalshi_order") as p2:
             res = EX.execute_arb(o, size_usdc=20.0)

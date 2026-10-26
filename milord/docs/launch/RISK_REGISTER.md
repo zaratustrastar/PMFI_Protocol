@@ -26,7 +26,7 @@ Contracts are **unaudited** and not production-ready until audited and fork-test
 | R-18 | pARB not instantly sellable / redeemable | Medium | disclose; vault withdrawals follow V3 rules | disclosure |
 | R-19 | Reported PPS wrong (reporter error or compromise) | High | V3 report bounds, signer separation, reconciliation dashboard | existing V3 |
 | R-20 | LP position locked forever: unsold MILORD unrecoverable, no repositioning, no rescue if the pool breaks | High | owner decides lock type, owner and fee beneficiary | NEEDS APPROVAL |
-| R-24 | Weekly ETH→USDG swap needs Safe signatures (manual) | Medium | ArbitrageFundingRouter (PARB_AUTOMATION.md) | to build after approval |
+| R-24 | ETH→USDG swap needs Safe signatures (manual) | Medium | ArbitrageFundingRouter (PARB_AUTOMATION.md) | to build after approval |
 | R-25 | No production epoch job/keeper yet | Medium | wrap the tested `eligibility.mjs`; independent watcher | to build |
 | R-21 | Website shows a stale or wrong network | Low | network switch to 4663; testnet entries marked unverified | TESTED locally |
 | R-22 | Third-party bridges (Across, Relay, LI.FI) fail or are exploited | Medium | cap per transfer; one route at a time; monitor arrivals | EXTERNAL |

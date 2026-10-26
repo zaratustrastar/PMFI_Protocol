@@ -16,7 +16,7 @@ New in this round: ArbitrageFundingRouterTest (16: wiring, revenue → USDG → 
 | ConverterInvariantTest | 5 | escrow == active NFTs × 1M; no unbacked NFT |
 | VaultV3Test | 16 | V3 vault on USDG, 0% fee, PPS from reports only |
 | FeeToParbFlowTest | 6 | fee batch → USDG → deposit → pARB at current PPS, no double deposit |
-| DistributionTest | 14 | daily accounting, weekly time-weighted roots, funded roots, claims |
+| DistributionTest | 14 | daily time-weighted cumulative roots, pending root cannot be replaced, missed days, veto, late funding, 365 roots then a claim after 10 years |
 | DistributionInvariantTest | 6 | allocated ≤ funded; no double claim |
 | SplitterTest | 10 | tax, entry, royalty splitters; bounded payee changes |
 | NFTTest | 10 | 6,767 cap, ERC-2981 6.7%, inventory reuse |
@@ -28,7 +28,7 @@ New in this round: ArbitrageFundingRouterTest (16: wiring, revenue → USDG → 
 
 ## End-to-end simulation (`./sim/run-local.sh`): 39 / 39 checks pass
 
-The weekly close now runs the packaged services' own code (`offchain/services/lib/jobs.mjs`): keeper passes (tax settle, splits, LP fee collection into buyback-and-burn, buyback, router ETH → USDG on an official Uniswap V3 pool with a 30-min TWAP, settle, root activation), then the epoch publisher (deterministic root after a 6 h settlement grace) and the root checker. New checks: router swaps within cap and slippage of the TWAP; router swapped + held == allocated; every proposed root recomputed identically; keeper passes had no failed step; LP fees ETH → burner and MILORD burned; position locked forever with release refused.
+The weekly close now runs the packaged services' own code (`offchain/services/lib/jobs.mjs`): keeper passes (tax settle, splits, LP fee collection into buyback-and-burn, buyback, router ETH → USDG on an official Uniswap V3 pool with a 30-min TWAP, settle, root activation), then the epoch publisher (deterministic daily root through the week's last day, after a 6 h settlement grace) and the root checker. New checks: router swaps within cap and slippage of the TWAP; router swapped + held == allocated; every proposed root recomputed identically; keeper passes had no failed step; LP fees ETH → burner and MILORD burned; position locked forever with release refused.
 
 See [MILORD_END_TO_END.md](MILORD_END_TO_END.md) for the trace. Invariants checked:
 

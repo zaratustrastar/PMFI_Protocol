@@ -10,10 +10,10 @@ class Recovery(unittest.TestCase):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
         self.env=patch.dict(os.environ,{'ARB_CTF_JOURNAL':self.tmp.name+'/journal.json','ARB_CTF_ROUTE_VERIFIED':'true'});self.env.start();self.addCleanup(self.env.stop)
         self.pos=dict(pair_id='p',shares=10,cost_basis_usdc=9,poly_yes_token='1',kalshi_ticker='K',kalshi_side='NO',status='pending_redeem')
-        self.calls=[];self.marks=[];self.visible=100;self.paid=10;self.pending=False;self.fail_submit=False;self.fail_db=False
+        self.calls=[];self.marks=[];self.visible=100;self.paid=10;self.pending=False;self.fail_submit=False;self.fail_db=False;self.approved=True
     def send(self,action,**kw):
         self.calls.append(action)
-        if action=='prepare':return dict(payoutRaw=str(self.paid),cashBefore='100')
+        if action=='prepare':return dict(payoutRaw=str(self.paid),cashBefore='100',approved=self.approved)
         if action=='submit':
             if self.fail_submit:raise TimeoutError()
             return dict(txHash='0x'+'ab'*32)
@@ -60,6 +60,13 @@ class Recovery(unittest.TestCase):
         with open(C.journal_path(),'w') as f:f.write('{bad')
         with self.assertRaises(Exception):self.tick()
         self.assertFalse(self.calls)
+    def test_missing_approval_journals_nothing(self):
+        self.approved=False
+        self.assertEqual(self.tick(),'approval_required');self.assertEqual(self.tick(),'approval_required')
+        self.assertNotIn('submit',self.calls);self.assertFalse(os.path.exists(C.journal_path()) and C.ledger.read_rows(C.journal_path()))
+        self.approved=True
+        self.assertEqual(self.tick(),'waiting_cash_visibility');self.visible=110
+        self.assertEqual(self.tick(),'reconciled');self.assertEqual(self.calls.count('submit'),1)
     def test_submicro_shares_rejected(self):
         with self.assertRaises(ValueError):C.raw_shares('0.0000001')
 
@@ -97,3 +104,26 @@ class KalshiEvidence(unittest.TestCase):
             self.assertIsNone(C.kalshi_payout(position))
             response.raise_for_status.side_effect=RuntimeError('HTTP failure')
             with self.assertRaises(RuntimeError):C.kalshi_payout(position)
+
+
+class Mapping(unittest.TestCase):
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+        self.path=self.tmp.name+'/markets.json'
+        self.pos=dict(pair_id='p',shares='12.5',poly_yes_token='777',kalshi_side='NO')
+    def write(self,entry):
+        import json
+        with open(self.path,'w') as f:json.dump({'p':entry},f)
+        return patch.dict(os.environ,{'MILORD_CTF_MARKETS_FILE':self.path})
+    def test_declared_systems_map_side_to_outcome(self):
+        for system,cid in (('ctf','0x'+'33'*32),('ctf_negrisk','0x'+'33'*32),('v2','0x01'+'ab'*30)):
+            with self.write({'system':system,'conditionId':cid}):
+                m=C.mapping(self.pos)
+            self.assertEqual(m,dict(system=system,conditionId=cid,outcome=0,yesTokenId='777',sharesRaw='12500000'))
+        with self.write({'system':'v2','conditionId':'0x01'+'ab'*30}):
+            self.assertEqual(C.mapping({**self.pos,'kalshi_side':'YES'})['outcome'],1)
+    def test_undeclared_or_legacy_entries_refused(self):
+        with self.write({'conditionId':'0x'+'33'*32,'collateral':'0x'+'22'*20}):
+            with self.assertRaises(ValueError):C.mapping(self.pos)
+        with patch.dict(os.environ,{},clear=True):
+            with self.assertRaises(ValueError):C.mapping(self.pos)

@@ -21,6 +21,9 @@ export const ABI = {
     "function activateRoot()",
     "function proposeRoot(bytes32,uint256,uint64,bytes32)",
     "function totalClaimed() view returns (uint256)",
+    "function claimed(address) view returns (uint256)",
+    "event RootProposed(bytes32 indexed root, uint256 totalCumulative, uint64 epoch, uint64 activatesAt, bytes32 dataHash)",
+    "event RootVetoed(bytes32 indexed root)",
   ],
   nft: ["event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"],
   hook: ["function collect()"],
@@ -43,7 +46,8 @@ export function loadConfig(env = process.env) {
     D,
     rpcUrl: env.RPC_URL ?? "http://127.0.0.1:8545",
     chainId: num("CHAIN_ID", D.chainId),
-    genesis: num("EPOCH_GENESIS", 0), // Monday 00:00 UTC of the first distribution week
+    genesis: num("EPOCH_GENESIS", 0), // 00:00 UTC of the first distribution day (epochs are daily UTC days)
+    ackVetoes: (env.PUBLISHER_ACK_VETOES ?? "").split(",").map((x) => x.trim()).filter(Boolean),
     settlementGrace: num("SETTLEMENT_GRACE_SECS", 6 * 3600),
     confirmations: num("FINALITY_CONFIRMATIONS", 64),
     intervalMs: num("INTERVAL_SECS", 300) * 1000,
@@ -58,9 +62,21 @@ export function loadConfig(env = process.env) {
   };
 }
 
+/**
+ * Chain 4663 is allowed only with ALLOW_MAINNET=yes (owner approval), or with ALLOW_LOCAL_FORK=yes when the RPC is a
+ * loopback address (a private Anvil fork such as fork/rehearse-full-launch.sh FORK_KEEP=yes). Other chains: always.
+ */
+export function chainAllowed(chainId, rpcUrl, env = process.env) {
+  if (Number(chainId) !== 4663) return true;
+  if (env.ALLOW_MAINNET === "yes") return true;
+  let host = "";
+  try { host = new URL(rpcUrl).hostname; } catch {}
+  return env.ALLOW_LOCAL_FORK === "yes" && ["127.0.0.1", "localhost", "[::1]"].includes(host);
+}
+
 export function connect(cfg, keyEnv) {
   if (cfg.hookrSettle && (cfg.chainId === 4663 || cfg.chainId === 46630)) throw new Error("HOOKR_SETTLE=mock is for the local simulation only");
-  if (cfg.chainId === 4663 && process.env.ALLOW_MAINNET !== "yes") throw new Error("Robinhood mainnet: set ALLOW_MAINNET=yes only after owner approval");
+  if (!chainAllowed(cfg.chainId, cfg.rpcUrl)) throw new Error("Robinhood mainnet: set ALLOW_MAINNET=yes only after owner approval (ALLOW_LOCAL_FORK=yes accepts a loopback RPC only)");
   const provider = new JsonRpcProvider(cfg.rpcUrl, cfg.chainId, { staticNetwork: true });
   const key = keyEnv ? process.env[keyEnv] : undefined;
   const signer = key ? new NonceManager(new Wallet(key, provider)) : null;

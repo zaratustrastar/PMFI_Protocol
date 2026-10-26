@@ -2,23 +2,30 @@
 //   node --test offchain/services/test/
 import test from "node:test";
 import assert from "node:assert/strict";
-import { keeperTick, computeEpochs, publishEpoch, checkRoot, closedEpoch } from "../lib/jobs.mjs";
+import { keeperTick, computeEpochs, publishEpoch, checkRoot, closedEpoch, rewardsStatus } from "../lib/jobs.mjs";
 import { retry, createAlerter, runLoop, createMetrics } from "../lib/runtime.mjs";
-import { WEEK } from "../../lib/eligibility.mjs";
+import { DAY } from "../../lib/eligibility.mjs";
 
 const ZERO_ROOT = "0x" + "0".repeat(64);
-const G = 1_800_000_000 - (1_800_000_000 % WEEK); // a week boundary
+const G = 1_800_000_000 - (1_800_000_000 % DAY); // 00:00 UTC
+const H = 3600;
+const GRACE = 6 * H;
 const A = "0x00000000000000000000000000000000000000a1";
 const B = "0x00000000000000000000000000000000000000b2";
 const CONV = "0x00000000000000000000000000000000000000cc";
 const Z = "0x0000000000000000000000000000000000000000";
 const revert = (name) => Object.assign(new Error(`execution reverted: ${name}()`), { shortMessage: `execution reverted: ${name}()` });
 
+const EMPTY = { root: ZERO_ROOT, totalCumulative: 0n, epoch: 0n, activatesAt: 0n, dataHash: ZERO_ROOT };
+
 function fakeChain({ routerPaused = false, reporterDown = false } = {}) {
   const log = [];
   const batches = [];
   const requests = [];
-  const st = { routerEth: 0n, splitterEth: [0n, 0n, 0n], pending: { root: ZERO_ROOT, totalCumulative: 0n, epoch: 0n, activatesAt: 0n, dataHash: ZERO_ROOT }, active: { root: ZERO_ROOT, totalCumulative: 0n, epoch: 0n, activatesAt: 0n, dataHash: ZERO_ROOT }, now: G, budget: 0n, claimed: 0n, held: 0n };
+  const st = { routerEth: 0n, splitterEth: [0n, 0n, 0n], pending: { root: ZERO_ROOT, totalCumulative: 0n, epoch: 0n, activatesAt: 0n, dataHash: ZERO_ROOT }, active: { root: ZERO_ROOT, totalCumulative: 0n, epoch: 0n, activatesAt: 0n, dataHash: ZERO_ROOT }, now: G, budget: 0n, claimed: 0n, held: 0n, proposed: [], vetoes: [] };
+  const activateIfReady = () => {
+    if (st.pending.root !== ZERO_ROOT && BigInt(st.now) >= st.pending.activatesAt) { st.active = st.pending; st.pending = { ...EMPTY }; }
+  };
   const c = {
     splitters: [0, 1, 2].map((i) => ({
       undistributed: async () => st.splitterEth[i],
@@ -45,8 +52,17 @@ function fakeChain({ routerPaused = false, reporterDown = false } = {}) {
     distributor: {
       pending: async () => st.pending,
       active: async () => st.active,
-      activateRoot: async () => { log.push("activate"); st.active = st.pending; st.pending = { root: ZERO_ROOT, totalCumulative: 0n, epoch: 0n, activatesAt: 0n, dataHash: ZERO_ROOT }; },
-      proposeRoot: async (root, total, epoch, dataHash) => { log.push(`propose:${epoch}`); st.pending = { root, totalCumulative: total, epoch: BigInt(epoch), activatesAt: BigInt(st.now + 86400), dataHash }; },
+      activateRoot: async () => { log.push("activate"); activateIfReady(); },
+      proposeRoot: async (root, total, epoch, dataHash) => {
+        activateIfReady();
+        if (st.pending.root !== ZERO_ROOT) throw revert("PendingRootNotActivated");
+        if (total < st.active.totalCumulative || BigInt(epoch) <= st.active.epoch) throw revert("NotIncreasing");
+        if (total > st.held + st.claimed) throw revert("Underfunded");
+        log.push(`propose:${epoch}`);
+        st.pending = { root, totalCumulative: total, epoch: BigInt(epoch), activatesAt: BigInt(st.now + 86400), dataHash };
+        st.proposed.push({ root, epoch: Number(epoch) });
+      },
+      vetoPending: async () => { st.vetoes.push({ root: st.pending.root, epoch: Number(st.pending.epoch) }); st.pending = { ...EMPTY }; },
       totalClaimed: async () => st.claimed,
       target: "0xdist",
     },
@@ -118,80 +134,219 @@ test("buyback without a trustworthy price is skipped, never guessed", async () =
   assert.ok(!ch.log.some((l) => l.startsWith("buyback")));
 });
 
+// #1 minted to A at genesis; #2 minted to B at 12:00 on day 1; #1 sold A -> B at 12:00 on day 2; converter excluded
 const transfers = [
   { tokenId: 1, from: Z, to: A, timestamp: G, blockNumber: 1, logIndex: 0 },
-  { tokenId: 2, from: Z, to: B, timestamp: G + 3.5 * 86400, blockNumber: 2, logIndex: 0 },
   { tokenId: 3, from: Z, to: CONV, timestamp: G, blockNumber: 1, logIndex: 1 },
+  { tokenId: 2, from: Z, to: B, timestamp: G + 12 * H, blockNumber: 2, logIndex: 0 },
+  { tokenId: 1, from: A, to: B, timestamp: G + DAY + 12 * H, blockNumber: 3, logIndex: 0 },
 ];
+const batch = (shares, at) => ({ sharesMinted: BigInt(shares), settledAt: at });
+const pub = (ch, inputs, extra = {}) => publishEpoch({ distributor: ch.c.distributor, inputs, genesis: G, now: ch.st.now, excluded: [CONV], settlementGrace: GRACE, ...extra });
 
-test("epochs are deterministic, time-weighted, never over-allocate, and carry dust", () => {
-  const batches = [{ sharesMinted: 1000n, settledAt: G + 7 * 86400 + 60 }, { sharesMinted: 501n, settledAt: G + 14 * 86400 + 60 }];
+test("daily epochs: time-weighted by seconds held, deterministic, never over-allocate, dust carried", () => {
+  // day 1 revenue settles at 01:00 on day 2 (inside the 6 h grace), day 2 revenue at 01:00 on day 3
+  const batches = [batch(1500, G + DAY + H), batch(1001, G + 2 * DAY + H)];
   const a = computeEpochs({ transfers, batches, genesis: G, upToEpoch: 2, excluded: [CONV] });
   const b = computeEpochs({ transfers: [...transfers].reverse(), batches, genesis: G, upToEpoch: 2, excluded: [CONV] });
   assert.equal(a[1].root, b[1].root, "same inputs, same root");
-  assert.equal(a[0].allocatedNow + a[0].dust, 1000n);
-  assert.equal(a[0].cumulative.get(A), 666n); // A held 7 days, B 3.5 days
-  assert.equal(a[0].cumulative.get(B), 333n);
-  assert.ok(a[1].total <= 1501n);
-  assert.equal(a[1].amount, 1501n - a[0].allocatedNow, "epoch 2 = new shares + carried dust");
+  assert.deepEqual([a[0].start, a[0].end], [G, G + DAY], "epoch 1 is the UTC day from genesis");
+  // day 1: A held 24 h, B 12 h
+  assert.equal(a[0].allocations.get(A), 1000n);
+  assert.equal(a[0].allocations.get(B), 500n);
+  // day 2: A held #1 until 12:00 (12 h), B held #2 all day and #1 from 12:00 (36 h)
+  assert.equal(a[1].weights.get(A), BigInt(12 * H));
+  assert.equal(a[1].weights.get(B), BigInt(36 * H));
+  assert.equal(a[1].allocations.get(A), 250n);
+  assert.equal(a[1].allocations.get(B), 750n);
+  assert.equal(a[1].dust, 1n, "rounding dust is carried, not lost");
+  assert.equal(a[1].cumulative.get(A), 1250n, "the seller keeps day 1 and earns day 2 until the sale");
+  assert.equal(a[1].total, 2500n);
   assert.equal(a[0].cumulative.get(CONV), undefined, "converter inventory earns nothing");
 });
 
-test("a batch settled after the cutoff belongs to the next epoch", () => {
-  const late = [{ sharesMinted: 900n, settledAt: G + 7 * 86400 + 7 * 3600 }];
-  const e = computeEpochs({ transfers, batches: late, genesis: G, upToEpoch: 2, settlementGrace: 6 * 3600, excluded: [CONV] });
+test("transfer halfway through a day: the new owner earns from the transfer second, the seller keeps the rest", () => {
+  const t = [{ tokenId: 9, from: Z, to: A, timestamp: G - 5 * DAY, blockNumber: 1, logIndex: 0 },
+    { tokenId: 9, from: A, to: B, timestamp: G + 6 * H + 30 * 60, blockNumber: 2, logIndex: 0 }];
+  const e = computeEpochs({ transfers: t, batches: [batch(86400, G + DAY + 60)], genesis: G, upToEpoch: 1 });
+  assert.equal(e[0].weights.get(A), BigInt(6 * H + 1800));
+  assert.equal(e[0].weights.get(B), BigInt(DAY - 6 * H - 1800));
+  assert.equal(e[0].allocations.get(A) + e[0].allocations.get(B), 86400n);
+  assert.equal(e[0].allocations.get(A), BigInt(6 * H + 1800), "1 share per second held");
+});
+
+test("late funding: a batch settled after a day's cutoff belongs to the next day", () => {
+  const late = [batch(900, G + DAY + 7 * H)]; // day 1 closes at 06:00 on day 2
+  const e = computeEpochs({ transfers, batches: late, genesis: G, upToEpoch: 2, settlementGrace: GRACE, excluded: [CONV] });
   assert.equal(e[0].amount, 0n);
   assert.equal(e[1].amount, 900n);
 });
 
-test("zero eligible NFTs: nothing allocated, shares roll forward to the next epoch", async () => {
-  const onlyLater = [{ tokenId: 1, from: Z, to: A, timestamp: G + 8 * 86400, blockNumber: 5, logIndex: 0 }];
-  const batches = [{ sharesMinted: 700n, settledAt: G + 7 * 86400 + 10 }];
-  const e = computeEpochs({ transfers: onlyLater, batches, genesis: G, upToEpoch: 2 });
+test("zero-revenue day: nothing proposed; zero eligible NFTs: shares roll forward to the next day", async () => {
+  const ch = fakeChain();
+  ch.st.held = 700n;
+  ch.st.now = G + 2 * DAY + 7 * H;
+  let r = await pub(ch, { transfers, batches: [] });
+  assert.equal(r.action, "none");
+  assert.match(r.reason, /nothing new/);
+  const onlyLater = [{ tokenId: 1, from: Z, to: A, timestamp: G + DAY + 2 * H, blockNumber: 5, logIndex: 0 }];
+  const e = computeEpochs({ transfers: onlyLater, batches: [batch(700, G + 10)], genesis: G, upToEpoch: 2 });
   assert.equal(e[0].eligible, 0);
   assert.equal(e[0].allocatedNow, 0n);
   assert.equal(e[1].amount, 700n);
   assert.equal(e[1].cumulative.get(A), 700n);
-  const ch = fakeChain();
-  const r = await publishEpoch({ distributor: ch.c.distributor, inputs: { transfers: onlyLater, batches }, genesis: G, now: G + 7 * 86400 + 7 * 3600 });
+  ch.st.now = G + DAY + 7 * H;
+  r = await pub(ch, { transfers: onlyLater, batches: [batch(700, G + 10)] });
   assert.equal(r.action, "none");
   assert.match(r.reason, /roll forward/);
 });
 
-test("indexer down for two weeks: catch-up proposes one cumulative root covering both", async () => {
-  const batches = [{ sharesMinted: 1000n, settledAt: G + 7 * 86400 + 60 }, { sharesMinted: 1000n, settledAt: G + 14 * 86400 + 60 }];
+test("accumulated rewards over many days: claims are cumulative and nothing expires", async () => {
   const ch = fakeChain();
-  ch.st.now = G + 14 * 86400 + 7 * 3600;
-  const r = await publishEpoch({ distributor: ch.c.distributor, inputs: { transfers, batches }, genesis: G, now: ch.st.now, excluded: [CONV] });
+  const batches = [];
+  for (let d = 1; d <= 30; d++) batches.push(batch(100 * d, G + d * DAY + H));
+  ch.st.held = batches.reduce((x, b) => x + b.sharesMinted, 0n);
+  const days = [];
+  for (let d = 1; d <= 30; d++) {
+    ch.st.now = G + d * DAY + GRACE + 120 + (d - 1) * 300; // each run a few minutes later than 24 h after the last
+    const r = await pub(ch, { transfers, batches });
+    days.push(r.action === "proposed" ? r.epoch : r.action);
+  }
+  assert.ok(days.every((x) => typeof x === "number"), `a root every day: ${days}`);
+  ch.st.now += DAY;
+  await ch.c.distributor.activateRoot();
+  const e = computeEpochs({ transfers, batches, genesis: G, upToEpoch: 30, excluded: [CONV] }).at(-1);
+  assert.equal(Number(ch.st.active.epoch), 30);
+  assert.equal(ch.st.active.totalCumulative, e.total);
+  assert.equal(e.cumulative.get(A) + e.cumulative.get(B) + e.dust, ch.st.held);
+});
+
+test("missed epochs: publisher down for 3 days, then one cumulative root covers all of them", async () => {
+  const batches = [batch(1000, G + DAY + H), batch(1000, G + 2 * DAY + H), batch(1000, G + 3 * DAY + H)];
+  const ch = fakeChain();
+  ch.st.held = 3000n;
+  ch.st.now = G + 3 * DAY + 7 * H;
+  const r = await pub(ch, { transfers, batches });
   assert.equal(r.action, "proposed");
-  assert.equal(r.epoch, 2);
-  assert.ok(r.total > 1990n && r.total <= 2000n);
-  const again = await publishEpoch({ distributor: ch.c.distributor, inputs: { transfers, batches }, genesis: G, now: ch.st.now, excluded: [CONV] });
+  assert.equal(r.epoch, 3);
+  assert.deepEqual(r.covers, [1, 3]);
+  assert.ok(r.total > 2990n && r.total <= 3000n);
+  const again = await pub(ch, { transfers, batches });
   assert.equal(again.action, "none", "idempotent: does not re-propose");
+  assert.equal(again.reason, "already pending");
+});
+
+test("pending root in review is never replaced; the next day waits and is proposed once it activates", async () => {
+  const batches = [batch(1000, G + DAY + H), batch(1000, G + 2 * DAY + H)];
+  const ch = fakeChain();
+  ch.st.held = 2000n;
+  ch.st.now = G + DAY + 6 * H + 600; // day 1 closed at 06:00; publisher runs at 06:10
+  assert.equal((await pub(ch, { transfers, batches })).epoch, 1);
+  const pendingDay1 = ch.st.pending.root;
+  ch.st.now = G + 2 * DAY + 6 * H + 300; // day 2 closed; day 1's root activates at 06:10
+  const w = await pub(ch, { transfers, batches });
+  assert.equal(w.action, "waiting");
+  assert.equal(w.pendingEpoch, 1);
+  assert.equal(ch.st.pending.root, pendingDay1, "the root in review was not replaced");
+  assert.ok(!ch.log.includes("propose:2"));
+  // the contract refuses it too
+  await assert.rejects(ch.c.distributor.proposeRoot("0x" + "ab".repeat(32), 2000n, 2, ZERO_ROOT), /PendingRootNotActivated/);
+  ch.st.now = G + 2 * DAY + 6 * H + 600;
+  const p = await pub(ch, { transfers, batches });
+  assert.equal(p.action, "proposed");
+  assert.equal(p.epoch, 2);
+  assert.equal(Number(ch.st.active.epoch), 1, "day 1 activated first, inside proposeRoot");
+  assert.equal(ch.st.active.root, pendingDay1);
+});
+
+test("veto: the publisher stops instead of re-proposing, also after a restart, until the veto is acknowledged", async () => {
+  const batches = [batch(1000, G + DAY + H), batch(1000, G + 2 * DAY + H)];
+  const ch = fakeChain();
+  ch.st.held = 2000n;
+  ch.st.now = G + DAY + 7 * H;
+  await pub(ch, { transfers, batches });
+  const vetoed = ch.st.pending.root;
+  await ch.c.distributor.vetoPending();
+  const alerter = createAlerter({ service: "t", webhook: null });
+  ch.st.now = G + 2 * DAY + 7 * H;
+  const inputs = () => ({ transfers, batches, vetoes: ch.st.vetoes }); // a restarted publisher reads RootVetoed from chain
+  let r = await pub(ch, inputs(), { alerter });
+  assert.equal(r.action, "blocked");
+  assert.ok(alerter.sent.some((x) => x.level === "critical" && /vetoed/.test(x.text)));
+  assert.equal(ch.st.proposed.length, 1);
+  r = await pub(ch, inputs(), { acknowledgedVetoes: [vetoed] });
+  assert.equal(r.action, "proposed");
+  assert.deepEqual(r.covers, [1, 2], "the vetoed day is still allocated in the next root");
+});
+
+test("restart recovery: a fresh publisher recomputes the same root and neither duplicates nor skips", async () => {
+  const batches = [batch(500, G + DAY + H), batch(700, G + 2 * DAY + H)];
+  const ch = fakeChain();
+  ch.st.held = 1200n;
+  ch.st.now = G + DAY + 7 * H;
+  const first = await pub(ch, { transfers, batches });
+  // process restarts mid-review: same chain, no local state
+  const again = await pub(ch, { transfers: [...transfers], batches: [...batches] });
+  assert.equal(again.reason, "already pending");
+  ch.st.now = G + 2 * DAY + 8 * H; // restarted after the delay: activates day 1 and proposes day 2
+  const next = await pub(ch, { transfers, batches });
+  assert.equal(next.epoch, 2);
+  assert.equal(ch.st.active.root, first.root);
+});
+
+test("underfunded root waits (late funding) instead of failing the tick", async () => {
+  const ch = fakeChain();
+  ch.st.held = 10n; // shares not yet in the distributor
+  ch.st.now = G + DAY + 7 * H;
+  const parb = { balanceOf: async () => ch.st.held };
+  const r = await pub(ch, { transfers, batches: [batch(1000, G + DAY + H)] }, { parb });
+  assert.equal(r.action, "waiting");
+  assert.match(r.reason, /covers 10/);
 });
 
 test("root checker: matching root passes, tampered root raises a veto alert, insolvency alerts", async () => {
-  const batches = [{ sharesMinted: 1000n, settledAt: G + 7 * 86400 + 60 }];
+  const batches = [batch(1000, G + DAY + H)];
   const ch = fakeChain();
   ch.st.held = 1000n;
-  await publishEpoch({ distributor: ch.c.distributor, inputs: { transfers, batches }, genesis: G, now: G + 7 * 86400 + 7 * 3600, excluded: [CONV] });
+  ch.st.now = G + DAY + 7 * H;
+  await pub(ch, { transfers, batches });
   const parb = { balanceOf: async () => ch.st.held };
   const alerter = createAlerter({ service: "t", webhook: null });
-  let r = await checkRoot({ distributor: ch.c.distributor, parb, inputs: { transfers, batches }, genesis: G, excluded: [CONV], alerter });
+  const chk = () => checkRoot({ distributor: ch.c.distributor, parb, inputs: { transfers, batches }, genesis: G, excluded: [CONV], alerter });
+  let r = await chk();
   assert.equal(r[0].match, true);
   assert.equal(alerter.sent.length, 0);
   ch.st.pending = { ...ch.st.pending, root: "0x" + "ab".repeat(32) };
-  r = await checkRoot({ distributor: ch.c.distributor, parb, inputs: { transfers, batches }, genesis: G, excluded: [CONV], alerter });
+  r = await chk();
   assert.equal(r[0].match, false);
   assert.match(alerter.sent[0].text, /vetoPending/);
   ch.st.held = 10n;
-  await checkRoot({ distributor: ch.c.distributor, parb, inputs: { transfers, batches }, genesis: G, excluded: [CONV], alerter });
+  await chk();
   assert.ok(alerter.sent.some((x) => x.key === "solvency"));
 });
 
-test("closedEpoch waits for the settlement grace", () => {
-  assert.equal(closedEpoch(G, G + WEEK + 3600, 6 * 3600), 0);
-  assert.equal(closedEpoch(G, G + WEEK + 6 * 3600, 6 * 3600), 1);
+test("closedEpoch: a day closes at its end plus the settlement grace; genesis must be 00:00 UTC", () => {
+  assert.equal(closedEpoch(G, G + DAY + 5 * H, GRACE), 0);
+  assert.equal(closedEpoch(G, G + DAY + 6 * H, GRACE), 1);
+  assert.equal(closedEpoch(G, G + 10 * DAY + 6 * H, GRACE), 10);
+  assert.throws(() => computeEpochs({ transfers, batches: [], genesis: G + H, upToEpoch: 1 }), /00:00 UTC/);
+});
+
+test("rewards status keeps earned, allocated, active (claimable basis) and accruing apart", () => {
+  const batches = [batch(1500, G + DAY + H), batch(1000, G + 2 * DAY + H), batch(400, G + 3 * DAY + H)];
+  const e = computeEpochs({ transfers, batches, genesis: G, upToEpoch: 3, excluded: [CONV] });
+  const root = (k) => ({ root: "0x" + String(k).repeat(64), totalCumulative: e[k - 1].total, epoch: BigInt(k), activatesAt: BigInt(G + (k + 1) * DAY + 7 * H), dataHash: ZERO_ROOT });
+  const now = G + 3 * DAY + 7 * H + 1800; // day 3 closed; day 4 open since 00:00
+  const s = rewardsStatus({ inputs: { transfers, batches }, genesis: G, now, excluded: [CONV], active: root(1), pending: root(2) });
+  assert.equal(s.latestClosedEpoch, 3);
+  assert.equal(s.activeEpoch, 1);
+  assert.equal(s.pendingEpoch, 2);
+  assert.equal(s.accounts[A].active, "1000");
+  assert.equal(s.accounts[A].allocated, "1250");
+  assert.equal(s.accounts[A].earned, "1250", "A sold on day 2: day 3 earns nothing");
+  assert.equal(s.accounts[B].earned, String(e[2].cumulative.get(B)));
+  assert.equal(s.accounts[A].accruingSeconds, 0);
+  assert.equal(s.accounts[B].accruingSeconds, 2 * (7 * H + 1800), "B holds two Milords since 00:00 of day 4");
 });
 
 test("retry: backs off on transient errors, stops on permanent ones", async () => {
@@ -352,4 +507,15 @@ test("lock watch: silent when locked or far from the unlock block, warns, then c
     assert.equal(w[0]?.l ?? null, level, `${owner} at ${now}`);
     if (now >= until) assert.match(w[0].t, /WITHDRAWABLE/);
   }
+});
+
+test("chain 4663: ALLOW_MAINNET, or ALLOW_LOCAL_FORK with a loopback RPC only", async () => {
+  const { chainAllowed } = await import("../lib/config.mjs");
+  assert.equal(chainAllowed(46630, "https://rpc.testnet.chain.robinhood.com", {}), true);
+  assert.equal(chainAllowed(4663, "https://rpc.mainnet.chain.robinhood.com", {}), false);
+  assert.equal(chainAllowed(4663, "https://rpc.mainnet.chain.robinhood.com", { ALLOW_LOCAL_FORK: "yes" }), false);
+  assert.equal(chainAllowed(4663, "http://127.0.0.1:8550", { ALLOW_LOCAL_FORK: "yes" }), true);
+  assert.equal(chainAllowed(4663, "http://127.0.0.1.example.com:8550", { ALLOW_LOCAL_FORK: "yes" }), false);
+  assert.equal(chainAllowed(4663, "http://127.0.0.1:8550", {}), false);
+  assert.equal(chainAllowed(4663, "https://rpc.mainnet.chain.robinhood.com", { ALLOW_MAINNET: "yes" }), true);
 });

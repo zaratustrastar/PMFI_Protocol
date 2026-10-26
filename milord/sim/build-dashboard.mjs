@@ -111,7 +111,7 @@ ${bars("MILORD burned by buybacks (cumulative)", "burnedByBuybackTotal", "MILORD
 </div>
 <p>Price points: ${S.priceSeries.map((p, i) => `${i + 1} ${esc(p.label)}`).join(" · ")}.</p>
 <h2>Fee and asset reconciliation</h2><div class="tw">${flowTable}</div>
-<h2>Weekly numbers</h2><div class="tw">${table}</div>
+<h2>Weekly numbers (each week = 7 daily epochs)</h2><div class="tw">${table}</div>
 <h2>Entry fees</h2><p>${S.conversions.length} conversions. ${minFee} paid the 0.002 ETH minimum because 10% of the TWAP value of 1M MILORD was lower; ${S.conversions.length - minFee} paid 10%. Every quote came from a 30-minute TWAP; a quote requested 5 minutes after the market opened was refused.</p>
 <h2>Tracked wallets</h2><p>The seller keeps week-1 earnings, the buyer earns from the sale, the redeemer stops earning at redemption and keeps what was earned.</p><div class="tw">${tracked}</div>
 <h2>NFT owner allocations (top 15 by cumulative pARB)</h2><div class="tw">${owners}</div>

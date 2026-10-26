@@ -6,7 +6,8 @@
 // PoolManager / PositionManager / StateView, V4SwapAdapter, HookrLockFeeCollector, ArbitrageFundingRouter with
 // UniV3SwapVenue and the 30-minute UniV3TwapReference on the official Uniswap V3 factory build, the EIP-712 quote
 // and report signing code, the TWAP reference price, and the packaged keeper and epoch-publisher jobs
-// (offchain/services/lib/jobs.mjs) that run the weekly flow.
+// (offchain/services/lib/jobs.mjs) that run the flow. The scenario is reported in weeks; pARB is distributed in
+// DAILY UTC epochs (each weekly close publishes one cumulative root through the week's last day).
 // What is mocked: Hookr's Tax + Conversion hook (MockHookrTaxHook reproduces its economics), Hookr's launcher and
 // HookrFamilyLock (MockHookrFamilyLock, same lock/collect surface), USDG (MockUSDG) and the WETH/USDG pool's
 // depth, arbitrage P&L (minted or burned on the servicer wallet).
@@ -21,7 +22,7 @@ import { issueQuote } from "../offchain/lib/quote.mjs";
 import { signReport } from "../offchain/lib/report.mjs";
 import { TwapOracle, weiPerMillionAtTick } from "../offchain/lib/twap.mjs";
 import { ENTRY_PRICE } from "../offchain/lib/entry-price.mjs";
-import { keeperTick, publishEpoch, checkRoot, readInputs } from "../offchain/services/lib/jobs.mjs";
+import { keeperTick, publishEpoch, checkRoot, readInputs, computeEpochs, closedEpoch, rewardsStatus } from "../offchain/services/lib/jobs.mjs";
 
 // ───────────── SCENARIO inputs (hypothetical) ─────────────
 const SCENARIO = {
@@ -190,6 +191,8 @@ const batches = [];
 const sumAlloc = async (who) => (await entrySplit.totalAllocated(ZERO, who)) + (await royaltySplit.totalAllocated(ZERO, who)) + (await taxSplit.totalAllocated(ZERO, who));
 let lastEpoch = null;
 const rootChecks = [];
+const dailyEpochs = [];
+let pendingReplaceChecked = false, pendingGuard = null;
 
 const GRACE = 6 * 3600;
 const keeperContracts = {
@@ -252,10 +255,26 @@ async function closeWeek(label, start, end, pnlBps, notes) {
   await observe();
   const chk = await checkRoot({ distributor: dist, parb: vault, inputs, genesis: T0, settlementGrace: GRACE, excluded: [D.MilordConverter] });
   rootChecks.push(...chk.map((x) => ({ label, ...x })));
-  let rootHex = null, allocations = new Map(), dust = 0n, weights = new Map();
-  if (lastEpoch && lastEpoch.end === end) {
-    ({ allocations, dust, weights } = lastEpoch);
-    cumulative = lastEpoch.cumulative;
+  // the week's daily epochs, summed for the weekly report (allocation itself is per UTC day)
+  let rootHex = null, dust = 0n;
+  const allocations = new Map(), weights = new Map();
+  const eps = computeEpochs({ ...inputs, genesis: T0, upToEpoch: closedEpoch(T0, await now(), GRACE), settlementGrace: GRACE, excluded: [D.MilordConverter], trees: "none" });
+  const inWeek = eps.filter((e) => e.start >= start && e.end <= end);
+  for (const e of inWeek) {
+    for (const [a, v] of e.allocations) allocations.set(a, (allocations.get(a) ?? 0n) + v);
+    for (const [a, v] of e.weights) weights.set(a, (weights.get(a) ?? 0n) + v);
+  }
+  dust = inWeek.at(-1)?.dust ?? 0n;
+  if (eps.length) cumulative = eps.at(-1).cumulative;
+  dailyEpochs.push(...inWeek.map((e) => ({ day: e.epoch, start: e.start, amount: e.amount, allocated: e.allocatedNow, eligible: e.eligible, weights: e.weights })));
+  if (pub.action === "proposed" && !pendingReplaceChecked) {
+    // the real ShareDistributor refuses a second root while this one is in review (daily proposals must not
+    // restart the review clock), and the publisher reports "already pending" instead of re-proposing
+    pendingReplaceChecked = true;
+    let reason = "";
+    try { await dist.connect(operator).proposeRoot.staticCall(pub.root, pub.total, pub.epoch + 1, pub.dataHash); } catch (e) { reason = String(e.shortMessage ?? e.message); const data = e.data ?? e.info?.error?.data; if (data) { const p = dist.interface.parseError(data); reason += ` [${p?.name ?? data}]`; } }
+    const again = await publishEpoch({ distributor: dist.connect(operator), inputs, genesis: T0, now: await now(), settlementGrace: GRACE, excluded: [D.MilordConverter] });
+    pendingGuard = { contractRefused: /PendingRootNotActivated/.test(reason), reason, publisher: again.reason };
   }
   if (pub.action === "proposed") {
     await provider.send("evm_increaseTime", [3601]);
@@ -295,7 +314,7 @@ async function closeWeek(label, start, end, pnlBps, notes) {
     parbMintedThisWeek: fmtE(shares), parbMintedTotal: fmtE(await adapter.totalSharesMinted()),
     ppsUsdg: fmtU(pps), navUsdg: fmtU(reported),
     parbAllocatedThisWeek: fmtE([...allocations.values()].reduce((a, b) => a + b, 0n)), dustCarried: fmtE(dust),
-    eligibleWallets: weights.size, epochAction: pub.action, epochReason: pub.reason ?? null, cumulativeAllocated: fmtE(prevTotal), claimedTotal: fmtE(await dist.totalClaimed()),
+    eligibleWallets: weights.size, rootEpoch: pub.epoch ?? null, lastDay: (end - T0) / DAY, epochAction: pub.action, epochReason: pub.reason ?? null, cumulativeAllocated: fmtE(prevTotal), claimedTotal: fmtE(await dist.totalClaimed()),
     unclaimed: fmtE(prevTotal - (await dist.totalClaimed())),
     weiPerMillionSpot: fmtE(weiPerMillionAtTick(await spotTick())),
     merkleRoot: rootHex, tracked: {},
@@ -574,6 +593,15 @@ ok("USDG has 6 decimals and NAV = vault + servicer USDG", Number(await usdg.deci
 }
 ok("seller keeps week-1 pARB after selling", weeks[2].tracked.seller_alice.cumulative >= weeks[0].tracked.seller_alice.cumulative && weeks[0].tracked.seller_alice.cumulative > 0);
 ok("buyer earns only from day 3.5 of week 2", weeks[0].tracked.buyer.cumulative === 0 && Math.abs(weeks[1].tracked.buyer.weightSeconds - 3.5 * DAY) <= 60);
+ok("daily epochs: each weekly close proposed one cumulative root through the week's last UTC day", weeks.slice(0, 3).every((w) => w.epochAction === "proposed" && w.rootEpoch === w.lastDay), weeks.map((w) => `${w.label}:${w.rootEpoch}/${w.lastDay}`).join(" "));
+{
+  const saleDay = Math.floor((W2 + 3.5 * DAY - T0) / DAY) + 1;
+  const d = dailyEpochs.find((e) => e.day === saleDay);
+  ok("mid-day sale: buyer earns from the transfer second (12 h of that UTC day), not the whole day", d && Math.abs(Number(d.weights.get(BUYER.address.toLowerCase()) ?? 0n) - 12 * 3600) <= 60, `day ${saleDay}: ${d?.weights.get(BUYER.address.toLowerCase())} s`);
+  const days = dailyEpochs.map((e) => e.day);
+  ok("every UTC day since genesis is an epoch exactly once (no gaps, no overlap)", days.every((x, i) => x === i + 1) && dailyEpochs.every((e, i) => e.start === T0 + i * DAY), `${days.length} days`);
+}
+ok("a pending root in review cannot be replaced on chain; the publisher waits instead", pendingGuard?.contractRefused && pendingGuard.publisher === "already pending", JSON.stringify(pendingGuard));
 ok("redeemer keeps earned pARB, earns nothing after redeeming", (cumulative.get(CAROL.address.toLowerCase()) ?? 0n) >= carolEarned && carolEarned > 0n && weeks[2].tracked.redeemer_carol.weightSeconds === (perHolder[2] - 1) * 7 * DAY);
 ok("100% of supply entered the position: deployer, team, arbitrage and operator held 0 MILORD at open", Object.values(outsideAtOpen).every((v) => v === 0n) && BigInt(D.launchDustBurned) <= 1_000_000n, `remainder burned ${D.launchDustBurned} wei`);
 ok("pool started with 0 ETH and the first trade was a buy", Math.abs(start.poolEth) < 1e-9 && firstOut > 0n);
@@ -616,6 +644,12 @@ if (lastTree) {
   const claims = {};
   for (const [i, v] of lastTree.entries()) claims[v[0].toLowerCase()] = { cumulative: v[1], proof: lastTree.getProof(i) };
   fs.writeFileSync(path.join(root, "sim/output/epoch-latest.json"), JSON.stringify({ epoch, root: lastTree.root, total: prevTotal.toString(), claims }, null, 2));
+}
+{
+  // the publisher's rewards.json for the frontend (earned / allocated / active / accruing per account)
+  const inputs = await readInputs({ nft, adapter, provider, fromBlock: Number(D.startBlock ?? 0), toBlock: await provider.getBlockNumber() });
+  const status = rewardsStatus({ inputs, genesis: T0, now: await now(), settlementGrace: GRACE, excluded: [D.MilordConverter], active: await dist.active(), pending: await dist.pending() });
+  fs.writeFileSync(path.join(root, "sim/output/rewards.json"), JSON.stringify(status, null, 2));
 }
 console.log(`checks: ${checks.filter((c) => c.pass).length}/${checks.length} passed`);
 if (checks.some((c) => !c.pass)) process.exit(1);

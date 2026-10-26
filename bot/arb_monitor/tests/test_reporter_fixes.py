@@ -140,7 +140,7 @@ class VaultConfigTests(unittest.TestCase):
         self.addCleanup(lambda: [setattr(R, k, v) for k, v in saved.items()])
 
     def _env(self, **kw):
-        env = {"ARB_FUNDING_CHAIN": "robinhood", "ARB_VAULT_ASSET": F.USDG, "ARB_VAULT_RPC_URL": F.RH_RPC,
+        env = {"ARB_FUNDING_CHAIN": "robinhood", "ARB_EXECUTION_MODE": "live", "ARB_VAULT_ASSET": F.USDG, "ARB_VAULT_RPC_URL": F.RH_RPC,
                "ARB_VAULT_CHAIN_ID": "4663", "ARB_VAULT_DOMAIN_SALT": "PMFIArbVaultV3.milord.v1"}
         env.update(kw)
         return mock.patch.dict(os.environ, {k: v for k, v in env.items() if v is not None}, clear=True)
@@ -284,7 +284,7 @@ class SettlementTests(unittest.TestCase):
     POS = {"pair_id": "p", "poly_yes_token": "t", "kalshi_ticker": "K", "shares": 10, "cost_basis_usdc": 9.7}
 
     def run_check(self, trigger, rh):
-        env = {"ARB_FUNDING_CHAIN": "robinhood"} if rh else {}
+        env = {"ARB_FUNDING_CHAIN": "robinhood", "ARB_EXECUTION_MODE": "live"} if rh else {}
         with mock.patch.dict(os.environ, env, clear=True), \
              mock.patch.object(arb_settlement, "get_open_positions", return_value=[dict(self.POS)]), \
              mock.patch.object(arb_settlement, "_detect", return_value=(trigger, 10.0, 1.0)), \

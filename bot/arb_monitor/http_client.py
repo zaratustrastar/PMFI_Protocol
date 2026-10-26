@@ -40,11 +40,51 @@ _direct_session: Optional[requests.Session] = None
 _opinion_session: Optional[requests.Session] = None
 
 
+def public_data_route() -> str:
+    """ARB_PUBLIC_DATA_ROUTE=direct|proxy for public market data (Gamma, CLOB books/prices).
+
+    Default "direct" for the Robinhood pilot (ARB_FUNDING_CHAIN=robinhood) and in shadow mode, so
+    public reads never depend on PROXY_URL; "proxy" (the existing behaviour) for the Base engine.
+    Order eligibility never follows this setting: it is decided by the direct-egress Polymarket
+    geoblock check (core/venue_eligibility.py).
+    """
+    pilot = (os.environ.get("ARB_FUNDING_CHAIN", "base").strip().lower() == "robinhood"
+             or os.environ.get("ARB_EXECUTION_MODE", "").strip().lower() == "shadow")
+    route = os.environ.get("ARB_PUBLIC_DATA_ROUTE", "direct" if pilot else "proxy").strip().lower()
+    if route not in ("direct", "proxy"):
+        raise ValueError(f"ARB_PUBLIC_DATA_ROUTE={route!r}; expected direct or proxy")
+    return route
+
+
+def describe_proxy(url: str) -> tuple[bool, str]:
+    """(well_formed, display) for a proxy URL; display is scheme://host:port, never credentials.
+    A malformed URL (bad port, no host, unknown scheme) returns False and a sanitized reason."""
+    from urllib.parse import urlsplit
+    if not url:
+        return False, "not set"
+    try:
+        u = urlsplit(url.strip())
+        host, port, scheme = u.hostname, u.port, (u.scheme or "").lower()
+    except ValueError as e:  # e.g. "Port could not be cast to integer value"
+        scheme = url.split("://", 1)[0].lower() if "://" in url else "?"
+        reason = "invalid port" if "port" in str(e).lower() else type(e).__name__
+        return False, f"malformed proxy URL (scheme={scheme[:10]}, {reason})"
+    if scheme not in ("http", "https", "socks5", "socks5h", "socks4"):
+        return False, f"malformed proxy URL (scheme={scheme[:10] or 'missing'})"
+    if not host:
+        return False, f"malformed proxy URL (scheme={scheme}, no host)"
+    return True, f"{scheme}://{host}{':' + str(port) if port else ''}"
+
+
 def _get_session() -> requests.Session:
     global _session
     if _session is None:
         _session = requests.Session()
         _session.headers.update({"User-Agent": DEFAULT_USER_AGENT})
+        if public_data_route() == "direct":
+            _session.trust_env = False
+            print("🌐 [HTTP] Public data route: direct (ARB_PUBLIC_DATA_ROUTE); PROXY_URL not used")
+            return _session
         proxies = {}
         if HTTP_PROXY:
             proxies["http"] = HTTP_PROXY
@@ -54,10 +94,11 @@ def _get_session() -> requests.Session:
             proxies["http"] = PROXY_URL
             proxies["https"] = PROXY_URL
         if proxies:
+            ok, proxy_display = describe_proxy(list(proxies.values())[0])
+            if not ok:
+                print(f"🌐 [HTTP] {proxy_display} — not used, connecting directly")
+                return _session
             _session.proxies.update(proxies)
-            proxy_display = list(proxies.values())[0]
-            if "@" in proxy_display:
-                proxy_display = proxy_display.split("@")[1]
             print(f"🌐 [HTTP] Proxy configured: {proxy_display} (source: {'PROXY_URL' if PROXY_URL and not HTTP_PROXY and not HTTPS_PROXY else 'HTTP(S)_PROXY'})")
         else:
             print("🌐 [HTTP] No proxy configured (direct connections)")

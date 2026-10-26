@@ -2,7 +2,7 @@
 //   node offchain/services/monitor.mjs
 // Watches: gas on service keys, missing NAV reports, unexpected PPS moves, vault paused, redemptions waiting on
 // liquidity, undistributed splitter ETH, router stuck or paused, stale funding price, Hookr tax queues not paid,
-// funding batches not settled, missed weekly epochs, the permanent-lock deadline, unconfirmed bridge transfers, and
+// funding batches not settled, missed daily epochs, a pending root left unactivated, the permanent-lock deadline, unconfirmed bridge transfers, and
 // the other services' /healthz and failed ticks.
 // Env: RPC_URL (use a provider different from the keeper's), DEPLOYMENTS_FILE, CHAIN_ID, EPOCH_GENESIS,
 //      SETTLEMENT_GRACE_SECS, ALERT_WEBHOOK_URL, HEALTH_PORT, STATE_DIR, INTERVAL_SECS,

@@ -18,7 +18,7 @@ import {ArbitrageFundingRouter, IParbFundingAdapter} from "../src/automation/Arb
 import {IPriceReference, ISwapVenue} from "../src/automation/IPriceReference.sol";
 
 /// @notice Single-chain MILORD deployment: token, NFT, converter, fee routing AND the pARB
-///         vault + weekly distributor, all on Robinhood Chain (or a local/test chain).
+///         vault + daily distributor, all on Robinhood Chain (or a local/test chain).
 ///         Shared by DeployLocal, DeployRobinhood and the tests so they deploy identically.
 abstract contract MilordDeployer {
     struct Config {

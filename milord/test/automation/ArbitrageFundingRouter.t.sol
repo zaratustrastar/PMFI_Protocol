@@ -50,7 +50,7 @@ contract MockAggregator is IAggregatorV3 {
     }
 }
 
-/// @notice Protocol ETH revenue -> USDG -> pArbitrage V3 -> pARB for the weekly distributor, with no Safe
+/// @notice Protocol ETH revenue -> USDG -> pArbitrage V3 -> pARB for the daily distributor, with no Safe
 ///         signature per run, on the official Uniswap V3 WETH/USDG pool and its 30-minute TWAP.
 contract ArbitrageFundingRouterTest is HookrFixture {
     ArbitrageFundingRouter internal r;

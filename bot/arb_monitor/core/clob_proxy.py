@@ -1,4 +1,18 @@
-"""HTTP proxy injection for Polymarket CLOB requests (V1/V2 compatible)."""
+"""HTTP proxy injection for Polymarket CLOB requests (V1/V2 compatible).
+
+Two transports reach clob*.polymarket.com and both must be patched:
+  - `requests` (order books, prices, the V1 SDK): HTTPAdapter.send is wrapped, host-matched.
+  - py-clob-client-v2 (orders, cancels, balances, API-key auth): it uses its own module-level
+    httpx.Client in py_clob_client_v2.http_helpers.helpers, which the requests patch never sees.
+    That client is replaced by one with the same settings plus the proxy. The SDK only talks to the
+    CLOB host, so proxying the whole client is equivalent to host matching.
+    POLY_CLOB_PROXY_SDK=true routes the SDK through the proxy; the default is false (direct).
+
+Not applied at all when ARB_PUBLIC_DATA_ROUTE resolves to direct (the Robinhood pilot and shadow mode):
+public books and prices then go direct, and orders go from this host's own egress. A proxy is never
+used to make Polymarket order placement possible from a geoblocked location (core/venue_eligibility.py
+decides eligibility over the direct route).
+"""
 
 import os
 import re
@@ -6,6 +20,35 @@ import re
 POLY_CLOB_HOST_RE = re.compile(r"clob[\w\-]*\.polymarket\.com", re.IGNORECASE)
 
 _PATCHED = False
+SDK_ROUTE = "direct"  # "proxy" once the V2 SDK's httpx client goes through the proxy
+
+
+def _redact(url: str) -> str:
+    from ..http_client import describe_proxy
+    return describe_proxy(url)[1]
+
+
+def patch_sdk_httpx(proxy_url: str) -> bool:
+    """Route py-clob-client-v2's httpx client through proxy_url. False when the SDK or a proxy
+    transport is unavailable (logged); the SDK then stays direct."""
+    global SDK_ROUTE
+    try:
+        import httpx
+        from py_clob_client_v2.http_helpers import helpers
+    except ImportError:
+        return False
+    try:
+        try:
+            client = httpx.Client(http2=True, proxy=proxy_url)
+        except TypeError:  # httpx < 0.26
+            client = httpx.Client(http2=True, proxies=proxy_url)
+    except Exception as e:  # e.g. socks5:// without socksio installed
+        print(f"[Arb/CLOBProxy] V2 SDK proxy NOT applied ({type(e).__name__}: {e}) -- SDK orders go direct", flush=True)
+        return False
+    helpers._http_client = client
+    SDK_ROUTE = "proxy"
+    print(f"[Arb/CLOBProxy] V2 SDK httpx client routed via {_redact(proxy_url)}", flush=True)
+    return True
 
 
 def _under_proxychains():
@@ -27,6 +70,17 @@ def install_proxy_patch():
             "[Arb/CLOBProxy] No proxy configured -- Polymarket CLOB calls go direct",
             flush=True,
         )
+        _PATCHED = True
+        return
+
+    from ..http_client import describe_proxy, public_data_route
+    if public_data_route() == "direct":
+        print("[Arb/CLOBProxy] ARB_PUBLIC_DATA_ROUTE=direct -- proxy not applied, CLOB calls go direct", flush=True)
+        _PATCHED = True
+        return
+    ok, display = describe_proxy(proxy_url)
+    if not ok:
+        print(f"[Arb/CLOBProxy] {display} -- proxy not applied, CLOB calls go direct", flush=True)
         _PATCHED = True
         return
 
@@ -61,8 +115,10 @@ def install_proxy_patch():
 
     HTTPAdapter.send = _poly_proxied_send
     _PATCHED = True
+    if os.environ.get("POLY_CLOB_PROXY_SDK", "false").strip().lower() == "true":
+        patch_sdk_httpx(proxy_url)
 
-    proxy_display = re.sub(r"//[^@]+@", "//<redacted>@", proxy_url)
+    proxy_display = _redact(proxy_url)
     print(
         f"[Arb/CLOBProxy] Poly CLOB proxy ACTIVE "
         f"(HTTPAdapter patched, matching clob*.polymarket.com): {proxy_display}",
@@ -70,4 +126,4 @@ def install_proxy_patch():
     )
 
 
-__all__ = ["install_proxy_patch", "POLY_CLOB_HOST_RE"]
+__all__ = ["install_proxy_patch", "patch_sdk_httpx", "POLY_CLOB_HOST_RE"]

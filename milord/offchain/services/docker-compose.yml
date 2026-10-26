@@ -1,10 +1,11 @@
-# Testnet / local deployment of the four services. Mainnet only after owner approval (ALLOW_MAINNET=yes).
+# Testnet / local deployment of the five services. Mainnet only after owner approval (ALLOW_MAINNET=yes).
 #   cd milord && docker compose -f offchain/services/docker-compose.yml up -d --build
 # Each service reads only its own env file (copy the *.env.example files next to this one; never commit them), so the
 # keeper key never reaches the publisher and no key reaches the root checker or the monitor.
 # The deployments file (DEPLOYMENTS_HOST_FILE, default ../../deployments/robinhood-46630.json written by
 # DeployRobinhood.s.sol and completed by offchain/record-launch.mjs) is mounted read-only.
-# Memory: each container is capped at 192 MB (4 x 192 MB = 768 MB worst case); measure real use on testnet.
+# Memory: each container is capped at 192 MB (5 x 192 MB = 960 MB worst case); measure real use on testnet.
+# Backups: offchain/services/backup.sh (state volumes + deployments file + epoch files; never the env files).
 x-service: &service
   build: { context: ../.., dockerfile: offchain/services/Dockerfile }
   restart: unless-stopped
@@ -43,9 +44,17 @@ services:
     environment:
       <<: *env
       HEALTH_PORT: "9104"
-      MONITOR_HEALTH_URLS: "keeper=http://keeper:9101/healthz,epoch-publisher=http://epoch-publisher:9102/healthz,root-checker=http://root-checker:9103/healthz"
+      MONITOR_HEALTH_URLS: "keeper=http://keeper:9101/healthz,epoch-publisher=http://epoch-publisher:9102/healthz,root-checker=http://root-checker:9103/healthz,quote-server=http://quote-server:8787/healthz"
     volumes: ["monitor-state:/data", "${DEPLOYMENTS_HOST_FILE:-../../deployments/robinhood-46630.json}:/app/deployments.json:ro"]
     ports: ["127.0.0.1:9104:9104"]
+  quote-server:
+    <<: *service
+    command: ["node", "offchain/quote-server.mjs"]
+    # QUOTE_SIGNER_PRIVATE_KEY only (the converter's quote signer); public behind a TLS reverse proxy, rate-limited there
+    env_file: [common.env, quote.env]
+    environment: { <<: *env, QUOTE_HOST: "0.0.0.0", QUOTE_PORT: "8787", HEALTH_PORT: "8787" }
+    volumes: ["${DEPLOYMENTS_HOST_FILE:-../../deployments/robinhood-46630.json}:/app/deployments.json:ro"]
+    ports: ["127.0.0.1:8787:8787"]
 volumes:
   keeper-state:
   publisher-state:

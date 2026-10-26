@@ -30,7 +30,7 @@ the mainnet lock awaits approval). The 24,920-wei rounding remainder is burned; 
 | 10 | 40 users buy 2–3M MILORD each | — |
 | 11 | 100 conversions with TWAP-signed quotes | 0.2 ETH fees, all at the 0.002 ETH minimum (price still low) |
 | 12 | 100 Milords issued | escrow = 100 × 1,000,000 MILORD |
-| 13 | Weekly close | entry fees 70/30; tax split; buyback burn; ETH → USDG; deposit; report; pARB minted; Merkle root; claims |
+| 13 | Weekly close (7 daily roots summed) | entry fees 70/30; tax split; buyback burn; ETH → USDG; deposit; report; pARB minted; Merkle root; claims |
 | 14–17 | Characteristics | owners without a choice default to pArbitrage; one holder edits their preference to characteristics 2 and 5 (identity and original selection unchanged); pArbitrage is the only live strategy |
 | 18 | Secondary sales | one sale pays 6.7% (0.0335 ETH, split 50/50); a private sale pays none |
 | 19 | Large buy (30 ETH, SCENARIO) in week 2 | FDV passes ≈135 ETH; later conversions pay the 10% path |

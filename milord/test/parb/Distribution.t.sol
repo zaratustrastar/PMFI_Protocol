@@ -98,9 +98,9 @@ contract DistributionTest is ParbFixture {
         dist.activateRoot();
     }
 
-    function test_weeklyCumulativeClaims_previousOwnerKeepsEarned() public {
+    function test_dailyCumulativeClaims_previousOwnerKeepsEarned() public {
         _seed(1000e6, "w1");
-        // week 1: alice held the whole week, bob half a week then sold to carol
+        // day 1: alice held the whole day, bob until 12:00 then sold to carol
         bytes32[] memory l1 = _tree3(600e18, 200e18, 200e18);
         _publish(Merkle.root(l1), 1000e18, 1);
 
@@ -109,13 +109,13 @@ contract DistributionTest is ParbFixture {
         assertEq(vault.balanceOf(alice), 600e18);
 
         _seed(500e6, "w2");
-        // week 2: bob no longer holds; his cumulative stays 200
+        // day 2: bob no longer holds; his cumulative stays 200
         bytes32[] memory l2 = _tree3(850e18, 200e18, 450e18);
         _publish(Merkle.root(l2), 1500e18, 2);
 
         dist.claim(alice, 850e18, Merkle.proof(l2, 0)); // anyone can trigger; pays alice
         assertEq(vault.balanceOf(alice), 850e18);
-        dist.claim(bob, 200e18, Merkle.proof(l2, 1)); // bob skipped week 1 claim, loses nothing
+        dist.claim(bob, 200e18, Merkle.proof(l2, 1)); // bob skipped the day 1 claim, loses nothing
         assertEq(vault.balanceOf(bob), 200e18);
         dist.claim(carol, 450e18, Merkle.proof(l2, 2));
         assertEq(vault.balanceOf(carol), 450e18);
@@ -201,5 +201,108 @@ contract DistributionTest is ParbFixture {
         vm.prank(alice);
         vault.claimRedeem(rr, alice);
         assertEq(usdc.balanceOf(alice), 1000e6);
+    }
+
+    // ───────── daily epochs ─────────
+
+    function _pendingEpoch() internal view returns (uint64 e, uint64 eta) {
+        (,, e, eta,) = dist.pending();
+    }
+
+    function _activeEpoch() internal view returns (uint64 e, uint256 total) {
+        (, total, e,,) = dist.active();
+    }
+
+    /// A daily proposal must not restart the review clock of a root still in its delay.
+    function test_pendingRootInReviewCannotBeReplaced() public {
+        _seed(200e6, "d1");
+        bytes32[] memory l1 = _tree3(100e18, 0, 0);
+        vm.prank(publisher);
+        dist.proposeRoot(Merkle.root(l1), 100e18, 1, 0);
+        (, uint64 eta) = _pendingEpoch();
+        vm.warp(eta - 1);
+        bytes32[] memory l2 = _tree3(200e18, 0, 0);
+        vm.prank(publisher);
+        vm.expectRevert(abi.encodeWithSelector(ShareDistributor.PendingRootNotActivated.selector, uint64(1), eta));
+        dist.proposeRoot(Merkle.root(l2), 200e18, 2, 0);
+        (uint64 still,) = _pendingEpoch();
+        assertEq(still, 1, "day 1 root still pending, clock not reset");
+    }
+
+    /// Once the delay has passed, the next day's proposal activates the waiting root first.
+    function test_dailyProposalActivatesReadyPendingRoot() public {
+        _seed(200e6, "d1");
+        bytes32[] memory l1 = _tree3(100e18, 0, 0);
+        vm.prank(publisher);
+        dist.proposeRoot(Merkle.root(l1), 100e18, 1, 0);
+        vm.warp(vm.getBlockTimestamp() + 1 days);
+        bytes32[] memory l2 = _tree3(150e18, 50e18, 0);
+        vm.prank(publisher);
+        dist.proposeRoot(Merkle.root(l2), 200e18, 2, 0);
+        (uint64 a, uint256 total) = _activeEpoch();
+        (uint64 p,) = _pendingEpoch();
+        assertEq(a, 1);
+        assertEq(total, 100e18);
+        assertEq(p, 2);
+        dist.claim(alice, 100e18, Merkle.proof(l1, 0)); // day 1 claimable while day 2 is in review
+        assertEq(vault.balanceOf(alice), 100e18);
+    }
+
+    /// Missed days: one cumulative root covers every day since the last one; zero-revenue days need no root.
+    function test_missedDaysCoveredByOneCumulativeRoot() public {
+        _seed(300e6, "d1-3");
+        bytes32[] memory l1 = _tree3(100e18, 0, 0);
+        _publish(Merkle.root(l1), 100e18, 1);
+        // days 2..5 not published (publisher down, or nothing new on some days); day 6 root covers them all
+        bytes32[] memory l6 = _tree3(180e18, 70e18, 50e18);
+        _publish(Merkle.root(l6), 300e18, 6);
+        (uint64 a,) = _activeEpoch();
+        assertEq(a, 6);
+        dist.claim(alice, 180e18, Merkle.proof(l6, 0));
+        dist.claim(bob, 70e18, Merkle.proof(l6, 1));
+        assertEq(vault.balanceOf(alice), 180e18);
+        assertEq(vault.balanceOf(bob), 70e18);
+    }
+
+    /// A vetoed day is not lost: the next root re-includes it, cumulative from genesis.
+    function test_vetoedRootIsSupersededWithoutLoss() public {
+        _seed(200e6, "d1-2");
+        bytes32[] memory bad = _tree3(0, 100e18, 0); // wrong allocation: checker alerts, Safe vetoes
+        vm.prank(publisher);
+        dist.proposeRoot(Merkle.root(bad), 100e18, 1, 0);
+        vm.prank(owner);
+        dist.vetoPending();
+        bytes32[] memory good = _tree3(150e18, 50e18, 0); // days 1-2, corrected
+        _publish(Merkle.root(good), 200e18, 2);
+        dist.claim(alice, 150e18, Merkle.proof(good, 0));
+        vm.expectRevert(ShareDistributor.InvalidProof.selector);
+        dist.claim(bob, 100e18, Merkle.proof(bad, 1));
+    }
+
+    /// Late funding: a root above the distributor's pARB is refused; it succeeds once the shares are settled.
+    function test_lateFundingRootWaitsForSettledShares() public {
+        _seed(100e6, "d1");
+        bytes32[] memory l = _tree3(100e18, 50e18, 0);
+        vm.prank(publisher);
+        vm.expectRevert(abi.encodeWithSelector(ShareDistributor.Underfunded.selector, 150e18, 100e18));
+        dist.proposeRoot(Merkle.root(l), 150e18, 1, 0);
+        vm.warp(vm.getBlockTimestamp() + 1 hours);
+        _seed(50e6, "d1-late");
+        _publish(Merkle.root(l), 150e18, 1);
+        dist.claim(bob, 50e18, Merkle.proof(l, 1));
+        assertEq(vault.balanceOf(bob), 50e18);
+    }
+
+    /// Unclaimed rewards never expire: after a year of daily roots the first day's allocation is still claimable.
+    function test_unclaimedRewardsNeverExpire() public {
+        _seed(365e6, "year");
+        bytes32[] memory l;
+        for (uint64 d = 1; d <= 365; ++d) {
+            l = _tree3(uint256(d) * 1e18, 0, 0);
+            _publish(Merkle.root(l), uint256(d) * 1e18, d);
+        }
+        vm.warp(vm.getBlockTimestamp() + 3650 days);
+        dist.claim(alice, 365e18, Merkle.proof(l, 0));
+        assertEq(vault.balanceOf(alice), 365e18);
     }
 }
