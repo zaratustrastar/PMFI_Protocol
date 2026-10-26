@@ -9,7 +9,7 @@ import {PMFIArbVaultV3} from "../../src/parb/PMFIArbVaultV3.sol";
 import {ParbFundingAdapter} from "../../src/parb/ParbFundingAdapter.sol";
 import {ShareDistributor} from "../../src/parb/ShareDistributor.sol";
 
-/// Drives funding, honest reports with P&L, weekly cumulative roots and claims.
+/// Drives funding, honest reports with P&L, cumulative roots and claims.
 contract DistHandler is Test {
     ParbFixtureView f;
     MockUSDC usdc;

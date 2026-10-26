@@ -1,10 +1,20 @@
-// Eligibility, allocation and Merkle building for weekly pARB distributions.
+// Eligibility, allocation and Merkle building for DAILY pARB distributions.
+// Epoch k is the UTC day [genesis + (k-1) DAY, genesis + k DAY); genesis is 00:00 UTC.
 // Pure functions: no RPC access, so the same code runs in tests, the simulation
 // and the production epoch job.
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 
 export const DAY = 86400;
-export const WEEK = 7 * DAY;
+export const EPOCH = DAY; // one reward epoch = one UTC day
+export const WEEK = 7 * DAY; // kept for callers that report weekly totals; epochs are daily
+
+/** Throws unless `genesis` is a UTC midnight (epochs start and end at 00:00 UTC). */
+export function assertUtcMidnight(genesis) {
+  if (!Number.isInteger(genesis) || genesis <= 0 || genesis % DAY !== 0) {
+    throw new Error(`EPOCH_GENESIS ${genesis} must be a 00:00 UTC timestamp (a multiple of 86400)`);
+  }
+  return genesis;
+}
 const ZERO = "0x0000000000000000000000000000000000000000";
 
 /**

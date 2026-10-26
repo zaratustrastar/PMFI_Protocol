@@ -58,20 +58,22 @@ blocks every gate.
 2. Check: all `/healthz` 200, one test alert delivered, `monitor` shows no finding.
 3. 💸 First conversion and first exit by a team wallet; check escrow, fees, NFT, votes.
 
-## 4. Weekly loop (automatic; people only watch and veto)
+## 4. Daily loop (automatic; people only watch and veto)
 
 1. Keeper, every 5 min: Hookr tax queues `payCreator` → splitters `distribute` → LP fee collection → bounded
    buyback-and-burn → `router.execute` (ETH → USDG within caps and the TWAP bound → vault deposit request) →
    `adapter.settle` after a report → `activateRoot` after the delay.
 2. Engine: trades with deployable capital; signs NAV reports (gross USDG: vault + servicer + venues + positions at
    cost + bridges and recalls in transit, each once); returns liquidity when redemptions exceed the idle buffer.
-3. Publisher after Monday 00:00 UTC + grace: deterministic root, `proposeRoot`; root checker recomputes from its own
-   RPC; Team Safe vetoes a mismatch within the 1-day delay.
+3. Publisher after each 00:00 UTC + 6 h grace: deterministic cumulative root through the last closed day,
+   `proposeRoot` (it waits while the previous root is still in its 1-day review); root checker recomputes from its own
+   RPC; Team Safe vetoes a mismatch within the delay. After a veto the publisher halts until the vetoed root is
+   listed in `PUBLISHER_ACK_VETOES`.
 4. Monitor alerts on anything stuck (services README, "Monitor alerts").
 
-## 5. Weekly human checks
-- Publish `epoch-N.json` to IPFS; a second person reads the root checker's result.
-- Review the monitor's resolved alerts, gas balances and the PPS series.
+## 5. Human checks
+- Daily: publish `epochs/<k>.json` to IPFS; a second person reads the root checker's result before activation.
+- Weekly: review the monitor's resolved alerts, gas balances and the PPS series.
 
 ## 6. Emergency
 

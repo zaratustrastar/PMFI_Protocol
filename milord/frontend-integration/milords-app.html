@@ -96,7 +96,8 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
       <div class="stats" id="rew"><div><em>Claimable pARB</em><b>—</b></div></div>
       <div class="actions"><button class="btn primary" id="claim" disabled>Claim pARB</button></div>
       <p class="fine" id="market"></p>
-      <p class="fine">Protocol fees are swapped to USDG and deposited into the pARBITRAGE vault on Robinhood Chain; the shares go to Milords held during each UTC week, weighted by time held. Earlier holders keep what they earned. pARB has a 0% performance fee here, its price can fall, and redemption goes through the vault's queue. Nothing here is a promise of return.</p>
+      <p class="fine" id="rewNote"></p>
+      <p class="fine">Protocol fees are swapped to USDG and deposited into the pARBITRAGE vault on Robinhood Chain; the shares are shared every UTC day (00:00 to 00:00) between Milords held that day, by the seconds each was held. A seller keeps what was earned before the sale; a buyer earns from the second of the transfer. Each day's pARB is allocated in a Merkle root after the day's revenue settles (6 h grace) and a 24 h review, then becomes claimable here. pARB is not sent to your wallet automatically: press Claim. Unclaimed pARB never expires. pARB has a 0% performance fee here, its price can fall, and redemption goes through the vault's queue. Nothing here is a promise of return.</p>
     </div>
   </section>
 
@@ -112,7 +113,7 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
   <section class="row">
     <h3><i>05</i>Automation</h3>
     <div>
-      <p class="fine">The arbitrage share of protocol ETH is swapped to USDG and deposited into pArbitrage V3 by a public contract, in small capped amounts, never more than the set slippage below a 30-minute average price. New pARB is minted only when the vault accepts the deposit, then shared weekly between Milords holders. Anyone can trigger it; the Arbitrage Funding Safe can pause it.</p>
+      <p class="fine">The arbitrage share of protocol ETH is swapped to USDG and deposited into pArbitrage V3 by a public contract, in small capped amounts, never more than the set slippage below a 30-minute average price. New pARB is minted only when the vault accepts the deposit, then allocated each UTC day between Milords holders by seconds held; holders claim it (nothing is sent automatically). Anyone can trigger it; the Arbitrage Funding Safe can pause it.</p>
       <div class="stats" id="auto"><div><em>Funding router</em><b>—</b></div></div>
     </div>
   </section>
@@ -127,14 +128,17 @@ header b{font-size:20px;font-weight:600;letter-spacing:-.02em}
 import * as milord from "./milord-sdk.mjs";
 const q = new URLSearchParams(location.search);
 const DEPLOY = q.get("deployments") ?? "../sim/deployments.local.json";
-const EPOCH = q.get("epoch") ?? "../sim/output/epoch-latest.json";
+const EPOCH = q.get("epoch") ?? "../sim/output/epoch-latest.json";        // active root's epoch file (proofs)
+const PENDING = q.get("pending");                                          // pending root's epoch file, if any
+const STATUS = q.get("rewards") ?? "../sim/output/rewards.json";          // publisher's rewards.json
 const QUOTE = q.get("quote") ?? "http://127.0.0.1:8787/quote";
 const HOOKR = q.get("hookr");      // the MILORD pool page on hookr.fun, once the market is open
 const MARKET = q.get("market");    // the Milords collection page on a marketplace, once listed
 const $ = (id) => document.getElementById(id);
 const log = (s) => { $("log").textContent = `${new Date().toLocaleTimeString()}  ${s}\n` + $("log").textContent; };
 const fmt = (s, d = 4) => Number(s).toLocaleString(undefined, { maximumFractionDigits: d });
-let m, epoch, chars;
+let m, files, chars;
+const getJson = (u) => (u ? fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null) : null);
 
 async function refresh() {
   const s = await milord.status(m);
@@ -180,9 +184,15 @@ async function refresh() {
     <div class="item"><b>#${n.id}</b><span class="fine" style="margin:0">${MARKET ? `<a href="${MARKET}/${n.id}" target="_blank" rel="noopener">view on marketplace</a> · ` : ""}wake ${n.activation} · ${n.personal ? `chose ${n.charA} + ${n.charB} → strategy ${n.strategyId}` : "no choice yet (pArbitrage)"}</span>
       <span><select data-a="${n.id}">${opts}</select> <select data-b="${n.id}">${opts}</select> <button class="btn" data-choose="${n.id}">Choose</button>
       <button class="btn" data-redeem="${n.id}">Redeem</button></span></div>`).join("") : `<p class="fine">No Milords yet.</p>`;
-  if (epoch) {
-    const r = await milord.rewards(m, epoch);
-    $("rew").innerHTML = `<div><em>Claimable pARB</em><b>${fmt(r.claimable)}</b></div><div><em>Earned to date</em><b>${fmt(r.cumulative)}</b></div><div><em>Already claimed</em><b>${fmt(r.claimed)}</b></div>`;
+  if (files.active || files.status) {
+    const r = await milord.rewards(m, files);
+    $("rew").innerHTML = `<div><em>Earned (closed days)</em><b>${fmt(r.earned)}</b></div><div><em>Allocated</em><b>${fmt(r.allocated)}</b></div>`
+      + `<div><em>Claimable now</em><b>${fmt(r.claimable)}</b></div><div><em>Claimed</em><b>${fmt(r.claimed)}</b></div>`;
+    const notes = [];
+    if (Number(r.awaitingActivation) > 0) notes.push(`${fmt(r.awaitingActivation)} pARB allocated, in review until ${new Date(r.activatesAt * 1000).toUTCString()}.`);
+    if (Number(r.earned) > Number(r.allocated)) notes.push(`${fmt(Number(r.earned) - Number(r.allocated))} pARB earned, waiting for the next daily root.`);
+    if (r.accruingSeconds > 0) notes.push(`Today you hold ${fmt(r.accruingSeconds / 86400, 2)} Milord-days so far; today's pARB is set after the day closes and its revenue settles.`);
+    $("rewNote").textContent = notes.join(" ");
     $("claim").disabled = !(Number(r.claimable) > 0);
   }
 }
@@ -193,7 +203,7 @@ $("connect").onclick = async () => {
   m = await milord.connect(D);
   if (HOOKR) $("hookrLink").href = HOOKR; else $("hookrLink").style.display = "none";
   if (m.router) $("localTrade").style.display = "inline";
-  epoch = await fetch(EPOCH).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  files = { active: await getJson(EPOCH), pending: await getJson(PENDING), status: await getJson(STATUS) };
   chars = await milord.characteristics(m);
   $("net").textContent = `chain ${D.chainId}`;
   $("acct").textContent = m.account.slice(0, 6) + "…" + m.account.slice(-4);
@@ -204,7 +214,7 @@ $("wake").onclick = async () => { try { await milord.wake(m, QUOTE); await refre
 $("buy").onclick = async () => { try { await milord.localTrade(m, "buy", $("amt").value); log(`bought with ${$("amt").value} ETH`); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
 $("sell").onclick = async () => { try { await milord.localTrade(m, "sell", $("amt").value); log(`sold ${$("amt").value} MILORD`); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
 $("delegate").onclick = async () => { try { await milord.delegateSelf(m); log("votes activated"); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
-$("claim").onclick = async () => { try { await milord.claim(m, epoch); log("claimed pARB"); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
+$("claim").onclick = async () => { try { await milord.claim(m, files); log("claimed pARB"); await refresh(); } catch (e) { log(e.shortMessage ?? e.message); } };
 document.addEventListener("click", async (e) => {
   const r = e.target.dataset.redeem, c = e.target.dataset.choose;
   try {

@@ -62,7 +62,7 @@ with a 0% performance fee. Shares are minted only by depositing USDG at the offi
 | Exit burn | MILORD | 100% burned | lower supply |
 
 The router swaps its ETH to USDG within per-swap, daily and slippage bounds against a TWAP reference, and requests a
-vault deposit; settled pARB goes to ShareDistributor, which pays holders weekly by Merkle root (REWARD_DISTRIBUTION.md).
+vault deposit; settled pARB goes to ShareDistributor, where holders claim daily allocations by cumulative Merkle root (REWARD_DISTRIBUTION.md).
 
 Only fee revenue becomes pARB for holders. Principal deposited to convert is escrowed MILORD and is never
 counted as revenue or deposited in the vault.

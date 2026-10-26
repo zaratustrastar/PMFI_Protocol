@@ -21,6 +21,9 @@ export const ABI = {
     "function activateRoot()",
     "function proposeRoot(bytes32,uint256,uint64,bytes32)",
     "function totalClaimed() view returns (uint256)",
+    "function claimed(address) view returns (uint256)",
+    "event RootProposed(bytes32 indexed root, uint256 totalCumulative, uint64 epoch, uint64 activatesAt, bytes32 dataHash)",
+    "event RootVetoed(bytes32 indexed root)",
   ],
   nft: ["event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"],
   hook: ["function collect()"],
@@ -43,7 +46,8 @@ export function loadConfig(env = process.env) {
     D,
     rpcUrl: env.RPC_URL ?? "http://127.0.0.1:8545",
     chainId: num("CHAIN_ID", D.chainId),
-    genesis: num("EPOCH_GENESIS", 0), // Monday 00:00 UTC of the first distribution week
+    genesis: num("EPOCH_GENESIS", 0), // 00:00 UTC of the first distribution day (epochs are daily UTC days)
+    ackVetoes: (env.PUBLISHER_ACK_VETOES ?? "").split(",").map((x) => x.trim()).filter(Boolean),
     settlementGrace: num("SETTLEMENT_GRACE_SECS", 6 * 3600),
     confirmations: num("FINALITY_CONFIRMATIONS", 64),
     intervalMs: num("INTERVAL_SECS", 300) * 1000,

@@ -10,7 +10,7 @@ are marked; none of them contradicts the spec.
 | D1 | Trading-tax mechanism | **Resolved 2026-10-13: Hookr existing-token pool, Tax + Conversion 1.5%/1.5% in ETH, immutable, no custom hook** | See launch/HOOKR_FINAL_CONFIG.md |
 | D10 | Launch values | **Final (Bobo 2026-10-14): 100% of supply in the founding position, 0 outside, 0 ETH, ~10 ETH FDV, range ~1,000×; no migration reserve** | launch/LAUNCH_LIQUIDITY.md |
 | D14 | LP lock type, position owner, fee beneficiary | APPROVED 2026-10-14: permanent HookrFamilyLock, beneficiary HookrLockFeeCollector (ETH → BuybackBurner, MILORD burned). Execution waits for a separate go-ahead | launch/LP_LOCK.md |
-| D15 | Weekly funding automation | **Authorized 2026-10-14**: ArbitrageFundingRouter is the arbitrage payee of all three splitters (ETH → USDG → vault → pARB → weekly Merkle claims), with caps, slippage bound, independent TWAP reference, Safe pause, no keeper withdrawals | launch/PARB_AUTOMATION.md |
+| D15 | Funding automation | **Authorized 2026-10-14**: ArbitrageFundingRouter is the arbitrage payee of all three splitters (ETH → USDG → vault → pARB → daily cumulative Merkle claims), with caps, slippage bound, independent TWAP reference, Safe pause, no keeper withdrawals | launch/PARB_AUTOMATION.md |
 | D11 | Hookr launch-tax decay (must not exceed 1.5%) | **Resolved**: flat launch, Anti-Snipe off; fork-verified flat 1.5% from the first trade with no surcharge. A 40% → 0 over 60 min Anti-Snipe stays an unapproved candidate | launch/HOOKR_FINAL_CONFIG.md |
 | D12 | Hookr commission, LP fee, lock type, LP fee recipient | **Approved 2026-10-14**: 20% (fork-verified) · 0.3% · forever · HookrLockFeeCollector (ETH → buyback-and-burn, MILORD burned) | launch/HOOKR_FINAL_CONFIG.md |
 | D13 | Tax recipient | **TradingTaxSplitter** · Hookr Revenue Router | splitter (exact thirds, burn record) |
@@ -35,7 +35,7 @@ are marked; none of them contradicts the spec.
 | P6 | Royalty ceiling | 10% | |
 | P7 | Governor | advisory only in V1 | quorum 10%, 1-day delay, 5-day period |
 | P8 | Buyback size limits | 0.01 – 5 ETH per call | |
-| P9 | Eligibility week | UTC Monday 00:00 | |
+| P9 | Eligibility epoch | UTC day, 00:00–00:00 (Bobo 2026-10-26: daily, was weekly) | |
 
 ## Legacy PMFI holders (documented only, no contract)
 

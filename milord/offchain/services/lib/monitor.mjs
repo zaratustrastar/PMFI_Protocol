@@ -1,8 +1,8 @@
 // Read-only monitor for the MILORD automation: no key, never sends a transaction. One pass reads the chain and the
 // other services' health endpoints, and alerts on conditions that have persisted longer than their grace period.
 // Each condition alerts once on onset (then throttled by the alerter) and sends "resolved" when it clears.
-import { closedEpoch } from "./jobs.mjs";
-import { WEEK } from "../../lib/eligibility.mjs";
+import { closedEpoch, rootInfo } from "./jobs.mjs";
+import { EPOCH } from "../../lib/eligibility.mjs";
 
 export const MONITOR_ABI = {
   vault: [
@@ -170,23 +170,34 @@ export async function monitorTick(c, opts) {
       `a funding batch has waited ${Math.round((now - (oldest ?? now)) / 3600)} h to be settled into pARB: the vault needs a NAV report and the keeper's settle`);
   });
 
-  // 5. Weekly epochs: a closed epoch with shares to allocate and no root proposed.
+  // 5. Daily epochs. (a) A pending root whose review delay passed long ago and is still not active: the keeper's
+  //    activateRoot step is not running (claims of the new days wait). (b) A closed day with shares to allocate and
+  //    no root covering it, while nothing legitimately blocks the publisher: a pending root still in its 1-day review
+  //    delay is expected (the publisher must wait for it), so the alert counts from the later of the day's cutoff and
+  //    that root's activation time.
+  if (c.distributor && o.genesis) await check("root-activation", async () => {
+    const p = rootInfo(await c.distributor.pending());
+    await cond("root-not-activated", p.set && now - Number(p.activatesAt) > o.epochGraceSecs, "warning",
+      `the root for day ${p.epoch} could be activated ${Math.round((now - Number(p.activatesAt)) / 3600)} h ago and is still pending: check the keeper (activateRoot is permissionless)`);
+  });
   if (c.distributor && c.adapter && o.genesis) await check("epoch", async () => {
     const k = closedEpoch(o.genesis, now - o.epochGraceSecs, o.settlementGrace);
     if (k === 0) return;
-    const [active, pending] = await Promise.all([c.distributor.active(), c.distributor.pending()]);
-    const latest = Math.max(Number(active.epoch ?? active[2]), Number(pending.epoch ?? pending[2]));
-    const cutoff = o.genesis + k * WEEK + o.settlementGrace;
+    const [active, pending] = (await Promise.all([c.distributor.active(), c.distributor.pending()])).map(rootInfo);
+    const latest = Math.max(active.epoch, pending.set ? pending.epoch : 0);
+    const cutoff = o.genesis + k * EPOCH + o.settlementGrace;
+    const blockedUntil = pending.set ? Number(pending.activatesAt) : 0;
     let settled = 0n;
     const n = Number(await c.adapter.batchCount());
     for (let i = 0; i < n; i++) {
       const b = await c.adapter.batch(i);
       if (Number(b.settledAt) > 0 && Number(b.settledAt) < cutoff) settled += BigInt(b.sharesMinted);
     }
-    const allocated = [active, pending].reduce((m, r) => (BigInt(r.totalCumulative ?? r[1]) > m ? BigInt(r.totalCumulative ?? r[1]) : m), 0n);
+    const allocated = active.total > pending.total ? active.total : pending.total;
     o.metrics?.set("latest_root_epoch", latest);
-    await cond("epoch-missed", latest < k && settled > allocated, "critical",
-      `weekly epoch ${k} closed ${Math.round((now - cutoff) / 3600)} h ago with ${settled - allocated} unallocated pARB shares and no root: check the epoch publisher (shares roll forward only if no NFT was eligible)`);
+    o.metrics?.set("days_behind", k - latest);
+    await cond("epoch-missed", latest < k && settled > allocated && now - blockedUntil > o.epochGraceSecs, "critical",
+      `day ${k} closed ${Math.round((now - cutoff) / 3600)} h ago with ${settled - allocated} unallocated pARB shares and no root covering it, and no pending root is in review: check the epoch publisher (it may be blocked by a vetoed root; shares roll forward only if no NFT was eligible)`);
   });
 
   // 6. Permanent-lock deadline (read-only; same check as the keeper, from an independent process).

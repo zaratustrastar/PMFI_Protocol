@@ -54,7 +54,7 @@ curl -s 127.0.0.1:9101/healthz; curl -s 127.0.0.1:8787/healthz
 4. `docker compose -f offchain/services/docker-compose.yml up -d --build keeper epoch-publisher root-checker monitor`
    (the quote server needs a Hookr pool and stays off on testnet).
 5. Engine in robinhood mode against the testnet vault (servicer and report signer keys), small testnet amounts.
-6. Run for at least one full weekly epoch: one root published, checked, activated and claimed.
+6. Run for at least seven daily epochs: roots published, checked, activated and claimed; at least one root proposed while the previous is in review (must wait), and one publisher restart.
 
 ## Monitoring
 

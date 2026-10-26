@@ -1,4 +1,4 @@
-# Protocol ETH → USDG → pArbitrage V3 → weekly pARB (automated)
+# Protocol ETH → USDG → pArbitrage V3 → daily pARB (automated)
 
 **Status: TESTED locally (Foundry + anvil simulation, 46/46 incl. redemptions with liquidity return and restarts). Not deployed.** Deployment wiring: `DeployRobinhood.s.sol` makes the router the arbitrage payee of all three splitters. Monitoring: `offchain/services/monitor.mjs`. No Safe signature per run; the Arbitrage Funding Safe only sets bounds, pauses and owns the router.
 
@@ -10,7 +10,7 @@
 | 4 | USDG → vault deposit request for the distributor | router → `ParbFundingAdapter.fund` | router (only automated operator) | unique `sourceRef` per run; only the adapter can deposit |
 | 5 | Vault processes the request at the reported PPS | existing reporter → `PMFIArbVaultV3.report` | reporter bot | signed report, max PPS move |
 | 6 | pARB minted to the distributor | `ParbFundingAdapter.settle` | keeper / anyone | only what the vault minted |
-| 7 | Weekly eligibility, Merkle tree, `proposeRoot` | `offchain/services/epoch-publisher.mjs` | publisher key | deterministic from finalized data; cannot exceed pARB held |
+| 7 | Daily eligibility, cumulative Merkle tree, `proposeRoot` (waits while a root is in review) | `offchain/services/epoch-publisher.mjs` | publisher key | deterministic from finalized data; cannot exceed pARB held |
 | 8 | Independent recomputation | `offchain/services/root-checker.mjs` | no key | critical alert → Team Safe `vetoPending` within 1 day |
 | 9 | Activation and claims | `activateRoot`, `claim` | keeper / anyone | 1-day delay; pARB goes only to the leaf account |
 
@@ -28,8 +28,10 @@ Uniswap v4 has **no built-in oracle**, so the ETH price comes from the Uniswap V
 | Router paused | ETH accumulates in the router; nothing lost; funds after unpause within bounds | `test_routerStoppedRevenueAccumulatesSafely`, services test |
 | Keeper down | nothing moves; one pass catches up every step; all steps are permissionless | services test "keeper down for days" |
 | Reporter down | requests stay pending, no pARB minted, nothing allocated; settles after the next report | services test "reporter down" |
-| Indexer down | the next run proposes one cumulative root covering missed weeks | services test "indexer down for two weeks" |
+| Indexer or publisher down | the next run proposes one cumulative root covering every missed day | services tests "missed epochs", "restart recovery" |
+| Root in review | the publisher waits; never replaces a pending root (contract reverts `PendingRootNotActivated`) | services test "pending root in review", `test_pendingRootInReviewCannotBeReplaced` |
+| Root vetoed | publisher halts with a critical alert until the veto is acknowledged; the next root re-covers those days | services test "veto", `test_vetoedRootIsSupersededWithoutLoss` |
 | No eligible NFTs | nothing allocated, shares roll to the next epoch | services test "zero eligible" |
 | Wrong root | root checker alerts; Team Safe vetoes | services test "root checker" |
 
-Weekly rule: epoch k covers one UTC week from Monday; its pARB is everything settled before `end + 6 h` and not yet allocated, split by NFT-seconds held, converter inventory excluded. Recipients keep claimed pARB after selling or redeeming their NFT.
+Daily rule: epoch k covers one UTC day (00:00–00:00); its pARB is everything settled before `end + 6 h` and not yet allocated, split by NFT-seconds held, converter inventory excluded. Recipients keep claimed pARB after selling or redeeming their NFT.

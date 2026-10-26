@@ -8,8 +8,9 @@ import {ShareDistributor} from "../../src/parb/ShareDistributor.sol";
 
 /// The complete Robinhood Chain flow, one chain end to end:
 /// conversions, royalty, trading tax -> splitters -> Arbitrage Safe ETH -> USDG ->
-/// adapter.fund -> vault report -> settle (pARB to distributor) -> time-weighted weekly
-/// cumulative root -> holder claims -> pARB redemption for USDG. No bridge anywhere.
+/// adapter.fund -> vault report -> settle (pARB to distributor) -> time-weighted
+/// cumulative root (each root here covers several daily epochs, as after missed days) -> holder claims
+/// -> pARB redemption for USDG. No bridge anywhere.
 contract FeeToParbFlowTest is SingleChainFixture {
     uint256 constant DAY = 1 days;
     uint256 constant PRICE = 0.5 ether; // SCENARIO: ETH value of 1M MILORD -> fee 0.05 ETH

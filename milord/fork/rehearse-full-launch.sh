@@ -11,7 +11,7 @@
 #   5. fork/rehearse-flows.mjs operate   safe-2-accept, safe-3-lock (FORK ONLY), trading through the Hookr pool,
 #                                        keeper passes (tax queues, splitters, LP fees, buyback, ETH->USDG router),
 #                                        an NFT conversion with a signed TWAP quote, a signed vault report, deposit
-#                                        settlement, a weekly root, checker, activation and a pARB claim.
+#                                        settlement, a daily root, checker, activation and a pARB claim.
 #
 # Fails closed: any refused check, failed forge run or recorder result other than "complete" stops it (exit 1).
 # Usage (from milord/): ./fork/rehearse-full-launch.sh
@@ -164,7 +164,7 @@ ADAPTER=$(broadcast_addr HookrPostLaunch.s.sol V4SwapAdapter) || die "no V4SwapA
 COLLECTOR=$(broadcast_addr HookrPostLaunch.s.sol HookrLockFeeCollector) || die "no HookrLockFeeCollector deployment"
 say "V4SwapAdapter $ADAPTER, HookrLockFeeCollector $COLLECTOR"
 
-say "== 5. accept, lock (fork only), trading, keeper, conversion, report, weekly root, claim"
+say "== 5. accept, lock (fork only), trading, keeper, conversion, report, daily root, claim"
 STATUS=0
 flows operate "$TMP/deployments.json" "$HELPER" "$ADAPTER" "$COLLECTOR" || STATUS=$?
 keep_logs

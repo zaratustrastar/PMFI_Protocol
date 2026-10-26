@@ -1,6 +1,6 @@
 # MILORD V1 autonomous pipeline: readiness matrix (2026-10-23)
 
-**Verdict: not production-ready.** The fee → USDG → pARB vault → engine → signed NAV → weekly NFT allocation loop
+**Verdict: not production-ready.** The fee → USDG → pARB vault → engine → signed NAV → daily NFT allocation loop
 is implemented and tested end to end on a local chain, and the protocol side is fork-tested against real Hookr-1. It
 is blocked on unverified venue and bridge routes, a missing Polymarket CTF redemption, an unaudited codebase, and
 infrastructure that does not exist yet. Unit tests passing is not readiness.
@@ -27,7 +27,7 @@ Columns: **Impl** = code exists. **Integ** = wired into the deploy scripts and t
 | 4b | Settlement and fund recovery | yes, disabled: `open → pending_redeem → redeemed`; pUSD redemption of standard CTF, neg-risk CTF and Protocol V2 positions with journal, approval gate and exact receipt evidence; reports refused while a recovery is unreconciled | yes | `ctf_redemption.test.mjs`, `test_ctf_redemption.py`; Polygon fork test `fork/polygon-redemption-fork.sh` passed 6/6 on the VPS at `f2ee9dba` | no | markets-file generation, approved approval tx and small redemption (pilot P6) |
 | 4c | Return liquidity for redemptions | yes: waterfall (servicer sweep → venue recalls, no duplicate recalls, cooldown), refill journaled | yes | sim step 27: 56 redemptions, 513 USDG needed against 103 idle, 7 processed on the first report, the engine returns 411 USDG, all paid shares × PPS; Python C4 tests | no | B9 (venue recalls) |
 | 5 | Keeper, reporter, funding adapter, epoch publisher, root checker: integration and recovery | yes: tick watchdog, tx timeout + nonce reset, chunked log reads from `startBlock`, startup retry; engine intents reconcile on start | compose with per-service env files, separate keys | services tests (watchdog, timeouts, RPC outage, keeper down for a week, reporter down); sim step 28 (restart with empty state repeats nothing); engine crash tests (`test_funding_recovery.py`) | no hosts yet | testnet week; restore drill (OPERATIONS_PLAN §6) |
-| 6 | End-to-end rehearsal | yes: Hookr fees, mint fees, royalties, ETH→USDG, deposits, pARB, signed NAV, weekly roots, claims, NFT transfers, redemptions, liquidity return, restarts | local anvil: real MILORD/vault/v4/v3 contracts | 46/46 | — | Integrated private-fork rehearsal (`fork/rehearse-full-launch.sh`, launch + operate) **passed on the VPS at `96f7dad`** (2026-10-23). Still mocked there: venue P&L |
+| 6 | End-to-end rehearsal | yes: Hookr fees, mint fees, royalties, ETH→USDG, deposits, pARB, signed NAV, daily roots, claims, NFT transfers, redemptions, liquidity return, restarts | local anvil: real MILORD/vault/v4/v3 contracts | 46/46 | — | Integrated private-fork rehearsal (`fork/rehearse-full-launch.sh`, launch + operate) **passed on the VPS at `96f7dad`** (2026-10-23). Still mocked there: venue P&L |
 | 7 | Monitoring | yes: `monitor.mjs`. Gas, NAV staleness, PPS moves, vault paused, redemptions waiting, stuck splitter/router/tax queue, stale price, unsettled batch, missed epoch, lock deadline, unconfirmed bridges (engine `/bridges`), service health and failed ticks | compose service, read-only | `monitor.test.mjs` (6 cases + runtime) | no webhook, no host | ops |
 | 8 | Deployment and operations plan | OPERATIONS_PLAN.md | — | — | not provisioned | hosts, secrets, Bobo's sizing approval |
 | 9 | Atomic launch tooling | `DeployAtomicLaunch.s.sol` (local fork only, flat launch, Anti-Snipe refused), `safe-launch-batch.mjs`, `record-launch.mjs` (read-only) | yes | compiles; contract fork-tested 33/33 | — | VPS fork rehearsal of the script; launch and lock approvals |
@@ -36,7 +36,7 @@ Columns: **Impl** = code exists. **Integ** = wired into the deploy scripts and t
 ## Documentation versus executable scripts (fixed in this round)
 | Doc | Was | Now |
 |---|---|---|
-| MAINNET_RUNBOOK §0–4 | token minted to an allocation Safe, a manual pool seed, an Arbitrage Safe swapping by hand, weekly manual `fund` | atomic launch, the router and keeper do the weekly loop, record-launch, services |
+| MAINNET_RUNBOOK §0–4 | token minted to an allocation Safe, a manual pool seed, an Arbitrage Safe swapping by hand, weekly manual `fund` | atomic launch, the router and keeper do the loop, record-launch, services |
 | DEPLOYMENT_ORDER Phase C | allocation Safe launches through the Hookr UI | `DeployAtomicLaunch` → `DeployRobinhood` (predicted token) → Safe batches |
 | SAFE_CONFIGURATION §4.3 | "Allocation Safe approve + launch (BLOCKED)" | Team Safe `MilordAtomicLaunch.launch` |
 | MAINNET_LAUNCH_CHECKLIST | 139 tests / 36 checks; items now done | current counts; links to the go/no-go list |

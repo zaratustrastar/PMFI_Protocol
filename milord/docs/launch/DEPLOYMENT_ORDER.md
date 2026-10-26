@@ -17,7 +17,7 @@ MAINNET_RUNBOOK.md §2. No secrets are stored in the repo; keys are supplied by 
 
 `./fork/rehearse-full-launch.sh` (VPS, CI artifacts of HEAD) runs Phase C steps 1–8 with the real deploy scripts and
 the generated Safe batches on a loopback Anvil fork of 4663, then trading, keeper passes, a conversion, a report, a
-weekly root and a claim (fork/rehearse-flows.mjs). Exit criterion: `INTEGRATED REHEARSAL PASSED` at the release SHA.
+daily root and a claim (fork/rehearse-flows.mjs). Exit criterion: `INTEGRATED REHEARSAL PASSED` at the release SHA.
 The forge fork suite (`./fork/run-fork-tests.sh`) covers the Hookr terms and failure cases.
 
 ## Phase C: mainnet (after approval of every NEEDS APPROVAL item)
@@ -35,7 +35,7 @@ The forge fork suite (`./fork/run-fork-tests.sh`) covers the Hookr terms and fai
 | 9 | Start services, quote server and engine | OPERATIONS_PLAN.md §5 | hot keys on their hosts |
 | 10 | 💸 First conversion and exit by a team wallet | website | team wallet |
 | 11 | Website on with the official pool and marketplace links | frontend | — |
-| 12 | First automatic weekly cycle watched end to end; second person checks the root | MAINNET_RUNBOOK §3 | ops |
+| 12 | First automatic daily cycles watched end to end; second person checks the root | MAINNET_RUNBOOK §3 | ops |
 
 ## Rollback
 

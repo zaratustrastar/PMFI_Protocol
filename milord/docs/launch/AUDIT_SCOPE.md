@@ -19,7 +19,7 @@ code, what is an operational assumption, and what is not implemented.
 | `src/automation/ArbitrageFundingRouter.sol` | 209 | ETH → USDG → vault deposit, caps, slippage, pause | unit + sim |
 | `src/automation/UniV3TwapReference.sol`, `ChainlinkReference.sol`, `DualReference.sol`, `UniV3SwapVenue.sol` | 229 | price references and venue | unit + sim |
 | `src/parb/PMFIArbVaultV3.sol` | 683 | fresh pARB vault (diff against the legacy V2 is the review focus) | unit + `LegacyV2Bugs` |
-| `src/parb/ParbFundingAdapter.sol`, `ShareDistributor.sol` | 286 | batched deposits, weekly cumulative Merkle roots with veto delay | unit + invariant + sim |
+| `src/parb/ParbFundingAdapter.sol`, `ShareDistributor.sol` | 286 | batched deposits, daily cumulative Merkle roots with veto delay; a root in review cannot be replaced | unit + invariant + sim |
 | `script/MilordDeployer.sol`, `script/DeployRobinhood.s.sol` | | deployment wiring, ownership handover, testnet-only guard | unit |
 
 Out of scope: `src/mocks/*`, `src/legacy/PMFIArbVaultV2.sol` (deployed, not modified; reviewed only as the base of the
@@ -29,7 +29,7 @@ V3 diff), `src/vendor/hookr/*` (interfaces copied from Hookr-1 at 7e771b3).
 | Code | Role |
 |---|---|
 | `offchain/services/lib/jobs.mjs`, `keeper.mjs` | keeper: tax-queue payout (fails closed), splitters, collector, bounded buyback, router, settle, root activation, lock watch |
-| `offchain/services/epoch-publisher.mjs`, `root-checker.mjs`, `offchain/lib/eligibility.mjs` | weekly pARB allocation and independent root check |
+| `offchain/services/epoch-publisher.mjs`, `root-checker.mjs`, `offchain/lib/eligibility.mjs` | daily pARB allocation and independent root check |
 | `offchain/quote-server.mjs`, `offchain/lib/twap.mjs`, `entry-price.mjs`, `pool-price.mjs` | signed entry-fee quotes from a TWAP rebuilt from PoolManager events |
 | `offchain/option-d-reconcile.mjs`, `offchain/lib/option-d.mjs` | Option D split from Swap and LPFeesCollected events (encodes only) |
 | `offchain/safe-launch-batch.mjs` | Safe batch encoding (encodes only) |

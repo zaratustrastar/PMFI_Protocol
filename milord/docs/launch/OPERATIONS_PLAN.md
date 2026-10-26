@@ -113,7 +113,7 @@ report's NAV matches the last one (no artificial P&L).
 - [ ] `trading_bot/safe_proxy_withdraw_parb.ts` bridges the requested amount, not the whole balance (B22)
 
 **Automation and monitoring**
-- [ ] Testnet: router payee wiring verified on chain, one full weekly cycle (fee → USDG → deposit → report → settle → root → claim)
+- [ ] Testnet: router payee wiring verified on chain, several full daily cycles (fee → USDG → deposit → report → settle → root → claim)
 - [ ] Testnet: a redemption that exceeds the idle buffer is filled by the engine's waterfall
 - [ ] All four services healthy for 7 days on testnet; every monitor alert fired once in a drill and reached a person
 - [ ] Engine crash/restore drill passed (§6)

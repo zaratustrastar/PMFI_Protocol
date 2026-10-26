@@ -18,7 +18,8 @@ npx http-server . -p 8080             # from milord/
 # open http://127.0.0.1:8080/frontend-integration/milords-app.html with MetaMask on 127.0.0.1:8545
 ```
 
-Query parameters: `deployments` (addresses JSON), `epoch` (published epoch file), `quote` (quote service),
+Query parameters: `deployments` (addresses JSON), `epoch` (the active root's epoch file), `pending` (the pending root's epoch file),
+`rewards` (the publisher's `rewards.json`), `quote` (quote service),
 `hookr` (the MILORD pool page on hookr.fun, shown as "Trade on Hookr"), `market` (the collection's marketplace
 URL; each Milord links to `<market>/<id>`). Without `hookr`/`market` those links are hidden rather than guessed.
 Locally the page also shows Buy/Sell buttons against the local test pool; on Robinhood Chain users trade on Hookr.

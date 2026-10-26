@@ -8,7 +8,7 @@
 //   node fork/rehearse-flows.mjs operate <deployments.json> <MilordAtomicLaunch> <V4SwapAdapter> <HookrLockFeeCollector>
 //       safe-2-accept, safe-3-lock (fork only: irreversible on mainnet and NOT approved there), trading through the
 //       Hookr pool, keeper passes with the services' own code (tax queues, splitters, LP fees, buyback, ETH -> USDG
-//       router, deposit settlement), an NFT conversion with a TWAP-signed quote, a signed vault report, a weekly
+//       router, deposit settlement), an NFT conversion with a TWAP-signed quote, a signed vault report, a daily
 //       pARB root (publisher, checker, activation) and a claim. Writes $REHEARSAL_TMP/summary.json.
 //
 // Env: REHEARSAL_RPC (http://127.0.0.1:<port>), REHEARSAL_TMP (scratch dir), STATE_VIEW. Exit 1 on any failure.
@@ -277,7 +277,7 @@ ok((await router.totalEthSwapped()) > 0n && (await router.totalAssetFunded()) > 
 ok((await adapter.batchCount()) === 1n, "one funding batch requested from the vault");
 
 // ── 6. NFT conversion with a TWAP-signed quote (Anvil #2 signs) ──
-const genesis = await now(); // epoch 1 starts here, before the first NFT exists
+const genesis = (await now()) - ((await now()) % 86400); // 00:00 UTC today: daily epoch 1, before the first NFT exists
 const quoteSigner = new Wallet(KEYS.quoteSigner, provider);
 const conv = new Contract(D.MilordConverter, abi("MilordConverter"), trader);
 await receipt(milord.connect(trader).approve(D.MilordConverter, parseEther("1000000")), "approve converter");
@@ -321,15 +321,21 @@ ok((await entrySplit.totalAllocated(ZERO, D.ArbitrageFundingRouter)) === (entryT
 const parbHeld = await vault.balanceOf(D.ShareDistributor);
 ok(parbHeld > 0n, "pARB minted to ShareDistributor", formatEther(parbHeld));
 
-// ── 8. weekly root: publisher (Anvil #5), independent checker, activation by the keeper, claim ──
-await provider.send("evm_setNextBlockTimestamp", [genesis + 7 * 86400 + cfg.settlementGrace + 60]);
+// ── 8. daily root: publisher (Anvil #5), independent checker, activation by the keeper, claim ──
+// close the current UTC day (00:00 + the settlement grace); the root covers every day since genesis
+const closeDayEnd = (await now()) - ((await now()) % 86400) + 86400;
+const expectedDay = (closeDayEnd - genesis) / 86400;
+await provider.send("evm_setNextBlockTimestamp", [closeDayEnd + cfg.settlementGrace + 60]);
 await provider.send("evm_mine", []);
 const toBlock = await provider.getBlockNumber();
 const inputs = await readInputs({ nft: svc.contracts.nft, adapter: svc.contracts.adapter, provider, fromBlock: Number(D.startBlock ?? 0), toBlock, logStep: cfg.logStep });
 let epoch = null;
 const publisher = new NonceManager(new Wallet(KEYS.publisher, provider));
 const pub = await publishEpoch({ distributor: dist.connect(publisher), inputs, genesis, now: await now(), settlementGrace: cfg.settlementGrace, excluded: [D.MilordConverter], save: (e) => { epoch = e; } });
-ok(pub.action === "proposed" && pub.epoch === 1, "publisher proposed the epoch 1 root", pub.reason ?? pub.root);
+ok(pub.action === "proposed" && pub.epoch === expectedDay, `publisher proposed the root through UTC day ${expectedDay}`, pub.reason ?? pub.root);
+let replaceRefused = "";
+try { await dist.connect(publisher).proposeRoot.staticCall(pub.root, pub.total, pub.epoch + 1, pub.dataHash); } catch (e) { replaceRefused = String(e.shortMessage ?? e.message); }
+ok(/PendingRootNotActivated/.test(replaceRefused), "a root in review cannot be replaced by the next day's", replaceRefused);
 const chk = await checkRoot({ distributor: dist, parb: vault, inputs, genesis, settlementGrace: cfg.settlementGrace, excluded: [D.MilordConverter] });
 ok(chk.length > 0 && chk.every((x) => x.match), "independent checker recomputes the same root");
 await mine(Number(await dist.activationDelay()) + 1);

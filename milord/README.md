@@ -1,7 +1,7 @@
 # MILORD
 
 The next version of PMFI: a tradeable **MILORD** token on Robinhood Chain, 6,767 unique convertible
-**Milords** NFTs, and protocol fees turned into **pARB** shares in a USDG vault on the same chain, distributed weekly to holders.
+**Milords** NFTs, and protocol fees turned into **pARB** shares in a USDG vault on the same chain, allocated daily (UTC days) to holders, who claim them.
 
 > **Unaudited. Local and test chains only.** Nothing here has been deployed to any public network.
 > Nothing here promises a return.

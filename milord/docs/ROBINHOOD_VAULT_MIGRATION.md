@@ -1,6 +1,6 @@
 # pARB vault on Robinhood Chain with USDG
 
-Owner instruction (2026-10-13): deploy a fresh V3 vault, pARB and the weekly distributor on Robinhood Chain
+Owner instruction (2026-10-13): deploy a fresh V3 vault, pARB and the distributor (daily epochs since 2026-10-26) on Robinhood Chain
 instead of Base, with USDG as the candidate asset, keeping the V3 implementation unchanged where possible.
 Nothing has been deployed to any public network.
 
@@ -28,7 +28,7 @@ address, and the asset is an immutable constructor argument.
 | Issuer | Paxos (Global Dollar). Natively minted on Robinhood Chain. |
 | Address | `0x5fc5360d0400a0fd4f2af552add042d716f1d168` as listed by DEX aggregators. **Not verified on-chain from here** (explorer blocked); confirm against Paxos's published list before use. |
 | Decimals | Paxos tokens use 6 on Ethereum; **not verified on Robinhood**. The vault constructor and the deployer both revert unless 6, so a wrong assumption cannot deploy. |
-| Liquidity | about $8.5M in Uniswap pools and about 65% of the chain's stablecoin supply (public reports, July 2026). Enough for weekly fee swaps of the expected size; not verified for engine-sized transfers. |
+| Liquidity | about $8.5M in Uniswap pools and about 65% of the chain's stablecoin supply (public reports, July 2026). Enough for routine fee swaps of the expected size; not verified for engine-sized transfers. |
 | Compatibility | Standard ERC-20, no fee-on-transfer, no rebasing: compatible with `SafeERC20` and the vault's balance checks. |
 | Issuer controls | Upgradeable proxy (admin can change code), `PAUSE_ROLE` pauses all transfers, `ASSET_PROTECTION_ROLE` can freeze an address and wipe its balance. A freeze of the vault would block deposits, `tend` and redemptions; it cannot touch pARB already claimed. |
 
@@ -39,7 +39,7 @@ but cannot be redeemed until unfrozen.
 ## 2. Fee-to-pARB flow (now one chain)
 
 Splitters → Arbitrage Safe ETH → Safe swap ETH→USDG on Robinhood → `adapter.fund(sourceRef, amount)` →
-vault report at official PPS → `adapter.settle` → shares to `ShareDistributor` → weekly cumulative root →
+vault report at official PPS → `adapter.settle` → shares to `ShareDistributor` → daily cumulative root →
 holder claims → holder may `requestRedeem` for USDG. `sourceRef` is single-use, so the same fees cannot be
 turned into shares twice. Covered end to end in `test/robinhood/FeeToParbFlow.t.sol` and the 3-week simulation.
 

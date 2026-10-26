@@ -14,7 +14,7 @@ Everything below runs on **Robinhood Chain** (one chain, no reward bridge).
    │ ETH fee                         │ Transfer events ──┐        │ shares
    ▼                                 ▼                   │        ▼
  RevenueSplitter (entry 70/30)   RevenueSplitter (royalty 50/50)  ShareDistributor (cumulative Merkle)
- RevenueSplitter (tax ⅓ ⅓ ⅓) ──► BuybackBurner                    ▲ weekly root          │ claim
+ RevenueSplitter (tax ⅓ ⅓ ⅓) ──► BuybackBurner                    ▲ daily root           │ claim
    │ Arbitrage Safe ETH ── swap ETH→USDG (Safe tx) ──────────────┘ │                     ▼
    │                                                  off-chain epoch job  ◄── finalized Transfer events
  StrategyRegistry (characteristics → strategy)        (eligibility, Merkle)     holder address
@@ -48,16 +48,16 @@ No proxies, no AMM, no custom Uniswap hook, no ERC-404, no migration contract.
 |---|---|---|
 | Quote signer | `offchain/lib/quote.mjs` | Signs EIP-712 quotes only from a fresh manipulation-resistant price; no fallback. |
 | Report signer | existing `arb_reporter.py` (needs fixes) + `offchain/lib/report.mjs` | V3 uses the V2 struct with a new salt. |
-| Epoch job | `offchain/lib/eligibility.mjs` | Finalized Transfer events → NFT-seconds per UTC day → weekly allocation → cumulative StandardMerkleTree. |
+| Epoch job | `offchain/lib/eligibility.mjs` | Finalized Transfer events → NFT-seconds per UTC day → daily allocation → cumulative StandardMerkleTree (REWARD_DISTRIBUTION.md). |
 | Simulation | `sim/simulate.mjs`, `sim/run-local.sh` | Full 3-week run on anvil against the real contracts. |
 
-## Weekly cycle
+## Daily cycle
 
 1. Revenue lands in splitters (permissionless `distribute`).
 2. Arbitrage Safe swaps ETH to USDG on Robinhood Chain (Safe transaction; no contract custody).
 3. Operator calls `adapter.fund(sourceRef, usdc)`; the vault's next report processes it at the official PPS;
    `adapter.settle` mints the shares to the distributor.
-4. After the UTC week closes and the Robinhood blocks are final, the epoch job computes eligibility and
+4. After each UTC day closes (+ 6 h grace) and the Robinhood blocks are final, the epoch job computes eligibility and
    publishes a cumulative root (must be fully funded); it activates after the delay unless vetoed.
 5. Holders (or anyone on their behalf) claim; pARB is redeemable through the vault's normal request flow.
 
@@ -74,7 +74,7 @@ No proxies, no AMM, no custom Uniswap hook, no ERC-404, no migration contract.
 | Funding (Safe ops) | — | Arbitrage Safe → swap | swap → ParbFundingAdapter | — | — |
 | `adapter.fund` | — | — | adapter → vault (pending deposit) | — | — |
 | Vault report + `adapter.settle` | — | — | stays in vault (then `tend` → servicer) | vault mints `usdg / PPS` → ShareDistributor | — |
-| Weekly root | — | — | — | none (commitment only; must be covered by distributor balance) | — |
+| Daily root | — | — | — | none (commitment only; must be covered by distributor balance) | — |
 | Claim | — | — | — | distributor → holder address | — |
 | pARB redeem | — | — | vault → holder at a later report's PPS, when liquid | holder → vault (burned at processing) | — |
 
@@ -84,7 +84,7 @@ No proxies, no AMM, no custom Uniswap hook, no ERC-404, no migration contract.
   manipulable in one block. A signer reading a TWAP plus sanity bounds, with 5-minute single-use account-bound
   quotes, gives manipulation resistance without a custom hook. If the signer is down, entry waits (spec: no fallback).
 - **Merkle distribution, not on-chain per-NFT accounting**: time-weighted per-NFT accounting in the NFT's
-  transfer hook would make every transfer expensive and couple the NFT to the vault. Weekly roots with a funded
+  transfer hook would make every transfer expensive and couple the NFT to the vault. Daily cumulative roots with a funded
   check, delay and veto stay simple, and the data can be recomputed by anyone.
 - **V3 fork, not V2 reuse**: V2 has a fixed 20% fee and PPS-inflation bugs (see audit). V3 keeps every V2
   interface the frontend and reporter use, so the existing deposit/report/claim UI and bot work with an address change (plus the reporter's chain settings).
