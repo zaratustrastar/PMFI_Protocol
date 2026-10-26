@@ -146,8 +146,13 @@ async function fetchQuote(m, quoteUrl) {
   return body;
 }
 
+// Votes checkpoints use block.timestamp: a node may estimate in a block with the last checkpoint's timestamp
+// (cheap update) while the transaction lands in a later one (new checkpoint), so estimates get a margin.
+const withMargin = async (fn, ...args) => ({ gasLimit: ((await fn.estimateGas(...args)) * 13n) / 10n + 50_000n });
+
 /** Ask the quote service, check its fee against the pool-based ceiling, then convert with maxFee = that fee.
  *  The wallet shows the exact ETH amount before signing. Approves MILORD if needed. */
+
 export async function wake(m, quoteUrl) {
   const body = await fetchQuote(m, quoteUrl);
   const fee = await m.conv.entryFeeFor(body.quote.weiPerMillion);
@@ -155,7 +160,7 @@ export async function wake(m, quoteUrl) {
   if (fee > ceiling) throw new Error(`Quoted fee ${formatEther(fee)} ETH is above the ${formatEther(ceiling)} ETH this page allows at the current pool price; nothing was sent. Try again in a few minutes.`);
   const principal = await m.conv.PRINCIPAL();
   if ((await m.token.allowance(m.account, m.D.MilordConverter)) < principal) await (await m.token.approve(m.D.MilordConverter, principal)).wait();
-  const tx = await m.conv.convert(body.quote, body.signature, fee, { value: fee });
+  const tx = await m.conv.convert(body.quote, body.signature, fee, { value: fee, ...(await withMargin(m.conv.convert, body.quote, body.signature, fee, { value: fee })) });
   return tx.wait();
 }
 
@@ -170,7 +175,7 @@ export async function myMilords(m, who = m.account) {
   return out;
 }
 
-export const redeem = async (m, id) => (await m.conv.redeem(id)).wait();
+export const redeem = async (m, id) => (await m.conv.redeem(id, await withMargin(m.conv.redeem, id))).wait();
 export const choose = async (m, id, a, b) => (await m.registry.select(id, a, b)).wait();
 
 export async function characteristics(m) {

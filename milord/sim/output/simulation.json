@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-26T12:38:46.510Z",
+  "generatedAt": "2026-10-26T12:53:38.318Z",
   "disclaimer": "SIMULATED. Local chain with hypothetical SCENARIO inputs, illustrative (unapproved) launch parameters, a mock of Hookr's tax hook, mock USDG and scenario P&L. Not actual financial performance, not a forecast, not proposed production values.",
   "scenario": {
     "firstBuyEth": "1000000000000000000",
@@ -76,7 +76,7 @@
       "claimedTotal": 226.5402105,
       "unclaimed": 226.5402105,
       "weiPerMillionSpot": 0.002646805169103,
-      "merkleRoot": "0x271cf959aabde88b48f8f0cbe9f991ac6db096a4cd66b281a88c79375605314c",
+      "merkleRoot": "0x5bf34c99f8109c5d7cad876e04d2058fc52c0cd208d723f9be2d0b8f84653688",
       "tracked": {
         "seller_alice": {
           "weightSeconds": 1540799,
@@ -93,7 +93,7 @@
           "nftsHeld": 0
         },
         "redeemer_carol": {
-          "weightSeconds": 1533600,
+          "weightSeconds": 1533599,
           "allocatedThisWeek": 13.59241263,
           "cumulative": 13.59241263,
           "pARBBalance": 13.59241263,
@@ -148,7 +148,7 @@
       "claimedTotal": 489.52140661173536,
       "unclaimed": 494.3914287619527,
       "weiPerMillionSpot": 0.008402216667018,
-      "merkleRoot": "0xb2420fb9051b429113df914504441f2732ea20eb806bd8f32f78f5fa31f73fb3",
+      "merkleRoot": "0x05048f34f673525fcc7ac4283b5c7bcf14454bfaea6cbd4a5732fb77e196ffa0",
       "tracked": {
         "seller_alice": {
           "weightSeconds": 1512000,
@@ -220,7 +220,7 @@
       "claimedTotal": 514.8417988571783,
       "unclaimed": 520.6161207304473,
       "weiPerMillionSpot": 0.006503941411376,
-      "merkleRoot": "0x4f304ba841d6d2503531e7fc5d17c85d43f04a37b8f2d815483b99a08fff8f77",
+      "merkleRoot": "0xbf62ed80b20732169d29248bd081f5f5ef709ede7778da182cdaec79d626b6f1",
       "tracked": {
         "seller_alice": {
           "weightSeconds": 1209600,
@@ -305,20 +305,20 @@
     },
     {
       "step": 11,
-      "t": 1793739600,
+      "t": 1793739601,
       "text": "100 conversions with TWAP-signed quotes",
       "feesEth": 0.2,
       "minimumApplied": 100
     },
     {
       "step": 12,
-      "t": 1793739600,
+      "t": 1793739601,
       "text": "100 Milords issued",
       "active": 100
     },
     {
       "step": 5,
-      "t": 1793750401,
+      "t": 1793750400,
       "text": "two traders sold half their MILORD"
     },
     {
@@ -352,25 +352,25 @@
     },
     {
       "step": 25,
-      "t": 1794873600,
+      "t": 1794873601,
       "text": "second strategy registered, inactive; collection and token unchanged",
       "strategyId": 2
     },
     {
       "step": 22,
-      "t": 1795417268,
+      "t": 1795417267,
       "text": "negative-return report",
       "pps": 0.990513
     },
     {
       "step": 23,
-      "t": 1795417268,
+      "t": 1795417267,
       "text": "fee-funded deposit after the PPS change",
       "usdg": 51.056076
     },
     {
       "step": 24,
-      "t": 1795417268,
+      "t": 1795417267,
       "text": "shares minted at the new PPS",
       "shares": 51.54508421393763,
       "pps": 0.990513
@@ -426,7 +426,7 @@
       "weiPerMillion": 0.003020271465415
     },
     {
-      "t": 1793739600,
+      "t": 1793739601,
       "label": "after conversions",
       "weiPerMillion": 0.003147299100725
     },
@@ -446,14 +446,14 @@
       "weiPerMillion": 0.008402216667018
     },
     {
-      "t": 1795417268,
+      "t": 1795417267,
       "label": "week 3 close",
       "weiPerMillion": 0.006503941411376
     }
   ],
   "ppsSeries": [
     {
-      "t": 1794182400,
+      "t": 1794182401,
       "label": "week 1",
       "pps": 1,
       "navUsdg": 453.080421,
@@ -491,77 +491,77 @@
   "quoteRefusals": [],
   "owners": [
     {
-      "address": "0xb1ab720dfb5f7c430396a30e7d694b08db4c2d8e",
+      "address": "0x1e8fd766f05f63f702296389f0e0b12638ac0099",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x07eb288c590466353bf175fa7124778a718bc5d3",
+      "address": "0x52ff9b417cf3ee545c9281821705ca48298c915f",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x2a067184d8d130b2e3a57188f89d3a43b86acfb3",
+      "address": "0x13938a7e10a0e1513844ac9d05f784d20f2d805d",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x35f4644bf68ec94ed27d7ffab0dc62b21e3d9d5f",
+      "address": "0x4802b6147b0e04a6dd86bc48a7a7135b3aa56781",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x1a39c742aad62308f797c6fe83257ddf0e94fb19",
+      "address": "0xa4b2f8ad3d27fcf95e534a1b0a083b3f8e036c4d",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x456fd921e1446fba73b424916b16c1df7c1c1091",
+      "address": "0x43effb0adacbd21f3718f86cb10835d90b8902ec",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0xe78a85206e20b7f698a42a859ea2722df5e5c28a",
+      "address": "0x1bf6afc15db1a7e97809238146b74d8485880b18",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x76cb2a0ca86d79306437692f38c8951e218b4f38",
+      "address": "0x8bfaeca639f956544d383fb025ca5b03bb02adc8",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x1eb5ca03e6616a18d3bbe9e1bdae3b68275ea71f",
+      "address": "0xba1b8a8c3698bcf0cd11f2a36faae19136aa7da3",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x1d840b520a18b0aec09ae5cd29b0b37914ec69df",
+      "address": "0xe9ade080119f16bf4d7a4200b6b9282a7b30ed24",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x7e9ea35a705f061e01a220b22ffc49734cda1488",
+      "address": "0xc856464c2facb1a89c765b192a7dac4e6a92c990",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x01d0130a955e06da2325318f90982534d399d575",
+      "address": "0x294e95eec59e4b468b614a0de1f5851fb3c57668",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0xd9b4e50543412719ec808b8c2be10c9e12274fa6",
+      "address": "0x64617d1216fac19e0f8c275a1c56cc3b66328f64",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0xdfaaeb3a6b33be5e5d96435b92423668eadb16e2",
+      "address": "0x2a9d04801479c75d53cb143e3ad357ceba217ca2",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     },
     {
-      "address": "0x436e720ab4eef0c8883f74daccb77ef172bf8b35",
+      "address": "0x4c0f1c3857f49bdc619310e79830e3cc02c1685a",
       "cumulativePARB": 29.55892866522927,
       "claimed": 29.55892866522927
     }
@@ -1290,7 +1290,7 @@
   "keeperLog": [
     {
       "label": "week 1 pass 1",
-      "t": 1794182400,
+      "t": 1794182401,
       "steps": [
         "hookr-settle:done",
         "split-0:done",
@@ -1305,7 +1305,7 @@
     },
     {
       "label": "week 1 pass 2",
-      "t": 1794182401,
+      "t": 1794182402,
       "steps": [
         "hookr-settle:done",
         "split-0:skipped",
@@ -1410,7 +1410,7 @@
     },
     {
       "label": "week 3 pass 3",
-      "t": 1795417264,
+      "t": 1795417263,
       "steps": [
         "hookr-settle:done",
         "split-0:skipped",
@@ -1430,40 +1430,40 @@
       "which": "pending",
       "epoch": 7,
       "match": true,
-      "expected": "0x271cf959aabde88b48f8f0cbe9f991ac6db096a4cd66b281a88c79375605314c",
-      "onchain": "0x271cf959aabde88b48f8f0cbe9f991ac6db096a4cd66b281a88c79375605314c"
+      "expected": "0x5bf34c99f8109c5d7cad876e04d2058fc52c0cd208d723f9be2d0b8f84653688",
+      "onchain": "0x5bf34c99f8109c5d7cad876e04d2058fc52c0cd208d723f9be2d0b8f84653688"
     },
     {
       "label": "week 2",
       "which": "pending",
       "epoch": 14,
       "match": true,
-      "expected": "0xb2420fb9051b429113df914504441f2732ea20eb806bd8f32f78f5fa31f73fb3",
-      "onchain": "0xb2420fb9051b429113df914504441f2732ea20eb806bd8f32f78f5fa31f73fb3"
+      "expected": "0x05048f34f673525fcc7ac4283b5c7bcf14454bfaea6cbd4a5732fb77e196ffa0",
+      "onchain": "0x05048f34f673525fcc7ac4283b5c7bcf14454bfaea6cbd4a5732fb77e196ffa0"
     },
     {
       "label": "week 2",
       "which": "active",
       "epoch": 7,
       "match": true,
-      "expected": "0x271cf959aabde88b48f8f0cbe9f991ac6db096a4cd66b281a88c79375605314c",
-      "onchain": "0x271cf959aabde88b48f8f0cbe9f991ac6db096a4cd66b281a88c79375605314c"
+      "expected": "0x5bf34c99f8109c5d7cad876e04d2058fc52c0cd208d723f9be2d0b8f84653688",
+      "onchain": "0x5bf34c99f8109c5d7cad876e04d2058fc52c0cd208d723f9be2d0b8f84653688"
     },
     {
       "label": "week 3",
       "which": "pending",
       "epoch": 21,
       "match": true,
-      "expected": "0x4f304ba841d6d2503531e7fc5d17c85d43f04a37b8f2d815483b99a08fff8f77",
-      "onchain": "0x4f304ba841d6d2503531e7fc5d17c85d43f04a37b8f2d815483b99a08fff8f77"
+      "expected": "0xbf62ed80b20732169d29248bd081f5f5ef709ede7778da182cdaec79d626b6f1",
+      "onchain": "0xbf62ed80b20732169d29248bd081f5f5ef709ede7778da182cdaec79d626b6f1"
     },
     {
       "label": "week 3",
       "which": "active",
       "epoch": 14,
       "match": true,
-      "expected": "0xb2420fb9051b429113df914504441f2732ea20eb806bd8f32f78f5fa31f73fb3",
-      "onchain": "0xb2420fb9051b429113df914504441f2732ea20eb806bd8f32f78f5fa31f73fb3"
+      "expected": "0x05048f34f673525fcc7ac4283b5c7bcf14454bfaea6cbd4a5732fb77e196ffa0",
+      "onchain": "0x05048f34f673525fcc7ac4283b5c7bcf14454bfaea6cbd4a5732fb77e196ffa0"
     }
   ],
   "checks": [
