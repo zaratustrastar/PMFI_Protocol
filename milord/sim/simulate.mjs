@@ -272,7 +272,7 @@ async function closeWeek(label, start, end, pnlBps, notes) {
     // restart the review clock), and the publisher reports "already pending" instead of re-proposing
     pendingReplaceChecked = true;
     let reason = "";
-    try { await dist.connect(operator).proposeRoot.staticCall(pub.root, pub.total, pub.epoch + 1, pub.dataHash); } catch (e) { reason = String(e.shortMessage ?? e.message); }
+    try { await dist.connect(operator).proposeRoot.staticCall(pub.root, pub.total, pub.epoch + 1, pub.dataHash); } catch (e) { reason = String(e.shortMessage ?? e.message); const data = e.data ?? e.info?.error?.data; if (data) { const p = dist.interface.parseError(data); reason += ` [${p?.name ?? data}]`; } }
     const again = await publishEpoch({ distributor: dist.connect(operator), inputs, genesis: T0, now: await now(), settlementGrace: GRACE, excluded: [D.MilordConverter] });
     pendingGuard = { contractRefused: /PendingRootNotActivated/.test(reason), reason, publisher: again.reason };
   }
